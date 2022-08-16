@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 
 public class Activator implements BundleActivator {
@@ -21,6 +22,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         // register the racing service in the OSGi registry
         context.registerService(SwissTimingAdapterFactory.class.getName(), swissTimingAdapterFactory, null);
+        context.registerService(MasterDataImportClassLoaderService.class, new MasterDataImportClassLoaderServiceImpl(), null);
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
     

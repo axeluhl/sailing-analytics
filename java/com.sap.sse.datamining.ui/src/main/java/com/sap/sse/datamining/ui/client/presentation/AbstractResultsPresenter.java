@@ -82,15 +82,16 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
     @Override
     public void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         if (result != null && !result.isEmpty()) {
+            getPresentationWidget().removeFromParent(); // make sure charts are not rendering all tiny updates while setting the results
+            this.currentResult = result;
+            this.currentQueryDefinition = queryDefinition;
+            updateCurrentResultInfo();
+            internalShowResults(getCurrentResult());
             if (state != ResultsPresenterState.RESULT) {
                 mainPanel.setWidgetHidden(controlsPanel, controlsPanel.getWidgetCount() == 0);
                 presentationPanel.setWidget(getPresentationWidget());
                 state = ResultsPresenterState.RESULT;
             }
-            this.currentResult = result;
-            this.currentQueryDefinition = queryDefinition;
-            updateCurrentResultInfo();
-            internalShowResults(getCurrentResult());
         } else {
             showError(getDataMiningStringMessages().noDataFound() + ".");
         }

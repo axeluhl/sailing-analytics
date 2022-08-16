@@ -14,10 +14,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -43,6 +44,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
@@ -72,9 +74,9 @@ public class RaceLogFixTrackerManagerTest {
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c2", null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "USA 123", null);
+    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "USA 123", null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
     protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
 
@@ -90,12 +92,10 @@ public class RaceLogFixTrackerManagerTest {
     public void setUp() throws UnknownHostException, MongoException {
         raceLog = new RaceLogImpl("racelog");
         raceLog2 = new RaceLogImpl("racelog2");
-
         regattaLog = new RegattaLogImpl("regattalog");
-
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory);
-
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
+                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
         Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
@@ -108,7 +108,7 @@ public class RaceLogFixTrackerManagerTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
     }
 
     /**
@@ -120,7 +120,6 @@ public class RaceLogFixTrackerManagerTest {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRaceLog(raceLog2);
-
         RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager(trackedRace,
                 EmptySensorFixStore.INSTANCE, new SensorFixMapperFactory() {
                     @Override
@@ -128,7 +127,7 @@ public class RaceLogFixTrackerManagerTest {
                             Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
                         throw new IllegalArgumentException("Unknown event type");
                     }
-                });
+                }, /* removeOutliersFromCompetitorTracks */ true);
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }
 
@@ -140,7 +139,6 @@ public class RaceLogFixTrackerManagerTest {
     public void testThatNoExceptionIsThrownWhenStoppingTrackingWhenAddingSecondRaceLogWhileAlreadyTracking_bug4001() {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.attachRaceLog(raceLog);
-
         RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager(trackedRace,
                 EmptySensorFixStore.INSTANCE, new SensorFixMapperFactory() {
                     @Override
@@ -148,7 +146,7 @@ public class RaceLogFixTrackerManagerTest {
                             Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
                         throw new IllegalArgumentException("Unknown event type");
                     }
-                });
+                }, /* removeOutliersFromCompetitorTracks */ true);
         trackedRace.attachRaceLog(raceLog2);
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }

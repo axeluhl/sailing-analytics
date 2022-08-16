@@ -184,19 +184,19 @@ public class AppPreferences {
     public LoginType getLoginType() {
         int type = helper.getInt(HIDDEN_PREFERENCE_LOGIN_TYPE, -1);
         switch (type) {
-        case 0: {
-            return LoginType.NONE;
-        }
-        case 1: {
-            return LoginType.VIEWER;
-        }
-        case 2: {
-            return LoginType.OFFICER;
-        }
+            case 0: {
+                return LoginType.NONE;
+            }
+            case 1: {
+                return LoginType.VIEWER;
+            }
+            case 2: {
+                return LoginType.OFFICER;
+            }
 
-        default: {
-            return LoginType.NONE;
-        }
+            default: {
+                return LoginType.NONE;
+            }
         }
     }
 
@@ -230,20 +230,21 @@ public class AppPreferences {
 
     private String getRacingProcedureClassFlagKey(RacingProcedureType type) {
         switch (type) {
-        case RRS26:
-            return key(R.string.preference_racing_procedure_rrs26_classflag_key);
-        case SWC:
-            return key(R.string.preference_racing_procedure_swc_classflag_key);
-        case GateStart:
-            return key(R.string.preference_racing_procedure_gatestart_classflag_key);
-        case ESS:
-            return key(R.string.preference_racing_procedure_ess_classflag_key);
-        case BASIC:
-            return key(R.string.preference_racing_procedure_basic_classflag_key);
-        case LEAGUE:
-            return key(R.string.preference_racing_procedure_league_classflag_key);
-        default:
-            throw new IllegalArgumentException("Unknown racing procedure type.");
+            case RRS26:
+            case RRS26_3MIN:
+                return key(R.string.preference_racing_procedure_rrs26_classflag_key);
+            case SWC:
+                return key(R.string.preference_racing_procedure_swc_classflag_key);
+            case GateStart:
+                return key(R.string.preference_racing_procedure_gatestart_classflag_key);
+            case ESS:
+                return key(R.string.preference_racing_procedure_ess_classflag_key);
+            case BASIC:
+                return key(R.string.preference_racing_procedure_basic_classflag_key);
+            case LEAGUE:
+                return key(R.string.preference_racing_procedure_league_classflag_key);
+            default:
+                throw new IllegalArgumentException("Unknown racing procedure type.");
         }
     }
 
@@ -254,20 +255,21 @@ public class AppPreferences {
 
     private String getRacingProcedureHasIndividualRecallKey(RacingProcedureType type) {
         switch (type) {
-        case RRS26:
-            return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
-        case SWC:
-            return key(R.string.preference_racing_procedure_swc_hasxray_key);
-        case GateStart:
-            return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
-        case ESS:
-            return key(R.string.preference_racing_procedure_ess_hasxray_key);
-        case BASIC:
-            return key(R.string.preference_racing_procedure_basic_hasxray_key);
-        case LEAGUE:
-            return key(R.string.preference_racing_procedure_league_hasxray_key);
-        default:
-            throw new IllegalArgumentException("Unknown racing procedure type.");
+            case RRS26:
+            case RRS26_3MIN:
+                return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
+            case SWC:
+                return key(R.string.preference_racing_procedure_swc_hasxray_key);
+            case GateStart:
+                return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
+            case ESS:
+                return key(R.string.preference_racing_procedure_ess_hasxray_key);
+            case BASIC:
+                return key(R.string.preference_racing_procedure_basic_hasxray_key);
+            case LEAGUE:
+                return key(R.string.preference_racing_procedure_league_hasxray_key);
+            default:
+                throw new IllegalArgumentException("Unknown racing procedure type.");
         }
     }
 
@@ -278,20 +280,21 @@ public class AppPreferences {
 
     private String getRacingProcedureIsResultEntryEnabledKey(RacingProcedureType type) {
         switch (type) {
-        case RRS26:
-            return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
-        case SWC:
-            return key(R.string.preference_racing_procedure_swc_resultentryenabled_key);
-        case GateStart:
-            return key(R.string.preference_racing_procedure_gatestart_resultentryenabled_key);
-        case ESS:
-            return key(R.string.preference_racing_procedure_ess_resultentryenabled_key);
-        case BASIC:
-            return key(R.string.preference_racing_procedure_basic_resultentryenabled_key);
-        case LEAGUE:
-            return key(R.string.preference_racing_procedure_league_resultentryenabled_key);
-        default:
-            throw new IllegalArgumentException("Unknown racing procedure type.");
+            case RRS26:
+            case RRS26_3MIN:
+                return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
+            case SWC:
+                return key(R.string.preference_racing_procedure_swc_resultentryenabled_key);
+            case GateStart:
+                return key(R.string.preference_racing_procedure_gatestart_resultentryenabled_key);
+            case ESS:
+                return key(R.string.preference_racing_procedure_ess_resultentryenabled_key);
+            case BASIC:
+                return key(R.string.preference_racing_procedure_basic_resultentryenabled_key);
+            case LEAGUE:
+                return key(R.string.preference_racing_procedure_league_resultentryenabled_key);
+            default:
+                throw new IllegalArgumentException("Unknown racing procedure type.");
         }
     }
 
@@ -316,7 +319,10 @@ public class AppPreferences {
     }
 
     public String getServerBaseURL() {
-        return helper.getString(key(R.string.preference_server_url_key), null);
+        return helper.getString(
+                key(R.string.preference_server_url_key),
+                context.getString(R.string.preference_server_url_default)
+        );
     }
 
     public double getWindBearingFromDirection() {
@@ -395,22 +401,22 @@ public class AppPreferences {
         Editor setEdit = helper.getEditor();
 
         switch (type) {
-        case NONE: {
-            setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 0);
-            break;
-        }
-        case VIEWER: {
-            setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 1);
-            break;
-        }
-        case OFFICER: {
-            setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 2);
-            break;
-        }
+            case NONE: {
+                setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 0);
+                break;
+            }
+            case VIEWER: {
+                setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 1);
+                break;
+            }
+            case OFFICER: {
+                setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 2);
+                break;
+            }
 
-        default: {
-            break;
-        }
+            default: {
+                break;
+            }
         }
 
         setEdit.commit();
@@ -523,30 +529,9 @@ public class AppPreferences {
                 context.getResources().getInteger(R.integer.preference_protest_time_duration_default));
     }
 
-    public int getProtestTimeDurationInMinutesCustom() {
-        return helper.getInt(context.getString(R.string.preference_protest_time_duration_custom_key), -1);
-    }
-
-    public boolean isDefaultProtestTimeCustomEditable() {
-        return helper.getBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key),
-                context.getResources().getBoolean(R.bool.preference_protest_time_duration_custom_editable_default));
-    }
-
     public void setDefaultProtestTimeDurationInMinutes(int protestTimeInMinutes) {
         helper.getEditor()
                 .putInt(context.getString(R.string.preference_protest_time_duration_key), protestTimeInMinutes)
-                .commit();
-    }
-
-    public void setDefaultProtestTimeDurationInMinutesCustom(int protestTimeInMinutest) {
-        helper.getEditor()
-                .putInt(context.getString(R.string.preference_protest_time_duration_custom_key), protestTimeInMinutest)
-                .commit();
-    }
-
-    public void setDefaultProtestTimeDurationInMinutesCustomEditable(boolean editable) {
-        helper.getEditor()
-                .putBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key), editable)
                 .commit();
     }
 

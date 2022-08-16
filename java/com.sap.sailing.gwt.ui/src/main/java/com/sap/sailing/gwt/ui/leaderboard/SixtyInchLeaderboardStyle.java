@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.resources.LeaderboardTableResourcesSixty;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.gwt.client.celltable.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 
@@ -40,8 +41,9 @@ public class SixtyInchLeaderboardStyle implements LeaderBoardStyle {
     }
 
     @Override
-    public void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb) {
-        sb.append(FLAG_RENDERER.imageWithTitle(nationalityFlagImageResource.getSafeUri().asString(), 60, 40, ""));
+    public void renderNationalityFlag(ImageResource nationalityFlagImageResource, CountryCode countryCode, SafeHtmlBuilder sb) {
+        sb.append(FLAG_RENDERER.imageWithTitle(nationalityFlagImageResource.getSafeUri().asString(), 60, 40,
+                countryCode==null?"":countryCode.getName()));
     }
 
     @Override

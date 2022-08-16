@@ -73,6 +73,11 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
     }
 
     private boolean checksumOk(int checksum, String packetAsString) {
+        int b = computeChecksum(packetAsString);
+        return b == checksum;
+    }
+
+    int computeChecksum(String packetAsString) {
         int b = 0;
         int posOfLastCharToAddToChecksum = packetAsString.lastIndexOf('*');
         if (packetAsString.length() > posOfLastCharToAddToChecksum && packetAsString.charAt(posOfLastCharToAddToChecksum+1) == 'X') {
@@ -82,7 +87,7 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
         for (byte stringByte : checksumString.getBytes()) {
             b ^= stringByte;
         }
-        return b == checksum;
+        return b;
     }
 
 }

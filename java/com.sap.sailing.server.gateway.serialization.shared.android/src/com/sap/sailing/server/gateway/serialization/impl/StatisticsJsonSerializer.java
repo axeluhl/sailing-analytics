@@ -4,10 +4,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.statistics.Statistics;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class StatisticsJsonSerializer implements JsonSerializer<Statistics> {
 

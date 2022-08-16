@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.client.usermanagement.roles;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -14,9 +16,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -49,12 +53,14 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
     private final SuggestBox suggestRole;
     private final RoleAndPermissionDetailsResources roleAndPermissionDetailsResources = GWT
             .create(RoleAndPermissionDetailsResources.class);
+    private final RoleDefinitionSuggestOracle oracle;
 
     public UserRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final CellTableWithCheckboxResources tableResources,
-            final MultiSelectionModel<UserDTO> userSelectionModel, final Runnable updateUsers) {
-
+            final MultiSelectionModel<UserDTO> userSelectionModel, final Runnable updateUsers,
+            Function<SuggestOracle, SuggestBox> suggestBoxConstructor, Supplier<TextBox> textBoxConstructor) {
         // create multi to single selection adapter
+        this.ensureDebugId(getClass().getSimpleName());
         final SingleSelectionModel<UserDTO> multiToSingleSelectionModelAdapter = new SingleSelectionModel<>();
         userSelectionModel.addSelectionChangeHandler(event -> {
             multiToSingleSelectionModelAdapter.clear();
@@ -70,37 +76,36 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
             }
         });
         this.userSelectionModel = multiToSingleSelectionModelAdapter;
-
         // create role suggest
-        final RoleDefinitionSuggestOracle oracle = new RoleDefinitionSuggestOracle(
+        oracle = new RoleDefinitionSuggestOracle(
                 userService.getUserManagementService(), stringMessages);
-        suggestRole = new SuggestBox(oracle);
+        suggestRole = suggestBoxConstructor.apply(oracle);
         roleAndPermissionDetailsResources.css().ensureInjected();
         suggestRole.addStyleName(roleAndPermissionDetailsResources.css().enterRoleNameSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
+        suggestRole.ensureDebugId("suggestRole");
         this.initPlaceholder(suggestRole, stringMessages.enterRoleName());
-
         // create role input panel + add controls
         final HorizontalPanel roleInputPanel = new HorizontalPanel();
-
-        final TextBox tenantInput = new TextBox();
+        final TextBox tenantInput = textBoxConstructor.get();
+        tenantInput.ensureDebugId("tenantInput");
         this.initPlaceholder(tenantInput, stringMessages.groupName());
-
-        final TextBox userInput = new TextBox();
+        final TextBox userInput = textBoxConstructor.get();
+        userInput.ensureDebugId("userInput");
         this.initPlaceholder(userInput, stringMessages.username());
-
+        final CheckBox transitiveCheckBox = new CheckBox(stringMessages.transitive());
+        transitiveCheckBox.setValue(true);
         roleInputPanel.add(suggestRole);
         roleInputPanel.add(tenantInput);
         roleInputPanel.add(userInput);
-
+        roleInputPanel.add(transitiveCheckBox);
         final Button addRoleButton = new Button(stringMessages.add(), (ClickHandler) event -> {
             StrippedRoleDefinitionDTO role = oracle.fromString(suggestRole.getText());
             if (role != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
-                    userService.getUserManagementService().addRoleToUser(selectedUser.getName(), userInput.getText(),
-                            role.getId(), tenantInput.getText(), new AsyncCallback<SuccessInfo>() {
-
+                    userService.getUserManagementWriteService().addRoleToUser(selectedUser.getName(), userInput.getText(),
+                            role.getId(), tenantInput.getText(), transitiveCheckBox.getValue(), new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Window.alert(caught.getMessage());
@@ -120,12 +125,13 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
             suggestRole.setText("");
             tenantInput.setText("");
             userInput.setText("");
+            transitiveCheckBox.setValue(true);
         });
+        addRoleButton.ensureDebugId("addRoleButton");
         final Command addRoleButtonUpdater = () -> addRoleButton.setEnabled(!suggestRole.getValue().isEmpty());
         suggestRole.addKeyUpHandler(event -> addRoleButtonUpdater.execute());
         suggestRole.addSelectionHandler(event -> addRoleButtonUpdater.execute());
         roleInputPanel.add(addRoleButton);
-
         // create role table
         roleWithSecurityDTOTableWrapper = new RoleWithSecurityDTOTableWrapper(userService, stringMessages,
                 errorReporter, /* enablePager */ true, tableResources, this.userSelectionModel, updateUsers);
@@ -133,19 +139,20 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         final LabeledAbstractFilterablePanel<RoleWithSecurityDTO> userFilterbox = roleWithSecurityDTOTableWrapper
                 .getFilterField();
         userFilterbox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
-
         // add elements to role panel + add caption
         final VerticalPanel rolePanel = new VerticalPanel();
         rolePanel.add(roleInputPanel);
         rolePanel.add(userFilterbox);
         rolePanel.add(scrollPanel);
-
         final CaptionPanel captionPanel = new CaptionPanel(stringMessages.roles());
         captionPanel.add(rolePanel);
-
         this.setVisible(false);
-
         add(captionPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
+    }
+
+    public void refreshSuggest() {
+        oracle.refresh();
     }
 
     private void initPlaceholder(final UIObject target, final String placeholder) {

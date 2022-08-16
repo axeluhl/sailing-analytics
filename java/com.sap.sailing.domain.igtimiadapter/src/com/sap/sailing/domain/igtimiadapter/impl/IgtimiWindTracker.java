@@ -70,13 +70,12 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                 }
                             } catch (Exception e) {
                                 logger.log(Level.SEVERE, "Exception trying to start Igtimi wind tracker for race "
-                                        + getTrackedRace().getRace().getName() + " for account " + account);
+                                        + getTrackedRace().getRace().getName() + " for account " + account, e);
                             }
                         }
                     }
                 }
             }
-
         }.start();
     }
 
@@ -101,7 +100,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 final UserGroup groupOwner = ownershipOfRace == null ? null
                         : ownershipOfRace.getAnnotation().getTenantOwner();
                 if (groupOwner != null) {
-                    if (groupOwner.equals(optionalSecurityService.getDefaultTenant())) {
+                    if (groupOwner.equals(optionalSecurityService.getServerGroup())) {
                         // It is assumed to be an auto-migration case
                         isPermittedToUseAccount = true;
                     } else {
@@ -116,7 +115,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                         if (PermissionChecker.isPermitted(permissionToCheck, null, Collections.singleton(groupOwner),
                                 allUser, userGroupsOfAllUser,
                                 ownershipOfAccount == null ? null : ownershipOfAccount.getAnnotation(),
-                                aclOfAccount == null ? null : aclOfAccount.getAnnotation())) {
+                                aclOfAccount == null ? null : aclOfAccount.getAnnotation(), null)) {
                             isPermittedToUseAccount = true;
                         } else {
                             isPermittedToUseAccount = false;

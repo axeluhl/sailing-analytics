@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderboardStyle;
-import com.sap.sailing.gwt.ui.raceboard.QuickRanksDTOFromLeaderboardDTOProvider;
+import com.sap.sailing.gwt.ui.raceboard.QuickFlagDataFromLeaderboardDTOProvider;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -161,11 +161,12 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
+        
         leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings, false, liveRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
-                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()), getClientFactory());
 
         leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
 
@@ -186,7 +187,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             }
         });
 
-        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(
+        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickFlagDataFromLeaderboardDTOProvider(
                 new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), liveRace));
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY + AnimationPanel.ANIMATION_DURATION + AnimationPanel.DELAY);

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,6 +66,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
+import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 /**
  * This class aggregates race information by preparing {@link DTO}s for different components representing a race in the
@@ -255,7 +257,7 @@ public class RaceContext {
     }
     
     private String getCourseAreaOrNull() {
-        return HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard);
+        return HomeServiceUtil.getCourseAreaNameForRegattaIfThereIsMoreThanOne(event, leaderboard);
     }
 
     private RaceProgressDTO getProgressOrNull() {
@@ -327,6 +329,9 @@ public class RaceContext {
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
             liveRaceDTO.setWind(getWindOrNull());
+            if(getRaceIdentifierOrNull() != null) {
+                SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), liveRaceDTO);
+            }
             return liveRaceDTO;
         }
         return null;
@@ -340,7 +345,8 @@ public class RaceContext {
     public RaceListRaceDTO getFinishedRaceOrNull() {
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
-        if (getLiveRaceViewState() == RaceViewState.FINISHED) {
+        // See: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5029
+        if (getLiveRaceViewState() == RaceViewState.FINISHED && !isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
             RaceListRaceDTO raceListRaceDTO = new RaceListRaceDTO(getLeaderboardName(), 
                     getRaceIdentifierOrNull(), getRaceName());
@@ -359,6 +365,9 @@ public class RaceContext {
                 windStatsDTO = null;
             }
             raceListRaceDTO.setWind(windStatsDTO);
+            if(getRaceIdentifierOrNull() != null) {
+                SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceListRaceDTO);
+            }
             return raceListRaceDTO;
         }
         return null;
@@ -367,6 +376,9 @@ public class RaceContext {
     public SimpleRaceMetadataDTO getRaceCompetitionFormat() {
         SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
         fillSimpleRaceMetadata(raceDTO);
+        if(getRaceIdentifierOrNull() != null) {
+            SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceDTO);
+        }
         return raceDTO;
     }
 
@@ -449,6 +461,9 @@ public class RaceContext {
         final Iterable<String> leaderboardGroupNames = leaderboardContext.getLeaderboardGroupNames();
         dto.setLeaderboardGroupName(leaderboardGroupNames == null || Util.isEmpty(leaderboardGroupNames) ? null :
             leaderboardGroupNames.iterator().next());
+        final Iterable<UUID> leaderboardGroupIds = leaderboardContext.getLeaderboardGroupIds();
+        dto.setLeaderboardGroupId(leaderboardGroupIds == null || Util.isEmpty(leaderboardGroupIds) ? null :
+            leaderboardGroupIds.iterator().next());
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
@@ -549,13 +564,13 @@ public class RaceContext {
             RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 Flags upperFlag = abortingFlagEvent.getUpperFlag();
-                if(upperFlag.equals(Flags.AP)) {
+                if (upperFlag.equals(Flags.AP)) {
                     return RaceViewState.POSTPONED;
                 }
-                if(upperFlag.equals(Flags.NOVEMBER)) {
+                if (upperFlag.equals(Flags.NOVEMBER)) {
                     return RaceViewState.ABANDONED;
                 }
-                if(upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+                if (upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
                     return RaceViewState.ABANDONED;
                 }
             }

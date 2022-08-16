@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -32,6 +33,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 
 public interface RaceLogTrackingAdapter {
+    String NAME = "RaceLog";
+    String DEFAULT_URL = null;
     /**
      * Performs the necessary steps to ensure that the race is tracked (aka that a {@link TrackedRace} is created from
      * the data in this {@code RaceLog}).
@@ -116,10 +119,10 @@ public interface RaceLogTrackingAdapter {
     /**
      * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}
      * race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated.
-     * @param priority TODO
+     * @param copyMarkDeviceMappings TODO
      */
-    void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
-            RacingEventService service, int priority);
+    void copyCourse(RaceLog fromRaceLog, LeaderboardThatHasRegattaLike fromLeaderboard, Set<RaceLog> toRaceLogs,
+            LeaderboardThatHasRegattaLike toLeaderboard, boolean copyMarkDeviceMappings, SharedDomainFactory<?> baseDomainFactory, RacingEventService service, int priority);
 
     void copyCompetitors(RaceColumn fromRaceColumn, Fleet fromFleet, Iterable<Pair<RaceColumn, Fleet>> toRaces);
 }

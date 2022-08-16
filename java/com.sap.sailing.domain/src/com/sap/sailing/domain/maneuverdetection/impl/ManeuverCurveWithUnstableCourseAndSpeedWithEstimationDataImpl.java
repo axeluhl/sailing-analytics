@@ -2,13 +2,12 @@ package com.sap.sailing.domain.maneuverdetection.impl;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
-import com.sap.sse.common.Distance;
+import com.sap.sailing.domain.tracking.impl.ManeuverCurveBoundariesImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
-public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl
-        extends ManeuverCurveBoundariesWithDetailedManeuverLossImpl
+public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl extends ManeuverCurveBoundariesImpl
         implements ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData {
 
     private final SpeedWithBearing averageSpeedWithBearingBefore;
@@ -24,17 +23,14 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl
 
     public ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(TimePoint timePointBefore,
             TimePoint timePointAfter, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, Speed lowestSpeed, SpeedWithBearing averageSpeedWithBearingBefore,
-            Duration durationFromPreviousManeuverEndToManeuverStart,
+            double directionChangeInDegrees, Speed lowestSpeed, Speed highestSpeed,
+            SpeedWithBearing averageSpeedWithBearingBefore, Duration durationFromPreviousManeuverEndToManeuverStart,
             int gpsFixesCountFromPreviousManeuverEndToManeuverStart, SpeedWithBearing averageSpeedWithBearingAfter,
             Duration durationFromManeuverEndToNextManeuverStart, int gpsFixesCountFromManeuverEndToNextManeuverStart,
-            Distance distanceSailedWithinManeuver, Distance distanceSailedWithinManeuverTowardMiddleAngleProjection,
-            Distance distanceSailedIfNotManeuvering, Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering,
             int gpsFixesCount, Duration longestIntervalBetweenTwoFixes,
             Duration intervalBetweenLastFixOfCurveAndNextFix, Duration intervalBetweenFirstFixOfCurveAndPreviousFix) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
-                lowestSpeed, distanceSailedWithinManeuver, distanceSailedWithinManeuverTowardMiddleAngleProjection,
-                distanceSailedIfNotManeuvering, distanceSailedTowardMiddleAngleProjectionIfNotManeuvering);
+                lowestSpeed, highestSpeed);
         this.averageSpeedWithBearingBefore = averageSpeedWithBearingBefore;
         this.durationFromPreviousManeuverEndToManeuverStart = durationFromPreviousManeuverEndToManeuverStart;
         this.gpsFixesCountFromPreviousManeuverEndToManeuverStart = gpsFixesCountFromPreviousManeuverEndToManeuverStart;

@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -39,9 +39,9 @@ import com.sap.sse.common.TimePoint;
  */
 public class RaceRankComparator extends AbstractRaceRankComparator<Distance> {
     private final Map<Competitor, Distance> windwardDistanceToGoInLegCache;
-    private final WindLegTypeAndLegBearingCache cache;
+    private final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache;
     
-    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         super(trackedRace, timePoint, /* lessIsBetter */ true);
         this.cache = cache;
         this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();

@@ -26,12 +26,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
+import com.sap.sailing.gwt.ui.client.NauticalSideFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -165,6 +165,7 @@ public class ManeuverMarkersAndLossIndicators {
         Marker marker = Marker.newInstance(options);
         marker.setPosition(latLng);
         marker.setTitle(ManeuverTypeFormatter.format(maneuver.getType(), stringMessages));
+        marker.setZindex(RaceMapOverlaysZIndexes.MANEUVERMARK_ZINDEX);
         marker.addClickHandler(event -> {
             LatLng where = raceMap.getCoordinateSystem().toLatLng(maneuver.getPosition());
             Widget content = getInfoWindowContent(maneuver, competitor);
@@ -393,8 +394,7 @@ public class ManeuverMarkersAndLossIndicators {
                     raceMap.createInfoWindowLabelAndValue(stringMessages.markPassing(),
                             DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.getMarkPassingTimePoint())
                                     + (maneuver.getMarkPassingSide() == null ? ""
-                                            : " (" + (maneuver.getMarkPassingSide() == NauticalSide.PORT
-                                                    ? stringMessages.portSide() : stringMessages.starboardSide())
+                                            : " (" + NauticalSideFormatter.format(maneuver.getMarkPassingSide(), stringMessages)
                                                     + ")")));
         }
         return vPanel;

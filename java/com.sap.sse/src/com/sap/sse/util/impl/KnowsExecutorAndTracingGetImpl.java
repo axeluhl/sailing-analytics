@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,8 +29,9 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
     private static final Logger logger = Logger.getLogger(KnowsExecutorAndTracingGetImpl.class.getName());
     private static Field inheritableThreadLocalsField;
     private static Method childValueMethod;
+    private static Field threadLocalsField;
     private ThreadPoolExecutor executorThisTaskIsScheduledFor;
-    private final WeakHashMap<InheritableThreadLocal<Object>, Object> threadLocalValuesToInherit;
+    private final WeakHashMap<ThreadLocal<Object>, Object> threadLocalValuesToInherit;
     
     static {
         try {
@@ -37,8 +39,12 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
             inheritableThreadLocalsField.setAccessible(true);
             childValueMethod = InheritableThreadLocal.class.getDeclaredMethod("childValue", Object.class);
             childValueMethod.setAccessible(true);
+            threadLocalsField = Thread.class.getDeclaredField("threadLocals");
+            threadLocalsField.setAccessible(true);
         } catch (NoSuchFieldException | SecurityException | NoSuchMethodException e) {
-            logger.log(Level.SEVERE, "Problem finding field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads", e);
+            logger.log(Level.SEVERE,
+                    "Problem finding field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads",
+                    e);
         }
     }
     
@@ -47,53 +53,69 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
      * that they can be set just before this task is run.
      */
     public KnowsExecutorAndTracingGetImpl() {
-        WeakHashMap<InheritableThreadLocal<Object>, Object> threadLocalValuesToInheritValue = null;
+        final WeakHashMap<ThreadLocal<Object>, Object> threadLocalValuesToInheritValue = new WeakHashMap<>();
         final Thread currentThread = Thread.currentThread();
-        try {
-            final Object inheritableThreadLocals = inheritableThreadLocalsField.get(currentThread);
-            if (inheritableThreadLocals != null) {
-                threadLocalValuesToInheritValue = new WeakHashMap<>();
-                final Method expungeStaleEntries = inheritableThreadLocals.getClass().getDeclaredMethod("expungeStaleEntries");
-                expungeStaleEntries.setAccessible(true);
-                expungeStaleEntries.invoke(inheritableThreadLocals);
-                final Field tableField = inheritableThreadLocals.getClass().getDeclaredField("table");
-                tableField.setAccessible(true);
-                final Object[] table = (Object[]) tableField.get(inheritableThreadLocals);
-                for (int j = 0; j < table.length; j++) {
-                    final WeakReference<?> entry = (WeakReference<?>) table[j];
-                    if (entry != null) {
-                        @SuppressWarnings("unchecked")
-                        final InheritableThreadLocal<Object> key = (InheritableThreadLocal<Object>) entry.get();
-                        if (key != null) {
-                            final Field valueField = entry.getClass().getDeclaredField("value");
-                            valueField.setAccessible(true);
-                            final Object value = childValueMethod.invoke(key, valueField.get(entry));
-                            threadLocalValuesToInheritValue.put(key, value);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Problem accessing field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads", e);
-        }
+        handleThreadLocals(currentThread, inheritableThreadLocalsField, (key, value) -> {
+            threadLocalValuesToInheritValue.put(key, value);
+        });
         threadLocalValuesToInherit = threadLocalValuesToInheritValue;
     }
     
     @Override
     public void setInheritableThreadLocalValues() {
-        for (Entry<InheritableThreadLocal<Object>, Object> e : threadLocalValuesToInherit.entrySet()) { 
+        for (Entry<ThreadLocal<Object>, Object> e : threadLocalValuesToInherit.entrySet()) { 
             e.getKey().set(e.getValue());
         }
     }
 
     @Override
     public void removeInheritableThreadLocalValues() {
-        for (Entry<InheritableThreadLocal<Object>, Object> e : threadLocalValuesToInherit.entrySet()) { 
+        for (Entry<ThreadLocal<Object>, Object> e : threadLocalValuesToInherit.entrySet()) { 
             e.getKey().remove();
         }
     }
 
-    public Map<InheritableThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
+    @Override
+    public void removeThreadLocalValues() {
+        handleThreadLocals(Thread.currentThread(), threadLocalsField, (key, value) -> key.remove());
+    }
+
+    private void handleThreadLocals(final Thread thread, final Field threadLocalSourceField,
+            final BiConsumer<ThreadLocal<Object>, Object> valueHandler) {
+        try {
+            final Object threadLocals = threadLocalSourceField.get(thread);
+            if (threadLocals != null) {
+                final Method expungeStaleEntries = threadLocals.getClass().getDeclaredMethod("expungeStaleEntries");
+                expungeStaleEntries.setAccessible(true);
+                expungeStaleEntries.invoke(threadLocals);
+                final Field tableField = threadLocals.getClass().getDeclaredField("table");
+                tableField.setAccessible(true);
+                final Object[] table = (Object[]) tableField.get(threadLocals);
+                for (int j = 0; j < table.length; j++) {
+                    final WeakReference<?> entry = (WeakReference<?>) table[j];
+                    if (entry != null) {
+                        @SuppressWarnings("unchecked")
+                        final ThreadLocal<Object> key = (ThreadLocal<Object>) entry.get();
+                        if (key != null) {
+                            final Field valueField = entry.getClass().getDeclaredField("value");
+                            valueField.setAccessible(true);
+                            final Object value = key instanceof InheritableThreadLocal
+                                    ? childValueMethod.invoke(key, valueField.get(entry))
+                                    : key.get();
+                            valueHandler.accept(key, value);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,
+                    "Problem accessing field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads",
+                    e);
+        }
+    }
+
+    @Override
+    public Map<ThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
         return Collections.unmodifiableMap(threadLocalValuesToInherit);
     }
 

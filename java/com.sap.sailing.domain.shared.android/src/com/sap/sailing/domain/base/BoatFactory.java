@@ -24,5 +24,5 @@ public interface BoatFactory {
      */
     boolean isBoatToUpdateDuringGetOrCreate(Boat result);
 
-    DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color);
+    DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color, boolean storePersistently);
 }

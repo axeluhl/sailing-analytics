@@ -10,9 +10,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesHeader extends Composite {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -24,28 +29,29 @@ public class SeriesHeader extends Composite {
     @UiField DivElement eventStateUi;
     @UiField AnchorElement eventLogoUi;
     @UiField DivElement locationsUi;
+    @UiField SharingButtons sharingButtons;
 
-    public SeriesHeader(EventSeriesViewDTO event) {
-        this(event, null);
+    public SeriesHeader(SeriesContext seriesContext, EventSeriesViewDTO series) {
+        this(seriesContext, series, null);
     }
     
-    public SeriesHeader(EventSeriesViewDTO event, PlaceNavigation<?> logoNavigation) {
+    public SeriesHeader(SeriesContext seriesContext, EventSeriesViewDTO series, PlaceNavigation<?> logoNavigation) {
         SeriesHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
-        setUiFieldValues(event, logoNavigation);
+        setUiFieldValues(series, logoNavigation);
+        setupSharing(seriesContext, series);
     }
 
-    private void setUiFieldValues(EventSeriesViewDTO event, PlaceNavigation<?> logoNavigation) {
-        LogoUtil.setEventLogo(eventLogoUi, event);
+    private void setUiFieldValues(EventSeriesViewDTO series, PlaceNavigation<?> logoNavigation) {
+        LogoUtil.setEventLogo(eventLogoUi, series);
         if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
-        eventNameUi.setInnerText(event.getDisplayName());
-        LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
+        eventNameUi.setInnerText(series.getDisplayName());
+        LabelTypeUtil.renderLabelType(eventStateUi, series.getState().getStateMarker());
         StringBuilder locationsBuilder = new StringBuilder();
         boolean first = true;
-        for (EventAndLeaderboardReferenceWithStateDTO eventOfSeries : event.getEventsAndRegattasOfSeriesAscending()) {
+        for (EventAndLeaderboardReferenceWithStateDTO eventOfSeries : series.getEventsAndRegattasOfSeriesAscending()) {
             if(!first) {
                 locationsBuilder.append(", ");
             }
@@ -56,5 +62,19 @@ public class SeriesHeader extends Composite {
             }
         }
         locationsUi.setInnerText(locationsBuilder.toString());
+    }
+
+    private void setupSharing(SeriesContext seriesContext, EventSeriesViewDTO series) {
+        sharingButtons.setUp(new SharingMetadataProvider() {
+            @Override
+            public ShareablePlaceContext getContext() {
+                return seriesContext;
+            }
+
+            @Override
+            public String getShortText() {
+                return StringMessages.INSTANCE.seriesSharingShortText(series.getDisplayName());
+            }
+        });
     }
 }

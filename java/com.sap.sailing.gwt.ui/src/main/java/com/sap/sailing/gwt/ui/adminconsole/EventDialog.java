@@ -12,8 +12,6 @@ import java.util.UUID;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -24,12 +22,12 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
@@ -39,10 +37,8 @@ import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
-import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDTO> {
     protected StringMessages stringMessages;
@@ -61,8 +57,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
-    private final FileStorageServiceConnectionTestObservable storageServiceAvailable = new FileStorageServiceConnectionTestObservable();
-    
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
+
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -76,14 +72,18 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         @Override
         public String getErrorMessage(EventDTO eventToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = eventToValidate.getName() != null && eventToValidate.getName().length() > 0;
-            boolean venueNotEmpty = eventToValidate.venue.getName() != null && eventToValidate.venue.getName().length() > 0;
-            boolean courseAreaNotEmpty = eventToValidate.venue.getCourseAreas() != null && eventToValidate.venue.getCourseAreas().size() > 0;
 
-            if (courseAreaNotEmpty) {
+            boolean emptyName = eventToValidate.getName() == null
+                    || eventToValidate.getName().isEmpty();
+            boolean emptyVenue = eventToValidate.venue.getName() == null
+                    || eventToValidate.venue.getName().isEmpty();
+            boolean emptyCourseArea = eventToValidate.venue.getCourseAreas() == null
+                    || eventToValidate.venue.getCourseAreas().isEmpty();
+
+            if (!emptyCourseArea) {
                 for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
-                    courseAreaNotEmpty = courseArea.getName() != null && courseArea.getName().length() > 0;
-                    if (!courseAreaNotEmpty) {
+                    emptyCourseArea = courseArea.getName() == null || courseArea.getName().isEmpty();
+                    if (emptyCourseArea) {
                         break;
                     }
                 }
@@ -103,38 +103,36 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             // remark: startDate == null and endDate == null is valid
             if (startDate != null && endDate != null) {
                 if (startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate(); 
+                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate();
                 }
             } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
-            
+
             if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
-            } else if (!nameNotEmpty) {
+            } else if (emptyName) {
                 errorMessage = stringMessages.pleaseEnterAName();
-            } else if (!venueNotEmpty) {
+            } else if (emptyVenue) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyVenue();
-            } else if (!courseAreaNotEmpty) {
+            } else if (emptyCourseArea) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyCourseArea();
             } else if (!unique) {
                 errorMessage = stringMessages.eventWithThisNameAlreadyExists();
             }
-
             return errorMessage;
         }
-
     }
 
     /**
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService,
+    public EventDialog(EventParameterValidator validator, SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
-        testFileStorageService(sailingService);
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
@@ -165,7 +163,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        imagesListComposite = new ImagesListComposite(sailingService, stringMessages, storageServiceAvailable);
+        imagesListComposite = new ImagesListComposite(sailingServiceWrite, stringMessages, storageServiceAvailable);
         videosListComposite = new VideosListComposite(stringMessages, storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
@@ -180,15 +178,15 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
 
     @Override
     protected EventDTO getResult() {
-        EventDTO result = new EventDTO();
+        final List<LeaderboardGroupDTO> leaderboardGroups = new ArrayList<>();
         List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
         for (final String lgName : leaderboardGroupNames) {
             final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
             if (lgDTO != null) {
-                result.addLeaderboardGroup(lgDTO);
-            }                
+                leaderboardGroups.add(lgDTO);
+            }
         }
-        result.setName(nameEntryField.getText());
+        EventDTO result = new EventDTO(nameEntryField.getText(), leaderboardGroups);
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
         result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
@@ -267,73 +265,4 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected FocusWidget getInitialFocusWidget() {
         return nameEntryField;
     }
-
-    // used for ImageDialog and VideoDialog to inform user that upload is not possible
-    // without needing to try it first
-    private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
-        sailingService.testFileStorageServiceProperties(null, LocaleInfo.getCurrentLocale().getLocaleName(),
-                new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-
-                    @Override
-                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
-                        if (result == null) {
-                            storageServiceAvailable.testPassed();
-                        }
-                    }
-                });
-    }
-    
-    /**
-     * The only purpose of this class is to hold the value of the response of the {@link EventDialog#testFileStorageService(FileStorageManagementGwtServiceAsync)} method
-     * It will notify all registered observers on a change and directly after the registration, if the value is already true
-     * The value of this will only change from false to true, so the value can also be seen as an alreadyChanged value
-     * If the test fails, the value will not change due its lifetime
-     * 
-     * @author Robin Fleige (D067799)
-     */
-    public class FileStorageServiceConnectionTestObservable {
-        private List<FileStorageServiceConnectionTestObserver> observer = new ArrayList<>();
-        private boolean value;
-        
-        public FileStorageServiceConnectionTestObservable() {
-            value = false;
-        }
-        
-        public void testPassed() {
-            value = true;
-            for (FileStorageServiceConnectionTestObserver observer : this.observer) {
-                observer.onFileStorageServiceTestPassed();
-            }
-        }
-        
-        public boolean getValue() {
-            return value;
-        }
-        
-        public void registerObserver(FileStorageServiceConnectionTestObserver observer) {
-            this.observer.add(observer);
-            if (value) {
-                observer.onFileStorageServiceTestPassed();
-            }
-        }
-
-        public void unregisterObserver(FileStorageServiceConnectionTestObserver observer) {
-            this.observer.remove(observer);
-        }
-    }
-    
-    /**
-     * The only use of this interface is to get notified if the response of the {@link EventDialog#testFileStorageService(FileStorageManagementGwtServiceAsync)} method arrives
-     * Also see {@link EventDialog.FileStorageServiceConnectionTestObservable}
-     * 
-     * @author Robin Fleige (D067799)
-     */
-    public interface FileStorageServiceConnectionTestObserver {
-        void onFileStorageServiceTestPassed();
-    }
-
 }

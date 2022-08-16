@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -23,6 +24,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -30,9 +33,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     protected static class RegattaParameterValidator extends AbstractRegattaParameterValidator {
         private ArrayList<RegattaDTO> existingRegattas;
 
-        public RegattaParameterValidator(StringMessages stringMessages, Collection<RegattaDTO> existingRegattas) {
+        public RegattaParameterValidator(StringMessages stringMessages, Iterable<RegattaDTO> existingRegattas) {
             super(stringMessages);
-            this.existingRegattas = new ArrayList<RegattaDTO>(existingRegattas);
+            this.existingRegattas = new ArrayList<RegattaDTO>();
+            Util.addAll(existingRegattas, this.existingRegattas);
         }
 
         @Override
@@ -49,7 +53,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                         break;
                     }
                 }
-    
                 Date startDate = regattaToValidate.startDate;
                 Date endDate = regattaToValidate.endDate;
                 String datesErrorMessage = null;
@@ -66,8 +69,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                     errorMessage = datesErrorMessage;
                 } else if (!nameNotEmpty) {
                     errorMessage = stringMessages.pleaseEnterAName();
-                } else if (regattaToValidate.getName().contains("/")) {
-                    errorMessage = stringMessages.regattaNameMustNotContainSlashes();
                 } else if (!boatClassNotEmpty) {
                     errorMessage = stringMessages.pleaseEnterABoatClass();
                 } else if (!unique) {
@@ -108,11 +109,11 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
-            StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(new RegattaDTO(), Collections.<SeriesDTO> emptySet(), existingEvents, correspondingEvent,
-                stringMessages.addRegatta(), stringMessages.ok(), sailingService, stringMessages,
-                new RegattaParameterValidator(stringMessages, existingRegattas), callback);
+            Iterable<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
+            UserService userService, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(new RegattaDTO("", ScoringSchemeType.LOW_POINT), Collections.<SeriesDTO> emptySet(), existingEvents, correspondingEvent,
+                stringMessages.addRegatta(), stringMessages.ok(), sailingService, userService,
+                stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
         buoyZoneRadiusInHullLengthsDoubleBox.setValue(Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS);
         SeriesDTO series = new SeriesDTO();
         series.setName(Series.DEFAULT_NAME);
@@ -154,8 +155,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             if (series.getName().equals(Series.DEFAULT_NAME)) {
                 List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
                 for (int i = 1; i <= 3; i++) {
-                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(series.getName(), dto.getName());
-                    raceColumnDTO.setName("R"+i);
+                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO("R"+i, series.getName(), dto.getName());
                     races.add(raceColumnDTO);
                 }
                 series.setRaceColumns(races);

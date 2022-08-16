@@ -18,6 +18,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
@@ -34,8 +35,11 @@ public class WindFinderPollerTest {
         factory.addReviewedSpotCollection(new ReviewedSpotsCollectionImpl("schilksee"));
         final List<Pair<Wind, WindSource>> wind = Collections.synchronizedList(new ArrayList<>());
         final RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
+        final Regatta mockedRegatta = mock(Regatta.class);
         final DynamicTrackedRegatta mockedTrackedRegatta = mock(DynamicTrackedRegatta.class);
         final DynamicTrackedRace mockedTrackedRace = mock(DynamicTrackedRace.class);
+        when(mockedTrackedRace.getTrackedRegatta()).thenReturn(mockedTrackedRegatta);
+        when(mockedTrackedRegatta.getRegatta()).thenReturn(mockedRegatta);
         when(mockedTrackedRegatta.getExistingTrackedRace(mockedRaceDefinition)).thenReturn(mockedTrackedRace);
         when(mockedTrackedRegatta.getTrackedRace(mockedRaceDefinition)).thenReturn(mockedTrackedRace);
         when(mockedTrackedRace.recordWind(any(Wind.class), any(WindSourceWithAdditionalID.class))).thenAnswer(new Answer<Boolean>() {

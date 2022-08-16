@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,7 +96,7 @@ public class LeaderboardContext {
     public ResultWithTTL<GetMiniLeaderboardDTO> calculateMiniLeaderboard(RacingEventService service, int limit) {
         GetMiniLeaderboardDTO result = new GetMiniLeaderboardDTO();
         try {
-            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
+            final LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
                     service, service.getBaseDomainFactory(), false);
             
             result.setScoreCorrectionText(leaderboardDTO.getComment());
@@ -227,6 +228,14 @@ public class LeaderboardContext {
         }
         return result;
     }
+    
+    public Iterable<UUID> getLeaderboardGroupIds() {
+        final List<UUID> result = new ArrayList<>();
+        for (final LeaderboardGroup lg : leaderboardGroups) {
+            result.add(lg.getId());
+        }
+        return result;
+    }
 
     public RegattaMetadataDTO asRegattaMetadataDTO() {
         RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO();
@@ -269,8 +278,8 @@ public class LeaderboardContext {
             regattaDTO.setEndDate(getEndDateWithEventFallback());
         }
         regattaDTO.setState(calculateRegattaState());
-        regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
-        regattaDTO.setDefaultCourseAreaId(HomeServiceUtil.getCourseAreaIdForRegatta(event, leaderboard));
+        regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIfThereIsMoreThanOne(event, leaderboard));
+        regattaDTO.setCourseAreaIdsAsStrings(HomeServiceUtil.getCourseAreaIdsAsStringsForRegatta(event, leaderboard));
         regattaDTO.setFlexibleLeaderboard(leaderboard instanceof FlexibleLeaderboard);
         
         RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();

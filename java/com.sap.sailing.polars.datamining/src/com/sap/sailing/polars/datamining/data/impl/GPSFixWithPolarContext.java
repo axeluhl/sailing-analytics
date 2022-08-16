@@ -1,13 +1,21 @@
 package com.sap.sailing.polars.datamining.data.impl;
 
+import com.sap.sailing.datamining.data.HasLeaderboardContext;
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
+import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.impl.data.TrackedRaceWithContext;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
+import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
+import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatistic;
 import com.sap.sse.common.Speed;
@@ -36,6 +44,27 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
         this.settings = settings;
         this.competitorPolarContext = competitorPolarContext;
         this.wind = wind;
+    }
+
+    @Override
+    public HasTrackedRaceContext getTrackedRaceContext() {
+        final HasFleetPolarContext fleetPolarContext = getCompetitorPolarContext().getLegPolarContext().getFleetPolarContext();
+        final RaceColumn raceColumn = fleetPolarContext.getRaceColumn();
+        final HasLeaderboardPolarContext leaderboardPolarContext = fleetPolarContext.getRaceColumnPolarContext().getLeaderboardPolarContext();
+        final Leaderboard leaderboard = leaderboardPolarContext.getLeaderboard();
+        final HasLeaderboardContext leaderboardContext = new HasLeaderboardContext() {
+            @Override
+            public HasLeaderboardGroupContext getLeaderboardGroupContext() {
+                return leaderboardPolarContext.getLeaderboardGroupContext();
+            }
+
+            @Override
+            public Leaderboard getLeaderboard() {
+                return leaderboard;
+            }
+        };
+        return new TrackedRaceWithContext(leaderboardContext, trackedRace.getTrackedRegatta().getRegatta(), raceColumn,
+                fleetPolarContext.getFleet(), trackedRace);
     }
 
     @Override

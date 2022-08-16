@@ -45,7 +45,7 @@ public class MarkPassingCalculatorWithTrackersOnStartBoatTest extends AbstractEx
     @Before
     public void setUp() throws IOException, ParseException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         startOfSetup = MillisecondsTimePoint.now();
-        trackedRace = readRace("/MoevensteinCompetitorPositions.json.gz", "/MoevensteinMarkPositions.json.gz", new BoatClassImpl("J/70", BoatClassMasterdata.J70));
+        trackedRace = readRace("/MoevensteinCompetitorPositions.json.gz", "/MoevensteinMarkPositions.json.gz", new BoatClassImpl(BoatClassMasterdata.J70));
         markPassings = new HashMap<>();
         for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
             markPassings.put(competitor, trackedRace.getMarkPassings(competitor, /* waitForLatest */ true));
@@ -61,8 +61,10 @@ public class MarkPassingCalculatorWithTrackersOnStartBoatTest extends AbstractEx
     @Override
     protected Course createCourse(Map<String, Mark> marksByName) {
         final Map<String, ControlPoint> controlPoints = new HashMap<>(marksByName);
-        controlPoints.put("Start/Ziel", new ControlPointWithTwoMarksImpl(marksByName.get("G2"), marksByName.get("MEU"), "Start/Ziel"));
-        controlPoints.put("Gate", new ControlPointWithTwoMarksImpl(marksByName.get("G1"), marksByName.get("G2"), "Gate"));
+        controlPoints.put("Start/Ziel", new ControlPointWithTwoMarksImpl(marksByName.get("G2"), marksByName.get("MEU"),
+                "Start/Ziel", "Start/Ziel"));
+        controlPoints.put("Gate",
+                new ControlPointWithTwoMarksImpl(marksByName.get("G1"), marksByName.get("G2"), "Gate", "Gate"));
         return createCourse(controlPoints,
                 wp(controlPoints, "Start/Ziel", PassingInstruction.Line),
                 wp(controlPoints, "LUV", PassingInstruction.Port),

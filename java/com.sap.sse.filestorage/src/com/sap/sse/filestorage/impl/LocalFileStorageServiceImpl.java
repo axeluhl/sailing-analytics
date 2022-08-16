@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,8 +50,8 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     
     private static final Logger logger = Logger.getLogger(LocalFileStorageServiceImpl.class.getName());
 
-    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true, "localBaseUrlDesc");
-    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "localLocalPathDesc");
+    private final FileStorageServicePropertyImpl baseURL = new FileStorageServicePropertyImpl("baseURL", true, /* isPassword */ false, "localBaseUrlDesc");
+    private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, /* isPassword */ false, "localLocalPathDesc");
 
     
     protected LocalFileStorageServiceImpl(BundleContext bundleContext) {
@@ -87,12 +86,6 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
                     }
                     return getUri(fileName);
                 });
-    }
-
-    private static String getKey(String fileEnding) {
-        String key = UUID.randomUUID().toString();
-        key += fileEnding;
-        return key;
     }
 
     private URI getUri(String pathToFile) {

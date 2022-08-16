@@ -11,7 +11,7 @@ import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
+public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory<?>>, WithQualifiedObjectIdentifier {
     Team getTeam();
     
     /**
@@ -26,6 +26,7 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
 
     boolean hasEmail();
 
+    @Dimension(messageKey="ShortName", ordinal=12)
     String getShortName();
 
     /**
@@ -54,6 +55,7 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     /**
      * Adds a listener to this competitor. The listener is also added to the boat and the team for changes.
      * Adding a listener that is already part of this competitor's listeners set remains without effect.
+     * The listeners added here will not be serialized together with this {@link Competitor} instance.
      */
     void addCompetitorChangeListener(CompetitorChangeListener listener);
     

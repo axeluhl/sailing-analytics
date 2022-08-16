@@ -34,7 +34,9 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
     private Double timeOnTimeFactor;
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorDTOImpl() {}
+    protected CompetitorDTOImpl() {
+        super("");
+    }
     
     public CompetitorDTOImpl(String name, String shortName, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String idAsString, String imageURL, String flagImageURL, 
@@ -247,17 +249,22 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
     }
     
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.COMPETITOR;
     }
     
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(idAsString);
+    }
+
+    @Override
+    public void clearNonPublicFields() {
+        email = null;
     }
 
 }

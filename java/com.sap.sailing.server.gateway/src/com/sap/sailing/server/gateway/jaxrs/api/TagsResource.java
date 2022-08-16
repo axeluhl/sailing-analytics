@@ -29,9 +29,9 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sailing.server.tagging.TagDTODeSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -90,7 +90,7 @@ public class TagsResource extends AbstractSailingServerResource {
                 }
             }
             JSONArray jsonTags = serializer.serialize(tags);
-            response = Response.ok(jsonTags.toJSONString()).type(APPLICATION_JSON_UTF8).build();
+            response = Response.ok(streamingOutput(jsonTags)).type(APPLICATION_JSON_UTF8).build();
         } catch (RaceLogNotFoundException e) {
             response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).build();
         } catch (Exception e) {

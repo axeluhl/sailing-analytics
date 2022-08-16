@@ -1,6 +1,10 @@
 package com.sap.sailing.polars.datamining.data.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 
@@ -22,6 +26,22 @@ public class BoatClassWithBackendPolarContext implements HasBackendPolarBoatClas
     @Override
     public PolarDataService getPolarDataService() {
         return polarDataService;
+    }
+    
+    public Double getTargetBeatAngle() {
+        try {
+            return polarDataService.getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(12), LegType.UPWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            return null;
+        }
+    }
+    
+    public Double getTargetRunawayAngle() {
+        try {
+            return polarDataService.getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(12), LegType.DOWNWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            return null;
+        }
     }
 
     @Override

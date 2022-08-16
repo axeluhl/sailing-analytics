@@ -15,4 +15,10 @@ public interface HasBackendPolarBoatClassContext {
     @Statistic(messageKey="BackendPolars")
     HasBackendPolarBoatClassContext getBackendPolarBoatClassContext();
 
+    @Statistic(messageKey="TargetBeatAngle")
+    Double getTargetBeatAngle();
+
+    @Statistic(messageKey="TargetRunawayAngle")
+    Double getTargetRunawayAngle();
+
 }

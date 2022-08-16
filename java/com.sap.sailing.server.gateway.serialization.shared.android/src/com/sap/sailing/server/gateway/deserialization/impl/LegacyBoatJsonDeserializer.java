@@ -11,17 +11,17 @@ import com.sap.sailing.domain.base.BoatFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class LegacyBoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private final BoatClassJsonDeserializer boatClassDeserializer;
 
-    public static LegacyBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static LegacyBoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new LegacyBoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory));
     }
     

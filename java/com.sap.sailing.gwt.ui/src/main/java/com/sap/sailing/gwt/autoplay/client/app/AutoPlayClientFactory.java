@@ -1,9 +1,10 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.WithSailingServiceWrite;
 import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 
-public interface AutoPlayClientFactory extends SailingClientFactory {
+public interface AutoPlayClientFactory extends SailingClientFactory, WithSailingServiceWrite {
     AutoPlayPlaceNavigator getPlaceNavigator();
 
     void setAutoPlayContext(AutoPlayContext configurationSixtyInch);

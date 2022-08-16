@@ -52,5 +52,4 @@ public interface EventHeaderResources extends SharedDesktopResources {
         String navbar_button();
         String navbar_buttonhidden();
     }
-
 }

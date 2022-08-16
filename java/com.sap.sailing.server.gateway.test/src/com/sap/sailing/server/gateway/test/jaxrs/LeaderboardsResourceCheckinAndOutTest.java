@@ -54,10 +54,10 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
     public void setUp() throws Exception {
         super.setUp();
         Competitor c = createCompetitors(1).get(0);
-        Boat boat = racingEventService.getBaseDomainFactory().getOrCreateBoat("boat", "boat", boatClass, "GER1", null);
+        Boat boat = racingEventService.getBaseDomainFactory().getOrCreateBoat("boat", "boat", boatClass, "GER1", null, /* storePersistently */ true);
         competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitorWithBoat(c.getId(), c.getName(), c.getShortName(),
                 c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, (DynamicBoat) boat);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, (DynamicBoat) boat, /* storePersistently */ true);
         regatta = new RegattaImpl("regatta", boatClass, /* canBoatsOfCompetitorsChangePerRace */ false, CompetitorRegistrationType.CLOSED,
                 MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,

@@ -64,7 +64,7 @@ public class SwissTimingArchiveConfigurationWithSecurityDTO implements IsSeriali
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT;
     }
 
@@ -75,6 +75,6 @@ public class SwissTimingArchiveConfigurationWithSecurityDTO implements IsSeriali
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 }

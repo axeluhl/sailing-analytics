@@ -7,10 +7,11 @@ public class GateDTO extends ControlPointDTO {
     private MarkDTO left;
     private MarkDTO right;
     
-    public GateDTO() {}
+    @Deprecated
+    GateDTO() {} // for GWT RPC serialization only
     
-    public GateDTO(String idAsString, String name, MarkDTO left, MarkDTO right) {
-        super(idAsString, name);
+    public GateDTO(String idAsString, String name, MarkDTO left, MarkDTO right, String shortName) {
+        super(idAsString, name, shortName);
         this.left = left;
         this.right = right;
     }

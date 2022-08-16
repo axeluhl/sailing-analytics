@@ -1,12 +1,14 @@
 package com.sap.sse.gwt.client.async;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-
-import com.google.gwt.core.client.GWT;
+import java.util.Set;
+import java.util.logging.Logger;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 
@@ -18,6 +20,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author c5163874, Simon Marcel Pamies
  */
 public class AsyncActionsExecutor {
+    private final static Logger logger = Logger.getLogger(AsyncActionsExecutor.class.getName());
+    
     private class ExecutionJob<T> implements AsyncCallback<T> {
         private final AsyncAction<T> action;
         private final String category;
@@ -38,14 +42,12 @@ public class AsyncActionsExecutor {
         }
         
         public void execute() {
-//            GWT.log("Action name " + action.getClass().getName());
             this.action.execute(new MarkedAsyncCallback<T>(this, getCategory()));
         }
         
         @Override
         public void onSuccess(T result) {
             try {
-//                GWT.log("Execution success for action of type " + getType() + ", category "+getCategory());
                 this.callback.onSuccess(result);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);
@@ -55,7 +57,7 @@ public class AsyncActionsExecutor {
         @Override
         public void onFailure(Throwable caught) {
             try {
-                GWT.log("Execution failure for action of type " + getType() + ", category "+getCategory());
+                logger.warning("Execution failure for action of type " + getType() + ", category "+getCategory());
                 this.callback.onFailure(caught);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);
@@ -83,6 +85,8 @@ public class AsyncActionsExecutor {
     private final Map<String, Integer> actionsPerTypeCounter;
     private final Map<String, ExecutionJob<?>> lastRequestedActionsNotBeingSentOut;
     private final Map<String, TimePoint> timePointOfTypeLastBeingExecuted;
+    private final Map<String, Set<Runnable>> runAfterLastActionForCategoryReturned;
+    private final Set<Runnable> runAfterLastActionReturned;
     
     private int numPendingCalls = 0;
     private TimePoint timePointOfFirstExecutorInit = null;
@@ -96,6 +100,8 @@ public class AsyncActionsExecutor {
         if (maxPendingCalls < maxPendingCallsPerType) {
             throw new RuntimeException("The number of max pending calls can not be lower than the number of max pending calls per type.");
         }
+        this.runAfterLastActionForCategoryReturned = new HashMap<>();
+        this.runAfterLastActionReturned = new HashSet<>();
         this.maxPendingCalls = maxPendingCalls;
         this.maxPendingCallsPerType = maxPendingCallsPerType;
         this.durationAfterToResetQueue = durationAfterToResetQueue;
@@ -103,6 +109,32 @@ public class AsyncActionsExecutor {
         this.lastRequestedActionsNotBeingSentOut = new HashMap<>();
         this.timePointOfTypeLastBeingExecuted = new HashMap<>();
         this.timePointOfFirstExecutorInit = MillisecondsTimePoint.now(); // triggering duration to reset
+    }
+    
+    /**
+     * If there are no calls for the {@code category} whose results are still outstanding, the {@code callback}
+     * is invoked immediately. Otherwise, the {@code callback} is stored and will be invoked once there are
+     * no more outstanding responses for the {@code category}.
+     */
+    public void runAfterLastActionReturned(String category, Runnable callback) {
+        if (getNumberOfPendingActionsPerType(category) == 0) {
+            callback.run();
+        } else {
+            Util.addToValueSet(runAfterLastActionForCategoryReturned, category, callback);
+        }
+    }
+    
+    /**
+     * If there are no calls for this executor whose results are still outstanding, the {@code callback}
+     * is invoked immediately. Otherwise, the {@code callback} is stored and will be invoked once there are
+     * no more outstanding responses for this executor.
+     */
+    public void runAfterLastActionReturned(Runnable callback) {
+        if (getNumberOfPendingActions() == 0) {
+            callback.run();
+        } else {
+            runAfterLastActionReturned.add(callback);
+        }
     }
     
     public <T> void execute(AsyncAction<T> action, AsyncCallback<T> callback) {
@@ -115,9 +147,7 @@ public class AsyncActionsExecutor {
     
     public int getNumberOfPendingActionsPerType(String type) {
         int result = 0;
-        if (actionsPerTypeCounter != null) {
-            result = actionsPerTypeCounter.get(type);
-        }
+        result = actionsPerTypeCounter.getOrDefault(type, 0);
         return result;
     }
     
@@ -146,7 +176,7 @@ public class AsyncActionsExecutor {
                 }
                 numActionsOfType = 0;
             } else {
-                GWT.log("Dropping action of type " + job.getType() + ", category "+job.getCategory());
+                logger.info("Dropping action of type " + job.getType() + ", category "+job.getCategory());
                 /* don't put the call into the execution queue, but save it as the last one of each type
                  * after each successful execution of a job checkForEmptyCallQueue will check if there
                  * are other jobs of that type that need execution and execute the last one thus
@@ -166,8 +196,18 @@ public class AsyncActionsExecutor {
         Integer numActionsPerType = actionsPerTypeCounter.get(type);
         if (numActionsPerType != null && numActionsPerType > 0) {
             actionsPerTypeCounter.put(type, numActionsPerType-1);
+            if (numActionsPerType-1 == 0) {
+                final Set<Runnable> callbacks = runAfterLastActionForCategoryReturned.get(type);
+                if (callbacks != null) {
+                    callbacks.forEach(callback->callback.run());
+                }
+            }
+
         }
         numPendingCalls--;
+        if (numPendingCalls == 0) {
+            runAfterLastActionReturned.forEach(callback->callback.run());
+        }
         timePointOfTypeLastBeingExecuted.put(type, MillisecondsTimePoint.now());
         checkForEmptyCallQueue(type);
     }
@@ -176,7 +216,7 @@ public class AsyncActionsExecutor {
         Integer numActionsPerType = actionsPerTypeCounter.get(type);
         if (numActionsPerType != null && numActionsPerType < maxPendingCallsPerType && lastRequestedActionsNotBeingSentOut.containsKey(type)) {
             ExecutionJob<?> lastRequestedAction = lastRequestedActionsNotBeingSentOut.remove(type);
-            GWT.log("Executing last queued action of type: " + lastRequestedAction.getType());
+            logger.info("Executing last queued action of type: " + lastRequestedAction.getType());
             execute(lastRequestedAction);
         }
     }

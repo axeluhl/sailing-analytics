@@ -10,8 +10,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.maps.client.LoadApi;
-import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
@@ -48,14 +46,16 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
 import com.sap.sailing.gwt.ui.shared.racemap.PathNameFormatter;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -136,70 +136,57 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         public void onSuccess(SimulatorResultsDTO result) {
 
             String notificationMessage = result.getNotificationMessage();
-            if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+            if (Util.hasLength(notificationMessage) && warningAlreadyShown == false) {
                 errorReporter.reportError(notificationMessage, true);
                 warningAlreadyShown = true;
             }
-
             PathDTO[] paths = result.getPaths();
-
             LOGGER.info("Number of Paths : " + paths.length);
-            long startTime = paths[0].getPoints().get(0).timepoint;
-            long maxDurationTime = 0;
-
+            final TimePoint startTime = paths[0].getPoints().get(0).timepoint;
+            long maxDurationMillis = 0;
             if (mode == SailingSimulatorConstants.ModeMeasured) {
                 Position pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
                 Position pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
                 raceCourseCanvasOverlay.setStartEndPoint(coordinateSystem.toLatLng(pos1), coordinateSystem.toLatLng(pos2));
             }
-
             raceCourseCanvasOverlay.draw();
             removeOverlays();
             // pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
             colorPalette.reset();
-
             PathDTO currentPath = null;
             //String color = null;
             String pathName = null;
             boolean algorithmTimedOut = false;
             int noOfPaths = paths.length;
-
             for (int index = 0; index < noOfPaths; ++index) {
-
                 currentPath = paths[index];
                 pathName = currentPath.getName();
                 algorithmTimedOut = currentPath.getAlgorithmTimedOut();
                 //color = colorPalette.getColor(noOfPaths - 1 - index);
-
                 if (pathName.equals("Polyline")) {
                     pathPolyline = createPathPolyline(currentPath);
                 } else if (pathName.equals("GPS Poly")) {
                     continue;
                 } else {
-
                     /* TODO Revisit for now creating a WindFieldDTO from the path */
                     WindFieldDTO pathWindDTO = null;
                     if (!currentPath.getMixedLeg()) {
                         pathWindDTO = new WindFieldDTO();
                         pathWindDTO.setMatrix(currentPath.getPoints());
                     }
-
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX, 
                             pathNameFormatter.format(currentPath), timer, windParams, algorithmTimedOut, currentPath.getMixedLeg(), coordinateSystem);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setPathColor(colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1));
-
                     if (summaryView) {
                         replayPathCanvasOverlay.displayWindAlongPath = true;
                         timer.removeTimeListener(replayPathCanvasOverlay);
                         replayPathCanvasOverlay.setTimer(null);
                     }
-
                     if (SHOW_ONLY_PATH_POLYLINE == false) {
                         replayPathCanvasOverlay.addToMap();
                     }
-
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
                     replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.getStartPoint(), raceCourseCanvasOverlay.getEndPoint());
                     /*if (index == 0) {
@@ -211,32 +198,27 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                         replayPathCanvasOverlay.draw();
                     }
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
-
                     long tmpDurationTime = currentPath.getPathTime();
-                    if ((!currentPath.getMixedLeg())&&(!currentPath.getAlgorithmTimedOut())&&(tmpDurationTime > maxDurationTime)) {
-                        maxDurationTime = tmpDurationTime;
+                    if ((!currentPath.getMixedLeg())&&(!currentPath.getAlgorithmTimedOut())&&(tmpDurationTime > maxDurationMillis)) {
+                        maxDurationMillis = tmpDurationTime;
                     }
                 }
             }
-            
-        	legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
-
+            legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
             if (timePanel != null) {
-            	Date endDate = new Date(startTime + maxDurationTime);
-                timePanel.setMinMax(new Date(startTime), endDate, true);
+            	final TimePoint endDate = startTime.plus(maxDurationMillis);
+                timePanel.setMinMax(startTime.asDate(), endDate.asDate(), true);
                 timePanel.resetTimeSlider();
                 timePanel.timeChanged(windParams.getStartTime(), null);
                 if (windParams.isShowStreamlets()) {
-                	windStreamletsCanvasOverlay.setEndDate(endDate);
+                    windStreamletsCanvasOverlay.setEndDate(endDate.asDate());
                 }
             }
-
             /**
              * Now we always get the wind field
              */
             WindFieldDTO windFieldDTO = result.getWindField();
             //LOGGER.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
-
             if (windParams.isShowGrid()) {
                 windGridCanvasOverlay.addToMap();
             }
@@ -370,11 +352,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private void loadMapsAPIV3() {
-        // load all the libs for use in the maps
-        ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
-        loadLibraries.add(LoadLibrary.DRAWING);
-        loadLibraries.add(LoadLibrary.GEOMETRY);
-
         Runnable onLoad = new Runnable() {
           @Override
           public void run() {
@@ -557,8 +534,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
               }
           }
         };
-
-        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
+        GoogleMapsLoader.load(onLoad);
     }
 
     private void initializeOverlays() {
@@ -650,7 +626,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         busyIndicator.setBusy(true);
         timer.pause();
         timer.setTime(windParams.getStartTime().getTime());
-
         simulatorService.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
@@ -1032,7 +1007,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private PathPolyline createPathPolyline(final PathDTO pathDTO) {
         SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(parent.getSelectedBoatClassIndex(), parent.getSelectedRaceIndex(),
                 parent.getSelectedCompetitorIndex(), parent.getSelectedLegIndex());
-
         return PathPolyline.createPathPolyline(pathDTO.getPoints(), errorReporter, simulatorService, map, this, parent, selection, coordinateSystem);
     }
 

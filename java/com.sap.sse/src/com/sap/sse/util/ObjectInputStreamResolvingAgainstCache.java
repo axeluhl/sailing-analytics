@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
+import java.util.Map;
 
 import com.sap.sse.common.IsManagedByCache;
 
@@ -30,39 +31,66 @@ import com.sap.sse.common.IsManagedByCache;
  */
 public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectInputStream {
     public interface ResolveListener {
+        /**
+         * Invoked if during {@link ObjectInputStreamResolvingAgainstCache#resolveObject(Object)} an object
+         * was replaced by a new object. The new object that will be returned by the {@code resolveObject} method
+         * is passed as parameter.
+         */
         void onNewObject(Object result);
+        
+        /**
+         * Invoked if during {@link ObjectInputStreamResolvingAgainstCache#resolveObject(Object)} an object
+         * was not replaced by anything else but returned unmodified.
+         */
         void onResolvedObject(Object result);
     }
 
     private final C cache;
+    private final Map<String, Class<?>> classLoaderCache;
     private ResolveListener resolveListener;
 
     /**
      * Package protected on purpose; instances to be created using a factory method on the {@link Replicable}. This
      * constructor {@link #enableResolveObject(boolean) enables resolving} by default.
-     * 
      * @param cache must not be {@code null}
+     * @param classLoaderCache must not be {@code null}
      */
-    protected ObjectInputStreamResolvingAgainstCache(InputStream in, C cache, ResolveListener resolveListener)
+    protected ObjectInputStreamResolvingAgainstCache(InputStream in, C cache, ResolveListener resolveListener, Map<String, Class<?>> classLoaderCache)
             throws IOException {
         super(in);
         assert cache != null;
         this.cache = cache;
         this.resolveListener = resolveListener;
+        assert classLoaderCache != null;
+        this.classLoaderCache = classLoaderCache;
         enableResolveObject(true);
     }
 
-    public C getCache() {
+    private C getCache() {
         return cache;
     }
 
     @Override
-    protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
+    protected Class<?> resolveClass(ObjectStreamClass classDesc) throws ClassNotFoundException {
         String className = classDesc.getName();
         // see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6554519
         // If using loadClass(...) on the class loader directly, an exception is thrown:
         // StreamCorruptedException: invalid type code 00
-        return Class.forName(className, /* initialize */true, Thread.currentThread().getContextClassLoader());
+        try {
+            return classLoaderCache.computeIfAbsent(className, cn->{
+                try {
+                    return Class.forName(cn, /* initialize */true, Thread.currentThread().getContextClassLoader());
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() != null && e.getCause() instanceof ClassNotFoundException) {
+                throw (ClassNotFoundException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override

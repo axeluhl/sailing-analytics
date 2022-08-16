@@ -31,11 +31,11 @@ public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier 
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return SecuredDomainType.SWISS_TIMING_ACCOUNT;
     }
 

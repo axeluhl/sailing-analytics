@@ -83,6 +83,8 @@ public class SimpleDomainFactoryTest {
                 return "The famous SAX920103 race";
             }
         }, new StartList() {
+            private static final long serialVersionUID = -4148295407963335012L;
+
             @Override
             public String getRaceID() {
                 return raceID;

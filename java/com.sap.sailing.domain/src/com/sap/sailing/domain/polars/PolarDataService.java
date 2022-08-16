@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.polars;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -188,5 +189,8 @@ public interface PolarDataService {
     SpeedWithBearingWithConfidence<Void> getClosestTwaTws(ManeuverType type, Speed speedAtManeuverStart,
             double courseChangeDeg, BoatClass boatClass);
 
-    double getManeuverAngleInDegreesFromTwa(double twa, ManeuverType maneuverType);
+    double getManeuverAngleInDegreesFromTwa(ManeuverType maneuverType, Bearing twa);
+
+    Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException;
 }

@@ -8,6 +8,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
@@ -27,12 +28,21 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     
     UserGroup getUserGroupByName(String name);
     
+    /**
+     * Obtains all user groups that have {@code roleDefinition} as key in their {@link UserGroup#getRoleDefinitionMap() role definition map},
+     * regardless of whether for all users or only the members of the group.
+     */
+    Iterable<UserGroup> getUserGroupsWithRoleDefinition(RoleDefinition roleDefinition);
+    
     UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException;
+
+    void addUserGroup(UserGroup group) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup userGroup);
     
-    void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
-    
+    /**
+     * A new, non-live copy, as a snapshot, of the set of users known to this user store
+     */
     Iterable<User> getUsers();
     
     boolean hasUsers();
@@ -52,6 +62,8 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     User createUser(String name, String email, Account... accounts)
             throws UserManagementException;
 
+    void addUser(User user) throws UserManagementException;
+
     void updateUser(User user);
 
     Iterable<Role> getRolesFromUser(String username) throws UserManagementException;
@@ -59,8 +71,6 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     void addRoleForUser(String username, Role role) throws UserManagementException;
 
     void removeRoleFromUser(String username, Role role) throws UserManagementException;
-
-    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
 
     void removePermissionFromUser(String username, WildcardPermission permission) throws UserManagementException;
 
@@ -70,7 +80,10 @@ public interface BasicUserStore extends UserGroupProvider, Named {
 
     Iterable<RoleDefinition> getRoleDefinitions();
     RoleDefinition getRoleDefinition(UUID roleDefinitionId);
-    RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName, Iterable<WildcardPermission> permissions);
+
+    RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName,
+            Iterable<WildcardPermission> permissions);
+
     void setRoleDefinitionPermissions(UUID roleDefinitionId, Set<WildcardPermission> permissions);
     void addRoleDefinitionPermission(UUID roleDefinitionId, WildcardPermission permission);
     void removeRoleDefinitionPermission(UUID roleDefinitionId, WildcardPermission permission);
@@ -149,9 +162,21 @@ public interface BasicUserStore extends UserGroupProvider, Named {
      * {@link UserGroupImpl} object whose name equals that of the default tenant name. It will have been used
      * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
      * and the users with the original role will obtain a corresponding {@link Role} with this default
-     * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
+     * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}. It is by default used as the
+     * group owner of the {@link SecuredSecurityTypes#SERVER} object for the local server/replica set.
      */
-    UserGroup getDefaultTenant();
+    UserGroup getServerGroup();
+    
+    /**
+     * For use after replica initialization / initial load, when the server group has been resolved against
+     * the initial load received from the master instance.
+     */
+    void setServerGroup(UserGroup newServerGroup);
+    
+    /**
+     * The name of the {@link #getServerGroup() server group}.
+     */
+    String getServerGroupName();
 
     /**
      * Ensures that the predefined role definitions, particularly the "admin" and the "user" role, exist.

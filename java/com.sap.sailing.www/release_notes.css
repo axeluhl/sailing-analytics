@@ -38,3 +38,11 @@
 	padding: 10px;
 	font-size: 11px;
 }
+
+tr:nth-child(even) {
+	background: #eee
+}
+
+tr:nth-child(odd) {
+	background: white;
+}

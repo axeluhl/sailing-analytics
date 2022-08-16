@@ -2,8 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:background="?attr/swipe_idle">
+    android:layout_height="72dp">
 
     <LinearLayout
         android:id="@+id/container"
@@ -36,16 +35,13 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:gravity="right|end"
-                android:orientation="horizontal"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/warning_sign"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="6dp"
-                    android:paddingRight="6dp"
+                    android:layout_marginLeft="8dp"
                     tools:src="@drawable/ic_warning_red" />
 
                 <TextView
@@ -53,10 +49,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginLeft="8dp"
                     android:background="@drawable/penalty_text_background"
-                    android:paddingLeft="6dp"
-                    android:paddingRight="6dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
                     tools:text="OCS" />
             </LinearLayout>
 
@@ -65,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:padding="5dp"
+                android:padding="4dp"
                 android:textAppearance="?attr/textSmall"
                 tools:text="GDR001" />
 
@@ -74,9 +70,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:layout_marginStart="4dp"
+                android:layout_marginLeft="4dp"
                 android:layout_toLeftOf="@+id/penalty_layout"
                 android:layout_toRightOf="@+id/vessel_id"
-                android:padding="5dp"
                 android:singleLine="true"
                 android:textAppearance="?attr/textSmall"
                 tools:text="Cool Runnings" />
@@ -87,11 +84,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
             android:src="?attr/create" />
 
         <RelativeLayout
             android:id="@id/drag_handle"
-            android:layout_width="42dp"
+            android:layout_width="48dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical">
 

@@ -12,7 +12,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     private static final long serialVersionUID = -7901836864741040400L;
-    private final Action[] availableActions;
+    /* #gwtnofinal */ private Action[] availableActions;
 
     /**
      * By default, all actions as provided by {@link DefaultActions} are supported by logical types with permissions
@@ -45,6 +45,16 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return getName().equals(((HasPermissions) o).getName());
+    }
+    
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
+    }
+    
     @Override
     public Action[] getAvailableActions() {
         return availableActions;

@@ -16,10 +16,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 8474205424939759851L;
@@ -63,9 +63,7 @@ public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends Abstr
         for(String name : optionalParameters){
             parameterValues.put(name, req.getParameter(name));
         }
-
         RequestT domainObject = null;
-
         if (getRequestDeserializer() != null) {
             try {
                 logger.fine("Post issued to " + this.getClass().getName());
@@ -82,7 +80,6 @@ public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends Abstr
                 return;
             }
         }
-
         ResponseT responseObject = null;
         try {
             responseObject = process(parameterValues, domainObject);
@@ -92,11 +89,10 @@ public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends Abstr
             e.printStackTrace();
             return;
         }
-
         setJsonResponseHeader(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         if (getResponseSerializer() != null && responseObject != null) {
-            resp.getWriter().write(getResponseSerializer().serialize(responseObject).toJSONString());
+            getResponseSerializer().serialize(responseObject).writeJSONString(resp.getWriter());
             logger.fine(String.format("Created %s as result of gateway request", responseObject.toString()));
         }
     }

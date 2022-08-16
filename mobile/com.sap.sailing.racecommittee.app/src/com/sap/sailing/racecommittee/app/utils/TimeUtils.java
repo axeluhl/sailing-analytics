@@ -4,14 +4,62 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
+import com.sap.sse.common.TimePoint;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.widget.DatePicker;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
 
 public class TimeUtils extends com.sap.sailing.android.shared.util.TimeUtils {
+
+    /**
+     * Shows a {@link DatePicker} in a {@link DialogFragment}.
+     *
+     * @param manager {@link FragmentManager}
+     * @param calendar {@link Calendar} used for the selected year, month and day of month
+     * @param event Optional {@link EventBase} wit minimum and maximum date
+     */
+    public static void showDatePickerDialog(@NonNull final FragmentManager manager, @NonNull final Calendar calendar,
+                                            @Nullable final EventBase event) {
+        final int year = calendar.get(Calendar.YEAR);
+        final int month = calendar.get(Calendar.MONTH);
+        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        Long minDate = null, maxDate = null;
+        if (event != null) {
+            final TimePoint startDate = event.getStartDate();
+            final TimePoint endDate = event.getEndDate();
+            if (startDate != null) {
+                minDate = startDate.asMillis();
+            }
+            if (endDate != null) {
+                maxDate = endDate.asMillis();
+            }
+        }
+        final DialogFragment fragment = DatePickerFragment.newInstance(year, month, dayOfMonth, minDate, maxDate);
+        fragment.show(manager, DatePickerFragment.TAG);
+    }
+
+    /**
+     * Shows a {@link DatePicker} in a {@link DialogFragment}.
+     *
+     * @param manager {@link FragmentManager}
+     * @param time {@link TimePoint} used for the selected year, month and day of month
+     * @param event Optional {@link EventBase} wit minimum and maximum date
+     */
+    public static void showDatePickerDialog(@NonNull final FragmentManager manager, @NonNull final TimePoint time,
+                                            @Nullable final EventBase event) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time.asDate());
+        showDatePickerDialog(manager, calendar, event);
+    }
 
     public static void initTimePickerWithSeconds(Context context, final Calendar time,
             @Nullable final TimePicker timePicker, @Nullable NumberPicker secondPicker) {

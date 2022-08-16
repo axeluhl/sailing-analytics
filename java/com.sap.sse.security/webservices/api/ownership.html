@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/ownership</h2>
+
+<b>Description:</b>
+<p>The service obtains or changes the ownership of object, or obtains or changes access control list (ACL) properties of an object.</p>
+<br/>
+
+<b>Change Ownership</b>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT /{objectType}/{typeRelativeObjectId}</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{ "responseStatus": "true", "responseMessage": "Ownership changed successfully"}</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path and body):</td>
+        <td>
+            <div>typeRelativeObjectId</div> Unique Object id.
+            <div>objectType</div> Object type represents the type of object to change the ownership.
+            <div>groupId</div> GroupId to assign given group to ownership of object object. If the property is missing in the body,
+                               the group ownership is not touched. If it is null, the group ownership is reset to null.
+            <div>username</div> Username to search the user in order to attach it with given Object ownership. If the property is missing in the body,
+                               the user ownership is not touched. If it is null, the user ownership is reset to null.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X POST -d '{
+             	"groupId":"admin-tenant",
+             	"username":"admin"
+            }' -H 'Content-type: application/json' "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/427ebd42-ac69-4f74-a171-376d9bea9457"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+
+    <tr>
+        <td>Request Method:</td>
+        <td>GET /{objectType}/{typeRelativeObjectId}</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","username":"admin"}</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to change the ownership.
+            <div>objectId</div> Unique Object id.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl "http://127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/82832851-07ac-47ee-9ddf-6f4f9eaa7823"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+    
+    <tr>
+        <td>Request Method:</td>
+        <td>GET /{objectType}?id={typeRelativeObjectIdPart1}&id={typeRelativeObjectIdPart2}&...</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","username":"admin"}</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to change the ownership.
+            <div>id</div> Can be used multiple times, e.g., in order to encode a composite type-relative object ID such as they
+                          are used for objects of type TRACKED_RACE.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl "http://127.0.0.1:8888/security/api/restsecurity/ownership/TRACKED_RACE?id=Croatia%20Coast%20Cup%202019%20-%20ORC%20with%20Spinnaker&id=Race%201%20-%20ORC%20mit%20Spi"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+
+    <tr>
+        <td>Request Method:</td>
+        <td>GET /{objectType}/{typeRelativeObjectId}/acl</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","displayName": null,"acl":[{"groupId":null,"actions":["READ","!DELETE"]},{"groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","actions":["READ","!UPDATE"]}]}
+</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to request the ACL information for
+            <div>objectId</div> Unique Object id.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -i -X GET "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/82832851-07ac-47ee-9ddf-6f4f9eaa7823/acl"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+    
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT /{objectType}/{typeRelativeObjectId}/acl</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>{ "responseStatus": "true", "responseMessage": "Ownership changed successfully"}</pre>
+        </td>
+    </tr>
+     <tr>
+        <td>Parameter (path, body)</td>
+        <td>
+            <div>objectType</div> Object type represents the type of object to request the ACL information for
+            <div>objectId</div> Unique Object id.
+            <div>The body must contain a document as the one returned by the GET method, only that the objectType and objectId fields are not required in
+            the body and will be ignored as these parameters are expected to be provided in the path.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -i -X PUT -H 'Content-Type: application/json' -d '{"objectType":"USER_GROUP","objectId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","displayName":"The Admin Tenant ACL","acl":[{"groupId":null,"actions":["READ","!UPDATE"]},{"groupId":"82832851-07ac-47ee-9ddf-6f4f9eaa7823","actions":["READ","!DELETE"]}]}' "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/ownership/USER_GROUP/82832851-07ac-47ee-9ddf-6f4f9eaa7823/acl"</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+    
+</table>
+</body>
+</html>

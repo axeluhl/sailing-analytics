@@ -189,6 +189,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        getRaceColumnListeners().notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
+    }
+
+    @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         getRaceColumnListeners().notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }
@@ -324,18 +329,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public void disableCompetitorRegistrationOnRaceLog(Fleet fleetByName) {
-    }
-
-    /**
-     * When the leaderboard name changes, notify this to this object's {@link RaceColumnListener}s as a
-     * change of this race column's name, but only if no {@link Leaderboard#getDisplayName() display name}
-     * is set because that would take precedence over the regular name.
-     */
-    @Override
-    public void nameChanged(String oldName, String newName) {
-        if (leaderboard.getDisplayName() == null) {
-            getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(this, oldName, newName);
-        }
     }
 
     /**

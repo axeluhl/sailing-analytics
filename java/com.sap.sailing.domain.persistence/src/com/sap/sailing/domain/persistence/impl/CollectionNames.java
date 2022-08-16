@@ -120,5 +120,6 @@ public enum CollectionNames {
     /**
      * Contains the known anniversaries
      */
-    ANNIVERSARIES
+    ANNIVERSARIES;
+
 }

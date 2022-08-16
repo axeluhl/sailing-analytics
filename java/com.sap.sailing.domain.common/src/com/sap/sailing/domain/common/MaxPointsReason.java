@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import java.util.Arrays;
+
 /**
  * The reasons why a competitor may get the maximum number of points, usually equaling the
  * number of competitors enlisted for the regatta plus one.
@@ -50,7 +52,10 @@ public enum MaxPointsReason {
     /** Disqualified after causing a tangle in an incident */
     DCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Retired after causing a tangle */
-    RCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false);
+    RCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
+    /** Did not sail the course */
+    NSC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false)
+    ;
     
     private final boolean discardable;
     
@@ -79,5 +84,11 @@ public enum MaxPointsReason {
 
     public boolean isAppliesAtStartOfRace() {
         return appliesAtStartOfRace;
+    }
+
+    public static MaxPointsReason[] getLexicographicalValues() {
+        MaxPointsReason[] result = MaxPointsReason.values();
+        Arrays.sort(result, (o1, o2) -> o1.name().compareToIgnoreCase(o2.name()));
+        return result;
     }
 }

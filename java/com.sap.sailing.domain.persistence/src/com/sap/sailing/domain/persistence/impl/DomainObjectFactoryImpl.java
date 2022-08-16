@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadDeviceId;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadPosition;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -44,6 +46,16 @@ import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCImpliedWindSourceEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCScratchBoatEventImpl;
+import com.sap.sailing.domain.abstractlog.orc.impl.RegattaLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -51,6 +63,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -60,6 +73,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
@@ -73,6 +87,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
@@ -83,6 +98,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPathfinderEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogResultsAreOfficialEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
@@ -177,7 +193,6 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
@@ -189,15 +204,17 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -219,13 +236,11 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelogtracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
@@ -236,18 +251,21 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorWithBoatRefJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.LegacyCompetitorWithContainedBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.ImpliedWindSourceDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificateJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -263,12 +281,14 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.sap.sse.util.impl.UUIDHelper;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -308,7 +328,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         this.baseDomainFactory = baseDomainFactory;
         this.legacyCompetitorWithBoatDeserializer = LegacyCompetitorWithContainedBoatJsonDeserializer.create(baseDomainFactory);
         this.competitorWithBoatRefDeserializer = CompetitorWithBoatRefJsonDeserializer.create(baseDomainFactory);
-        this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory);
+        this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory, /* storeDeserializedBoatPersistently */ false);
         this.database = db;
     }
 
@@ -317,27 +337,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return baseDomainFactory;
     }
 
+    @Override
     public Wind loadWind(Document object) {
         return new WindImpl(loadPosition(object), loadTimePoint(object), loadSpeedWithBearing(object));
     }
 
-    public Position loadPosition(Document object) {
-        Number latNumber = (Number) object.get(FieldNames.LAT_DEG.name());
-        Double lat = latNumber == null ? null : latNumber.doubleValue();
-        Number lngNumber = (Number) object.get(FieldNames.LNG_DEG.name());
-        Double lng = lngNumber == null ? null : lngNumber.doubleValue();
-        if (lat != null && lng != null) {
-            return new DegreePosition(lat, lng);
-        } else {
-            return null;
-        }
-    }
-
     public static TimePoint loadTimePoint(Document object, String fieldName) {
-        TimePoint result = null;
+        final TimePoint result;
         Number timePointAsNumber = (Number) object.get(fieldName);
         if (timePointAsNumber != null) {
             result = new MillisecondsTimePoint(timePointAsNumber.longValue());
+        } else {
+            result = null;
         }
         return result;
     }
@@ -348,12 +359,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     public static TimeRange loadTimeRange(Document object, FieldNames field) {
         Document timeRangeObj = (Document) object.get(field.name());
+        final TimeRange result;
         if (timeRangeObj == null) {
-            return null;
+            result = null;
+        } else {
+            TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
+            TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
+            result = new TimeRangeImpl(from, to);
         }
-        TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
-        TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
-        return new TimeRangeImpl(from, to);
+        return result;
     }
 
     /**
@@ -371,27 +385,29 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public RaceIdentifier loadRaceIdentifier(Document dbObject) {
         RaceIdentifier result = null;
-        String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
-        String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
-        if (regattaName != null && raceName != null) {
-            result = new RegattaNameAndRaceName(regattaName, raceName);
+        if (dbObject != null) {
+            String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
+            String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
+            if (regattaName != null && raceName != null) {
+                result = new RegattaNameAndRaceName(regattaName, raceName);
+            }
         }
         return result;
     }
 
-    private void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
-        windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1), new IndexOptions().name("windbyrace")); // for new programmatic access
-        windTracks.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1), new IndexOptions().name("windbyregatta")); // for export or human look-up
+    static void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
+        windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1), new IndexOptions().name("windbyrace").background(false)); // for new programmatic access
+        windTracks.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1), new IndexOptions().name("windbyregatta").background(false)); // for export or human look-up
         // for legacy access to not yet migrated fixes
         windTracks.createIndex(new Document().append(FieldNames.EVENT_NAME.name(), 1)
-                .append(FieldNames.RACE_NAME.name(), 1), new IndexOptions().name("windbyeventandrace"));
+                .append(FieldNames.RACE_NAME.name(), 1), new IndexOptions().name("windbyeventandrace").background(false));
         // Unique index
         try {
             windTracks.createIndex(
                     new Document().append(FieldNames.RACE_ID.name(), 1)
                             .append(FieldNames.WIND_SOURCE_NAME.name(), 1).append(FieldNames.WIND_SOURCE_ID.name(), 1)
                             .append(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1),
-                            new IndexOptions().name("windByRaceSourceAndTime").unique(true));
+                            new IndexOptions().name("windByRaceSourceAndTime").unique(true).background(false));
         } catch (MongoException exception) {
             if (exception.getCode() == 10092) {
                 logger.warning(String.format(
@@ -582,8 +598,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     + " for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
             result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-            result.setName(leaderboardName); // this will temporarily set the display name; it will be adjusted later if
-                                             // a display name is found
         }
         return result;
     }
@@ -610,25 +624,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = null;
         } else {
             final ScoringScheme scoringScheme = loadScoringScheme(dbLeaderboard);
-
-            Serializable courseAreaId = (Serializable) dbLeaderboard.get(FieldNames.COURSE_AREA_ID.name());
-            CourseArea courseArea = null;
-            if (courseAreaId != null) {
-                UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-                courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
-            }
-
+            final Iterable<CourseArea> courseAreas = loadCourseAreas(dbLeaderboard);
             result = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(),
                     (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), resultDiscardingRule, scoringScheme,
-                    courseArea);
+                    courseAreas);
             // For a FlexibleLeaderboard, there should be only the default fleet for any race column
             for (Object dbRaceColumnAsObject : dbRaceColumns) {
                 Document dbRaceColumn = (Document) dbRaceColumnAsObject;
                 String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
-
                 RaceColumn raceColumn = result.addRaceColumn(columnName,
                         (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
-
                 Map<String, RaceIdentifier> raceIdentifiers = loadRaceIdentifiers(dbRaceColumn);
                 RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(result.getFleet(null).getName());
                 if (defaultFleetRaceIdentifier == null) {
@@ -638,7 +643,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (defaultFleetRaceIdentifier != null) {
                     Fleet defaultFleet = result.getFleet(null);
                     if (defaultFleet != null) {
-
                         raceColumn.setRaceIdentifier(defaultFleet, defaultFleetRaceIdentifier);
                     } else {
                         // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
@@ -647,10 +651,41 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 + " because no default fleet was found in leaderboard");
                     }
                 }
-
             }
         }
         return result;
+    }
+
+    /**
+     * Loads no, one, or several course areas from the {@link FieldNames#COURSE_AREA_ID} and the
+     * {@link FieldNames#COURSE_AREA_IDS} fields of the document passed. For backward compatibility, {@code null} or a
+     * single course area ID are accepted in {@link FieldNames#COURSE_AREA_ID}. If a non-{@code null} value is found
+     * there, it is looked up as a course area and dded to the result. The default way of representing the course areas
+     * now is in the {@link FieldNames#COURSE_AREA_IDS} field where a list is expected.
+     * 
+     * @return an always valid, non-{@code null} sequence which may be empty
+     */
+    private Iterable<CourseArea> loadCourseAreas(Document documentContainingCourseAreaIds) {
+        final Set<CourseArea> courseAreas = new HashSet<>();
+        String courseAreaId = (String) documentContainingCourseAreaIds.get(FieldNames.COURSE_AREA_ID.name());
+        if (courseAreaId != null) {
+            lookupCourseAreaAndAddIfFound(courseAreas, courseAreaId);
+        }
+        List<?> courseAreaIds = (List<?>) documentContainingCourseAreaIds.get(FieldNames.COURSE_AREA_IDS.name());
+        if (courseAreaIds != null) {
+            for (final Object courseAreaIdAsString : courseAreaIds) {
+                lookupCourseAreaAndAddIfFound(courseAreas, courseAreaIdAsString.toString());
+            }
+        }
+        return courseAreas;
+    }
+
+    private void lookupCourseAreaAndAddIfFound(final Set<CourseArea> courseAreas, String courseAreaIdAsString) {
+        UUID courseAreaUuid = UUID.fromString(courseAreaIdAsString);
+        final CourseArea lookupResult = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
+        if (lookupResult != null) {
+            courseAreas.add(lookupResult);
+        }
     }
 
     private ScoringScheme loadScoringScheme(Document dbLeaderboard) {
@@ -764,7 +799,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (raceIdentifiersPerFleet != null) {
             for (String escapedFleetName : raceIdentifiersPerFleet.keySet()) {
                 String fleetName = MongoUtils.unescapeDollarAndDot(escapedFleetName);
-                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(fleetName)));
+                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(escapedFleetName)));
             }
         }
         return result;
@@ -973,7 +1008,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (constrainToWindSource != null) {
                 queryByName.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
             }
-            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName);
+            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName).batchSize(100000);
             if (windFixesFoundByName.iterator().hasNext()) {
                 List<Document> windFixesToMigrate = new ArrayList<>();
                 for (Document dbWind : windFixesFoundByName) {
@@ -982,7 +1017,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regattaName,
                             wind.getB(), wind.getA()));
                 }
-                final long size = windTracks.count(queryByName);
+                final long size = windTracks.countDocuments(queryByName);
                 logger.info("Migrating " + size + " wind fixes of regatta " + regattaName
                         + " and race " + race.getName() + " to ID-based keys");
                 windTracks.insertMany(windFixesToMigrate);
@@ -1103,11 +1138,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RemoteSailingServerReference loadRemoteSailingSever(Document serverDBObject) {
         RemoteSailingServerReference result = null;
-        String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
-        String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
+        final String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
+        final Boolean include = (Boolean) serverDBObject.get(FieldNames.INCLUDE.name());
+        @SuppressWarnings("unchecked")
+        final List<UUID> selectedEventIds = (List<UUID>) serverDBObject.get(FieldNames.SELECTED_EVENT_IDS.name());
+        final String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
         try {
             URL serverUrl = new URL(urlAsString);
-            result = new RemoteSailingServerReferenceImpl(name, serverUrl);
+            // if the INCLUDE field is not present, assume "false", meaning that the list of "selected" events
+            // which the most likely is also missing (we assume we're reading an old record that isn't aware
+            // of per-event includes/excludes) will therefore exclude no event, leading to backward-compatible
+            // behavior of considering all events found across that reference.
+            result = new RemoteSailingServerReferenceImpl(name, serverUrl, include == null ? false : include,
+                    selectedEventIds == null ? Collections.emptySet() : selectedEventIds);
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
         }
@@ -1141,6 +1184,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
+        if (endDate != null && startDate != null && endDate.before(startDate)) {
+            logger.warning("End date "+endDate+" of event "+name+" with ID "+id+" is before its start date "+
+                    startDate+"; adjusting such that end date equals start date.");
+            endDate = startDate;
+        }
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null
                 ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((Document) eventDBObject.get(FieldNames.VENUE.name()));
@@ -1260,12 +1308,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             @SuppressWarnings("unchecked")
             Iterable<Document> dbSeries = (Iterable<Document>) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
-            Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
-            CourseArea courseArea = null;
-            if (courseAreaId != null) {
-                UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-                courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
-            }
+            final Iterable<CourseArea> courseAreas = loadCourseAreas(dbRegatta);
             RegattaConfiguration configuration = null;
             if (dbRegatta.containsKey(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
                 final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
@@ -1284,6 +1327,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     .get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta
                     .get(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name());
+            final Boolean autoRestartTrackingUponCompetitorSetChange = (Boolean) dbRegatta
+                    .get(FieldNames.REGATTA_AUTO_RESTART_TRACKING_UPON_COMPETITOR_SET_CHANGE.name());
             Boolean canBoatsOfCompetitorsChangePerRace = (Boolean) dbRegatta
                     .get(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name());
             // for backward compatibility
@@ -1292,7 +1337,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 canBoatsOfCompetitorsChangePerRace = false;
                 createMigratableRegatta = true;
             }
-            
             CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType
                     .valueOfOrDefault((String) dbRegatta.get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name()));
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
@@ -1300,21 +1344,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
-                        loadScoringScheme(dbRegatta), id, courseArea,
+                        loadScoringScheme(dbRegatta), id, courseAreas,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor, new MongoObjectFactoryImpl(database), registrationLinkSecret);
+                                autoRestartTrackingUponCompetitorSetChange == null ? false : autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor,
+                                        new MongoObjectFactoryImpl(database), registrationLinkSecret);
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
-                        loadScoringScheme(dbRegatta), id, courseArea,
+                        loadScoringScheme(dbRegatta), id, courseAreas,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor, registrationLinkSecret);
+                        autoRestartTrackingUponCompetitorSetChange == null ? false : autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
             }
             result.setRegattaConfiguration(configuration);
         }
@@ -1499,8 +1544,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-
-    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) {
+    
+    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, Document query) throws JsonDeserializationException, ParseException {
         List<RaceLogEvent> result = new ArrayList<>();
         MongoCollection<Document> raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
         for (Document o : raceLog.find(query)) {
@@ -1529,7 +1574,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         updating this object into the RACE_LOGS collection then because only the caller knows the key surrounding
      *         the event object passed to this method.
      */
-    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) {
+    public Pair<RaceLogEvent, Optional<Document>> loadRaceLogEvent(Document dbObject) throws JsonDeserializationException, ParseException {
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         Serializable id = (Serializable) dbObject.get(FieldNames.RACE_LOG_EVENT_ID.name());
@@ -1616,10 +1661,48 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     competitors, dbObject);
         } else if (eventClass.equals(RaceLogTagEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
-        }else {
+        } else if (eventClass.equals(RaceLogORCLegDataEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCLegDataEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else if (eventClass.equals(RaceLogORCCertificateAssignmentEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        } else if (eventClass.equals(RaceLogORCScratchBoatEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogORCImpliedWindSourceEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogORCSetImpliedWindEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogResultsAreOfficialEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogResultsAreOfficialEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogExcludeWindSourcesEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogExcludeWindSourceEvent(createdAt, author, logicalTimePoint, passId, passId, dbObject);
+        } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
         return new Pair<>(resultEvent, dbObjectForUpdate);
+    }
+
+    private RaceLogEvent loadRaceLogORCScratchBoatEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, Document dbObject) {
+        return new RaceLogORCScratchBoatEventImpl(createdAt, logicalTimePoint, author, id, passId, competitors.get(0));
+    }
+    
+    private RaceLogEvent loadRaceLogORCSetImpliedWindEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
+            List<Competitor> competitors, Document dbObject) throws JsonDeserializationException, ParseException {
+        final Document impliedWindSourceDocument = (Document) dbObject.get(FieldNames.ORC_IMPLIED_WIND_SOURCE.name());
+        final ImpliedWindSource impliedWindSource;
+        if (impliedWindSourceDocument == null) {
+            impliedWindSource = null;
+        } else {
+            final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(impliedWindSourceDocument.toJson(writerSettings)));
+            impliedWindSource = new ImpliedWindSourceDeserializer().deserialize(json);
+        }
+        return new RaceLogORCImpliedWindSourceEventImpl(createdAt, logicalTimePoint, author, id, passId, impliedWindSource);
+    }
+    
+    private RaceLogEvent loadRaceLogResultsAreOfficialEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
+            List<Competitor> competitors, Document dbObject) throws JsonDeserializationException, ParseException {
+        return new RaceLogResultsAreOfficialEventImpl(createdAt, logicalTimePoint, author, id, passId);
     }
 
     private RaceLogEvent loadRaceLogUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -1739,7 +1822,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String sailId = ""+(secondLeagueBoatCounter++ % 6 + 1);
         final String auxiliaryBoatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+sailId;
         final Boat auxiliaryBoat = baseDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat(auxiliaryBoatId, sailId,
-                baseDomainFactory.getOrCreateBoatClass(BoatClassMasterdata.J70.getDisplayName()), sailId, /* color */ null);
+                baseDomainFactory.getOrCreateBoatClass(BoatClassMasterdata.J70.getDisplayName()), sailId, /* color */ null, /* storePersistently */ true);
         return createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, auxiliaryBoat, competitor);
     }
     
@@ -1862,8 +1945,34 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, Document dbObject) {
         String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
+        UUID courseOriginatingTemplateId = (UUID) dbObject.get(FieldNames.RACE_LOG_COURSE_ORIGINATING_TEMPLATE_ID.name());
         Pair<CourseBase, Boolean> courseData = loadCourseData((Iterable<?>) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
-                courseName);
+                courseName, courseOriginatingTemplateId);
+
+        // load associated roles
+        final ArrayList<?> markList = dbObject.get(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), ArrayList.class);
+        if (markList != null) {
+            for (final Object entry : markList) {
+                if (entry instanceof Document) {
+                    final Document entryObject = (Document) entry;
+                    final UUID markUUID = UUID.fromString(
+                            entryObject.getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name()));
+                    final Mark mark = baseDomainFactory.getExistingMarkById(markUUID);
+                    if (mark != null) {
+                        final String roleIdAsStringOrNull = entryObject
+                                .getString(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE_ID.name());
+                        if (roleIdAsStringOrNull != null) {
+                            courseData.getA().addRoleMapping(mark, UUID.fromString(roleIdAsStringOrNull));
+                        }
+                    } else {
+                        logger.warning(String.format("Could not resolve mark with id %s for course %s.", markUUID, id));
+                    }
+                } else {
+                    logger.warning(String.format("Unexpected mark entry found for course %s.", id));
+                }
+            }
+        }
+
         final String courseDesignerModeName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name());
         final CourseDesignerMode courseDesignerMode = courseDesignerModeName == null ? null
                 : CourseDesignerMode.valueOf(courseDesignerModeName);
@@ -1906,8 +2015,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // server restarts and the timepoint of loading
             // competitors by tracking providers.
             final Integer rank = (Integer) dbObject.get(FieldNames.LEADERBOARD_RANK.name());
-            final MaxPointsReason maxPointsReason = MaxPointsReason
-                    .valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
+            final String maxPointsReasonString = (String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name());
+            final MaxPointsReason maxPointsReason = maxPointsReasonString == null ? MaxPointsReason.NONE : MaxPointsReason.valueOf(maxPointsReasonString);
             final Number scoreAsNumber = (Number) dbObject.get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
             final Double score = scoreAsNumber == null ? null : scoreAsNumber.doubleValue();
             final Number finishingTimePointAsMillisAsNumber = (Number) dbObject
@@ -1960,10 +2069,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             Document dbObject) {
-        TimePoint startTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_START_TIME);
-        RaceLogRaceStatus nextStatus = RaceLogRaceStatus
+        final TimePoint startTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_START_TIME);
+        final UUID courseAreaId = loadCourseAreaId(dbObject);
+        final RaceLogRaceStatus nextStatus = RaceLogRaceStatus
                 .valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
-        return new RaceLogStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, startTime, nextStatus);
+        return new RaceLogStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, startTime, nextStatus, courseAreaId);
+    }
+
+    private UUID loadCourseAreaId(Document dbObject) {
+        final String courseAreaIdAsString = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_COURSE_AREA_ID_AS_STRING.name());
+        final UUID courseAreaId = courseAreaIdAsString == null ? null : UUID.fromString(courseAreaIdAsString);
+        return courseAreaId;
     }
 
     private RaceLogStartOfTrackingEvent loadRaceLogStartOfTrackingEvent(TimePoint createdAt,
@@ -1992,10 +2108,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Object startTimeDifferenceObject = dbObject.get(FieldNames.RACE_LOG_START_TIME_DIFFERENCE_IN_MS.name());
         final Duration startTimeDifference = startTimeDifferenceObject == null ? null
                 : new MillisecondsDurationImpl(((Number) startTimeDifferenceObject).longValue());
-        RaceLogRaceStatus nextStatus = RaceLogRaceStatus
+        final RaceLogRaceStatus nextStatus = RaceLogRaceStatus
                 .valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
+        final UUID courseAreaId = loadCourseAreaId(dbObject);
         return new RaceLogDependentStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, dependentRaceLog,
-                startTimeDifference, nextStatus);
+                startTimeDifference, nextStatus, courseAreaId);
     }
 
     private RaceLogRaceStatusEvent loadRaceLogRaceStatusEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -2004,6 +2121,48 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus
                 .valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
         return new RaceLogRaceStatusEventImpl(createdAt, logicalTimePoint, author, id, passId, nextStatus);
+    }
+    
+    private RaceLogORCLegDataEvent loadRaceLogORCLegDataEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, Integer passId, Document dbObject) {
+        final int legNr = ((Number) dbObject.get(FieldNames.ORC_LEG_NR.name())).intValue();
+        final Number twaInDegrees = (Number) dbObject.get(FieldNames.ORC_LEG_TWA_IN_DEG.name());
+        final Bearing twa = twaInDegrees==null?null:new DegreeBearingImpl(twaInDegrees.doubleValue());
+        final Number lengthInNauticalMiles = (Number) dbObject.get(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name());
+        final Distance length = lengthInNauticalMiles==null?null:new NauticalMileDistance(lengthInNauticalMiles.doubleValue());
+        final ORCPerformanceCurveLegTypes type = ORCPerformanceCurveLegTypes.valueOf(dbObject.getString(FieldNames.ORC_LEG_TYPE.name()));
+        return new RaceLogORCLegDataEventImpl(createdAt, logicalTimePoint, author, id, passId, legNr, twa, length, type);
+    }
+
+    private RaceLogORCCertificateAssignmentEvent loadRaceLogORCCertificateAssignmentEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, int passId, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Document certificateDbObject = (Document) dbObject.get(FieldNames.ORC_CERTIFICATE.name());
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(certificateDbObject.toJson(writerSettings)));
+        final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
+        Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
+        return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, passId, certificate, boatId);
+    }
+
+    private RaceLogExcludeWindSourcesEvent loadRaceLogExcludeWindSourceEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, int passId, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Set<WindSource> windSourcesToExclude = new HashSet<>();
+        final Iterable<?> dbWindSourcesToExclude = (Iterable<?>) dbObject.get(FieldNames.WIND_SOURCES_TO_EXCLUDE.name());
+        for (final Object dbWindSourceToExcludeObject : dbWindSourcesToExclude) {
+            final Document dbWindSourceToExclude = (Document) dbWindSourceToExcludeObject;
+            WindSourceType windSourceType = WindSourceType.valueOf((String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_NAME.name()));
+            final WindSource windSourceToExclude;
+            if (dbWindSourceToExclude.containsKey(FieldNames.WIND_SOURCE_ID.name())) {
+                windSourceToExclude = new WindSourceWithAdditionalID(windSourceType,
+                        (String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_ID.name()));
+            } else {
+                windSourceToExclude = new WindSourceImpl(windSourceType);
+            }
+            windSourcesToExclude.add(windSourceToExclude);
+        }
+        return new RaceLogExcludeWindSourcesEventImpl(createdAt, logicalTimePoint, author, id, passId, windSourcesToExclude);
     }
 
     @Override
@@ -2023,7 +2182,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private void loadRegattaLogEvents(RegattaLog targetRegattaLog, Document query,
-            RegattaLikeIdentifier regattaLogIdentifier) {
+            RegattaLikeIdentifier regattaLogIdentifier) throws JsonDeserializationException, ParseException {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         for (Document o : collection.find(query)) {
             try {
@@ -2031,13 +2190,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (event != null) {
                     targetRegattaLog.load(event);
                 }
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, "Couldn't load regatta log event " + o + ": " + e.getMessage(), e);
             }
         }
     }
 
-    private RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier) {
+    public RegattaLogEvent loadRegattaLogEvent(Document o, RegattaLikeIdentifier regattaLogIdentifier)
+            throws JsonDeserializationException, ParseException {
         Document dbObject = (Document) o.get(FieldNames.REGATTA_LOG_EVENT.name());
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
@@ -2045,7 +2205,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final AbstractLogEventAuthor author;
         String authorName = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name());
         Number authorPriority = (Number) dbObject.get(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name());
-        author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        if (authorName != null && authorPriority != null) {
+            author = new LogEventAuthorImpl(authorName, authorPriority.intValue());
+        } else {
+            author = LogEventAuthorImpl.createCompatibilityAuthor();
+        }
         // CloseOpenEnded, DeviceCompMapping, DeviceMarkMapping, RegisterComp, Revoke
         String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
@@ -2090,6 +2254,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRegattaLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRevokeEvent.class.getSimpleName())) {
             return loadRegattaLogRevokeEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        } else if (eventClass.equals(RegattaLogORCCertificateAssignmentEvent.class.getSimpleName())) {
+            return loadRegattaLogORCCertificateAssignmentEvent(createdAt, author, logicalTimePoint, id, dbObject);
         }
         throw new IllegalStateException(String.format("Unknown RegattaLogEvent type %s", eventClass));
     }
@@ -2106,7 +2272,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return boat;
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnTimeFactorAsNumber = (Number) dbObject.get(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name());
@@ -2115,7 +2281,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 timeOnTimeFactor);
     }
 
-    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
+    private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
         final Number timeOnDistanceSecondsAllowancePerNauticalMileAsNumber = (Number) dbObject
@@ -2192,6 +2358,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 RegattaLogDeviceMarkMappingEventImpl::new,
                 result -> new MongoObjectFactoryImpl(database, serviceFinderFactory)
                         .storeRegattaLogEvent(regattaLogIdentifier, result));
+    }
+    
+    private RegattaLogORCCertificateAssignmentEvent loadRegattaLogORCCertificateAssignmentEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Document certificateDbObject = (Document) dbObject.get(FieldNames.ORC_CERTIFICATE.name());
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(certificateDbObject.toJson(writerSettings)));
+        final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
+        Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
+        return new RegattaLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, certificate, boatId);
     }
 
     /**
@@ -2363,12 +2540,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         been edited "in place" to describe the migration that has happened
      */
     @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
-    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName) {
+    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName,
+            UUID originatingCourseTemplateId) {
         boolean migrated = false;
         if (courseName == null) {
             courseName = "Course";
         }
-        CourseBase courseData = new CourseDataImpl(courseName);
+        CourseBase courseData = new CourseDataImpl(courseName, originatingCourseTemplateId);
         int i = 0;
         for (Object object : dbCourseList) {
             Document dbObject = (Document) object;
@@ -2470,8 +2648,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             dbObject.remove(FieldNames.GATE_RIGHT.name());
         }
         Mark rightMark = loadMark(dbRight);
+        String shortName = (String) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_SHORT_NAME.name());
+
+        if (shortName == null || shortName.isEmpty()) {
+            shortName = controlPointName;
+        }
         ControlPointWithTwoMarks gate = baseDomainFactory.createControlPointWithTwoMarks(controlPointId, leftMark,
-                rightMark, controlPointName);
+                rightMark, controlPointName, shortName);
         return gate;
     }
 
@@ -2480,12 +2663,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String markColorAsString = (String) dbObject.get(FieldNames.MARK_COLOR.name());
         Color markColor = AbstractColor.getCssColor(markColorAsString);
         String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
+        String markShortName = (String) dbObject.get(FieldNames.MARK_SHORT_NAME.name());
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
         Object markTypeRaw = dbObject.get(FieldNames.MARK_TYPE.name());
+        Object originatingMarkTemplateIdObject = dbObject.get(FieldNames.MARK_ORIGINATING_MARK_TEMPLATE_ID.name());
+        UUID originatingMarkTemplateId = originatingMarkTemplateIdObject == null ? null
+                : UUID.fromString(originatingMarkTemplateIdObject.toString());
+        Object originatingMarkPropertiesIdObject = dbObject
+                .get(FieldNames.MARK_ORIGINATING_MARK_PROPERTIES_ID.name());
+        UUID originatingMarkPropertiesId = originatingMarkPropertiesIdObject == null ? null
+                : UUID.fromString(originatingMarkPropertiesIdObject.toString());
         MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
-
-        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
+        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markShortName, markType, markColor, markShape,
+                markPattern, originatingMarkTemplateId, originatingMarkPropertiesId);
         return mark;
     }
 
@@ -2493,23 +2684,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Collection<DynamicCompetitor> loadAllCompetitors() {
         Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        try {
             final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
-                DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
-                // ensure that in case there should be multiple competitors with equal IDs in the DB
-                // only one will survive
-                if (competitorsById.containsKey(c.getId())) {
-                    collection.deleteOne(o);
-                } else {
-                    competitorsById.put(c.getId(), c);
+                try {
+                    JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
+                    DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
+                    // ensure that in case there should be multiple competitors with equal IDs in the DB
+                    // only one will survive
+                    if (competitorsById.containsKey(c.getId())) {
+                        collection.deleteOne(o);
+                    } else {
+                        competitorsById.put(c.getId(), c);
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors: "+
+                            o.toString());
+                    logger.log(Level.SEVERE, "loadCompetitors", e);
                 }
             }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
-            logger.log(Level.SEVERE, "loadCompetitors", e);
-        }
         return competitorsById.values();
     }
 
@@ -2530,7 +2722,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // there is a corner case where tests can create just one competitor without boat
         // before we migrate we need to check if this case
         if (competitorsCollectionExist && !boatsCollectionCollectionExist) {
-            long competitorCount = orginalCompetitorCollection.count();
+            long competitorCount = orginalCompetitorCollection.countDocuments();
             if (competitorCount > 0) {
                 Document oneCompetitorDbObject = orginalCompetitorCollection.find().first();
                 Object boatObject = oneCompetitorDbObject.get(CompetitorJsonConstants.FIELD_BOAT);
@@ -2596,6 +2788,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+
     private DeviceConfiguration loadConfigurationEntry(Document dbObject) throws JsonDeserializationException, ParseException {
         final String idAsString = dbObject.getString(FieldNames.CONFIGURATION_ID_AS_STRING.name());
         final DeviceConfiguration configuration;
@@ -2630,22 +2823,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(configObject.toJson(writerSettings)));
         configuration = deserializer.deserialize(json);
         return configuration;
-    }
-
-    private DeviceIdentifier loadDeviceId(
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, Document deviceId)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
-        Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name());
-        String stringRepresentation = (String) deviceId.get(FieldNames.DEVICE_STRING_REPRESENTATION.name());
-
-        try {
-            return deviceIdentifierServiceFinder.findService(deviceType).deserialize(deviceTypeId, deviceType,
-                    stringRepresentation);
-        } catch (TransformationException e) {
-            return new PlaceHolderDeviceIdentifierSerializationHandler().deserialize(stringRepresentation, deviceType,
-                    stringRepresentation);
-        }
     }
 
     @Override
@@ -2842,7 +3019,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final MongoCollection<Document> collection = database
                 .getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         final FindIterable<Document> cursor = collection.find();
-        final long count = collection.count();
+        final long count = collection.countDocuments();
         logger.info("Restoring " + count + " races");
         final List<Document> restoreParameters = new ArrayList<>();
         // consume all elements quickly to avoid cursor/DB timeouts while restoring many races;
@@ -2964,4 +3141,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return fromDb;
     }
+
+    @Override
+    public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
+        return raceTrackingConnectivityParamsServiceFinder;
+    }
+
 }

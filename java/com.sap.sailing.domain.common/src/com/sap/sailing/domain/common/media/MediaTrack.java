@@ -54,8 +54,6 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
     public TimePoint startTime;
     public Duration duration;
     public MimeType mimeType;
-    @Deprecated
-    public Status status = Status.UNDEFINED;
     public Set<RegattaAndRaceIdentifier> assignedRaces;
 
     public MediaTrack() {
@@ -82,7 +80,7 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
     }
 
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + " - " + assignedRaces + " - " + startTime + " [" + duration + status + ']'; 
+        return title + " - " + url + " [" + typeToString() + ']' + " - " + assignedRaces + " - " + startTime + " [" + duration + ']'; 
     }
 
     public TimePoint deriveEndTime() {
@@ -143,25 +141,11 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
     }
 
     public boolean beginsAfter(Date date) {
-        if (date == null) {
-            return false;
-        } else if (startTime.asDate().after(date)) {
-            return true;
-        } else {
-            return false;
-        }
+        return startTime != null && date != null && startTime.asDate().after(date);
     }
 
     public boolean endsBefore(Date date) {
-        if (date == null) {
-            return false;
-        } else if (duration == null) {
-            return false; //null-duration implies open-ended!
-        } else if (deriveEndTime().asDate().before(date)) {
-            return true;
-        } else {
-            return false;
-        }
+        return date != null && deriveEndTime() != null && deriveEndTime().asDate().before(date);
     }
 
     @Override
@@ -171,11 +155,11 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.MEDIA_TRACK;
     }
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -13,6 +13,8 @@ import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
 /**
  * Master data about a single race that is to be transferred to the client.<p>
+ * 
+ * The permission type represented by this class of objects is {@link SecuredDomainType#TRACKED_RACE}.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -35,23 +37,32 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
 
     public TrackedRaceStatisticsDTO trackedRaceStatistics;
 
-    private String regattaName;
     public String boatClass;
     
+    private RankingMetrics rankingMetricType;
+    
+    private RegattaAndRaceIdentifier raceIdentifier;
+    
+    @Deprecated
     public RaceDTO() {}
 
-    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked) {
+    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked, RankingMetrics rankingMetricType) {
         super(raceIdentifier, trackedRace);
-        this.regattaName = raceIdentifier.getRegattaName();
+        this.raceIdentifier = raceIdentifier;
         this.isTracked = isCurrentlyTracked;
+        this.rankingMetricType = rankingMetricType;
     }
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
-        return new RegattaNameAndRaceName(regattaName, getName());
+        return raceIdentifier;
     }
 
+    public RankingMetrics getRankingMetricType() {
+        return rankingMetricType;
+    }
+    
     public String getRegattaName() {
-        return regattaName;
+        return raceIdentifier.getRegattaName();
     }
 
     @Override
@@ -61,7 +72,7 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
         result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
         result = prime * result + (isTracked ? 1231 : 1237);
         result = prime * result + ((places == null) ? 0 : places.hashCode());
-        result = prime * result + ((regattaName == null) ? 0 : regattaName.hashCode());
+        result = prime * result + ((getRegattaName() == null) ? 0 : getRegattaName().hashCode());
         result = prime * result + ((status == null) ? 0 : status.hashCode());
         return result;
     }
@@ -87,10 +98,10 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
                 return false;
         } else if (!places.equals(other.places))
             return false;
-        if (regattaName == null) {
-            if (other.regattaName != null)
+        if (getRegattaName() == null) {
+            if (other.getRegattaName() != null)
                 return false;
-        } else if (!regattaName.equals(other.regattaName))
+        } else if (!getRegattaName().equals(other.getRegattaName()))
             return false;
         if (status == null) {
             if (other.status != null)
@@ -121,17 +132,25 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     }
     
     @Override
-    public HasPermissions getType() {
-        return SecuredDomainType.TRACKED_RACE;
+    public HasPermissions getPermissionType() {
+        return getPermissionTypeForClass();
     }
     
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
+    public static HasPermissions getPermissionTypeForClass() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
+        return raceIdentifier.getTypeRelativeObjectIdentifier();
+    }
+    
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return new TypeRelativeObjectIdentifier(regattaName, getName());
+        return getTypeRelativeObjectIdentifier(raceIdentifier);
     }
 
 }

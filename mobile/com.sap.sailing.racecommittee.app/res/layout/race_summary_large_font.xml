@@ -288,6 +288,7 @@
                         tools:text="AUT 553  GER 766  ITA 912" />
                 </LinearLayout>
             </LinearLayout>
+            <include layout="@layout/race_finishing_revoke_button" />
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

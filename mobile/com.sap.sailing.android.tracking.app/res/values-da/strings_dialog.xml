@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    <string name="yes">"Ja"</string>
+    <string name="no">"Nej"</string>
+    <string name="confirm_data_hello_name">"Hej {full_name}"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Du logger på som {sail_id}"</string>
+    <string name="confirm_data_is_correct">"OK"</string>
+    <string name="decline_data_is_incorrect">"Det er ikke mig!"</string>
+    <string name="confirm_delete_checkin">"Er du sikker på, at du vil slette denne indcheckning?"</string>
+    <string name="download_team_image_message">"Downloader teambillede..."</string>
+    <string name="checkout_warning_message">"Er du sikker på, at du vil logge af? Du skal logge på igen med den angivne QR-kode for at få adgang til din regatta!"</string>
+</resources>

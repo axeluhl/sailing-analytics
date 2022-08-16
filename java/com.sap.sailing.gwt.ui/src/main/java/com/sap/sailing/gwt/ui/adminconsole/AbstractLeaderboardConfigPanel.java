@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -16,6 +17,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -30,57 +32,61 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
+import com.sap.sailing.gwt.ui.client.Refresher;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.async.ParallelExecutionCallback;
+import com.sap.sse.gwt.client.async.ParallelExecutionHolder;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel
-        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, RegattasDisplayer,
-        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+        implements SelectedLeaderboardProvider<StrippedLeaderboardDTO>, TrackedRaceChangedListener,
+        FilterablePanelProvider<StrippedLeaderboardDTO> {
     protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
 
     protected final StringMessages stringMessages;
 
-    protected final SailingServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingServiceWrite;
 
-    protected final ListDataProvider<StrippedLeaderboardDTOWithSecurity> filteredLeaderboardList;
+    protected final ListDataProvider<StrippedLeaderboardDTO> filteredLeaderboardList;
 
     protected final ErrorReporter errorReporter;
 
-    protected final FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable;
+    protected final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable;
 
     protected final RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
     protected final RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
@@ -91,27 +97,52 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     protected final CaptionPanel trackedRacesCaptionPanel;
     protected final List<RegattaDTO> allRegattas;
 
-    protected LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity> filterLeaderboardPanel;
+    protected LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
 
-    protected List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList;
+    protected List<StrippedLeaderboardDTO> availableLeaderboardList;
 
-    protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTOWithSecurity> leaderboardSelectionModel;
+    protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTO> leaderboardSelectionModel;
 
     protected final RefreshableSelectionModel<RaceDTO> refreshableTrackedRaceSelectionModel;
     protected final SelectionChangeEvent.Handler trackedRaceListHandler;
     protected HandlerRegistration trackedRaceListHandlerRegistration;
 
-    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
+    protected final Presenter presenter;
     private final Button reloadAllRaceLogs;
 
     protected UserService userService;
+    protected SubscriptionServiceFactory subscriptionServiceFactory;
+    
+    private final Displayer<StrippedLeaderboardDTO> leaderboardsDisplayer = new Displayer<StrippedLeaderboardDTO>() {
+        
+        @Override
+        public void fill(Iterable<StrippedLeaderboardDTO> result) {
+            fillLeaderboards(result);
+        }
+    };
+    
+    public Displayer<StrippedLeaderboardDTO> getLeaderboardsDisplayer() {
+        return leaderboardsDisplayer;
+    }
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
+        
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
 
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality
-            extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTOWithSecurity> {
+            extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
         public RaceColumnDTOAndFleetDTOWithNameBasedEquality(RaceColumnDTO a, FleetDTO b,
-                StrippedLeaderboardDTOWithSecurity c) {
+                StrippedLeaderboardDTO c) {
             super(a, b, c);
         }
 
@@ -152,41 +183,41 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         }
     }
 
-    public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, final UserService userService,
-            RegattaRefresher regattaRefresher,
-            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
-            final ErrorReporter errorReporter, StringMessages theStringConstants, boolean multiSelection) {
+    public AbstractLeaderboardConfigPanel(final Presenter presenter, StringMessages theStringConstants, boolean multiSelection) {
         this.stringMessages = theStringConstants;
-        this.sailingService = sailingService;
-        this.userService = userService;
-        filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTOWithSecurity>();
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
+        this.subscriptionServiceFactory = presenter.getSubscriptionServiceFactory();
+        filteredLeaderboardList = new ListDataProvider<>();
         allRegattas = new ArrayList<RegattaDTO>();
-        this.errorReporter = errorReporter;
-        this.leaderboardsRefresher = leaderboardsRefresher;
-        this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTOWithSecurity>();
+        this.errorReporter = presenter.getErrorReporter();
+        this.presenter = presenter;
+        this.availableLeaderboardList = new ArrayList<>();
         mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
         this.setWidget(mainPanel);
-
         // Create leaderboards list and functionality
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
         leaderboardsCaptionPanel.setStyleName("bold");
         mainPanel.add(leaderboardsCaptionPanel);
-
         VerticalPanel leaderboardsPanel = new VerticalPanel();
         leaderboardsCaptionPanel.add(leaderboardsPanel);
-
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, LEADERBOARD);
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
-        addLeaderboardControls(buttonPanel);
         leaderboardsPanel.add(buttonPanel);
-
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTOWithSecurity>(/* pageSize */10000, tableRes);
-        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity>(lblFilterEvents,
-                availableLeaderboardList, filteredLeaderboardList) {
+        final Button createLeaderboardRefreshBtn = buttonPanel.addAction(stringMessages.refresh(), ()->true, new Command() {
             @Override
-            public List<String> getSearchableStrings(StrippedLeaderboardDTOWithSecurity t) {
+            public void execute() {
+                getLeaderboardsRefresher().reloadAndCallFillAll();
+            }
+        });
+        createLeaderboardRefreshBtn.ensureDebugId("LeaderboardRefreshButton");
+        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
+        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
+                availableLeaderboardList, filteredLeaderboardList, stringMessages) {
+            @Override
+            public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.displayName);
@@ -194,18 +225,19 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
 
             @Override
-            public AbstractCellTable<StrippedLeaderboardDTOWithSecurity> getCellTable() {
+            public AbstractCellTable<StrippedLeaderboardDTO> getCellTable() {
                 return leaderboardTable;
             }
         };
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
-
+        filterLeaderboardPanel
+                .setUpdatePermissionFilterForCheckbox(leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
         addColumnsToLeaderboardTableAndSetSelectionModel(userService, leaderboardTable, tableRes,
                 filterLeaderboardPanel.getAllListDataProvider());
         @SuppressWarnings("unchecked")
-        RefreshableMultiSelectionModel<StrippedLeaderboardDTOWithSecurity> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTOWithSecurity>) leaderboardTable
+        RefreshableMultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable
                 .getSelectionModel();
         leaderboardSelectionModel = multiSelectionModel;
         leaderboardTable.setWidth("100%");
@@ -219,36 +251,30 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }
         });
+        addLeaderboardControls(buttonPanel);
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
         mainPanel.add(new Grid(1, 1));
-
         // caption panels for the selected leaderboard and tracked races
         HorizontalPanel splitPanel = new HorizontalPanel();
         splitPanel.setWidth("100%");
         splitPanel.ensureDebugId("LeaderboardDetailsPanel");
         mainPanel.add(splitPanel);
-
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
         splitPanel.add(selectedLeaderBoardPanel);
         splitPanel.setCellWidth(selectedLeaderBoardPanel, "50%");
-
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
         selectedLeaderBoardPanel.setContentWidget(vPanel);
-
         trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
         splitPanel.add(trackedRacesCaptionPanel);
         splitPanel.setCellWidth(trackedRacesCaptionPanel, "50%");
-
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
-
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
-                errorReporter,
-                regattaRefresher, stringMessages, /* multiselection */false, isActionButtonsEnabled());
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, presenter, stringMessages,
+                /* multiselection */false, isActionButtonsEnabled());
         refreshableTrackedRaceSelectionModel = trackedRacesListComposite.getSelectionModel();
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
@@ -260,7 +286,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
                 // if no leaderboard column is selected, ignore the race selection change
                 if (selectedRaceColumnAndFleetName != null) {
-                    final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
+                    final StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
                     if (userService.hasPermission(selectedLeaderboard, UPDATE)) {
                         RaceColumnDTO selectedRaceColumn = selectedRaceColumnAndFleetName.getA();
                         FleetDTO selectedRaceColumnFleet = selectedRaceColumnAndFleetName.getB();
@@ -313,7 +339,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         this.reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
         reloadAllRaceLogs.ensureDebugId("ReloadAllRaceLogsButton");
         reloadAllRaceLogs.addClickHandler(event -> {
-            StrippedLeaderboardDTOWithSecurity leaderboard = getSelectedLeaderboard();
+            StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
             for (RaceColumnDTO column : leaderboard.getRaceList()) {
                 for (FleetDTO fleet : column.getFleets()) {
                     refreshRaceLog(column, fleet, false);
@@ -325,11 +351,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
-                sailingService, stringMessages, errorReporter, multiSelection);
+                sailingServiceWrite, stringMessages, errorReporter, multiSelection);
         raceColumnTable.asWidget().ensureDebugId("RaceColumnTable");
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
-
         this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
         raceColumnTableSelectionModel.addSelectionChangeHandler(event -> {
             // If the selection on the raceColumnTable changes,
@@ -339,11 +364,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             leaderboardRaceColumnSelectionChanged();
         });
         vPanel.add(raceColumnTable);
-
         HorizontalPanel selectedLeaderboardRaceButtonPanel = new HorizontalPanel();
         selectedLeaderboardRaceButtonPanel.setSpacing(5);
         vPanel.add(selectedLeaderboardRaceButtonPanel);
-
         addSelectedLeaderboardRacesControls(selectedLeaderboardRaceButtonPanel);
     }
 
@@ -356,32 +379,21 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     protected abstract void addSelectedLeaderboardRacesControls(Panel racesPanel);
 
     protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService,
-            FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
-            AdminConsoleTableResources tableRes, ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider);
+            FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
+            AdminConsoleTableResources tableRes, ListDataProvider<StrippedLeaderboardDTO> listDataProvider);
 
     protected abstract void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable);
 
-    protected SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> createSortableSelectionCheckboxColumn(
-            final FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
+    protected SelectionCheckboxColumn<StrippedLeaderboardDTO> createSortableSelectionCheckboxColumn(
+            final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
             AdminConsoleTableResources tableResources,
-            ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler,
-            ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider) {
-        SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity>(
+            ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler,
+            ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                new EntityIdentityComparator<StrippedLeaderboardDTOWithSecurity>() {
-                    @Override
-                    public boolean representSameEntity(StrippedLeaderboardDTOWithSecurity dto1,
-                            StrippedLeaderboardDTOWithSecurity dto2) {
-                        return dto1.getName().equals(dto2.getName());
-                    }
-
-                    @Override
-                    public int hashCode(StrippedLeaderboardDTOWithSecurity t) {
-                        return t.getName().hashCode();
-                    }
-                }, listDataProvider, leaderboardTable);
+                new NameBasedStrippedLeaderboardDTOEntityIdentityComparator(), listDataProvider, leaderboardTable);
         selectionCheckboxColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(selectionCheckboxColumn,
                 (o1, o2) -> (leaderboardTable.getSelectionModel().isSelected(o1) ? 1 : 0)
@@ -389,23 +401,20 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         return selectionCheckboxColumn;
     }
 
-    @Override
-    public void fillLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> leaderboards) {
+    public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> result) {
         availableLeaderboardList.clear();
-        Util.addAll(leaderboards, availableLeaderboardList);
-        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
+        Util.addAll(result, availableLeaderboardList);
+        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList    
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
     }
 
-    /**
-     */
     public void loadAndRefreshLeaderboard(final String leaderboardName) {
-        MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity> callback = new MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity>(
-                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+        MarkedAsyncCallback<StrippedLeaderboardDTO> callback = new MarkedAsyncCallback<StrippedLeaderboardDTO>(
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTOWithSecurity leaderboard) {
-                        for (StrippedLeaderboardDTOWithSecurity leaderboardDTO : leaderboardSelectionModel
+                    public void onSuccess(StrippedLeaderboardDTO leaderboard) {
+                        for (StrippedLeaderboardDTO leaderboardDTO : leaderboardSelectionModel
                                 .getSelectedSet()) {
                             if (leaderboardDTO.getName().equals(leaderboardName)) {
                                 leaderboardSelectionModel.setSelected(leaderboardDTO, false);
@@ -417,8 +426,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                                                                                     // provider
                         leaderboardSelectionModel.setSelected(leaderboard, true);
                         leaderboardSelectionChanged();
-                        getLeaderboardsRefresher().updateLeaderboards(filteredLeaderboardList.getList(),
-                                AbstractLeaderboardConfigPanel.this);
+                        getLeaderboardsRefresher().updateAndCallFillForAll(filteredLeaderboardList.getList(),
+                                AbstractLeaderboardConfigPanel.this.getLeaderboardsDisplayer());
                     }
 
                     @Override
@@ -428,11 +437,26 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                                         + t.getMessage());
                     }
                 });
-        sailingService.getLeaderboardWithSecurity(leaderboardName, callback);
+        sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName, callback);
+    }
+    
+    public void loadAndRefreshLeaderboard(final StrippedLeaderboardDTO leaderboard) {
+        for (StrippedLeaderboardDTO leaderboardDTO : leaderboardSelectionModel.getSelectedSet()) {
+            if (leaderboardDTO.getName().equals(leaderboard.getName())) {
+                leaderboardSelectionModel.setSelected(leaderboardDTO, false);
+                break;
+            }
+        }
+        replaceLeaderboardInList(availableLeaderboardList, leaderboard.getName(), leaderboard);
+        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
+        leaderboardSelectionModel.setSelected(leaderboard, true);
+        leaderboardSelectionChanged();
+        getLeaderboardsRefresher().updateAndCallFillForAll(filteredLeaderboardList.getList(), this.getLeaderboardsDisplayer());
+
     }
 
-    private void replaceLeaderboardInList(List<StrippedLeaderboardDTOWithSecurity> leaderboardList,
-            String leaderboardToReplace, StrippedLeaderboardDTOWithSecurity newLeaderboard) {
+    private void replaceLeaderboardInList(List<StrippedLeaderboardDTO> leaderboardList,
+            String leaderboardToReplace, StrippedLeaderboardDTO newLeaderboard) {
         int index = -1;
         for (StrippedLeaderboardDTO existingLeaderboard : leaderboardList) {
             index++;
@@ -447,7 +471,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected void unlinkRaceColumnFromTrackedRace(final String raceColumnName, final FleetDTO fleet) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        sailingService.disconnectLeaderboardColumnFromTrackedRace(selectedLeaderboardName, raceColumnName,
+        sailingServiceWrite.disconnectLeaderboardColumnFromTrackedRace(selectedLeaderboardName, raceColumnName,
                 fleet.getName(), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -466,7 +490,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected void refreshRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleet, final boolean showAlerts) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        sailingService.reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet,
+        sailingServiceWrite.reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -503,7 +527,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA()
                     .getRaceColumnName();
             final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB().getName();
-            sailingService.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
+            sailingServiceWrite.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
                     selectedRaceColumnName, new MarkedAsyncCallback<Map<String, RegattaAndRaceIdentifier>>(
                             new AsyncCallback<Map<String, RegattaAndRaceIdentifier>>() {
                                 @Override
@@ -559,7 +583,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected abstract void leaderboardSelectionChanged();
 
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         removeTrackedRaceListHandlerTemporarily();
         trackedRacesListComposite.fillRegattas(regattas);
@@ -600,7 +623,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     private void linkTrackedRaceToSelectedRaceColumn(final RaceColumnDTO selectedRaceInLeaderboard,
             final FleetDTO fleet, final RegattaAndRaceIdentifier selectedRace) {
-        sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(),
+        sailingServiceWrite.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(),
                 selectedRaceInLeaderboard.getRaceColumnName(), fleet.getName(), selectedRace,
                 new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
                     @Override
@@ -623,13 +646,13 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity getSelectedLeaderboard() {
+    public StrippedLeaderboardDTO getSelectedLeaderboard() {
         return leaderboardSelectionModel.getSelectedSet().isEmpty() ? null
                 : leaderboardSelectionModel.getSelectedSet().iterator().next();
     }
 
-    protected LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher() {
-        return leaderboardsRefresher;
+    protected Refresher<StrippedLeaderboardDTO> getLeaderboardsRefresher() {
+        return presenter.getLeaderboardsRefresher();
     }
 
     protected void editRaceColumnOfLeaderboard(
@@ -683,15 +706,15 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                             }
                         };
                         if (rename) {
-                            sailingService.renameLeaderboardColumn(selectedLeaderboardName, oldRaceColumnName,
+                            sailingServiceWrite.renameLeaderboardColumn(selectedLeaderboardName, oldRaceColumnName,
                                     result.getName(), renameLeaderboardColumnCallback);
                         }
                         if (updateIsMedalRace) {
-                            sailingService.updateIsMedalRace(selectedLeaderboardName, result.getName(),
+                            sailingServiceWrite.updateIsMedalRace(selectedLeaderboardName, result.getName(),
                                     result.isMedalRace(), updateIsMedalRaceCallback);
                         }
                         if (updateFactor) {
-                            sailingService.updateLeaderboardColumnFactor(selectedLeaderboardName, result.getName(),
+                            sailingServiceWrite.updateLeaderboardColumnFactor(selectedLeaderboardName, result.getName(),
                                     result.getExplicitFactor(), updateLeaderboardColumnFactorCallback);
                         }
                     }
@@ -701,7 +724,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected void showRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        sailingService.getRaceLog(selectedLeaderboardName, raceColumnDTO, fleetDTO,
+        sailingServiceWrite.getRaceLog(selectedLeaderboardName, raceColumnDTO, fleetDTO,
                 new MarkedAsyncCallback<RaceLogDTO>(new AsyncCallback<RaceLogDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -730,7 +753,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected void showRegattaLog() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        sailingService.getRegattaLog(selectedLeaderboardName,
+        sailingServiceWrite.getRegattaLog(selectedLeaderboardName,
                 new MarkedAsyncCallback<RegattaLogDTO>(new AsyncCallback<RegattaLogDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -805,5 +828,113 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
         }
         return regatta;
+    }
+
+    protected void assignCertificates(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingServiceWrite, userService,
+                stringMessages, errorReporter, new RaceBoatCertificatesPanel(sailingServiceWrite, userService, object.getC(), object.getA(), object.getB(), stringMessages, errorReporter));
+        dialog.show();
+    }
+
+    protected void selectScratchBoat(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        sailingServiceWrite.getORCPerformanceCurveScratchBoat(object.getC().getName(), object.getA().getName(), object.getB().getName(), new AsyncCallback<CompetitorDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorObtainingScratchBoat(caught.getMessage()), /* silent */ true);
+            }
+
+            @Override
+            public void onSuccess(CompetitorDTO scratchBoatSoFar) {
+                new CompetitorSelectionDialog(sailingServiceWrite, userService, errorReporter,
+                        stringMessages.selectScratchBoat(), stringMessages.selectScratchBoat(), getRaceCompetitorProvider(object), stringMessages, scratchBoatSoFar,
+                        new DialogCallback<CompetitorDTO>() {
+                            @Override
+                            public void ok(CompetitorDTO newScratchBoat) {
+                                sailingServiceWrite.setORCPerformanceCurveScratchBoat(object.getC().getName(), object.getA().getName(), object.getB().getName(),
+                                        newScratchBoat, new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(stringMessages.errorSettingScratchBoat(caught.getMessage()), /* silent */ true);
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        Notification.notify(stringMessages.scratchBoatSetSuccessfully(), NotificationType.SUCCESS);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void cancel() {}
+                }).show();
+            }
+        });
+    }
+    
+    protected void setImpliedWind(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
+        final String raceDisplayName = object.getC().getName() + "/" + object.getA().getName() + "/" + object.getB().getName();
+        sailingServiceWrite.getImpliedWindSource(object.getC().getName(), object.getA().getName(), object.getB().getName(),
+                new AsyncCallback<ImpliedWindSource>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorObtainingImpliedWindSourceForRace(
+                                raceDisplayName,
+                                caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(ImpliedWindSource result) {
+                        new ImpliedWindSourceEditDialog(object, result, availableLeaderboardList, stringMessages, errorReporter, sailingServiceWrite, userService, new DialogCallback<ImpliedWindSource>() {
+                            @Override
+                            public void ok(ImpliedWindSource editedObject) {
+                                sailingServiceWrite.setImpliedWindSource(object.getC().getName(), object.getA().getName(), object.getB().getName(), editedObject,
+                                        new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter.reportError(
+                                                        stringMessages.errorSettingImpliedWindSourceForRace(raceDisplayName,
+                                                                caught.getMessage()));
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                Notification.notify(stringMessages.impliedWindForRaceSetSuccessfully(raceDisplayName), NotificationType.SUCCESS);
+                                            }
+                                });
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+                    }
+        });
+    }
+
+    /**
+     * Helps in obtaining competitors for a specific "race slot" identified by leaderboard name, race column name and
+     * fleet name. In particular, the implementation is expected to return a consumer that when called with a callback
+     * fetches the competitors for the particular race identified by {@code raceSlotIdentifier} and sends them to the
+     * callback's {@link AsyncCallback#onSuccess(Object)} method.
+     */
+    protected Consumer<AsyncCallback<Iterable<? extends CompetitorDTO>>> getRaceCompetitorProvider(
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceSlotIdentifier) {
+        return callback -> sailingServiceWrite.getCompetitorsAndBoatsOfRace(raceSlotIdentifier.getC().getName(),
+                raceSlotIdentifier.getA().getName(), raceSlotIdentifier.getB().getName(), new AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>>() {
+            @Override
+            public void onFailure(Throwable e) {
+                callback.onFailure(e);
+            }
+            
+            @Override
+            public void onSuccess(Map<? extends CompetitorDTO, BoatDTO> competitorToBoatMap) {
+                callback.onSuccess(competitorToBoatMap.keySet());
+            }
+        });
+    }
+    
+    @Override
+    public AbstractFilterablePanel<StrippedLeaderboardDTO> getFilterablePanel() {
+        return filterLeaderboardPanel;
     }
 }

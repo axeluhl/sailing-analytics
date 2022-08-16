@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sse.common.Util;
+
 /**
  * A group of users; equality and hash code are based solely on the {@link #getId() ID}.
  */
@@ -35,8 +37,8 @@ public abstract class AbstractUserGroupImpl<U extends UserReference, RD extends 
         return users.contains(user);
     }
 
-    public void put(final RD roleDefinition, final boolean forAll) {
-        this.roleDefinitionMap.put(roleDefinition, forAll);
+    public Boolean put(final RD roleDefinition, final boolean forAll) {
+        return this.roleDefinitionMap.put(roleDefinition, forAll);
     }
 
     public void remove(final RD roleDefinition) {
@@ -45,7 +47,6 @@ public abstract class AbstractUserGroupImpl<U extends UserReference, RD extends 
 
     @Override
     public String toString() {
-        return "AbstractUserGroupImpl [users=" + users + ", getName()=" + getName() + ", getId()=" + getId()
-                + ", getRoleDefinitionMap()=" + getRoleDefinitionMap() + "]";
+        return "User group "+getName()+", "+Util.size(getUsers())+" users";
     }
 }

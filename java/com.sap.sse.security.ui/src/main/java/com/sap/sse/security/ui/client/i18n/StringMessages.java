@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
 
     String name();
+    String locale();
     String company();
     String password();
     String passwordRepeat();
@@ -16,6 +17,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String signIn();
     String invalidUsername();
     String signUp();
+    String signInOrUp();
     String signOut();
     String couldNotSignOut(String message);
     String createUser();
@@ -34,8 +36,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String ok();
     String cancel();
     String username();
+    String reallyUseLeadingOrTrailingSpacesInUsername();
     String email();
     String usernameMustHaveAtLeastNCharacters(int minimumUsernameLength);
+    String usernameShouldNotStartOrEndWithSpaceCharactersUnlessYouExplicitlyWantTo();
     String passwordMustHaveAtLeastNCharacters(int minimumPasswordLength);
     String passwordsDontMatch();
     String couldNotCreateUser(String message);
@@ -122,10 +126,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterRoles();
     String actions();
     String actionEdit();
+    String actionExcludeEvents();
     String actionRemove();
     String actionChangeOwnership();
     String errorUpdatingOwnership(String name);
     String doYouReallyWantToRemoveRole(String name);
+    String doYouReallyWantToRemoveSelectedElements(String message);
     String errorTryingToDeleteRole(String rolename, String message);
     String pleaseEnterARoleName();
     String editRoles();
@@ -182,7 +188,34 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterPermission();
     String permission();
     String nullUserGroup();
-
+    String failGeneratingHostedPageObject();
+    String errorOpenCheckout(String errMessage);
+    String errorSaveSubscription(String errMessage);
     String editRolesAndPermissionsForUser(String username);
     String permissionType();
+    String couldNotLoadMarkTemplates();
+    String transitive();
+    String unlockWithSubscription();
+    String selectOption();
+    String currentlyUnableToSubscribe();
+    String subscriptionPlanOverview();
+    String subscriptionBusinessModelInfoButton();
+    String contactServicesAndInformation();
+    String premiumFeatureList();
+    String premiumFeatureListDescription();
+    String selectSubscriptionPlan();
+    String features();
+    String premiumFeature();
+    String premium();
+    String price();
+    String pleaseSubscribeToUse();
+    String pleaseSubscribeToUseSpecific(String actionName);
+    String notLoggedIn();
+    String mailNotValidated();
+    String streamletsOverlayFeature();
+    String subscriptionSuggestionTitle(); 
+    String takeMeToSubscriptions();
+    String errorPollingCheckoutResults();
+    String paymentUnfinished();
+    String paymentFinished();
 }

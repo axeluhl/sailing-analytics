@@ -3,9 +3,11 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -30,7 +32,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -43,6 +45,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
@@ -52,8 +55,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
     private final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-    private final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
+    private final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null, /* storePersistently */ true);
     private final Course course =  new CourseImpl("course", Arrays.asList(new WaypointImpl(mark), new WaypointImpl(mark2)));
 
     private RaceDefinition raceDefinition;
@@ -72,29 +75,23 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-
         DeviceIdentifier markDevice = new SmartphoneImeiIdentifier("imei2");
         defineMarksOnRegattaLog(mark, mark2);
-
         map(comp, device, 0, 10000);
         map(mark, markDevice, 0, 10000);
-
         store.storeFix(device, createFix(100, 10, 20, 30, 40)); // before
         store.storeFix(device, createFix(1100, 10, 20, 30, 40)); // in
         store.storeFix(device, createFix(2100, 10, 20, 30, 40)); // after
         store.storeFix(markDevice, createFix(100, 10, 20));
         store.storeFix(markDevice, createFix(1100, 10, 20));
         store.storeFix(markDevice, createFix(2100, 10, 20));
-
         final DynamicTrackedRaceImpl trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
-        new FixLoaderAndTracker(trackedRace, store, null);
-
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         // now extend the tracking interval of the tracked race and assert that the additional fixes are loaded
@@ -114,32 +111,27 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         defineMarksOnRegattaLog(mark, mark2);
         DeviceIdentifier device2 = new SmartphoneImeiIdentifier("imei2");
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
-
         map(comp, device, 0, 20000);
         map(comp2, device2, 0, 600);
         // reuse device for two marks
         map(mark, device3, 0, 600);
         map(mark2, device3, 0, 600);
-
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
         store.storeFix(device, createFix(200, 10, 20, 30, 40));
         store.storeFix(device2, createFix(100, 10, 20, 30, 40));
         store.storeFix(device3, createFix(100, 10, 20));
         store.storeFix(device3, createFix(100, 10, 20));
-
+        final List<GPSFixMoving> fixes = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
-            store.storeFix(device, createFix(i + 1000, 10, 20, 30, 40));
+            fixes.add(createFix(i + 1000, 10, 20, 30, 40));
         }
-
+        store.storeFixes(device, fixes, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
-
-        new FixLoaderAndTracker(trackedRace, store, null);
-        
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         raceLog.add(new RaceLogStartOfTrackingEventImpl(TimePoint.BeginningOfTime, author, 0));
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getTrack(comp), 10002);
         testNumberOfRawFixes(trackedRace.getTrack(comp2), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
@@ -528,7 +520,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        new FixLoaderAndTracker(trackedRace, store, null);
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         for(Consumer<DynamicTrackedRace> afterTrackingStarted : afterTrackingStartedConsumers) {
             trackedRace.waitForLoadingToFinish();
             afterTrackingStarted.accept(trackedRace);
@@ -543,7 +535,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
         store.storeFix(device, createFix(200, 10, 20, 30, 40));
         assertEquals(2, store.getNumberOfFixes(device));
-        assertEquals(TimeRangeImpl.create(100, 200), store.getTimeRangeCoveredByFixes(device));
+        assertEquals(TimeRangeImpl.create(100, 200, /* toIsInclusive */ true), store.getTimeRangeCoveredByFixes(device));
+        assertEquals(new DegreePosition(10, 20), ((GPSFix) store.getFixLastReceived(Collections.singleton(device)).get(device)).getPosition());
     }
     
     @Test
@@ -551,28 +544,28 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
         store.storeFix(device, createFix(1100, 10, 20, 30, 40));
         store.storeFix(device, createFix(2100, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes = store.getLastFix(Collections.singleton(device));
+        final Map<DeviceIdentifier, Timed> lastFixes = store.getFixLastReceived(Collections.singleton(device));
         assertEquals(1, lastFixes.size());
         Timed lastFix = lastFixes.get(device);
         assertEquals(2100, lastFix.getTimePoint().asMillis());
         store.storeFix(device, createFix(2000, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes2 = store.getLastFix(Collections.singleton(device));
+        final Map<DeviceIdentifier, Timed> lastFixes2 = store.getFixLastReceived(Collections.singleton(device));
         assertEquals(1, lastFixes2.size());
         Timed lastFix2 = lastFixes2.get(device);
-        assertEquals(2100, lastFix2.getTimePoint().asMillis());
+        assertEquals(2000, lastFix2.getTimePoint().asMillis()); // not the fix with the latest time point but the fix that was last received by the store
         store.storeFix(device, createFix(2200, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes3 = store.getLastFix(Collections.singleton(device));
+        final Map<DeviceIdentifier, Timed> lastFixes3 = store.getFixLastReceived(Collections.singleton(device));
         assertEquals(1, lastFixes3.size());
         Timed lastFix3 = lastFixes3.get(device);
         assertEquals(2200, lastFix3.getTimePoint().asMillis());
         final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
         store.storeFix(device2, createFix(1200, 10, 20, 30, 40));
         store.storeFix(device2, createFix(1100, 10, 20, 30, 40));
-        final Map<DeviceIdentifier, Timed> lastFixes4 = store.getLastFix(Arrays.asList(device, device2));
+        final Map<DeviceIdentifier, Timed> lastFixes4 = store.getFixLastReceived(Arrays.asList(device, device2));
         assertEquals(2, lastFixes4.size());
         Timed lastFix4 = lastFixes4.get(device);
         assertEquals(2200, lastFix4.getTimePoint().asMillis());
         Timed lastFixDevice2 = lastFixes4.get(device2);
-        assertEquals(1200, lastFixDevice2.getTimePoint().asMillis());
+        assertEquals(1100, lastFixDevice2.getTimePoint().asMillis());  // not the fix with the latest time point but the fix that was last received by the store
     }
 }

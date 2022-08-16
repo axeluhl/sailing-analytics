@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -27,9 +27,9 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
     private final TrackedLeg trackedLeg;
     private final TimePoint timePoint;
     private final Map<TrackedLegOfCompetitor, Distance> wwdtgCache;
-    private final WindLegTypeAndLegBearingCache windAndLegTypeCache;
+    private final WindLegTypeAndLegBearingAndORCPerformanceCurveCache windAndLegTypeCache;
 
-    public WindwardToGoComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public WindwardToGoComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         this.trackedLeg = trackedLeg;
         this.timePoint = timePoint;
         wwdtgCache = new HashMap<TrackedLegOfCompetitor, Distance>();

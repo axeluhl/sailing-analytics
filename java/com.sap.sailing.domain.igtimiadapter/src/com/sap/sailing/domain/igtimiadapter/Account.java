@@ -15,7 +15,7 @@ public interface Account extends WithQualifiedObjectIdentifier {
     String getCreatorName();
 
     @Override
-    default HasPermissions getType() {
+    default HasPermissions getPermissionType() {
         return SecuredDomainType.IGTIMI_ACCOUNT;
     }
 
@@ -27,7 +27,7 @@ public interface Account extends WithQualifiedObjectIdentifier {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
 

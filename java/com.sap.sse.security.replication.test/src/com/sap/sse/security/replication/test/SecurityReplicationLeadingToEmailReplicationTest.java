@@ -24,6 +24,9 @@ import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -51,7 +54,8 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     private class SecurityServerReplicationTestSetUp extends
             AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp {
         @Override
-        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException, UserGroupManagementException, UserManagementException {
+        protected SecurityServiceImpl createNewMaster()
+                throws MalformedURLException, IOException, InterruptedException, UserStoreManagementException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
@@ -59,21 +63,24 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
+                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             result.initialize();
             return result;
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
+        protected SecurityServiceImpl createNewReplica()
+                throws UserStoreManagementException, MalformedURLException, IOException, InterruptedException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
+                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             userStore.ensureDefaultRolesExist();
-            userStore.ensureDefaultTenantExists();
+            userStore.ensureServerGroupExists();
             result.initialize();
             result.clearReplicaState();
             return result;
@@ -104,9 +111,9 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     @Test
     public void triggerEmailSendByAddingUserOnMaster()
             throws UserManagementException, MailException, IllegalAccessException, InterruptedException, UserGroupManagementException {
-        //TODO IllegalStateExceptions thrown, probably because the two replication services per instance share the
-        //same message queue, but don't know about each other (unlike actual OSGi setup, where there is only
-        //one replication service per instance that nows all Replicables)
+        // TODO IllegalStateExceptions thrown, probably because the two replication services per instance share the
+        // same message queue, but don't know about each other (unlike actual OSGi setup, where there is only
+        // one replication service per instance that knows all Replicables)
         SecurityService masterSecurityService = securitySetUp.getMaster();
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";

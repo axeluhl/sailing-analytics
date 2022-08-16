@@ -142,14 +142,6 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
         mComment = comment;
     }
 
-    public boolean isDirty() {
-        return mDirty;
-    }
-
-    public void setDirty(boolean dirty) {
-        mDirty = dirty;
-    }
-
     public boolean isChecked() {
         return mChecked;
     }

@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.parser.ParseException;
@@ -63,7 +62,6 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -72,6 +70,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
@@ -96,10 +95,10 @@ import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -108,8 +107,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 /**
@@ -287,9 +284,7 @@ public class ExpeditionAllInOneImporter {
     public ImporterResult importFiles(final String filenameWithSuffix, final FileItem fileItem,
             final String boatClassName, ImportMode importMode, String existingRegattaName, boolean importStartData)
                     throws AllInOneImportException, IOException, FormatNotSupportedException {
-        SecurityUtils.getSubject().checkPermission(
-                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT,
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        securityService.checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         final List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         final String filename = ExpeditionImportFilenameUtils.truncateFilenameExtentions(filenameWithSuffix);
@@ -578,7 +573,7 @@ public class ExpeditionAllInOneImporter {
                 startOfTracking, endOfTracking, regatta, regattaLeaderboard, raceColumn, fleet);
         if (startTime != null) {
             final RaceLog raceLog = raceColumn.getRaceLog(raceColumn.getFleets().iterator().next());
-            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime));
+            raceLog.add(new RaceLogStartTimeEventImpl(startTime, service.getServerAuthor(), /* priority */ 0, startTime, /* courseAreaId */ null));
         }
         return new Triple<>(trackedRace, raceColumnName, fleetName);
     }
@@ -768,23 +763,39 @@ public class ExpeditionAllInOneImporter {
                 /* can boats of competitors change */ false, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* start date */ null, /* end date */ null,
                 UUID.randomUUID(),
-                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true, false,
-                rankingMetric));
+                regattaCreationParameters, true, scoringScheme,
+                courseAreaId==null?Collections.emptySet():Collections.singleton(courseAreaId),
+                buoyZoneRadiusInHullLengths, /* use start time inference */ true,
+                /* control tracking from start and finish times */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, rankingMetric));
         this.ensureBoatClassDetermination(regatta);
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
         return regatta;
     }
 
-    private void createLeaderboardGroupAndAddItToTheEvent(final String leaderboardGroupName, final String regattaNameAndleaderboardName,
-            final String description, final Event event) {
+    private void createLeaderboardGroupAndAddItToTheEvent(final String leaderboardGroupName,
+            final String regattaNameAndleaderboardName, final String description, final Event event) {
         UUID newGroupid = UUID.randomUUID();
-        final LeaderboardGroup leaderboardGroup = service
-                .apply(new CreateLeaderboardGroup(newGroupid, leaderboardGroupName,
-                description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null));
+        final LeaderboardGroup leaderboardGroup = securityService
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
+                        LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(newGroupid),
+                        /* securityDisplayName */ null, new Callable<LeaderboardGroup>() {
+                            @Override
+                            public LeaderboardGroup call() throws Exception {
+                                CreateLeaderboardGroup createLeaderboardGroup = new CreateLeaderboardGroup(newGroupid,
+                                        leaderboardGroupName, description, /* displayName */ null,
+                                        /* displayGroupsInReverseOrder */ false,
+                                        Collections.singletonList(regattaNameAndleaderboardName),
+                                        /* overallLeaderboardDiscardThresholds */ null,
+                                        /* overallLeaderboardScoringSchemeType */ null);
+                                return service.apply(createLeaderboardGroup);
+                            }
+                        });
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
                 Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
-                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
+                event.getWindFinderReviewedSpotsCollectionIds()));
     }
 
     private DynamicTrackedRace createTrackedRaceAndSetupRaceTimes(final List<ErrorImportDTO> errors,

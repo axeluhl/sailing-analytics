@@ -5,11 +5,17 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.util.ThreadLocalTransporter;
 
@@ -45,18 +51,51 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * initial load is requested and when an {@link Operation} is received. The initial load streams as well as each
  * replication operation need to identify the {@link Replicable} they refer to. This identification is added as an OSGi
  * service registry parameter that is used during service discovery.
+ * <p>
+ * 
+ * To implement a new replicable, consider the following steps:
+ * <ul>
+ * <li>Consider using {@link AbstractReplicableWithObjectInputStream} as an abstract base class for your
+ * {@link Replicable} implementation.</li>
+ * <li>Implement the necessary methods, in particular ensuring that your
+ * {@link ReplicableWithObjectInputStream#createObjectInputStreamResolvingAgainstCache(InputStream, Map)} implementation
+ * returns an object whose class is loaded by your replicable's class loader, such as an in-place anonymous inner class
+ * instantiation of the {@link ObjectInputStreamResolvingAgainstCache} class.</li>
+ * <li>In your bundle's {@link BundleActivator activator} create your replicable instance and
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary) register it with the OSGi service registry}
+ * under the {@link Replicable} service interface, like this:
+ * <pre>
+ *     final Dictionary&lt;String, String&gt; replicableServiceProperties = new Hashtable&lt;&gt;();
+ *     replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
+ *     registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));</pre></li>
+ * <li>Add your replicable's fully-qualified class name to the {@code env-default-rules.sh} file where the
+ * {@code REPLICATE_ON_START} variable has its default value defined.</li>
+ * </ul>
+ * 
+ * The {@link #getId() ID} must be different from {@link ReplicationReceiver#VERSION_INDICATOR}.<p>
  * 
  * @param <S>
  *            the type of state to which the operations are applied; usually this will be set to the implementing
  *            subclass
  * @param <O>
- *            type of operation that the replicable accepts
+ *            type of operation that the replicable accepts; it is good practice to declare a dedicated interface for
+ *            the operation type of each {@link Replicable} implementation class. This helps to avoid accidentally
+ *            passing an operation intended for a different replicable service. Make sure to implement operation types
+ *            as dedicated classes and withstand the temptation to use lambdas. While lambdas may work at first and look
+ *            nice and compact, two major problems emerge (see also
+ *            <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5197">bug 5197</a>): you may
+ *            unintentionally reference comprehensive contextual state in your lambda which then needs to get serialized
+ *            with it; and by using {@link Serializable} lambdas, serialization compatibility is brittle because it
+ *            depends on the lambda's position in its type, and hence code insertions, removals or changes in method
+ *            ordering can already cause unnecessary incompatibilities. Specifically for {@link Replicable} services
+ *            shared by many instances this should be avoided at any cost because incompatible changes then require
+ *            upgrading the entire landscape.
  * 
  * @author Axel Uhl (D043530)
  *
  */
 public interface Replicable<S, O extends OperationWithResult<S, ?>>
-extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O> {
+extends OperationsToMasterSender<S, O>, Replicator<S, O> {
     static final Logger logger = Logger.getLogger(Replicable.class.getName());
     
     /**
@@ -71,31 +110,35 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
      * If this object is not a replica, executes the <code>operation</code>. By
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifying} all registered
      * operation execution listeners about the execution of the operation, the <code>operation</code> will in particular
-     * be replicated to all replicas registered.
+     * be replicated to all replicas registered, unless its
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()} method returns {@code false}.
      * <p>
      * 
-     * If this object is a replica, the operation will not be executed locally and will instead be forwarded to the
+     * If this object is a replica, the operation will be executed locally and will then be forwarded to the
      * master server for execution from where it is expected to replicate to all replicas including this object where
-     * the {@link #applyReplicated(OperationWithResult)} method will then carry out the operation.
+     * the {@link #applyReplicated(OperationWithResult)} method will identify it as the one that originated here and
+     * ignore it (see also {@link OperationWithResultWithIdWrapper}).
      * <p>
      * 
      * To determine whether this {@link Replicable} is a replica, this method uses the
      * {@link ReplicationService#getReplicatingFromMaster()} method which also provides the master server's connectivity
      * information required to forward the <code>operation</code>.
      */
-    <T> T apply(OperationWithResult<S, T> operation);
+    <T> T apply(O operation);
 
     /**
      * Executes an operation received from another (usually "master") server where this object lives on a replica. The
-     * <code>operation</code>'s effects also need to be replicated to any replica of this service known and
+     * <code>operation</code>'s effects also need to be replicated to any replica of this service known, so this method
      * {@link OperationExecutionListener#executed(OperationWithTransformationSupport) notifies} all registered operation
-     * execution listeners about the execution of the operation.<p>
+     * execution listeners about the execution of the operation, unless its
+     * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()} method returns {@code false}.
+     * <p>
      * 
      * One important difference to {@link #apply(OperationWithResult)} is that the operation will be applied immediately
      * in any case whereas {@link #apply(OperationWithResult)} will check first if this is a replica and in that case
      * forward the operation to the master for first execution instead of initiating the execution on the replica.
      */
-    <T> T applyReplicated(OperationWithResult<S, T> operation);
+    <T> T applyReplicated(O operation);
     
     void startedReplicatingFrom(ReplicationMasterDescriptor master);
     
@@ -125,6 +168,12 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
     void clearReplicaState() throws MalformedURLException, IOException, InterruptedException;
 
     /**
+     * Produces an object input stream that can choose to resolve objects against a cache so that duplicate instances
+     * are avoided.
+     */
+    ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException;
+
+    /**
      * Dual, reading operation for {@link #serializeForInitialReplication(OutputStream)}. In other words, when this
      * operation returns, this service instance is in a state "equivalent" to that of the service instance that produced
      * the stream contents in its {@link #serializeForInitialReplication(OutputStream)}. "Equivalent" here means that a
@@ -147,18 +196,42 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
     void serializeForInitialReplication(OutputStream os) throws IOException;
 
     /**
+     * The class loader to use for de-serializing objects. By default, this object's class's class loader is used.
+     */
+    default ClassLoader getDeserializationClassLoader() {
+        return getClass().getClassLoader();
+    }
+    
+    /**
+     * Implementation of {@link #readOperation(InputStream, Map)}, using the {@link ObjectInputStream} created by
+     * {@link #createObjectInputStreamResolvingAgainstCache(InputStream, Map)}. Before actually reading an operation
+     * object, the current thread's context class loader is set to the {@link #getDeserializationClassLoader() class
+     * loader for de-serialization} and restored to its previous value in the {@code finally} clause.
+     */
+    @SuppressWarnings("unchecked")
+    default O readOperationFromObjectInputStream(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
+        try {
+            return (O) ois.readObject();
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+        }
+    }
+
+    /**
      * From an input stream, reads an operation that can be {@link #apply(OperationWithResult) applied} to this object.
      * Separating reading and applying gives clients an opportunity to queue operations, e.g., in order to wait until
      * receiving and {@link #initiallyFillFrom(InputStream) filling} the initial load has completed.
      */
-    O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException;
+    O readOperation(InputStream inputStream, Map<String, Class<?>> classLoaderCache) throws IOException, ClassNotFoundException;
 
     /**
      * Checks if {@link #hasSentOperationToMaster(OperationWithResultWithIdWrapper) the operation was previously
      * sent to the master}. If so, the operation is ignored because it has been applied before to this replica.
      * Otherwise, it is locally applied and replicated, using a call to {@link #applyReplicated(OperationWithResult)}. 
      */
-    default void applyReceivedReplicated(OperationWithResult<S, ?> operation) {
+    default void applyReceivedReplicated(O operation) {
         if (!hasSentOperationToMaster(operation)) {
             assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
             try {

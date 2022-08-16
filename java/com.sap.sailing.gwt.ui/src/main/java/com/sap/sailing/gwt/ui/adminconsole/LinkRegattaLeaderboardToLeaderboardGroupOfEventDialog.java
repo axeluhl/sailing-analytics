@@ -38,7 +38,7 @@ public class LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog extends DataE
         leaderboardGroupsBox = createListBox(/* isMultipleSelect */ false);
         for (final LeaderboardGroupDTO lgDTO : event.getLeaderboardGroups()) {
             this.leaderboardGroups.add(lgDTO);
-            this.leaderboardGroupsBox.addItem(lgDTO.getName());
+            this.leaderboardGroupsBox.addItem(lgDTO.getName(), lgDTO.getId().toString());
         }
     }
     

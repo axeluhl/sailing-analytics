@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.partials.storebadges;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -17,6 +18,8 @@ public class PlayStoreBadge extends AbstractStoreBadge {
     @UiConstructor
     public PlayStoreBadge(String targetUrl) {
         super(targetUrl);
+        badgeImageUi.getStyle().setHeight(90, Unit.PX);
+        badgeImageUi.getStyle().setMargin(-15, Unit.PX);
     }
 
     @Override

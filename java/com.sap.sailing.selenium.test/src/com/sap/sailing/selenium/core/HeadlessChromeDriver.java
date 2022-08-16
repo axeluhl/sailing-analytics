@@ -20,7 +20,8 @@ public class HeadlessChromeDriver extends ChromeDriver {
     private static ChromeOptions constructChromeOptions(Capabilities capabilities) {
         final ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.merge(capabilities);
-        chromeOptions.addArguments("--headless", "--window-size=1440,900");
+        chromeOptions.addArguments("--disable-gpu", "--disable-extensions", "--headless", "--window-size=1440,900");
+        chromeOptions.setExperimentalOption("useAutomationExtension", false);
         return chromeOptions;
     }
 }

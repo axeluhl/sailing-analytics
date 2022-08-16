@@ -72,14 +72,13 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     public void setWindField(final WindFieldDTO windFieldDTO) {
         this.windFieldDTO = windFieldDTO;
-
         timePointWindDTOMap.clear();
         if (windFieldDTO != null) {
             for(final SimulatorWindDTO w : windFieldDTO.getMatrix()) {
-                if (!timePointWindDTOMap.containsKey(w.timepoint)) {
-                    timePointWindDTOMap.put(w.timepoint, new LinkedList<SimulatorWindDTO>());
+                if (!timePointWindDTOMap.containsKey(w.timepoint.asMillis())) {
+                    timePointWindDTOMap.put(w.timepoint.asMillis(), new LinkedList<SimulatorWindDTO>());
                 }
-                timePointWindDTOMap.get(w.timepoint).add(w);
+                timePointWindDTOMap.get(w.timepoint.asMillis()).add(w);
             }
         }
     }
@@ -92,7 +91,6 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     @Override
     public void addToMap() {
         super.addToMap();
-
         if (timer != null) {
             timer.addTimeListener(this);
         }

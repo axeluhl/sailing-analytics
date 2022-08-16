@@ -2,7 +2,6 @@ package com.sap.sailing.server.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +13,6 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
-import slash.common.type.CompactCalendar;
 import slash.navigation.base.BaseNavigationPosition;
 import slash.navigation.base.BaseRoute;
 import slash.navigation.base.NavigationFormat;
@@ -61,9 +59,6 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         NavigationFormatParser parser = new NavigationFormatParser();
         List<BaseRoute> routes;
         try {
-            Method m = NavigationFormatParser.class.getDeclaredMethod("read", InputStream.class, Integer.TYPE,
-                    CompactCalendar.class, List.class);
-            m.setAccessible(true);
             ParserResult result = parser.read(inputStream, /* read buffer size; 1GB max... the problem is that some
                                                             * formats continue to read to the end even if they don't
                                                             * happen to find anything in the stream because they assume

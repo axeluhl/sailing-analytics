@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.shiro.subject.PrincipalCollection;
@@ -28,6 +29,7 @@ import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.AclResolver;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -45,6 +47,14 @@ import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
+    private final AclResolver<AccessControlList, Ownership> noopAclResolver = new AclResolver<AccessControlList, Ownership>() {
+        @Override
+        public Iterable<AccessControlList> resolveDenyingAclsAndCheckIfAnyMatches(Ownership ownershipOrNull,
+                String type, Iterable<String> objectIdentifiersAsStringOrNull, Predicate<AccessControlList> filterCondition,
+                Iterable<AccessControlList> allAclsForTypeAndObjectIdsOrNull) {
+            return Collections.emptySet(); // assuming an empty ACL set
+        }
+    };
     private final UUID eventId = UUID.randomUUID();
     private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT
             .getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
@@ -73,7 +83,7 @@ public class PermissionCheckerTest {
         final String adminTenantName = "admin-tenant";
         userStore = new UserStoreImpl(adminTenantName);
         userStore.ensureDefaultRolesExist();
-        userStore.ensureDefaultTenantExists();
+        userStore.ensureServerGroupExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         AbstractCompositeAuthorizingRealm.setTestStores(userStore, accessControlStore);
         realm = new UsernamePasswordRealm();
@@ -85,6 +95,7 @@ public class PermissionCheckerTest {
         userTenant = userStore.createUserGroup(userTenantId, "jonas-tenant");
         user = userStore.createUser("jonas", "jonas@dann.io");
         userTenant.add(user);
+        userStore.updateUserGroup(userTenant);
         ownership = new Ownership(user, userTenant);
         adminTenant.add(adminUser);
         adminOwnership = new Ownership(adminUser, adminTenant);
@@ -102,17 +113,18 @@ public class PermissionCheckerTest {
     @Test
     public void testOwnership() throws UserManagementException {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                null, acl));
+                null, acl, null));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         // being the owning user does not imply any permissions per se
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                ownership, acl));
+                ownership, acl, null));
         userStore.addRoleForUser(user.getName(),
-                new Role(AdminRole.getInstance(), /* qualified for userTenant */ null, /* qualified for user */ user));
+                new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()),
+                        /* qualified for userTenant */ null, /* qualified for user */ user, true));
         // having the admin role qualified for objects owned by user should help
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                ownership, acl));
+                ownership, acl, null));
     }
     
     /**
@@ -145,7 +157,8 @@ public class PermissionCheckerTest {
                 /* tenantOwner */ null, regattaName);
         // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
         userStore.addRoleForUser(user.getName(),
-                new Role(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
+                new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()), /* qualifiedForTenant */ null,
+                        /* qualifiedForUser */ user, true));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaIdentifier), /* userOwner */ null,
@@ -155,7 +168,8 @@ public class PermissionCheckerTest {
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // but now we assign the admin role to the user, qualified for objects owned by the group owner:
         userStore.addRoleForUser(user.getName(),
-                new Role(AdminRole.getInstance(), /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null));
+                new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()),
+                        /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null, true));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         // now the user should be granted permission because admin gets *, and the user gets admin on all objects owned by userTenant
         assertTrue(realm.isPermitted(principalCollection, regattaPermission.toString()));
@@ -164,62 +178,62 @@ public class PermissionCheckerTest {
     @Test
     public void testAccessControlList() {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, null));
+                adminOwnership, null, null));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         acl.addPermission(userTenant, DefaultActions.READ.name());
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         // ensure that anonymous users don't have access because they don't belong to any group
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
-                null, null, adminOwnership, acl));
+                null, null, adminOwnership, acl, null));
         user.addPermission(eventReadPermission);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         final Set<String> permissionSet = new HashSet<>();
         permissionSet.add("!" + DefaultActions.READ.name());
         acl.setPermissions(userTenant, permissionSet);
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         // User ownership shall NOT imply permissions; the revoking ACL still takes precedence
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                ownership, acl));
+                ownership, acl, null));
         // now add "public read" permission to ACL:
         acl.addPermission(null, DefaultActions.READ.name());
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
-                null, null, adminOwnership, acl));
+                null, null, adminOwnership, acl, null));
         // now deny "public read" permission in ACL which is expected to supersede the granting from above:
-        acl.denyPermission(null, DefaultActions.READ.name());
+        acl.addPermission(null, "!"+DefaultActions.READ.name());
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
-                null, null, adminOwnership, acl));
+                null, null, adminOwnership, acl, null));
     }
     
     @Test
     public void testDirectPermission() {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         user.addPermission(eventReadPermission);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
     }
     
     @Test
     public void testRole() {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
-        final Role globalRole = new Role(globalRoleDefinition);
+                adminOwnership, acl, null));
+        final Role globalRole = new Role(globalRoleDefinition, true);
         user.addRole(globalRole);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         user.removeRole(globalRole);
-        user.addRole(new Role(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
+        user.addRole(new Role(globalRoleDefinition, this.userTenant, /* user qualifier */ null, true));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                adminOwnership, acl));
+                adminOwnership, acl, null));
         Ownership testOwnership = new Ownership(adminUser, userTenant);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                testOwnership, acl));
+                testOwnership, acl, null));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
-                null, acl));
+                null, acl, null));
     }
     
     @Test
@@ -229,10 +243,10 @@ public class PermissionCheckerTest {
         final Ownership foo = new Ownership(null, userTenant);
         Supplier<Boolean> permissionCheckGranted = () -> PermissionChecker.isPermitted(
                 WildcardPermission.builder().withTypes(type1).withActions(DefaultActions.READ).withIds("abc").build(),
-                user, tenants, null, null, foo, null);
+                user, tenants, null, null, foo, null, null);
         Supplier<Boolean> permissionCheckNotGranted = () -> PermissionChecker.isPermitted(
                 WildcardPermission.builder().withTypes(type2).withActions(DefaultActions.READ).withIds("abc").build(),
-                user, tenants, null, null, foo, null);
+                user, tenants, null, null, foo, null, null);
         assertFalse(permissionCheckGranted.get());
         userTenant.put(roleDefinition, false);
         assertTrue(permissionCheckGranted.get());
@@ -256,7 +270,6 @@ public class PermissionCheckerTest {
                 type1.getPermission(DefaultActions.READ)));
         assertTrue(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission,
                 type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
-
         final WildcardPermission combinedTypePermission = WildcardPermission.builder().withTypes(type1, type2).build();
         assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission));
         assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission()));
@@ -268,7 +281,6 @@ public class PermissionCheckerTest {
                 type2.getPermission(DefaultActions.READ)));
         assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission(),
                 type2.getPermission(DefaultActions.READ, DefaultActions.DELETE)));
-
         final WildcardPermission combinedTypeWithDistinctActionPermission = WildcardPermission.builder()
                 .withTypes(type1, type2).withActions(DefaultActions.READ).build();
         assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission));
@@ -291,7 +303,7 @@ public class PermissionCheckerTest {
         for (WildcardPermission p : grantedPermissions) {
             user.addPermission(p);
         }
-        boolean result = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null);
+        boolean result = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
         for (WildcardPermission p : grantedPermissions) {
             user.removePermission(p);
         }
@@ -302,36 +314,34 @@ public class PermissionCheckerTest {
     public void testMetaPermissionWithOwnership() {
         RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
                 Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier("someid"));
         // The assigned role is qualified by the tenant. This makes a check without ownership fail
-        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null));
+        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver));
         // In addition a check with ownership without tentant will also fail
         assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, null)));
+                new Ownership(user, null), noopAclResolver));
         // A check with the wrong tentant owner will also fail
         assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, adminTenant)));
-        
+                new Ownership(user, adminTenant), noopAclResolver));
         // Only an ownership with a tenant owner matching the roles qualification makes the check succeed
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(null, userTenant)));
+                new Ownership(null, userTenant), noopAclResolver));
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
-                new Ownership(user, userTenant)));
+                new Ownership(user, userTenant), noopAclResolver));
     }
     
     @Test
     public void testMetaPermissionWithOwnershipandWildcardAction() {
         RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "admin",
                 Collections.singleton(WildcardPermission.builder().build()));
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         final String objectId = "someid";
-        
         // wildcard for the action part
         assertTrue(PermissionChecker.checkMetaPermissionWithOwnershipResolution(
                 WildcardPermission.builder().withTypes(type1).withIds(objectId).build(), allHasPermissions, user, null,
-                id -> new Ownership(null, userTenant)));
+                id -> new Ownership(null, userTenant), noopAclResolver));
     }
     
     @Test
@@ -341,7 +351,6 @@ public class PermissionCheckerTest {
         final String objectId = "someid";
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier(objectId));
-        
         Function<QualifiedObjectIdentifier, Ownership> ownershipResolver = id -> {
             final String typeRelativeIdentifierString = id.getTypeRelativeObjectIdentifier().toString();
             if (objectId.equals(typeRelativeIdentifierString)) {
@@ -349,16 +358,14 @@ public class PermissionCheckerTest {
             }
             return null;
         };
-        
         BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
-                user, null, ownershipResolver);
-        
+                user, null, ownershipResolver, noopAclResolver);
         assertFalse(permissionCheck.getAsBoolean());
         // Not the right qualification -> check still fails
-        user.addRole(new Role(rd, adminTenant, null));
+        user.addRole(new Role(rd, adminTenant, null, true));
         assertFalse(permissionCheck.getAsBoolean());
         // The right qualification
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         assertTrue(permissionCheck.getAsBoolean());
     }
     
@@ -384,12 +391,12 @@ public class PermissionCheckerTest {
         };
         
         BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
-                user, null, ownershipResolver);
+                user, null, ownershipResolver, noopAclResolver);
         
         assertFalse(permissionCheck.getAsBoolean());
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         assertFalse(permissionCheck.getAsBoolean());
-        user.addRole(new Role(rd, adminTenant, null));
+        user.addRole(new Role(rd, adminTenant, null, true));
         assertTrue(permissionCheck.getAsBoolean());
     }
 
@@ -458,6 +465,30 @@ public class PermissionCheckerTest {
                 type1.getPermission(DefaultActions.READ)));
         assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
                 type1.getPermission(DefaultActions.READ), type2.getPermission(DefaultActions.DELETE)));
+    }
+
+    @Test
+    public void testPermissionCheckWithTransientRole() {
+        final WildcardPermission permissionToCheck = new WildcardPermission("a:b:c");
+        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck));
+        final Role transientRole = new Role(transientRoleDefinition, null, null, false);
+        user.addRole(transientRole);
+        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
+        assertFalse(metaPermitted);
+        boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
+        assertTrue(permitted);
+    }
+    
+    @Test
+    public void testPermissionCheckWithTransientRoleThroughGroup() {
+        final WildcardPermission permissionToCheck = new WildcardPermission("a:b:c");
+        // No non-transitivity flag defined on role definition level
+        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck));
+        userTenant.put(transientRoleDefinition, false);
+        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
+        assertFalse(metaPermitted);
+        boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
+        assertTrue(permitted);
     }
 
     private boolean checkAnyPermissionWithGrantedUserPermissions(WildcardPermission permissionToCheck,

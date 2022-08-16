@@ -64,6 +64,18 @@ public enum DataImportSubProgress {
             return messages.importSensorFixes();
         }
     },
+    IMPORT_TRACKED_RACES {
+        @Override
+        public String getMessage(CommonStringMessages messages) {
+            return messages.importTrackedRaces();
+        }
+    },
+    WAITING_FOR_TRACKED_RACES_TO_FINISH_LOADING {
+        @Override
+        public String getMessage(CommonStringMessages messages) {
+            return messages.waitingForTrackedRacesToFinishLoading();
+        }
+    },
     UPDATE_EVENT_LEADERBOARD_GROUP_LINKS {
         @Override
         public String getMessage(CommonStringMessages messages) {

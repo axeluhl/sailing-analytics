@@ -101,11 +101,11 @@ public class DependentRaceStateTest {
     @Test
     public void testCorrectAmountOfStartTimeChanges() {
         raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), RaceLogRaceStatus.SCHEDULED));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         verify(listenerC, times(3)).onStartTimeChanged(stateC);
         verify(listenerB, times(2)).onStartTimeChanged(stateB);
         verify(listenerA, times(1)).onStartTimeChanged(stateA);
@@ -117,11 +117,11 @@ public class DependentRaceStateTest {
     @Test
     public void testCyclicStartTimeDependencyDoesNotLeadToEndlessRecursion() {
         raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         raceLogA.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("C", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("C", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         assertEquals(ResolutionFailed.CYCLIC_DEPENDENCY, stateA.getStartTimeFinderResult().getResolutionFailed());
     }
 
@@ -129,7 +129,7 @@ public class DependentRaceStateTest {
     public void testInitialRegistrationOfRaceState() {
         final MillisecondsDurationImpl delta = new MillisecondsDurationImpl(5000);
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), delta));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), delta, /* courseAreaId */ null));
         final RaceState stateB2 = new RaceStateImpl(raceLogResolver, raceLogB, author, new RacingProcedureFactoryImpl(
                 author, configuration));
         final TimePoint[] bTime = new TimePoint[1];
@@ -140,19 +140,19 @@ public class DependentRaceStateTest {
             }
         });
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, 12, now));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, 12, now, /* courseAreaId */ null));
         assertEquals(now.plus(delta), bTime[0]);
     }
 
     @Test
     public void testCorrectAmountOfStartTimeChanges2() {
         raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), RaceLogRaceStatus.SCHEDULED));
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         verify(listenerA, times(1)).onStartTimeChanged(stateA);
         verify(listenerB, times(3)).onStartTimeChanged(stateB);
         verify(listenerC, times(4)).onStartTimeChanged(stateC);
@@ -166,14 +166,14 @@ public class DependentRaceStateTest {
     @Test
     public void testLateDeliveryOfDependentStartTimeForPriorPass() {
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "1", /* pass */ 0, new MillisecondsTimePoint( 5000), RaceLogRaceStatus.SCHEDULED));
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "2", /* pass */ 0, new MillisecondsTimePoint(10000), RaceLogRaceStatus.SCHEDULED));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "1", /* pass */ 0, new MillisecondsTimePoint( 5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "2", /* pass */ 0, new MillisecondsTimePoint(10000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         // now B enters a new pass:
         raceLogB.add(new RaceLogPassChangeEventImpl(now.plus(1000), author, /* pass */ 1));
         // this is expected to reset B's start time:
         assertNull(stateB.getStartTime());
         // now B receives an absolute start time definition for pass 1 (the second pass):
-        raceLogB.add(new RaceLogStartTimeEventImpl(now.plus(1000), now.plus(1000), author, /* ID */ "3", /* pass */ 1, new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now.plus(1000), now.plus(1000), author, /* ID */ "3", /* pass */ 1, new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         assertEquals(new MillisecondsTimePoint( 5000), stateA.getStartTime());
         assertEquals(new MillisecondsTimePoint(20000), stateB.getStartTime());
         // here comes a late event for B's pass 0, setting a relative start time; it is expected to not
@@ -182,7 +182,7 @@ public class DependentRaceStateTest {
         // be established from B to A; in particular, updating A's start time is expected to leave B's
         // start time unmodified.
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(now.plus(500), now.plus(500), author, /* ID */ "4", /* pass */ 0,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         
         // verify that B's race state is *not* observing A's race state
         assertNull(stateB.getRaceStateToObserve());
@@ -191,7 +191,7 @@ public class DependentRaceStateTest {
         assertEquals(new MillisecondsTimePoint(20000), stateB.getStartTime());
         // moving A's start time is expected to NOT move B's start time:
         raceLogA.add(new RaceLogStartTimeEventImpl(now.plus(10000), now.plus(10000), author, /* ID */ "5", /* pass */ 0,
-                /* new start time */ new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED));
+                /* new start time */ new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         assertEquals(new MillisecondsTimePoint(20000), stateA.getStartTime());
         assertEquals(new MillisecondsTimePoint(20000), stateB.getStartTime()); // no update to B's start time expected
     }
@@ -204,32 +204,32 @@ public class DependentRaceStateTest {
     @Test
     public void testLateDeliveryOfAbsoluteStartTimeForPrioPass() {
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "1", /* pass */ 0, new MillisecondsTimePoint( 5000), RaceLogRaceStatus.SCHEDULED));
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "2", /* pass */ 0, new MillisecondsTimePoint(10000), RaceLogRaceStatus.SCHEDULED));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "1", /* pass */ 0, new MillisecondsTimePoint( 5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "2", /* pass */ 0, new MillisecondsTimePoint(10000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         // now B enters a new pass:
         raceLogB.add(new RaceLogPassChangeEventImpl(now.plus(1000), author, /* pass */ 1));
         // this is expected to reset B's start time:
         assertNull(stateB.getStartTime());
         // now B receives a start time definition relative to that of A:
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(now.plus(2000), now.plus(2000), author, /* ID */ "3", /* pass */ 1,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         assertEquals(new MillisecondsTimePoint( 5000), stateA.getStartTime());
         assertEquals(stateA.getStartTime().plus(5000), stateB.getStartTime()); // B is expected to have a start time 5s after that of A due to its relative start time
         // moving A's start time is expected to move B's start time:
         raceLogA.add(new RaceLogStartTimeEventImpl(now.plus(10000), now.plus(10000), author, /* ID */ "4", /* pass */ 0,
-                /* new start time */ new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED));
+                /* new start time */ new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         assertEquals(new MillisecondsTimePoint(20000), stateA.getStartTime());
         assertEquals(stateA.getStartTime().plus(5000), stateB.getStartTime()); // B is expected to have a start time 5s after that of A due to its relative start time
         // here comes a late event for B's pass 0, updating the absolute start time; it is expected to not
         // have any effect on B's current start time because B is already in pass 1; furthermore, it is
         // expected to not have an effect on the observing relationship: when updating A's start time
         // later, B's relative start time is expected to still update.
-        raceLogB.add(new RaceLogStartTimeEventImpl(now.plus(10), now.plus(10), author, /* ID */ "5", /* pass */ 0, new MillisecondsTimePoint(11000), RaceLogRaceStatus.SCHEDULED));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now.plus(10), now.plus(10), author, /* ID */ "5", /* pass */ 0, new MillisecondsTimePoint(11000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         assertEquals(stateA.getStartTime().plus(5000), stateB.getStartTime()); // B is expected to still have a start time 5s after that of A due to its relative start time
         // move A's start time to then check that B's still relative start time has moved as well, testing the
         // continued existence of the observer relationship:
         raceLogA.add(new RaceLogStartTimeEventImpl(now.plus(11000), now.plus(11000), author, /* ID */ "6", /* pass */ 0,
-                /* new start time */ new MillisecondsTimePoint(30000), RaceLogRaceStatus.SCHEDULED));
+                /* new start time */ new MillisecondsTimePoint(30000), RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null));
         assertEquals(new MillisecondsTimePoint(30000), stateA.getStartTime());
         assertEquals(stateA.getStartTime().plus(5000), stateB.getStartTime()); // B is expected to still have a start time 5s after that of A due to its relative start time
     }

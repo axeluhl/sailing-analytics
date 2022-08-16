@@ -8,6 +8,10 @@
      -moz-transition: top 0.3s ease-in-out;
           transition: top 0.3s ease-in-out;
 }
+.eventheader_with_logo{
+ padding-bottom: 0.5em;
+ position: relative;
+}
 .eventheader_info {
   padding: 0.666666666666667em 0 0 0.666666666666667em;
 }
@@ -52,4 +56,10 @@
 }
 .eventheader_info_subtitle_info_location {
   visibility: visible;
+}
+
+.eventheader_info_subtitle_dataBy_logo_container{
+ position:absolute;
+ bottom:0.25em;
+ right:0.25em;
 }

@@ -1,28 +1,12 @@
 package com.tractrac.subscription.app.tracapi;
 
-import java.net.URI;
-import java.util.UUID;
-
-import com.tractrac.model.lib.api.data.IControlPassings;
-import com.tractrac.model.lib.api.data.IMessageData;
-import com.tractrac.model.lib.api.data.IPosition;
-import com.tractrac.model.lib.api.data.IPositionOffset;
-import com.tractrac.model.lib.api.data.IPositionSnapped;
-import com.tractrac.model.lib.api.data.IStartStopData;
-import com.tractrac.model.lib.api.event.DataSource;
-import com.tractrac.model.lib.api.event.ICompetitor;
-import com.tractrac.model.lib.api.event.IEvent;
-import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.data.*;
+import com.tractrac.model.lib.api.event.*;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.route.IPathRoute;
 import com.tractrac.model.lib.api.sensor.ISensorData;
-import com.tractrac.subscription.lib.api.competitor.ICompetitorSensorDataListener;
-import com.tractrac.subscription.lib.api.competitor.ICompetitorsListener;
-import com.tractrac.subscription.lib.api.competitor.IPositionListener;
-import com.tractrac.subscription.lib.api.competitor.IPositionOffsetListener;
-import com.tractrac.subscription.lib.api.competitor.IPositionSnappedListener;
+import com.tractrac.subscription.lib.api.competitor.*;
 import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
 import com.tractrac.subscription.lib.api.control.IControlPointPositionListener;
 import com.tractrac.subscription.lib.api.control.IControlRouteChangeListener;
@@ -31,9 +15,13 @@ import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.IEventMessageListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
+import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 import com.tractrac.subscription.lib.api.race.IRaceMessageListener;
 import com.tractrac.subscription.lib.api.race.IRaceStartStopTimesChangeListener;
 import com.tractrac.subscription.lib.api.race.IRacesListener;
+
+import java.net.URI;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:jorge@tractrac.dk">Jorge Piera Llodr&aacute;</a>
@@ -43,7 +31,7 @@ public abstract class AbstractListener  implements IEventMessageListener,
         IPositionSnappedListener, IConnectionStatusListener, IControlPointPositionListener,
         IControlPassingsListener, IRaceStartStopTimesChangeListener,
         IControlRouteChangeListener, ICompetitorSensorDataListener,
-        IRacesListener, ICompetitorsListener, IControlsListener {
+        IRacesListener, ICompetitorsListener, IControlsListener, IRaceCompetitorListener {
 
     @Override
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
@@ -66,7 +54,7 @@ public abstract class AbstractListener  implements IEventMessageListener,
     }
 
     @Override
-    public void gotControlPassings(IRaceCompetitor raceCompetitor,
+    public void gotControlPassings(long timestamp, IRaceCompetitor raceCompetitor,
                                    IControlPassings markPassings) {
 
     }
@@ -124,67 +112,87 @@ public abstract class AbstractListener  implements IEventMessageListener,
     }
 
     @Override
-    public void updateCompetitor(ICompetitor competitor) {
+    public void updateCompetitor(long timestamp, ICompetitor competitor) {
 
     }
 
     @Override
-    public void addCompetitor(ICompetitor competitor) {
+    public void addCompetitor(long timestamp, ICompetitor competitor) {
 
     }
 
     @Override
-    public void deleteCompetitor(UUID competitorId) {
+    public void deleteCompetitor(long timestamp, UUID competitorId) {
 
     }
 
     @Override
-    public void updateControl(IControl control) {
+    public void updateControl(long timestamp, IControl control) {
 
     }
 
     @Override
-    public void addControl(IControl control) {
+    public void addControl(long timestamp, IControl control) {
 
     }
 
     @Override
-    public void deleteControl(UUID controlId) {
+    public void deleteControl(long timestamp, UUID controlId) {
 
     }
 
     @Override
-    public void updateRace(IRace race) {
+    public void updateRace(long timestamp, IRace race) {
 
     }
 
     @Override
-    public void addRace(IRace race) {
+    public void addRace(long timestamp, IRace race) {
 
     }
 
     @Override
-    public void deleteRace(UUID raceId) {
+    public void deleteRace(long timestamp, UUID raceId) {
 
     }
 
     @Override
-    public void reloadRace(UUID raceId) {
+    public void reloadRace(long timestamp, UUID raceId) {
 
     }
 
     @Override
-    public void abandonRace(UUID raceId) {
+    public void abandonRace(long timestamp, UUID raceId) {
 
     }
 
     @Override
-    public void startTracking(UUID raceId) {
+    public void startTracking(long timestamp, UUID raceId) {
 
     }
 
     @Override
-    public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {
+    public void dataSourceChanged(long timestamp, IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {
+
+    }
+
+    @Override
+    public void addRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
+
+    }
+
+    @Override
+    public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
+
+    }
+
+    @Override
+    public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
+
+    }
+
+    @Override
+    public void removeOffsetPositions(long timestamp, UUID competitorId, int offset) {
 
     }
 }

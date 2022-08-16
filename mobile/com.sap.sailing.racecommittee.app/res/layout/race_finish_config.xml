@@ -89,13 +89,12 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:layout_centerVertical="true"
+                    android:drawableStart="?attr/access_time_36dp"
                     android:drawableLeft="?attr/access_time_36dp"
                     android:drawablePadding="@dimen/default_padding_half"
-                    android:drawableStart="?attr/access_time_36dp"
                     android:gravity="center"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/textSize_40"
-                    android:visibility="invisible"
                     tools:text="@string/time" />
             </RelativeLayout>
         </RelativeLayout>
@@ -129,6 +128,14 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/date_button"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/today" />
 
                     <include
                         android:id="@+id/time_picker"

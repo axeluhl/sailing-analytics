@@ -26,6 +26,10 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
 
     public TracTracConfigurationWithSecurityDTO() {
     }
+    
+    public TracTracConfigurationWithSecurityDTO(String creatorName) {
+        this.creatorName = creatorName;
+    }
 
     public TracTracConfigurationWithSecurityDTO(String name, String jsonUrl, String liveDataURI, String storedDataURI,
             String courseDesignUpdateUrl, String tractracUsername, String tractracPassword, String creatorName) {
@@ -110,7 +114,7 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.TRACTRAC_ACCOUNT;
     }
 
@@ -121,6 +125,6 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 }

@@ -20,8 +20,14 @@ public interface HasTrackedRaceContext {
     @Connector(scanForStatistics=false)
     public HasLeaderboardContext getLeaderboardContext();
     
+    /**
+     * May be {@code null}
+     */
     public TrackedRace getTrackedRace();
     
+    /**
+     * May be {@code null}
+     */
     @Connector(messageKey="Regatta", ordinal=0)
     public Regatta getRegatta();
     
@@ -55,6 +61,12 @@ public interface HasTrackedRaceContext {
     @Statistic(messageKey="FinishLineLength")
     public Distance getFinishLineLength();
     
+    @Statistic(messageKey="BiasAtStartOfRace", resultDecimals=2)
+    Double getStartLineBiasInMetersAtStartOfRace();
+    
+    @Statistic(messageKey="Bias30SecondsAfterRaceStart", resultDecimals=2)
+    Double getStartLineBiasInMeters30SecondsAfterRaceStart();
+    
     @Dimension(messageKey="MedalRace", ordinal=8)
     public Boolean isMedalRace();
     
@@ -77,5 +89,4 @@ public interface HasTrackedRaceContext {
     public Double getRelativeScoreForCompetitor(Competitor competitor);
     
     public Integer getRankAtFinishForCompetitor(Competitor competitor);
-    
 }

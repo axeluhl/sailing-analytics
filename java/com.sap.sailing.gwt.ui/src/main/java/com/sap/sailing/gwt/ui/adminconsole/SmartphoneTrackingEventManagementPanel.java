@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.READ;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,15 +43,14 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -58,14 +59,12 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -88,9 +87,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class SmartphoneTrackingEventManagementPanel
-        extends AbstractLeaderboardConfigPanel
-        implements LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel {
     private ToggleButton startStopTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
@@ -98,26 +95,25 @@ public class SmartphoneTrackingEventManagementPanel
     protected boolean regattaHasCompetitors = false; 
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     private CaptionPanel importPanel;
+    private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
     
-    public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService, UserService userService,
-            RegattaRefresher regattaRefresher,
-            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
-            ErrorReporter errorReporter, StringMessages stringMessages) {
-        super(sailingService, userService, regattaRefresher, leaderboardsRefresher, errorReporter,
-                stringMessages, /* multiSelection */ true);
+    public SmartphoneTrackingEventManagementPanel(final Presenter presenter, StringMessages stringMessages) {
+        super(presenter, stringMessages, /* multiSelection */ true);
+        this.competitorsRefresher = presenter.getCompetitorsRefresher();
+        this.boatsRefresher = presenter.getBoatsRefresher();
         // add upload panel
         importPanel = new CaptionPanel(stringMessages.importFixes());
         importPanel.setVisible(false);
         VerticalPanel importContent = new VerticalPanel();
         mainPanel.add(importPanel);
-        deviceIdentifierTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
+        deviceIdentifierTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
         TrackFileImportWidget importWidget = new TrackFileImportWidget(deviceIdentifierTable, stringMessages,
-                sailingService, errorReporter);
+                sailingServiceWrite, errorReporter);
         importPanel.add(importContent);
         importContent.add(importWidget);
         importContent.add(deviceIdentifierTable);
         trackedRacesListComposite.addTrackedRaceChangeListener(new TrackedRaceChangedListener() {
-            
             @Override
             public void racesStoppedTracking(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
                 loadAndRefreshLeaderboard(getSelectedLeaderboard().getName()); 
@@ -128,7 +124,6 @@ public class SmartphoneTrackingEventManagementPanel
                 loadAndRefreshLeaderboard(getSelectedLeaderboard().getName()); 
             }
         });
-
         this.userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
@@ -148,91 +143,75 @@ public class SmartphoneTrackingEventManagementPanel
     
     @Override
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService,
-            FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
+            FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
             AdminConsoleTableResources tableResources,
-            ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider) {
-        ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTOWithSecurity>(
+            ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
+        ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 filteredLeaderboardList.getList());
-        SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
                 leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getName();
             }
         };
         leaderboardNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardNameColumn,
-                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+                new Comparator<StrippedLeaderboardDTO>() {
             @Override
-                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 return new NaturalComparator(false).compare(o1.getName(), o2.getName());
             }
         });
-
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
         leaderboardDisplayNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn,
-                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+                new Comparator<StrippedLeaderboardDTO>() {
                     @Override
-                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                         return new NaturalComparator(false).compare(o1.getDisplayName(), o2.getDisplayName());
                     }
                 });
-
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
             }
         };
         leaderboardCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
             Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
-
         final HasPermissions type = SecuredDomainType.EVENT;
-
-        final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, leaderboard -> {
-                }, stringMessages);
-
-        final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, leaderboard -> leaderboard.getAccessControlList(),
+        final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTO> configOwnership = EditOwnershipDialog
+                .create(userService.getUserManagementWriteService(), type, leaderboard -> listDataProvider.refresh(), stringMessages);
+        final EditACLDialog.DialogConfig<StrippedLeaderboardDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementWriteService(), type, leaderboard -> leaderboard.getAccessControlList(),
                 stringMessages);
-
-        final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = AccessControlledActionsColumn
+        final AccessControlledActionsColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = AccessControlledActionsColumn
                 .create(new RaceLogTrackingEventManagementImagesBarCell(stringMessages), userService);
-
         leaderboardActionColumn.addAction(
                 RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING, DefaultActions.UPDATE,
                 this::denoteForRaceLogTracking);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS,
                 DefaultActions.UPDATE, this::handleCompetitorRegistration);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_BOAT_REGISTRATIONS,
                 DefaultActions.UPDATE, this::handleBoatRegistration);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES,
                 DefaultActions.UPDATE, this::handleDeviceMappings);
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_INVITE_BUOY_TENDERS,
                 DefaultActions.UPDATE, t -> openChooseEventDialogAndSendMails(t.getName()));
-
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG,
                 DefaultActions.UPDATE, t -> showRegattaLog());
-
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.UPDATE,
-                configOwnership::openDialog);
-
+                configOwnership::openOwnershipDialog);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.UPDATE,
                 configACL::openDialog);
-
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(leaderboardNameColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
@@ -256,9 +235,8 @@ public class SmartphoneTrackingEventManagementPanel
     
     private boolean isFinished(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
         RaceDTO raceDTO = race.getA().getRace(race.getB());
-        
         boolean raceFinished = false;
-        if (raceDTO != null){
+        if (raceDTO != null) {
             raceFinished = raceDTO.status.status.equals(TrackedRaceStatusEnum.FINISHED);
         }
         return raceFinished;
@@ -301,11 +279,9 @@ public class SmartphoneTrackingEventManagementPanel
                 return doesCourseExist(raceColumnAndFleetName) ? stringMessages.ok() : stringMessages.none();
             }
         };
-
         final AccessControlledActionsColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell> raceActionColumn = AccessControlledActionsColumn
                 .create(new RaceLogTrackingEventManagementRaceImagesBarCell(stringMessages, this), userService,
                         t -> t.getC());
-
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING,
                 DefaultActions.UPDATE, this::denoteForRaceLogTracking);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_REMOVE_DENOTATION,
@@ -316,11 +292,11 @@ public class SmartphoneTrackingEventManagementPanel
                 DefaultActions.UPDATE, this::handleDefineCourse);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY, DefaultActions.UPDATE,
                 this::handleCopy);
-        raceActionColumn.addAction(LeaderboardRaceConfigImagesBarCell.ACTION_EDIT, DefaultActions.UPDATE,
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_EDIT, DefaultActions.UPDATE,
                 this::editRaceColumnOfLeaderboard);
-        raceActionColumn.addAction(LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK, DefaultActions.UPDATE,
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_UNLINK, DefaultActions.UPDATE,
                 t -> unlinkRaceColumnFromTrackedRace(t.getA().getRaceColumnName(), t.getB()));
-        raceActionColumn.addAction(LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG, DefaultActions.UPDATE,
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_REFRESH_RACELOG, DefaultActions.UPDATE,
                 t -> refreshRaceLog(t.getA(), t.getB(), true));
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_STARTTIME,
                 DefaultActions.UPDATE, this::setStartTime);
@@ -338,6 +314,12 @@ public class SmartphoneTrackingEventManagementPanel
         raceActionColumn.addAction(
                 RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS,
                 DefaultActions.UPDATE, this::showCompetitorToBoatMappings);
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_CERTIFICATE_ASSIGNMENT, READ,
+                t -> assignCertificates(t));
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SCRATCH_BOAT_SELECTION, READ,
+                t -> selectScratchBoat(t));
+        raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_IMPLIED_WIND, READ,
+                t -> setImpliedWind(t));
         
         racesTable.addColumn(raceLogTrackingStateColumn, stringMessages.raceStatusColumn());
         racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());
@@ -353,8 +335,8 @@ public class SmartphoneTrackingEventManagementPanel
         races.remove(t);
         Distance buoyZoneRadius = getSelectedRegatta() == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
                 : getSelectedRegatta().getCalculatedBuoyZoneRadius();
-        new CopyCourseAndCompetitorsDialog(sailingService, errorReporter, stringMessages, races, leaderboardName,
-                buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
+        new CopyCourseAndCompetitorsDialog(sailingServiceWrite, errorReporter, stringMessages, races, t, availableLeaderboardList,
+                leaderboardName, buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
                     @Override
                     public void ok(CourseAndCompetitorCopyOperation operation) {
                         operation.perform(leaderboardName, t, /* onSuccessCallback */ new Runnable() {
@@ -375,7 +357,7 @@ public class SmartphoneTrackingEventManagementPanel
         final String leaderboardName = t.getC().getName();
         final String raceColumnName = t.getA().getName();
         final String fleetName = t.getB().getName();
-        new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName,
+        new RaceLogTrackingCourseDefinitionDialog(presenter, stringMessages, leaderboardName,
                 raceColumnName, fleetName, new DialogCallback<RaceLogTrackingCourseDefinitionDialog.Result>() {
                     @Override
                     public void cancel() {
@@ -383,11 +365,22 @@ public class SmartphoneTrackingEventManagementPanel
 
                     @Override
                     public void ok(RaceLogTrackingCourseDefinitionDialog.Result waypointPairs) {
-                        sailingService.addCourseDefinitionToRaceLog(leaderboardName, raceColumnName, fleetName,
+                        sailingServiceWrite.addCourseDefinitionToRaceLog(leaderboardName, raceColumnName, fleetName,
                                 waypointPairs.getWaypoints(), waypointPairs.getPriority(), new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
-                                        loadAndRefreshLeaderboard(leaderboardName);
+                                        sailingServiceWrite.setORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
+                                                waypointPairs.getORCLegData(), new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                loadAndRefreshLeaderboard(leaderboardName);
+                                            }
+                                        });
                                     }
 
                                     @Override
@@ -396,7 +389,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     }
                                 });
                     }
-                }, userService).show();
+                }).show();
     }
 
     private void handleCompetitorRegistration(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
@@ -414,13 +407,14 @@ public class SmartphoneTrackingEventManagementPanel
             RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
-            errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
-            raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
+        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName,
+                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter,
+                editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
+                raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
                 @Override
                 public void ok(final Set<CompetitorDTO> registeredCompetitors) {
                     if (canBoatsOfCompetitorsChangePerRace) {
-                        sailingService.getCompetitorAndBoatRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
+                        sailingServiceWrite.getCompetitorAndBoatRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                             @Override
                             public void onSuccess(Map<CompetitorDTO, BoatDTO> existingCompetitorToBoatMappings) {
                                 // remove the competitors which has been removed in the first dialog (competitor selection)
@@ -433,11 +427,11 @@ public class SmartphoneTrackingEventManagementPanel
                                         newCompetitorToBoatMappings.put(competitorDTO, null);
                                     }
                                 }
-                                new CompetitorToBoatMappingsDialog(sailingService, stringMessages,
+                                new CompetitorToBoatMappingsDialog(sailingServiceWrite, stringMessages,
                                         errorReporter, leaderboardName, newCompetitorToBoatMappings, new DialogCallback<Map<CompetitorDTO, BoatDTO>>() {
                                     @Override
                                     public void ok(final Map<CompetitorDTO, BoatDTO> competitorToBoatMappings) {
-                                        sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
+                                        sailingServiceWrite.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
                                             fleetName, competitorToBoatMappings, new AsyncCallback<Void>() {
                                             @Override
                                             public void onSuccess(Void result) {
@@ -452,7 +446,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     @Override
                                     public void cancel() {
                                     }
-                                }).show();                                    
+                                                    }, userService).show();
                             }
                             
                             @Override
@@ -465,7 +459,7 @@ public class SmartphoneTrackingEventManagementPanel
                         for (final CompetitorDTO competitor : registeredCompetitors) {
                             registeredCompetitorsWithBoat.add((CompetitorWithBoatDTO) competitor);
                         }
-                        sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
+                        sailingServiceWrite.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
                             fleetName, registeredCompetitorsWithBoat, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
@@ -513,7 +507,6 @@ public class SmartphoneTrackingEventManagementPanel
                 refreshTrackingActionButtons();
             }
         });
-        
         raceColumnTableSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -531,7 +524,7 @@ public class SmartphoneTrackingEventManagementPanel
                 racesToStopTracking.add(race.getRaceIdentifier());
             }   
         }
-        sailingService.stopTrackingRaces(racesToStopTracking, new MarkedAsyncCallback<Void>(
+        sailingServiceWrite.stopTrackingRaces(racesToStopTracking, new MarkedAsyncCallback<Void>(
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -540,7 +533,7 @@ public class SmartphoneTrackingEventManagementPanel
         
                     @Override
                     public void onSuccess(Void result) {
-                        trackedRacesListComposite.regattaRefresher.fillRegattas();
+                        trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                         for (TrackedRaceChangedListener listener : trackedRacesListComposite.raceIsTrackedRaceChangeListener) {
                             listener.racesStoppedTracking(racesToStopTracking);
                         }
@@ -553,47 +546,38 @@ public class SmartphoneTrackingEventManagementPanel
         boolean onlyUntrackedRacesPresent = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
         boolean onlyTrackedRacesPresent = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
         boolean onlyRacesWithNonExistentTracker = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
-        
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : raceColumnTableSelectionModel.getSelectedSet()) {
-            if (getTrackingState(race).isForTracking() && isFinished(race)){
+            if (getTrackingState(race).isForTracking() && isFinished(race)) {
                 onlyUntrackedRacesPresent = false;
                 onlyTrackedRacesPresent = false;
             }
-            
-            if (! getTrackingState(race).isForTracking() || doesTrackerExist(race) || isFinished(race)) {
+            if (!getTrackingState(race).isForTracking() || doesTrackerExist(race) || isFinished(race)) {
                 onlyUntrackedRacesPresent = false;
             } else {
                 onlyTrackedRacesPresent = false;
             }
-            
-            if (trackerExists(race)){
+            if (trackerExists(race)) {
                 onlyRacesWithNonExistentTracker = false;
             }
         }
-        
         boolean hasPermissionToChange = leaderboardSelectionModel.getSelectedSet().stream()
-                .filter(new Predicate<StrippedLeaderboardDTOWithSecurity>() {
+                .filter(new Predicate<StrippedLeaderboardDTO>() {
                     @Override
-                    public boolean test(StrippedLeaderboardDTOWithSecurity t) {
+                    public boolean test(StrippedLeaderboardDTO t) {
                         return userService.hasPermission(t, DefaultActions.UPDATE);
                     }
                 }).count() > 0;
-        
-        
-        if ((!onlyTrackedRacesPresent && !onlyUntrackedRacesPresent)){
+        if ((!onlyTrackedRacesPresent && !onlyUntrackedRacesPresent)) {
             startStopTrackingButton.setEnabled(false);
         }
-        
-        if (onlyTrackedRacesPresent){
+        if (onlyTrackedRacesPresent) {
             startStopTrackingButton.setDown(true);
             startStopTrackingButton.setEnabled(hasPermissionToChange);
         }
-        
-        if (onlyUntrackedRacesPresent || onlyRacesWithNonExistentTracker){
+        if (onlyUntrackedRacesPresent || onlyRacesWithNonExistentTracker) {
             startStopTrackingButton.setDown(false);
             startStopTrackingButton.setEnabled(hasPermissionToChange);
         }
-        
     }
 
     @Override
@@ -618,7 +602,7 @@ public class SmartphoneTrackingEventManagementPanel
                     raceColumnsAndFleets.add(new Triple<String, String, String>(selectedLeaderboard.getName(), raceColumn.getName(), fleet.getName()));
                 }
             }
-            sailingService.getTrackingTimes(raceColumnsAndFleets,
+            sailingServiceWrite.getTrackingTimes(raceColumnsAndFleets,
                     new AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -643,7 +627,7 @@ public class SmartphoneTrackingEventManagementPanel
                 trackedRacesListComposite.setRegattaFilterValue(selectedLeaderboard.regattaName);
                 trackedRacesCaptionPanel.setVisible(true);
             }
-            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).getName(), new RegattaLogCallBack());
+            sailingServiceWrite.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).getName(), new RegattaLogCallBack());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
@@ -668,16 +652,16 @@ public class SmartphoneTrackingEventManagementPanel
     }
     
     private void denoteForRaceLogTracking(final StrippedLeaderboardDTO leaderboard) {
-        final ChooseNameDenoteEventDialog dialog = new ChooseNameDenoteEventDialog(stringMessages,leaderboard,
+        final ChooseNameDenoteEventDialog dialog = new ChooseNameDenoteEventDialog(stringMessages, leaderboard,
                 new DialogCallback<String>() {
-
                     @Override
                     public void ok(String prefix) {
-                        sailingService.denoteForRaceLogTracking(leaderboard.getName(), prefix, new AsyncCallback<Void>() {
+                        sailingServiceWrite.denoteForRaceLogTracking(leaderboard.getName(), prefix, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 loadAndRefreshLeaderboard(leaderboard.getName());
                                 updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
+                                denoteRacesWithMultipleFleetsToDefineTheirOwnCompetitors(leaderboard.getName(), leaderboard.getRaceList());
                                 raceColumnTableSelectionModel.clear();
                             }
 
@@ -697,6 +681,37 @@ public class SmartphoneTrackingEventManagementPanel
         dialog.show();
     }
 
+    /**
+     * When a race in a race column is denoted for smartphone tracking and the race column has more than one fleet then it
+     * is inevitable for the race to define its own set of competitors so that competitors don't overlap for the races
+     * in a single race column. This method denotes all races in the columns specified to define their own set of competitors
+     * through their race logs if the race column has more than one fleet.
+     */
+    private void denoteRacesWithMultipleFleetsToDefineTheirOwnCompetitors(String leaderboardName, Iterable<RaceColumnDTO> raceColumns) {
+        final Set<Pair<RaceColumnDTO, FleetDTO>> raceCoordinatesUsingOwnCompetitors = new HashSet<>();
+        for (final RaceColumnDTO raceColumn : raceColumns) {
+            if (raceColumn.getFleets().size() > 1) {
+                for (final FleetDTO fleet : raceColumn.getFleets()) {
+                    sailingServiceWrite.enableCompetitorRegistrationsForRace(leaderboardName, raceColumn.getName(), fleet.getName(),
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            stringMessages.errorSettingRaceToDefineItsOwnCompetitors(leaderboardName,
+                                                    raceColumn.getName(), fleet.getName(), caught.getMessage()),
+                                            /* silentMode */ true);
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                }
+                    });
+                    raceCoordinatesUsingOwnCompetitors.add(new Pair<>(raceColumn, fleet));
+                }
+            }
+        }
+    }
+    
     private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {
         final RegattaDTO regatta = getRegattaByName(regattaName);
         if (regatta != null) {
@@ -754,11 +769,11 @@ public class SmartphoneTrackingEventManagementPanel
     private void updateRegattaConfiguration(final RegattaDTO regatta,
             DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
-        sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
-                regatta.defaultCourseAreaUuid, configuration, regatta.buoyZoneRadiusInHullLengths,
+        sailingServiceWrite.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
+                Util.mapToArrayList(regatta.courseAreas, CourseAreaDTO::getId), configuration, regatta.buoyZoneRadiusInHullLengths,
                 regatta.useStartTimeInference, regatta.controlTrackingFromStartAndFinishTimes,
-                regatta.registrationLinkSecret, regatta.competitorRegistrationType,
-                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                regatta.autoRestartTrackingUponCompetitorSetChange, regatta.registrationLinkSecret,
+                regatta.competitorRegistrationType, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(
@@ -774,12 +789,13 @@ public class SmartphoneTrackingEventManagementPanel
     }
 
     private void denoteForRaceLogTracking(final RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-        sailingService.denoteForRaceLogTracking(t.getC().getName(), t.getA().getName(), t.getB().getName(),
+        sailingServiceWrite.denoteForRaceLogTracking(t.getC().getName(), t.getA().getName(), t.getB().getName(),
                 new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 if (result == true) {
-                            loadAndRefreshLeaderboard(t.getC().getName());
+                    loadAndRefreshLeaderboard(t.getC().getName());
+                    denoteRacesWithMultipleFleetsToDefineTheirOwnCompetitors(t.getC().getName(), Collections.singleton(t.getA()));
                 }
             }
 
@@ -791,7 +807,7 @@ public class SmartphoneTrackingEventManagementPanel
     }
     
     private void removeDenotation(final RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-        sailingService.removeDenotationForRaceLogTracking(t.getC().getName(), t.getA().getName(), t.getB().getName(),
+        sailingServiceWrite.removeDenotationForRaceLogTracking(t.getC().getName(), t.getA().getName(), t.getB().getName(),
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
@@ -831,12 +847,12 @@ public class SmartphoneTrackingEventManagementPanel
             leaderboardRaceColumnFleetNames
                     .add(new Triple<>(leaderboard.getName(), raceColumn.getName(), fleet.getName()));
         }
-        sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, trackWind, correctWindByDeclination,
+        sailingServiceWrite.startRaceLogTracking(leaderboardRaceColumnFleetNames, trackWind, correctWindByDeclination,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
                         loadAndRefreshLeaderboard(leaderboard.getName());
-                        trackedRacesListComposite.regattaRefresher.fillRegattas();
+                        trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                     }
 
                     @Override
@@ -848,12 +864,12 @@ public class SmartphoneTrackingEventManagementPanel
     }
 
     private void setStartTime(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-        new SetStartTimeDialog(sailingService, errorReporter, t.getC().getName(), t.getA().getName(),
+        new SetStartTimeDialog(sailingServiceWrite, errorReporter, t.getC().getName(), t.getA().getName(),
                 t.getB().getName(), stringMessages,
                 new DataEntryDialog.DialogCallback<RaceLogSetStartTimeAndProcedureDTO>() {
                     @Override
                     public void ok(RaceLogSetStartTimeAndProcedureDTO editedObject) {
-                        sailingService.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
+                        sailingServiceWrite.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(caught.getMessage());
@@ -865,7 +881,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     Notification.notify(stringMessages.failedToSetNewStartTime(),
                                             NotificationType.ERROR);
                                 } else {
-                                    trackedRacesListComposite.regattaRefresher.fillRegattas();
+                                    trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                                 }
                             }
                         });
@@ -878,11 +894,11 @@ public class SmartphoneTrackingEventManagementPanel
     }
     
     private void setEndTime(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-        new SetFinishingAndFinishedTimeDialog(sailingService, errorReporter, t.getC().getName(), t.getA().getName(),
+        new SetFinishingAndFinishedTimeDialog(sailingServiceWrite, errorReporter, t.getC().getName(), t.getA().getName(),
                 t.getB().getName(), stringMessages, new DialogCallback<RaceLogSetFinishingAndFinishTimeDTO>() {
                     @Override
                     public void ok(RaceLogSetFinishingAndFinishTimeDTO editedObject) {
-                        sailingService.setFinishingAndEndTime(editedObject,
+                        sailingServiceWrite.setFinishingAndEndTime(editedObject,
                                 new AsyncCallback<Pair<Boolean, Boolean>>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -895,7 +911,7 @@ public class SmartphoneTrackingEventManagementPanel
                                             Notification.notify(stringMessages.failedToSetNewFinishingAndFinishTime(),
                                                     NotificationType.ERROR);
                                         } else {
-                                            trackedRacesListComposite.regattaRefresher.fillRegattas();
+                                            trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                                         }
                                     }
                                 });
@@ -912,11 +928,11 @@ public class SmartphoneTrackingEventManagementPanel
     }
 
     private void showSetTrackingTimesDialog(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-        new SetTrackingTimesDialog(sailingService, errorReporter, t.getC().getName(), t.getA().getName(),
+        new SetTrackingTimesDialog(sailingServiceWrite, errorReporter, t.getC().getName(), t.getA().getName(),
                 t.getB().getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetTrackingTimesDTO>() {
                     @Override
                     public void ok(RaceLogSetTrackingTimesDTO editedObject) {
-                        sailingService.setTrackingTimes(editedObject, new AsyncCallback<Void>(){
+                        sailingServiceWrite.setTrackingTimes(editedObject, new AsyncCallback<Void>(){
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error while setting tracking times: " + caught.getMessage());
@@ -943,9 +959,9 @@ public class SmartphoneTrackingEventManagementPanel
         final String raceColumnName = t.getA().getName();
         final String fleetName = t.getB().getName();
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
-        ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService, 
+        ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingServiceWrite, 
                 stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, 
-                raceName);
+                raceName, userService);
         dialog.center();
     }
 
@@ -954,10 +970,10 @@ public class SmartphoneTrackingEventManagementPanel
     }
     
     private void openChooseEventDialogAndSendMails(final String leaderboardName) {
-        new InviteBuoyTenderDialog(stringMessages, sailingService, leaderboardName, errorReporter, new DialogCallback<Triple<EventDTO, String, String>>() {
+        new InviteBuoyTenderDialog(stringMessages, sailingServiceWrite, leaderboardName, errorReporter, new DialogCallback<Triple<EventDTO, String, String>>() {
             @Override
             public void ok(Triple<EventDTO, String, String> result) {
-                sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderboardName, result.getC(),
+                sailingServiceWrite.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderboardName, result.getC(),
                         null,
                         stringMessages.playStoreBuoyPingerApp(),
                         getLocaleInfo(), new AsyncCallback<Void>() {
@@ -980,16 +996,15 @@ public class SmartphoneTrackingEventManagementPanel
         }).show();
     }
 
-    private void handleCompetitorRegistration(StrippedLeaderboardDTOWithSecurity t) {
+    private void handleCompetitorRegistration(StrippedLeaderboardDTO t) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-
-        new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
-                errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
-                new DialogCallback<Set<CompetitorDTO>>() {
+        new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService,
+                competitorsRefresher, boatsRefresher, stringMessages, errorReporter, /* editable */true, t.getName(),
+                t.canBoatsOfCompetitorsChangePerRace, new DialogCallback<Set<CompetitorDTO>>() {
                     @Override
                     public void ok(Set<CompetitorDTO> registeredCompetitors) {
-                        sailingService.setCompetitorRegistrationsInRegattaLog(t.getName(), registeredCompetitors,
+                        sailingServiceWrite.setCompetitorRegistrationsInRegattaLog(t.getName(), registeredCompetitors,
                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
@@ -1010,17 +1025,17 @@ public class SmartphoneTrackingEventManagementPanel
                 }).show();
     }
 
-    private void handleBoatRegistration(StrippedLeaderboardDTOWithSecurity t) {
+    private void handleBoatRegistration(StrippedLeaderboardDTO t) {
         if (t.canBoatsOfCompetitorsChangePerRace) {
             RegattaDTO regatta = getSelectedRegatta();
             String boatClassName = regatta.boatClass.getName();
 
-            new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
-                    errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
-                    new DialogCallback<Set<BoatDTO>>() {
+            new RegattaLogBoatRegistrationDialog(boatClassName, sailingServiceWrite, userService, boatsRefresher,
+                    competitorsRefresher, stringMessages, errorReporter, /* editable */true, t.getName(),
+                    t.canBoatsOfCompetitorsChangePerRace, new DialogCallback<Set<BoatDTO>>() {
                         @Override
                         public void ok(Set<BoatDTO> registeredBoats) {
-                            sailingService.setBoatRegistrationsInRegattaLog(t.getName(), registeredBoats,
+                            sailingServiceWrite.setBoatRegistrationsInRegattaLog(t.getName(), registeredBoats,
                                     new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
@@ -1044,9 +1059,8 @@ public class SmartphoneTrackingEventManagementPanel
         }
     }
 
-    private void handleDeviceMappings(StrippedLeaderboardDTOWithSecurity t) {
-        sailingService.getSecretForRegattaByName(t.getName(), new AsyncCallback<String>() {
-
+    private void handleDeviceMappings(StrippedLeaderboardDTO t) {
+        sailingServiceWrite.getSecretForRegattaByName(t.getName(), new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 // if this happens, the user did apparently not have sufficient rights.
@@ -1055,7 +1069,7 @@ public class SmartphoneTrackingEventManagementPanel
 
             @Override
             public void onSuccess(String secret) {
-                new RegattaLogTrackingDeviceMappingsDialog(sailingService, userService, stringMessages, errorReporter,
+                new RegattaLogTrackingDeviceMappingsDialog(sailingServiceWrite, userService, stringMessages, errorReporter,
                         t.getName(), secret, new DialogCallback<Void>() {
                             @Override
                             public void ok(Void editedObject) {

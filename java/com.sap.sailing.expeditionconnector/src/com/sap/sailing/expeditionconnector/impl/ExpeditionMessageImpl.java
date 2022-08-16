@@ -144,52 +144,71 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
 
     @Override
     public GPSFixMoving getGPSFixMoving() {
+        final GPSFixMoving result;
         if (hasValue(ID_GPS_LAT) && hasValue(ID_GPS_LNG)) {
-            return new GPSFixMovingImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), getTimePoint(),
-                    getSpeedOverGround());
+            final SpeedWithBearing cogSog = getSpeedOverGround();
+            if (cogSog != null) {
+                result = new GPSFixMovingImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), getTimePoint(),
+                        getSpeedOverGround());
+            } else {
+                result = null;
+            }
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 
     @Override
     public SpeedWithBearing getTrueWind() {
-        if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
-            return new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
-        } else if (hasValue(ID_GWD) && hasValue(ID_GWS)) {
-            return new KnotSpeedWithBearingImpl(getValue(ID_GWS), getTrueWindBearing());
+        final SpeedWithBearing result;
+        // FIXME bug 5223: prefer own TWD calculation over reported TWD/TWS because that may still contain a current-based correction
+        if (hasValue(ID_GWD) && hasValue(ID_GWS)) {
+            result = new KnotSpeedWithBearingImpl(getValue(ID_GWS), getTrueWindBearing());
+        } else if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
+            result = new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
     
     @Override
     public Bearing getTrueWindBearing() {
+        final Bearing result;
         if (hasValue(ID_TWD)) { // TWD represents the "from" direction and need to be reversed to obtain the "to" bearing
-            return new DegreeBearingImpl(getValue(ID_TWD)).reverse();
+            result = new DegreeBearingImpl(getValue(ID_TWD)).reverse();
         } else if (hasValue(ID_GWD)) {
-                return new DegreeBearingImpl(getValue(ID_GWD)).reverse();
+            result = new DegreeBearingImpl(getValue(ID_GWD)).reverse();
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 
     @Override
     public SpeedWithBearing getSpeedOverGround() {
-        if (hasValue(ID_GPS_COG) && hasValue(ID_GPS_SOG)) {
-            return new KnotSpeedWithBearingImpl(getValue(ID_GPS_SOG), getCourseOverGround());
+        final SpeedWithBearing result;
+        if (hasValue(ID_GPS_COG)) {
+            // We're assuming that if SOG is not part of the message but COG is then
+            // the SOG was probably so low that it's fair to approximate it as 0.
+            final double sogInKnots = hasValue(ID_GPS_SOG) ? getValue(ID_GPS_SOG) : 0;
+            result = new KnotSpeedWithBearingImpl(sogInKnots, getCourseOverGround());
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
     
     @Override
     public Bearing getCourseOverGround() {
+        final Bearing result;
         if (hasValue(ID_GPS_COG)) {
-            return new DegreeBearingImpl(getValue(ID_GPS_COG));
+            result = new DegreeBearingImpl(getValue(ID_GPS_COG));
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
 
     @Override

@@ -56,7 +56,7 @@ public class SerializeRaceLogEventsTest {
     public void testRaceLogSerializationWithSingleEvent() throws IOException, ClassNotFoundException {
         RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(),
                 new LogEventAuthorImpl("Author Name", /* priority */0), /* passId */1, /* startTime */
-                MillisecondsTimePoint.now());
+                MillisecondsTimePoint.now(), /* courseAreaId */ null);
         raceLog.add(startTimeEvent);
         oos.writeObject(raceLog);
         ObjectInputStream ois = getObjectInputStream();

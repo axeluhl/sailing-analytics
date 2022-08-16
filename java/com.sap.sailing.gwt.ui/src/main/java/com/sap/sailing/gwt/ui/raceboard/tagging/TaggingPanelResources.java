@@ -7,7 +7,7 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
 
 /**
- * Interface for styling {@link TaggingPanel} and its content.
+ * Interface for styling {@link TaggingComponent} and its content.
  */
 public interface TaggingPanelResources extends CellList.Resources, CellTable.Resources {
     static final TaggingPanelResources INSTANCE = GWT.create(TaggingPanelResources.class);

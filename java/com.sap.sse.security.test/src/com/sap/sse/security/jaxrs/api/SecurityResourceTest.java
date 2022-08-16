@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import javax.ws.rs.core.Response;
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
@@ -31,13 +33,15 @@ import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -46,7 +50,7 @@ public class SecurityResourceTest {
     private static final String USERNAME = "user-123";
     private static final String PASSWORD = "pass-234";
     private SecurityResource servlet;
-    private SecurityServiceImpl service;
+    private SecurityService service;
     private Subject authenticatedAdmin;
     private UserStore store;
     private AccessControlStore accessControlStore;
@@ -59,11 +63,12 @@ public class SecurityResourceTest {
         try {
             store = new UserStoreImpl("TestDefaultTenant");
             store.ensureDefaultRolesExist();
-            store.ensureDefaultTenantExists();
+            store.ensureServerGroupExists();
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
-            service = new SecurityServiceImpl(/* mailServiceTracker */ null,
-                    store, accessControlStore, /* hasPermissionsProvider */null);
+            service = new SecurityServiceImpl(/* mailServiceTracker */ null, store, accessControlStore,
+                    /* hasPermissionsProvider */SecuredSecurityTypes::getAllInstances,
+                    SSESubscriptionPlan::getAllInstances);
             service.initialize();
             Activator.setSecurityService(service);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
@@ -179,8 +184,8 @@ public class SecurityResourceTest {
     public void testCheckCurrentUserDefaultPermissions() throws UserManagementException {
         final MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.dbId = "Humba";
-        store.addPermissionForUser(USERNAME, mediaTrack.getType().getPermissionForObject(DefaultActions.READ, mediaTrack));
-        store.addPermissionForUser(USERNAME, mediaTrack.getType().getPermissionForObject(DefaultActions.UPDATE, mediaTrack));
+        store.addPermissionForUser(USERNAME, mediaTrack.getPermissionType().getPermissionForObject(DefaultActions.READ, mediaTrack));
+        store.addPermissionForUser(USERNAME, mediaTrack.getPermissionType().getPermissionForObject(DefaultActions.UPDATE, mediaTrack));
         assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserReadPermission(mediaTrack)));
         assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserUpdatePermission(mediaTrack)));
         assertFalse(authenticatedAdmin.execute(()->service.hasCurrentUserDeletePermission(mediaTrack)));
@@ -234,8 +239,8 @@ public class SecurityResourceTest {
         }
     }
 
-    private String getOrCreateAccessToken() throws ParseException {
-        String responseJsonString = (String) servlet.respondWithAccessTokenForUser(USERNAME).getEntity();
+    private String getOrCreateAccessToken() throws ParseException, IOException {
+        String responseJsonString = StreamingOutputUtil.getEntityAsString(servlet.respondWithAccessTokenForUser(USERNAME).getEntity());
         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
         assertEquals(USERNAME, responseJson.get("username"));
         String accessToken = (String) responseJson.get("access_token");
@@ -243,9 +248,9 @@ public class SecurityResourceTest {
         return accessToken;
     }
 
-    private String createAccessToken() throws ParseException {
+    private String createAccessToken() throws ParseException, IOException {
         assertEquals(Response.Status.OK.getStatusCode(), servlet.respondToRemoveAccessTokenForUser(USERNAME).getStatus());
-        String responseJsonString = (String) servlet.respondWithAccessTokenForUser(USERNAME).getEntity();
+        String responseJsonString = StreamingOutputUtil.getEntityAsString(servlet.respondWithAccessTokenForUser(USERNAME).getEntity());
         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
         assertEquals(USERNAME, responseJson.get("username"));
         String accessToken = (String) responseJson.get("access_token");
@@ -258,7 +263,7 @@ public class SecurityResourceTest {
     }
 
     @Test
-    public void createAccessTokenAndAuthenticate() throws ParseException, UserManagementException {
+    public void createAccessTokenAndAuthenticate() throws ParseException, UserManagementException, IOException {
         String accessToken = getOrCreateAccessToken();
         User user = service.getUserByAccessToken(accessToken);
         assertNotNull(user);
@@ -280,7 +285,7 @@ public class SecurityResourceTest {
     }
 
     @Test
-    public void ensureOldBearerTokenIsInvalidatedByObtainingNewOne() throws ParseException {
+    public void ensureOldBearerTokenIsInvalidatedByObtainingNewOne() throws ParseException, IOException {
         String accessToken = getOrCreateAccessToken();
         createAccessToken();
         User user = service.getUserByAccessToken(accessToken);
@@ -288,7 +293,7 @@ public class SecurityResourceTest {
     }
 
     @Test
-    public void ensureOldBearerTokenIsInvalidatedByRequestingItsRemoval() throws ParseException {
+    public void ensureOldBearerTokenIsInvalidatedByRequestingItsRemoval() throws ParseException, IOException {
         String accessToken = getOrCreateAccessToken();
         removeAccessToken();
         User user = service.getUserByAccessToken(accessToken);

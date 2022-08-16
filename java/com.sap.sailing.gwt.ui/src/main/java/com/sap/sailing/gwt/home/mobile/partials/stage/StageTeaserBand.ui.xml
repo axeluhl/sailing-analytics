@@ -1,6 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.ui.shared">
 	<ui:with field="i18n"
 		type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res"
@@ -10,16 +10,14 @@
 		
 	<ui:style>
 		.left {
-			display: inline;
-			position: absolute;
 			top: 0px;
 			left: 0px;
 			width: 50%;
 			vertical-align: middle;
 		}
 		.right {
-			display: inline;
-			position: absolute;
+            display: inline;
+            position: absolute;
 			top: 0px;
 			left: 50%;
 			right: 0px;
@@ -41,6 +39,7 @@
 		<div class="{local_res.css.stageteaser_content_band_text}" >
 			<div class="{local_res.css.stageteaser_content_band_text_name} {style.left}" >
 				<div ui:field="bandSubtitle" />
+				<s:databylogo.DataByLogo ui:field="dataByLogo" addStyleNames="{local_res.css.stageteaser_databylogo_container}" />
 			</div>
 			<div class="{style.right}">
 				<g:Anchor ui:field="actionLink"

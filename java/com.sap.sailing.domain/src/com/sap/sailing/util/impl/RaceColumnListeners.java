@@ -164,6 +164,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutMaximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.maximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
+        }
+    }
+
     public void notifyListenersAboutRaceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceLogEventAdded(raceColumn, raceLogIdentifier, event);

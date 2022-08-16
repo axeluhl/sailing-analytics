@@ -18,10 +18,17 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class UserGroupSuggestOracle extends AbstractListSuggestOracle<UserDTO> {
 
     private final Collection<UserDTO> allUsers = new ArrayList<>();
+    private final UserManagementServiceAsync userManagementService;
+    private final StringMessages stringMessages;
 
     public UserGroupSuggestOracle(final UserManagementServiceAsync userManagementService,
             final StringMessages stringMessages) {
+        this.userManagementService = userManagementService;
+        this.stringMessages = stringMessages;
+        refresh();
+    }
 
+    public void refresh() {
         userManagementService.getUserList(new AsyncCallback<Collection<UserDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -30,6 +37,7 @@ public class UserGroupSuggestOracle extends AbstractListSuggestOracle<UserDTO> {
 
             @Override
             public void onSuccess(Collection<UserDTO> result) {
+                allUsers.clear();
                 allUsers.addAll(result);
                 setSelectableValues(result);
             }

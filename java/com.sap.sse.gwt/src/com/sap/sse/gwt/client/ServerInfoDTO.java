@@ -12,18 +12,28 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
     private static final long serialVersionUID = 554811472250094684L;
 
     private String buildVersion;
+
+    /**
+     * Eventmanagement base URL.
+     */
+    private String manageEventsBaseUrl;
     
     // for GWT
-    ServerInfoDTO() {
-    }
+    @Deprecated
+    ServerInfoDTO() {} // for GWT RPC serialization only
 
-    public ServerInfoDTO(String serverName, String buildVersion) {
-        setName(serverName);
+    public ServerInfoDTO(String serverName, String buildVersion, String manageEventsBaseUrl) {
+        super(serverName);
         this.buildVersion = buildVersion;
+        this.manageEventsBaseUrl = manageEventsBaseUrl;
     }
 
     public String getBuildVersion() {
         return buildVersion;
+    }
+    
+    public String getManageEventsBaseUrl() {
+        return this.manageEventsBaseUrl;
     }
 
     public static TypeRelativeObjectIdentifier getServerIdentifier(String serverName) {
@@ -32,7 +42,7 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -44,7 +54,7 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredSecurityTypes.SERVER;
     }
 

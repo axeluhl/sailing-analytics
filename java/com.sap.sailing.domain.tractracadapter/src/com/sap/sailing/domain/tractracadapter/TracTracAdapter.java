@@ -24,6 +24,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface TracTracAdapter {
+    static final String NAME = "TracTrac";
+    static final String DEFAULT_URL = "https://www.tractrac.com/";
+
     DomainFactory getTracTracDomainFactory();
     
     /**
@@ -54,7 +57,7 @@ public interface TracTracAdapter {
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis,
-            RaceTrackingHandler raceTrackingHandler)
+            boolean useOfficialEventsToUpdateRaceLog, RaceTrackingHandler raceTrackingHandler)
                     throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -78,9 +81,10 @@ public interface TracTracAdapter {
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
-            RaceTrackingHandler raceTrackingHandler)
+            long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,
+            boolean useInternalMarkPassingAlgorithm, String tracTracUsername, String tracTracPassword,
+            String raceStatus, String raceVisibility, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -104,5 +108,5 @@ public interface TracTracAdapter {
     TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
             String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
-
+    
 }

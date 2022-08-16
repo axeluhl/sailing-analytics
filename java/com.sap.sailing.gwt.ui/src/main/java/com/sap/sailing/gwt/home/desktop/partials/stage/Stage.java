@@ -24,19 +24,16 @@ public class Stage extends Composite {
     SimplePanel widgetCarouselContainerUi;
     
     private StageTeaser stageTeaser;
-    private List<StageTeaser> stageTeaserComposites;
     private final DesktopPlacesNavigator placeNavigator;
 
     public Stage(DesktopPlacesNavigator placeNavigator) {
         this.placeNavigator = placeNavigator;
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        stageTeaserComposites = new ArrayList<StageTeaser>();
     }
 
     public void setFeaturedEvents(List<EventStageDTO> list) {
-        final WidgetCarousel widgetCarousel = new WidgetCarousel();
-        widgetCarousel.setShowDots(false);
+        final List<Widget> stageWidgets = new ArrayList<>();
         for (EventStageDTO event : list) {
             switch (event.getStageType()) {
             case POPULAR:
@@ -49,9 +46,11 @@ public class Stage extends Composite {
                 stageTeaser = new UpcomingEventStageTeaser(event, placeNavigator);
                 break;
             }
-            widgetCarousel.addWidget(stageTeaser);
-            stageTeaserComposites.add(stageTeaser);
+            stageWidgets.add(stageTeaser);
         }
+        final WidgetCarousel widgetCarousel = new WidgetCarousel();
+        widgetCarousel.setShowDots(false);
+        widgetCarousel.setWidgets(stageWidgets);
         this.widgetCarouselContainerUi.setWidget(widgetCarousel);
     }
 }

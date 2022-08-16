@@ -21,13 +21,15 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A compact filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
@@ -43,9 +45,9 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final Map<CompetitorDTO, BoatDTO> boatsForCompetitors;
     
-    public CompactCompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+    public CompactCompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter,
+            boolean multiSelection, boolean enablePager, UserService userService) {
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
                     public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
@@ -133,7 +135,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
         };
         
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), dataProvider) {
+                new ArrayList<CompetitorDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -148,6 +150,8 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 return table;
             }
         };
+        filterField.setUpdatePermissionFilterForCheckbox(comp -> userService.hasPermission(comp, DefaultActions.UPDATE));
+
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
@@ -187,7 +191,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 refreshCompetitorList(result);
             }
         };
-        sailingService.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
+        sailingServiceWrite.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
     }
 
     private void getFilteredCompetitors(Iterable<? extends CompetitorDTO> result) {

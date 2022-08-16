@@ -87,5 +87,30 @@ public interface TrackedRegattaRegistry {
      * yet.
      */
     void stopTracker(Regatta regatta, RaceTracker tracker) throws MalformedURLException, IOException, InterruptedException;
+    
 
+    Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
+
+    /**
+     * Does what is necessary to react to an external change in the {@code race}'s set of competitors. This can, e.g.,
+     * entail removing and re-tracking that race which, however, has to be explicitly
+     * {@link Regatta#isAutoRestartTrackingUponCompetitorSetChange() permitted by the regatta} as it will lead to a
+     * temporary unavailability of the race and any information related to it such as the leaderboard scores.
+     * <p>
+     * By and large, we assume that a race's {@link RaceDefinition#getCompetitors() set of competitors} remains
+     * unchanged once the race has been created. There are, however, scenarios in which this causes some trouble. For
+     * example, if tracking for a regatta shall be started early, so as to enable race officials to see the course
+     * geometry and wind data for the first race of the day, then especially in self-service scenarios there may be late
+     * competitors registrations that happen after tracking has been started. These competitors, depending on how the
+     * connector in use works, may make it into the regatta's leaderboard, but not into the {@link RaceDefinition}. This
+     * would be unfortunate as those competitors then would remain invisible until the race is reloaded.
+     * <p>
+     * 
+     * See also <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5219">bug 5219</a> for a discussion.
+     * 
+     * @return {@code null} if it was not possible to re-load the race, either because the regatta doesn't allow for it,
+     *         or because the connectivity parameters were not found; a {@link RaceHandle} for the re-started race
+     *         otherwise.
+     */
+    RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception;
 }

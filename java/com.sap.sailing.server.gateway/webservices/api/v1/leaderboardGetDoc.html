@@ -37,6 +37,17 @@
 		<td>maxCompetitorsCount [1000 = Default]</td>
 	</tr>
 	<tr>
+	    <td>&nbsp;</td>
+	    <td>
+	        <div>competitorAndBoatIdsOnly [Default = false, true] if true, only IDs and no further attributes
+	             will be delivered for competitor and boat JSON objects in the result document. This can help
+	             save bandwidth if the competitor and boat data have been received already during previous calls
+	             and the current call is only an update. Note, however, that competitor and boat data may change,
+	             so every now and then it is advisable to still set this to false to obtain the full up-to-date
+	             fields for all competitors and boats again.</div>
+	    </td>
+	</tr>
+	<tr>
 		<td>Request method:</td>
 		<td>GET</td>
 	</tr>

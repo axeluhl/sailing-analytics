@@ -163,7 +163,11 @@ public enum IFBoatStatus {
     /** 
      * Standard Penalty by Race Committee; gives a certain number of penalty points on top of rank-inferred score 
      */
-    STP;
+    STP,
+    /**
+     * Did not sail the course
+     */
+    NSC;
     
     public String value() {
         return name();

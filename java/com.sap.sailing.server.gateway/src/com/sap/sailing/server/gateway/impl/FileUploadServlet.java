@@ -13,11 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 
@@ -33,14 +32,10 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
 
     private static final Logger logger = Logger.getLogger(FileUploadServlet.class.getName());
 
-    public static final String JSON_FILE_NAME = "file_name";
-    
-    public static final String JSON_FILE_URI = "file_uri";
-
     /**
      * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
      */
-    private static final int MAX_SIZE_IN_MB = 500;
+    private static final long MAX_SIZE_IN_MB = 8192;
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
@@ -59,34 +54,32 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                 fileExtension = ".png";
             } else if (fileType.equals("image/gif")) {
                 fileExtension = ".gif";
-            } else if (fileType.startsWith("video/")) {
-                fileExtension = fileType.substring(fileType.indexOf('/')+1);
             } else {
                 int lastDot = fileName.lastIndexOf(".");
                 if (lastDot > 0) {
-                    fileExtension = fileName.substring(lastDot);
+                    fileExtension = fileName.substring(lastDot).toLowerCase();
                 } else {
                     fileExtension = "";
                 }
             }
             try {
-                if (fileItem.getSize() > 1024 * 1024 * MAX_SIZE_IN_MB) {
+                if (fileItem.getSize() > 1024l * 1024l * MAX_SIZE_IN_MB) {
                     final String errorMessage = "Image is larger than " + MAX_SIZE_IN_MB + "MB";
-                    logger.warning("Ignoring file storage request because file "+fileName+" is larger than "+MAX_SIZE_IN_MB+"MB");
-                    result.put("status", Status.INTERNAL_SERVER_ERROR.name());
-                    result.put("message", errorMessage);
+                    logger.warning("Ignoring file storage request because file " + fileName + " is larger than "
+                            + MAX_SIZE_IN_MB + "MB");
+                    result.put(FileUploadConstants.STATUS, Status.INTERNAL_SERVER_ERROR.name());
+                    result.put(FileUploadConstants.MESSAGE, errorMessage);
                 } else {
                     final URI fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
                             .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
-                    result.put(JSON_FILE_NAME, fileName);
-                    result.put(JSON_FILE_URI, fileUri.toString());
+                    result.put(FileUploadConstants.FILE_NAME, fileName);
+                    result.put(FileUploadConstants.FILE_URI, fileUri.toString());
                 }
-            } catch (IOException | OperationFailedException | InvalidPropertiesException
-                    | NoCorrespondingServiceRegisteredException | UnauthorizedException e) {
+            } catch (IOException | OperationFailedException | RuntimeException | InvalidPropertiesException e) {
                 final String errorMessage = "Could not store file"+ (e.getMessage()==null?"":(": " + e.getMessage()));
                 logger.log(Level.WARNING, "Could not store file", e);
-                result.put("status", Status.INTERNAL_SERVER_ERROR.name());
-                result.put("message", errorMessage);
+                result.put(FileUploadConstants.STATUS, Status.INTERNAL_SERVER_ERROR.name());
+                result.put(FileUploadConstants.MESSAGE, errorMessage);
             }
             resultList.add(result);
         }
@@ -96,6 +89,6 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
         // in the browser unchanged.
         resp.setContentType("text/html");
         resp.setCharacterEncoding("UTF-8");
-        resp.getWriter().append(resultList.toJSONString());
+        resultList.writeJSONString(resp.getWriter());
     }
 }

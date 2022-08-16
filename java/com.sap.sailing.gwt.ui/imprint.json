@@ -2,11 +2,11 @@
     "components": [
         {
             "name": "Apache Commons BeanUtils",
-            "version": "1.9.0",
+            "version": "1.9.4",
             "owner": "The Apache Software Foundation",
             "homepage": "http://commons.apache.org/proper/commons-beanutils/",
             "acknowledgements": [
-                "Apache Commons BeanUtils Copyright 2000-2013 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
+                "Apache Commons BeanUtils Copyright 2000-2019 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
             ],
             "key": "ASL2.0"
         },
@@ -25,11 +25,11 @@
         },
         {
             "name": "Apache Commons Collections",
-            "version": "3.2.1",
+            "version": "3.2.2",
             "owner": "The Apache Software Foundation",
             "homepage": "http://commons.apache.org/collections/",
             "acknowledgements": [
-                "Apache Commons Collections Copyright 2001-2008 The Apache Software Foundation This product includes software developed by The Apache Software Foundation (http://www.apache.org/)."
+                "Apache Commons Collections Copyright 2001-2019 The Apache Software Foundation This product includes software developed by The Apache Software Foundation (http://www.apache.org/)."
             ],
             "key": "ASL2.0"
         },
@@ -128,7 +128,7 @@
             "name": "Apache ServiceMix :: Bundles :: aws-java-sdk",
             "version": "1.9.8_1",
             "owner": "The Apache Software Foundation",
-            "homepage": "http://repo.maven.apache.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.aws-java-sdk/",
+            "homepage": "https://repo.maven.apache.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.aws-java-sdk/",
             "acknowledgements": [
                 "Apache ServiceMix :: Bundles :: aws-java-sdk Copyright 2005-2014 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
             ],
@@ -136,21 +136,21 @@
         },
         {
             "name": "Apache ServiceMix :: Bundles :: ehcache",
-            "version": "2.6.9_1",
+            "version": "2.6.11_1",
             "owner": "The Apache Software Foundation",
-            "homepage": "http://repo.maven.apache.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.ehcache/",
+            "homepage": "https://repo.maven.apache.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.ehcache/",
             "acknowledgements": [
-                "Apache ServiceMix :: Bundles :: ehcache Copyright 2005-2014 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
+                "Apache ServiceMix :: Bundles :: ehcache Copyright 2005-2019 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
             ],
             "key": "ASL2.0"
         },
         {
             "name": "Apache ServiceMix :: Bundles :: scribe",
-            "version": "1.3.3_1",
+            "version": "1.3.7_1",
             "owner": "The Apache Software Foundation",
             "homepage": "http://servicemix.apache.org/bundles-pom/org.apache.servicemix.bundles.scribe/",
             "acknowledgements": [
-                "Apache ServiceMix :: Bundles :: scribe Copyright 2005-2013 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
+                "Apache ServiceMix :: Bundles :: scribe Copyright 2005-2019 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
             ],
             "key": "ASL2.0"
         },
@@ -158,7 +158,7 @@
             "name": "Apache ServiceMix :: Bundles :: zxing",
             "version": "3.1.0_1",
             "owner": "The Apache Software Foundation",
-            "homepage": "http://repo.maven.apache.org/maven2//org/apache/servicemix/bundles/org.apache.servicemix.bundles.zxing/",
+            "homepage": "https://repo.maven.apache.org/maven2//org/apache/servicemix/bundles/org.apache.servicemix.bundles.zxing/",
             "acknowledgements": [
                 "Apache ServiceMix :: Bundles :: zxing Copyright 2005-2014 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/)."
             ],
@@ -166,32 +166,34 @@
         },
         {
             "name": "Apache Shiro",
-            "version": "1.2.2",
+            "version": "1.7.1",
             "owner": "The Apache Software Foundation",
-            "homepage": "http://shiro.apache.org/",
+            "homepage": "https://shiro.apache.org/",
             "acknowledgements": [
-                "Copyright 2008-2012 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/). The implementation for org.apache.shiro.util.SoftHashMap is based on initial ideas from Dr. Heinz Kabutz's publicly posted version available at http://www.javaspecialists.eu/archive/Issue015.html, with continued modifications. Certain parts (StringUtils etc.) of the source code for this product was copied for simplicity and to reduce dependencies from the source code developed by the Spring Framework Project (http://www.springframework.org)."
-            ],
-            "key": "ASL2.0"
-        },
-        {
-            "name": "Apache Shiro",
-            "version": "1.2.3",
-            "owner": "The Apache Software Foundation",
-            "homepage": "http://shiro.apache.org/",
-            "acknowledgements": [
-                "Copyright 2008-2012 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/).",
+                "Copyright 2008-2021 The Apache Software Foundation This product includes software developed at The Apache Software Foundation (http://www.apache.org/).",
                 "The implementation for org.apache.shiro.util.SoftHashMap is based on initial ideas from Dr. Heinz Kabutz's publicly posted version available at http://www.javaspecialists.eu/archive/Issue015.html, with continued modifications.",
                 "Certain parts (StringUtils etc.) of the source code for this product was copied for simplicity and to reduce dependencies from the source code developed by the Spring Framework Project (http://www.springframework.org)."
             ],
             "key": "ASL2.0"
         },
         {
-            "name": "Apache XMLBeans",
-            "version": "2.4.0",
+            "name": "org.owasp.encoder",
+            "version": "1.7.1",
             "owner": "The Apache Software Foundation",
-            "homepage": "http://xmlbeans.apache.org/",
+            "homepage": "https://owasp.org/owasp-java-encoder/encoder/index.html",
             "acknowledgements": [
+		"Humba Copyright (c) 2015 OWASP.",
+		"All rights reserved."
+            ],
+            "key": "BSD3CL"
+        },
+        {
+            "name": "Apache XMLBeans",
+            "version": "3.1.0",
+            "owner": "The Apache Software Foundation",
+            "homepage": "https://xmlbeans.apache.org/",
+            "acknowledgements": [
+                "Copyright © 2004-2021 The Apache Software Foundation",
                 "NOTICE file corresponding to section 4(d) of the Apache License, == == Version 2.0, in this case for the Apache XmlBeans distribution. == ",
                 "=========================================================================",
                 "This product includes software developed by The Apache Software Foundation (http://www.apache.org/). ",
@@ -208,118 +210,22 @@
         },
         {
             "name": "DOM4J - Flexible XML Framework for Java",
-            "version": "1.6.1",
+            "version": "2.1.3",
             "owner": "MetaStuff, Ltd.",
-            "homepage": "http://dom4j.sourceforge.net/",
+            "homepage": "https://dom4j.sourceforge.net/",
             "acknowledgements": [
-                "BSD 3-clause \"New\" or \"Revised\" License"
+                "BSD 3-clause \"New\" or \"Revised\" License",
+                "https://github.com/dom4j/dom4j/blob/master/LICENSE"
             ],
             "key": "ASL2.0"
         },
         {
             "name": "google-web-toolkit ",
-            "version": "2.7.0",
+            "version": "2.10.0",
             "owner": "Google, Inc.",
-            "homepage": "http://www.moxiegroup.com/moxieapps/gwt-highcharts/",
+            "homepage": "http://www.gwtproject.org/terms.html",
             "acknowledgements": [
-                "Google Web Toolkit 2.7.0 (git revision a6da588) Copyright (c) Google, Inc. 2009.  All rights reserved. Visit Google Code (http://code.google.com/webtoolkit/).",
-                "This product includes software developed by:",
-                "- The Apache Software Foundation (http://www.apache.org/).",
-                " - Tomcat (http://tomcat.apache.org/) with modifications",
-                " - Tapestry (http://tapestry.apache.org/)",
-                "- The Eclipse Foundation (http://www.eclipse.org/).",
-                " - Java Development Tools (http://www.eclipse.org/jdt/)",
-                " - Standard Widget Toolkit (http://www.eclipse.org/swt/) with modifications",
-                "- Mort Bay Consulting (http://www.mortbay.com/)",
-                " - Jetty 6.1.11 (http://mortbay.org/jetty/)",
-                "- The Mozilla Foundation (http://www.mozilla.org/).",
-                " - Mozilla 1.7.12 (http://www.mozilla.org/releases/mozilla1.7.12/)",
-                " - Rhino (http://www.mozilla.org/rhino/) with modifications",
-                "- ObjectWeb (http://www.objectweb.org/)",
-                "- ASM (http://asm.objectweb.org/) with modifications",
-                "- The OpenQA Project (http://openqa.org/)",
-                "- Selenium-RC (http://selenium-rc.openqa.org/)",
-                "- The Protobuf Project (http://code.google.com/p/protobuf/) with modifications",
-                "For source availability and license information see COPYING.",
-                "=====",
-                "",
-                "GOOGLE WEB TOOLKIT LICENSE INFORMATION",
-                "",
-                "March 3, 2008",
-                "",
-                "The Google Web Toolkit software and sample code developed by Google is",
-                "licensed under the Apache License, v. 2.0. Other software included in this",
-                "distribution is provided under other licenses, as listed in the Included",
-                "Software and Licenses section at the bottom of this page. Source code for",
-                "software included in this distribution is available from the Google Web",
-                "Toolkit project or as otherwise indicated at the bottom of this page.",
-                "",
-                "Please note that the executable version of the Google Web Toolkit",
-                "distributed by Google will communicate with Google's servers to check for",
-                "available updates. If updates are available, you will receive the option to",
-                "install them.",
-                "",
-                "===",
-                "",
-                "LICENSE INFORMATION REGARDING BUNDLED THIRD-PARTY SOFTWARE",
-                "",
-                "The following third party software is distributed with Google Web",
-                "Toolkit and is provided under other licenses and/or has source",
-                "available from other locations. Where \"gwt-dev.jar\" is listed,",
-                "substitute in the name of the jar corresponding to your platform,",
-                "e.g. \"gwt-dev-linux.jar\".",
-                "",
-                "* Apache Tomcat",
-                "License: Apache License v. 2.0 (above)",
-                "Source code availability: http://tomcat.apache.org",
-                "modifications are at org/apache/tomcat/ within gwt-dev.jar",
-                "",
-                "* Apache Tapestry",
-                "License: Apache License v. 2.0 (above)",
-                "Source code availability: http://tapestry.apache.org",
-                "",
-                "* ASM 3.1",
-                "License: (custom)",
-                "http://asm.objectweb.org/license.html",
-                "Source code availability: com/google/gwt/dev/asm/ within gwt-dev.jar",
-                "",
-                "* Eclipse Java Development Tools (JDT)",
-                "License: Eclipse Public License v. 1.0",
-                "http://www.eclipse.org/legal/epl-v10.html",
-                "Source code availability:",
-                "http://archive.eclipse.org/eclipse/downloads/drops/R-3.3.1-200709211145/download.php?dropFile=eclipse-JDT-SDK-3.3.1.zip",
-                "",
-                "* Eclipse Standard Widget Toolkit (SWT)",
-                "License: Eclipse Public License v. 1.0",
-                "http://www.eclipse.org/legal/epl-v10.html",
-                "Source code availability:",
-                "Linux: http://download.eclipse.org/eclipse/downloads/drops/R-3.2.1-200609210945/download.php?dropFile=swt-3.2.1-gtk-linux-x86.zip",
-                "Windows: http://download.eclipse.org/eclipse/downloads/drops/R-3.2.1-200609210945/download.php?dropFile=swt-3.2.1-win32-win32-x86.zip",
-                "Mac: http://download.eclipse.org/eclipse/downloads/drops/R-3.2.1-200609210945/download.php?dropFile=swt-3.2.1-carbon-macosx.zip",
-                "modifications are at org/eclipse/swt/ within gwt-dev.jar",
-                "",
-                "* Jetty",
-                "License: Apache License v. 2.0 (above)",
-                "Source code availability:",
-                "http://mortbay.org/jetty/",
-                "",
-                "* Mozilla Rhino",
-                "License: Mozilla Public License v. 1.1",
-                "http://www.mozilla.org/MPL/MPL-1.1.txt",
-                "Source code availability: com/google/gwt/dev/js/rhino/ within gwt-dev.jar",
-                "",
-                "* Mozilla 1.7.12 (Linux only)",
-                "License: Mozilla Public License v. 1.1",
-                "http://www.mozilla.org/MPL/MPL-1.1.txt",
-                "Source code availability:",
-                "http://developer.mozilla.org/en/docs/Download_Mozilla_Source_Code",
-                "",
-                "* Protobuf",
-                "License: New BSD License",
-                "http://www.opensource.org/licenses/bsd-license.php",
-                "Source code availablility:",
-                "http://code.google.com/p/protobuf/source/checkout",
-                "Binary modifications consist of package-rebasing. The rebased classes are rooted at com/google/gwt/dev/protobuf/ within gwt-dev.jar"
+                "http://www.gwtproject.org/terms.html#licenses"
             ],
             "key": "ASL2.0"
         },
@@ -371,8 +277,6 @@
             "acknowledgements": [
                 "Hyperic SIGAR includes some third-party open source components in its distribution. The list below identifies the community or organization and links to their appropriate license terms. The Hyperic team would like to thank all the communities of the projects listed below for their contributions.",
                 "---------------------------------------------------------------------",
-                "The following components are included without modification: ",
-                " - log4j - Information: http://logging.apache.org/ License: http://www.apache.org/licenses/LICENSE-2.0",
                 "The following components are included with modification:",
                 " - cpptasks - Information: http://ant-contrib.sourceforge.net/ License: http://ant-contrib.sourceforge.net/LICENSE.txt",
                 " - (portions of) APR - Information: http://apr.apache.org/ License: http://www.apache.org/licenses/LICENSE-2.0",
@@ -414,57 +318,6 @@
             "key": "ASL2.0"
         },
         {
-            "name": "Jackson JSON Mapper ASL",
-            "version": "1.9.13",
-            "owner": "The Apache Software Foundation",
-            "homepage": "http://wiki.fasterxml.com/JacksonHome",
-            "acknowledgements": [
-                "This product currently only contains code developed by authors of specific components, as identified by the source code files; if such notes are missing files have been created by Tatu Saloranta. For additional credits (generally to people who reported problems) see CREDITS file."
-            ],
-            "key": "ASL2.0"
-        },
-        {
-            "name": "Jackson-annotations",
-            "version": "2.5.0",
-            "owner": "FasterXML, LLC",
-            "homepage": "https://github.com/FasterXML/jackson-annotations",
-            "acknowledgements": [
-            ],
-            "key": "ASL2.0"
-        },
-        {
-            "name": "jackson-databind",
-            "version": "2.5.0",
-            "owner": "Tatu Saloranta",
-            "homepage": "http://github.com/FasterXML/jackson-databind/",
-            "acknowledgements": [
-                "Jackson JSON processor Jackson is a high-performance, Free/Open Source JSON processing library. It was originally written by Tatu Saloranta (tatu.saloranta@iki.fi), and has been in development since 2007. It is currently developed by a community of developers, as well as supported commercially by FasterXML.com. ## Licensing Jackson core and extension components may be licensed under different licenses. To find the details that apply to this artifact see the accompanying LICENSE file. For more information, including possible other licensing options, contact FasterXML.com (http://fasterxml.com). ## Credits A list of contributors may be found from CREDITS file, which is included in some artifacts (usually source distributions); but is always available from the source code management (SCM) system "
-            ],
-            "key": "ASL2.0"
-        },
-        {
-            "name": "Jackson-JAXRS-base",
-            "version": "2.5.0",
-            "owner": "FasterXML, LLC",
-            "homepage": "http://repo.maven.apache.org/maven2/com/fasterxml/jackson/jaxrs/jackson-jaxrs-base/",
-            "acknowledgements": [
-
-            ],
-            "key": "ASL2.0"
-        },
-        {
-            "name": "jackson-jaxrs-providers",
-            "version": "2.5.0",
-            "owner": "FasterXML, LLC",
-            "homepage": "http://github.com/FasterXML/jackson-jaxrs-providers/",
-            "acknowledgements": [
-                "# Jackson JSON processor Jackson is a high-performance, Free/Open Source JSON processing library. It was originally written by Tatu Saloranta (tatu.saloranta@iki.fi), and has been in development since 2007. It is currently developed by a community of developers, as well as supported commercially by FasterXML.com. ",
-                "## Licensing Jackson core and extension components may be licensed under different licenses. To find the details that apply to this artifact see the accompanying LICENSE file. For more information, including possible other licensing options, contact FasterXML.com (http://fasterxml.com).",
-                "## Credits A list of contributors may be found from CREDITS file, which is included in some artifacts (usually source distributions); but is always available from the source code management (SCM) system project uses."
-            ],
-            "key": "ASL2.0"
-        },
-        {
             "name": "Java Servlet API",
             "version": "2.5.0",
             "owner": "Sun Microsystems, Inc.",
@@ -486,9 +339,9 @@
         },
         {
             "name": "JavaMail",
-            "version": "1.4.5",
-            "owner": "Sun Microsystems, Inc.",
-            "homepage": "http://www.oracle.com/technetwork/java/javamail/index-138643.html",
+            "version": "1.6.2",
+            "owner": "Oracle and/or its affiliates",
+            "homepage": "https://javaee.github.io/javamail/",
             "acknowledgements": [
                 ""
             ],
@@ -496,7 +349,7 @@
         },
         {
             "name": "JDOM ",
-            "version": "1.1",
+            "version": "1.1.1",
             "owner": "Jason Hunter & Brett McLaughlin",
             "homepage": "http://www.jdom.org",
             "acknowledgements": [
@@ -525,46 +378,6 @@
             "key": "ASL2.0"
         },
         {
-            "name": "JQuery",
-            "version": "1.10.1",
-            "owner": "jQuery Foundation and other contributors",
-            "homepage": "http://jquery.com/",
-            "acknowledgements": [
-                "Copyright 2014 jQuery Foundation and other contributors"
-            ],
-            "key": "MITL"
-        },
-        {
-            "name": "JQuery",
-            "version": "1.5.2",
-            "owner": "John Resig",
-            "homepage": "http://jquery.com/",
-            "acknowledgements": [
-                "Copyright 2011, John Resig"
-            ],
-            "key": "MITL"
-        },
-        {
-            "name": "JQuery",
-            "version": "1.7.1",
-            "owner": "John Resig",
-            "homepage": "http://code.jquery.com/",
-            "acknowledgements": [
-                "Copyright 2011, John Resig"
-            ],
-            "key": "MITL"
-        },
-        {
-            "name": "JQuery",
-            "version": "1.5.1",
-            "owner": "John Resig",
-            "homepage": "http://github.com/jquery/jquery/",
-            "acknowledgements": [
-                "Copyright 2011, John Resig"
-            ],
-            "key": "MITL"
-        },
-                {
             "name": "JQuery",
             "version": "3.3.1",
             "owner": "jQuery Foundation and other contributors",
@@ -616,21 +429,13 @@
         },
         {
             "name": "MongoDB Java Driver - org.mongodb:mongo-java-driver",
-            "version": "2.13.0",
+            "version": "3.6.4",
             "owner": "10gen, Inc.",
             "homepage": "http://docs.mongodb.org/ecosystem/drivers/java/",
             "acknowledgements": [
-                "Copyright (C) 2008-2013 10gen, Inc."
-            ],
-            "key": "ASL2.0"
-        },
-        {
-            "name": "MongoDB Java Driver - org.mongodb:mongo-java-driver",
-            "version": "2.13.2",
-            "owner": "MongoDB, Inc",
-            "homepage": "http://repo.maven.apache.org/maven2//org/mongodb/mongo-java-driver/",
-            "acknowledgements": [
-                "Copyright (C) 2008-2013 10gen, Inc."
+                "Copyright (C) 2008-2018 10gen, Inc.",
+                "https://github.com/mongodb/mongo-java-driver/releases/tag/r3.6.4",
+                "https://github.com/mongodb/mongo-java-driver/blob/master/THIRD-PARTY-NOTICES"
             ],
             "key": "ASL2.0"
         },
@@ -687,11 +492,11 @@
         },
         {
             "name": "Simple Logging Facade for Java (SLF4J)",
-            "version": "1.6.4",
+            "version": "1.7.30",
             "owner": "QOS.ch",
             "homepage": "http://www.slf4j.org/",
             "acknowledgements": [
-                "Copyright (c) 2004-2013 QOS.ch"
+                "Copyright (c) 2004-2019 QOS.ch"
             ],
             "key": "MITL"
         },
@@ -753,7 +558,7 @@
             "acknowledgements": [
                 "Copyright 2016 yanwsh@gmail.com"
             ],
-            "key": "Apache License 2.0"
+            "key": "ASL2.0"
         }
     ],
     "licenses": [
@@ -780,6 +585,32 @@
         {
             "key": "UNIDATA",
             "file": "unidata.txt"
+        },
+        {
+            "key": "BSD3CL",
+            "file": "bsd3cl.txt"
+        }
+    ],
+    "disclaimers":[
+        {
+            "title":"SAP Legal Disclosure",
+            "link": "https://www.sap.com/corporate/en/legal/impressum.html?campaigncode=CRM-XH21-OSP-Sailing",
+            "content": "Please visit ${link} to view the general SAP legal disclosure."
+        },
+        {
+            "title":"YouTube",
+            "link": "https://www.youtube.com/t/terms",
+            "content": "The application utilizes the YouTube video streaming service. Therefore, by using the application, users implicitly agree to the terms of service provided by YouTube, found under ${link}."
+        },
+        {
+            "title":"Google Privacy",
+            "link": "https://policies.google.com/privacy",
+            "content": "The application utilizes services of Google. Therefore, by using the application, users implicitly agree to the privacy policies of Google, as stated under ${link}."
+        },
+        {
+            "title":"Google Maps",
+            "link": "http://www.google.com/intl/en/policies/terms/",
+            "content": "Google Maps Service (\"GM Service\"). If the Cloud Service accesses the GM Service through a Google Maps API, customer's use of the GM Service is subject to Google's Terms of Service, which are set forth at ${link}. If customer does not  accept  the Google  Terms  of  Service,  including,  but  not  limited  to,  all  limitations  and  restrictions therein, customer may not use the GM Service in the Cloud Service. Use of the GM Service in or through the Cloud Service will constitute customer's acceptance of Google's Terms of  Service.  Customer's  usage  of  the GM  Service  in  or  through the Cloud Service  can  be  terminated  by  SAP  without  reason  at  any  time  and SAP will not be required  to  provide  an  equivalent service via another provider."
         }
     ]
 }

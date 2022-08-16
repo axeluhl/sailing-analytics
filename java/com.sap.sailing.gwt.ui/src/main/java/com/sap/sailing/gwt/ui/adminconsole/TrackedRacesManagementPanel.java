@@ -8,16 +8,16 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.DurationAsHoursMinutesSecondsFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -26,25 +26,23 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
             DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     private final DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
-    private final DateTimeFormatRenderer durationFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM), TimeZone.createTimeZone(0));
+    private final DurationAsHoursMinutesSecondsFormatter durationFormatter = new DurationAsHoursMinutesSecondsFormatter();
 
     private final UserService userService;
     private final Grid raceDataGrid;
     private final Button setStartTimeButton;
     
-    public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, UserService userService,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
+    public TrackedRacesManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
+        super(presenter, /* actionButtonsEnabled */ true,
                 stringMessages);
-        this.userService = userService;
+        this.userService = presenter.getUserService();
         this.setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 new SetStartTimeReceivedDialog(stringMessages, new DialogCallback<Date>() {
                     @Override
                     public void ok(Date newStartTimeReceived) {
-                        sailingService.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
+                        sailingServiceWrite.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 TrackedRacesManagementPanel.this.errorReporter.reportError(stringMessages.errorSettingStartTime(caught.getMessage()));
@@ -53,7 +51,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                             public void onSuccess(RaceDTO result) {
                                 selectedRaceDTO = result;
                                 refreshSelectedRaceData();
-                                TrackedRacesManagementPanel.this.regattaRefresher.fillRegattas();
+                                TrackedRacesManagementPanel.this.presenter.getRegattasRefresher().reloadAndCallFillAll();
                             }
                         });
                     }
@@ -96,9 +94,9 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
             } else {
                 raceDataGrid.setText(2, 1, "");
             }
-            if(selectedRaceDTO.startOfRace != null && selectedRaceDTO.endOfRace != null) {
-                Date duration = new Date(selectedRaceDTO.endOfRace.getTime() - selectedRaceDTO.startOfRace.getTime());
-                raceDataGrid.setText(3, 1, durationFormatter.render(duration));
+            if (selectedRaceDTO.startOfRace != null && selectedRaceDTO.endOfRace != null) {
+                Duration duration = new MillisecondsDurationImpl(selectedRaceDTO.endOfRace.getTime() - selectedRaceDTO.startOfRace.getTime());
+                raceDataGrid.setText(3, 1, durationFormatter.getHoursMinutesSeconds(duration));
             } else {
                 raceDataGrid.setText(3, 1, "");
             }

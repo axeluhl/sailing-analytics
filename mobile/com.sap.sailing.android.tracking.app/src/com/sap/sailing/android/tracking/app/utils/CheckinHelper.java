@@ -11,7 +11,7 @@ import org.json.JSONObject;
 public class CheckinHelper {
 
     @NonNull
-    private static JSONObject getBaseCheckinJsom(String deviceUuid, String pushDeviceId,
+    private static JSONObject getBaseCheckinJson(String deviceUuid, String pushDeviceId,
                                                  long fromMillis, JSONObject jsonObject)
             throws JSONException {
         jsonObject.put(DeviceMappingConstants.JSON_DEVICE_TYPE, "android");
@@ -28,7 +28,7 @@ public class CheckinHelper {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt(DeviceMappingConstants.JSON_REGISTER_SECRET, secret);
         jsonObject.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitorId);
-        return getBaseCheckinJsom(deviceUuid, pushDeviceId, fromMillis, jsonObject);
+        return getBaseCheckinJson(deviceUuid, pushDeviceId, fromMillis, jsonObject);
     }
 
     @NonNull
@@ -38,7 +38,7 @@ public class CheckinHelper {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt(DeviceMappingConstants.JSON_REGISTER_SECRET, secret);
         jsonObject.put(DeviceMappingConstants.JSON_MARK_ID_AS_STRING, markId);
-        return getBaseCheckinJsom(deviceUuid, pushDeviceId, fromMillis, jsonObject);
+        return getBaseCheckinJson(deviceUuid, pushDeviceId, fromMillis, jsonObject);
     }
 
     @NonNull
@@ -48,7 +48,7 @@ public class CheckinHelper {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt(DeviceMappingConstants.JSON_REGISTER_SECRET, secret);
         jsonObject.put(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING, boatId);
-        return getBaseCheckinJsom(deviceUuid, pushDeviceId, fromMillis, jsonObject);
+        return getBaseCheckinJson(deviceUuid, pushDeviceId, fromMillis, jsonObject);
     }
 
 }

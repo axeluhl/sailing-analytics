@@ -32,7 +32,6 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Base Activity for all desktop single-regatta-event/series-event pages as well as the pages for one regatta of a
@@ -57,10 +56,14 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
                     clientFactory.getErrorReporter(), flagImageResolver));
         }
-        
         initNavigationPath(navigationPathDisplay);
     }
-    
+
+    @Override
+    public com.google.web.bindery.event.shared.EventBus getEventBus() {
+        return clientFactory.getEventBus();
+    }
+
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
         final List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
         if (showRegattaMetadata()) {
@@ -160,10 +163,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         return super.isEventOrRegattaLive();
     }
 
-    @Override
-    public UserService getUserService() {
-        return clientFactory.getUserService();
-    }
     
     @Override
     public void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,

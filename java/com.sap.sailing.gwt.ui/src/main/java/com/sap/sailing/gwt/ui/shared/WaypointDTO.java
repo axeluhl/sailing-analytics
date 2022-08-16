@@ -5,7 +5,6 @@ import com.sap.sse.security.shared.dto.NamedDTO;
 
 /**
  * Equality and hashcode based on object identity
- *
  */
 public class WaypointDTO extends NamedDTO {
     private static final long serialVersionUID = 7439553659782967746L;
@@ -14,7 +13,8 @@ public class WaypointDTO extends NamedDTO {
     
     public PassingInstruction passingInstructions;
     
-    WaypointDTO() {}
+    @Deprecated
+    WaypointDTO() {} // for GWT RPC serialization only
     
     public WaypointDTO(String name, ControlPointDTO controlPoint, PassingInstruction passingInstructions) {
         super(name);

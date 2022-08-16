@@ -4,6 +4,310 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">July 2022</h5>
+         <ul class="bulletList">
+           <li>Paypal is now available as payment method for subscriptions.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2022</h5>
+         <ul class="bulletList">
+           <li>Bug fix: in the REST API's leaderboard-related end points the leaderboard object was not properly
+               used for premium permission checks. Therefore, a premium role qualified, e.g., with a user group
+               did not properly grant its permissions to requests.</li>
+           <li>Fixed a regression regarding the availability of <tt>/sailingserver/api/v1/regattas/{regatta-name}/datamining/...</tt>
+               requests; a refactoring attempt accidentally introduced this problem which has now been resolved.</li>
+           <li>Fixed an issue with column factors other than 1 in combination with excluding worst scores; previously,
+               the points before multiplication by the column factor were compared for discarding.
+               With this, the display of those discards has also been fixed such that the scaled number is displayed
+               with a strike-through.</li>
+         </ul>
+         <h5 class="articleSubheadline">May 2022</h5>
+         <ul class="bulletList">
+           <li>Bug fix: when the "Boats" column is expanded for a race in which not all entries of the leaderboard
+               compete, the race won't expand properly. Now it does.</li>
+         </ul>
+         <h5 class="articleSubheadline">April 2022</h5>
+         <ul class="bulletList">
+           <li>Fixed a regression regarding the secondary metric in the "Competitor Charts." As we had
+               introduced mechanisms that avoid redundant data requests by the chart component, a bug crept
+               in which caused problems when users selected a secondary metric to be displayed in the Competitor
+               Charts view. This has now been fixed.</li>
+           <li>Not an April Fools' joke: We are introducing a subscription model for the SAP Sailing Analytics
+               with the beginning of April 2022. You now have the chance to support the project, going forward,
+               by subscribing to the "Premium" plan which grants you continued access to the advanced features
+               of the solution. All your payments will be used to support, maintain, operate and further develop
+               the solution. You can submit your thoughts and requests and follow our progress at
+               <a href="https://bugzilla.sapsailing.com/">bugzilla.sapsailing.com</a>. Thank you for your
+               continued support and understanding!.</li>
+           <li>Minor bug fix: the tool tips on the time slider markers in the race player are now properly updated
+               when, e.g., the start time changes.</li>
+           <li>Aborted and postponed races with dependent start times now have their status field correctly filled
+               in the "Regatta Overview" page.</li>
+           <li>The search results page now shows a progress indicator until all search results from all servers
+               queried have been received.</li>
+           <li>Added a low-point scoring scheme variant that requires three wins in the medal series, including any
+               wins from an optional carry-forward column in the medal series. This is a variant of the low-point
+               scoring scheme that requires two wins in the medal series.</li>
+           <li><a href="/gwt/DataMining.html">Data mining</a> has become a subscribable option now. You can find it
+               in the top-level menu bar. Its two plans ("all" including live events, or "archive" which excludes
+               current live events) can also be tried for a short time for free.</li>
+           <li>Simulator and Data Mining are now always part of the top-level menu bar and can easily be subscribed
+               to from there.</li>
+           <li>"Sailing Loves Photography" images and videos for the Home.html landing page are now collected across
+               ten years of events, not only one year.</li>
+         </ul>
+         <h5 class="articleSubheadline">December 2021</h5>
+         <ul class="bulletList">
+           <li>The strategy simulator (see <a href="https://sapsailing.com/gwt/Simulator.html">https://sapsailing.com/gwt/Simulator.html</a>)
+               now offers all the boat polars trained during more than 25,000 races tracked.
+           </li>
+         </ul>
+         <h5 class="articleSubheadline">November 2021</h5>
+         <ul class="bulletList">
+           <li>When signing up for a new user account, the user name is now trimmed, meaning that
+               leading and trailing whitespace / blank characters are removed. For example, if you
+               sign up for a user name " abc123 " it will become "abc123". This change is inteneded
+               to help those using touch-screen keyboards with auto-completion where particularly
+               trailing blanks are often appended, leading to problems logging in to these accounts
+               if the trailing blank remains part of the username but then are not provided during
+               the login process.</li>
+         </ul>
+         <h5 class="articleSubheadline">October 2021</h5>
+         <ul class="bulletList">
+           <li>The <a href="/gwt/DataMining.html">Data Mining</a> module now has additional statistics for a competitor's
+               start performance, such as the absolute and normalized distance from the starboard side of the start line,
+               projected onto the start line, the distance to the next boat to port/starboard at the start projected
+               onto the start line, and the windward/line-perpendicular distances to the port/starboard neighbors
+               at the start line.</li>
+           <li>More enhancements to the DataMining module, e.g., adding the IRM / penalty code as a filter / grouping
+               dimension, and providing sums of absolute distances to neighbors at start line.</li>
+           <li>Performance improvements for ORC Performance Curve Scoring, especially for the "WINDWARD_LEEWARD_REAL_LIVE"
+               leg type.</li>
+           <li>Performance improvements for leaderboards with few or only a single column but many competitors by parallelizing
+               calculations across competitors, too.</li>
+           <li>When a boat name but no competitor short name is provided, the boat name now takes precedence over the sail number in the
+               little flag-shaped overlays on the race map.</li>
+         </ul>
+         <h5 class="articleSubheadline">September 2021</h5>
+         <ul class="bulletList">
+           <li>On race board it is now possible to add media files from disc or capture video and sound directly from mobile device.</li>
+           <li>Also in the media gallery of the event page it is now possible to add photos and videos from disc or capture them from smartphone.</li>
+           <li>Due to the growing number of functions we cleaned up the race board. The most of the buttons moved to a launch pad.
+               The features are now arranged in one place within a uniform look and are available with a maximum of two short clicks.
+               This creates a lot more space for the actual race map.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2021</h5>
+         <ul class="bulletList">
+           <li>The data mining module (<a href="/gwt/DataMining.html">/gwt/DataMining.html</a>) now offers additional
+               metrics regarding the regular wind-based rank calculation for upwind and downwind legs as well as
+               hypothetical ranks calculated for upwind and downwind legs ignoring wind information and instead
+               projecting onto the Rhumb line. This allows for analyzing the effects of a wind-based ranking
+               on upwind and downwind legs.</li>
+           <li>Groups are now ordered by name in the drop-down for setting the default creation group
+               under "User Details."</li>
+           <li>A Slovenian translation of the user interface has been added.</li>
+           <li>The IOC code for "Russian Olympic Committee" has been added under the "ROC" abbreviation, together
+               with the IOC-provided flag.</li>
+           <li>Fixed a regression: competitors are now again selected correctly for the Start Analysis and for the
+               Winning Lanes modes of the race viewer.</li>
+           <li>When the streamlet settings are changed using the wind indicator on the map, these settings are now
+               also stored in the user profile as if they had been changed via the map settings dialog.</li>
+           <li>Boat scaling on large zoom levels has been fixed. The pixel size now better corresponds to the
+               boat class's hull length and beam.</li>
+           <li>An issue with re-drawing the "Progression" chart during live races has been fixed.</li>
+           <li>Wind arrows now fade according to their fading confidence, e.g., when a WindBot device has been
+               switched off, or if Wind Finder samples have aged by ten minutes or more.</li>
+           <li>The place for which the "combined wind" is calculated is now closer to the "middle of the course" than
+               before. Before, each waypoint's position was considered for the average, overemphasizing leeward waypoints
+               for windward-leeward courses, for example. Now, each leg's middle position is considered for the average,
+               with a weight that corresponds to the leg's length. This results in an average that virtually takes into
+               account every single point on each sailed leg's rhumb line. Note, though, that the positions are taken based
+               on the mark positions at the time point requested. If marks are moved around the course this will have an
+               effect, obviously, on how this average is calculated.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2021</h5>
+         <ul class="bulletList">
+           <li>The advantage line now also (again) shows after the first competitor has crossed the finish line.</li>
+           <li>Dampening of wind, in particular the estimation from courses over ground (COG),
+               has been improved. The confidences inferred from cluster sizes sailing on separate tacks
+               are now growing more smoothly for small fleet sizes and hence cause less unexpected
+               "jumps" in estimated wind directions. Base confidence of wind estimations, compared
+               to sensor-based measurements, has been slightly reduced, as has the base confidence for
+               estimations from downwind legs.</li>
+           <li>Wind streamlet overlay on race map now scales better for long-distance races. Its spatial
+               interpolation is now a much closer approximation of the server-side wind field used which
+               also leads to smoother transitions between sensors distributed across the race course area.</li>
+           <li>Usernames with leading/trailing space characters can no longer be created in the sign-up dialog.
+               Access to existing accounts with such names now need explicit confirmation during sign-in and
+               password recovery to make users aware of the problem.</li>
+         </ul>
+         <h5 class="articleSubheadline">May 2021</h5>
+         <ul class="bulletList">
+           <li>Added language support for Danish (Dansk).</li>
+           <li>The stage will from now on randomize the order of long-running events that span more than
+               two weeks, assuming that those are actually event <em>series</em>, so these won't
+               dominate the stage.</li>
+           <li>Fixed a problem that occurred with empty tracks while trying to display a leaderboard.
+               The issue was displayed to users as error message at the bottom of the race board:
+               "Error trying to obtain leaderboard contents: ...".</li>
+           <li>The advantage line will now also be shown reliably after the first competitors have
+               finished the race.</li>
+         </ul>
+         <h5 class="articleSubheadline">April 2021</h5>
+         <ul class="bulletList">
+           <li>Bug fix: the distance traveled in a leg is now reported correctly by the DataMining module even
+               if no "end of tracking" time point is known for the containing race.</li>
+           <li>Added <tt>balaton</tt> to the list of supported <a href="https://www.windfinder.com">WindFinder</a>
+               spot collections you can use for your own events.</li>
+           <li>The polar sheet display in the DataMining front-end suffered from bad performance after the server
+               returned the query results. This is now fixed.</li>
+           <li>Cross track error (XTE) statistics have now been added to the <tt>/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/competitors/legs</tt>
+               and the <tt>/sailingserver/api/v2/leaderboards/{name}</tt> end points. The former also contains the average XTE values (signed and absolute)
+               for all legs. For the latter, specify one or more of the following new detail types:
+               <ul>
+                 <li><tt>LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS</tt> produces the new field <tt>legCurrentAbsoluteCrossTrackErrorInMeters</tt></li>
+                 <li><tt>LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS</tt> produces the new field <tt>legCurrentSignedCrossTrackErrorInMeters</tt></li>
+               </ul>
+               Note that the "...CURRENT..." values will not be present when at the time point for which the values are to be reported
+               the competitor is not actively racing in any leg.
+           </li>
+           <li>When removing a setting from <tt>gwt/Home.html#/user/profile/settings/:</tt> the filter expression is now
+               considered while refreshing the table.</li>
+         </ul>
+         <h5 class="articleSubheadline">March 2021</h5>
+         <ul class="bulletList">
+           <li>Bug fix: show course middle line of first leg only if display of course middle lines is selected in settings.</li>
+           <li>Start/finish line biases are now correctly translated into the selected locale's display language.</li>
+         </ul>
+         <h5 class="articleSubheadline">February 2021</h5>
+         <ul class="bulletList">
+           <li>The solution now supports the new Olympic penalty code (IRM) "NSC" ("Did not sail the course").</li>
+         </ul>
+         <h5 class="articleSubheadline">January 2021</h5>
+         <ul class="bulletList">
+           <li>The charts within the progression tab of a regatta or series now support viewing in fullscreen mode.</li>
+         </ul>
+         <h5 class="articleSubheadline">October 2020</h5>
+         <ul class="bulletList">
+           <li>An SAP Qualtrics survey is now part of the /gwt/Home.html page. It presents itself after 60s as
+               a small feedback tab rolling into view from the right and can be reached through the "Feedback"
+               link in the page footer at any time. Once answered (even empty is okay), you won't be bothered again
+               by the tab for the next three months. We're looking forward to your feedback!</li>
+           <li>Bug fix: if a start or finish line was missing position information for one of its ends, the map display
+               of tracks and course broke. This has been fixed now.</li>
+           <li>For better visibility especially with satellite view enabled, rhumb line display now uses a bright
+               green color.</li>
+           <li>Added an optional COG (Course over Ground) column to the leaderboard which shows all competitors'
+               COG in true degrees.</li>
+           <li>The rhumb line ("course middle line") for the first leg is now already displayed prior to the
+               start time point.</li>
+         </ul>
+         <h5 class="articleSubheadline">September 2020</h5>
+         <ul class="bulletList">
+           <li>Problems and inconsistencies with the gap (in seconds) calculation, especially after finishing legs and races,
+               have been fixed now. Different issues existed for the different ranking metrics (one-design, ToT/ToD, ORC PCS),
+               particularly when competitors finished a leg or a race and their gaps kept counting.</li>
+           <li>Calculated leg time is now also displayed in hh:mm:ss format.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2020</h5>
+         <ul class="bulletList">
+           <li>Fixed a problem with cross-track error calculations in case no track can be found for a competitor</li>
+           <li>New menu entries in the header of the SAP Sailing home. Depending on the currently logged in users rights a link to the Administration Console and/or Data Mining is shown.</li>
+           <li>Fixed an issue with ToT/ToD handicap ranking in case a duration to the end of a leg cannot be computed based on missing data.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2020</h5>
+         <ul class="bulletList">
+            <li>The "Gap Change" for the first leg will now show the current gap in the first leg rather than
+                "NaN" (not a number).</li>
+         </ul>        
+         <h5 class="articleSubheadline">March 2020</h5>
+         <ul class="bulletList">
+            <li>The security infrastructure of the previously separate environments of
+                www.sapsailing.com, dedicated event servers and other sub-domains such as
+                club-level or sailing federation servers with their
+                own sub-domains has now been merged. Users can now roam freely from specific
+                servers to <a href="https://www.sapsailing.com">www.sapsailing.com</a> and back without losing their user session,
+                preferences or sailor profiles. One <tt>sapsailing.com</tt> account does it all.</li>
+            <li>The cross track error values (XTE) for the legs now contain the actual values at the time point for which the
+                leaderboard is shown when the competitor is sailing in that leg at this time point; after the leg, as in previous
+                versions, the average values are shown. With this, during a leg you can sort by the current distance to the
+                leg's course middle line, absolute or signed. Note that this change has no effect on the <em>race-level</em>
+                cross track error values which are still computed as averages at all times, restricted to the upwind legs of the
+                race.</li>
+         </ul>        
+
+         <h5 class="articleSubheadline">January 2020</h5>
+         <ul class="bulletList">
+            <li>When selecting race statistics, race specific dimensions are now displayed for filtering.</li>
+            <li>In the Data Mining module, the estimation for the number of participants in a race for which
+                no tracked race is available has been changed to increase accuracy.
+            </li>
+         </ul>        
+      
+         <h5 class="articleSubheadline">December 2019</h5>
+         <ul class="bulletList">
+            <li>A problem with saving / loading stored queries in the /gwt/DataMining.html module
+	        has been fixed, specifically in conjunction with queries related to maneuvers.
+            </li>
+            <li>The "Relative score" rank on race level in the data mining module has been adjusted
+                such that it computes the score relative to the number of competitors in the single race,
+                not in the entire leaderboard. This leads to different numbers being reported for
+                split-fleet / group racing. Assume the fleet of 150 competitors is split into three groups
+                of 50 boats each. Before, a rank of 20 led to a relative score of 20/150. Now it is reported
+                as 20/50, so the values reported will increase, roughly by a factor determined by the number
+                of groups into which the fleet is split.
+            </li>
+            <li>A data mining issue with relative scores for races not sailed by all competitors has been fixed.</li>
+         </ul>
+         
+         <h5 class="articleSubheadline">October 2019</h5>
+         <ul class="bulletList">
+            <li>The SAP Sailing Analytics now also support ORC Performance Curve for ranking and scoring.
+                See also <a href="https://www.orc.org/index.asp?id=32">here</a> for more details on this
+                advanced and fair way of sailing handicap regattas. The leaderboard for regattas using
+                this ranking/scoring option will reflect the ranks based on each boat's individual
+                performance-based allowance and be a good reflection of the race standings. This also
+                works live, while the race is progressing, and allows spectators and sailors alike to
+                judge their gap to the leader in corrected times. See also
+                <a href="https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta">https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta</a>
+                for how to set this up.
+            </li>
+            <li>The satellite imagery button has moved into the settings menu which can be opened via the cog / settings
+                button in the top-right corner of the map. The very first checkbox labeled "Show satellite images" will
+                now enable satellite imagery. (Note: Satellite imagery is not available in Wind-Up view)
+            </li>
+         </ul>
+         
+         <h5 class="articleSubheadline">July 2019</h5>
+         <ul class="bulletList">
+            <li>A new wind source that estimates true wind direction and speed from maneuvers is available.
+                It has been trained using machine learning techniques, based on approximately 12 million
+                maneuvers that the SAP Sailing Analytics have tracked and classified so far. It is intended
+                to serve as a fallback wind source in case the wind direction is not being made available
+                to a tracked race in any other way (entry through the Race Manager app, the web page or
+                estimated based on the first upwind leg's direction). Therefore, the confidence level has
+                been set fairly low, hence this wind source will always be outweighed by any real wind
+                sensor out on the course, but it will help "bootstrap" true wind direction which then
+                also helps the already existing wind direction estimation that clusters the tracks of
+                a race into upwind and downwind, then by the tacks the boats are on and then averages
+                the COG values to obtain a TWD approximation. With the new maneuver-based wind source
+                this other estimation will be able to infer wind directions in more cases.</li>
+         </ul>
+
+         <h5 class="articleSubheadline">June 2019</h5>
+         <ul class="bulletList">
+            <li>The combined wind arrow on the top left of the map now switches through three states:
+                wind visualization off, wind visualization on, wind visualization on with color.</li>
+            <li>The SAP Sailing Analytics are now also available in <em>Italian</em>; see, e.g.,
+            	<a href="/gwt/Home.html?locale=it">here</a>.</li>
+         </ul>
+
+         <h5 class="articleSubheadline">May 2019</h5>
+         <ul class="bulletList">
+            <li>Improvements for handicap regattas: when finishing times have been entered, leading to finish line
+                mark passings, those times will now be considered during calculating the corrected times. This way
+                it has become possible to fix results even if tracking was incomplete.</li>
+         </ul>
+
          <h5 class="articleSubheadline">April 2019</h5>
          <ul class="bulletList">
             <li>Competitor tails on the map can now be colored according to a metric. This enables quick and intuitive

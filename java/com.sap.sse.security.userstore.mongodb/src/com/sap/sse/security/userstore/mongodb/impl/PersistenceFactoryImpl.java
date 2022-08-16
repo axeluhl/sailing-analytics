@@ -10,10 +10,14 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
     private final MongoObjectFactory defaultMongoObjectFactory;
     
     public PersistenceFactoryImpl() {
-        this.defaultDomainObjectFactory = new DomainObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
-        this.defaultMongoObjectFactory = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
+        this(MongoDBService.INSTANCE);
     }
 
+    public PersistenceFactoryImpl(MongoDBService mongoDBService) {
+        this.defaultDomainObjectFactory = new DomainObjectFactoryImpl(mongoDBService.getDB());
+        this.defaultMongoObjectFactory = new MongoObjectFactoryImpl(mongoDBService.getDB());
+    }
+    
     /**
      * A default domain object factory for test purposes only. In a server environment, ensure NOT to use this and use
      * {@link #getDomainObjectFactory(MongoDBService, DomainFactory)} instead, using the base domain factory that

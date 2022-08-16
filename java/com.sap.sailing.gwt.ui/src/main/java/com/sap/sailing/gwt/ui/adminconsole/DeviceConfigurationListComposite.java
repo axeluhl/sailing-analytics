@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.common.Util;
@@ -50,13 +50,13 @@ public class DeviceConfigurationListComposite extends Composite  {
 
     private final Label noConfigurationsLabel;
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
 
-    public DeviceConfigurationListComposite(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public DeviceConfigurationListComposite(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         mainPanel = new SimplePanel();
@@ -71,24 +71,24 @@ public class DeviceConfigurationListComposite extends Composite  {
         configurationTable.setVisible(true);
         refreshableConfigurationSelectionModel = new RefreshableMultiSelectionModel<>(
                 new EntityIdentityComparator<DeviceConfigurationWithSecurityDTO>() {
-            @Override
+                    @Override
                     public boolean representSameEntity(DeviceConfigurationWithSecurityDTO dto1,
                             DeviceConfigurationWithSecurityDTO dto2) {
-                return Util.equalsWithNull(dto1.id, dto2.id);
-            }
+                        return Util.equalsWithNull(dto1.id, dto2.id);
+                    }
 
-            @Override
+                    @Override
                     public int hashCode(DeviceConfigurationWithSecurityDTO t) {
-                return t.id == null ? 0 : t.id.hashCode();
-            }
-        }, configurationsDataProvider);
+                        return t.id == null ? 0 : t.id.hashCode();
+                    }
+                }, configurationsDataProvider);
         configurationTable.setSelectionModel(refreshableConfigurationSelectionModel);
         panel.add(configurationTable);
         initWidget(mainPanel);
     }
 
     public void refreshTable() {
-        sailingService.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
+        sailingServiceWrite.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
             public void onSuccess(List<DeviceConfigurationWithSecurityDTO> result) {
                 if (configurationsDataProvider.getList().isEmpty()) {
@@ -133,17 +133,14 @@ public class DeviceConfigurationListComposite extends Composite  {
         identifierNameColumn.setSortable(true);
         columnSortHandler.setComparator(identifierNameColumn, (r1, r2) -> r1.name.compareTo(r2.name));
         table.addColumn(identifierNameColumn, stringMessages.device());
-
-        final TextColumn<DeviceConfigurationWithSecurityDTO> deviceConfigurationUUidColumn = new AbstractSortableTextColumn<DeviceConfigurationWithSecurityDTO>(
-                config -> config.id == null ? "<null>" : config.id.toString());
-
-
+        final TextColumn<DeviceConfigurationWithSecurityDTO> deviceConfigurationUUIDColumn = new AbstractSortableTextColumn<DeviceConfigurationWithSecurityDTO>(
+                config -> config.id == null ? "<null>" : config.id.toString(), columnSortHandler);
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final AccessControlledActionsColumn<DeviceConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, config -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveDeviceConfiguration(config.getName()))) {
-                sailingService.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
+                sailingServiceWrite.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                         refreshTable();
@@ -156,23 +153,27 @@ public class DeviceConfigurationListComposite extends Composite  {
                 });
             }
         });
-
         final EditOwnershipDialog.DialogConfig<DeviceConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, user -> refreshTable(), stringMessages);
-
+                .create(userService.getUserManagementWriteService(), type, user -> refreshTable(), stringMessages);
         final EditACLDialog.DialogConfig<DeviceConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
-
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
-
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
-        table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
+        table.addColumn(deviceConfigurationUUIDColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());
         return table;
     }
 
+    void update(DeviceConfigurationWithSecurityDTO configurationToUpdate) {
+        final List<DeviceConfigurationWithSecurityDTO> configList = configurationsDataProvider.getList();
+        for (int i=0; i<configList.size(); i++) {
+            if (configList.get(i).id.equals(configurationToUpdate.id)) {
+                configList.set(i, configurationToUpdate);
+                break;
+            }
+        }
+    }
 }

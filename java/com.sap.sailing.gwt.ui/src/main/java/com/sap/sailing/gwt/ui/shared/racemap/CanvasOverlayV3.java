@@ -381,9 +381,8 @@ public abstract class CanvasOverlayV3 {
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
         Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));
-        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
-        Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
-
+        Point pointX = projection.fromLatLngToDivPixel(posWithDistanceX);
+        Point pointY = projection.fromLatLngToDivPixel(posWithDistanceY);
         return Size.newInstance(Math.abs(pointX.getX() - pointCenter.getX()), Math.abs(pointY.getY() - pointCenter.getY()));
     }
     

@@ -16,15 +16,16 @@ public class MarkDTO extends ControlPointDTO implements MappableToDevice {
     public String pattern;
     public MarkType type;
 
-    MarkDTO() {}
+    @Deprecated
+    MarkDTO() {} // for GWT RPC serialization only
     
-    public MarkDTO(String idAsString, String name, double latDeg, double lngDeg) {
-        super(idAsString, name);
+    public MarkDTO(String idAsString, String name, String shortName, double latDeg, double lngDeg) {
+        super(idAsString, name, shortName);
         this.position = new DegreePosition(latDeg, lngDeg);
     }
 
-    public MarkDTO(String idAsString, String name) {
-        super(idAsString, name);
+    public MarkDTO(String idAsString, String name, String shortName) {
+        super(idAsString, name, shortName);
     }
     
     @Override

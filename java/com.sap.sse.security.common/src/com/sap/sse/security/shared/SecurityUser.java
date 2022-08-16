@@ -14,9 +14,8 @@ import com.sap.sse.common.WithID;
 public interface SecurityUser<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup<?>>
         extends UserReference, WithQualifiedObjectIdentifier {
     /**
-     * Returns the "raw" permissions explicitly set for this user. This does not include permissions
-     * inferred by any {@link PermissionsForRoleProvider} for the {@link #getRoles() roles} that this
-     * user has. Use {@link #getAllPermissions(PermissionsForRoleProvider)} for that.
+     * Returns the "raw" permissions explicitly set for this user. This does not include permissions inferred from the
+     * {@link #getRoles() roles} that this user has. See also {@link PermissionChecker}.
      */
     Iterable<WildcardPermission> getPermissions();
 

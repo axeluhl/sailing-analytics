@@ -20,14 +20,16 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public abstract class AbstractRegattaCompetitionFleetRace extends Widget implements RegattaCompetitionRaceView {
     
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    private final RaceviewerLaunchPadController launchPadController;
+    private final RaceviewerLaunchPadController<SimpleRaceMetadataDTO> launchPadController;
     protected final Element mainElement;
     private final SimpleRaceMetadataDTO race;
 
-    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race,
+    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race, String fleetName,
             RegattaCompetitionPresenter presenter) {
         this.race = race;
-        this.launchPadController = new RaceviewerLaunchPadController(presenter::getRaceViewerURL);
+        this.launchPadController = new RaceviewerLaunchPadController<>(presenter::getRaceViewerURL,
+                r -> presenter.getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), fleetName),
+                presenter.getPaywallResolver());
         this.mainElement = getMainUiElement();
         setupRaceState(race);
         getRaceNameUiElement().setInnerText(race.getRaceName());

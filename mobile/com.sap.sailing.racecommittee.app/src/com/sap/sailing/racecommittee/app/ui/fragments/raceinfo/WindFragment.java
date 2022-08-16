@@ -1,19 +1,28 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.Browser;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsCallback;
+import android.support.customtabs.CustomTabsClient;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsServiceConnection;
+import android.support.customtabs.CustomTabsSession;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -22,6 +31,9 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -66,6 +78,7 @@ import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.Bearing;
@@ -75,20 +88,21 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public class WindFragment extends BaseFragment
         implements CompassDirectionListener, OnRaceUpdatedListener,
         OnSuccessListener<LocationSettingsResponse>, OnFailureListener {
 
-    private final static String TAG = WindFragment.class.getName();
     private final static long FIVE_SEC = 5000;
     private final static long EVERY_POSITION_CHANGE = 2000;
     private final static int MIN_KTS = 3;
@@ -112,8 +126,6 @@ public class WindFragment extends BaseFragment
     private EditText mWindInputDirection;
     private EditText mWindInputSpeed;
     private Button mContentMapShow;
-    private ImageView mEditCourse;
-    private ImageView mEditSpeed;
 
     private FusedLocationProviderClient apiClient;
     private SettingsClient settingsClient;
@@ -127,6 +139,9 @@ public class WindFragment extends BaseFragment
     private List<ManagedRace> mSelectedRaces;
     private List<ManagedRace> mManagedRaces;
     private LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
+    private View mMapLayout;
+    private WebView mMapWebView;
+    private Button mMapHide;
 
     public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
@@ -147,7 +162,7 @@ public class WindFragment extends BaseFragment
         for (float i = MIN_KTS; i <= MAX_KTS; i += .5f) {
             numbers.add(String.format(Locale.US, "%.1f ", i) + kn);
         }
-        return numbers.toArray(new String[numbers.size()]);
+        return numbers.toArray(new String[0]);
     }
 
     @Override
@@ -179,6 +194,7 @@ public class WindFragment extends BaseFragment
 
         mHeaderLayout = ViewHelper.get(layout, R.id.header_layout);
         mContentLayout = ViewHelper.get(layout, R.id.content_layout);
+        mMapLayout = ViewHelper.get(layout, R.id.map_layout);
 
         mHeaderText = ViewHelper.get(layout, R.id.header_text);
         mHeaderWindSensor = ViewHelper.get(layout, R.id.wind_sensor);
@@ -195,45 +211,53 @@ public class WindFragment extends BaseFragment
         mAccuracyTimestamp = ViewHelper.get(layout, R.id.accuracy_timestamp);
         mWindInputDirection = ViewHelper.get(layout, R.id.wind_input_direction);
         if (mWindInputDirection != null) {
-            mWindInputDirection.setFilters(new InputFilter[] { new RangeInputFilter(0, 360) });
+            mWindInputDirection.setFilters(new InputFilter[]{new RangeInputFilter(0, 360)});
         }
         mWindInputSpeed = ViewHelper.get(layout, R.id.wind_input_speed);
         if (mWindInputSpeed != null) {
-            mWindInputSpeed.setFilters(new InputFilter[] { new RangeInputFilter(0, MAX_KTS) });
+            mWindInputSpeed.setFilters(new InputFilter[]{new RangeInputFilter(0, MAX_KTS)});
             mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
         }
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
-
+        mMapWebView = ViewHelper.get(layout, R.id.web_view);
+        mMapHide = ViewHelper.get(layout, R.id.position_hide);
         mReceiver = new IsTrackedReceiver(mContentMapShow);
 
-        mEditCourse = ViewHelper.get(layout, R.id.edit_course);
-        if (mEditCourse != null) {
-            mEditCourse.setOnClickListener(new EditCourseClick());
+        ImageView editCourse = ViewHelper.get(layout, R.id.edit_course);
+        if (editCourse != null) {
+            editCourse.setOnClickListener(new EditCourseClick());
         }
-        mEditSpeed = ViewHelper.get(layout, R.id.edit_speed);
-        if (mEditSpeed != null) {
-            mEditSpeed.setOnClickListener(new EditSpeedClick());
+        ImageView editSpeed = ViewHelper.get(layout, R.id.edit_speed);
+        if (editSpeed != null) {
+            editSpeed.setOnClickListener(new EditSpeedClick());
         }
 
         return layout;
     }
 
     @Override
+    public boolean onBackPressed() {
+        if (mMapHide == null && mContentLayout.getVisibility() == View.GONE) {
+            setupLayouts(false);
+            return true;
+        }
+        return super.onBackPressed();
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null
-                && getRaceState().getWindFix() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
-            Wind wind = getRaceState().getWindFix();
-            mHeaderWindSensor.setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()),
-                    wind.getFrom().getDegrees(), wind.getKnots()));
+        if (mHeaderWindSensor != null) {
+            if (getRaceState().getWindFix() != null) {
+                Wind wind = getRaceState().getWindFix();
+                mHeaderWindSensor.setText(getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint(), false),
+                        wind.getFrom().getDegrees(), wind.getKnots()));
+            }
         }
         setupButtons();
         setupWindSpeedPicker();
         setupLayouts(false);
-
         refreshUI(false);
-
         if (hasPermissions()) {
             // Check the location settings
             checkLocationSettings();
@@ -245,7 +269,6 @@ public class WindFragment extends BaseFragment
     @Override
     public void onStart() {
         super.onStart();
-
         if (mCompassView != null) {
             mCompassView.setDirectionListener(this);
         }
@@ -257,13 +280,12 @@ public class WindFragment extends BaseFragment
         // disconnect googleApiClient and unregister position poller
         stopLocationUpdates();
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mRacesByGroup = ((RacingActivity) getActivity()).getRacesByGroup();
+        mRacesByGroup = ((RacingActivity) requireActivity()).getRacesByGroup();
         final Set<ManagedRace> allRaces = new HashSet<>();
         for (final Iterable<ManagedRace> racesInGroup : mRacesByGroup.values()) {
             Util.addAll(racesInGroup, allRaces);
@@ -272,21 +294,21 @@ public class WindFragment extends BaseFragment
         mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
         Collections.sort(mManagedRaces, new CurrentRaceComparator());
         mSelectedRaces = new ArrayList<>();
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
         // register receiver to be notified if race is tracked
-        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        IntentFilter filter = new IntentFilter(AppConstants.ACTION_IS_TRACKING);
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
         // Contact server and ask if race is tracked and map is allowed to show.
-        WindHelper.isTrackedRace(getActivity(), getRace());
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        WindHelper.isTrackedRace(requireActivity(), getRace());
 
         startLocationUpdates();
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        super.notifyTick(now);
+    public TickListener getCurrentTimeTickListener() {
+        return this::onCurrentTimeTick;
+    }
 
+    private void onCurrentTimeTick(TimePoint now) {
         refreshUI(true);
     }
 
@@ -299,7 +321,7 @@ public class WindFragment extends BaseFragment
      */
     private void refreshUI(boolean timeOnly) {
         if (isAdded()) {
-            int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
+            int whiteColor = ThemeHelper.getColor(requireContext(), R.attr.white);
             int redColor = R.color.sap_red;
             if (!timeOnly) {
                 setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
@@ -369,39 +391,21 @@ public class WindFragment extends BaseFragment
      */
     public void setupButtons() {
         if (mHeaderText != null) {
-            mHeaderText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    goHome();
-                }
-            });
+            mHeaderText.setOnClickListener(v -> goHome());
         }
         if (mSetData != null) {
-            mSetData.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onSendClick();
-                }
-            });
+            mSetData.setOnClickListener(v -> onSendClick());
         }
         if (mSetDataMulti != null) {
-            mSetDataMulti.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showWindDialog();
-                }
-            });
+            mSetDataMulti.setOnClickListener(v -> showWindDialog());
         }
         if (mContentMapShow != null) {
             // disable functionality at first. will be enabled after contacting the server if race is tracked
             mContentMapShow.setEnabled(false);
-            mContentMapShow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false,
-                            /* showMapControls */ true);
-                }
-            });
+            mContentMapShow.setOnClickListener(v -> setupLayouts(true));
+        }
+        if (mMapHide != null) {
+            mMapHide.setOnClickListener(v -> setupLayouts(false));
         }
     }
 
@@ -411,16 +415,14 @@ public class WindFragment extends BaseFragment
     public void setupWindSpeedPicker() {
         double enteredWindSpeed = preferences.getWindSpeed();
         double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
-        if (getRace() != null && getRaceState() != null) {
-            Wind enteredWind = getRaceState().getWindFix();
-            if (enteredWind != null) {
-                enteredWindSpeed = enteredWind.getKnots();
-                enteredWindBearingFrom = enteredWind.getFrom().getDegrees();
-            }
+        Wind enteredWind = getRaceState().getWindFix();
+        if (enteredWind != null) {
+            enteredWindSpeed = enteredWind.getKnots();
+            enteredWindBearingFrom = enteredWind.getFrom().getDegrees();
         }
 
         if (mWindSpeed != null && mCompassView != null) {
-            initSpeedPicker(mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
+            initSpeedPicker(mWindSpeed, ThemeHelper.getColor(requireContext(), R.attr.white));
             mCompassView.setDirection((float) enteredWindBearingFrom);
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
@@ -430,10 +432,10 @@ public class WindFragment extends BaseFragment
     }
 
     private void initSpeedPicker(NumberPicker picker, @ColorInt int textColor) {
-        String numbers[] = generateNumbers();
+        String[] numbers = generateNumbers();
         ViewHelper.disableSave(picker);
         ThemeHelper.setPickerColor(getActivity(), picker, textColor,
-                ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
+                ThemeHelper.getColor(requireContext(), R.attr.sap_yellow_1));
         picker.setMaxValue(numbers.length - 1);
         picker.setMinValue(0);
         picker.setWrapSelectorWheel(false);
@@ -441,8 +443,6 @@ public class WindFragment extends BaseFragment
         picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
     }
 
-    // the map view needs java script
-    @SuppressLint("SetJavaScriptEnabled")
     private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
             if (getArguments() != null
@@ -457,21 +457,31 @@ public class WindFragment extends BaseFragment
         if (mContentLayout != null) {
             mContentLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
         }
+        if (mMapLayout != null) {
+            WebSettings settings = mMapWebView.getSettings();
+            if (showMap) {
+                settings.setJavaScriptEnabled(true);
+                loadRaceMap();
+                mMapLayout.setVisibility(View.VISIBLE);
+            } else {
+                mMapWebView.loadUrl("about:blank");
+                settings.setJavaScriptEnabled(false);
+                mMapLayout.setVisibility(View.GONE);
+            }
+        }
     }
 
-    private boolean loadRaceMap(boolean showWindCharts, boolean showStreamlets, boolean showSimulation,
-            boolean showMapControls) {
-        ManagedRace race = getRace();
-        if (race != null) {
-            // build complete race map url
-            String mapUrl = WindHelper.generateMapURL(getActivity(), race, showWindCharts, showStreamlets,
-                    showSimulation, showMapControls);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(mapUrl));
-            startActivity(intent);
-            return true;
+    private void loadRaceMap() {
+        // Build complete race map URL
+        final String mapUrl = WindHelper.generateMapURL(getActivity(), getRace(), true, false, false, true);
+        final Context context = requireContext();
+        final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        final String accessToken = pref.getString(context.getString(com.sap.sailing.android.shared.R.string.preference_access_token_key), null);
+        final Map<String, String> headers = new HashMap<>();
+        if (accessToken != null) {
+            headers.put("Authorization", "Bearer " + accessToken);
         }
-        return false;
+        mMapWebView.loadUrl(mapUrl, headers);
     }
 
     /**
@@ -482,12 +492,10 @@ public class WindFragment extends BaseFragment
         boolean isMagnetic = preferences.isMagnetic();
         getRaceState().setWindFix(MillisecondsTimePoint.now(), wind, isMagnetic);
         saveEntriesInPreferences(wind);
-        switch (getArguments().getInt(START_MODE, 0)) {
-        case 1:
-            break;
-        default:
+        final Bundle args = getArguments();
+        final int startMode = args != null ? args.getInt(START_MODE, 0) : 0;
+        if (startMode != 1) {
             openMainScheduleFragment();
-            break;
         }
     }
 
@@ -522,7 +530,7 @@ public class WindFragment extends BaseFragment
         Position currentPosition = new DegreePosition(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         if (mCompassView != null && mWindSpeed != null) {
             windBearing = mCompassView.getDirection();
-            windSpeed = mWindSpeed.getValue() / 2 + MIN_KTS;
+            windSpeed = mWindSpeed.getValue() / 2f + MIN_KTS;
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
             windBearing = Double.parseDouble(mWindInputDirection.getText().toString());
             windSpeed = Double.parseDouble(mWindInputSpeed.getText().toString());
@@ -580,26 +588,18 @@ public class WindFragment extends BaseFragment
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.wind_select_race));
-        builder.setMultiChoiceItems(races.toArray(new String[races.size()]), selected,
-                new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        ManagedRace race = mManagedRaces.get(which);
-                        if (mSelectedRaces.contains(race)) {
-                            mSelectedRaces.remove(race);
-                        }
-                        if (isChecked) {
-                            mSelectedRaces.add(race);
-                        }
+        builder.setMultiChoiceItems(races.toArray(new String[0]), selected,
+                (dialog, which, isChecked) -> {
+                    ManagedRace race = mManagedRaces.get(which);
+                    mSelectedRaces.remove(race);
+                    if (isChecked) {
+                        mSelectedRaces.add(race);
                     }
                 });
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                for (ManagedRace race : mSelectedRaces) {
-                    race.getState().setWindFix(MillisecondsTimePoint.now(), getResultingWindFix(),
-                            preferences.isMagnetic());
-                }
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            for (ManagedRace race : mSelectedRaces) {
+                race.getState().setWindFix(MillisecondsTimePoint.now(), getResultingWindFix(),
+                        preferences.isMagnetic());
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
@@ -618,7 +618,7 @@ public class WindFragment extends BaseFragment
         public void onReceive(Context context, Intent intent) {
             Button button = reference.get();
             if (button != null) {
-                button.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+                button.setEnabled(intent.getBooleanExtra(AppConstants.EXTRA_IS_TRACKING, false));
             }
         }
     }
@@ -629,25 +629,22 @@ public class WindFragment extends BaseFragment
         public void onClick(View v) {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.wind_from);
-            View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_course, null);
-            final CompassView compassView = (CompassView) layout.findViewById(R.id.compass_view);
+            View layout = LayoutInflater.from(requireContext()).inflate(R.layout.wind_input_course, null);
+            final CompassView compassView = layout.findViewById(R.id.compass_view);
             if (compassView != null) {
                 if (mWindInputDirection != null && !TextUtils.isEmpty(mWindInputDirection.getText())) {
-                    compassView.setDirection(Float.valueOf(mWindInputDirection.getText().toString()));
+                    compassView.setDirection(Float.parseFloat(mWindInputDirection.getText().toString()));
                 } else {
                     compassView.setDirection(0);
                 }
                 compassView.setReadOnly(true);
             }
             builder.setView(layout);
-            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (compassView != null) {
-                        float degrees = (compassView.getDirection() >= 0) ? compassView.getDirection()
-                                : compassView.getDirection() + 360;
-                        mWindInputDirection.setText(String.format("%.0f", degrees));
-                    }
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                if (compassView != null) {
+                    float degrees = (compassView.getDirection() >= 0) ? compassView.getDirection()
+                            : compassView.getDirection() + 360;
+                    mWindInputDirection.setText(String.format(Locale.getDefault(), "%.0f", degrees));
                 }
             });
             builder.setNegativeButton(android.R.string.cancel, null);
@@ -661,21 +658,18 @@ public class WindFragment extends BaseFragment
         public void onClick(View v) {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.wind_speed);
-            View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_speed, null);
-            final NumberPicker speed = (NumberPicker) layout.findViewById(R.id.wind_speed);
+            View layout = LayoutInflater.from(requireContext()).inflate(R.layout.wind_input_speed, null);
+            final NumberPicker speed = layout.findViewById(R.id.wind_speed);
             initSpeedPicker(speed, getResources().getColor(R.color.black));
             double value = 0;
             if (!TextUtils.isEmpty(mWindInputSpeed.getText())) {
-                value = Double.valueOf(mWindInputSpeed.getText().toString());
+                value = Double.parseDouble(mWindInputSpeed.getText().toString());
             }
             speed.setValue(((int) ((value - MIN_KTS) * 2)));
             builder.setView(layout);
-            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    float value = (float) speed.getValue() / 2 + MIN_KTS;
-                    mWindInputSpeed.setText(String.valueOf(value));
-                }
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                float value1 = (float) speed.getValue() / 2 + MIN_KTS;
+                mWindInputSpeed.setText(String.valueOf(value1));
             });
             builder.setNegativeButton(android.R.string.cancel, null);
             builder.show();

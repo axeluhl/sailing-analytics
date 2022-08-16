@@ -22,6 +22,7 @@ public class RegattaLeaderboardCreateDialogPO extends DataEntryDialogPO {
     }
     
     public void selectRegatta(RegattaDescriptor regatta) {
+        waitUntil(() -> regattaDropDown.isDisplayed());
         Select dropDown = new Select(this.regattaDropDown);
         dropDown.selectByValue(regatta.toString());
     }

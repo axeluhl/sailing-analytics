@@ -13,7 +13,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.3.2"
+        classpath 'com.android.tools.build:gradle:3.6.4'
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
         classpath "org.ajoberstar:grgit:2.3.0"
     }
@@ -37,18 +37,18 @@ allprojects {
     tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-        options.encoding = 'UTF-8'
+        options.encoding = "UTF-8"
     }
-    defaultTasks 'clean', 'assemble'
+    defaultTasks "clean", "assemble"
 }
 
 // dependency versions for all sub modules
 ext {
     // regular
-    buildTools = "28.0.3"
-    compileSdk = 28
+    buildTools = "30.0.3"
+    compileSdk = 30
     minSdk = 16
-    targetSdk = 28
+    targetSdk = 30
 
     sourceCompatibilityVersion = JavaVersion.VERSION_1_8
     targetCompatibilityVersion = JavaVersion.VERSION_1_8
@@ -68,19 +68,12 @@ ext {
     isXmakeBuild = project.hasProperty("xmake")
     isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
 
-    destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
+    destinationFolder = project.rootDir.absolutePath + "/java/com.sap.sailing.www/apps/"
 }
 
-apply plugin: "org.ajoberstar.grgit"
 if (project.hasProperty("xmake")) {
-    task wrapper(type: Wrapper) {
+    apply plugin: "org.ajoberstar.grgit"
+    wrapper {
         distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
-        System.setProperty("http.proxyHost", sapProxyHost)
-        System.setProperty("https.proxyHost", sapProxyHost)
-        System.setProperty("http.proxyPort", sapProxyPort)
-        System.setProperty("https.proxyPort", sapProxyPort)
-        System.setProperty("http.nonProxyHosts", sapNonProxyHosts)
-        System.setProperty("https.nonProxyHosts", sapNonProxyHosts)
     }
 }
-

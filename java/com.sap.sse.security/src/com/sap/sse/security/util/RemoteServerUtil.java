@@ -12,6 +12,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.jaxrs.api.SecurityResource;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public final class RemoteServerUtil {
@@ -36,16 +37,20 @@ public final class RemoteServerUtil {
      */
     public static String resolveBearerTokenForRemoteServer(String hostname, int port, String username, String password) {
         try {
-            return resolveBearerTokenForRemoteServer(new URL("http", hostname, port, ""), username, password);
+            return resolveBearerTokenForRemoteServer(getBaseServerUrl(hostname, port), username, password);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static URL getBaseServerUrl(String hostname, int port) throws MalformedURLException {
+        return new URL(port==443?"https":"http", hostname, port, "");
     }
     
     private static String resolveBearerTokenForRemoteServer(URL base, String username, String password) throws Exception {
         String token = "";
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-            String path = "/security/api/restsecurity/access_token";
+            String path = "/security/api"+SecurityResource.RESTSECURITY+SecurityResource.ACCESS_TOKEN_METHOD;
             URL serverAddress = createRemoteServerUrl(base, path, null);
             URLConnection connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
                     t -> {
@@ -64,7 +69,7 @@ public final class RemoteServerUtil {
             Object requestBody = JSONValue.parseWithException(jsonToken);
             if (requestBody instanceof JSONObject) {
                 JSONObject json = (JSONObject) requestBody;
-                Object tokenObj = json.get("access_token");
+                Object tokenObj = json.get(SecurityResource.ACCESS_TOKEN);
                 if (tokenObj instanceof String) {
                     token = (String) tokenObj;
                     logger.info("Obtained access token for user "+username);

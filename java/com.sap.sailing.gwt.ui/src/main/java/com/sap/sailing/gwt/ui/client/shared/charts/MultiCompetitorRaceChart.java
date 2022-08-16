@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.UUID;
+
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -42,12 +44,12 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
             RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
-            final String leaderboardGroupName, String leaderboardName) {
+            final String leaderboardGroupName, final UUID leaderboardGroupId, String leaderboardName) {
         super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
                 selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter,
                 /* show initially */DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
-                allowTimeAdjust, leaderboardGroupName, leaderboardName);
+                allowTimeAdjust, leaderboardGroupName, leaderboardGroupId, leaderboardName);
         this.lifecycle = lifecycle;
     }
     

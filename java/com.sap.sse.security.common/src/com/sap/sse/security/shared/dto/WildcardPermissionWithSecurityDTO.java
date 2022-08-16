@@ -47,7 +47,7 @@ public class WildcardPermissionWithSecurityDTO extends WildcardPermission implem
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredSecurityTypes.PERMISSION_ASSOCIATION;
     }
 

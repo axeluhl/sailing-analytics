@@ -84,7 +84,7 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier()); 
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier()); 
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
@@ -92,7 +92,7 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredSecurityTypes.USER;
     }
 

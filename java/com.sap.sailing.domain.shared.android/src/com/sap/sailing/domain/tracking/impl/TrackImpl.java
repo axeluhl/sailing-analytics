@@ -18,8 +18,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
-import com.sap.sse.util.impl.UnmodifiableNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.UnmodifiableNavigableSet;
 
 public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     private static final long serialVersionUID = -4075853657857657528L;
@@ -335,25 +335,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     @Override
     public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive) {
         assertReadLock();
-        Iterator<FixType> result = (Iterator<FixType>) getInternalFixes().tailSet(
-                getDummyFix(startingAt), inclusive).iterator();
-        return result;
+        return getTimeConstrainedFixesIterator(getInternalFixes(), startingAt, inclusive, /* endingAt */ null, /* endingAtInclusive */ false);
     }
 
     @Override
     public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean startingAtInclusive, TimePoint endingAt,
             boolean endingAtInclusive) {
         assertReadLock();
-        NavigableSet<FixType> set = getInternalFixes();
-        if (startingAt != null && endingAt != null) {
-            set = set.subSet(getDummyFix(startingAt), startingAtInclusive, getDummyFix(endingAt), endingAtInclusive);
-        } else if (endingAt != null) {
-            set = set.headSet(getDummyFix(endingAt), endingAtInclusive);
-        } else  if (startingAt != null) {
-            set = set.tailSet(getDummyFix(startingAt), startingAtInclusive);
-        }
-        Iterator<FixType> result = set.iterator();
-        return result;
+        return getTimeConstrainedFixesIterator(getInternalFixes(), startingAt, startingAtInclusive, endingAt, endingAtInclusive);
     }
 
     @Override
@@ -380,9 +369,28 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     @Override
     public Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive) {
         assertReadLock();
-        Iterator<FixType> result = (Iterator<FixType>) getInternalRawFixes().tailSet(
-                getDummyFix(startingAt), inclusive).iterator();
+        return getTimeConstrainedFixesIterator(getInternalRawFixes(), startingAt, inclusive, /* endingAt */ null, /* endingAtInclusive */ false);
+    }
+
+    private Iterator<FixType> getTimeConstrainedFixesIterator(NavigableSet<FixType> set, TimePoint startingAt, boolean startingAtInclusive,
+            TimePoint endingAt, boolean endingAtInclusive) {
+        assertReadLock();
+        if (startingAt != null && endingAt != null) {
+            set = set.subSet(getDummyFix(startingAt), startingAtInclusive, getDummyFix(endingAt), endingAtInclusive);
+        } else if (endingAt != null) {
+            set = set.headSet(getDummyFix(endingAt), endingAtInclusive);
+        } else  if (startingAt != null) {
+            set = set.tailSet(getDummyFix(startingAt), startingAtInclusive);
+        }
+        Iterator<FixType> result = set.iterator();
         return result;
+    }
+    
+    @Override
+    public Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean startingAtInclusive,
+            TimePoint endingAt, boolean endingAtInclusive) {
+        assertReadLock();
+        return getTimeConstrainedFixesIterator(getInternalRawFixes(), startingAt, startingAtInclusive, endingAt, endingAtInclusive);
     }
 
     @Override
@@ -432,9 +440,9 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         lockForRead();
         try {
             final Duration result;
-            final int size = getFixes().size();
+            final int size = getRawFixes().size();
             if (size > 1) {
-                result = getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(size-1);
+                result = getRawFixes().first().getTimePoint().until(getRawFixes().last().getTimePoint()).divide(size-1);
             } else {
                 result = null;
             }

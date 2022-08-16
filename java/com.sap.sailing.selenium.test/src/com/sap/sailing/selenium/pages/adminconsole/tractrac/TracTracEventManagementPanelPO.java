@@ -139,7 +139,7 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     public AddTracTracConnectionDialogPO addConnection() {
         addConnectionButton.click();
-        final WebElement dialog = findElementBySeleniumId(this.driver, "EditTracTracConnectionDialog");
+        final WebElement dialog = findElementBySeleniumId(this.driver, "TracTracConnectionDialog");
         return new AddTracTracConnectionDialogPO(this.driver, dialog);
     }
 
@@ -283,9 +283,8 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     private void waitForSelectedRacesContainDifferentBoatClassesError(String boatClass) {
-        String message = String.format("The selected races contain boat classes which are not the same as "
-                + "the boat class '%s' of the selected regatta.", boatClass);
-        
-        waitForNotificationAndDismiss(message);
+        String message = String.format("(?s)The selected races contain boat classes which are not the same as "
+                + "the boat class '%s' of the selected regatta. Really load races\\?.*", boatClass);
+        waitForAlertAndAccept(message);
     }
 }

@@ -1,0 +1,14 @@
+{{- /*
+  This template checks whether a pod exists within the kubernetes cluster already having the same tag as the one provided with this release. Therefore it is absolutely necessary to never declare doNotUseThisValueInYourFile within the given values.yaml or by setting it through the command line. Unfortunately there is no other way to achieve this check as of now. 
+  Another rather unfortunate (and undocumented) behavior is that the lookup function is not executed during a helm install --dry-run.
+*/ -}}
+
+{{ $appname := include "sapsailing-app-name" . }}
+{{ $errorgenerator := include "already-existing-app-tag" . }}
+{{ range $pods := (lookup "v1" "Pod" "" "").items }}
+    {{ if and ( $pods.metadata.labels.app ) ( $pods.metadata.labels.role ) }}
+        {{ if and ( eq $appname $pods.metadata.labels.app ) ( eq $.Values.master.role $pods.metadata.labels.role ) }}
+            {{ required $errorgenerator $.Values.doNotUseThisValueInYourFile}}
+        {{ end }}
+    {{ end }}
+{{ end }}

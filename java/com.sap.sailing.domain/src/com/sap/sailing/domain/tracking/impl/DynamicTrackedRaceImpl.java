@@ -24,7 +24,6 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -46,6 +45,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -64,10 +64,12 @@ import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -119,10 +121,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForCacheInvalidationOfWindEstimation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogResolver raceLogResolver) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
         super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
-                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver, trackingConnectorInfo);
         raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
         this.competitorResultsFromRaceLog = new HashMap<>();
         this.logListener = new DynamicTrackedRaceLogListener(this);
@@ -132,18 +134,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.courseDesignChangedListeners = new HashSet<>();
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
-        
         gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
-            Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
-            for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
-                windSourcesToExclude.add(windSourceToExclude);
-            }
-            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
-            setWindSourcesToExclude(windSourcesToExclude);
+            setWindSourcesToExclude(getWindSourcesToExclude()); // implicitly adds COURSE_BASED to the wind sources to exclude
         }
-        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -210,10 +205,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, boolean useInternalMarkPassingAlgorithm,
-            RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
+            RankingMetricConstructor rankingMetricConstructor, RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+                millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver, trackingConnectorInfo);
     }
 
     @Override
@@ -399,7 +394,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
             @Override
             public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
-                updated(fix.getTimePoint());
+                final TimePoint fixTimePoint = fix.getTimePoint();
+                updated(fixTimePoint);
+                final GPSFix lastFixBefore = result.getLastFixBefore(fixTimePoint);
+                final GPSFix firstFixAfter = result.getFirstFixAfter(fixTimePoint);
+                invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange.create(lastFixBefore==null?null:lastFixBefore.getTimePoint(),
+                        firstFixAfter==null?null:firstFixAfter.getTimePoint()));
                 triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark, firstFixInTrack, addedOrReplaced);
             }
@@ -464,7 +464,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 // Holding the serialization lock 
                 for (WindSource windSource : getWindSources()) {
                     if (windSource.getType().canBeStored()) {
-                        WindTrack windTrack = getOrCreateWindTrack(windSource);
+                        final WindTrack windTrack = getOrCreateWindTrack(windSource);
                         // replicate all wind fixes that may have been loaded by the wind store
                         windTrack.lockForRead();
                         try {
@@ -521,10 +521,29 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    /**
+     * Adds the {@link WindSourceType#COURSE_BASED} wind source to those to exclude if the race is not
+     * {@link #raceIsKnownToStartUpwind known to start with an upwind leg}.
+     */
     @Override
-    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        super.setWindSourcesToExclude(windSourcesToExclude);
-        notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
+    public void setWindSourcesToExclude(final Iterable<? extends WindSource> windSourcesToExclude) {
+        final Set<WindSource> effectiveWindSourcesToExclude = new HashSet<>();
+        Util.addAll(windSourcesToExclude, effectiveWindSourcesToExclude);
+        if (!raceIsKnownToStartUpwind) {
+            effectiveWindSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
+        }
+        super.setWindSourcesToExclude(effectiveWindSourcesToExclude);
+        notifyListenersWindSourcesToExcludeChanged(effectiveWindSourcesToExclude);
+    }
+
+    @Override
+    public void setFinishingTime(TimePoint newFinishingTime) {
+        final TimePoint oldFinishingTime = getFinishingTime();
+        if (!Util.equalsWithNull(newFinishingTime, oldFinishingTime)) {
+            logger.info("Finishing time of race " + getRace().getName() + " updated from " + getFinishingTime() + " to " + newFinishingTime);
+            super.setFinishingTime(newFinishingTime);
+            notifyListenersFinishingTimeChanged(oldFinishingTime, newFinishingTime);
+        }
     }
 
     @Override
@@ -558,6 +577,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.startOfRaceChanged(oldStartOfRace, newStartOfRace));
     }
 
+    private void notifyListenersFinishingTimeChanged(TimePoint oldFinishingTime, TimePoint newFinishingTime) {
+        notifyListeners(listener -> listener.finishingTimeChanged(oldFinishingTime, newFinishingTime));
+    }
+
     private void notifyListenersFinishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
         notifyListeners(listener -> listener.finishedTimeChanged(oldFinishedTime, newFinishedTime));
     }
@@ -573,12 +596,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         super.waypointAdded(zeroBasedIndex, waypointThatGotAdded);
+        if (zeroBasedIndex == getRace().getCourse().getNumberOfWaypoints()-1) {
+            // a new finishing waypoint was added; make sure that explicit finishing times from
+            // the race log are now applied to this new finishing waypoint:
+            updateFinishingTimesFromRaceLog();
+        }
         notifyListenersWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
     }
 
     @Override
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         super.waypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
+        if (zeroBasedIndex == getRace().getCourse().getNumberOfWaypoints()) {
+            // the previous finishing waypoint was removed, if the course is not empty, a new ; make sure that explicit finishing times from
+            // the race log are now applied to this new finishing waypoint:
+            updateFinishingTimesFromRaceLog();
+        }
         notifyListenersWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
     }
 
@@ -691,6 +724,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * <li>A wrapper finish mark passing exists that has a {@code null} original, meaning it was created solely based
      * on the race log finishing time, and we have no finish time in the {@code competitorResult}: then the synthetic
      * finish mark passing is removed.</li>
+     * <li>A mark passing exists for a waypoint that is not (no longer?) the finishing waypoint and that is a wrapper
+     * mark passing for a finish time coming from the race log. Such a mark passing is replaced by its original mark
+     * passing which may be {@code null} in which case it will not be added to the result.</li>
      * </ul>
      * 
      * If no such modification was required, the unmodified {@code markPassings} object is returned; otherwise, a new
@@ -707,26 +743,51 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         boolean neededToCreateOrUpdateFinishMarkPassing = false;
         boolean foundFinishMarkPassing = false;
         for (final MarkPassing originalMarkPassing : markPassings) {
+            final MarkPassing originalsOriginal = originalMarkPassing.getOriginal();
             if (originalMarkPassing.getWaypoint() != finish) {
-                copyOfMarkPassings.add(originalMarkPassing);
+                // take the originalMarkPassing if it is a real mark passing, or unwrap a wrapper
+                // mark passing because this is not the finishing waypoint and hence no finishing time-
+                // based mark passing wrapper is desired. Should no original mark passing exist for a
+                // wrapper, don't add a mark passing.
+                if (originalsOriginal != null) {
+                    copyOfMarkPassings.add(originalsOriginal);
+                }
             } else {
                 foundFinishMarkPassing = true;
                 final MarkPassing finishMarkPassingToUse;
-                if (competitorResult != null && competitorResult.getFinishingTime() != null
-                 && (originalMarkPassing.getOriginal() == originalMarkPassing || !originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime()))) {
-                    // since we so far only have the original mark passing or a wrapper mark passing with an
-                    // incorrect time point, we need to create a wrapper mark passing:
-                    finishMarkPassingToUse = new MarkPassingFromRaceLogProvidedFinishingTimeImpl(
-                            competitorResult.getFinishingTime(), finish, competitor,
-                            originalMarkPassing.getOriginal());
-                    logger.info(getRace().getName()+": Updating finish mark passing "+originalMarkPassing.getOriginal()+" to "+finishMarkPassingToUse);
-                    neededToCreateOrUpdateFinishMarkPassing = true;
+                if (/* we have a result for the competitor */ competitorResult != null &&
+                    /* the result has a valid finishing time */ competitorResult.getFinishingTime() != null) {
+                    // we do have a competitor result with a valid finishing time; we shall have a wrapper mark
+                    // passing that has the result's finishing time as its time point.
+                    // If we already have a wrapper in place with the correct time, nothing needs to be done.
+                    // If no wrapper is in place or a wrapper is in place but has the wrong time, a wrapper
+                    // for the original is constructed with the time taken from the competitor result.
+                    if (/* is it the original mark passing? */ originalsOriginal == originalMarkPassing ||
+                        /* is the time incorrect? */ !originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime())) {
+                        // since we so far only have the original mark passing or a wrapper mark passing with an
+                        // incorrect time point, we need to create a wrapper mark passing:
+                        finishMarkPassingToUse = new MarkPassingFromRaceLogProvidedFinishingTimeImpl(
+                                competitorResult.getFinishingTime(), finish, competitor,
+                                originalsOriginal);
+                        logger.info(getRace().getName()+": Updating finish mark passing "+originalsOriginal+" to "+finishMarkPassingToUse);
+                        neededToCreateOrUpdateFinishMarkPassing = true;
+                    } else {
+                        // the finish mark passing already is a wrapper with the correct time; no action is required:
+                        assert originalsOriginal != originalMarkPassing;
+                        assert originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime());
+                        finishMarkPassingToUse = originalMarkPassing;
+                        neededToCreateOrUpdateFinishMarkPassing = false;
+                    }
                 } else {
-                    finishMarkPassingToUse = originalMarkPassing.getOriginal();
+                    // we don't have a result for the competitor, or we do have a result but the finishing time is null;
+                    // use the original mark passing (null, if none exists) and flag the change in case it is a change
+                    finishMarkPassingToUse = originalsOriginal;
                     if (finishMarkPassingToUse != originalMarkPassing) {
                         logger.info(getRace().getName()+": Reverting race log-based finish mark passing "+originalMarkPassing+" to "+finishMarkPassingToUse+
                                 " because no finishing time found anymore for that competitor in race log");
                         neededToCreateOrUpdateFinishMarkPassing = true;
+                    } else {
+                        neededToCreateOrUpdateFinishMarkPassing = false;
                     }
                 }
                 if (finishMarkPassingToUse != null) {
@@ -750,7 +811,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         final Map<Competitor, CompetitorResult> result = new HashMap<>();
         CompetitorResults results = null; 
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
-            results = new ConfirmedFinishPositioningListFinder(raceLog).analyze();
+            results = new ConfirmedFinishPositioningListFinder(raceLog).analyze().getCompetitorResults();
             if (results != null) {
                 for (CompetitorResult cr : results) {
                     result.put(getRace().getCompetitorById(cr.getCompetitorId()), cr);
@@ -987,56 +1048,50 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
-     * call, all listeners are notified about these existing wind fixes using their
+     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded into this
+     * new wind track, all listeners are notified about these existing wind fixes using their
      * {@link RaceChangeListener#windDataReceived(Wind, WindSource)} callback method. In particular this replicates all
      * wind fixes that may have been loaded from the wind store for the new track.
      */
     @Override
-    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+    protected void notifyWindTrackHasBeenCreatedAndAddedToWindTracks(WindSource windSource, WindTrack windTrack) {
+        super.notifyWindTrackHasBeenCreatedAndAddedToWindTracks(windSource, windTrack);
         if (windSource.getType().canBeStored()) {
             // replicate all wind fixes that may have been loaded by the wind store
-            result.lockForRead();
+            windTrack.lockForRead();
             try {
-                for (Wind wind : result.getRawFixes()) {
+                for (Wind wind : windTrack.getRawFixes()) {
                     notifyListeners(wind, windSource); // Note that this doesn't notify the track's listeners but the tracked race's listeners.
                 } // In particular, the wind store won't receive events (again) for the wind fixes it already has.
             } finally {
-                result.unlockAfterRead();
+                windTrack.unlockAfterRead();
             }
         }
-        return result;
     }
 
     @Override
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
-        final boolean result;
-        if (!applyFilter || takesWindFixWithTimePoint(wind.getTimePoint())) {
-            result = getOrCreateWindTrack(windSource).add(wind);
-            updated(wind.getTimePoint());
-            triggerManeuverCacheRecalculationForAllCompetitors();
+        boolean result = super.recordWind(wind, windSource, applyFilter);
+        if (result) {
             notifyListeners(wind, windSource);
-        } else {
-            result = false;
         }
         return result;
     }
 
     @Override
     public void removeWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource).remove(wind);
-        updated(/* time point */null); // wind events shouldn't advance race time
-        triggerManeuverCacheRecalculationForAllCompetitors();
+        super.removeWind(wind, windSource);
         notifyListenersWindRemoved(wind, windSource);
     }
 
     @Override
     public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
         updated(fix.getTimePoint());
+        invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange.create(
+                fix.getTimePoint().minus(getMillisecondsOverWhichToAverageSpeed()),
+                fix.getTimePoint().plus(getMillisecondsOverWhichToAverageSpeed())));
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor, addedOrReplaced);
-        
         // getAndSet call is atomic which means, that it can be ensured that the listeners are notified only once
         final boolean oldGPSFixReceived = gpsFixReceived.getAndSet(true);
         if (!oldGPSFixReceived) {
@@ -1072,12 +1127,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
-        long result = 0; // default in case there is no competitor
-        for (WindSource windSource : getWindSources()) {
-            WindTrack someTrack = getOrCreateWindTrack(windSource);
-            result = someTrack.getMillisecondsOverWhichToAverageWind();
-        }
-        return result;
+        return this.millisecondsOverWhichToAverageWind;
     }
 
     @Override
@@ -1097,8 +1147,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        logListener.addTo(raceLog);
+        logListener.beforeAttaching(raceLog);
         super.attachRaceLog(raceLog);
+        logListener.afterAttaching(raceLog);
         getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
     }
     
@@ -1106,9 +1157,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public RaceLog detachRaceLog(Serializable identifier) {
         final RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
         if (attachedRaceLog != null) {
-            logListener.removeFrom(attachedRaceLog);
+            logListener.beforeDetaching(attachedRaceLog);
         }
         final RaceLog raceLogDetached = super.detachRaceLog(identifier);
+        if (attachedRaceLog != null) {
+            logListener.afterDetaching(attachedRaceLog);
+        }
         assert raceLogDetached == attachedRaceLog;
         synchronized (raceStates) {
             final ReadonlyRaceState raceState = raceStates.remove(attachedRaceLog);

@@ -1,9 +1,18 @@
 package com.sap.sailing.android.shared.services.sending;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.FileHandlerUtils;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -12,13 +21,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.FileHandlerUtils;
-
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 
 public class MessagePersistenceManager {
 
@@ -167,16 +169,10 @@ public class MessagePersistenceManager {
         return messageIntent;
     }
 
-    /**
-     * @return
-     * @throws FileNotFoundException
-     */
-    private String getFileContent() throws FileNotFoundException {
+    private String getFileContent(InputStream inputStream) {
         String fileContent = "";
-        FileInputStream inputStream;
         try {
-            inputStream = context.openFileInput(delayedMessagesFileName);
-
+            ExLog.i(context, TAG, "Convert stream to string...");
             fileContent = FileHandlerUtils.convertStreamToString(inputStream, context);
             inputStream.close();
         } catch (IOException e) {
@@ -204,7 +200,9 @@ public class MessagePersistenceManager {
 
     private void initializeFileAndPersistedMessages() {
         try {
-            String fileContent = getFileContent();
+            ExLog.i(context, TAG, "Open file for reading...");
+            FileInputStream inputStream = context.openFileInput(delayedMessagesFileName);
+            String fileContent = getFileContent(inputStream);
             String[] messageLines = fileContent.split("\n");
             for (String messageLine : messageLines) {
                 if (!messageLine.isEmpty()) {
@@ -225,6 +223,7 @@ public class MessagePersistenceManager {
 
     private void writeToFile(String content, int mode) {
         try {
+            Log.wtf(TAG, "Create and write file");
             FileOutputStream outputStream = context.openFileOutput(delayedMessagesFileName, mode);
             outputStream.write(content.getBytes());
             outputStream.close();

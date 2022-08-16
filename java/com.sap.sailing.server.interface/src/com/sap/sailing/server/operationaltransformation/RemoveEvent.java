@@ -24,14 +24,6 @@ public class RemoveEvent extends AbstractEventOperation<Void> {
         return null;
     }
 
-    /**
-     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
-     */
-    @Override
-    public boolean isRequiresExplicitTransitiveReplication() {
-        return false;
-    }
-    
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         toState.removeEvent(getId());

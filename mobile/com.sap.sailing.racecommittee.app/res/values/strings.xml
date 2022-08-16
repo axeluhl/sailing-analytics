@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"></string>
+<resources>
     <string name="log_file_template" translatable="false">sap_rc_log_%s.txt</string>
     <string name="crash_file_name" translatable="false">sap_rc_crash_%s.txt</string>
 
@@ -191,7 +188,7 @@
     <string name="confirm_tracking_list">@string/publish_button_empty</string>
     <string name="snap">Snap</string>
     <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">Do you want to log out and log in as a new user? All your races will still be monitored.</string>
+    <string name="logout_dialog_message">Do you want to log out and log in as a new user?</string>
     <string name="change_dialog_title">Change Regatta</string>
     <string name="change_dialog_message">Do you want to change a regatta and/or the area? Currently monitored races will be disconnected.</string>
     <string name="logout">Log out</string>
@@ -258,8 +255,6 @@
     <string name="race_start_in_4_minutes">4 Minutes</string>
     <string name="race_start_in_2_minutes">2 Minutes</string>
     <string name="race_start_in_1_minute">1 Minute</string>
-    <string name="race_start_time_in">-%s</string>
-    <string name="race_start_time_ago">%s</string>
     <string name="race_set_time">Set Time</string>
     <string name="race_reset_course">Reset Course</string>
     <string name="no_course_active">No course active</string>
@@ -307,13 +302,11 @@
     <string name="login_sub_text">Please select a regatta</string>
     <string name="login_onboarding_text">Onboarding</string>
     <string name="sign_up">Sign Me Up</string>
-    <string name="wind_display">dd</string>
     <string name="flags_abandon">Abandon</string>
     <string name="flags_recall">Recall</string>
     <string name="flags_course">Course</string>
     <string name="flags_more">Finish</string>
     <string name="flags_postpone">Postpone</string>
-    <string name="flags_dependent_races">of dependent races</string>
     <string name="race_select">Select a Race</string>
 
     <string name="gate_start_pathfinder">Pathfinder</string>
@@ -351,8 +344,8 @@
     <string name="flag_ap_desc">Postpone upcoming races</string>
     <string name="flag_ap_alpha_desc">Postpone, no more racing today</string>
     <string name="flag_ap_hotel_desc">Postpone, more information ashore</string>
-    <string name="flag_ap_alpha"><![CDATA[AP & Alpha]]></string>
-    <string name="flag_ap_hotel"><![CDATA[AP & Hotel]]></string>
+    <string name="flag_ap_alpha">AP &amp; Alpha</string>
+    <string name="flag_ap_hotel">AP &amp; Hotel</string>
     <string name="flag_xray">Xray</string>
     <string name="flag_xray_desc">Individual Recall</string>
     <string name="flag_first_subst">1st Sub</string>
@@ -360,8 +353,8 @@
     <string name="flag_blue">Blue</string>
     <string name="flag_blue_desc">Begin Finish Phase</string>
     <string name="flag_november_desc">Abandon all started races</string>
-    <string name="flag_november_alpha"><![CDATA[November & Alpha]]></string>
-    <string name="flag_november_hotel"><![CDATA[November & Hotel]]></string>
+    <string name="flag_november_alpha">"November &amp; Alpha"</string>
+    <string name="flag_november_hotel">"November &amp; Hotel"</string>
     <string name="flag_november_alpha_desc">Abandon, no more racing today</string>
     <string name="flag_november_hotel_desc">Abandon, more information ashore</string>
     <string name="race_reset_confirm">Reset Race</string>
@@ -388,7 +381,6 @@
     <string name="finishing_started">First in finish at %1$s</string>
     <string name="finishing_started_since">(%s)</string>
     <string name="finishing_done">Down now</string>
-
     <string name="finished_recording">Recording</string>
     <string name="finished_replay">Replay Voice</string>
     <string name="finished_list">Finish List</string>
@@ -439,7 +431,6 @@
     <string name="events_waiting_to_be_sent"><![CDATA[Currently %1$d events waiting to be sent.\nLast successful sent was at: %2$s.]]></string>
     <string name="no_event_to_be_sent">Currently no event waiting to be sent.</string>
     <string name="never">never</string>
-    <string name="connected_to_wp">Connected to: %1$s\n%2$s\nBoundService:%3$s</string>
     <string name="theme_changed_title">Theme Change</string>
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
@@ -569,4 +560,7 @@
 
     <string name="competitor_merge_error_message">This competitor was changed from another device and you have changed the same data. Please be sure, that this data is correct now.</string>
 
+    <string name="finishing_revoke">Revoke</string>
+    <string name="error_revoke_finished">Cannot revoke finished time</string>
+    <string name="error_revoke_finishing">Cannot revoke finishing time</string>
 </resources>

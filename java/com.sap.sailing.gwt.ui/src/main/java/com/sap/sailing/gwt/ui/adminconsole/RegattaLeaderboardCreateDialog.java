@@ -17,16 +17,9 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
         super(stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringMessages,
                 errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards),
                 callback);
-        nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("NameTextBox");
-        nameTextBox.setVisibleLength(50);
-        // the name of the regatta leaderboard will be derived from the selected regatta
-        nameTextBox.setEnabled(false);
-
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);
-
         regattaListBox = createSortedRegattaListBox(existingRegattas, null);
         regattaListBox.ensureDebugId("RegattaListBox");
         regattaListBox.addChangeHandler(new ChangeHandler() {
@@ -34,11 +27,11 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
                 int selectedIndex = regattaListBox.getSelectedIndex();
                 if (selectedIndex > 0) {
                     nameTextBox.setText(regattaListBox.getValue(selectedIndex)); 
+                    validateAndUpdate();
                 }
                 adjustVisibilityOfResultDiscardingRuleComponent();
             }
         });
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
     }
-
 }

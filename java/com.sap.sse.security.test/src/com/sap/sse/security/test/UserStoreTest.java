@@ -52,7 +52,7 @@ public class UserStoreTest {
      */
     @Test
     public void testDeleteUserWithPreference() throws UserManagementException {
-        userStore.unsetPreference(username, prefKey);
+        userStore.deleteUser(username);
         assertNull(prefValue, userStore.getPreference(username, prefKey));
     }
 }

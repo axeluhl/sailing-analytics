@@ -15,7 +15,6 @@ public class RaceTrackerListenersTest {
         final RaceTrackerListeners listeners = new RaceTrackerListeners();
         for (int i = 0; i < 2; i++) {
             listeners.addListener(new RaceTracker.Listener() {
-
                 @Override
                 public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
                     listeners.removeListener(this);

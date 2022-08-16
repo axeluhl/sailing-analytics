@@ -57,7 +57,7 @@ public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievin
         TimeRange protestTime = new TimeRangeImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(Duration.ONE_MINUTE.times(90)));
         RaceLogProtestStartTimeEvent expectedEventYellow = new RaceLogProtestStartTimeEventImpl(now, author, 0, protestTime);
         yellowLog.add(expectedEventYellow);
-        RaceLogStartTimeEvent expectedEventBlue = new RaceLogStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
+        RaceLogStartTimeEvent expectedEventBlue = new RaceLogStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now(), /* courseAreaId */ null);
         blueLog.add(expectedEventBlue);
         // these events are now expected to be stored persistently in the race log store
         //getLastError() is now deprecated - seems to run fine without (at least locally)

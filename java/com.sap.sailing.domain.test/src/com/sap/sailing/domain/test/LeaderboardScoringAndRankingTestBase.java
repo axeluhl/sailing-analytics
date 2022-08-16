@@ -38,9 +38,10 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTest {
     protected ArrayList<Series> series;
@@ -54,7 +55,7 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
             double[][] scoresAfterNRaces, TimePoint timePoint, Competitor[] competitors) throws NoWindException {
         for (int competitorIndex=0; competitorIndex<scoresAfterNRaces.length; competitorIndex++) {
             final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule()
-                    .getDiscardedRaceColumns(competitors[competitorIndex], leaderboard, raceColumnsToConsider, timePoint);
+                    .getDiscardedRaceColumns(competitors[competitorIndex], leaderboard, raceColumnsToConsider, timePoint, leaderboard.getScoringScheme());
             for (int raceColumnIndex=0; raceColumnIndex<raceColumnsToConsider.size(); raceColumnIndex++) {
                 assertEquals(scoresAfterNRaces[competitorIndex][raceColumnIndex],
                         leaderboard.getNetPoints(competitors[competitorIndex], raceColumnsToConsider.get(raceColumnIndex),
@@ -88,7 +89,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         for (Competitor[] competitorList : competitorLists) {
             RaceColumn raceColumn = columnIter.next();
             final Map<Competitor, TimePoint> lastMarkPassingTimes = lastMarkPassingTimesForCompetitors[i];
-            final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Left StartBuoy"), new MarkImpl("Right StartBuoy"), "Start"));
+            final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Left StartBuoy"),
+                    new MarkImpl("Right StartBuoy"), "Start", "Start"));
             final Waypoint finish = new WaypointImpl(new MarkImpl("FinishBuoy"));
             TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startTimes[i], Arrays.asList(competitorList)) {
                 private static final long serialVersionUID = 1L;
@@ -97,6 +99,12 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
                     ArrayListNavigableSet<MarkPassing> result = new ArrayListNavigableSet<>(new TimedComparator());
                     result.add(new MarkPassingImpl(lastMarkPassingTimes.get(competitor), finish, competitor));
                     return result;
+                }
+                @Override
+                public Duration getTimeSailedSinceRaceStart(Competitor competitor, TimePoint timePoint) {
+                    final TimePoint timePointOfFinishMarkPassing = getMarkPassings(competitor).last().getTimePoint();
+                    final TimePoint to = timePointOfFinishMarkPassing.before(timePoint) ? timePointOfFinishMarkPassing : timePoint;
+                    return to.before(getStartOfRace()) ? null : getStartOfRace().until(to);
                 }
             };
             trackedRace.getRace().getCourse().addWaypoint(0, start);

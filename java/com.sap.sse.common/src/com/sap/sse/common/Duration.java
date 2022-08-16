@@ -3,6 +3,7 @@ package com.sap.sse.common;
 import java.io.Serializable;
 
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 /**
  * A time duration that can be converted to various time units and that interoperates with {@link TimePoint}.
@@ -12,6 +13,11 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  */
 public interface Duration extends Serializable, Comparable<Duration> {
     
+    /**
+     * This NULL {@link Duration} is defined as a {@link MillisecondsDurationImpl}, therefore it is only accurate up to
+     * full milliseconds. If a higher accuracy for calculations is needed (like in the case of
+     * {@link ORCPerformanceCurve}), it is recommended to use a new {@link SecondsDurationImpl} object instead.
+     */
     static final Duration NULL = new MillisecondsDurationImpl(0);
     static final Duration ONE_MILLISECOND = new MillisecondsDurationImpl(1);
     static final Duration ONE_SECOND = new MillisecondsDurationImpl(1000);
@@ -20,6 +26,15 @@ public interface Duration extends Serializable, Comparable<Duration> {
     static final Duration ONE_DAY = ONE_HOUR.times(24);
     static final Duration ONE_WEEK = ONE_DAY.times(7);
     static final Duration ONE_YEAR = ONE_DAY.times(365); // well, leap years have 366 days, but this should be close enough...
+    static final Duration FOREVER = new MillisecondsDurationImpl(Long.MAX_VALUE);
+    
+    static Duration ofMillis(long millis) {
+        return new MillisecondsDurationImpl(millis);
+    }
+    
+    static Duration ofSeconds(double seconds) {
+        return new SecondsDurationImpl(seconds);
+    }
     
     long asMillis();
     

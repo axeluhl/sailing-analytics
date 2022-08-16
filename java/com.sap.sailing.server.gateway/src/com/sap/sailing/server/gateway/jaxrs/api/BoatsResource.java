@@ -13,8 +13,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
@@ -44,9 +44,7 @@ public class BoatsResource extends AbstractSailingServerResource {
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             BoatJsonSerializer boatJsonSerializer = BoatJsonSerializer.create();
-            String jsonString = boatJsonSerializer.serialize(boat).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                    .build();
+            response = Response.ok(streamingOutput(boatJsonSerializer.serialize(boat))).build();
         }
         return response;
     }

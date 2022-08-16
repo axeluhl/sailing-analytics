@@ -18,19 +18,22 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 /**
  * Base Activity for all desktop multi-regatta-event pages.
  *
- * @param <PLACE> The concrete {@link AbstractMultiregattaEventPlace} subclass, this instance is bound to.
+ * @param <PLACE>
+ *            The concrete {@link AbstractMultiregattaEventPlace} subclass, this instance is bound to.
  */
-public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMultiregattaEventPlace> implements EventMultiregattaView.Presenter {
+public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMultiregattaEventPlace>
+        implements EventMultiregattaView.Presenter {
 
     private EventMultiregattaView currentView = new TabletAndDesktopMultiRegattaEventView();
 
-    public EventMultiregattaActivity(AbstractMultiregattaEventPlace place, EventViewDTO eventDTO, EventClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
+    public EventMultiregattaActivity(AbstractMultiregattaEventPlace place, EventViewDTO eventDTO,
+            EventClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator,
+            NavigationPathDisplay navigationPathDisplay) {
         super(place, eventDTO, clientFactory, homePlacesNavigator);
-        
+
         initNavigationPath(navigationPathDisplay);
     }
-    
+
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
         final List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
         navigationPathDisplay.showNavigationPath(navigationItems.toArray(new NavigationItem[navigationItems.size()]));
@@ -42,16 +45,21 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
         panel.setWidget(currentView);
         currentView.navigateTabsTo(currentPlace);
     }
-    
+
+    @Override
+    public com.google.web.bindery.event.shared.EventBus getEventBus() {
+        return clientFactory.getEventBus();
+    }
+
     @Override
     public boolean needsSelectionInHeader() {
         return false;
     }
-    
+
     @Override
     public void forPlaceSelection(PlaceCallback callback) {
     }
-    
+
     @Override
     public boolean showRegattaMetadata() {
         return false;

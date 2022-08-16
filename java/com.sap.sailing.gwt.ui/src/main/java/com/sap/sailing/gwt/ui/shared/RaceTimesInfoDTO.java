@@ -22,6 +22,7 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public Date startOfTracking;
     public Date endOfTracking;
     public Date endOfRace;
+    public Date raceFinishingTime;
     public Date raceFinishedTime;
     public Date newestTrackingEvent;
     
@@ -87,7 +88,11 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public Date getEndOfRace() {
         return endOfRace;
     }
-    
+
+    public Date getFinishingTime() {
+        return raceFinishingTime;
+    }
+
     public Date getFinishedTime() {
         return raceFinishedTime;
     }

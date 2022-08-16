@@ -3,6 +3,13 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * See also <a href="https://www.igtimi.com/api/v1/data_types">https://www.igtimi.com/api/v1/data_types</a> for a list of data types
+ * published by the Igtimi API.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public enum Type {
     gps_latlong(1, GpsLatLong.class),
     gps_quality_indicator(2, GpsQualityIndicator.class),
@@ -18,7 +25,6 @@ public enum Type {
     AWS(12, AWS.class),
     ant_hrm(13, AntHrm.class),
     ant_cbst(14, AntCbst.class),
-    battery_level(15, BatteryLevel.class),
     File(16, File.class);
 
     public static Type valueOf(int code) {

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.tracking;
 
+import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
@@ -13,6 +14,6 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
  * If 'canBoatsOfCompetitorsChangePerRace' is true the type must be {@link Competitor}    
  * If 'canBoatsOfCompetitorsChangePerRace' is false the type must be {@link CompetitorWithBoat}    
  */
-public interface RaceLogRegisterCompetitorEvent extends RaceLogEvent, RegisterCompetitorEvent<RaceLogEventVisitor> {
+public interface RaceLogRegisterCompetitorEvent extends RaceLogEvent, RegisterCompetitorEvent<RaceLogEventVisitor>, InvalidatesLeaderboardCache {
     Boat getBoat();
 }

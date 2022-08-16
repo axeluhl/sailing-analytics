@@ -7,11 +7,26 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.domain.common.BranchIOConstants;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
+/**
+ * A place that can be used to display QR codes that direct users to branch.io using deep links which then point to an
+ * app, together with configuration parameters that branch.io maps into the app runtime even through an installation
+ * process. See
+ * <a href="https://dashboard.branch.io/link-settings/general">https://dashboard.branch.io/link-settings/general</a>
+ * for details. There, as the "Default URL", this QRCodePlace is configured, using URLs looking like this:<p>
+ * 
+ * <pre>
+ *     https://my.sapsailing.com/gwt/Home.html#QRCodePlace:mode=COMPETITOR
+ * </pre>
+ * The URL fragment's {@code mode} parameter is used to configure the kind of link that is rendered in the QR code.
+ *
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class QRCodePlace extends AbstractBasePlace {
 
     public static final String PARAM_REGATTA_NAME = "regatta_name";
@@ -31,19 +46,41 @@ public class QRCodePlace extends AbstractBasePlace {
     private String targetServer;
 
     public enum InvitationMode {
-        COMPETITOR_2,
-        COMPETITOR,
-        PUBLIC_INVITE,
-        BOUY_TENDER
+        COMPETITOR(MailInvitationType.SailInsight1, /* isCompetitorBoatMarkMode */ true, /* isPublicInvite */ false),
+        COMPETITOR_2(MailInvitationType.SailInsight2, /* isCompetitorBoatMarkMode */ true, /* isPublicInvite */ false),
+        COMPETITOR_3(MailInvitationType.SailInsight3, /* isCompetitorBoatMarkMode */ true, /* isPublicInvite */ false),
+        PUBLIC_INVITE(MailInvitationType.SailInsight2, /* isCompetitorBoatMarkMode */ false, /* isPublicInvite */ true),
+        PUBLIC_INVITE3(MailInvitationType.SailInsight3, /* isCompetitorBoatMarkMode */ false, /* isPublicInvite */ true),
+        BOUY_TENDER(null, /* isCompetitorBoatMarkMode */ false, /* isPublicInvite */ false);
+        
+        private InvitationMode(MailInvitationType mailInvitationType, boolean isCompetitorBoatMarkMode, boolean isPublicInvite) {
+            this.mailInvitationType = mailInvitationType;
+            this.isCompetitorBoatMarkMode = isCompetitorBoatMarkMode;
+            this.isPublicInvite = isPublicInvite;
+        }
+        
+        public MailInvitationType getMailInvitationType() {
+            return mailInvitationType;
+        }
+        public boolean isCompetitorBoatMarkMode() {
+            return isCompetitorBoatMarkMode;
+        }
+        public boolean isPublicInvite() {
+            return isPublicInvite;
+        }
+
+        private final MailInvitationType mailInvitationType;
+        private final boolean isCompetitorBoatMarkMode;
+        private final boolean isPublicInvite;
     }
 
     public QRCodePlace(String token) {
         super(token);
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
-            if (mode == InvitationMode.PUBLIC_INVITE) {
+            targetServer = Window.Location.getParameter(PARAM_SERVER);
+            if (mode.isPublicInvite()) {
                 // alternative direct link version
-                targetServer = Window.Location.getParameter(PARAM_SERVER);
                 publicRegattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
                 regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
                 if (publicRegattaName == null || regattaRegistrationLinkSecret == null || targetServer == null) {
@@ -150,8 +187,8 @@ public class QRCodePlace extends AbstractBasePlace {
         return pairs;
     }
 
-    public String getPublicInviteBranchIOUrl() {
-        return BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?" + QRCodePlace.PARAM_REGATTA_NAME + "="
+    public String getPublicInviteBranchIOUrl(MailInvitationType mailInvitationType) {
+        return mailInvitationType.getBranchIOopenRegattaURL() + "?" + QRCodePlace.PARAM_REGATTA_NAME + "="
                 + encodeUrl(publicRegattaName) + "&" + QRCodePlace.PARAM_REGATTA_SECRET + "="
                 + encodeUrl(regattaRegistrationLinkSecret) + "&" + QRCodePlace.PARAM_SERVER + "="
                 + encodeUrl(targetServer);

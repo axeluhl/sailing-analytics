@@ -33,6 +33,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
         mainMedia = new MainMedia(navigator);
         
         initWidget(uiBinder.createAndBindUi(this));
+
     }
     
     @Override

@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDeviceIdentifier {    
@@ -32,7 +32,7 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     }
     
     public TrackFileImportDeviceIdentifierImpl(UUID id, String fileName, String trackName, TimePoint timePoint) {
-        this(id, computeStringRepresentation(id, trackName, fileName, timePoint), fileName,
+        this(id, computeStringRepresentation(id, fileName, trackName, timePoint), fileName,
                 trackName, timePoint);
         cache.put(id, this);
     }
@@ -104,16 +104,10 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
 
     /**
      * Computes unique string representation for this device identifier. This string representaion should be human
-     * readable.
+     * readable.<p>
      * 
      * old computed representation algorithm: String.format("%s: %s\n  @%s(uploaded %s)", id.toString(), trackName,
      * fileName, timePoint)
-     * 
-     * @param id
-     * @param fileName
-     * @param trackName
-     * @param timePoint
-     * @return
      */
     
     private static final String computeStringRepresentation(UUID id, String fileName, String trackName,

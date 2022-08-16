@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
@@ -19,11 +20,11 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
  *
  */
 public class BoatClassCacheTest {
-    private SharedDomainFactory sharedDomainFactory;
+    private SharedDomainFactory<RaceLogResolver> sharedDomainFactory;
     
     @Before
     public void setUp() {
-        sharedDomainFactory = new SharedDomainFactoryImpl(/* raceLogResolver */ null);
+        sharedDomainFactory = new SharedDomainFactoryImpl<>(/* raceLogResolver */ null);
     }
     
     @Test

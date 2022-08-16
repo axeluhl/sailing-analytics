@@ -1,31 +1,57 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
-	<ui:style>
-	.holder {
-		cursor: pointer;
-	}
-	.imageOuterBox {
-		display: inline-block;
-		text-align: center;
-		
-	}
-	
-	.imageHolder {
-		display: inline-block;
- 		padding: 0px;
-		box-sizing: border-box;
- 		background-size: cover; 
- 		background-repeat: no-repeat;
- 		background-position:center;
- 		width: 100%;
- 		padding-top: 100%;
- 		height: 0;
- 		background-color: #ebebeb;
-		cursor: pointer;
-	} 
-	
-	</ui:style>
-	<div style="margin-bottom: 10px;">
-		<div class="{style.imageHolder}" ui:field="imageHolderUi"/>
-	</div>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+        xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res"
+        type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res"
+        type="com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources" />
+    <ui:with field="res_home"
+        type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
+    <ui:style>
+    .holder {
+        cursor: pointer;
+    }
+    .imageOuterBox {
+        display: inline-block;
+        text-align: center;
+        
+    }
+    .imageHolder {
+        display: inline-block;
+        padding: 0px;
+        box-sizing: border-box;
+        background-size: cover; 
+        background-repeat: no-repeat;
+        background-position:center;
+        width: 100%;
+        padding-top: 100%;
+        height: 0;
+        background-color: #ebebeb;
+        cursor: pointer;
+        margin-bottom: 10px;
+    } 
+    .overlayWrapper {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: block;
+        top: 0;
+        left: 0;
+        padding: 0 5px 10px 5px;
+    }
+    .overlay {
+        position: relative;
+    }
+    </ui:style>
+    <g:HTMLPanel>
+        <div class="{style.overlayWrapper}">
+            <div class="{res_home.sharedHomeCss.overlay} {style.overlay}"
+                ui:field="overlay" style="display:none;">
+                <g:Anchor ui:field="deleteAnchor"
+                    href="javascript:;"
+                    styleName="{res.mainCss.button} {local_res.css.button} {local_res.css.thumbnail_delete_button}" />
+            </div>
+        </div>
+        <div class="{style.imageHolder}" ui:field="imageHolderUi"></div>
+    </g:HTMLPanel>
 </ui:UiBinder>

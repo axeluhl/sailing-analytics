@@ -213,7 +213,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     }
     
     private static RaceLogStartTimeEvent createStartTimeEvent(TimePoint startTime) {
-        return new RaceLogStartTimeEventImpl(startTime, new LogEventAuthorImpl("Author", /* priority */ 0), /* pass */ 0, startTime);
+        return new RaceLogStartTimeEventImpl(startTime, new LogEventAuthorImpl("Author", /* priority */ 0), /* pass */ 0, startTime, /* courseAreaId */ null);
     }
     
     private static class StartTimeVisitorAnswer implements Answer<Void> {

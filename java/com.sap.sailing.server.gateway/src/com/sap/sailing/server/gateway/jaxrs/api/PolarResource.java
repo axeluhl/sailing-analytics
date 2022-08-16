@@ -32,12 +32,13 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrack;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
+import com.sap.sailing.polars.windestimation.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
@@ -161,8 +162,9 @@ public class PolarResource extends AbstractSailingServerResource {
                 JSONArray resultAsJson = new JSONArray();
                 WindJsonSerializer serializer = new WindJsonSerializer(new PositionJsonSerializer());
                 PolarDataService service = getService().getPolarDataService();
-                ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                final ManeuverBasedWindEstimationTrack maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
+                maneuverBasedWindEstimationTrackImpl.initialize();
                 maneuverBasedWindEstimationTrackImpl.lockForRead();
                 try {
                     for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
@@ -171,7 +173,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } finally {
                     maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
                 }
-                response = Response.ok(resultAsJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(resultAsJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -207,7 +209,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } else {
                     clusters = maneuverBasedWindEstimationTrackImpl.getClusters().stream();
                 }
-                response = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(clusters, /* waitForLatest */ true),
+                response = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(clusters),
                         MediaType.TEXT_PLAIN).build();
             }
         }

@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInfo
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
@@ -42,11 +43,12 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPla
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserProfileSubscriptionsPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
-        EventsPlace.Tokenizer.class, SolutionsPlace.Tokenizer.class, WhatsNewPlace.Tokenizer.class,
-        SponsoringPlace.Tokenizer.class, SearchResultPlace.Tokenizer.class, StartPlace.Tokenizer.class,
-        RegattaPlace.Tokenizer.class, SeriesPlace.Tokenizer.class,
+        EventsPlace.Tokenizer.class, SolutionsPlace.Tokenizer.class, SubscriptionPlace.Tokenizer.class,
+        WhatsNewPlace.Tokenizer.class, SponsoringPlace.Tokenizer.class, SearchResultPlace.Tokenizer.class,
+        StartPlace.Tokenizer.class, RegattaPlace.Tokenizer.class, SeriesPlace.Tokenizer.class,
         // Event tab places...
         EventDefaultPlace.Tokenizer.class,
         // Multiregatta places:
@@ -77,6 +79,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileS
         UserProfilePreferencesPlace.Tokenizer.class,
         SailorProfilePlace.Tokenizer.class,
         UserProfileSettingsPlace.Tokenizer.class,
+        UserProfileSubscriptionsPlace.Tokenizer.class,
         AuthenticationPlace.Tokenizer.class,
         ConfirmationPlace.Tokenizer.class,
         PasswordResetPlace.Tokenizer.class,

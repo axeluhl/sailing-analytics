@@ -98,7 +98,7 @@ public class CourseFragmentName extends CourseFragment {
         if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();
         } else {
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

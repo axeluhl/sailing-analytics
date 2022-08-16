@@ -21,9 +21,9 @@ import com.sap.sse.common.Duration;
 
 /**
  * Creates a {@link Competitor} if {@link #boatId} is {@code null}, or a {@link CompetitorWithBoat} otherwise. See also
- * {@link CompetitorAndBoatStore#getOrCreateCompetitor(Serializable, String, String, Color, String, URI, DynamicTeam, Double, Duration, String)}
+ * {@link CompetitorAndBoatStore#getOrCreateCompetitor(Serializable, String, String, Color, String, URI, DynamicTeam, Double, Duration, String, boolean)}
  * and
- * {@link CompetitorAndBoatStore#getOrCreateCompetitorWithBoat(Serializable, String, String, Color, String, URI, DynamicTeam, Double, Duration, String, com.sap.sailing.domain.base.impl.DynamicBoat)},
+ * {@link CompetitorAndBoatStore#getOrCreateCompetitorWithBoat(Serializable, String, String, Color, String, URI, DynamicTeam, Double, Duration, String, com.sap.sailing.domain.base.impl.DynamicBoat, boolean)},
  * respectively. This operation assumes that the boat creation has been replicated before the competitor creation in
  * case a non-{@code null} boat ID has been provided, so the boat is expected to be found by a
  * {@link CompetitorAndBoatStore#getExistingBoatById(Serializable) lookup by ID}.
@@ -79,7 +79,7 @@ public class CreateCompetitor extends AbstractRacingEventServiceOperation<Compet
         if (boatId == null) {
             result = toState.getBaseDomainFactory().getCompetitorAndBoatStore()
                 .getOrCreateCompetitor(competitorId, name, shortName, displayColor, email, flagImageUri,
-                        team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                        team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, /* storePersistently */ true);
         } else {
             final DynamicBoat boat = toState.getBaseDomainFactory().getCompetitorAndBoatStore().getExistingBoatById(boatId);
             if (boat == null) {
@@ -87,7 +87,7 @@ public class CreateCompetitor extends AbstractRacingEventServiceOperation<Compet
             }
             result = toState.getBaseDomainFactory().getCompetitorAndBoatStore()
                     .getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageUri,
-                            team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                            team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat, /* storePersistently */ true);
         }
         return result;
     }

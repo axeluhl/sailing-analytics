@@ -15,7 +15,6 @@ import java.util.function.Function;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -44,6 +43,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
@@ -83,14 +83,14 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* courseArea */ null,
-                /* controlTrackingFromStartAndFinishTimes */ false, TimeOnTimeAndDistanceRankingMetric::new,
-                /* registrationLinkSecret */ UUID.randomUUID().toString());
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                TimeOnTimeAndDistanceRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
         MarkImpl left = new MarkImpl("Left lee gate buoy");
         MarkImpl right = new MarkImpl("Right lee gate buoy");
-        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate");
+        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate", "Lee Gate");
         Mark windwardMark = new MarkImpl("Windward mark");
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));
@@ -102,7 +102,7 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
                 tr->new TimeOnTimeAndDistanceRankingMetric(tr,
                         timeOnTimeFactors, // time-on-time
-                        c->new MillisecondsDurationImpl((long) (1000.*timeOnDistanceFactors.apply(c)))), mock(RaceLogResolver.class));
+                        c->new MillisecondsDurationImpl((long) (1000.*timeOnDistanceFactors.apply(c)))), mock(RaceLogAndTrackedRaceResolver.class), null);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(1, 0);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(0, -0.000001), timePointForFixes));
@@ -176,7 +176,8 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
         RankingMetric.CompetitorRankingInfo c1RI = rankingInfo.getCompetitorRankingInfo().apply(c1);
         RankingMetric.CompetitorRankingInfo c2RI = rankingInfo.getCompetitorRankingInfo().apply(c2);
         assertEquals(c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
-                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(), 0.00001);
+                c2RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds(),
+                /* relative accuracy */ 0.0000001 * c1RI.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead().asSeconds());
     }
 
     @Test

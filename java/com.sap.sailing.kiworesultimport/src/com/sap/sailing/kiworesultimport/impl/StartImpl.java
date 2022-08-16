@@ -46,7 +46,9 @@ public class StartImpl extends AbstractNodeWrapper implements Start {
 
     @Override
     public TimePoint getTimePoint() throws ParseException {
-        return new MillisecondsTimePoint(df.parse(getStartTimeAsString()));
+        synchronized (df) {
+            return new MillisecondsTimePoint(df.parse(getStartTimeAsString()));
+        }
     }
 
     @Override

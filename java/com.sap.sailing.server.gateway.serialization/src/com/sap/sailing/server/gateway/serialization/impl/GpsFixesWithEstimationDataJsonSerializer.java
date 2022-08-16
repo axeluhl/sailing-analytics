@@ -7,9 +7,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
-import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
@@ -58,7 +58,7 @@ public class GpsFixesWithEstimationDataJsonSerializer implements CompetitorTrack
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
         ManeuverDetectorWithEstimationDataSupportDecoratorImpl estimationDataSupportDecoratorImpl = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
                 maneuverDetector, null);
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         track.lockForRead();
         try {
             for (GPSFixMoving gpsFix : track.getFixes(from, true, to, true)) {

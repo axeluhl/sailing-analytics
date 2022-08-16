@@ -12,6 +12,6 @@ import com.sap.sse.common.NamedWithID;
  * @author Axel Uhl (D043530)
  *
  */
-public interface CourseArea extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
+public interface CourseArea extends NamedWithID, IsManagedByCache<SharedDomainFactory<?>> {
     UUID getId();
 }

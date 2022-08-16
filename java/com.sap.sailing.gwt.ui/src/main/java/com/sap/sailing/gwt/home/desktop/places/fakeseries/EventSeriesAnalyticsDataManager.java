@@ -74,12 +74,12 @@ public class EventSeriesAnalyticsDataManager {
             SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
-                    competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
+                    competitorSelectionProvider, timer, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
-                    flagImageResolver, availableDetailTypes);
+                    flagImageResolver, availableDetailTypes, sailingCF);
         }
         return overallLeaderboardPanel;
     }
@@ -110,7 +110,7 @@ public class EventSeriesAnalyticsDataManager {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingServiceFactory, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,
-                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver, availableDetailTypes);
+                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver, availableDetailTypes, sailingCF);
         }
         return multiLeaderboardPanel;
     }

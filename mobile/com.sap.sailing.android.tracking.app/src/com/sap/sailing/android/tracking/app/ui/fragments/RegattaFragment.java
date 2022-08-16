@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
@@ -367,21 +368,13 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     private void setCountdownTime(int days, int hours, int minutes) {
-        TextView daysTextView = (TextView) getActivity().findViewById(R.id.starts_in_days);
-        TextView hoursTextView = (TextView) getActivity().findViewById(R.id.starts_in_hours);
-        TextView minutesTextView = (TextView) getActivity().findViewById(R.id.starts_in_minutes);
+        TextView daysTextView = getActivity().findViewById(R.id.starts_in_days);
+        TextView hoursTextView = getActivity().findViewById(R.id.starts_in_hours);
+        TextView minutesTextView = getActivity().findViewById(R.id.starts_in_minutes);
 
-        TextView daysTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_days_label);
-        TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
-        TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
-
-        daysTextViewLabel.setText(getResources().getQuantityText(R.plurals.day, days));
-        hoursTextViewLabel.setText(getResources().getQuantityText(R.plurals.hour, hours));
-        minutesTextViewLabel.setText(getResources().getQuantityText(R.plurals.minute, minutes));
-
-        daysTextView.setText(String.format("%02d", days));
-        hoursTextView.setText(String.format("%02d", hours));
-        minutesTextView.setText(String.format("%02d", minutes));
+        daysTextView.setText(String.format("%02d", days, Locale.getDefault()));
+        hoursTextView.setText(String.format("%02d", hours, Locale.getDefault()));
+        minutesTextView.setText(String.format("%02d", minutes, Locale.getDefault()));
     }
 
     public void setFragmentWatcher(FragmentWatcher fWatcher) {

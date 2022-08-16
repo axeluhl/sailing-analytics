@@ -37,7 +37,7 @@ public class PolarStatisticImpl implements PolarStatistic {
         if (settings.useOnlyEstimatedForWindDirection()) {
             windSourcesToExclude = collectWindSourcesToIgnoreForBearing(trackedRace, /* exclude course based */true);
         } else {
-            windSourcesToExclude = new HashSet<WindSource>();
+            windSourcesToExclude = new HashSet<>();
         }
 
         Wind windEstimated = trackedRace.getWind(position, fix.getTimePoint(), windSourcesToExclude);
@@ -109,6 +109,10 @@ public class PolarStatisticImpl implements PolarStatistic {
             Iterable<WindSource> trackBasedSources = race.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION);
             for (WindSource trackBasedSource : trackBasedSources) {
                 windSourcesToExclude.add(trackBasedSource);
+            }
+            Iterable<WindSource> maneuverBasedSources = race.getWindSources(WindSourceType.MANEUVER_BASED_ESTIMATION);
+            for (WindSource maneuverBasedSource : maneuverBasedSources) {
+                windSourcesToExclude.add(maneuverBasedSource);
             }
             Iterable<WindSource> rcSources = race.getWindSources(WindSourceType.RACECOMMITTEE);
             for (WindSource rcSource : rcSources) {

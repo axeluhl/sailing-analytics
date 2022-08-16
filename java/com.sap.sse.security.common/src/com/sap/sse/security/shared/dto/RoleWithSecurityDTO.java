@@ -16,8 +16,8 @@ public class RoleWithSecurityDTO extends RoleDTO implements SecuredDTO {
     }
 
     public RoleWithSecurityDTO(StrippedRoleDefinitionDTO roleDefinition, StrippedUserGroupDTO qualifiedForTenant,
-            StrippedUserDTO qualifiedForUser, QualifiedObjectIdentifier identifier) {
-        super(roleDefinition, qualifiedForTenant, qualifiedForUser);
+            StrippedUserDTO qualifiedForUser, boolean transitive, QualifiedObjectIdentifier identifier) {
+        super(roleDefinition, qualifiedForTenant, qualifiedForUser, transitive);
         this.identifier = identifier;
     }
 
@@ -47,7 +47,7 @@ public class RoleWithSecurityDTO extends RoleDTO implements SecuredDTO {
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredSecurityTypes.ROLE_ASSOCIATION;
     }
 

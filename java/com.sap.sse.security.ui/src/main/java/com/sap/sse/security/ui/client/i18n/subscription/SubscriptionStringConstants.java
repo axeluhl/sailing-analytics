@@ -1,0 +1,81 @@
+package com.sap.sse.security.ui.client.i18n.subscription;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.ConstantsWithLookup;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
+
+@DefaultLocale("en")
+public interface SubscriptionStringConstants extends ConstantsWithLookup {
+    public static final SubscriptionStringConstants INSTANCE = GWT.create(SubscriptionStringConstants.class);
+
+    String payment_interval_YEAR();
+    String payment_interval_MONTH();
+    String payment_interval_WEEK();
+    String payment_interval_DAY();
+    String support_subject();
+    
+    String businessModelTitle();
+    String businessModelDescription();
+    String free_subscription_plan_name();
+    String free_subscription_plan_description();
+    String free_subscription_plan_info();
+    String free_subscription_plan_price_info();
+    String free_subscription_plan_features();
+    String premium_name();
+    String premium_description();
+    String premium_price_info();
+    String premium_info();
+    String premium_features();
+    String data_mining_archive_name();
+    String data_mining_archive_description();
+    String data_mining_archive_price_info();
+    String data_mining_archive_info();
+    String data_mining_archive_features();
+    String data_mining_all_name();
+    String data_mining_all_description();
+    String data_mining_all_price_info();
+    String data_mining_all_info();
+    String data_mining_all_features();
+    String free_subscription_plan_shortname();
+    String premium_subscription_plan_shortname();
+    String datamining_subscription_plan_shortname();
+    String trial_name();
+    String trial_description();
+    String trial_price_info();
+    String trial_info();
+    String trial_features();
+    String features_map_analytics_title();
+    String features_map_analytics_description();
+    String features_simulator_title();
+    String features_simulator_description();
+    String features_advanced_leaderboard_info_title();
+    String features_advanced_leaderboard_info_description();
+    String features_competitor_analytics_title();
+    String features_competitor_analytics_description();
+    String features_maneuver_analytics_title();
+    String features_maneuver_analytics_description();
+    String features_wind_analytics_title();
+    String features_wind_analytics_description();
+    String features_limited_live_analytics_title();
+    String features_limited_live_analytics_description();
+    String features_full_live_analytics_title();
+    String features_full_live_analytics_description();
+    String features_organize_events_title();
+    String features_organize_events_description();
+    String features_events_with_more_regatta_title();
+    String features_events_with_more_regatta_description();
+    String features_connect_to_tractrac_title();
+    String features_connect_to_tractrac_description();
+    String features_imports_title();
+    String features_imports_description();
+    String features_media_management_title();
+    String features_media_management_description();
+    String features_analytic_charts_title();
+    String features_analytic_charts_description();
+    String features_media_tags_title();
+    String features_media_tags_description();
+    String features_scoring_title();
+    String features_scoring_description();
+    String features_data_mining_title();
+    String features_data_mining_description();
+}

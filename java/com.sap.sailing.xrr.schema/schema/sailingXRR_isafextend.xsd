@@ -2255,6 +2255,11 @@
           <xsd:documentation>Retired</xsd:documentation>
         </xsd:annotation>
       </xsd:enumeration>
+      <xsd:enumeration value="NSC">
+        <xsd:annotation>
+          <xsd:documentation>Did not sail the course</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
     </xsd:restriction>
   </xsd:simpleType>
   <xsd:simpleType name="IFCfcnGroup">

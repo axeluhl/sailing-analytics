@@ -32,10 +32,9 @@ public class StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
     @Override
     protected Flags performAnalysis() {
         RacingProcedureType type = procedureAnalyzer.analyze();
-        if (!(RacingProcedureType.RRS26.equals(type) || RacingProcedureType.SWC.equals(type))) {
+        if (!(RacingProcedureType.RRS26.equals(type) || RacingProcedureType.RRS26_3MIN.equals(type) || RacingProcedureType.SWC.equals(type))) {
             return null;
         }
-        
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogFlagEvent) {
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
@@ -48,10 +47,13 @@ public class StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
     }
     
     private boolean isStartModeFlagEvent(RaceLogFlagEvent event) {
+        final boolean result;
         // no matter if displayed or removed
         if (event.getLowerFlag().equals(Flags.NONE)) {
-            return startModeFlags.contains(event.getUpperFlag());
+            result = startModeFlags.contains(event.getUpperFlag());
+        } else {
+            result = false;
         }
-        return false;
+        return result;
     }
 }

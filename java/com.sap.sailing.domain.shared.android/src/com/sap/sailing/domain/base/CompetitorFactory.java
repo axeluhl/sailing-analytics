@@ -33,15 +33,20 @@ public interface CompetitorFactory {
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
     DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortName, Color displayColor, String email,
-            URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
+            URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, boolean storePersistently);
     
     /**
      * Updates only the competitor fields; the {@code boat} parameter is used only when the competitor needs to be
      * created because it doesn't exist yet. In this case the boat is assigned to the new competitor and stored in the
      * competitor and boat store. If changes to an existing competitor's {@link Boat} object shall be stored, use
-     * {@link CompetitorAndBoatStore#getOrCreateBoat(Serializable, String, BoatClass, String, Color)}.
+     * {@link CompetitorAndBoatStore#getOrCreateBoat(Serializable, String, BoatClass, String, Color, boolean)}.
+     * 
+     * @param storePersistently
+     *            if {@code true}, updates and creations will be store durably in the database; otherwise it is assumed
+     *            that the "creation" is caused by the loading process that fetches the objects from the persistence
+     *            layer; no need then to store them back to the DB. See also bug5106
      */
     DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName, Color displayColor, String email,
-            URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
+            URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat, boolean storePersistently);
 
 }

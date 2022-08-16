@@ -34,6 +34,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
     public CompetitorImpl(Serializable id, String name, String shortName, Color color, String email, URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+        assertFiniteTimeOnTimeFactor(timeOnTimeFactor);
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -45,6 +46,14 @@ public class CompetitorImpl implements DynamicCompetitor {
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
         this.searchTag = searchTag;
         this.listeners = new HashSet<CompetitorChangeListener>();
+    }
+
+    private Object writeReplace() {
+        if (CompetitorSerializationCustomizer.getCurrentCustomizer().removalOfPersonalDataNecessary(this)) {
+            return new CompetitorImpl(id, name, shortName, color, /* email */ null, flagImage, team, timeOnTimeFactor,
+                    timeOnDistanceAllowancePerNauticalMile, searchTag);
+        }
+        return this;
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -120,10 +129,10 @@ public class CompetitorImpl implements DynamicCompetitor {
         return getTeam() == null ? null : getTeam().getNationality();
     }
 
-    public Competitor resolve(SharedDomainFactory domainFactory) {
+    public Competitor resolve(SharedDomainFactory<?> domainFactory) {
         Competitor result = domainFactory
                 .getOrCreateCompetitor(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
-                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
+                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag, /* storePersistently */ true);
         return result;
     }
 
@@ -227,12 +236,19 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public void setTimeOnTimeFactor(Double timeOnTimeFactor) {
+        assertFiniteTimeOnTimeFactor(timeOnTimeFactor);
         Double oldTimeOnTimeFactor = this.timeOnTimeFactor;
         this.timeOnTimeFactor = timeOnTimeFactor;
         if (!Util.equalsWithNull(oldTimeOnTimeFactor, timeOnTimeFactor)) {
             for (CompetitorChangeListener listener : getListeners()) {
                 listener.timeOnTimeFactorChanged(oldTimeOnTimeFactor, timeOnTimeFactor);
             }
+        }
+    }
+
+    private void assertFiniteTimeOnTimeFactor(Double timeOnTimeFactor) {
+        if (timeOnTimeFactor != null && !Double.isFinite(timeOnTimeFactor)) {
+            throw new IllegalArgumentException("A competitor's time-on-time factor must be a finite number. "+timeOnTimeFactor+" is not.");
         }
     }
 
@@ -249,11 +265,11 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
-    public HasPermissions getType() {
+    public HasPermissions getPermissionType() {
         return SecuredDomainType.COMPETITOR;
     }
 

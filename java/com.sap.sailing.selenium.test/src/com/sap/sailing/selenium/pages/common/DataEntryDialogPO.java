@@ -109,4 +109,9 @@ public abstract class DataEntryDialogPO extends PageArea {
     public boolean isMakeDefaultButtonVisible() {
         return !driver.findElements(new BySeleniumId(ID_MAKE_DEFAULT_BUTTON)).isEmpty();
     }
+    
+    public void clickOkButtonOrThrow() {
+        waitUntil(okButton::isEnabled);
+        okButton.click();
+    }
 }

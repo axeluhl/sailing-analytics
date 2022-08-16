@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbstractFinishPositioningListFinder.CompetitorResultsAndTheirCreationTimePoints;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
@@ -24,7 +26,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.Util;
 
 public class ConfirmedFinishPositioningListFinderTest extends
-        PassAwareRaceLogAnalyzerTest<ConfirmedFinishPositioningListFinder, CompetitorResults> {
+        PassAwareRaceLogAnalyzerTest<ConfirmedFinishPositioningListFinder, CompetitorResultsAndTheirCreationTimePoints> {
     
     @Override
     protected ConfirmedFinishPositioningListFinder createAnalyzer(RaceLog raceLog) {
@@ -35,7 +37,8 @@ public class ConfirmedFinishPositioningListFinderTest extends
     protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogFinishPositioningConfirmedEvent event = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 1, passId, author);
         when(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(mockCompetitorResults());
-        return new TargetPair(Arrays.asList(event), event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        return new TargetPair(Arrays.asList(event), new CompetitorResultsAndTheirCreationTimePoints(
+                event.getPositionedCompetitorsIDsNamesMaxPointsReasons(), new HashMap<>()));
     }
     
     private CompetitorResults mockCompetitorResults(CompetitorResult... results) {
@@ -50,7 +53,7 @@ public class ConfirmedFinishPositioningListFinderTest extends
     public void testNullForNone() {
         RaceLogEvent event1 = createEvent(RaceLogEvent.class, 1);
         raceLog.add(event1);
-        assertNull(analyzer.analyze());
+        assertNull(analyzer.analyze().getCompetitorResults());
     }
 
     @Test
@@ -66,7 +69,7 @@ public class ConfirmedFinishPositioningListFinderTest extends
         when(event2.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(newerResults);
         raceLog.add(event1);
         raceLog.add(event2);
-        assertCompetitorResultsEquals(mockCompetitorResults(oldResultC1, newResultC2), analyzer.analyze());
+        assertCompetitorResultsEquals(mockCompetitorResults(oldResultC1, newResultC2), analyzer.analyze().getCompetitorResults());
     }
     
     @Test
@@ -98,7 +101,7 @@ public class ConfirmedFinishPositioningListFinderTest extends
         // e1ResultC1 is expected to be overruled by e4ResultC1 because the latter has the same priority and comes later
         // e1ResultC2 is expected to be overruled by e2ResultC2 due to same priority but later time; and e3ResultC2 has less priority
         // e3ResultC3 and e4ResultC4 stand by themselves; they are not overruled by anything
-        assertCompetitorResultsEquals(mockCompetitorResults(e4ResultC1, e2ResultC2, e3ResultC3, e4ResultC4), analyzer.analyze());
+        assertCompetitorResultsEquals(mockCompetitorResults(e4ResultC1, e2ResultC2, e3ResultC3, e4ResultC4), analyzer.analyze().getCompetitorResults());
     }
 
     /**

@@ -220,17 +220,19 @@ public class DeclinationStore {
      * <code>args[1]</code> (inclusive) for all positions with a grid of <code>args[2]</code> degrees each, starting at
      * 0&deg;0.0'N and 0&deg;0.0'E. <code>args[3]</code> can optionally be used to select a non-default declination
      * importer. By default, the {@link NOAAImporter} will be used. Using "c" here will use the {@link ColoradoImporter}
-     * instead.
+     * instead, and using "b" gets you the {@link BGSImporter}.
      * 
      * @throws ParseException 
      * @throws ClassNotFoundException 
      */
     public static void main(String[] args) throws IOException, ClassNotFoundException, ParseException {
-        DeclinationStore store = new DeclinationStore(args.length > 3 && args[3].equals("c") ? new ColoradoImporter() : new NOAAImporter());
+        DeclinationStore store = new DeclinationStore(args.length > 3 && args[3].equals("c") ? new ColoradoImporter() :
+            args.length > 3 && args[3].equals("b") ? new BGSImporter() : new NOAAImporter());
         store.run(args);
     }
     
     private void usage() {
-        System.out.println("java " + getClass().getName() + " <fromYear> <toYear> <gridSizeInDegrees>");
+        System.out.println("java " + getClass().getName() + " <fromYear> <toYear> <gridSizeInDegrees> [c|b]");
+        System.out.println("The optional trailing c causes the ColoradoImporter, b the BGSImporter to be used instead of the default NOAAImporter.");
     }
 }

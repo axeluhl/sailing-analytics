@@ -32,7 +32,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
     @Test
     public void deviceMappingsAndSensorFixStoreShouldNotCauseADeadlock() {
         final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null,
-                null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
         final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
         final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
         
@@ -47,7 +47,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                store.addListener((device, fix) -> {
+                store.addListener((device, fix, returnManeuverChanges, returnLiveDelay) -> {
                     return null;
                 }, deviceIdentifier);
             }
@@ -61,7 +61,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
                     Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
             }
         };
-        store.addListener((dev,  fix)-> {
+        store.addListener((dev,  fix, returnManeuverChanges, returnLiveDelay)-> {
             try {
                 barrier.await();
             } catch (Exception e) {

@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.event.legacy;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.AbstractBasePlace;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class EventPlace extends AbstractBasePlace {
     private final String eventUuidAsString;
@@ -28,14 +30,19 @@ public class EventPlace extends AbstractBasePlace {
     }
 
     public EventPlace(String eventUuidAsString, EventNavigationTabs navigationTab, String leaderboardIdAsNameString) {
-        super(PARAM_EVENTID, eventUuidAsString, PARAM_NAVIGATION_TAB, navigationTab.name(), PARAM_LEADEROARD_NAME, leaderboardIdAsNameString);
+        super(Util.<String, String>mapBuilder()
+                .put(PARAM_EVENTID, eventUuidAsString)
+                .put(PARAM_NAVIGATION_TAB, navigationTab.name())
+                .put(PARAM_LEADEROARD_NAME, leaderboardIdAsNameString)
+                .build());
         this.eventUuidAsString = eventUuidAsString;
         this.navigationTab = navigationTab;
         this.leaderboardIdAsNameString = leaderboardIdAsNameString;
     }
 
     public String getTitle(String eventName) {
-        return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
+        return (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }
     
     public String getEventUuidAsString() {

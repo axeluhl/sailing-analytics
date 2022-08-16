@@ -23,35 +23,40 @@ import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
 import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispatchContext> {
     private static final long serialVersionUID = -245230476512348999L;
 
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
     private final ServiceTracker<WindFinderTrackerFactory, WindFinderTrackerFactory> windFinderTrackerFactory;
     private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     private final ServiceTracker<TrackedRaceStatisticsCache, TrackedRaceStatisticsCache> trackedRaceStatisticsCacheTracker;
 
     public SailingDispatchServlet() {
         final BundleContext context = Activator.getDefault();
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+        racingEventServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, RacingEventService.class);
         windFinderTrackerFactory = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         trackedRaceStatisticsCacheTracker = ServiceTrackerFactory.createAndOpen(context, TrackedRaceStatisticsCache.class);
     }
 
     @Override
     protected <R extends Result, A extends Action<R, SailingDispatchContext>> SailingDispatchContext createDispatchContextFor(
             RequestWrapper<R, A, SailingDispatchContext> request) {
-        return new SailingDispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(),
-                windFinderTrackerFactory.getService(),
-                eventNewsServiceTracker.getService(), securityServiceTracker.getService(),
-                trackedRaceStatisticsCacheTracker.getService(),
-                request.getClientLocaleName(), getThreadLocalRequest());
+        try {
+            return new SailingDispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getInitializedService(0),
+                    windFinderTrackerFactory.getService(),
+                    eventNewsServiceTracker.getService(), securityServiceTracker.getInitializedService(0),
+                    trackedRaceStatisticsCacheTracker.getService(),
+                    request.getClientLocaleName(), getThreadLocalRequest());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override

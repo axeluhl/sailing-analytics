@@ -18,13 +18,14 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
-public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
+public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
 
     private static final SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
     
@@ -52,7 +53,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         clockLabel.addStyleName(style.clockLabel());
 
         siteHeader = new SAPSailingHeaderWithAuthentication();
-        new FixedSailingAuthentication(getUserService(), siteHeader.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        new FixedSailingAuthentication(getUserService(), paywallResolver, siteHeader.getAuthenticationMenuView());
 
         siteHeader.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(siteHeader, 75);

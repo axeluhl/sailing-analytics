@@ -19,11 +19,11 @@ import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseA
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDataSupport;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
-import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.impl.CompleteManeuverCurveImpl;
@@ -63,6 +63,11 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
     }
 
     @Override
+    public TrackTimeInfo getTrackTimeInfo() {
+        return maneuverDetector.getTrackTimeInfo();
+    }
+
+    @Override
     public List<Maneuver> detectManeuvers(Iterable<CompleteManeuverCurve> maneuverCurves) {
         List<Maneuver> maneuvers = new ArrayList<>();
         for (CompleteManeuverCurve maneuverCurve : maneuverCurves) {
@@ -80,7 +85,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
 
     @Override
     public List<CompleteManeuverCurve> detectCompleteManeuverCurves() {
-        List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuverSpots();
+        List<? extends ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuverSpots();
         return maneuverSpots.stream().filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
                 .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
     }
@@ -130,6 +135,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 maneuver.getMainCurveBoundaries().getSpeedWithBearingAfter(),
                 maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees(),
                 maneuver.getMaxTurningRateInDegreesPerSecond(), maneuver.getMainCurveBoundaries().getLowestSpeed(),
+                maneuver.getMainCurveBoundaries().getHighestSpeed(),
                 maneuverDetector.getSpeedWithBearingSteps(maneuver.getMainCurveBoundaries().getTimePointBefore(),
                         maneuver.getMainCurveBoundaries().getTimePointAfter()));
         return new CompleteManeuverCurveImpl(mainCurveBoundaries,
@@ -149,6 +155,14 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         if (mainCurveDetails == null) {
             return maneuverCurve;
         }
+        Speed lowestSpeed = maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed()
+                .compareTo(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed()) > 0
+                        ? maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed()
+                        : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed();
+        Speed highestSpeed = maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getHighestSpeed()
+                .compareTo(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getHighestSpeed()) < 0
+                        ? maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getHighestSpeed()
+                        : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getHighestSpeed();
         ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries = new ManeuverCurveBoundariesImpl(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
                 maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(),
@@ -156,10 +170,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getDirectionChangeInDegrees()
                         + maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getDirectionChangeInDegrees(),
-                maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed()
-                        .compareTo(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed()) > 0
-                                ? maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed()
-                                : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed());
+                lowestSpeed, highestSpeed);
         return new CompleteManeuverCurveImpl(mainCurveDetails, maneuverCurveWithStableSpeedAndCourseBoundaries,
                 maneuverCurve.getMarkPassing() == null ? maneuver.getMarkPassing() : maneuverCurve.getMarkPassing());
     }
@@ -258,15 +269,9 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         } finally {
             maneuverDetector.track.unlockAfterRead();
         }
-        if(courseAtMaxTurningRate == null) {
+        if (courseAtMaxTurningRate == null) {
             courseAtMaxTurningRate = stepWithLowestSpeed.getSpeedWithBearing().getBearing();
         }
-        ManeuverLoss projectedManeuverLoss = maneuverDetector.getManeuverLoss(maneuverCurve.getMainCurveBoundaries());
-        Distance distanceSailedIfNotManeuvering = maneuverCurve.getMainCurveBoundaries().getSpeedWithBearingBefore()
-                .travel(maneuverCurve.getMainCurveBoundaries().getDuration());
-        Distance distanceSailedWithinManeuver = maneuverDetector.track.getDistanceTraveled(
-                maneuverCurve.getMainCurveBoundaries().getTimePointBefore(),
-                maneuverCurve.getMainCurveBoundaries().getTimePointAfter());
         Duration longestGpsFixIntervalBetweenTwoFixes = maneuverDetector.track.getLongestIntervalBetweenTwoFixes(
                 maneuverCurve.getMainCurveBoundaries().getTimePointBefore(),
                 maneuverCurve.getMainCurveBoundaries().getTimePointAfter());
@@ -280,25 +285,15 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 stepWithHighestSpeed.getSpeedWithBearing(), stepWithHighestSpeed.getTimePoint(),
                 maneuverCurve.getMainCurveBoundaries().getTimePoint(),
                 maneuverCurve.getMainCurveBoundaries().getMaxTurningRateInDegreesPerSecond(), courseAtMaxTurningRate,
-                distanceSailedWithinManeuver, projectedManeuverLoss.getDistanceSailedProjectedOnMiddleManeuverAngle(),
-                distanceSailedIfNotManeuvering,
-                projectedManeuverLoss.getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle(),
                 Math.abs(maneuverCurve.getMainCurveBoundaries().getDirectionChangeInDegrees())
                         / maneuverCurve.getMainCurveBoundaries().getDuration().asSeconds(),
                 gpsFixCountWithinMainCurve, longestGpsFixIntervalBetweenTwoFixes);
-        projectedManeuverLoss = maneuverDetector
-                .getManeuverLoss(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries());
-        distanceSailedIfNotManeuvering = maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                .getSpeedWithBearingBefore()
-                .travel(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getDuration());
-        distanceSailedWithinManeuver = maneuverDetector.track.getDistanceTraveled(
-                maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
-                maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter());
         longestGpsFixIntervalBetweenTwoFixes = maneuverDetector.track.getLongestIntervalBetweenTwoFixes(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter());
         TrackTimeInfo trackTimeInfo = previousManeuverCurve == null || nextManeuverCurve == null
-                ? maneuverDetector.getTrackTimeInfo() : null;
+                ? maneuverDetector.getTrackTimeInfo()
+                : null;
         Pair<Duration, SpeedWithBearing> durationAndAvgSpeedWithBearingBefore = calculateDurationAndAvgSpeedWithBearingBetweenTimePoints(
                 previousManeuverCurve == null ? trackTimeInfo.getTrackStartTimePoint()
                         : previousManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
@@ -306,7 +301,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore());
         Pair<Duration, SpeedWithBearing> durationAndAvgSpeedWithBearingAfter = calculateDurationAndAvgSpeedWithBearingBetweenTimePoints(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(),
-                nextManeuverCurve == null ? trackTimeInfo.getTrackEndTimePoint()
+                nextManeuverCurve == null ? trackTimeInfo.getLatestRawFixTimePoint()
                         : nextManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore());
         Duration intervalBetweenLastFixOfCurveAndNextFix = Duration.NULL;
         GPSFixMoving lastManeuverFix = maneuverDetector.track.getLastFixAtOrBefore(
@@ -337,13 +332,12 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getDirectionChangeInDegrees(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed(),
+                maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getHighestSpeed(),
                 durationAndAvgSpeedWithBearingBefore.getB(), durationAndAvgSpeedWithBearingBefore.getA(),
                 gpsFixesCountFromPreviousManeuver, durationAndAvgSpeedWithBearingAfter.getB(),
-                durationAndAvgSpeedWithBearingAfter.getA(), gpsFixesCountToNextManeuver, distanceSailedWithinManeuver,
-                projectedManeuverLoss.getDistanceSailedProjectedOnMiddleManeuverAngle(), distanceSailedIfNotManeuvering,
-                projectedManeuverLoss.getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle(),
-                gpsFixCountWithinWholeCurve, longestGpsFixIntervalBetweenTwoFixes,
-                intervalBetweenLastFixOfCurveAndNextFix, intervalBetweenFirstFixOfCurveAndPreviousFix);
+                durationAndAvgSpeedWithBearingAfter.getA(), gpsFixesCountToNextManeuver, gpsFixCountWithinWholeCurve,
+                longestGpsFixIntervalBetweenTwoFixes, intervalBetweenLastFixOfCurveAndNextFix,
+                intervalBetweenFirstFixOfCurveAndPreviousFix);
         TimePoint maneuverTimePoint = maneuverCurve.getMainCurveBoundaries().getTimePoint();
         Position maneuverPosition = maneuverDetector.track.getEstimatedPosition(maneuverTimePoint,
                 /* extrapolate */false);
@@ -366,18 +360,19 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 .compareTo(curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter()) < 0
                         ? curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore()
                         : curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter();
-        if (polarDataService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
+        if (polarDataService != null
+                && polarDataService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
             SpeedWithBearingWithConfidence<Void> closestTackTwa = polarDataService.getClosestTwaTws(ManeuverType.TACK,
                     boatSpeed, curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees(), boatClass);
             SpeedWithBearingWithConfidence<Void> closestJibeTwa = polarDataService.getClosestTwaTws(ManeuverType.JIBE,
                     boatSpeed, curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees(), boatClass);
             if (closestTackTwa != null) {
-                targetTackAngle = polarDataService.getManeuverAngleInDegreesFromTwa(
-                        closestTackTwa.getObject().getBearing().getDegrees(), ManeuverType.TACK);
+                targetTackAngle = polarDataService.getManeuverAngleInDegreesFromTwa(ManeuverType.TACK,
+                        closestTackTwa.getObject().getBearing());
             }
             if (closestJibeTwa != null) {
-                targetJibeAngle = polarDataService.getManeuverAngleInDegreesFromTwa(
-                        closestJibeTwa.getObject().getBearing().getDegrees(), ManeuverType.JIBE);
+                targetJibeAngle = polarDataService.getManeuverAngleInDegreesFromTwa(ManeuverType.JIBE,
+                        closestJibeTwa.getObject().getBearing());
             }
         }
         Distance closestDistanceToMark = getClosestDistanceToMark(mainCurve.getTimePointOfMaxTurningRate());
@@ -418,9 +413,11 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         Distance result = null;
         for (Mark mark : waypoint.getMarks()) {
             Position markPosition = markPositionAtTimePointCache.getEstimatedPosition(mark);
-            Distance distance = markPosition.getDistance(maneuverPosition);
-            if (result == null || distance.compareTo(result) < 0) {
-                result = distance;
+            if (markPosition != null) {
+                Distance distance = markPosition.getDistance(maneuverPosition);
+                if (result == null || distance.compareTo(result) < 0) {
+                    result = distance;
+                }
             }
         }
         return result;

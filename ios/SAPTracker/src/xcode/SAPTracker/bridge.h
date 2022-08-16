@@ -15,5 +15,6 @@
 #import "Libraries/UIKit+AFNetworking/UIImageView+AFNetworking.h"
 #import "Libraries/UIKit+AFNetworking/AFNetworkActivityIndicatorManager.h"
 #import "Libraries/SMTWiFiStatus/SMTWiFiStatus.h"
+#import "Libraries/Branch-SDK/Branch-SDK/Branch.h"
 
 #endif

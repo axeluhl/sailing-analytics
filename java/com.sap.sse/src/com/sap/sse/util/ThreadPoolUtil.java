@@ -1,6 +1,12 @@
 package com.sap.sse.util;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.logging.Level;
 
 import com.sap.sse.util.impl.ThreadPoolUtilImpl;
 
@@ -50,11 +56,19 @@ public interface ThreadPoolUtil {
      * be submitted to the same executor as deadlocks may occur.
      * <p>
      * 
-     * The same configuration as for {@link #getDefaultBackgroundTaskThreadPoolExecutor()} is used.
+     * The same configuration as for {@link #getDefaultBackgroundTaskThreadPoolExecutor()} is used. In particular,
+     * {@code executeExistingDelayedTasksAfterShutdownPolicy} will be set to {@code false} by default.
      */
     ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(String name);
     
     ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name);
+    
+    /**
+     * Like {@link #createBackgroundTaskThreadPoolExecutor(int, String)}, but the caller can configure the
+     * {@code executeExistingDelayedTasksAfterShutdownPolicy}; see
+     * {@link ScheduledThreadPoolExecutor#setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean)}.
+     */
+    ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name, boolean executeExistingDelayedTasksAfterShutdownPolicy);
 
     /**
      * In case an application module really requires its own thread pool instead of
@@ -79,4 +93,24 @@ public interface ThreadPoolUtil {
     ScheduledExecutorService createForegroundTaskThreadPoolExecutor(String name);
 
     ScheduledExecutorService createForegroundTaskThreadPoolExecutor(int size, String name);
+    
+    /**
+     * Logs all exceptions that occurred during the execution of the {@code futures} provided.
+     * 
+     * @param messageTemplate
+     *            a message string that must contain a single {@code %s} parameter placeholder that will be substituted
+     *            by the exception's message.
+     */
+    void logExceptionsFromFutures(Level logLevel, String messageTemplate, Iterable<? extends Future<?>> futures);
+    
+    /**
+     * Uses the {@code executor}'s {@link ExecutorService#invokeAll(java.util.Collection) invokeAll} method to execute
+     * all {@code tasks}. All exceptions that occur are logged, using the {@code logLevel} provided, using as the log
+     * message the message template, parameterized with the exception message.
+     * 
+     * @param messageTemplate
+     *            a message string that must contain a single {@code %s} parameter placeholder that will be substituted
+     *            by the exception's message.
+     */
+    <T> List<Future<T>> invokeAllAndLogExceptions(ExecutorService executor, Level logLevel, String messageTemplate, Iterable<? extends Callable<T>> tasks);
 }

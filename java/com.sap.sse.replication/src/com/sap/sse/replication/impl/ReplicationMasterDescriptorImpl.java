@@ -1,12 +1,12 @@
 package com.sap.sse.replication.impl;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -17,8 +17,11 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationServletActions;
+import com.sap.sse.replication.ReplicationServletActions.Action;
 
 /**
  * Equality is defined by the master's hostname / port, the messaging hostname / port and the
@@ -34,7 +37,6 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
     private static final Logger logger = Logger.getLogger(ReplicationMasterDescriptorImpl.class.getName());
     
-    private static final String REPLICATION_SERVLET = "/replication/replication";
     private final String masterServletHostname;
     private final String exchangeName;
     private final int servletPort;
@@ -89,22 +91,24 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException,
-            UnsupportedEncodingException {
+    public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws Exception {
         final String[] replicableIdsAsString = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).map(r->r.getId()).toArray(i->new String[i]);
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
-                + ReplicationServlet.Action.REGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
-                + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
-                + ReplicationServlet.ADDITIONAL_INFORMATION + "="
-                + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8") + "&"
-                + ReplicationServlet.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED + "="
-                + java.net.URLEncoder.encode(String.join(",", replicableIdsAsString), "UTF-8"));
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH + "?"
+                + ReplicationServletActions.ACTION_PARAMETER_NAME + "=" + Action.REGISTER.name() + "&"
+                + (ServerInfo.getServerInfo().getPort()==null?"":(ReplicationServletActions.PORT_NAME + "=" + ServerInfo.getServerInfo().getPort() + "&"))
+                + ReplicationServletActions.SERVER_UUID_PARAMETER_NAME + "=" + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
+                + ReplicationServletActions.ADDITIONAL_INFORMATION_PARAMETER_NAME + "=" + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8") + "&"
+                + ReplicationServletActions.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME + "=" + java.net.URLEncoder.encode(String.join(",", replicableIdsAsString), "UTF-8"));
+    }
+
+    private String getHttpRequestProtocol() {
+        return ReplicationMasterDescriptor.getHttpRequestProtocol(servletPort);
     }
 
     @Override
     public URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException {
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
-                + ReplicationServlet.Action.DEREGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH + "?" + ReplicationServletActions.ACTION_PARAMETER_NAME + "="
+                + Action.DEREGISTER.name() + "&" + ReplicationServletActions.SERVER_UUID_PARAMETER_NAME + "="
                 + uuid.toString());
     }
 
@@ -160,25 +164,24 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public URL getInitialLoadURL(Iterable<Replicable<?, ?>> replicables) throws MalformedURLException {
         final String replicablesIdsAsStringSeparatedByCommas = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).
             map(r->r.getId().toString()).collect(Collectors.joining(","));
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
-                + ReplicationServlet.Action.INITIAL_LOAD.name() +
-                "&"+ReplicationServlet.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED+"="+replicablesIdsAsStringSeparatedByCommas);
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH + "?" + ReplicationServletActions.ACTION_PARAMETER_NAME + "="
+                + Action.INITIAL_LOAD.name() +
+                "&"+ReplicationServletActions.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME+"="+replicablesIdsAsStringSeparatedByCommas);
     }
     
     @Override
     public URL getSendReplicaInitiatedOperationToMasterURL(String replicableIdAsString) throws MalformedURLException {
-        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET);
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH);
     }
 
     @Override
-    public synchronized QueueingConsumer getConsumer() throws IOException {
+    public synchronized QueueingConsumer getConsumer() throws IOException, TimeoutException {
         Channel channel = createChannel();
         /*
          * Connect a queue to the given exchange that has already been created by the master server.
          */
         channel.exchangeDeclare(exchangeName, "fanout");
         QueueingConsumer consumer = new QueueingConsumer(channel);
-
         /*
          * The x-message-ttl argument to queue.declare controls for how long a message published to a queue can live
          * before it is discarded. A message that has been in the queue for longer than the configured TTL is said to be
@@ -188,14 +191,12 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
          */
         final Map<String, Object> args = new HashMap<String, Object>();
         args.put("x-message-ttl", (60 * 30) * 1000); // messages will live half an hour in queue before being deleted
-
         /*
          * The x-expires argument to queue.declare controls for how long a queue can be unused before it is
          * automatically deleted. Unused means the queue has no consumers, the queue has not been redeclared, and
          * basic.get has not been invoked for a duration of at least the expiration period.
          */
         args.put("x-expires", (60 * 60) * 1000); // queue will live one hour before being deleted
-
         /*
          * The maximum length of a queue can be limited to a set number of messages by supplying the x-max-length queue
          * declaration argument with a non-negative integer value. Queue length is a measure that takes into account
@@ -203,24 +204,22 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
          * from the front of the queue to make room for new messages once the limit is reached.
          */
         args.put("x-max-length", 3000000);
-
         // a server-named non-exclusive, non-durable queue
         // this queue will survive a connection drop (autodelete=false) and
         // will also support being reconnected (exclusive=false). it will
         // not survive a rabbitmq server restart (durable=false).
-        String queueName = channel.queueDeclare(this.queueName,
-        /* durable */false, /* exclusive */false, /* auto-delete */false, args).getQueue();
-
+        final String queueName = channel.queueDeclare(this.queueName,
+                /* durable */false, /* exclusive */false, /* auto-delete */false, args).getQueue();
         // from now on we get all new messages that the exchange is getting from producer
         channel.queueBind(queueName, exchangeName, "");
-        channel.basicConsume(queueName, /* auto-ack */true, consumer);
+        channel.basicConsume(queueName, /* no auto-ack; see bug5611 */ false, consumer);
         this.consumer = consumer;
         return consumer;
     }
 
     @Override
-    public Channel createChannel() throws IOException {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
+    public Channel createChannel() throws IOException, TimeoutException {
+        ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         connectionFactory.setHost(getMessagingHostname());
         int port = getMessagingPort();
         if (port != 0) {

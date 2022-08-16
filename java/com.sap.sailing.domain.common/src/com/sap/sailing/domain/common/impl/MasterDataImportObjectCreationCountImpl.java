@@ -3,8 +3,6 @@ package com.sap.sailing.domain.common.impl;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
-
 
 /**
  * Keeps track of how many instances of domain classes are created in the process of
@@ -16,108 +14,60 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
  * @author Frederik Petersen (D054528)
  *
  */
-public class MasterDataImportObjectCreationCountImpl implements MasterDataImportObjectCreationCount {
+public class MasterDataImportObjectCreationCountImpl extends BaseMasterDataImportObjectCreationCountImpl {
     private static final long serialVersionUID = -3677005970701170818L;
-    private int leaderboardCount = 0;
-    private int leaderboardGroupCount = 0;
-    private int eventCount = 0;
-    private int regattaCount = 0;
-    private int mediaTrackCount = 0;
-    
-    private Set<String> createdLeaderboards = new HashSet<String>(); 
-    private Set<String> createdLeaderboardGroups = new HashSet<String>(); 
-    private Set<String> createdEvents = new HashSet<String>(); 
-    private Set<String> createdRegattas = new HashSet<String>(); 
-    
-    private Set<String> overwrittenRegattas = new HashSet<String>();
+    private Set<String> namesOfCreatedLeaderboards = new HashSet<>(); 
+    private Set<String> idsOfCreatedLeaderboardGroups = new HashSet<>(); 
+    private Set<String> idsOfCreatedEvents = new HashSet<>(); 
+    private Set<String> namesOfCreatedRegattas = new HashSet<>(); 
+    private Set<String> idsOfCreatedTrackedRaces = new HashSet<>();
 
-    //For GWT serialization
-    public MasterDataImportObjectCreationCountImpl() {};
+    public MasterDataImportObjectCreationCountImpl() {
+        super();
+    };
 
     public void addOneLeaderboard(String name) {
-        createdLeaderboards.add(name);
-        leaderboardCount++;
+        super.addOneLeaderboard(name);
+        namesOfCreatedLeaderboards.add(name);
     }
     
     public void addOneLeaderboardGroup(String name) {
-        createdLeaderboardGroups.add(name);
-        leaderboardGroupCount++;
+        super.addOneLeaderboardGroup(name);
+        idsOfCreatedLeaderboardGroups.add(name);
     }
     
-    public void addOneEvent(String id) {
-        createdEvents.add(id);
-        eventCount++;
+    public void addOneEvent(String idAsString) {
+        super.addOneEvent(idAsString);
+        idsOfCreatedEvents.add(idAsString);
     }
 
-    public void addOneRegatta(String id) {
-        createdRegattas.add(id);
-        regattaCount++;
+    public void addOneRegatta(String idAsString) {
+        super.addOneRegatta(idAsString);
+        namesOfCreatedRegattas.add(idAsString);
     }
     
-    @Override
-    public void addOneMediaTrack() {
-    	mediaTrackCount++;
-    }
-
-    public void add(MasterDataImportObjectCreationCountImpl toAdd) {
-        leaderboardCount = leaderboardCount + toAdd.leaderboardCount;
-        leaderboardGroupCount = leaderboardGroupCount + toAdd.leaderboardGroupCount;
-        eventCount = eventCount + toAdd.eventCount;
-        regattaCount = regattaCount + toAdd.regattaCount;
-        createdEvents.addAll(toAdd.createdEvents);
-        createdLeaderboardGroups.addAll(toAdd.createdLeaderboardGroups);
-        createdLeaderboards.addAll(toAdd.createdLeaderboards);
-        createdRegattas.addAll(toAdd.createdRegattas);
+    public void addOneTrackedRace(String idAsString) {
+        super.addOneTrackedRace(idAsString);
+        idsOfCreatedTrackedRaces.add(idAsString);
     }
     
     public boolean alreadyAddedLeaderboardWithName(String name) {
-        return createdLeaderboards.contains(name);
+        return namesOfCreatedLeaderboards.contains(name);
     }
     
     public boolean alreadyAddedLeaderboardGroupWithName(String name) {
-        return createdLeaderboardGroups.contains(name);
+        return idsOfCreatedLeaderboardGroups.contains(name);
     }
     
-    public boolean alreadyAddedEventWithId(String id) {
-        return createdEvents.contains(id);
+    public boolean alreadyAddedEventWithId(String idAsString) {
+        return idsOfCreatedEvents.contains(idAsString);
     }
     
-    public boolean alreadyAddedRegattaWithId(String id) {
-        return createdRegattas.contains(id);
-    }
-
-    @Override
-    public int getLeaderboardCount() {
-        return leaderboardCount;
-    }
-
-    @Override
-    public int getLeaderboardGroupCount() {
-        return leaderboardGroupCount;
-    }
-
-    @Override
-    public int getEventCount() {
-        return eventCount;
-    }
-
-    @Override
-    public int getRegattaCount() {
-        return regattaCount;
+    public boolean alreadyAddedRegattaWithId(String idAsString) {
+        return namesOfCreatedRegattas.contains(idAsString);
     }
     
-    @Override
-    public int getMediaTrackCount() {
-    	return mediaTrackCount;
+    public boolean alreadyAddedTrackedRaceWithId(String idAsString) {
+        return idsOfCreatedTrackedRaces.contains(idAsString);
     }
-
-    @Override
-    public Set<String> getOverwrittenRegattaNames() {
-        return overwrittenRegattas;
-    }
-
-    public void addOverwrittenRegattaName(String name) {
-        overwrittenRegattas.add(name);
-    }
-   
 }

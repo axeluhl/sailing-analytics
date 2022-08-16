@@ -6,14 +6,15 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
 
 public class ShowCompetitorToBoatMappingsDialog extends DialogBox {
-    public ShowCompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages, 
+    public ShowCompetitorToBoatMappingsDialog(final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, 
             final ErrorReporter errorReporter, String leaderboardName, final String raceColumnName, final String fleetName,
-            String raceName) {
+            String raceName, UserService userService) {
         super();
         setText(stringMessages.actionShowCompetitorToBoatAssignments());
         setAnimationEnabled(true);
@@ -25,8 +26,8 @@ public class ShowCompetitorToBoatMappingsDialog extends DialogBox {
             }
         });
         VerticalPanel vPanel = new VerticalPanel();
-        CompetitorToBoatMappingsViewPanel competitorPanel = new CompetitorToBoatMappingsViewPanel(sailingService,
-                stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName);
+        CompetitorToBoatMappingsViewPanel competitorPanel = new CompetitorToBoatMappingsViewPanel(sailingServiceWrite,
+                stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, userService);
         vPanel.add(new Label(stringMessages.race() + ": " + raceName));
         vPanel.add(competitorPanel);
         vPanel.add(okButton);

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.mobile.partials.regattaStatus;
 
 import java.util.Date;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -23,6 +24,7 @@ import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RegattaStatusRace extends Composite {
     
@@ -41,12 +43,16 @@ public class RegattaStatusRace extends Composite {
     @UiField DivElement raceLegsInfoLabelUi;
     @UiField DivElement raceLegsInfoProgressUi;
     @UiField DivElement actionArrowUi;
-    private final RaceviewerLaunchPadController launchPadController;
+    private final RaceviewerLaunchPadController<LiveRaceDTO> launchPadController;
     private final LiveRaceDTO race;
 
-    public RegattaStatusRace(LiveRaceDTO race, BiFunction<SimpleRaceMetadataDTO, String, String> raceboardUrlFactory) {
+    public RegattaStatusRace(LiveRaceDTO race,
+            BiFunction<? super SimpleRaceMetadataDTO, String, String> raceboardUrlFactory,
+            final Function<? super SimpleRaceMetadataDTO, String> mapAndWindChartUrlFactory,
+            PaywallResolver paywallResolver) {
         this.race = race;
-        this.launchPadController = new RaceviewerLaunchPadController(raceboardUrlFactory);
+        this.launchPadController = new RaceviewerLaunchPadController<LiveRaceDTO>(raceboardUrlFactory,
+                mapAndWindChartUrlFactory, paywallResolver);
         initWidget(uiBinder.createAndBindUi(this));
         initRaceFleetCorner(race.getFleet());
         raceTitleUi.setInnerText(race.getRaceName());

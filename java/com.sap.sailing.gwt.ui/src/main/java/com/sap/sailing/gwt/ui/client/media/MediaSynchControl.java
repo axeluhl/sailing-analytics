@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter.EditFlag;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -28,7 +28,7 @@ public class MediaSynchControl implements EditFlag {
     private static final int FAST = 1000;
     private static final int SLOW = 100;
 
-    private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final MediaSynchAdapter mediaSynchAdapter;
     private final ErrorReporter errorReporter;
     private final MediaTrack backupVideoTrack;
@@ -58,9 +58,9 @@ public class MediaSynchControl implements EditFlag {
         void setEnabled(boolean b);
     }
 
-    public MediaSynchControl(MediaSynchAdapter mediaSynchAdapter, MediaServiceAsync mediaService,
+    public MediaSynchControl(MediaSynchAdapter mediaSynchAdapter, MediaServiceWriteAsync mediaServiceWrite,
             ErrorReporter errorReporter, EditButtonProxy editButtonProxy, UserService userservice) {
-        this.mediaService = mediaService;
+        this.mediaServiceWrite = mediaServiceWrite;
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         this.userservice = userservice;
@@ -206,7 +206,7 @@ public class MediaSynchControl implements EditFlag {
 
     private void save() {
         if (!backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime)) {
-            mediaService.updateStartTime(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
+            mediaServiceWrite.updateStartTime(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     backupVideoTrack.startTime = mediaSynchAdapter.getMediaTrack().startTime;
@@ -221,7 +221,7 @@ public class MediaSynchControl implements EditFlag {
             });
         }
         if (!backupVideoTrack.title.equals(mediaSynchAdapter.getMediaTrack().title)) {
-            mediaService.updateTitle(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
+            mediaServiceWrite.updateTitle(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     backupVideoTrack.title = mediaSynchAdapter.getMediaTrack().title;
@@ -247,7 +247,7 @@ public class MediaSynchControl implements EditFlag {
         }
         mediaSynchAdapter.setControlsVisible(showEditUI);
         previewButton.setEnabled(showEditUI);
-        MediaTrack videoTrack = mediaSynchAdapter.getMediaTrack();
+        MediaTrackWithSecurityDTO videoTrack = mediaSynchAdapter.getMediaTrack();
         editButton.setEnabled(hasRightToEdit(videoTrack) && !showEditUI);
         mainPanel.getElement().getStyle()
                 .setDisplay(showEditUI && hasRightToEdit(videoTrack) ? Display.BLOCK : Display.NONE);
@@ -256,9 +256,8 @@ public class MediaSynchControl implements EditFlag {
         discardButton.setEnabled(showEditUI || isDirty);
     }
 
-    private boolean hasRightToEdit(MediaTrack video) {
-        return userservice.hasPermission(
-                SecuredDomainType.MEDIA_TRACK.getPermissionForObject(DefaultActions.UPDATE, video));
+    private boolean hasRightToEdit(MediaTrackWithSecurityDTO video) {
+        return userservice.hasPermission(video, DefaultActions.UPDATE);
     }
 
     private boolean isDirty() {

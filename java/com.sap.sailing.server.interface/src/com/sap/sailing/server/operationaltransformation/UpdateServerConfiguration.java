@@ -13,14 +13,6 @@ public class UpdateServerConfiguration extends AbstractRacingEventServiceOperati
         this.serverConfiguration = serverConfiguration;
     }
 
-    /**
-     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
-     */
-    @Override
-    public boolean isRequiresExplicitTransitiveReplication() {
-        return false;
-    }
-    
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         toState.updateServerConfiguration(serverConfiguration);

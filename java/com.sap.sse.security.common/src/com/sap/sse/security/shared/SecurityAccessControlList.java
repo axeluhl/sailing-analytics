@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
@@ -32,6 +33,8 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
  *
  */
 public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> extends Serializable {
+    String DENY_PREFIX = "!";
+
     /**
      * Checks whether this access control list grants the {@code user} the permission to execute {@code action} on the
      * object to which this ACL pertains.
@@ -62,28 +65,6 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
     boolean addPermission(G userGroup, String actionToAllow);
 
     /**
-     * @param actionToDeny
-     *            the action to be denied. The wildcard string {@code "*"} can be used to deny permission for all
-     *            possible actions for the {@code userGroup}. Prefixing the action by an exclamation mark character
-     *            {@code '!'} instead allows the action that follows. Multiple leading exclamation marks toggle
-     *            accordingly.
-     * @return {@code true} if the denial was added; {@code false} if the denial was already in this ACL and therefore
-     *         didn't need to be added
-     * @see #addPermission(UserGroupImpl, String)
-     */
-    boolean denyPermission(G userGroup, String actionToDeny);
-
-    /**
-     * Removes a permission denial from those permissions denied for the user group. If the action starts with an
-     * {@code "!"} exclamation mark, the exclamation mark is stripped, and {@link #removePermission(UserGroupImpl, String)}
-     * is invoked with the remaining string.
-     * 
-     * @return {@code true} if the permission was removed; {@code false} if the permission was not in this ACL and
-     *         therefore didn't need to be removed
-     */
-    boolean removeDenial(G userGroup, String substring);
-
-    /**
      * Removes a permission from those permissions granted to the user group. If the action starts with an {@code "!"}
      * exclamation mark, the exclamation mark is stripped, and {@link #removeDenial(UserGroupImpl, String)} is invoked with
      * the remaining string.
@@ -94,5 +75,46 @@ public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> exten
     boolean removePermission(G userGroup, String action);
 
     void setPermissions(G userGroup, Set<String> actions);
+    
+    /**
+     * When adding an action to a ACL prefixed with ! this is meant to be an explicit denial of that action instead of
+     * granting that action. This method checks if an action is such a denial.
+     * 
+     * @return {@code true} if it is a denied action, {@code false} otherwise
+     */
+    static boolean isDeniedAction(String action) {
+        return action.startsWith(DENY_PREFIX);
+    }
+
+    /**
+     * Removes a leading ! (see {@link #DENY_PREFIX}) if there is one; otherwise prefixes the action with a !
+     */
+    static String invertAction(String action) {
+        final String result;
+        if (isDeniedAction(action)) {
+            result = action.substring(DENY_PREFIX.length());
+        } else {
+            result = DENY_PREFIX+action;
+        }
+        return result;
+    }
+
+    /**
+     * Returns the actions explicitly <em>allowed</em> by this ACL for the {@code group} specified.
+     * 
+     * @return never {@code null}, but an empty or a non-empty set
+     */
+    Set<String> getAllowedActions(UserGroup group);
+
+    /**
+     * Returns the actions explicitly <em>denied</em> by this ACL for the {@code group} specified.
+     * 
+     * @return never {@code null}, but an empty or a non-empty set
+     */
+    Set<String> getDeniedActions(UserGroup group);
+
+    Map<G, Set<WildcardPermission>> getDeniedActions();
+
+    Map<G, Set<WildcardPermission>> getAllowedActions();
 
 }

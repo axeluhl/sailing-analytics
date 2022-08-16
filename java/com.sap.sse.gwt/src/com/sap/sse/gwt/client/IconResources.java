@@ -22,4 +22,40 @@ public interface IconResources extends ClientBundle {
     
     @Source("images/edit.png")
     ImageResource editIcon();
+    
+    @Source("images/boat_registrations.png")
+    ImageResource boatRegistrations();
+
+    @Source("images/download.png")
+    ImageResource downloadIcon();
+    
+    @Source("images/refresh.png")
+    ImageResource refreshIcon();
+    
+    @Source("images/scale.png")
+    ImageResource scaleIcon();
+
+    @Source("images/scaleUp.png")
+    ImageResource scaleUpIcon();
+
+    @Source("images/scaleDown.png")
+    ImageResource scaleDownIcon();
+
+    @Source("images/archive.png")
+    ImageResource archiveIcon();
+
+    @Source("images/load-balancer.png")
+    ImageResource loadBalancerIcon();
+
+    @Source("images/launch-another-replica-set-on-this-master.png")
+    ImageResource launchAnotherReplicaSetOnThisMasterIcon();
+
+    @Source("images/unlink.png")
+    ImageResource unlinkIcon();
+
+    @Source("images/red_gears.png")
+    ImageResource redGearsIcon();
+
+    @Source("images/move.png")
+    ImageResource moveIcon();
 }

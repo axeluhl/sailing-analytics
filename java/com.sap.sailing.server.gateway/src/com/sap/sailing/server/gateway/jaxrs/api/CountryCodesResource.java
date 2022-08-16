@@ -3,16 +3,15 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CountryCodeJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
+import com.sap.sse.shared.json.JsonSerializer;
 
 @Path("/v1/countrycodes")
 public class CountryCodesResource extends AbstractSailingServerResource {
@@ -26,6 +25,6 @@ public class CountryCodesResource extends AbstractSailingServerResource {
         for (final CountryCode cc : factory.getAll()) {
             result.add(serializer.serialize(cc));
         }
-        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).build();
     }
 }

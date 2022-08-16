@@ -7,27 +7,18 @@
  */
 package com.tractrac.subscription.app.tracapi;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.UUID;
-
-import com.tractrac.model.lib.api.data.IControlPassings;
-import com.tractrac.model.lib.api.data.IMessageData;
-import com.tractrac.model.lib.api.data.IPosition;
-import com.tractrac.model.lib.api.data.IPositionOffset;
-import com.tractrac.model.lib.api.data.IPositionSnapped;
-import com.tractrac.model.lib.api.data.IStartStopData;
-import com.tractrac.model.lib.api.event.DataSource;
-import com.tractrac.model.lib.api.event.ICompetitor;
-import com.tractrac.model.lib.api.event.IEvent;
-import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.data.*;
+import com.tractrac.model.lib.api.event.*;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.sensor.ISensorData;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 import com.tractrac.util.lib.api.TimeUtils;
+
+import java.net.URI;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * 
@@ -38,10 +29,17 @@ public class EventListener extends AbstractListener {
 	private static void show(Object obj) {
 		System.out.println(String.valueOf(TimeUtils.formatDateInMillis(new Date().getTime())) + ": " + obj);
 	}
+
+	private static long controlPos = 0;
+	private static long compPos = 0;
 		
 	@Override
 	public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
 		show(storedDataEvent);
+		if (storedDataEvent.getType() == IStoredDataEvent.Type.End) {
+			System.out.println("CONTROLS: " + controlPos);
+			System.out.println("COMPETITORS: " + compPos);
+		}
 	}
 
 	@Override
@@ -61,9 +59,10 @@ public class EventListener extends AbstractListener {
 	}
 
 	@Override
-	public void gotControlPassings(IRaceCompetitor raceCompetitor,
+	public void gotControlPassings(long timestamp, IRaceCompetitor raceCompetitor,
 			IControlPassings markPassings) {
-		show("New markpassings " + markPassings + " for the competitor " + raceCompetitor.getCompetitor().toString());				
+		show("New markpassings " + markPassings + " for the competitor " + raceCompetitor.getCompetitor().toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+
 	}
 
 	@Override
@@ -72,7 +71,8 @@ public class EventListener extends AbstractListener {
 		message.append("COTRLPOS " + markNumber);
 		message.append("\t").append(control.getShortName()).append("\t");
 		message.append(position.toString());
-		show(message.toString());
+		//show(message.toString());
+		controlPos++;
 	}
 
 	@Override
@@ -95,17 +95,18 @@ public class EventListener extends AbstractListener {
 			message.append("\t").append(raceCompetitor.getCompetitor().getShortName()).append("\t");
 		}
 		message.append(position.toString());
-		show(message.toString());
+	//	show(message.toString());
+		compPos++;
 	}
 
 	@Override
 	public void gotRaceStartStopTime(IRace race, IStartStopData startStopData) {
-		show("New race start/stop times " + startStopData.toString());										
+		show("RACE START TIME: " + (startStopData.getStartTime() == 0 ? "-" : TimeUtils.formatDate(startStopData.getStartTime())));
 	}
 
 	@Override
 	public void gotTrackingStartStopTime(IRace race, IStartStopData startStopData) {
-		show("New tracking race start/stop times " + startStopData.toString());				
+		show("TRACKING TIMES: " + TimeUtils.formatDate(startStopData.getStartTime()) + " - " + TimeUtils.formatDate(startStopData.getStopTime()));
 	}
 
 	@Override
@@ -135,72 +136,94 @@ public class EventListener extends AbstractListener {
 	}
 
 	@Override
-	public void updateCompetitor(ICompetitor competitor) {
-		show("UPDATE COMPETITOR " + competitor.toString());
+	public void updateCompetitor(long timestamp, ICompetitor competitor) {
+		show("UPDATE COMPETITOR " + competitor.toString()  + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void addCompetitor(ICompetitor competitor) {
-		show("ADD COMPETITOR " + competitor.toString());
+	public void addCompetitor(long timestamp, ICompetitor competitor) {
+		show("ADD COMPETITOR " + competitor.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void deleteCompetitor(UUID competitorId) {
-		show("DELETE COMPETITOR");
+	public void deleteCompetitor(long timestamp, UUID competitorId) {
+		show("DELETE COMPETITOR" + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void updateControl(IControl control) {
-		show("UPDATE CONTROL " + control.toString());
+	public void updateControl(long timestamp, IControl control) {
+		show("UPDATE CONTROL " + control.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void addControl(IControl control) {
-		show("ADD CONTROL " + control.toString());
+	public void addControl(long timestamp, IControl control) {
+		show("ADD CONTROL " + control.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void deleteControl(UUID controlId) {
-		show("DELETE CONTROL " + controlId);
+	public void deleteControl(long timestamp, UUID controlId) {
+		show("DELETE CONTROL " + controlId + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void updateRace(IRace race) {
-		show("UPDATE RACE " + race.toString() +
-				"[" + TimeUtils.formatDate(race.getTrackingStartTime()) +
-				"," + TimeUtils.formatDate(race.getTrackingEndTime()) + "] - " +
-				TimeUtils.formatDate(race.getRaceStartTime()) +
-				" liveDelay = " + race.getLiveDelay()
+	public void addRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
+		show("ADD RACE COMPETITOR " + raceCompetitor.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+	}
+
+	@Override
+	public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
+		show("UPDATE RACE COMPETITOR " + raceCompetitor.toString() + " at " + TimeUtils.formatDateInMillis(timestamp) +
+				"\n\t ENTRY STATUS: " + raceCompetitor.getStatus() +
+				"\n\t ENTRY STATUS TIME: " + TimeUtils.formatDate(raceCompetitor.getStatusTime()));
+	}
+
+	@Override
+	public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
+		show("DELETE RACE COMPETITOR " + competitorId + " at " + TimeUtils.formatDateInMillis(timestamp));
+	}
+
+
+	@Override
+	public void updateRace(long timestamp, IRace race) {
+		show("UPDATE RACE " + race.toString() + " at " + TimeUtils.formatDateInMillis(timestamp) +
+				"\n\tTrackingStartTime = " + TimeUtils.formatDate(race.getTrackingStartTime()) +
+				"\n\tTrackingEndTime = " + TimeUtils.formatDate(race.getTrackingEndTime()) +
+				"\n\tRaceStartTime = " + TimeUtils.formatDate(race.getRaceStartTime()) +
+				"\n\tLiveDelay = " + race.getLiveDelay() +
+				"\n\tRaceStatus = " + race.getStatus() +
+				"\n\tRaceStatusTime = " + TimeUtils.formatDate(race.getStatusTime())
 		);
 	}
 
 	@Override
-	public void addRace(IRace race) {
-		show("ADD RACE " + race.toString());
+	public void addRace(long timestamp, IRace race) {
+		show("ADD RACE " + race.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void deleteRace(UUID raceId) {
-		show("DELETE RACE " + raceId);
+	public void deleteRace(long timestamp, UUID raceId) {
+		show("DELETE RACE " + raceId + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void reloadRace(UUID raceId) {
-		show("RELOAD RACE " + raceId);
+	public void reloadRace(long timestamp, UUID raceId) {
+		show("RELOAD RACE " + raceId + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void abandonRace(UUID raceId) {
-		show("ABANDON RACE " + raceId);
+	public void abandonRace(long timestamp, UUID raceId) {
+		show("ABANDON RACE " + raceId + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void startTracking(UUID raceId) {
-		show("START TRACKING " + raceId);
+	public void startTracking(long timestamp, UUID raceId) {
+		show("START TRACKING " + raceId + " at " + TimeUtils.formatDateInMillis(timestamp));
 	}
 
 	@Override
-	public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {
-		show("DATA SOURCE CHANGE " + race);
+	public void dataSourceChanged(long timestamp, IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {
+		show("DATA SOURCE CHANGE " + race + ":\n" +
+				"\tLIVE URI: " + race.getLiveURI() + "\n" +
+				"\tSTORED URI: " + race.getStoredURI());
 	}
 }

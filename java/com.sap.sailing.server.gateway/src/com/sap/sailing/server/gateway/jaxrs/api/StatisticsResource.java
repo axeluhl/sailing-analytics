@@ -16,12 +16,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
 
 import com.sap.sailing.domain.statistics.Statistics;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.StatisticsByYearJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.StatisticsJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util.Pair;
 
 @Path("/v1/statistics")
@@ -65,7 +64,7 @@ public class StatisticsResource extends AbstractSailingServerResource {
         return integerYears;
     }
 
-    private Response getJsonResponse(JSONAware json) {
-        return Response.ok(json.toJSONString()).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
+    private Response getJsonResponse(JSONArray jsonArray) {
+        return Response.ok(streamingOutput(jsonArray)).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
     }
 }

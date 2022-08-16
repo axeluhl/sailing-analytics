@@ -34,12 +34,14 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -154,6 +156,14 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             @Override
             public void stopTracker(Regatta regatta, RaceTracker tracker)
                     throws MalformedURLException, IOException, InterruptedException {
+            }
+            @Override
+            public Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id) {
+                return null;
+            }
+            @Override
+            public RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception {
+                return null;
             }
         };
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
@@ -325,6 +335,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         Collections.sort(ranksOfNonMedalStartedRaces);
         int carryInt = (carry == null ? 0 : carry);
         int netPoints = carryInt;
+        final ScoringScheme scoringScheme = leaderboard.getScoringScheme();
         int medalRacePoints = getMedalRacePoints(competitorWithBoat, now, defaultFleet);
         for (TrackedRace race : testRaces) {
             RaceColumn raceColumn = raceColumnsInLeaderboard.get(race);
@@ -335,8 +346,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 assertEquals(rank, leaderboard.getContent(now).get(key).getTrackedRank());
                 assertEquals(rank, leaderboard.getEntry(competitorWithBoat, raceColumn, now).getTrackedRank());
                 assertEquals(rank, leaderboard.getTotalPoints(competitorWithBoat, raceColumn, now), 0.000000001);
-                assertEquals(rank, leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);
-                assertEquals(rank, leaderboard.getEntry(competitorWithBoat, raceColumn, now).getTotalPoints(), 0.000000001);
+                assertEquals(rank*scoringScheme.getScoreFactor(raceColumn), leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);
+                assertEquals(rank*scoringScheme.getScoreFactor(raceColumn), leaderboard.getEntry(competitorWithBoat, raceColumn, now).getTotalPoints(), 0.000000001);
                 // One race is discarded because four races were started, and for [3-6) one race can be discarded.
                 // The discarded race is the worst of those started, so the one with rank 4.
                 int expectedNumberOfDiscardedRaces =

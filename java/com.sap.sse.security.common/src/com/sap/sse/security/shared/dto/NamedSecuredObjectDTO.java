@@ -1,5 +1,9 @@
 package com.sap.sse.security.shared.dto;
 
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+
 /**
  * {@link NamedDTO} extension which also implements {@link SecuredObject} interface.
  */
@@ -7,15 +11,25 @@ public abstract class NamedSecuredObjectDTO extends NamedDTO implements SecuredD
 
     private static final long serialVersionUID = 2642220699434177353L;
 
-    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
+    private SecurityInformationDTO securityInformation;
 
-    protected NamedSecuredObjectDTO() {
-    }
+    @Deprecated
+    protected NamedSecuredObjectDTO() {} // for GWT RPC serialization only
 
     protected NamedSecuredObjectDTO(String name) {
         super(name);
+        securityInformation = new SecurityInformationDTO();
+    }
+    
+    protected NamedSecuredObjectDTO(String name, SecurityInformationDTO securityInformation) {
+        this(name);
+        this.securityInformation = securityInformation;
     }
 
+    protected SecurityInformationDTO getSecurityInformation() {
+        return securityInformation;
+    }
+    
     @Override
     public final AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
@@ -34,6 +48,22 @@ public abstract class NamedSecuredObjectDTO extends NamedDTO implements SecuredD
     @Override
     public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
+    }
+    
+    public static NamedSecuredObjectDTO create(String name, HasPermissions type, TypeRelativeObjectIdentifier objectId) {
+        return new NamedSecuredObjectDTO(name) {
+            private static final long serialVersionUID = 7803271077711791212L;
+
+            @Override
+            public QualifiedObjectIdentifier getIdentifier() {
+                return type.getQualifiedObjectIdentifier(objectId);
+            }
+        
+            @Override
+            public HasPermissions getPermissionType() {
+                return type;
+            }
+        };
     }
 
 }

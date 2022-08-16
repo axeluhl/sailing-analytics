@@ -57,6 +57,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
                 new RoleValidator(stringMessages, allOtherRoles), /* animationEnabled */ true, callback);
         this.stringMessages = stringMessages;
         roleDefinitionNameField = createTextBox("", /* visible length */ 20);
+        roleDefinitionNameField.ensureDebugId("name");
         permissionsList = new GenericStringListInlineEditorComposite<WildcardPermission>(Collections.emptySet(),
                 stringMessages, IconResources.INSTANCE.removeIcon(), Util.map(allExistingPermissions, p->p.toString()),
                 /* text box size */ 20) {
@@ -76,11 +77,12 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
                     }
         };
         permissionsList.addValueChangeHandler(e->validateAndUpdate());
+        permissionsList.ensureDebugId("permissions");
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(2, 2);
+        final Grid result = new Grid(3, 2);
         result.setWidget(0,  0, new Label(stringMessages.name()));
         result.setWidget(0, 1, roleDefinitionNameField);
         result.setWidget(1, 0, new Label(stringMessages.permissions()));
@@ -94,6 +96,6 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
         final List<WildcardPermission> permissions = permissionsList.getValue();
         return new RoleDefinitionDTO(getRoleDefinitionId(), newName, permissions);
     }
-    
+
     protected abstract UUID getRoleDefinitionId();
 }

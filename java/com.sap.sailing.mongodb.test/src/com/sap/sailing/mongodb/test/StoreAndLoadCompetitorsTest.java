@@ -1,6 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -70,7 +71,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     @Before
     public void setUp() {
         // clear the domainFactory competitor store for a clean start:
-        domainFactory = new DomainFactoryImpl((srlid)->null);
+        domainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
     }
     
     private void dropCompetitorAndBoatsCollection() {
@@ -121,17 +122,28 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     }
 
     @Test
+    public void testCompetitorDoesNotAcceptInfiniteTimeOnTimeFactor() {
+        final DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
+        final double infinity = 100./0.;
+        try {
+            c.setTimeOnTimeFactor(infinity); // see how we handle a 0 Yardstick number; see bug 5297
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    @Test
     public void testStoreAndUpdateCompetitorWithUUIDAsId() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorAndBoatsCollection();
-
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
         c.setName("Hasso Plattner");
-        mongoObjectFactory.storeCompetitor(c);
-        assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
+        final Collection<DynamicCompetitor> reloadedCompetitors = domainObjectFactory.loadAllCompetitors();
+        assertEquals(1, reloadedCompetitors.size());
     }
 
     @Test
@@ -139,11 +151,9 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorAndBoatsCollection();
-        
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso");
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
-
         mongoObjectFactory.removeCompetitor(c);
         assertEquals(0, Util.size(domainObjectFactory.loadAllCompetitors()));
     }

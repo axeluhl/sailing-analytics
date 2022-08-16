@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.EditTextPreference;
@@ -21,10 +23,13 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
+import io.branch.referral.Defines;
+
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
+
+    private static final String TAG = GeneralPreferenceFragment.class.getName();
 
     private static int REQUEST_CODE_QR_CODE = 45392;
 
@@ -50,7 +55,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
                         AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
-                        if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                        if (DataManager.create(getActivity()).getDataStore().getCourseAreaId() != null) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                             builder.setTitle(getString(R.string.non_public_changed_title));
                             builder.setMessage(getString(R.string.app_refresh_message));
@@ -108,14 +113,21 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
-                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                    builder.setTitle(getString(R.string.url_refresh_title));
-                    builder.setMessage(getString(R.string.app_refresh_message));
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
+            public boolean onPreferenceChange(Preference preference, @NonNull Object newValue) {
+                final String summary = (String) newValue;
+                final AppPreferences prefs = AppPreferences.on(getActivity());
+                if (summary.isEmpty()) {
+                    preference.setSummary(prefs.getServerBaseURL());
+                } else {
+                    preference.setSummary(summary);
+                }
+                prefs.setNeedConfigRefresh(true);
+                if (DataManager.create(getActivity()).getDataStore().getCourseAreaId() != null) {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(getString(R.string.url_refresh_title))
+                            .setMessage(getString(R.string.app_refresh_message))
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
                 }
                 return true;
             }
@@ -170,23 +182,24 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_QR_CODE) {
-            if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
-                Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-                QRHelper.with(getActivity()).saveData(barcode.displayValue);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQUEST_CODE_QR_CODE) {
+            return;
+        }
 
-                final AppPreferences appPreferences = AppPreferences.on(getActivity());
-                appPreferences.setNeedConfigRefresh(true);
-                // update device identifier in ui
-                EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
-                identifierPreference.setText(appPreferences.getDeviceConfigurationName());
-                identifierPreference.setSummary(appPreferences.getDeviceConfigurationName());
-                // update server url in ui
-                EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
-                serverUrlPreference.setText(appPreferences.getServerBaseURL());
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
+        if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
+            final Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+            final Uri uri = Uri.parse(barcode.displayValue);
+            final Intent intent = requireContext().getPackageManager()
+                    .getLaunchIntentForPackage(requireContext().getPackageName());
+            if (intent != null) {
+                intent.setData(uri);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(Defines.Jsonkey.ForceNewBranchSession.getKey(), true);
+                startActivity(intent);
             }
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
     }
 }

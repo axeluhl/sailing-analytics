@@ -54,12 +54,12 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
-    public void removeListener(Object listener) {
+    public void removeListener(RaceLogEventVisitor listener) {
         innerRaceLog.removeListener(listener);
     }
 
     @Override
-    public void addAllListeners(HashSet<RaceLogEventVisitor> listeners) {
+    public void addAllListeners(Iterable<RaceLogEventVisitor> listeners) {
         innerRaceLog.addAllListeners(listeners);
     }
 
@@ -157,6 +157,12 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     @Override
     public Iterator<RaceLogEvent> getRawFixesIterator(TimePoint startingAt, boolean inclusive) {
         return innerRaceLog.getRawFixesIterator(startingAt, inclusive);
+    }
+
+    @Override
+    public Iterator<RaceLogEvent> getRawFixesIterator(TimePoint startingAt, boolean startingAtInclusive,
+            TimePoint endingAt, boolean endingAtInclusive) {
+        return innerRaceLog.getRawFixesIterator(startingAt, startingAtInclusive, endingAt, endingAtInclusive);
     }
 
     @Override

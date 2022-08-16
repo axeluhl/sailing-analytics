@@ -83,9 +83,11 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
                     };
                     MultiRaceLeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 
                     if(leaderboardPanel == null) {
-                        createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer, result);
+                        createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(), 
+                                /*FIXME placeToken */ null, leaderboardConsumer, result);
                     } else if( /*FIXME placeToken not empty */ false) {
-                        createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null, result).getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
+                        createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(),
+                                /*FIXME placeToken */ null, result).getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
                             @Override
                             public void onSuccess(MultiRaceLeaderboardSettings settings) {
                                 leaderboardPanel.updateSettings(settings);

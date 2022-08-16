@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.List;
+import java.util.UUID;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -11,16 +14,17 @@ import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.shared.json.JsonSerializer;
 
 @Path("/v1/search")
 public class SearchResource extends AbstractSailingServerResource {
@@ -28,18 +32,23 @@ public class SearchResource extends AbstractSailingServerResource {
     
     public SearchResource() {
         final LeaderboardGroupBaseJsonSerializer leaderboardGroupSerializer = new LeaderboardGroupBaseJsonSerializer();
-        serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(
-                new CourseAreaJsonSerializer()), leaderboardGroupSerializer), leaderboardGroupSerializer);
+        serializer = new LeaderboardSearchResultJsonSerializer(
+                new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                        leaderboardGroupSerializer, new TrackingConnectorInfoJsonSerializer()),
+                leaderboardGroupSerializer);
     }
     
-    private Result<LeaderboardSearchResult> search(KeywordQuery query) {
+    private Result<LeaderboardSearchResult> search(KeywordQueryWithOptionalEventQualification query) {
         return getService().search(query);
     }
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response search(@QueryParam("q") String keywords) {
-        KeywordQuery query = new KeywordQuery(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(keywords));
+    public Response search(@QueryParam("q") String keywords, @QueryParam("include") Boolean include,
+            @QueryParam("eventId") List<UUID> eventIds) {
+        KeywordQueryWithOptionalEventQualification query = new KeywordQueryWithOptionalEventQualification(
+                Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(keywords), include == null ? false : include,
+                eventIds);
         Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
         JSONArray jsonSearchResults = new JSONArray();
         for (LeaderboardSearchResult searchResult : searchResults) {

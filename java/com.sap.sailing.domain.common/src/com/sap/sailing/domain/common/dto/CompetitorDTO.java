@@ -73,4 +73,10 @@ public interface CompetitorDTO extends Named, WithID, SecuredDTO, Serializable, 
      * from the previous version of the enclosing leaderboard.
      */
     CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion);
+
+    /**
+     * Erases the fields a user is not supposed to read with only the READ_PUBLIC and not the
+     * READ permission.
+     */
+    void clearNonPublicFields();
 }

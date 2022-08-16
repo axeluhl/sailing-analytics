@@ -10,12 +10,13 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * The boat being sailed by a competitor.
  *
  */
-public interface Boat extends NamedWithID, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
+public interface Boat extends NamedWithID, IsManagedByCache<SharedDomainFactory<?>>, WithQualifiedObjectIdentifier {
     BoatClass getBoatClass();   
     
     @Dimension(messageKey="SailID")
     String getSailID();
     
+    @Dimension(messageKey="Color")
     Color getColor();
     
     /**

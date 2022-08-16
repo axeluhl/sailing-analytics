@@ -10,9 +10,9 @@ import com.sap.sse.common.media.MimeType;
 
 /**
  * Used to transfer an {@link ImageDTO} and a list of {@link MediaTagConstants} which store information on how to resize the image
- * This class is used to validate an ImageDTO in the ImageDialog.ImageParameterValidator.
+ * This class is used to validate an {@link ImageDTO} in the ImageDialog.ImageParameterValidator.
  * After the validation passed, if the resizingTask is empty, it will be only used to transfer the ImageDTO.
- * If the resizingTask is not empty it will be transfered to the SailingService#resizeImage, 
+ * If the resizingTask is not empty it will be transfered to the {@link SailingServiceWrite#resizeImage}, 
  * where it will be used to create multiple {@link ImageDTO} with sizes fitting to the {@link MediaTagConstants}  
  * 
  * @author Robin Fleige (D067799)

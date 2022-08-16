@@ -220,6 +220,11 @@ input.magnifier {
 	top: 7.5px;
 }
 
+.orientationAnchor {
+	position: relative;
+    top: 7.5px;
+}
+
 .groupingProvider {
     padding: 3px 0px;
     overflow-y: auto;
@@ -312,11 +317,11 @@ input.magnifier {
 
 .dataMiningListBox {
 	min-width: 120px;
+	margin-right: 5px;
 }
 
 .queryDefinitionViewerContent {
 	background-color: white;
-	padding: 5px;
 }
 
 .filterDimensionsTitleLabel {

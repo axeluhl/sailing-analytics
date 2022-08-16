@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -38,6 +37,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -48,7 +48,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbstractMockedRaceMarkPassingTest {
-    final BoatClassImpl boatClass = new BoatClassImpl("boat", true, "boat", new MeterDistance(10), new MeterDistance(5), null);
+    final BoatClassImpl boatClass = new BoatClassImpl("boat", true, new MeterDistance(10), new MeterDistance(5), null);
     protected Competitor ron = new CompetitorImpl("Ron", "Ron", "KYC", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     protected Competitor tom = new CompetitorImpl("Tom", "Tom", "KYC", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     protected Competitor ben = new CompetitorImpl("Ben", "Ben", "KYC", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
@@ -66,7 +66,7 @@ public class AbstractMockedRaceMarkPassingTest {
     protected DynamicTrackedRace race;
 
     public AbstractMockedRaceMarkPassingTest() {
-        ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(gate1, gate2, "cp");
+        ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(gate1, gate2, "cp", "");
         Waypoint w1 = new WaypointImpl(cp, PassingInstruction.Line);
         Waypoint w2 = new WaypointImpl(m, PassingInstruction.Port);
         Waypoint w3 = new WaypointImpl(cp, PassingInstruction.Gate);
@@ -88,7 +88,7 @@ public class AbstractMockedRaceMarkPassingTest {
         race = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(),
                 new EmptyWindStore(), 0, 10000, 10000, /* useMarkPassingCalculator */ false,
                 OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
         race.setStartTimeReceived(new MillisecondsTimePoint(10000));
         TimePoint t = new MillisecondsTimePoint(30000);
         List<Util.Pair<Mark, Position>> pos = Arrays.asList(new Util.Pair<Mark, Position>(m, new DegreePosition(0, 0)),

@@ -24,6 +24,8 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionView;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
@@ -40,30 +42,30 @@ import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-
-public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> implements DesktopClientFactory {
+public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
-    
-    public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
+
+    public TabletAndDesktopApplicationClientFactory(final boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
     }
-    
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, boolean isStandaloneServer) {
+
+    private TabletAndDesktopApplicationClientFactory(final EventBus eventBus, final boolean isStandaloneServer) {
         this(eventBus, new PlaceController(eventBus), isStandaloneServer);
     }
 
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, boolean isStandaloneServer) {
+    private TabletAndDesktopApplicationClientFactory(final EventBus eventBus, final PlaceController placeController, final boolean isStandaloneServer) {
         this(eventBus, placeController, new DesktopPlacesNavigator(placeController, isStandaloneServer));
     }
 
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
+    private TabletAndDesktopApplicationClientFactory(final EventBus eventBus, final PlaceController placeController, 
+            final DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
-        
+        getUserService();
         final AuthenticationViewDesktop userManagementDisplay = new AuthenticationViewDesktop();
-        WhatsNewDialogFactory.registerWithUserService(getUserService(), getPlaceController());
-        final Runnable signInSuccesfullNavigation = new Runnable() {
+        WhatsNewDialogFactory.register(getUserService(), placeController);
+        final Runnable signInSuccesfulNavigation = new Runnable() {
             @Override
             public void run() {
                 userManagementWizardController.goTo(new LoggedInUserInfoPlace());
@@ -75,21 +77,19 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         this.userManagementWizardController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE),
                 new AuthenticationCallbackImpl(getHomePlacesNavigator().getUserProfileNavigation(),
-                        signInSuccesfullNavigation), userManagementDisplay, getEventBus());
-
+                        signInSuccesfulNavigation), userManagementDisplay, getEventBus());
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
-
         new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }
-    
+
     @Override
     public DesktopResettableNavigationPathDisplay getNavigationPathDisplay() {
         return getTopLevelView().getNavigationPathDisplay();
     }
 
     @Override
-    public TabletAndDesktopErrorView createErrorView(String errorMessage, Throwable errorReason) {
+    public TabletAndDesktopErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
         return new TabletAndDesktopErrorView(errorMessage, errorReason, null);
     }
 
@@ -109,8 +109,14 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public SolutionsView createSolutionsView(SolutionsNavigationTabs navigationTab) {
+    public SolutionsView createSolutionsView(final SolutionsNavigationTabs navigationTab) {
         return new TabletAndDesktopSolutionsView(navigationTab, getHomePlacesNavigator());
+    }
+
+    @Override
+    public SubscriptionView createSubscriptionsView() {
+        getSubscriptionServiceFactory().initializeProviders();
+        return new SubscriptionViewImpl();
     }
 
     @Override
@@ -119,7 +125,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public WhatsNewView createWhatsNewView(WhatsNewNavigationTabs navigationTab) {
+    public WhatsNewView createWhatsNewView(final WhatsNewNavigationTabs navigationTab) {
         return new TabletAndDesktopWhatsNewView(navigationTab, getHomePlacesNavigator());
     }
 
@@ -137,20 +143,19 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
     }
-    
+
     @Override
     public ConfirmationView createConfirmationView() {
         return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
-    
+
     @Override
     public PasswordResetView createPasswordResetView() {
         return new PasswordResetViewImpl();
     }
-    
+
     @Override
-    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(final String username) {
         return getHomePlacesNavigator().getPasswordResettedConfirmationNavigation(username);
     }
-
 }

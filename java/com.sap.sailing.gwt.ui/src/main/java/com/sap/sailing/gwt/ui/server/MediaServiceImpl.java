@@ -17,18 +17,14 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.shiro.SecurityUtils;
 import org.mp4parser.AbstractBoxParser;
 import org.mp4parser.IsoFile;
 import org.mp4parser.PropertyBoxParserImpl;
@@ -44,28 +40,22 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.media.mp4.MP4MediaParser;
 import com.sap.sailing.media.mp4.MP4ParserFakeFile;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.security.Action;
-import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
-    private String YOUTUBE_V3_API_KEY = "AIzaSyBzCJ9cxb9_PPzuYfrHIEdSRtR631b64Xs";
+    private String YOUTUBE_V3_API_KEY = "AIzaSyBPJQx0nIjYJmIaOBu0m28pEau8WKENMxs";
 
     private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
     private static final int METADATA_CONNECTION_TIMEOUT = 10000;
 
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-
 
     private static final long serialVersionUID = -8917349579281305977L;
 
@@ -77,88 +67,37 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         racingEventServiceTracker.open();
     }
 
-    private RacingEventService racingEventService() {
+    protected RacingEventService racingEventService() {
         return racingEventServiceTracker.getService();
     }
 
     @Override
-    public Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
+    public Iterable<MediaTrackWithSecurityDTO> getMediaTracksForRace(
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier));
     }
 
     @Override
-    public Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
+    public Iterable<MediaTrackWithSecurityDTO> getMediaTracksInTimeRange(
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+                racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier));
     }
 
     @Override
     public Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks() {
-        Collection<MediaTrackWithSecurityDTO> result = new ArrayList<>();
-        for (MediaTrack mediaTrack : racingEventService().getAllMediaTracks()) {
-            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                    mediaTrack.getIdentifier());
-            result.add(securedMediaTrack);
-        }
-        return result;
-    }
-    
-    @Override
-    public String addMediaTrack(MediaTrack mediaTrack) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermission(DefaultActions.CREATE));
-        if (mediaTrack.dbId != null) {
-            throw new IllegalStateException("Property dbId must not be null for newly created media track.");
-        }
-        racingEventService().mediaTrackAdded(mediaTrack);
-        SecurityService securityService = racingEventService().getSecurityService();
-        securityService.setDefaultOwnershipIfNotSet(mediaTrack.getIdentifier());
-        return mediaTrack.dbId;
+        return mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(racingEventService().getAllMediaTracks());
     }
 
-    @Override
-    public void deleteMediaTrack(MediaTrack mediaTrack) {
-        racingEventService().getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
-                mediaTrack, new Action() {
-
-                    @Override
-                    public void run() throws Exception {
-                        racingEventService().mediaTrackDeleted(mediaTrack);
-                    }
+    private List<MediaTrackWithSecurityDTO> mapMediaTracksToDTOsWithSecurityInformationAndFilterByReadPermission(
+            Iterable<MediaTrack> mediaTracksToFilter) {
+        return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(mediaTracksToFilter,
+                mediaTrack -> {
+                    final MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+                    SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack);
+                    return securedMediaTrack;
                 });
-    }
-
-    @Override
-    public void updateTitle(MediaTrack mediaTrack) {
-        ensureUserCanUpdateMediaTrack(mediaTrack);
-        racingEventService().mediaTrackTitleChanged(mediaTrack);
-    }
-
-    @Override
-    public void updateUrl(MediaTrack mediaTrack) {
-        ensureUserCanUpdateMediaTrack(mediaTrack);
-        racingEventService().mediaTrackUrlChanged(mediaTrack);
-    }
-
-    @Override
-    public void updateStartTime(MediaTrack mediaTrack) {
-        ensureUserCanUpdateMediaTrack(mediaTrack);
-        racingEventService().mediaTrackStartTimeChanged(mediaTrack);
-    }
-
-    @Override
-    public void updateDuration(MediaTrack mediaTrack) {
-        ensureUserCanUpdateMediaTrack(mediaTrack);
-        racingEventService().mediaTrackDurationChanged(mediaTrack);
-    }
-
-    private void ensureUserCanUpdateMediaTrack(MediaTrack mediaTrack) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObject(DefaultActions.UPDATE, mediaTrack));
-    }
-
-    @Override
-    public void updateRace(MediaTrack mediaTrack) {
-        ensureUserCanUpdateMediaTrack(mediaTrack);
-        racingEventService().mediaTrackAssignedRacesChanged(mediaTrack);
     }
 
     @Override
@@ -284,9 +223,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public MediaTrack getMediaTrackByUrl(String url) {
         MediaTrack result = null;
         for (MediaTrack mtrack : racingEventService().getAllMediaTracks()) {
-            if (url.equals(mtrack.url)) {
-                result = mtrack;
-                break;
+            if (racingEventService().getSecurityService().hasCurrentUserReadPermission(mtrack)) {
+                if (url.equals(mtrack.url)) {
+                    result = mtrack;
+                    break;
+                }
             }
         }
         return result;

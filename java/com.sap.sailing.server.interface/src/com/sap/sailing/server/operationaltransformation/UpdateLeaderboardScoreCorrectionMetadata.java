@@ -51,5 +51,4 @@ public class UpdateLeaderboardScoreCorrectionMetadata extends AbstractLeaderboar
         updateStoredLeaderboard(toState, leaderboard);
         return null;
     }
-
 }

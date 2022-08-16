@@ -64,6 +64,7 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
         deleteFilterSetButtons = new ArrayList<Button>();
         filterSets = new ArrayList<>();
         addFilterSetButton = new Button(stringMessages.actionAddFilter());
+        addFilterSetButton.addStyleName("btn-secondary");
         availableTagFilterNames = new ArrayList<String>();
         availableTagFilterNames.add(TagTagFilter.FILTER_NAME);
         availableTagFilterNames.add(TagUsernameFilter.FILTER_NAME);
@@ -151,6 +152,7 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
         final Button editFilterSetBtn = new Button(stringMessages.edit());
         final String filterSetToEditName = filterSetToEdit.getName();
         editFilterSetBtn.addStyleName("inlineButton");
+        editFilterSetBtn.addStyleName("btn-secondary");
         editFilterSetBtn.setVisible(filterSetToEdit.isEditable());
         editFilterSetButtons.add(editFilterSetBtn);
         editFilterSetBtn.addClickHandler(new ClickHandler() {
@@ -176,17 +178,14 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
                                     }
                                 }
                                 boolean isActiveFilterSet = activeFilterSetRadioButtons.get(index).getValue();
-
                                 activeFilterSetRadioButtons.remove(index);
                                 editFilterSetButtons.remove(index);
                                 deleteFilterSetButtons.remove(index);
                                 filterSets.remove(index);
-
                                 createActiveFilterSetRadioButton(changedFilterSet, isActiveFilterSet);
                                 createEditFilterSetButton(changedFilterSet);
                                 createDeleteFilterSetButton(changedFilterSet);
                                 filterSets.add(changedFilterSet);
-
                                 updateTagsFilterSetsGrid(mainPanel);
                                 validateAndUpdate();
                             }
@@ -209,6 +208,7 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
     private Button createDeleteFilterSetButton(FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet) {
         final Button deleteFilterSetBtn = new Button(stringMessages.delete());
         deleteFilterSetBtn.addStyleName("inlineButton");
+        deleteFilterSetBtn.addStyleName("btn-secondary");
         deleteFilterSetBtn.setVisible(filterSet.isEditable());
         deleteFilterSetButtons.add(deleteFilterSetBtn);
         deleteFilterSetBtn.addClickHandler(new ClickHandler() {
@@ -257,14 +257,12 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
                 }
             }
         }
-
         return result;
     }
 
     private void updateTagsFilterSetsGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(tagFilterSetsGrid);
         parentPanel.remove(tagFilterSetsGrid);
-
         int filterCount = activeFilterSetRadioButtons.size();
         if (filterCount > 0) {
             tagFilterSetsGrid = new Grid(filterCount, 3);

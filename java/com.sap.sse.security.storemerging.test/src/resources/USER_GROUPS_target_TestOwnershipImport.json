@@ -1,0 +1,4 @@
+{"_id":{"$oid":"5e3185c59d7cdfdd30a7da81"},"ID":{"$binary":"okBgqmSNPcVDlS73GpDSkQ==","$type":"03"},"NAME":"unknown server name-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
+{"_id":{"$oid":"5e3185c69d7cdfdd30a7da92"},"ID":{"$binary":"E0BzUn2A3Tb5tsMWSuEeoQ==","$type":"03"},"NAME":"admin-tenant","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e3186329d7cdfdd30a7dced"},"ID":{"$binary":"1UgI0lhcKGRe2FlWM2GZrQ==","$type":"03"},"NAME":"UserToBeDropped-tenant","USERNAMES":["UserToBeDropped"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e31863c9d7cdfdd30a7dd0a"},"ID":{"$binary":"6EvaMPDRDcMXsXoblyHojA==","$type":"03"},"NAME":"GroupToBeDropped","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}

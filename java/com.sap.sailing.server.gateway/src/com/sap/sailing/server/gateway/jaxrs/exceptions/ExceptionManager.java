@@ -4,15 +4,26 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import com.sap.sailing.domain.common.NotFoundException;
+
 @Provider
 public class ExceptionManager implements ExceptionMapper<Exception> {
     public Response toResponse(Exception exception) {
-        return Response.status(400).entity(exception.getMessage()).type("text/plain").build();
+        Response result;
+        try {
+            throw exception; 
+        } catch (NotFoundException nfe) {
+            result = Response.status(Status.NOT_FOUND).entity(nfe.getMessage()).type("text/plain").build();
+        } catch (Exception e) {
+            result = Response.status(Status.BAD_REQUEST).entity(e.getMessage()).type("text/plain").build();
+        }
+        return result;
     }
 
     public static String invalidDateFormatMsg(String date) {

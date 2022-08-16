@@ -17,19 +17,29 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.roles.UserRoleDefinitionPanel;
 
 /**
- * Suggest oracle for use in {@link UserGroupRoleDefinitionPanel} and {@link UserRoleDefinitionPanel}, which oracles the
+ * Suggest oracle for use in {@link GroupRoleDefinitionPanel} and {@link UserRoleDefinitionPanel}, which oracles the
  * role names.
  */
 public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {
 
     private final Map<String, StrippedRoleDefinitionDTO> allRoles = new HashMap<>();
     private boolean initialized = false;
+    private final UserManagementServiceAsync userManagementService;
+    private final StringMessages stringMessages;
 
     public RoleDefinitionSuggestOracle(final UserManagementServiceAsync userManagementService,
             final StringMessages stringMessages) {
+        this.userManagementService = userManagementService;
+        this.stringMessages = stringMessages;
+        refresh();
+    }
+
+    public void refresh() {
+        initialized = false;
         userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinitionDTO>>() {
             @Override
             public void onSuccess(ArrayList<RoleDefinitionDTO> result) {
+                allRoles.clear();
                 for (RoleDefinitionDTO role : result) {
                     allRoles.put(role.getName(),
                             new StrippedRoleDefinitionDTO(role.getId(), role.getName(), role.getPermissions()));

@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 
 /**
- * Helper class to support converting old places to new ones and relace inconsistent places with working ones.
+ * Helper class to support converting old places to new ones and replace inconsistent places with working ones.
  */
 public class ApplicationPlaceUpdater {
 
@@ -46,9 +46,7 @@ public class ApplicationPlaceUpdater {
         EventContext eventContext = new EventContext().withId(eventId);
         String regattaId = place.getLeaderboardIdAsNameString();
         boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
-
         // TODO evaluate additional parameters
-
         if (hasRegattaId) {
             switch (place.getNavigationTab()) {
             case CompetitorAnalytics:
@@ -71,7 +69,6 @@ public class ApplicationPlaceUpdater {
         boolean hasRegattaId = (regattaId != null && !regattaId.isEmpty());
         if (hasRegattaId) {
             eventContext.withRegattaId(regattaId);
-
             switch (place.getNavigationTab()) {
             case Media:
                 return new RegattaMediaPlace(eventContext);
@@ -93,16 +90,13 @@ public class ApplicationPlaceUpdater {
                 return new MultiregattaRegattasPlace(eventContext);
             }
         }
-
         return new EventDefaultPlace(eventContext);
     }
 
     private Place getRealSeriesPlace(SeriesPlace place) {
         String seriesId = place.getEventUuidAsString();
         SeriesContext context = SeriesContext.createWithSeriesId(UUID.fromString(seriesId));
-
         // TODO evaluate additional parameters
-
         switch (place.getNavigationTab()) {
         case OverallLeaderboard:
             return new EventSeriesOverallLeaderboardPlace(context);

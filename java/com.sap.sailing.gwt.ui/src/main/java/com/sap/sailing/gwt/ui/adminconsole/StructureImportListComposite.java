@@ -5,9 +5,7 @@ import java.util.Comparator;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.util.NaturalComparator;
@@ -17,7 +15,7 @@ import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.security.ui.client.UserService;
 
-public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
+public class StructureImportListComposite extends RegattaListComposite {
 
     private SelectionCheckboxColumn<RegattaDTO> selectionCheckboxColumn;
     private final RegattaStructureProvider regattaStructureProvider;
@@ -26,12 +24,19 @@ public class StructureImportListComposite extends RegattaListComposite implement
         RegattaStructure getRegattaStructure(RegattaDTO regatta);
     }
 
-    public StructureImportListComposite(final SailingServiceAsync sailingService, final UserService userService,
-            RegattaRefresher regattaRefresher, RegattaStructureProvider regattaStructureProvider,
+    public StructureImportListComposite(final Presenter presenter, RegattaStructureProvider regattaStructureProvider,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        super(sailingService, userService, regattaRefresher, errorReporter, stringMessages);
+        super(presenter, stringMessages);
         this.regattaStructureProvider = regattaStructureProvider;
     }
+    
+    /**
+     * No update permission check for the objects shown by this panel; they are no real back-end
+     * regattas with ownerships or security information, and filtering in this context makes no sense.
+     */
+    protected void setUpdatePermissionFilter(final UserService userService) {
+    }
+
 
     // create Regatta Table in StructureImportManagementPanel
     @Override

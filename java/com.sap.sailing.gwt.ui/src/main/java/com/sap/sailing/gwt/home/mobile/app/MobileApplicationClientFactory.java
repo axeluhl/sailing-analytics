@@ -4,7 +4,6 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
@@ -18,6 +17,9 @@ import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFa
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionClientFactory;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionView;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
@@ -37,50 +39,48 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
- * 
+ *
  * @author pgtaboada
  *
  */
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
-        SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory, WithAuthenticationManager,
-        ClientFactoryWithDispatchAndErrorAndUserService {
+        SubscriptionClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory,
+        WithAuthenticationManager, ClientFactoryWithDispatchAndErrorAndUserService {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;
     private final SailingServiceAsync sailingService;
 
-    public MobileApplicationClientFactory(boolean isStandaloneServer, SailingServiceAsync sailingService) {
+    public MobileApplicationClientFactory(final boolean isStandaloneServer, final SailingServiceAsync sailingService) {
         this(new SimpleEventBus(), isStandaloneServer, sailingService);
     }
 
-    private MobileApplicationClientFactory(SimpleEventBus eventBus, boolean isStandaloneServer,
-            SailingServiceAsync sailingService) {
+    private MobileApplicationClientFactory(final SimpleEventBus eventBus, final boolean isStandaloneServer,
+            final SailingServiceAsync sailingService) {
         this(eventBus, new PlaceController(eventBus), isStandaloneServer, sailingService);
     }
 
-    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController,
-            boolean isStandaloneServer, SailingServiceAsync sailingService) {
+    private MobileApplicationClientFactory(final EventBus eventBus, final PlaceController placeController,
+            final boolean isStandaloneServer, final SailingServiceAsync sailingService) {
         this(eventBus, placeController, new MobilePlacesNavigator(placeController, isStandaloneServer), sailingService);
     }
 
-    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController,
-            MobilePlacesNavigator navigator, SailingServiceAsync sailingService) {
+    private MobileApplicationClientFactory(final EventBus eventBus, final PlaceController placeController,
+            final MobilePlacesNavigator navigator, final SailingServiceAsync sailingService) {
         this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator, sailingService);
     }
 
-    public MobileApplicationClientFactory(final MobileApplicationView root, EventBus eventBus,
-            PlaceController placeController, final MobilePlacesNavigator navigator,
-            SailingServiceAsync sailingService) {
+    public MobileApplicationClientFactory(final MobileApplicationView root, final EventBus eventBus,
+            final PlaceController placeController, final MobilePlacesNavigator navigator,
+            final SailingServiceAsync sailingService) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         this.sailingService = sailingService;
-        getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
         this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getNavigator()
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
-        WhatsNewDialogFactory.registerWithUserService(getUserService(), getPlaceController());
-        
+        WhatsNewDialogFactory.register(getUserService(), placeController);
         authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
             final LoginHintContent content = new LoginHintContent(() -> {
                 root.setSubHeaderContent(null);
@@ -100,6 +100,7 @@ public class MobileApplicationClientFactory extends
         return navigator;
     }
 
+    @Override
     public SailingDispatchSystem getDispatch() {
         return dispatch;
     }
@@ -118,7 +119,13 @@ public class MobileApplicationClientFactory extends
     public ErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
         return new ErrorViewImpl(errorMessage, errorReason, null);
     }
-    
+
+    @Override
+    public SubscriptionView createSubscriptionsView() {
+        getSubscriptionServiceFactory().initializeProviders();
+        return new SubscriptionViewImpl();
+    }
+
     @Override
     public SearchResultView createSearchResultView() {
         return new SearchResultViewImpl(navigator);
@@ -127,7 +134,7 @@ public class MobileApplicationClientFactory extends
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
         return getTopLevelView().getNavigationPathDisplay();
     }
-    
+
     @Override
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
@@ -137,14 +144,14 @@ public class MobileApplicationClientFactory extends
     public ConfirmationView createConfirmationView() {
         return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
-    
+
     @Override
     public PasswordResetView createPasswordResetView() {
         return new PasswordResetViewImpl();
     }
-    
+
     @Override
-    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(final String username) {
         return getNavigator().getPasswordResettedConfirmationNavigation(username);
     }
 

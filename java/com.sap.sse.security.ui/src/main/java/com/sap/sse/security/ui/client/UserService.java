@@ -1,14 +1,15 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -21,13 +22,15 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
-import com.sap.sse.gwt.client.StorageEvent;
-import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
+import com.sap.sse.gwt.client.xdstorage.CrossDomainStorageEvent;
+import com.sap.sse.gwt.client.xdstorage.DelegatingCrossDomainStorageFuture;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -39,6 +42,8 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
+import com.sap.sse.security.ui.shared.EssentialSecuredDTO;
+import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -69,7 +74,6 @@ public class UserService {
      */
     private static final String LOCAL_STORAGE_UPDATE_KEY = "current-user-has-changed";
     
-    
     /**
      * Storage key to remember when a user was authenticated or dismissed the login hint the last time.
      */
@@ -81,6 +85,8 @@ public class UserService {
     protected static final Duration SUPRESSION_DELAY = Duration.ONE_WEEK;
     
     private final UserManagementServiceAsync userManagementService;
+    
+    private final UserManagementWriteServiceAsync userManagementWriteService;
 
     private final Set<UserStatusEventHandler> handlers;
 
@@ -97,27 +103,78 @@ public class UserService {
     private ServerInfoDTO serverInfo;
     
     private final Set<HasPermissions> allKnownHasPermissions;
+    
+    /**
+     * The storage configured based on what {@link UserManagementServiceAsync#getSharingConfiguration(AsyncCallback)} has returned.
+     */
+    private final DelegatingCrossDomainStorageFuture crossDomainStorage;
 
-    public UserService(UserManagementServiceAsync userManagementService) {
-        this.id = ""+(System.currentTimeMillis() * Random.nextInt()); // something pretty random
+    public UserService(UserManagementServiceAsync userManagementService, UserManagementWriteServiceAsync userManagementWriteService) {
+        this.id = UUID.randomUUID().toString();
         this.userManagementService = userManagementService;
+        this.userManagementWriteService = userManagementWriteService;
         handlers = new HashSet<>();
         allKnownHasPermissions = new HashSet<>();
-        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions);
+        crossDomainStorage = new DelegatingCrossDomainStorageFuture();
+        initializeCrossDomainStorage();
+        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions); // to start with...
+        // ...but the server may know more because HasPermissionsProviders can register in the OSGi registry
+        // dynamically, and the SecurityService exposes the results:
+        userManagementService.getAllHasPermissions(new AsyncCallback<ArrayList<HasPermissions>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error trying to obtain secured types: "+caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<HasPermissions> result) {
+                GWT.log("Loaded secured types "+result);
+                allKnownHasPermissions.addAll(result);
+            }
+        });
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
 
-    private void registerStorageEventHandler() {
-        Storage.addStorageEventHandler(new Handler() {
+    private void initializeCrossDomainStorage() {
+        assert userManagementService != null;
+        assert crossDomainStorage != null;
+        userManagementService.getSharingConfiguration(new AsyncCallback<SecurityServiceSharingDTO>() {
             @Override
-            public void onStorageChange(StorageEvent event) {
+            public void onFailure(Throwable caught) {
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(SecurityServiceSharingDTO result) {
+                crossDomainStorage.setStorageToUse(CrossDomainStorage.create(result.getBaseUrlForCrossDomainStorage()));
+            }
+        });
+    }
+    
+    /**
+     * Use this instead of {@link Storage#getLocalStorageIfSupported()}. The resulting {@link CrossDomainStorage} object
+     * is configured by the server settings for sharing or isolation of the security service. Note that the methods all
+     * work asynchronously, talking to a callback that the caller needs to pass. It can also happen that first requests
+     * initially have to wait a few milliseconds because the configuration needs to be loaded from the back-end first
+     * (which happens immediately when this {@link UserService} is constructed), and if a shared storage is configured,
+     * an {@code iframe} needs to be loaded, and request processing is delayed until the loading of that {@code iframe}
+     * has completed.
+     */
+    public CrossDomainStorage getStorage() {
+        return crossDomainStorage;
+    }
+
+    private void registerStorageEventHandler() {
+        getStorage().addStorageEventHandler(new CrossDomainStorageEvent.Handler() {
+            @Override
+            public void onStorageChange(CrossDomainStorageEvent event) {
                 logger.finest("Received storage event { key: "+event.getKey()+", newValue: "+event.getNewValue()+", oldValue: "+
-                        event.getOldValue()+", url: "+event.getUrl()+", storageArea: "+event.getStorageArea());
+                        event.getOldValue()+", url: "+event.getUrl());
                 // ignore update events coming from this object itself
                 if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && event.getNewValue() != null
                         && !event.getNewValue().isEmpty() && !event.getNewValue().equals(id.toString())) {
-                    updateUser(/* Don't play endless ping-ping between instances! */ false);
+                    updateUser(/* Don't play endless ping-pong between instances! */ false);
                 }
             }
         });
@@ -128,10 +185,8 @@ public class UserService {
      * tabs/windows.
      */
     public void fireUserUpdateEvent() {
-        if (Storage.isSupported()) {
-            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, ""); // force a change
-            Storage.getLocalStorageIfSupported().setItem(LOCAL_STORAGE_UPDATE_KEY, id);
-        }
+        getStorage().setItem(LOCAL_STORAGE_UPDATE_KEY, "", // force a change
+            e->getStorage().setItem(LOCAL_STORAGE_UPDATE_KEY, id, null));
     }
 
     /**
@@ -148,7 +203,7 @@ public class UserService {
         userManagementService.getCurrentUser(
                 new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
-                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
+            public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, notifyOtherInstances);
             }
 
@@ -193,7 +248,7 @@ public class UserService {
             }
 
             @Override
-                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
+            public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, /* notifyOtherInstances */ true);
                         logger.info(authProviderName + " user '" + result.getA().getName() + "' is verified!\n");
                         callback.onSuccess(result.getA());
@@ -236,12 +291,11 @@ public class UserService {
         }
         anonymousUser = resultAndAnomynous.getB();
         serverInfo = resultAndAnomynous.getC();
-
         preAuthenticated = (!userInitiallyLoaded && currentUser != null);
         userInitiallyLoaded = true;
         logger.info("User changed to "
                 + (currentUser == null ? "No User" : (currentUser.getName() + " roles: " + currentUser.getRoles())));
-        logger.info("User anonymous changed to " + anonymousUser.getName() + " roles: " + anonymousUser.getRoles());
+        logger.info("User anonymous changed to " + (anonymousUser == null ? "No User" : (anonymousUser.getName() + " roles: " + anonymousUser.getRoles())));
         notifyUserStatusEventHandlers(preAuthenticated);
         if (notifyOtherInstances) {
             fireUserUpdateEvent();
@@ -266,7 +320,7 @@ public class UserService {
                 consumer.accept(getServerInfo());
                 removeUserStatusEventHandler(this);
             }
-        }, true);
+        }, /* fireIfUserIsAlreadyAvailable */ true);
     }
 
     public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
@@ -283,6 +337,10 @@ public class UserService {
         return userManagementService;
     }
     
+    public UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return userManagementWriteService;
+    }
+    
     /**
      * Loads the {@link #getCurrentUser() current user}'s preference with the given {@link String key} from server.
      * The preferences are passed to the {@link AsyncCallback} as serialized in {@link String}.
@@ -295,18 +353,18 @@ public class UserService {
      */
     public void getPreference(String key,
             final AsyncCallback<String> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().getPreference(username, key, callback);
     }
     
     public void getPreferences(List<String> keys,
             final AsyncCallback<Map<String, String>> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().getPreferences(username, keys, callback);
     }
     
     public void getAllPreferences(final AsyncCallback<Map<String, String>> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        String username = getCurrentUser().getName();
         getUserManagementService().getAllPreferences(username, callback);
     }
     
@@ -319,14 +377,14 @@ public class UserService {
      *            Serialized settings as {@link String} containing the preferences
      */
     public void setPreference(String key, String serializedSettings, final AsyncCallback<Void> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
-        getUserManagementService().setPreference(username, key, serializedSettings, callback);
+        String username = getCurrentUser().getName();
+        userManagementWriteService.setPreference(username, key, serializedSettings, callback);
     }
     
     public void setPreferences(Map<String, String> keyValuePairs,
             final AsyncCallback<Void> callback) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
-        getUserManagementService().setPreferences(username, keyValuePairs, callback);
+        String username = getCurrentUser().getName();
+        userManagementWriteService.setPreferences(username, keyValuePairs, callback);
     }
     
     /**
@@ -338,46 +396,47 @@ public class UserService {
      * @see AbstractGenericSerializableSettings
      */
     public void unsetPreference(String key) {
-        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
-        getUserManagementService().unsetPreference(username, key, new AsyncCallback<Void>() {
+        String username = getCurrentUser().getName();
+        userManagementWriteService.unsetPreference(username, key, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO What to do in case of failure?
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
             }
             
             @Override
             public void onSuccess(Void result) {
-                // TODO Do anything in case of success?
             }
         });
     }
     
     /**
-     * Unauthenticated users get a hint that it has benefits to create an account and log in.When a user was recently
+     * Unauthenticated users get a hint that it has benefits to create an account and log in. When a user was recently
      * logged in or dismissed the notification, he won't see the hint again for some time. This method checks if a user
      * was logged in or dismissed the message recently.
+     * 
+     * @param runnable
+     *            called if the user was not recently logged in or dismissed the hint
      */
-    public boolean wasUserRecentlyLoggedInOrDismissedTheHint() {
-        final TimePoint lastLoginOrSupression = parseLastNewUserSupression();
-        return lastLoginOrSupression != null
-                && lastLoginOrSupression.plus(SUPRESSION_DELAY).after(MillisecondsTimePoint.now());
+    public void runIfUserWasNotRecentlyLoggedInOrDismissedTheHint(Runnable runnable) {
+        parseLastNewUserSupression(lastLoginOrSuppression->{
+            if (lastLoginOrSuppression == null
+                    || !lastLoginOrSuppression.plus(SUPRESSION_DELAY).before(MillisecondsTimePoint.now())) {
+                runnable.run();
+            }
+        });
     }
 
-    private TimePoint parseLastNewUserSupression() {
-        TimePoint lastLoginOrSupression = null;
-        final Storage storage = Storage.getLocalStorageIfSupported();
-        if(storage != null) {
-            final String stringValue = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+    private void parseLastNewUserSupression(Consumer<TimePoint> callback) {
+        getStorage().getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, stringValue->{
             try {
                 if (stringValue != null) {
-                    lastLoginOrSupression = new MillisecondsTimePoint(Long.parseLong(stringValue));
+                    callback.accept(new MillisecondsTimePoint(Long.parseLong(stringValue)));
                 }
             } catch (Exception e) {
                 logger.warning("Error parsing localstore value '" + stringValue + "'");
-                storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+                getStorage().removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, v->callback.accept(null));
             }
-        }
-        return lastLoginOrSupression;
+        });
     }
 
     /**
@@ -386,38 +445,51 @@ public class UserService {
      * suppression.
      */
     public void setUserLoginHintToStorage() {
-        final Storage storage = Storage.getLocalStorageIfSupported();
-        if(storage != null) {
-            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()));
-        }
-    }
-    
-    public boolean hasPermission(String permission) {
-        return hasPermission(new WildcardPermission(permission));
-    }
-
-    public boolean hasAllPermissions(WildcardPermission... permissions) {
-        for (WildcardPermission permission : permissions) {
-            if (!hasPermission(permission)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean hasPermission(WildcardPermission permission) {
-        return hasPermission(permission, /* ownership */ null, /* acl */ null);
+        getStorage().setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()), /* callback */ null);
     }
     
     /**
      * Checks whether the user has the permission to the given action for the given object.
      */
     public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        final boolean result;
         if (securedDTO == null) {
-            return false;
-        }
-        return PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
+            result = false;
+        } else {
+            result = PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
                 anonymousUser, securedDTO.getOwnership(), securedDTO.getAccessControlList());
+        }
+        return result;
+    }
+    
+    /**
+     * From a {@link HasPermissions} permission type, an object name and the type-relative object identifier parts this
+     * method constructs a full-fledged {@link SecuredDTO} and asks the server to fill in the corresponding security
+     * information, in particular the ownership and ACL data. The {@link SecuredDTO} that the server has augmented this
+     * way is sent to the {@code callback}'s {@link AsyncCallback#onSuccess(Object) onSuccess} method where it can,
+     * e.g., be used for a permission check as in {@link #hasPermission(SecuredDTO, Action)}.
+     * <p>
+     * 
+     * This is useful in case a full-fledged {@link SecuredDTO} is not available on the client for some entity, but all
+     * information about its type and ID are available. Imagine, for example, a situation where an identifier for a race
+     * is available on the client, and a permission check needs to be performed for the race identified this way.
+     * Instead of implementing a service that returns the full {@code RaceDTO} with large amounts of data attached that
+     * is not needed for the security check, this method can be used to obtain a proxy that is sufficient to check
+     * whether the current user has the permission to execute a specific action.
+     */
+    public void createEssentialSecuredDTOByIdAndType(HasPermissions permissionType, String name, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, final AsyncCallback<SecuredDTO> callback) {
+        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(permissionType, name, typeRelativeObjectIdentifier);
+        userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<SecuredDTO>() {
+            @Override
+            public void onSuccess(SecuredDTO result) {
+                callback.onSuccess(secureDTO);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+        });
     }
 
     /**
@@ -455,7 +527,7 @@ public class UserService {
     /**
      * Checks whether the user has permission to {@link DefaultActions#CREATE create} an object of the logical type
      * specified, assuming that it will be created with this user as the {@link Ownership#getUserOwner() user owner} and
-     * this user's {@link #getDefaultTenant() default group} as the {@link Ownership#getTenantOwner() group owner}.
+     * this user's {@link #getServerGroup() default group} as the {@link Ownership#getTenantOwner() group owner}.
      */
     public boolean hasCreatePermission(HasPermissions logicalSecuredObjectType) {
         if (currentUser == null) {
@@ -478,15 +550,6 @@ public class UserService {
         return anonymousUser;
     }
     
-    public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
-        Util.addAll(hasPermissions, allKnownHasPermissions);
-    }
-    
-    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
-        return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
-                anonymousUser, ownership);
-    }
-
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
@@ -505,10 +568,7 @@ public class UserService {
     }
 
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
-        if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
-            return false;
-        }
-        return hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
+        return hasServerPermission(ServerActions.CREATE_OBJECT) && hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
     }
     
     public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {
@@ -524,5 +584,4 @@ public class UserService {
     public ServerInfoDTO getServerInfo() {
         return serverInfo;
     }
-
 }

@@ -14,6 +14,8 @@
 <b>Description:</b>
 <p>Gets all GPS positions of the competitors of a race.<br/>
 All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).</p>
+The request must be authenticated with a user who has the <tt>TRACKED_RACE:EXPORT</tt> permission for the race for
+which the data is requested.
 <br/>
 <table>
 	<tr>
@@ -39,6 +41,14 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 			<div>competitorId (one or more competitor IDs; for multiple competitors, provide the parameter multiple times; by default, positions of all competitors will be provided)</div>
 			<div>raw ("true" or "false"; default is "false"; if "true" the result will also contain fixes that are considered outliers)</div>
 		</td>
+	</tr>
+	<tr>
+	    <td>Optional HTTP request header fields:</td>
+	    <td>
+	        <div>secondaryuserbearertoken: if provided, used to authenticate a subject for which then the <tt>TRACKED_RACE:EXPORT</tt>
+	             permission is checked for the race requested. This will skil the same test for the "primary" user that authenticated
+	             the request.</div>
+	    </td>
 	</tr>
 	<tr>
 		<td>Request method:</td>

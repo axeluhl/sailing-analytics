@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveDetailsWithBearingSteps;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Represents a segment within a GPS-track where a maneuver is performed. In contrast to {@link Maneuver}, the
@@ -40,5 +41,9 @@ public interface CompleteManeuverCurve {
      * Determines whether a mark was crossed within the maneuver curve.
      */
     boolean isMarkPassing();
+    
+    default TimePoint getTimePoint() {
+        return getMainCurveBoundaries().getTimePoint();
+    }
 
 }

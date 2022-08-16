@@ -10,25 +10,11 @@ import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 public interface MediaService extends RemoteService {
 
-    Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrackWithSecurityDTO> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrackWithSecurityDTO> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks();
-
-    String addMediaTrack(MediaTrack mediaTrack);
-
-    void deleteMediaTrack(MediaTrack mediaTrack);
-
-    void updateTitle(MediaTrack mediaTrack);
-
-    void updateUrl(MediaTrack mediaTrack);
-
-    void updateStartTime(MediaTrack mediaTrack);
-
-    void updateDuration(MediaTrack mediaTrack);
-
-    void updateRace(MediaTrack mediaTrack);
 
     VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped);
 

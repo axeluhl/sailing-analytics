@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
-import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
-import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeTimeRange;
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,31 +17,33 @@ import java.util.logging.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.lang.Nullable;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -54,13 +55,24 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * @author Fredrik Teschke
  *
  */
-public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
+public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSensorFixStore {
     private static final Logger logger = Logger.getLogger(MongoSensorFixStoreImpl.class.getName());
-    private final TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder;
-    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder;
     private final MongoCollection<Document> fixesCollection;
-    private final MongoCollection<Document> metadataCollection;
+    private final MetadataCollection metadataCollection;
     private final MongoObjectFactoryImpl mongoOF;
+    
+    /**
+     * Allows for causally-consistent access to the store; helpful, e.g., during test cases. May be {@code null}.
+     */
+    @Nullable
+    private final ClientSession clientSession;
+    
+    /**
+     * The write concern to use for updating the fixes and metadata collections. Tests can use this, e.g., to work with
+     * {@link WriteConcern#MAJORITY} in order to ensure they can read their own writes.
+     */
+    private final WriteConcern writeConcern;
+    
     /**
      * Lock object to be used when accessing {@link #listeners}.
      */
@@ -69,30 +81,26 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, ReadConcern.DEFAULT,
+                WriteConcern.UNACKNOWLEDGED, /* clientSession */ null, /* metadataCollectionClientSession */ null);
+    }
+    
+    public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
+            TypeBasedServiceFinderFactory serviceFinderFactory, ReadConcern readConcern, WriteConcern writeConcern,
+            ClientSession clientSession, ClientSession metadataCollectionClientSession) {
+        super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
+              serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
-        if (serviceFinderFactory != null) {
-            fixServiceFinder = createFixServiceFinder(serviceFinderFactory);
-            deviceServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
-        } else {
-            fixServiceFinder = null;
-            deviceServiceFinder = null;
-        }
-        fixesCollection = mongoOF.getGPSFixCollection();
-        metadataCollection = mongoOF.getGPSFixMetadataCollection();
-
+        fixesCollection = mongoOF.getGPSFixCollection(clientSession);
+        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern, metadataCollectionClientSession);
+        this.writeConcern = writeConcern;
+        this.clientSession = clientSession;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private TypeBasedServiceFinder<FixMongoHandler<?>> createFixServiceFinder(
+    private static TypeBasedServiceFinder<FixMongoHandler<?>> createFixServiceFinder(
             TypeBasedServiceFinderFactory serviceFinderFactory) {
         return (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(FixMongoHandler.class);
-    }
-
-    private <T extends Timed> T loadFix(Document object)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
-        Document fixObject = (Document) object.get(FieldNames.GPSFIX.name());
-        return this.<T> findService(type).transformBack(fixObject);
     }
 
     @Override
@@ -127,13 +135,11 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             boolean ascending, boolean onlyOneResult)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         progressConsumer.accept(0d);
-
         final TimePoint loadFixesFrom = from == null ? TimePoint.BeginningOfTime : from;
         final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
-
-        Document dbDeviceId = storeDeviceId(deviceServiceFinder, device);
+        Bson dbDeviceId = com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, device);
         final List<Bson> filters = new ArrayList<>();
-        filters.add(Filters.eq(FieldNames.DEVICE_ID.name(), dbDeviceId));
+        filters.add(dbDeviceId);
         filters.add(Filters.gte(FieldNames.TIME_AS_MILLIS.name(), loadFixesFrom.asMillis()));
         if (inclusive) {
             filters.add(Filters.lte(FieldNames.TIME_AS_MILLIS.name(), loadFixesTo.asMillis()));
@@ -141,8 +147,8 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             filters.add(Filters.lt(FieldNames.TIME_AS_MILLIS.name(), loadFixesTo.asMillis()));
         }
         Bson query = Filters.and(filters);
-        FindIterable<Document> result = fixesCollection.find(query);
-        result.sort(new Document(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
+        FindIterable<Document> result = clientSession == null ? fixesCollection.find(query) : fixesCollection.find(clientSession, query);
+        result.batchSize(100000).sort(new Document(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
         if (onlyOneResult) {
             result.limit(1);
         }
@@ -185,68 +191,57 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     /**
      * Store fixes in batches, reducing metadata storage update.
+     * 
+     * @return the identifiers of those races in which new maneuvers have been discovered since the last update for the
+     *         competitor / boat to which the device is mapped and/or information about the race's live delay, if
+     *         requested; always a valid, non-{@code null} but potentially empty collection.
      */
     @Override
-    public <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device,
-            Iterable<FixT> fixes) {
-        Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
+    public <FixT extends Timed> Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> storeFixes(DeviceIdentifier device,
+            Iterable<FixT> fixes, boolean returnManeuverChanges, boolean returnLiveDelay) {
+        final Set<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> racesWithManeuverChangesOrLiveDelay = new HashSet<>();
         if (!Util.isEmpty(fixes)) {
             try {
                 final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
                 final int nrOfTotalFixes = Util.size(fixes);
                 final ArrayList<Document> dbFixes = new ArrayList<>(nrOfTotalFixes);
-
-                TimePoint newFrom = null;
-                TimePoint newTo = null;
+                TimeRange newTimeRange = null;
+                FixT latestFix = null;
                 for (FixT fix : fixes) {
-                    String type = fix.getClass().getName();
-                    FixMongoHandler<FixT> mongoHandler = findService(type);
-                    Object fixObject = mongoHandler.transformForth(fix);
-                    Document entry = new Document().append(FieldNames.DEVICE_ID.name(), dbDeviceId)
-                            .append(FieldNames.GPSFIX_TYPE.name(), type).append(FieldNames.GPSFIX.name(), fixObject);
+                    if (latestFix == null || latestFix.getTimePoint().before(fix.getTimePoint())) {
+                        latestFix = fix;
+                    }
+                    Document entry = new Document().append(FieldNames.DEVICE_ID.name(), dbDeviceId);
+                    storeFixToDocument(entry, fix);
                     mongoOF.storeTimed(fix, entry);
                     dbFixes.add(entry);
                     TimePoint fixTP = fix.getTimePoint();
-                    if (newFrom == null || newFrom.after(fixTP)) {
-                        newFrom = fixTP;
-                    }
-                    if (newTo == null || newTo.before(fixTP)) {
-                        newTo = fixTP;
-                    }
+                    final TimeRangeImpl fixTimeRange = new TimeRangeImpl(fixTP, fixTP, /* toIsInclusive */ true);
+                    newTimeRange = newTimeRange == null ? fixTimeRange : newTimeRange.extend(fixTimeRange);
                 }
-                fixesCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).insertMany(dbFixes);
-                final Document updateOperation = new Document();
-                final Document newMetadata = new Document();
-                newMetadata.put(FieldNames.DEVICE_ID.name(), dbDeviceId);
-
-                TimeRange oldTimeRange = getTimeRangeCoveredByFixes(device);
-                if (oldTimeRange != null) {
-                    newFrom = oldTimeRange.from().before(newFrom) ? oldTimeRange.from() : newFrom;
-                    newTo = oldTimeRange.to().after(newTo) ? oldTimeRange.to() : newTo;
+                final MongoCollection<Document> fixesCollectionWithWriteConcern = fixesCollection.withWriteConcern(writeConcern);
+                if (clientSession == null) {
+                    fixesCollectionWithWriteConcern.insertMany(dbFixes);
+                } else {
+                    fixesCollectionWithWriteConcern.insertMany(clientSession, dbFixes);
                 }
-                final TimeRange newTimeRange = new TimeRangeImpl(newFrom, newTo);
-
-                storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
-                updateOperation.append("$set", newMetadata);
-                updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), nrOfTotalFixes));
-                metadataCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).updateOne(getDeviceQuery(device), updateOperation, new UpdateOptions().upsert(true));
+                metadataCollection.enqueueMetadataUpdate(device, dbDeviceId, nrOfTotalFixes, newTimeRange, latestFix);
             } catch (TransformationException e) {
-                logger.log(Level.WARNING, "Could not store fix in MongoDB");
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Could not store fix in MongoDB", e);
             }
-            Util.addAll(notifyListeners(device, fixes), maneuverChanged);
+            Util.addAll(notifyListeners(device, fixes, returnManeuverChanges, returnLiveDelay), racesWithManeuverChangesOrLiveDelay);
         }
-        return maneuverChanged;
+        return racesWithManeuverChangesOrLiveDelay;
     }
 
     @Override
     public <FixT extends Timed> void storeFix(DeviceIdentifier device, FixT fix) {
-        storeFixes(device, Collections.singletonList(fix));
+        storeFixes(device, Collections.singletonList(fix), /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
     }
 
-    private <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> notifyListeners(DeviceIdentifier device,
-            Iterable<FixT> fixes) {
-        Set<RegattaAndRaceIdentifier> raceWithChangedManeuver = new HashSet<>();
+    private <FixT extends Timed> Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> notifyListeners(DeviceIdentifier device,
+            Iterable<FixT> fixes, boolean returnManeuverChanges, boolean returnLiveDelay) {
+        final Set<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> raceWithChangedManeuver = new HashSet<>();
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Map<DeviceIdentifier, Set<FixReceivedListener<FixT>>> listenersWithFixType = (Map) listeners;
         final Set<FixReceivedListener<FixT>> listenersToInform = LockUtil.executeWithReadLockAndResult(listenersLock, () -> {
@@ -255,7 +250,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         });
         for (FixT fix : fixes) {
             for (FixReceivedListener<FixT> listener : listenersToInform) {
-                final Iterable<RegattaAndRaceIdentifier> racesWithManeuverChangeFromListener = listener.fixReceived(device, fix);
+                final Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> racesWithManeuverChangeFromListener = listener.fixReceived(device, fix, returnManeuverChanges, returnLiveDelay);
                 Util.addAll(racesWithManeuverChangeFromListener, raceWithChangedManeuver);
             }
         }
@@ -277,76 +272,25 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         LockUtil.executeWithWriteLock(listenersLock, () -> Util.removeFromValueSet(listeners, device, listener));
     }
 
-    private Bson getDeviceQuery(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Document dbDeviceId = storeDeviceId(deviceServiceFinder, device);
-        Bson query = Filters.eq(FieldNames.DEVICE_ID.name(), dbDeviceId);
-        return query;
-    }
-
-    private Document findMetadataObject(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Bson query = getDeviceQuery(device);
-        Document result = metadataCollection.find(query).first();
-        return result;
-    }
-
     @Override
     public TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Document result = findMetadataObject(device);
-        if (result == null) {
-            return null;
-        }
-        return DomainObjectFactoryImpl.loadTimeRange(result, FieldNames.TIMERANGE);
+        return getMetadataCollection().getTimeRangeCoveredByFixes(device);
+    }
+
+    private MetadataCollection getMetadataCollection() {
+        return metadataCollection;
     }
 
     @Override
     public long getNumberOfFixes(DeviceIdentifier device)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Document result = findMetadataObject(device);
-        if (result == null) {
-            return 0;
-        }
-        return ((Number) result.get(FieldNames.NUM_FIXES.name())).longValue();
-    }
-
-    /**
-     * Try to find a service implementing specified type of objects interface using the {@link #fixServiceFinder}.
-     * <p>
-     * To support an additional fix type, an implementation of {@link FixMongoHandler} is required, which specifies how
-     * to transform a fix forth to and back from database. This implementation needs to be registered during OSGi bundle
-     * activator startup, providing respective type mapping properties.
-     * </p>
-     * 
-     * @param type
-     *            type object to find service for
-     * @return the registered {@link FixMongoHandler} implementation
-     * 
-     * @see TypeBasedServiceFinder#findService(String)
-     */
-    @SuppressWarnings("unchecked")
-    private <FixT extends Timed> FixMongoHandler<FixT> findService(String type) {
-        return (FixMongoHandler<FixT>) fixServiceFinder.findService(type);
+        return metadataCollection.getNumberOfFixes(device);
     }
 
     @Override
-    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices)
+    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getFixLastReceived(Iterable<DeviceIdentifier> forDevices)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Map<DeviceIdentifier, FixT> result = new HashMap<>();
-        for (final DeviceIdentifier deviceIdentifier : forDevices) {
-            final Bson deviceQuery = getDeviceQuery(deviceIdentifier);
-            final Document orderBy = new Document(
-                    FieldNames.GPSFIX.name() + "." + FieldNames.TIME_AS_MILLIS.name(), -1);
-            FindIterable<Document> lastFixForDeviceCursor = fixesCollection.find(deviceQuery).sort(orderBy).limit(1);
-            if (lastFixForDeviceCursor.iterator().hasNext()) {
-                final Document lastFixForDeviceDbObject = lastFixForDeviceCursor.iterator().next();
-                final Timed lastFixForDevice = loadFix(lastFixForDeviceDbObject);
-                @SuppressWarnings("unchecked")
-                final FixT lastFixForDeviceTyped = (FixT) lastFixForDevice;
-                result.put(deviceIdentifier, lastFixForDeviceTyped);
-            }
-        }
-        return result;
+        return metadataCollection.getFixLastReceived(forDevices);
     }
 }

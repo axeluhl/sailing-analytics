@@ -52,7 +52,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTrackImpl<ItemType, FixType>
         implements GPSFixTrack<ItemType, FixType> {
@@ -173,12 +173,13 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     }
 
     @Override
-    public void suspendValidityCaching() {
+    public void suspendValidityAndMaxSpeedCaching() {
         validityCachingSuspended = true;
+        removeListener(maxSpeedCache);
     }
 
     @Override
-    public void resumeValidityCaching() {
+    public void resumeValidityAndMaxSpeedCaching() {
         lockForWrite();
         try {
             this.validityCachingSuspended = false;
@@ -188,6 +189,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         } finally {
             unlockAfterWrite();
         }
+        maxSpeedCache = createMaxSpeedCache();
         getDistanceCache().clear();
     }
 
@@ -1125,7 +1127,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         try {
             firstFixInTrack = getRawFixes().isEmpty();
             addResult = addWithoutLocking(fix, replace);
-            if (!validityCachingSuspended) {
+            if (addResult != AddResult.NOT_ADDED && !validityCachingSuspended) {
                 invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
             }
         } finally {

@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
@@ -36,14 +36,14 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * associated ACL.
  */
 public class UserGroupTableWrapper extends
-        TableWrapper<UserGroupDTO, RefreshableSingleSelectionModel<UserGroupDTO>, StringMessages, CellTableWithCheckboxResources> {
+        TableWrapper<UserGroupDTO, RefreshableMultiSelectionModel<UserGroupDTO>, StringMessages, CellTableWithCheckboxResources> {
     private final LabeledAbstractFilterablePanel<UserGroupDTO> filterField;
     private final UserService userService;
 
-    public UserGroupTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
-            StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
-            CellTableWithCheckboxResources tableResources, Runnable refresher) {
-        super(stringMessages, errorReporter, false, enablePager, new EntityIdentityComparator<UserGroupDTO>() {
+    public UserGroupTableWrapper(UserService userService, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean enablePager, CellTableWithCheckboxResources tableResources,
+            Runnable refresher) {
+        super(stringMessages, errorReporter, /* multi selection */ true, enablePager, new EntityIdentityComparator<UserGroupDTO>() {
             @Override
             public boolean representSameEntity(UserGroupDTO dto1, UserGroupDTO dto2) {
                 return dto1.getId().toString().equals(dto2.getId().toString());
@@ -56,20 +56,17 @@ public class UserGroupTableWrapper extends
         }, tableResources);
         this.userService = userService;
         final ListHandler<UserGroupDTO> userColumnListHandler = getColumnSortHandler();
-
-        // users table
+        // user groups table
         final TextColumn<UserGroupDTO> userGroupUUidColumn = new AbstractSortableTextColumn<UserGroupDTO>(
                 group -> group.getId() == null ? "<null>" : group.getId().toString(), userColumnListHandler);
-
         final TextColumn<UserGroupDTO> UserGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<UserGroupDTO>(
                 UserGroupDTO -> UserGroupDTO.getName(), userColumnListHandler);
-
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final AccessControlledActionsColumn<UserGroupDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, userGroupDTO -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupDTO.getName()))) {
-                userService.getUserManagementService().deleteUserGroup(userGroupDTO.getId().toString(),
+                userService.getUserManagementWriteService().deleteUserGroup(userGroupDTO.getId().toString(),
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -93,22 +90,18 @@ public class UserGroupTableWrapper extends
                         });
             }
         });
-
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 user -> refreshUserList(null), stringMessages);
-
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(),
                 stringMessages);
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
-                configOwnership::openDialog);
+                configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
         filterField = new LabeledAbstractFilterablePanel<UserGroupDTO>(new Label(stringMessages.filterUserGroups()),
-                new ArrayList<UserGroupDTO>(), dataProvider) {
+                new ArrayList<UserGroupDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(UserGroupDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -121,8 +114,8 @@ public class UserGroupTableWrapper extends
                 return table;
             }
         };
+        filterField.setUpdatePermissionFilterForCheckbox(userGroup -> userService.hasPermission(userGroup, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(UserGroupWithSecurityDTONameColumn, getStringMessages().groupName());

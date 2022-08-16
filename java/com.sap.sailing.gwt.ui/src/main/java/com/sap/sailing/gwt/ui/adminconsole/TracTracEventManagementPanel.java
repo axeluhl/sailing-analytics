@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,10 +29,11 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.adminconsole.tractrac.EditTracTracConnectionDialog;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionTableWrapper;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
@@ -48,6 +49,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -65,7 +67,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Axel Uhl (D043530)
  * 
  */
-public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
+public class TracTracEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<TracTracConfigurationWithSecurityDTO> {
     private final ErrorReporter errorReporter;
     
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
@@ -81,13 +83,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private final UserService userService;
     private final CellTableWithCheckboxResources tableResources;
+    private final SailingServiceWriteAsync sailingServiceWrite;
 
-    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, UserService userService,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
+    public TracTracEventManagementPanel(final Presenter presenter, StringMessages stringMessages,
             final CellTableWithCheckboxResources tableResources) {
-        super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
-        this.userService = userService;
-        this.errorReporter = errorReporter;
+        super(presenter, true, stringMessages);
+        this.userService = presenter.getUserService();
+        this.errorReporter = presenter.getErrorReporter();
+        this.sailingServiceWrite = presenter.getSailingService();
         this.tableResources = tableResources;
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
         this.raceList = new ListDataProvider<TracTracRaceRecordDTO>();
@@ -97,15 +100,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     protected Widget createContent() {
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
-
         CaptionPanel connectionsPanel = createConnectionsPanel();
         mainPanel.add(connectionsPanel);
-
         HorizontalPanel racesPanel = createRacesPanel();
         racesPanel.setWidth("100%");
-
         mainPanel.add(racesPanel);
-        
         return mainPanel;
     }
     
@@ -114,27 +113,23 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsPanel.ensureDebugId("ConnectionsSection");
         connectionsPanel.setStyleName("bold");
         VerticalPanel tableAndConfigurationPanel = new VerticalPanel();
-        connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
+        connectionsTable = new TracTracConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
-        connectionsPanel.setContentWidget(tableAndConfigurationPanel);
         final Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
         final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
         showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
         grid.setWidget(0, 1, showHiddenRacesCheckbox);
-        tableAndConfigurationPanel.add(connectionsTable);
-        tableAndConfigurationPanel.add(grid);
         // Add TracTrac Connection
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.TRACKED_RACE);
-        tableAndConfigurationPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
         Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
-                () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(),
+                () -> new TracTracConnectionDialog(
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.createTracTracConfiguration(editedConnection.getName(),
+                                sailingServiceWrite.createTracTracConfiguration(editedConnection.getName(),
                                         editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
                                         editedConnection.getStoredDataURI(),
                                         editedConnection.getCourseDesignUpdateURI(),
@@ -148,7 +143,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                                             @Override
                                             public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracConnectionList();
+                                                connectionsTable.refreshTracTracConnectionList(/* selectWhenDone */ editedConnection);
                                             }
                                         }));
                             }
@@ -158,13 +153,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             }
                         }, userService, errorReporter).show());
         addCreateAction.ensureDebugId("AddConnectionButton");
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            sailingService.deleteTracTracConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
+        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
+            sailingServiceWrite.deleteTracTracConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(
-                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
+                                    "Exception trying to delete configuration(s) in DB: " + caught.getMessage());
                         }
 
                         @Override
@@ -176,20 +171,22 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         loadingMessageLabel = new Label();
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             loadingMessageLabel.setText(stringMessages.loading());
-            fillRaces(sailingService, showHiddenRacesCheckbox.getValue());
+            fillRaces(sailingServiceWrite, showHiddenRacesCheckbox.getValue());
         });
         listRacesButton.ensureDebugId("ListRacesButton");
         listRacesButton.setEnabled(false);
-        removeButton.setEnabled(false);
         buttonPanel.addUnsecuredWidget(loadingMessageLabel);
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
-            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
+            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedSet().size() == 1;
             listRacesButton.setEnabled(objectSelected);
-            removeButton.setEnabled(objectSelected);
         });
+        tableAndConfigurationPanel.add(buttonPanel);
+        tableAndConfigurationPanel.add(grid);
+        tableAndConfigurationPanel.add(connectionsTable);
+        connectionsPanel.setContentWidget(tableAndConfigurationPanel);
         return connectionsPanel;
     }
-
+    
     protected HorizontalPanel createRacesPanel() {
         HorizontalPanel racesPanel = new HorizontalPanel();
         CaptionPanel trackableRacesPanel = createTrackableRacesPanel();
@@ -239,19 +236,24 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
+        final CheckBox useOfficialResultsToUpdateRaceLogsCheckbox = new CheckBox(stringMessages.useOfficialResultsForAutomaticUpdates());
+        ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
+        ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
         
         layoutTable.setWidget(++row, 0, trackSettingsLabel);
         layoutTable.setWidget(row, 1, trackWindCheckBox);
         layoutTable.setWidget(++row, 1, correctWindCheckBox);
         layoutTable.setWidget(++row, 1, simulationPanel);
         layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
+        layoutTable.setWidget(++row, 1, useOfficialResultsToUpdateRaceLogsCheckbox);
         
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRaces() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTable = new FlushableCellTable<TracTracRaceRecordDTO>(10000, tableResources);
         racesTable.ensureDebugId("TrackableRacesCellTable");
-        this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, raceList) {
+        this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel,
+                availableTracTracRaces, raceList, stringMessages) {
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -349,7 +351,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final Button startTrackingButton = new Button(stringMessages.startTracking());
         startTrackingButton.setEnabled(false);
         connectionsTable.getSelectionModel().addSelectionChangeHandler(
-                e -> startTrackingButton.setEnabled(connectionsTable.getSelectionModel().getSelectedObject() != null));
+                e -> startTrackingButton.setEnabled(connectionsTable.getSelectionModel().getSelectedSet().size() == 1));
         startTrackingButton.ensureDebugId("StartTrackingButton");
         startTrackingButton.addClickHandler(new ClickHandler() {
             @Override
@@ -359,7 +361,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     offsetToStartTimeOfSimulatedRace = getMillisecondsDurationFromMinutesAsString(simulationPanel.getOffsetToStartTimeInMinutes());
                 }
                 trackSelectedRaces(trackWindCheckBox.getValue(), correctWindCheckBox.getValue(),
-                        offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue());
+                        offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue(),
+                        useOfficialResultsToUpdateRaceLogsCheckbox.getValue());
             }
         });
         layoutTable.setWidget(++row, 1, startTrackingButton);
@@ -371,9 +374,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         CaptionPanel trackedRacesPanel = new CaptionPanel(stringMessages.trackedRaces());
         trackedRacesPanel.ensureDebugId("TrackedRacesSection");
         trackedRacesPanel.setStyleName("bold");
-        
         trackedRacesPanel.setContentWidget(this.trackedRacesListComposite);
-
         return trackedRacesPanel;
     }
     
@@ -444,10 +445,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void fillRaces(final SailingServiceAsync sailingService, boolean listHiddenRaces) {
-        final TracTracConfigurationWithSecurityDTO selectedConnection = connectionsTable.getSelectionModel()
-                .getSelectedObject();
-        if (selectedConnection != null) {
-
+        final Set<TracTracConfigurationWithSecurityDTO> selectedConnections = connectionsTable.getSelectionModel()
+                .getSelectedSet();
+        if (selectedConnections.size() == 1) {
+            TracTracConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();
             sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
                 new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
@@ -456,7 +457,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         loadingMessageLabel.setText("");
                         reportError("Error trying to list races: " + caught.getMessage());
                     }
-        
+
                     @Override
                     public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                         loadingMessageLabel.setText("Building resultset and saving configuration...");
@@ -472,33 +473,33 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         List<TracTracRaceRecordDTO> races = TracTracEventManagementPanel.this.raceList.getList();
                         races.clear();
                         races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
-                        
                         TracTracEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
                         TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                         loadingMessageLabel.setText("");
-                        
                         // store a successful configuration in the database for later retrieval
-                                    sailingService.updateTracTracConfiguration(updatedConnection,
-                                            new MarkedAsyncCallback<Void>(
-                                        new AsyncCallback<Void>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
-                                            }
-                
-                                            @Override
-                                            public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracConnectionList();
-                                            }
-                                        }));
+                        sailingServiceWrite.updateTracTracConfiguration(updatedConnection,
+                                new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void voidResult) {
+                                    connectionsTable.refreshTracTracConnectionList();
+                                }
+                            }));
                     }
                 }));
         }
     }
 
-    private void trackSelectedRaces(boolean trackWind, boolean correctWind, final Duration offsetToStartTimeOfSimulatedRace, boolean ignoreTracTracMarkPassings) {
+    private void trackSelectedRaces(boolean trackWind, boolean correctWind,
+            final Duration offsetToStartTimeOfSimulatedRace, boolean ignoreTracTracMarkPassings,
+            boolean useOfficialResultsToUpdateRaceLogs) {
         final TracTracConfigurationWithSecurityDTO selectedConnection = connectionsTable.getSelectionModel()
-                .getSelectedObject();
+                .getSelectedSet().iterator().next();
         String liveURI = selectedConnection.getLiveDataURI();
         String storedURI = selectedConnection.getStoredDataURI();
         String courseDesignUpdateURI = selectedConnection.getCourseDesignUpdateURI();
@@ -516,15 +517,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         //                                because it may be an accidental omission to select that regatta for loading
         List<TracTracRaceRecordDTO> allRaces = raceList.getList();
         SelectionModel<? super TracTracRaceRecordDTO> selectionModel = racesTable.getSelectionModel();
-        final Set<TracTracRaceRecordDTO> selectedRaces = new LinkedHashSet<>();
+        final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<>();
         for (TracTracRaceRecordDTO race : allRaces) {
             if (selectionModel.isSelected(race)) {
                 selectedRaces.add(race);
             }
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
-                    courseDesignUpdateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings, tractracUsername,
+            sailingServiceWrite.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
+                    courseDesignUpdateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings,
+                    useOfficialResultsToUpdateRaceLogs, tractracUsername,
                     tractracPassword, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -533,14 +535,19 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
+                            TracTracEventManagementPanel.this.presenter.getRegattasRefresher().reloadAndCallFillAll();
                         }
                     }));
         }
     }
-
+    
     public void refreshTracTracConnectors() {
         connectionsTable.refreshTracTracConnectionList();
         raceList.getList().clear();
+    }
+    
+    @Override
+    public AbstractFilterablePanel<TracTracConfigurationWithSecurityDTO> getFilterablePanel() {
+        return connectionsTable.getFilterField();
     }
 }
