@@ -40,6 +40,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -225,5 +226,5 @@ public interface DomainObjectFactory {
 
     Wind loadWind(Document windDocument);
 
-    TrackedRaceHashFingerprint loadFingerprint(Document fingerprint);
+    TrackedRaceHashFingerprint loadFingerprint(TrackedRace trackedRace);
 }

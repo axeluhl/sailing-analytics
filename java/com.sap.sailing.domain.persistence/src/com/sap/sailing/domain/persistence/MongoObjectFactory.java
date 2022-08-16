@@ -230,5 +230,5 @@ public interface MongoObjectFactory {
 
     Document storeWind(Wind wind);
 
-    Document storeFingerprint(TrackedRaceHashFingerprint fingerprint);
+    void storeFingerprint(TrackedRaceHashFingerprint fingerprint);
 }

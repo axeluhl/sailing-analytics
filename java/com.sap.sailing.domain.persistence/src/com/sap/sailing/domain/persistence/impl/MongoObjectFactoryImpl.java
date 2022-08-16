@@ -1960,9 +1960,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
 
-    public Document storeFingerprint(TrackedRaceHashFingerprint fingerprint) {
+    public void storeFingerprint(TrackedRaceHashFingerprint fingerprint) {
+        MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGHASHES.name());
         JSONObject fingerprintjson = fingerprint.toJson();
         Document result = Document.parse(fingerprintjson.toString());
-        return result;
+        markPassingCollection.insertOne(result);
     }
 }

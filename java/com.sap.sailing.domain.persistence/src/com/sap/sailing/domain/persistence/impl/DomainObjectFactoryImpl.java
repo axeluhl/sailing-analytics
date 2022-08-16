@@ -250,6 +250,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
@@ -3149,16 +3150,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceTrackingConnectivityParamsServiceFinder;
     }
 
-    public TrackedRaceHashFingerprint loadFingerprint(Document fingerprint) {
-        JSONObject json = null;
-        try {
-            json = Helpers.toJSONObjectSafe(new JSONParser().parse(fingerprint.toJson()));
-        } catch (JsonDeserializationException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+    public TrackedRaceHashFingerprint loadFingerprint(TrackedRace trackedRace) {
+        MongoCollection<Document> anniversarysStored = database.getCollection(CollectionNames.MARKPASSINGHASHES.name());
+        MongoCursor<Document> cursor = anniversarysStored.find().iterator();
+        while (cursor.hasNext()) {
+            Document currentDocument = cursor.next();
+            if (currentDocument.get("RACE_NAME").toString().equals(trackedRace.getName())) {
+                JSONObject json = null;
+                try {
+                    json = Helpers.toJSONObjectSafe(new JSONParser().parse(currentDocument.toJson()));
+                } catch (JsonDeserializationException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json);
+                return result;
+            }
         }
-        TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json);
-        return result;
+        return null;
     }
 }
