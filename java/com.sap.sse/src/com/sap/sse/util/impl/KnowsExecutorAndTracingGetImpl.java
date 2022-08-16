@@ -1,7 +1,5 @@
 package com.sap.sse.util.impl;
 
-import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -30,24 +28,6 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
     public KnowsExecutorAndTracingGetImpl() {
     }
 
-    private static Optional<Subject> getSubjectOrNull() {
-        Optional<Subject> mySubject;
-        try {
-            mySubject = Optional.of(SecurityUtils.getSubject());
-        } catch (IllegalStateException e) {
-            mySubject = Optional.empty();
-        }
-        return mySubject;
-    }
-    
-    public static <T> Callable<T> associateWithSubjectIfAny(Callable<T> callable) {
-        return getSubjectOrNull().map(subject->subject.associateWith(callable)).orElse(callable);
-    }
-    
-    public static Runnable associateWithSubjectIfAny(Runnable runnable) {
-        return getSubjectOrNull().map(subject->subject.associateWith(runnable)).orElse(runnable);
-    }
-    
     @Override
     public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {
         this.executorThisTaskIsScheduledFor = executorThisTaskIsScheduledFor;

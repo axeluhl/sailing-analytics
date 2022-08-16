@@ -27,7 +27,7 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     private final Object delegate; // either a Callable or a Runnable whose type may or may not conform to the KnowsExecutor interface
     
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Callable<V> callable) {
-        super(KnowsExecutorAndTracingGetImpl.associateWithSubjectIfAny(callable));
+        super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(callable));
         delegate = callable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = callable;
@@ -38,7 +38,7 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     }
 
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Runnable runnable, V result) {
-        super(KnowsExecutorAndTracingGetImpl.associateWithSubjectIfAny(runnable), result);
+        super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(runnable), result);
         delegate = runnable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = runnable;

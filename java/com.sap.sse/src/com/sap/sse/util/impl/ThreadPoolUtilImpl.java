@@ -2,6 +2,7 @@ package com.sap.sse.util.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -9,6 +10,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -104,5 +108,25 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
             logger.log(logLevel, String.format(messageTemplate, e.getMessage()), e);
         }
         return result;
+    }
+
+    private Optional<Subject> getSubjectOrNull() {
+        Optional<Subject> mySubject;
+        try {
+            mySubject = Optional.of(SecurityUtils.getSubject());
+        } catch (IllegalStateException e) {
+            mySubject = Optional.empty();
+        }
+        return mySubject;
+    }
+
+    @Override
+    public Runnable associateWithSubjectIfAny(Runnable runnable) {
+        return getSubjectOrNull().map(subject->subject.associateWith(runnable)).orElse(runnable);
+    }
+
+    @Override
+    public <T> Callable<T> associateWithSubjectIfAny(Callable<T> callable) {
+        return getSubjectOrNull().map(subject->subject.associateWith(callable)).orElse(callable);
     }
 }
