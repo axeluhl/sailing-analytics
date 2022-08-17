@@ -1,7 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -92,8 +92,8 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
         JSONObject json2 = fingerprint.toJson();
         JSONObject json2After = fingerprint2AfterDB.toJson();
         assertNotEquals("Json2 and Json2After are not equal: " + json2 + " json2After: " + json2, json2, json2After);
-//        assertNotEquals("Json1 and Json2 are not equal: " + json1 + " json2: " + json2, json1, json2);
-//        assertNotEquals("Json1After and Json2After are not equal: " + json1After +  "json2After: " + json2After, json1After, json2After);
+        assertTrue(json1.equals(json2));
+        assertTrue(json1After.equals(json2After));
     }
 
 }
