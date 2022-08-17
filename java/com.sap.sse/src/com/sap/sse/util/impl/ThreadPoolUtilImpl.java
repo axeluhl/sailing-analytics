@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.UnavailableSecurityManagerException;
 import org.apache.shiro.subject.Subject;
 
 import com.sap.sse.common.Util;
@@ -114,7 +115,7 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
         Optional<Subject> mySubject;
         try {
             mySubject = Optional.of(SecurityUtils.getSubject());
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | UnavailableSecurityManagerException e) {
             mySubject = Optional.empty();
         }
         return mySubject;
