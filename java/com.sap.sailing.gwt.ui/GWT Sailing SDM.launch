@@ -20,6 +20,7 @@
         <listEntry value="com.sap.sailing.gwt.ui.AdminConsole"/>
         <listEntry value="com.sap.sailing.gwt.home.Home"/>
     </listAttribute>
+    <booleanAttribute key="com.gwtplugins.gwt.eclipse.core.SUPERDEVMODE_ENABLED" value="true"/>
     <stringAttribute key="com.gwtplugins.gwt.eclipse.core.URL" value="/gwt/Home.html"/>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
         <listEntry value="/com.sap.sailing.gwt.ui"/>
