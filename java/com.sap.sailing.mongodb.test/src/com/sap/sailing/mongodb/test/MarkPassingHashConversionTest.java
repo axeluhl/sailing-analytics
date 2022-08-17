@@ -60,7 +60,7 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void testLoadingToMongo() throws UnknownHostException, MongoException  {
+    public void testLoadingToMongo() throws UnknownHostException, MongoException {
         TrackedRaceHashForMaskPassingCalculationFactory factory = TrackedRaceHashForMaskPassingCalculationFactory.INSTANCE;
         TrackedRaceHashFingerprint fingerprint = factory.createFingerprint(trackedRace1);
         MongoClient myFirstMongo = newMongo();
@@ -72,9 +72,9 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
         JSONObject json2 = fingerprintAfterDB.toJson();
         assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
     }
-    
+
     @Test
-    public void testloadingToMongoWithTwoRaces () throws UnknownHostException, MongoException {
+    public void testloadingToMongoWithTwoRaces() throws UnknownHostException, MongoException {
         TrackedRaceHashForMaskPassingCalculationFactory factory = TrackedRaceHashForMaskPassingCalculationFactory.INSTANCE;
         TrackedRaceHashFingerprint fingerprint = factory.createFingerprint(trackedRace1);
         TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
@@ -88,7 +88,8 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
         TrackedRaceHashFingerprint fingerprint2AfterDB = dF.loadFingerprint(trackedRace2);
         JSONObject json1 = fingerprint.toJson();
         JSONObject json1After = fingerprint1AfterDB.toJson();
-        assertNotEquals("Json1 and Json1After are not equal: " + json1 + " json1After: " + json1After, json1, json1After);
+        assertNotEquals("Json1 and Json1After are not equal: " + json1 + " json1After: " + json1After, json1,
+                json1After);
         JSONObject json2 = fingerprint.toJson();
         JSONObject json2After = fingerprint2AfterDB.toJson();
         assertNotEquals("Json2 and Json2After are not equal: " + json2 + " json2After: " + json2, json2, json2After);
