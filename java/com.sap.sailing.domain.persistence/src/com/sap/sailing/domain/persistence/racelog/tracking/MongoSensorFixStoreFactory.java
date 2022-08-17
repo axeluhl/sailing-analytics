@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreFactoryImpl;
@@ -25,10 +26,14 @@ public interface MongoSensorFixStoreFactory {
      * Like {@link #getMongoGPSFixStore(MongoObjectFactory, DomainObjectFactory, TypeBasedServiceFinderFactory)}, but
      * additionally the write concern for the MongoDB writes can be controlled which otherwise usually defaults
      * to {@link WriteConcern#UNACKNOWLEDGED} for the fixes as well as the metadata.
-     * @param readConcern TODO
      */
     MongoSensorFixStore getMongoGPSFixStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory, ReadConcern readConcern, WriteConcern writeConcern)
                     throws UnknownHostException, MongoException;
+
+    MongoSensorFixStore getMongoGPSFixStore(MongoObjectFactory mongoObjectFactory,
+            DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory,
+            ReadConcern readConcern, WriteConcern writeConcern, ClientSession clientSession,
+            ClientSession metadataCollectionClientSession) throws UnknownHostException, MongoException;
 
 }

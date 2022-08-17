@@ -80,6 +80,9 @@ public interface Position extends Serializable {
      * is no solution, and a <code>NaN</code> or exception will result.
      * <p>
      * 
+     * The distance returned will be negative if one needs to travel towards the reverse of {@code bearing} to reach this
+     * position starting at {@code from} on the shortest path.<p>
+     * 
      * If either <code>from</code> or <code>bearing</code> or both are <code>null</code>, <code>null</code> is returned.
      */
 
@@ -87,7 +90,8 @@ public interface Position extends Serializable {
     
     /**
      * Computes the distance from this position to the line between <code>left</code> and <code>right</code>. This distance
-     * is positive if <code>left</code> is actually the position farther to the left, as seen from this position.
+     * is positive if <code>left</code> is actually the position farther to the left, as seen from this position; negative
+     * otherwise.
      */
     Distance getDistanceToLine(Position left, Position right);
     

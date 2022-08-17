@@ -66,6 +66,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
+import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 /**
  * This class aggregates race information by preparing {@link DTO}s for different components representing a race in the
@@ -328,6 +329,9 @@ public class RaceContext {
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
             liveRaceDTO.setWind(getWindOrNull());
+            if(getRaceIdentifierOrNull() != null) {
+                SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), liveRaceDTO);
+            }
             return liveRaceDTO;
         }
         return null;
@@ -361,6 +365,9 @@ public class RaceContext {
                 windStatsDTO = null;
             }
             raceListRaceDTO.setWind(windStatsDTO);
+            if(getRaceIdentifierOrNull() != null) {
+                SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceListRaceDTO);
+            }
             return raceListRaceDTO;
         }
         return null;
@@ -369,6 +376,9 @@ public class RaceContext {
     public SimpleRaceMetadataDTO getRaceCompetitionFormat() {
         SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
         fillSimpleRaceMetadata(raceDTO);
+        if(getRaceIdentifierOrNull() != null) {
+            SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceDTO);
+        }
         return raceDTO;
     }
 
