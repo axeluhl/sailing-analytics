@@ -24,11 +24,10 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
     private final int waypointsHash;
     private final int numberOfGPSFixes;
     private final int gpsFixesHash;
-    private final String raceName;
 
     private static enum JSON_FIELDS {
         COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, START_TIME_RECEIVED_AS_MILLIS, START_TIME_FROM_RACE_LOG_AS_MILLIS,
-        FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_NAME
+        FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_ID
     };
 
     public TrackedRaceHashFingerprintImpl(TrackedRace trackedRace) {
@@ -42,7 +41,6 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         this.waypointsHash = calculateHashForWaypoints(trackedRace);
         this.numberOfGPSFixes = calculateHashForNumberOfGPSFixes(trackedRace);
         this.gpsFixesHash = calculateHashForGPSFixes(trackedRace);
-        this.raceName = trackedRace.getName();
     }
 
     public TrackedRaceHashFingerprintImpl(JSONObject json) {
@@ -60,8 +58,6 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH.toString())).intValue();
         this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.toString())).intValue();
         this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.toString())).intValue();
-        this.raceName = json.get(JSON_FIELDS.RACE_NAME.toString()).toString();
-        
     }
 
     @Override
@@ -76,7 +72,6 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         result.put(JSON_FIELDS.WAYPOINTS_HASH, waypointsHash);
         result.put(JSON_FIELDS.NUMBEROFGPSFIXES, numberOfGPSFixes);
         result.put(JSON_FIELDS.GPSFIXES_HASH, gpsFixesHash);
-        result.put(JSON_FIELDS.RACE_NAME, raceName);
         return result;
     }
 

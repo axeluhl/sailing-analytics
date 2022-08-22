@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -40,7 +41,6 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -226,5 +226,5 @@ public interface DomainObjectFactory {
 
     Wind loadWind(Document windDocument);
 
-    TrackedRaceHashFingerprint loadFingerprint(TrackedRace trackedRace);
+    HashMap<RaceIdentifier, TrackedRaceHashFingerprint> loadFingerprintsForMarkPassingHashes();
 }

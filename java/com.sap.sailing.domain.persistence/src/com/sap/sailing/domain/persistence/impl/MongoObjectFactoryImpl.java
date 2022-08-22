@@ -1960,10 +1960,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
 
-    public void storeFingerprint(TrackedRaceHashFingerprint fingerprint) {
+    public void storeFingerprintForMarkPassingHash(TrackedRaceHashFingerprint fingerprint, RaceIdentifier raceIdentification) {
         MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGHASHES.name());
         JSONObject fingerprintjson = fingerprint.toJson();
         Document result = Document.parse(fingerprintjson.toString());
-        markPassingCollection.insertOne(result);
+        storeRaceIdentifier(result, raceIdentification);
+        markPassingCollection.insertOne(result); // hier entsteht fehler 
     }
 }
