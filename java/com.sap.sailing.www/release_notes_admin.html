@@ -23,6 +23,35 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">July 2022</h2>
+          <ul class="bulletList">
+            <li>New load balancers that are created on demand now use the SSL policy "ELBSecurityPolicy-FS-1-2-Res-2019-08"
+                to disable TLS 1.1 for new load balancers. It has already been disabled manually for all existing ones.</li>
+            <li>In the Landscape management panel, replica set actions for the local ("active") replica set through which
+                the action is triggered are disabled in case they could lead to the replica set's master process being
+                stopped, moved, or re-started because this could interrupt the transaction while being processed,
+                with undefined results.</li>
+          </ul>
+          <h2 class="articleSubheadline">June 2022</h2>
+          <ul class="bulletList">
+            <li>Bug fix: when only the maximum number of discards of a series was changed, the leaderboard caches were not
+                properly invalidated, hence results wouldn't have been recalculated up to the next "real" change.</li>
+            <li>Replication performance has been updated. Less metadata overhead, parallel serialization for asynchronous
+                operations on the master node, and a versioned, yet backward-compatible protocol help to avoid congestion
+                situations when, e.g., re-loading races on a master node during live operations with several replicas attached.</li>
+          </ul>
+          <h2 class="articleSubheadline">May 2022</h2>
+          <ul class="bulletList">
+            <li>To configure remote server references, instead of the <tt>SERVER:UPDATE</tt> permission users
+                now need the more specific <tt>SERVER:CONFIGURE_REMOTE_INSTANCES</tt> permission.</li>
+            <li>Running subscription updates is now avoided on replica servers.</li> 
+            <li>Added the penalty code (IRM) "NSC" to the XRR schema, e.g., for allowing it to be imported
+                from XRR sources such as Manage2Sail.</li>
+            <li>Bug fix: when renaming a series while adding/removing columns to/from it, the model, especially
+                on a replica, could become inconsistent due to operations interleaving. This is now run in
+                sequential order, avoiding the undesired interleaving.</li>
+            <li>Added WASZP boat class</li>
+          </ul>
           <h2 class="articleSubheadline">April 2022</h2>
           <ul class="bulletList">
             <li>Note: the new "paywall" has been activated. There is a new role called "premium" that

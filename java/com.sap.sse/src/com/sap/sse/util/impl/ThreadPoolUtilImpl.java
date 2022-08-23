@@ -2,6 +2,7 @@ package com.sap.sse.util.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -9,6 +10,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.UnavailableSecurityManagerException;
+import org.apache.shiro.subject.Subject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -42,7 +47,13 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
 
     @Override
     public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name) {
-        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY-1, size);
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY-1, size, /* executeExistingDelayedTasksAfterShutdownPolicy */ false);
+    }
+
+    @Override
+    public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name,
+            boolean executeExistingDelayedTasksAfterShutdownPolicy) {
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY-1, size, executeExistingDelayedTasksAfterShutdownPolicy);
     }
 
     @Override
@@ -52,16 +63,18 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
 
     @Override
     public ScheduledExecutorService createForegroundTaskThreadPoolExecutor(int size, String name) {
-        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY, size);
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY, size, /* executeExistingDelayedTasksAfterShutdownPolicy */ false);
     }
 
     private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority) {
-        return createThreadPoolExecutor(name, priority, /* corePoolSize */ REASONABLE_THREAD_POOL_SIZE);
+        return createThreadPoolExecutor(name, priority, /* corePoolSize */ REASONABLE_THREAD_POOL_SIZE, /* executeExistingDelayedTasksAfterShutdownPolicy */ false);
     }
 
-    private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority, final int size) {
-        return new NamedTracingScheduledThreadPoolExecutor(name, /* corePoolSize */ size, new ThreadFactoryWithPriority(
-                name, priority, /* daemon */ true));
+    private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority, final int size, boolean executeExistingDelayedTasksAfterShutdownPolicy) {
+        final NamedTracingScheduledThreadPoolExecutor result = new NamedTracingScheduledThreadPoolExecutor(
+                name, /* corePoolSize */ size, new ThreadFactoryWithPriority(name, priority, /* daemon */ true));
+        result.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        return result;
     }
 
     @Override
@@ -96,5 +109,25 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
             logger.log(logLevel, String.format(messageTemplate, e.getMessage()), e);
         }
         return result;
+    }
+
+    private Optional<Subject> getSubjectOrNull() {
+        Optional<Subject> mySubject;
+        try {
+            mySubject = Optional.of(SecurityUtils.getSubject());
+        } catch (IllegalStateException | UnavailableSecurityManagerException e) {
+            mySubject = Optional.empty();
+        }
+        return mySubject;
+    }
+
+    @Override
+    public Runnable associateWithSubjectIfAny(Runnable runnable) {
+        return getSubjectOrNull().map(subject->subject.associateWith(runnable)).orElse(runnable);
+    }
+
+    @Override
+    public <T> Callable<T> associateWithSubjectIfAny(Callable<T> callable) {
+        return getSubjectOrNull().map(subject->subject.associateWith(callable)).orElse(callable);
     }
 }

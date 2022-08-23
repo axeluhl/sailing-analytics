@@ -21,19 +21,20 @@ public interface ResultDiscardingRule extends Serializable {
     /**
      * @param raceColumnsToConsider if a column is <code>not</code> contained, its existence will be ignored for determining the
      * columns to discard. It affects the count of races. Only columns contained can be part of the result.
+     * @param scoringScheme TODO
      */
     Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
-            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint);
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint, ScoringScheme scoringScheme);
 
     default Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            ScoringScheme scoringScheme, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint,
-                raceColumn->leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache), cache);
+                scoringScheme, raceColumn->leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache), cache);
     }
 
     Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
-            Function<RaceColumn, Double> totalPointsSupplier,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+            ScoringScheme scoringScheme,
+            Function<RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 }

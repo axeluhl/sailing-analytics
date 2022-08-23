@@ -38,11 +38,9 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
         try {
             apiService.getUserSubscriptions(this);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Fetch subscriptions failed, provider: " 
-        + apiService.getProviderName(), e);
+            logger.log(Level.SEVERE, "Fetch subscriptions failed, provider: " + apiService.getProviderName(), e);
         }
     }
-
 
     @Override
     public void onSubscriptionsResult(Map<String, List<Subscription>> subscriptions) {
@@ -94,7 +92,7 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
                         planSubscription = userSubscription;
                     }
                 }
-                if(planSubscription != null) {
+                if (planSubscription != null) {
                     skimmedSubscriptions.add(planSubscription);
                 }
             }

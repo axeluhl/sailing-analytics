@@ -331,6 +331,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
+    }
+
+    @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         raceColumnListeners.notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }
@@ -347,7 +352,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
+        final ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
         if (!Util.equalsWithNull(oldResultDiscardingRule, resultDiscardingRule)) {
             this.resultDiscardingRule = resultDiscardingRule;
             raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldResultDiscardingRule, resultDiscardingRule);
@@ -362,6 +367,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        final Integer oldMaximumNumberOfDiscards = maximumNumberOfDiscards;
+        if (!Util.equalsWithNull(maximumNumberOfDiscards, maximumNumberOfDiscards)) {
+            this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+            raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, maximumNumberOfDiscards);
+        }
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
 

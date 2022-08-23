@@ -206,7 +206,6 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
                 sb.append("; ");
             }
             sb.append(childSetting.getKey() + "=" + childSetting.getValue());
-
             first = false;
         }
         sb.append("}");

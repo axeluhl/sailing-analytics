@@ -395,6 +395,7 @@ import com.sap.sse.shared.util.impl.UUIDHelper;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ImageConverter;
 import com.sap.sse.util.ImageConverter.ImageWithMetadata;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class SailingServiceWriteImpl extends SailingServiceImpl implements SailingServiceWrite {
 
@@ -749,7 +750,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         for (String serverName : namesOfSailingServersToRemove) {
             getService().apply(new RemoveRemoteSailingServerReference(serverName));
         }
@@ -757,7 +758,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         final String expandedURL;
         if (sailingServer.getUrl().contains("//")) {
             expandedURL = sailingServer.getUrl();
@@ -775,7 +776,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
             final RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         RemoteSailingServerReference serverRef = getService()
                 .apply(new UpdateSailingServerReference(sailingServer.getName(),
                         sailingServer.isInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
@@ -789,7 +790,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(final String sailingServerName)
             throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         RemoteSailingServerReference serverRef = getService().getRemoteServerReferenceByName(sailingServerName);
         com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
                 .getCompleteRemoteServerReference(serverRef);
@@ -1636,7 +1637,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
-        for(String columnName: columnNames) {
+        for (String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
     }
@@ -1727,7 +1728,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         exportTrackedRacesAndStartTracking, importOperationId);
             }
         };
-        executor.execute(masterDataImportTask);
+        // We need to convey the current user's credentials into the masterDataImportTask for default object ownership and permissions in case no
+        // deviating username and password have been provided:
+        executor.execute(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(masterDataImportTask));
         return importOperationId;
     }
 
@@ -3202,18 +3205,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     getService().getFileStorageManagementService().getActiveFileStorageService()
                             .removeFile(new URI(alreadyStoredFileRef));
                 } catch (Exception e) {
+                    logger.warning("Exception trying to remove image file "+alreadyStoredFileRef+": "+e.getMessage());
                 }
                 // Exception occured while trying to revert changes after exception
                 // This only keeps some trash on the FileStorage
             }
             throw new Exception("Error occured while storing images on the FileStorage");
         }
-        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
-                resizedImages);
-        for (String tag : resizingTask.getImage().getTags()) {
+        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask, resizedImages);
+        final ImageDTO image = resizingTask.getImage();
+        for (String tag : new ArrayList<>(image.getTags())) {
             final MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
             if (predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
-                final ImageDTO image = resizingTask.getImage();
                 for (MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
                     image.getTags().remove(tagConstant.getName());
                 }

@@ -96,7 +96,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
                             if (added) {
                                 RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager(
                                         (DynamicTrackedRace) trackedRace, racingEventServiceTracker.getInitializedService(0).getSensorFixStore(),
-                                        sensorFixMapperFactory);
+                                        sensorFixMapperFactory, /* removeOutliersFromCompetitorTracks */ true);
                                 RaceLogFixTrackerManager oldInstance = null;
                                 synchronized (this) {
                                     oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
@@ -213,7 +213,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
         return new ObjectInputStream(is);
     }
 

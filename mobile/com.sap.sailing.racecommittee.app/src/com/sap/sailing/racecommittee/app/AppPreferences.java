@@ -231,6 +231,7 @@ public class AppPreferences {
     private String getRacingProcedureClassFlagKey(RacingProcedureType type) {
         switch (type) {
             case RRS26:
+            case RRS26_3MIN:
                 return key(R.string.preference_racing_procedure_rrs26_classflag_key);
             case SWC:
                 return key(R.string.preference_racing_procedure_swc_classflag_key);
@@ -255,6 +256,7 @@ public class AppPreferences {
     private String getRacingProcedureHasIndividualRecallKey(RacingProcedureType type) {
         switch (type) {
             case RRS26:
+            case RRS26_3MIN:
                 return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
             case SWC:
                 return key(R.string.preference_racing_procedure_swc_hasxray_key);
@@ -279,6 +281,7 @@ public class AppPreferences {
     private String getRacingProcedureIsResultEntryEnabledKey(RacingProcedureType type) {
         switch (type) {
             case RRS26:
+            case RRS26_3MIN:
                 return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
             case SWC:
                 return key(R.string.preference_racing_procedure_swc_resultentryenabled_key);

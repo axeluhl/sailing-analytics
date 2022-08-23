@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -134,6 +135,7 @@ import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.SetPreferenceOperation;
 import com.sap.sse.security.operations.SetSettingOperation;
 import com.sap.sse.security.operations.UnsetPreferenceOperation;
+import com.sap.sse.security.operations.UpdateItemPriceOperation;
 import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
@@ -560,6 +562,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
+    }
+    
+    public AccessControlListAnnotation getOrCreateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        return accessControlStore.getOrCreateAcl(idOfAccessControlledObjectAsString);
     }
 
     /**
@@ -2119,21 +2125,30 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
+    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype, boolean makeReadableForAll) {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
             result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
                     rolePrototype.getPermissions());
             setOwnership(result.getIdentifier(), null, getServerGroup());
-        } else if (!Util.containsAll(potentiallyExistingRoleDefinition.getPermissions(),
-                rolePrototype.getPermissions())) {
+        } else if (rolePrototype.getPermissions() != null
+                && !rolePrototype.getPermissions().equals(potentiallyExistingRoleDefinition.getPermissions())) {
             store.setRoleDefinitionPermissions(potentiallyExistingRoleDefinition.getId(),
                     rolePrototype.getPermissions());
             RoleDefinition roleDefinition = store.getRoleDefinition(rolePrototype.getId());
             result = roleDefinition;
         } else {
             result = potentiallyExistingRoleDefinition;
+        }
+        if (makeReadableForAll) {
+            AccessControlListAnnotation acl = getOrCreateAccessControlList(result.getIdentifier());
+            final Set<String> allowedActions = acl.getAnnotation().getAllowedActions(null);
+            if (!allowedActions.contains(DefaultActions.READ.name())) {
+                // make role publicly readable
+                addToAccessControlList(result.getIdentifier(), 
+                        /* for all users */ null, DefaultActions.READ.name());
+            }
         }
         return result;
     }
@@ -2151,8 +2166,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null);
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null, classLoaderCache);
     }
 
     @Override
@@ -2948,6 +2963,26 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
         permissionChangeListeners.removePermissionChangeListener(permission, listener);
+    }
+
+    @Override
+    public void updateSubscriptionPlanPrices(Map<String, BigDecimal> itemPrices) {
+        apply(new UpdateItemPriceOperation(itemPrices));
+    }
+    
+    @Override
+    public Void internalUpdateSubscriptionPlanPrices(Map<String, BigDecimal> updatedItemPrices) {
+        final Map<Serializable, SubscriptionPlan> allSubscriptionPlans = getAllSubscriptionPlans();
+        for (SubscriptionPlan subscriptionPlan : allSubscriptionPlans.values()) {
+            for (SubscriptionPrice subscriptionPrice : subscriptionPlan.getPrices()) {
+                final BigDecimal updatedPrice = updatedItemPrices.get(subscriptionPrice.getPriceId());
+                if(updatedPrice != null) {
+                    logger.log(Level.INFO, "Setting ItemPrice for SubscriptionPrice " + subscriptionPrice.getPriceId());
+                    subscriptionPrice.setPrice(updatedPrice);
+                }
+            }
+        }
+        return null;
     }
 
 }

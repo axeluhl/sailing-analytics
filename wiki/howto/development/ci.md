@@ -68,6 +68,11 @@ The image has been crafted specifically to contain the tools required for the bu
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/hudson_slave_setup/* /tmp
    sudo -i
+   # For Ubuntu 22.x install libssl1.1:
+   wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+   dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+   rm libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+   # For all O/S versions:
    dd if=/dev/zero of=/var/cache/swapfile bs=1G count=20
    chmod 600 /var/cache/swapfile
    mkswap /var/cache/swapfile
@@ -76,13 +81,19 @@ The image has been crafted specifically to contain the tools required for the bu
    mkdir /opt/android-sdk-linux
    echo "dev.internal.sapsailing.com:/home/hudson/android-sdk-linux /opt/android-sdk-linux nfs tcp,intr,timeo=100,retry=0" >>/etc/fstab
    apt-get update
-   apt-get install -y unzip xvfb libxi6 libgconf-2-4 nfs-common
+   apt-get install -y unzip xvfb libxi6 libgconf-2-4 nfs-common gnupg
    curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
    echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
-   apt-get -y install maven rabbitmq-server mongodb-org firefox firefox-geckodriver fwupd linux-aws linux-headers-aws linux-image-aws docker.io
+   # The following work well on Ubuntu 20.04 but not on Ubuntu 22.04 or Debian 11 because
+   # the firefox package may be "firefox-esr" and firefox-geckodriver and the linux*aws packages may not be available at
+   # all, in which case a direct download, e.g., from https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
+   # is an alternative; unpack to /usr/local/bin.
+   cd /usr/local/bin
+   wget -O - "https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz" | tar xzvpf -
+   apt-get -y install cloud-guest-utils maven rabbitmq-server mongodb-org firefox fwupd linux-aws linux-headers-aws linux-image-aws docker.io
    apt-get -y autoremove
    cd /tmp
    mv /tmp/imageupgrade /usr/local/bin
@@ -120,6 +131,8 @@ The image has been crafted specifically to contain the tools required for the bu
    sudo -u sailing ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
    sudo -u sailing git clone trac@sapsailing.com:/home/trac/git /home/sailing/code
    sudo -u hudson mkdir /home/hudson/.m2
+   chmod a+r /home/sailing
+   chmod a+x /home/sailing
    sudo -u hudson cp /home/sailing/code/toolchains.xml /home/hudson/.m2
    sudo -u hudson ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
    echo "export JAVA_HOME=/opt/sapjvm_8" >/etc/profile.d/sapjvm.sh

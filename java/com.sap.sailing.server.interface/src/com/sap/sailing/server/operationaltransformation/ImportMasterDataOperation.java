@@ -225,6 +225,7 @@ public class ImportMasterDataOperation extends
                                 sync.notifyAll();
                             }
                         }
+                        trackedRace.removeListener(this);
                     }
                 }
             });
