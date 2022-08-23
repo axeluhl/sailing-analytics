@@ -2305,6 +2305,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             final TimePoint now = MillisecondsTimePoint.now();
             if (notificationService != null && (lastNotificationForLeaderboard == null ||
                 lastNotificationForLeaderboard.until(now).compareTo(HOW_LONG_BETWEEN_TWO_NOTIFICATIONS_FOR_SIMILAR_EVENT) >= 0)) {
+                    // no Subject association required for runnable here
                     scheduler.execute(()->notificationService.notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(
                                         leaderboard.getBoatClass(), leaderboard));
                 lastNotificationForLeaderboard = now;
@@ -2320,13 +2321,13 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             final TimePoint now = MillisecondsTimePoint.now();
             if (notificationService != null && (!lastNotificationForCompetitor.containsKey(competitor) ||
                     lastNotificationForCompetitor.get(competitor).until(now).compareTo(HOW_LONG_BETWEEN_TWO_NOTIFICATIONS_FOR_SIMILAR_EVENT) >= 0)) {
+                // no Subject association required for runnable here
                 scheduler.execute(()->notificationService.notifyUserOnCompetitorScoreCorrections(competitor, leaderboard));
                 lastNotificationForCompetitor.put(competitor, now);
             }
             // a change to a single competitor also means a change to the leaderboard
             notifyForLeaderboardIfNotAlreadyNotifiedRecently();
         }
-
     }
 
     private class PolarFixCacheUpdater extends AbstractRaceChangeListener {
@@ -2396,8 +2397,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
             // no replication action required; the update signaled by this call is implicit; for explicit updates
             // see raceTimesChanged(TimePoint, TimePoint, TimePoint).
-            
             if (newStartOfRace != null && newStartOfRace.after(MillisecondsTimePoint.now())) {
+                // no Subject association required for runnable here
                 scheduler.execute(()->
                     // Notify interested users if the new start time is in the future
                     notificationService.notifyUserOnBoatClassUpcomingRace(trackedRace.getRace().getBoatClass(),
@@ -2415,6 +2416,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             // no action required; the update signaled by this call is implicit; the race log
             // updates that led to this change are replicated separately
             if (newFinishedTime != null && newFinishedTime.after(MillisecondsTimePoint.now().minus(Duration.ONE_HOUR))) {
+                // no Subject association required for runnable here
                 scheduler.execute(()->
                     // Notify interested users:
                     notificationService.notifyUserOnBoatClassRaceChangesStateToFinished(trackedRace.getRace().getBoatClass(), trackedRace,
@@ -2485,6 +2487,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             if (last != null && last.getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint() &&
                     trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.LOADING &&
                     last.getTimePoint().after(MillisecondsTimePoint.now().minus(Duration.ONE_HOUR))) {
+                // no Subject association required for runnable here
                 scheduler.execute(() ->
                     // Notify interested users:
                     notificationService.notifyUserOnCompetitorPassesFinish(competitor, trackedRace,

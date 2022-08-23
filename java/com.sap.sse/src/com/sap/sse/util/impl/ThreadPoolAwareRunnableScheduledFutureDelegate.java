@@ -20,13 +20,7 @@ public class ThreadPoolAwareRunnableScheduledFutureDelegate<V> extends KnowsExec
     }
 
     public void run() {
-        setInheritableThreadLocalValues();
-        try {
-            future.run();
-        } finally {
-            removeInheritableThreadLocalValues();
-            removeThreadLocalValues();
-        }
+        future.run();
     }
 
     public boolean isPeriodic() {
