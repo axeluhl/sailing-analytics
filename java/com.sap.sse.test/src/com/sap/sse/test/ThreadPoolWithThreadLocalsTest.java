@@ -14,8 +14,6 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import com.sap.sse.util.ThreadPoolUtil;
-
 public class ThreadPoolWithThreadLocalsTest {
 
     private static final Logger logger = Logger.getLogger(ThreadPoolWithThreadLocalsTest.class.getName());
