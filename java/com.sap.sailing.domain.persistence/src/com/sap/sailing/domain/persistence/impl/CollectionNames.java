@@ -123,7 +123,7 @@ public enum CollectionNames {
     ANNIVERSARIES,
     
     /**
-     * Contains the Hashes for the {@link TrackedRaceHashFingerprint}
+     * Contains the Hashes for the {@link MarkPassingHashFingerprint}
      */
     MARKPASSINGHASHES;
 

@@ -18,8 +18,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
-import com.sap.sailing.domain.markpassinghash.TrackedRaceHashForMaskPassingCalculationFactory;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashCalculationFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -64,16 +64,16 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
 
     @Test
     public void testLoadingToMongo() throws UnknownHostException, MongoException {
-        TrackedRaceHashForMaskPassingCalculationFactory factory = TrackedRaceHashForMaskPassingCalculationFactory.INSTANCE;
+        MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
         MarkPassingCalculator calculator = new MarkPassingCalculator(trackedRace1, false, false);
-        TrackedRaceHashFingerprint fingerprint = factory.createFingerprint(trackedRace1, calculator.getCalculatorVersion());
+        MarkPassingHashFingerprint fingerprint = factory.createFingerprint(trackedRace1);
         MongoClient myFirstMongo = newMongo();
         MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());
         RaceIdentifier raceIdentifier = trackedRace1.getRaceIdentifier();
         new MongoObjectFactoryImpl(firstDatabase).storeFingerprintForMarkPassingHash(fingerprint, raceIdentifier);
         DomainObjectFactory dF = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
-        HashMap<RaceIdentifier, TrackedRaceHashFingerprint> fingerprintHashMap = dF.loadFingerprintsForMarkPassingHashes();
-        TrackedRaceHashFingerprint fingerprintAfterDB = fingerprintHashMap.get(trackedRace1.getRaceIdentifier());
-        assertTrue("Original and de-serialized copy are equal", fingerprintAfterDB.matches(trackedRace1, calculator.getCalculatorVersion()));
+        HashMap<RaceIdentifier, MarkPassingHashFingerprint> fingerprintHashMap = dF.loadFingerprintsForMarkPassingHashes();
+        MarkPassingHashFingerprint fingerprintAfterDB = fingerprintHashMap.get(trackedRace1.getRaceIdentifier());
+        assertTrue("Original and de-serialized copy are equal", fingerprintAfterDB.matches(trackedRace1));
     }
 }

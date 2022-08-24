@@ -235,8 +235,8 @@ import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
-import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashFingerprintImpl;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
+import com.sap.sailing.domain.markpassinghash.impl.MarkPassingHashFingerprintImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -3150,10 +3150,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public HashMap<RaceIdentifier, TrackedRaceHashFingerprint> loadFingerprintsForMarkPassingHashes() {
+    public HashMap<RaceIdentifier, MarkPassingHashFingerprint> loadFingerprintsForMarkPassingHashes() {
         MongoCollection<Document> mongoCollection = database.getCollection(CollectionNames.MARKPASSINGHASHES.name());
         MongoCursor<Document> cursor = mongoCollection.find().iterator();
-        HashMap<RaceIdentifier, TrackedRaceHashFingerprint> fingerprintHashMap = new HashMap<RaceIdentifier, TrackedRaceHashFingerprint>();
+        HashMap<RaceIdentifier, MarkPassingHashFingerprint> fingerprintHashMap = new HashMap<RaceIdentifier, MarkPassingHashFingerprint>();
         while (cursor.hasNext()) {
             Document currentDocument = cursor.next();
             RaceIdentifier raceIdentifier = loadRaceIdentifier(currentDocument);
@@ -3166,7 +3166,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json); //hier entsteht fehler
+            MarkPassingHashFingerprint result = new MarkPassingHashFingerprintImpl(json); //hier entsteht fehler
             fingerprintHashMap.put(raceIdentifier, result);
         }
         return fingerprintHashMap;
