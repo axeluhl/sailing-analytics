@@ -3073,7 +3073,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         });
             }, /* void result */ null);
             waiters.add(waiter);
-            backgroundExecutor.execute(waiter);
+            backgroundExecutor.execute(waiter); // OK to not associate with the current Subject here because we may not even have a session
         }
         logger.info("Done restoring races; restored " + i + " of " + count + " races");
         return new ConnectivityParametersLoadingResult() {

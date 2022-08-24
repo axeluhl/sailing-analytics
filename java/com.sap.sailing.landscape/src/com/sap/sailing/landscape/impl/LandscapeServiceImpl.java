@@ -881,14 +881,14 @@ public class LandscapeServiceImpl implements LandscapeService {
             if (replicaSet.getAutoScalingGroup() != null) {
                 // run updating the auto-scaling group in the background; it's more time-critical now
                 // to remove the old replicas from the target group
-                ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().execute(()->
+                ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().execute(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(()->
                     {
                         try {
                             getLandscape().updateAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), oldAutoScalingGroupMinSize);
                         } catch (InterruptedException | ExecutionException e) {
                             throw new RuntimeException(e);
                         }
-                    });
+                    }));
             } // else, the replica was started explicitly, without an auto-scaling group; in any case, all replicas still
             // on the old release will now be stopped:
         }
