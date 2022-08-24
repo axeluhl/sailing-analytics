@@ -8,7 +8,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public interface TrackedRaceHashForMaskPassingCalculationFactory {
     TrackedRaceHashForMaskPassingCalculationFactory INSTANCE = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
     
-    TrackedRaceHashFingerprint createFingerprint(TrackedRace trackedRace);
+    TrackedRaceHashFingerprint createFingerprint(TrackedRace trackedRace, int calculatorVersion);
     
     TrackedRaceHashFingerprint fromJson(JSONObject json);
 }

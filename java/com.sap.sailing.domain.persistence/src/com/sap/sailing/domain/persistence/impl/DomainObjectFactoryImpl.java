@@ -3160,12 +3160,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             JSONObject json = null;
             try {
                 json = Helpers.toJSONObjectSafe(new JSONParser().parse(currentDocument.toJson()));
+                int i = 0;
             } catch (JsonDeserializationException e) {
                 e.printStackTrace();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json);
+            TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json); //hier entsteht fehler
             fingerprintHashMap.put(raceIdentifier, result);
         }
         return fingerprintHashMap;

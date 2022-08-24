@@ -1965,6 +1965,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         JSONObject fingerprintjson = fingerprint.toJson();
         Document result = Document.parse(fingerprintjson.toString());
         storeRaceIdentifier(result, raceIdentification);
-        markPassingCollection.insertOne(result); // hier entsteht fehler 
+        markPassingCollection.insertOne(result);
     }
 }

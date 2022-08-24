@@ -7,5 +7,5 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public interface TrackedRaceHashFingerprint {
     JSONObject toJson();
 
-    boolean matches(TrackedRace trackedRace);
+    boolean matches(TrackedRace trackedRace, int calculatorVersion);
 }

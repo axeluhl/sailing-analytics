@@ -1,6 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -16,6 +17,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
 import com.sap.sailing.domain.markpassinghash.TrackedRaceHashForMaskPassingCalculationFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -63,7 +65,8 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
     @Test
     public void testLoadingToMongo() throws UnknownHostException, MongoException {
         TrackedRaceHashForMaskPassingCalculationFactory factory = TrackedRaceHashForMaskPassingCalculationFactory.INSTANCE;
-        TrackedRaceHashFingerprint fingerprint = factory.createFingerprint(trackedRace1);
+        MarkPassingCalculator calculator = new MarkPassingCalculator(trackedRace1, false, false);
+        TrackedRaceHashFingerprint fingerprint = factory.createFingerprint(trackedRace1, calculator.getCalculatorVersion());
         MongoClient myFirstMongo = newMongo();
         MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());
         RaceIdentifier raceIdentifier = trackedRace1.getRaceIdentifier();
@@ -71,8 +74,6 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
         DomainObjectFactory dF = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         HashMap<RaceIdentifier, TrackedRaceHashFingerprint> fingerprintHashMap = dF.loadFingerprintsForMarkPassingHashes();
         TrackedRaceHashFingerprint fingerprintAfterDB = fingerprintHashMap.get(trackedRace1.getRaceIdentifier());
-        JSONObject json1 = fingerprint.toJson();
-        JSONObject json2 = fingerprintAfterDB.toJson();
-        assertEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+        assertTrue("Original and de-serialized copy are equal", fingerprintAfterDB.matches(trackedRace1, calculator.getCalculatorVersion()));
     }
 }

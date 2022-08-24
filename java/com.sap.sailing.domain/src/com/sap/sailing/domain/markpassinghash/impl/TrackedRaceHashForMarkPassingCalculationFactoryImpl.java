@@ -9,8 +9,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class TrackedRaceHashForMarkPassingCalculationFactoryImpl
         implements TrackedRaceHashForMaskPassingCalculationFactory {
     @Override
-    public TrackedRaceHashFingerprint createFingerprint(TrackedRace trackedRace) {
-        return new TrackedRaceHashFingerprintImpl(trackedRace);
+    public TrackedRaceHashFingerprint createFingerprint(TrackedRace trackedRace, int calculatorVersion) {
+        return new TrackedRaceHashFingerprintImpl(trackedRace, calculatorVersion);
     }
 
     @Override
