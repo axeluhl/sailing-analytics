@@ -1,6 +1,5 @@
 package com.sap.sailing.mongodb.test;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
@@ -8,7 +7,6 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 
-import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,9 +15,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
 import com.sap.sailing.domain.markpassinghash.MarkPassingHashCalculationFactory;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -65,7 +62,6 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
     @Test
     public void testLoadingToMongo() throws UnknownHostException, MongoException {
         MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
-        MarkPassingCalculator calculator = new MarkPassingCalculator(trackedRace1, false, false);
         MarkPassingHashFingerprint fingerprint = factory.createFingerprint(trackedRace1);
         MongoClient myFirstMongo = newMongo();
         MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());

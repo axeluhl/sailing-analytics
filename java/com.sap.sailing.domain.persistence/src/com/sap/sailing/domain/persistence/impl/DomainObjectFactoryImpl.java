@@ -3160,7 +3160,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             JSONObject json = null;
             try {
                 json = Helpers.toJSONObjectSafe(new JSONParser().parse(currentDocument.toJson()));
-                int i = 0;
             } catch (JsonDeserializationException e) {
                 e.printStackTrace();
             } catch (ParseException e) {
