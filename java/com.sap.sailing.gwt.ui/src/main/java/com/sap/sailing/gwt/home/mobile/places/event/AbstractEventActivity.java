@@ -61,6 +61,7 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
@@ -90,6 +91,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
+    }
+    
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return clientFactory.getSubscriptionServiceFactory();
     }
 
     protected abstract EventViewBase initView();

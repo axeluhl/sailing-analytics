@@ -71,7 +71,6 @@ public class TrackFileExporterImpl implements TrackFileExporter {
             } catch (Exception e) {
                 log.log(Level.WARNING, "Error exporting race: " + e.getMessage());
             }
-
         }
     }
 }

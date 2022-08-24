@@ -441,7 +441,7 @@ public class PolarDataMiner {
     }
 
     public void raceFinishedTracking(final TrackedRace race) {
-        processRacesThatFinishedLoadingExecutor.execute(()->{
+        processRacesThatFinishedLoadingExecutor.execute(()->{ // no Subject association necessary here
             logger.info("All queued fixes for newly loaded race will process now. "
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName()));
             for (final Competitor competitor : race.getRace().getCompetitors()) {

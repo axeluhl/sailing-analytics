@@ -32,6 +32,8 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private final DynamicTrackedRace trackedRace;
 
     private final SensorFixStore sensorFixStore;
+    
+    private final boolean removeOutliersFromCompetitorTracks;
 
     private final SensorFixMapperFactory sensorFixMapperFactory;
     
@@ -68,7 +70,8 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     };
 
     public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
-            SensorFixMapperFactory sensorFixMapperFactory) {
+            SensorFixMapperFactory sensorFixMapperFactory, boolean removeOutliersFromCompetitorTracks) {
+        this.removeOutliersFromCompetitorTracks = removeOutliersFromCompetitorTracks;
         this.trackedRace = trackedRace;
         this.sensorFixStore = sensorFixStore;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
@@ -128,7 +131,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private synchronized void startTrackerIfNotAlreadyStarted() {
         if (tracker == null) {
             logger.fine("Starting fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
-            tracker = new FixLoaderAndTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
+            tracker = new FixLoaderAndTracker(trackedRace, sensorFixStore, sensorFixMapperFactory, removeOutliersFromCompetitorTracks);
         }
     }
 
