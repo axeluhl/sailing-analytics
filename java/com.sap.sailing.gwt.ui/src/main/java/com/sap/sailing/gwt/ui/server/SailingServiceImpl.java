@@ -3135,7 +3135,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     }
                 });
                 resultFutures.put(competitorDTO, future);
-                executor.execute(future);
+                executor.execute(future); // security checks happen before; no need to associate future with Subject/session
             }
             for (Map.Entry<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> e : resultFutures.entrySet()) {
                 CompetitorRaceDataDTO competitorData;
@@ -3341,7 +3341,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         }
                         return createManeuverDTOsForCompetitor(maneuvers, trackedRace, competitor);
                     });
-                    executor.execute(future);
+                    executor.execute(future); // security checks happen before; no need to associate future with Subject
                     futures.put(competitorDTO, future);
                 }
             }

@@ -113,4 +113,8 @@ public interface ThreadPoolUtil {
      *            by the exception's message.
      */
     <T> List<Future<T>> invokeAllAndLogExceptions(ExecutorService executor, Level logLevel, String messageTemplate, Iterable<? extends Callable<T>> tasks);
+
+    Runnable associateWithSubjectIfAny(Runnable runnable);
+
+    <T> Callable<T> associateWithSubjectIfAny(Callable<T> callable);
 }

@@ -210,6 +210,7 @@ public class ManeuverAndWindImporter {
                         i++;
                         final int raceNumber = i;
                         logger.info("Processing race nr. " + raceNumber + ": \"" + trackedRaceName + "\"");
+                        // no Subject association required for runnable here
                         executorService.execute(() -> {
                             try {
                                 importRace(regattaName, trackedRaceName, importStatistics, bearerToken);

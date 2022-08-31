@@ -395,6 +395,7 @@ import com.sap.sse.shared.util.impl.UUIDHelper;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ImageConverter;
 import com.sap.sse.util.ImageConverter.ImageWithMetadata;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class SailingServiceWriteImpl extends SailingServiceImpl implements SailingServiceWrite {
 
@@ -1727,7 +1728,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         exportTrackedRacesAndStartTracking, importOperationId);
             }
         };
-        executor.execute(masterDataImportTask);
+        // We need to convey the current user's credentials into the masterDataImportTask for default object ownership and permissions in case no
+        // deviating username and password have been provided:
+        executor.execute(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(masterDataImportTask));
         return importOperationId;
     }
 
