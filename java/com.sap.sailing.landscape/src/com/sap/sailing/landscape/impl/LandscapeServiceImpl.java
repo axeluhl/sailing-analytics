@@ -1467,4 +1467,28 @@ public class LandscapeServiceImpl implements LandscapeService {
                     replicaSet.getName()+" within timeout period "+LandscapeService.WAIT_FOR_HOST_TIMEOUT);
         }
     }
+
+    /**
+     * Checks whether the {@code host} is eligbile for deploying a process of an application replica set named
+     * as defined by {@code serverName}, listening on the application port specified by {@code port}.
+     */
+    @Override
+    public <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> optionalTimeout,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        boolean result;
+        if (host.isManagedByAutoScalingGroup()) {
+            result = false;
+        } else {
+            result = true;
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = host.getApplicationProcesses(optionalTimeout,
+                    Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+            for (final SailingAnalyticsProcess<ShardingKey> applicationProcess : applicationProcesses) {
+                if (applicationProcess.getPort() == port || applicationProcess.getServerName(optionalTimeout, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase).equals(serverName)) {
+                    result = false;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }
