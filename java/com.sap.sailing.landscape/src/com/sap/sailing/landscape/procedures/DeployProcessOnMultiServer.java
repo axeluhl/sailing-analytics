@@ -13,6 +13,7 @@ import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.ConcurrentHashBag;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -173,20 +174,30 @@ implements Procedure<ShardingKey> {
             final Set<Integer> occupiedPorts = new HashSet<>();
             final Set<SailingAnalyticsProcess<ShardingKey>> applicationProcessesToScan = new HashSet<>();
             Util.addAll(hostToDeployTo.getApplicationProcesses(getOptionalTimeout(), optionalKeyName, privateKeyEncryptionPassphrase), applicationProcessesToScan);
-            final AwsAvailabilityZone azOfHostToDeployTo = hostToDeployTo.getAvailabilityZone();
-            for (final SailingAnalyticsHost<ShardingKey> sharedHost : getLandscape().getHostsWithTagValue(getApplicationConfigurationBuilder().getRegion(),
-                    SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE,
-                    new SailingAnalyticsHostSupplier<ShardingKey>())) {
-                if (!sharedHost.getId().equals(hostToDeployTo.getId()) && !sharedHost.getAvailabilityZone().equals(azOfHostToDeployTo)) {
-                    logger.info("...also scanning for available port on shared host "+sharedHost+" because it is in different availability zone");
-                    Util.addAll(sharedHost.getApplicationProcesses(getOptionalTimeout(), optionalKeyName, privateKeyEncryptionPassphrase), applicationProcessesToScan);
-                }
-            }
             for (final SailingAnalyticsProcess<ShardingKey> applicationProcess : applicationProcessesToScan) {
                 occupiedPorts.add(portFetcher.apply(applicationProcess));
             }
+            final AwsAvailabilityZone azOfHostToDeployTo = hostToDeployTo.getAvailabilityZone();
+            int numberOfSharedHostsInOtherAZs = 0;
+            final ConcurrentHashBag<Integer> portsOccupiedInSharedHostsInOtherAZs = new ConcurrentHashBag<>();
+            for (final SailingAnalyticsHost<ShardingKey> sharedHost : getLandscape().getHostsWithTagValue(getApplicationConfigurationBuilder().getRegion(),
+                    SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE,
+                    new SailingAnalyticsHostSupplier<ShardingKey>())) {
+                // accept only ports for which not all other shared instances in other AZs have that port occupied
+                if (!sharedHost.getAvailabilityZone().equals(azOfHostToDeployTo)) {
+                    logger.info("...also scanning for available port on shared host "+sharedHost+" because it is in different availability zone");
+                    numberOfSharedHostsInOtherAZs++;
+                    for (final SailingAnalyticsProcess<ShardingKey> processOnSharedHostInOtherAZ : sharedHost.getApplicationProcesses(getOptionalTimeout(), optionalKeyName, privateKeyEncryptionPassphrase)) {
+                        portsOccupiedInSharedHostsInOtherAZs.add(portFetcher.apply(processOnSharedHostInOtherAZ));
+                    }
+                }
+            }
             int port = defaultPort;
-            while (port<Integer.MAX_VALUE && occupiedPorts.contains(port)) {
+            while (port<Integer.MAX_VALUE && (occupiedPorts.contains(port) ||
+                    (numberOfSharedHostsInOtherAZs > 0 && portsOccupiedInSharedHostsInOtherAZs.count(port) == numberOfSharedHostsInOtherAZs))) {
+                if (!occupiedPorts.contains(port)) {
+                    logger.info("Didn't choose port "+port+" because all "+numberOfSharedHostsInOtherAZs+" in other AZs occupy it.");
+                }
                 port++;
             }
             logger.info("Identified "+port+" as the next available port, started at "+defaultPort);
