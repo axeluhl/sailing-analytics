@@ -847,7 +847,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             loadingJobs.add(job);
             updateStatusAndProgress();
         }
-        executor.execute(job);
+        executor.execute(job); // nothing security-related happening here, and we may not have a Subject/session; no need to associate with a Subject
     }
     
     /**

@@ -21,12 +21,13 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -230,5 +231,5 @@ public interface MongoObjectFactory {
 
     Document storeWind(Wind wind);
 
-    void storeFingerprint(TrackedRaceHashFingerprint fingerprint);
+    void storeFingerprintForMarkPassingHash(MarkPassingHashFingerprint fingerprint, RaceIdentifier raceIdentification);
 }

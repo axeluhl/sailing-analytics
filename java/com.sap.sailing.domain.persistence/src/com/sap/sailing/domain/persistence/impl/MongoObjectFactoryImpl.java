@@ -125,7 +125,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -1960,10 +1960,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
 
-    public void storeFingerprint(TrackedRaceHashFingerprint fingerprint) {
+    public void storeFingerprintForMarkPassingHash(MarkPassingHashFingerprint fingerprint, RaceIdentifier raceIdentification) {
         MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGHASHES.name());
         JSONObject fingerprintjson = fingerprint.toJson();
         Document result = Document.parse(fingerprintjson.toString());
+        storeRaceIdentifier(result, raceIdentification);
         markPassingCollection.insertOne(result);
     }
 }

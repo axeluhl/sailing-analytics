@@ -235,8 +235,8 @@ import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
-import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashFingerprintImpl;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
+import com.sap.sailing.domain.markpassinghash.impl.MarkPassingHashFingerprintImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -250,7 +250,6 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
@@ -3074,7 +3073,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         });
             }, /* void result */ null);
             waiters.add(waiter);
-            backgroundExecutor.execute(waiter);
+            backgroundExecutor.execute(waiter); // OK to not associate with the current Subject here because we may not even have a session
         }
         logger.info("Done restoring races; restored " + i + " of " + count + " races");
         return new ConnectivityParametersLoadingResult() {
@@ -3149,25 +3148,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
         return raceTrackingConnectivityParamsServiceFinder;
     }
-
-    public TrackedRaceHashFingerprint loadFingerprint(TrackedRace trackedRace) {
-        MongoCollection<Document> anniversarysStored = database.getCollection(CollectionNames.MARKPASSINGHASHES.name());
-        MongoCursor<Document> cursor = anniversarysStored.find().iterator();
+    
+    @Override
+    public HashMap<RaceIdentifier, MarkPassingHashFingerprint> loadFingerprintsForMarkPassingHashes() {
+        MongoCollection<Document> mongoCollection = database.getCollection(CollectionNames.MARKPASSINGHASHES.name());
+        MongoCursor<Document> cursor = mongoCollection.find().iterator();
+        HashMap<RaceIdentifier, MarkPassingHashFingerprint> fingerprintHashMap = new HashMap<RaceIdentifier, MarkPassingHashFingerprint>();
         while (cursor.hasNext()) {
             Document currentDocument = cursor.next();
-            if (currentDocument.get("RACE_NAME").toString().equals(trackedRace.getName())) {
-                JSONObject json = null;
-                try {
-                    json = Helpers.toJSONObjectSafe(new JSONParser().parse(currentDocument.toJson()));
-                } catch (JsonDeserializationException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json);
-                return result;
+            RaceIdentifier raceIdentifier = loadRaceIdentifier(currentDocument);
+            JSONObject json = null;
+            try {
+                json = Helpers.toJSONObjectSafe(new JSONParser().parse(currentDocument.toJson()));
+            } catch (JsonDeserializationException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
+            MarkPassingHashFingerprint result = new MarkPassingHashFingerprintImpl(json); //hier entsteht fehler
+            fingerprintHashMap.put(raceIdentifier, result);
         }
-        return null;
+        return fingerprintHashMap;
     }
 }

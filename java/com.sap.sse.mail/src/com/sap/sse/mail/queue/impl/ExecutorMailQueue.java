@@ -24,6 +24,7 @@ public class ExecutorMailQueue implements MailQueue {
 
     @Override
     public void addNotification(MailNotification notification) {
+        // no Subject association required for runnable here
         ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor()
                 .execute(() -> notification.sendNotifications(mailServiceTracker.getService()));
     }

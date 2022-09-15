@@ -7,14 +7,17 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
-public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprint {
+public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprint {
+    private final int calculatorVersion;
     private final int competitorHash;
     private final TimePoint startOfTracking;
     private final TimePoint startTimeReceived;
@@ -24,14 +27,14 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
     private final int waypointsHash;
     private final int numberOfGPSFixes;
     private final int gpsFixesHash;
-    private final String raceName;
 
     private static enum JSON_FIELDS {
         COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, START_TIME_RECEIVED_AS_MILLIS, START_TIME_FROM_RACE_LOG_AS_MILLIS,
-        FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_NAME
+        FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_ID, CALCULATOR_VERSION
     };
 
-    public TrackedRaceHashFingerprintImpl(TrackedRace trackedRace) {
+    public MarkPassingHashFingerprintImpl(TrackedRace trackedRace) {
+        this.calculatorVersion = getCalculatorVersion(trackedRace);
         this.competitorHash = calculateHashForCompetitors(trackedRace);
         this.startOfTracking = trackedRace.getStartOfTracking();
         this.endOfTracking = trackedRace.getEndOfTracking();
@@ -42,10 +45,10 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         this.waypointsHash = calculateHashForWaypoints(trackedRace);
         this.numberOfGPSFixes = calculateHashForNumberOfGPSFixes(trackedRace);
         this.gpsFixesHash = calculateHashForGPSFixes(trackedRace);
-        this.raceName = trackedRace.getName();
     }
 
-    public TrackedRaceHashFingerprintImpl(JSONObject json) {
+    public MarkPassingHashFingerprintImpl(JSONObject json) {
+        this.calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION.toString())).intValue();
         this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH.toString())).intValue();
         final Number startOfTrackingAsNumber = (Number) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.toString());
         this.startOfTracking = startOfTrackingAsNumber==null?null:TimePoint.of(startOfTrackingAsNumber.longValue());
@@ -60,13 +63,12 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH.toString())).intValue();
         this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.toString())).intValue();
         this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.toString())).intValue();
-        this.raceName = json.get(JSON_FIELDS.RACE_NAME.toString()).toString();
-        
     }
 
     @Override
     public JSONObject toJson() {
         JSONObject result = new JSONObject();
+        result.put(JSON_FIELDS.CALCULATOR_VERSION, calculatorVersion);
         result.put(JSON_FIELDS.COMPETITOR_HASH, competitorHash);
         result.put(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS, startOfTracking==null?null:startOfTracking.asMillis());
         result.put(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS, endOfTracking==null?null:endOfTracking.asMillis());
@@ -76,14 +78,15 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         result.put(JSON_FIELDS.WAYPOINTS_HASH, waypointsHash);
         result.put(JSON_FIELDS.NUMBEROFGPSFIXES, numberOfGPSFixes);
         result.put(JSON_FIELDS.GPSFIXES_HASH, gpsFixesHash);
-        result.put(JSON_FIELDS.RACE_NAME, raceName);
         return result;
     }
 
     @Override
     public boolean matches(TrackedRace trackedRace) {
         final boolean result;
-        if (!Util.equalsWithNull(startOfTracking, trackedRace.getStartOfTracking())) {
+        if (!Util.equalsWithNull(calculatorVersion, getCalculatorVersion(trackedRace))) {
+            result = false;
+        } else if (!Util.equalsWithNull(startOfTracking, trackedRace.getStartOfTracking())) {
             result = false;
         } else if (!Util.equalsWithNull(endOfTracking, trackedRace.getEndOfTracking())) {
             result = false;
@@ -110,6 +113,12 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         return result;
     }
 
+    private int getCalculatorVersion(TrackedRace trackedRace) {
+        MarkPassingCalculator calculator = new MarkPassingCalculator((DynamicTrackedRace) trackedRace, false, false);
+        int result = calculator.getCalculatorVersion();
+        return result;
+    }
+    
     private int calculateHashForCompetitors(TrackedRace trackedRace) {
         int hashForCompetitors = 1023;
         for (Competitor c : trackedRace.getRace().getCompetitors()) {
