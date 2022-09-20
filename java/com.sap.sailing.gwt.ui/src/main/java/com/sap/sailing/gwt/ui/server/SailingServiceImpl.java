@@ -1936,7 +1936,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     detailValue = null;
                                 }
                             }
-                            GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix), detailValue);
+                            // TODO bug5077: fold fix, estimatedSpeed and windDTO into an array of double values, two enums and a boolean to avoid large amounts of objects
+                            final GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix), detailValue);
                             fixesForCompetitor.add(fixDTO);
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();

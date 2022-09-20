@@ -15,6 +15,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MultiTimeRangeImpl;
 import com.sap.sse.gwt.client.async.TimeRangeAsyncCallback;
 
+/**
+ * The third type parameter ({@link String}) for {@link TimeRangeAsyncCallback} represents the stringified
+ * competitor IDs which form the key for the result structure.
+ */
 public class GetBoatPositionsCallback
         implements TimeRangeAsyncCallback<CompactBoatPositionsDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>, String> {
     private final AsyncCallback<CompactBoatPositionsDTO> callback;
@@ -67,5 +71,4 @@ public class GetBoatPositionsCallback
     public void onFailure(Throwable caught) {
         callback.onFailure(caught);
     }
-
 }
