@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.server;
 
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -22,27 +23,27 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
 
     /**
      * Overwritten version of {@link RemoteServiceServlet#processCall(RPCRequest)} that calls
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} instead of
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, Writer)} instead of
      * {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}.
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} in turn calls
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, Writer)} in turn calls
      * {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)} which subclasses can override
      * in order to customize result serialization, e.g., by picking a cached serialized version.
      */
     @Override
-    public String processCall(RPCRequest rpcRequest) throws SerializationException {
+    public void processCall(RPCRequest rpcRequest, Writer writer) throws SerializationException {
         final TimePoint startOfProcessCall = beforeProcessCall();
         try {
             final Object delegate = this;
             try {
                 onAfterRequestDeserialized(rpcRequest);
-                return invokeAndEncodeResponse(delegate, rpcRequest.getMethod(), rpcRequest.getParameters(),
-                        rpcRequest.getSerializationPolicy(), rpcRequest.getFlags());
+                invokeAndEncodeResponse(delegate, rpcRequest.getMethod(), rpcRequest.getParameters(),
+                        rpcRequest.getSerializationPolicy(), rpcRequest.getFlags(), writer);
             } catch (IncompatibleRemoteServiceException ex) {
                 log("An IncompatibleRemoteServiceException was thrown while processing this call.", ex);
-                return RPC.encodeResponseForFailedRequest(rpcRequest, ex);
+                RPC.encodeResponseForFailedRequest(rpcRequest, ex, writer);
             } catch (RpcTokenException tokenException) {
                 log("An RpcTokenException was thrown while processing this call.", tokenException);
-                return RPC.encodeResponseForFailedRequest(rpcRequest, tokenException);
+                RPC.encodeResponseForFailedRequest(rpcRequest, tokenException, writer);
             }
         } finally {
             afterProcessCall(rpcRequest, startOfProcessCall);
@@ -53,19 +54,19 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
      * Similar to {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}, but
      * calls {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)}, giving subclasses
      * a way to override result serialization.
+     * @param writer the writer to serialize the output to
      */
-    private String invokeAndEncodeResponse(Object target, Method serviceMethod, Object[] args,
-            SerializationPolicy serializationPolicy, int flags) throws SerializationException {
+    private void invokeAndEncodeResponse(Object target, Method serviceMethod, Object[] args,
+            SerializationPolicy serializationPolicy, int flags, Writer writer) throws SerializationException {
         if (serviceMethod == null) {
             throw new NullPointerException("serviceMethod");
         }
         if (serializationPolicy == null) {
             throw new NullPointerException("serializationPolicy");
         }
-        String responsePayload;
         try {
             Object result = serviceMethod.invoke(target, args);
-            responsePayload = encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
+            encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result, writer);
         } catch (IllegalAccessException e) {
             SecurityException securityException = new SecurityException(formatIllegalAccessErrorMessage(target, serviceMethod));
             securityException.initCause(e);
@@ -79,14 +80,13 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
             Throwable cause = resolveCause(e);
             logger.log(Level.SEVERE, "Uncaught exception, forwarded to client", cause);
             try {
-                responsePayload = RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
+                RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags, writer);
             } catch (SerializationException se) {
                 logger.warning("Couldn't serialize exception of type " + cause.getClass()
                 + "; serializing a RuntimeException with the message \"" + cause.getMessage() + "\" only.");
-                responsePayload = RPC.encodeResponseForFailure(serviceMethod, new RuntimeException(cause.getMessage()), serializationPolicy, flags);
+                RPC.encodeResponseForFailure(serviceMethod, new RuntimeException(cause.getMessage()), serializationPolicy, flags, writer);
             }
         }
-        return responsePayload;
     }
 
     private Throwable resolveCause(InvocationTargetException e) {
@@ -100,11 +100,9 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
     /**
      * To be overwritten by subclasses to customize the serialization of the result object.
      */
-    protected String encodeResponseForSuccess(Method serviceMethod, SerializationPolicy serializationPolicy, int flags,
-            Object result) throws SerializationException {
-        final String responsePayload;
-        responsePayload = RPC.encodeResponseForSuccess(serviceMethod, result, serializationPolicy, flags);
-        return responsePayload;
+    protected void encodeResponseForSuccess(Method serviceMethod, SerializationPolicy serializationPolicy, int flags,
+            Object result, Writer writer) throws SerializationException {
+        RPC.encodeResponseForSuccess(serviceMethod, result, serializationPolicy, flags, writer);
     }
 
     /**

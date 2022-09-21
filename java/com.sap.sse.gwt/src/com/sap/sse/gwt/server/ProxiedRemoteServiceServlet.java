@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.server;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -122,11 +123,10 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
      * the {@code startOfRequestProcessing} parameter.
      */
     @Override
-    public String processCall(RPCRequest rpcRequest) throws SerializationException {
+    public void processCall(RPCRequest rpcRequest, Writer writer) throws SerializationException {
         final TimePoint startOfRequestProcessing = beforeProcessCall();
         try {
-            final String result = super.processCall(rpcRequest);
-            return result;
+            super.processCall(rpcRequest, writer);
         } finally {
             afterProcessCall(rpcRequest, startOfRequestProcessing);
         }

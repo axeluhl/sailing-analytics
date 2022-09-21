@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.server;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -82,18 +84,21 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
     }
     
     @Override
-    protected String encodeResponseForSuccess(Method serviceMethod, SerializationPolicy serializationPolicy, int flags,
-            Object result) throws SerializationException {
+    protected void encodeResponseForSuccess(Method serviceMethod, SerializationPolicy serializationPolicy, int flags,
+            Object result, Writer writer) throws SerializationException {
         purgeCache();
         if (result instanceof CacheableRPCResult) {
             final CacheableRPCResult cacheableResult = (CacheableRPCResult) result;
             try {
                 callCount.incrementAndGet();
-                return resultCache.computeIfAbsent(new CacheKey(serializationPolicy, cacheableResult, dereferencedObjectsQueue),
+                resultCache.computeIfAbsent(new CacheKey(serializationPolicy, cacheableResult, dereferencedObjectsQueue),
                         key -> {
                             recalcCount.incrementAndGet();
                             try {
-                                return super.encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
+                                final StringWriter copyOfOutput = new StringWriter();
+                                final TeeWriter teeWriter = new TeeWriter(writer, copyOfOutput);
+                                super.encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result, teeWriter);
+                                return copyOfOutput.toString();
                             } catch (SerializationException serializationException) {
                                 throw new TemporaryWrapperException(serializationException);
                             }
@@ -101,8 +106,9 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
             } catch (TemporaryWrapperException e) {
                 throw e.serializationException;
             }
+        } else {
+            super.encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result, writer);
         }
-        return super.encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
     }
     
     /**
