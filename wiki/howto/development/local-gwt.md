@@ -23,7 +23,9 @@ Add restrictions with the following two tags to reduce the number of permutation
 Those tags must be put into the *.gwt.xml files e.g. "AdminConsole.gwt.xml".
 
 ## Debugging GWT
-
+### Super dev Mode
+For further instructions look [here](./development/super-dev-mode). 
+### dev Mode (deprecated)
 One of the great strengths of GWT is the use of Eclipse as a Java source-level debugging environment. To enjoy this feature, launch the SailingServer launch config appropriate for your environment (Proxy / No Proxy), then launch the SailingGWT launch configuration in debug mode. After a while it will show a "Development Mode" view that shows all entry points that have been initialized. Double-click on the one you want to debug, and your default browser (hopefully FireFox, because with other browsers the GWT debug plugin tends to be not very stable or not even present) will open.
 
 You can set breakpoints in your GWT Java code and inspect values for suspended threads as usual for any Java development.

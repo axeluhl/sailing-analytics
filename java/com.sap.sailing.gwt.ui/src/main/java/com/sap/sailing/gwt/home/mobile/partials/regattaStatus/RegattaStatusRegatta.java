@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView.RegattaListItem;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RegattaStatusRegatta extends Composite implements IsMobileSection, RegattaListItem {
 
@@ -47,9 +48,11 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection, 
     }
     
     public void addRaces(Set<LiveRaceDTO> races) {
+        final PaywallResolver paywallResolver = new PaywallResolver(presenter.getUserService(), 
+                presenter.getSubscriptionServiceFactory());
         races.stream()
                 .map(race -> new RegattaStatusRace(race, presenter::getRaceViewerURL, r -> presenter
-                        .getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), getFleetName(race))))
+                        .getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), getFleetName(race)), paywallResolver))
                 .forEach(itemContainerUi::addContent);
         headerUi.setLabelType(LabelType.LIVE);
     }

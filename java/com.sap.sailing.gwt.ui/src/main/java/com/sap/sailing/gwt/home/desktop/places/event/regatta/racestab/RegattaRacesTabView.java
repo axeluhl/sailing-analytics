@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
     
@@ -277,7 +278,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     private class DesktopRegattaCompetitionPresenter extends RegattaCompetitionPresenter {
         public DesktopRegattaCompetitionPresenter() {
-            super(compFormatContainerUi);
+            super(compFormatContainerUi, new PaywallResolver(currentPresenter.getUserService(), 
+                    currentPresenter.getSubscriptionServiceFactory()));
         }
         
         @Override

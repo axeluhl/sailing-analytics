@@ -66,7 +66,7 @@ public abstract class AbstractJaxRsApiTest {
         service.getDB().drop();
         xrrScoreCorrectionProvider = new ScoreCorrectionProviderImpl(mock(ResultDocumentProvider.class), ParserFactory.INSTANCE);
         racingEventService = Mockito.spy(new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
-                new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false));
+                /* sensorFixStore */ null, new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false));
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();

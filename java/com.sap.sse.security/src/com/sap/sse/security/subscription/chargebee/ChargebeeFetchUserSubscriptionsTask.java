@@ -46,15 +46,15 @@ public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptio
                 final ChargebeeSubscription subscription = sub.toSubscription(chargebeeApiServiceParams.getSubscriptionPlanProvider());
                 final String customerId = subscription.getCustomerId();
                 final List<Subscription> list;
-                if(userSubscriptions.containsKey(customerId)) {
+                if (userSubscriptions.containsKey(customerId)) {
                     list = userSubscriptions.get(customerId);
-                }else {
+                } else {
                     list = new ArrayList<>();
                     userSubscriptions.put(customerId, list);
                 }
                 list.add(subscription);
             }
-        }else { 
+        } else { 
             // An error might have occurred, nullifying result;
             userSubscriptions = null;
             onDone();
