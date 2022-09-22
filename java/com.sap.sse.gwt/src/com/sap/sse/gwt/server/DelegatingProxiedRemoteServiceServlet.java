@@ -17,8 +17,7 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.sap.sse.common.TimePoint;
 
 public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemoteServiceServlet {
-    private static final Logger logger = Logger.getLogger(DelegatingProxiedRemoteServiceServlet.class.getName())
-            ;
+    private static final Logger logger = Logger.getLogger(DelegatingProxiedRemoteServiceServlet.class.getName());
     private static final long serialVersionUID = -5543378343472849437L;
 
     /**
