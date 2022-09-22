@@ -23,7 +23,8 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 1. Git Account
    The primary Git repository for the project is hosted on sapsailing.com. It is mirrored on an hourly basis into SAP's internal Git/Gerrit repository, but branches from the external Git end up under the remote `sapsailing.com` in the internal repository, thus do not automatically merge into their branch counterparts. Conversely, commits pushed onto branches of the SAP-internal Gerrit will not by themselves end up on the external Git at sapsailing.com.
 
-   - For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+   - For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).  
+   Note: If you want to use the ssh-key in the context of our solution, it has to be in the PEM format, therefore add the parameter `-m PEM` to the ssh-keygen command when you are creating a new one. Example: `ssh-keygen -t rsa -b 4096 -C "test@test.com" -m PEM`. When using an existing key with the OpenSSH format, you can convert your private key with the command `ssh-keygen -p -m PEM -f <path-to-private-key>`, the public key can stay as it was. Make sure to set a password for your key.
    - Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: [https://git.wdf.sap.corp:8080/](https://git.wdf.sap.corp:8080/); ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 
 2. Bugzilla
@@ -51,7 +52,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 7. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
 8.  Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
     A setup guide for windows can be found on this webpage: [https://maven.apache.org/guides/getting-started/windows-prerequisites.html](https://maven.apache.org/guides/getting-started/windows-prerequisites.html)
-9.  GWT SDK 2.9.0 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
+9.  GWT SDK 2.10.0 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
     Download the gwt sdk and extract it to a location of your preference (e.g. windows `C:\Program Files\gwt`)
 10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
     Make sure that the environment variable `ANDROID_HOME` is set (e.g. Windows C:\Users\\**'user'**\AppData\Local\Android\Sdk )
@@ -108,6 +109,7 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
 
 - In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
 - In "General ⇒ Editors ⇒ Text Editors" check Insert Spaces for Tabs
+- In "General ⇒ Editors ⇒ Text Editors ⇒ Quick Diff" change the reference source from 'Version on Disk' to 'A Git Revision'. If you like other colours for marking diffs change them here. (Example: Changes = Yellow, Additions = Green, Deletions = Red)
 - In "GWT ⇒ Errors/Warnings" set "Missing SDK" to "Ignore" 
 - In "GWT ⇒ GWT Settings ⇒ Add..." add the GWT SDK 
 - In "Java ⇒ Build Path ⇒ Classpath Variables" create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
@@ -149,8 +151,9 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
    - In the list on the left, click on "Connectors"
    - For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL [http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php](http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php)(all other required information will be filled in automatically)
    - Press "List Races"
-
+6. Further useful launch configurations
    - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window ⇒ Perspective ⇒ Open Perspective ⇒ Profiling)
+   - Debugging gwt: For further instructions please see [here](./development/super-dev-mode)
 
 ### Build for deployment
 Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.

@@ -68,6 +68,11 @@ The image has been crafted specifically to contain the tools required for the bu
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/hudson_slave_setup/* /tmp
    sudo -i
+   # For Ubuntu 22.x install libssl1.1:
+   wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+   dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+   rm libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+   # For all O/S versions:
    dd if=/dev/zero of=/var/cache/swapfile bs=1G count=20
    chmod 600 /var/cache/swapfile
    mkswap /var/cache/swapfile
@@ -126,6 +131,8 @@ The image has been crafted specifically to contain the tools required for the bu
    sudo -u sailing ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
    sudo -u sailing git clone trac@sapsailing.com:/home/trac/git /home/sailing/code
    sudo -u hudson mkdir /home/hudson/.m2
+   chmod a+r /home/sailing
+   chmod a+x /home/sailing
    sudo -u hudson cp /home/sailing/code/toolchains.xml /home/hudson/.m2
    sudo -u hudson ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
    echo "export JAVA_HOME=/opt/sapjvm_8" >/etc/profile.d/sapjvm.sh

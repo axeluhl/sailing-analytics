@@ -55,7 +55,7 @@ public interface SharedLandscapeConstants {
     String ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME = "ARCHIVE";
 
     /**
-     * Value of the {@link #SAILSAILING_ANALYTICS_APPLICATION_HOST_TAGING_ANALYTICS_APPLICATION_HOST_TAG} tag
+     * Value of the {@link #SAILING_ANALYTICS_APPLICATION_HOST_TAG} tag
      * for hosts expected to run more than one dedicated application process.
      */
     String MULTI_PROCESS_INSTANCE_TAG_VALUE = "___multi___";

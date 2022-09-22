@@ -364,6 +364,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private final AsyncActionsExecutor asyncActionsExecutor;
 
+    
     /**
      * See also {@link #getDefaultSortColumn()}. If no other column is explicitly selected for sorting and this
      * attribute holds a non-<code>null</code> string identifying a valid race by name that is represented in this

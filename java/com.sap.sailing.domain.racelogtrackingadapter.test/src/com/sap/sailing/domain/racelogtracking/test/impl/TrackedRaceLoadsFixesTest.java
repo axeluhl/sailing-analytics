@@ -3,9 +3,11 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -73,29 +75,23 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-
         DeviceIdentifier markDevice = new SmartphoneImeiIdentifier("imei2");
         defineMarksOnRegattaLog(mark, mark2);
-
         map(comp, device, 0, 10000);
         map(mark, markDevice, 0, 10000);
-
         store.storeFix(device, createFix(100, 10, 20, 30, 40)); // before
         store.storeFix(device, createFix(1100, 10, 20, 30, 40)); // in
         store.storeFix(device, createFix(2100, 10, 20, 30, 40)); // after
         store.storeFix(markDevice, createFix(100, 10, 20));
         store.storeFix(markDevice, createFix(1100, 10, 20));
         store.storeFix(markDevice, createFix(2100, 10, 20));
-
         final DynamicTrackedRaceImpl trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
-        new FixLoaderAndTracker(trackedRace, store, null);
-
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         // now extend the tracking interval of the tracked race and assert that the additional fixes are loaded
@@ -115,32 +111,27 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         defineMarksOnRegattaLog(mark, mark2);
         DeviceIdentifier device2 = new SmartphoneImeiIdentifier("imei2");
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
-
         map(comp, device, 0, 20000);
         map(comp2, device2, 0, 600);
         // reuse device for two marks
         map(mark, device3, 0, 600);
         map(mark2, device3, 0, 600);
-
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
         store.storeFix(device, createFix(200, 10, 20, 30, 40));
         store.storeFix(device2, createFix(100, 10, 20, 30, 40));
         store.storeFix(device3, createFix(100, 10, 20));
         store.storeFix(device3, createFix(100, 10, 20));
-
+        final List<GPSFixMoving> fixes = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
-            store.storeFix(device, createFix(i + 1000, 10, 20, 30, 40));
+            fixes.add(createFix(i + 1000, 10, 20, 30, 40));
         }
-
+        store.storeFixes(device, fixes, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
-
-        new FixLoaderAndTracker(trackedRace, store, null);
-        
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         raceLog.add(new RaceLogStartOfTrackingEventImpl(TimePoint.BeginningOfTime, author, 0));
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
-
         testNumberOfRawFixes(trackedRace.getTrack(comp), 10002);
         testNumberOfRawFixes(trackedRace.getTrack(comp2), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
@@ -529,7 +520,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        new FixLoaderAndTracker(trackedRace, store, null);
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         for(Consumer<DynamicTrackedRace> afterTrackingStarted : afterTrackingStartedConsumers) {
             trackedRace.waitForLoadingToFinish();
             afterTrackingStarted.accept(trackedRace);

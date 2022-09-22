@@ -140,14 +140,6 @@ public interface RankingMetric extends Serializable {
         Competitor getLeaderInLegByCalculatedTime(Leg leg, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     }
     
-    public interface LegRankingInfo extends Timed, Serializable {
-        /**
-         * The time point for which this ranking information is valid
-         */
-        @Override
-        TimePoint getTimePoint();
-    }
-
     /**
      * @return the tracked race to which this ranking metric is specific
      */
