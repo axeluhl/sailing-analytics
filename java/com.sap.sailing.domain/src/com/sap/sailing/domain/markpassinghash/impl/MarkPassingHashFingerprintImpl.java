@@ -48,8 +48,9 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
     }
 
     public MarkPassingHashFingerprintImpl(JSONObject json) {
-        this.calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION.toString())).intValue();
-        this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH.toString())).intValue();
+        this.calculatorVersion = (Integer) json.get(JSON_FIELDS.CALCULATOR_VERSION);
+        //this.calculatorVersoin = (Integer) json.get(JSON_FIELDS.CALCULATO_VERSION); --> old Version
+        this.competitorHash = (Integer) json.get(JSON_FIELDS.COMPETITOR_HASH);
         final Number startOfTrackingAsNumber = (Number) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.toString());
         this.startOfTracking = startOfTrackingAsNumber==null?null:TimePoint.of(startOfTrackingAsNumber.longValue());
         final Number endOfTrackingAsNumber = (Number) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS.toString());
@@ -60,9 +61,9 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
         this.startTimeFromRaceLog = startTimeFromRaceLogAsNumber==null?null:TimePoint.of(startTimeFromRaceLogAsNumber.longValue());
         final Number finishTimeFromRaceLogAsNumber = (Number) json.get(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS.toString());
         this.finishTimeFromRaceLog = finishTimeFromRaceLogAsNumber==null?null:TimePoint.of(finishTimeFromRaceLogAsNumber.longValue());
-        this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH.toString())).intValue();
-        this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.toString())).intValue();
-        this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.toString())).intValue();
+        this.waypointsHash = (Integer) json.get(JSON_FIELDS.WAYPOINTS_HASH);
+        this.numberOfGPSFixes = (Integer) json.get(JSON_FIELDS.NUMBEROFGPSFIXES);
+        this.gpsFixesHash = (Integer) json.get(JSON_FIELDS.GPSFIXES_HASH);
     }
 
     @Override
