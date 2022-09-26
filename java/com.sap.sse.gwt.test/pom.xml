@@ -11,7 +11,7 @@
   <packaging>eclipse-test-plugin</packaging>
   <dependencies>
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-dev</artifactId>
       <version>${gwt.version}</version>
     </dependency>
