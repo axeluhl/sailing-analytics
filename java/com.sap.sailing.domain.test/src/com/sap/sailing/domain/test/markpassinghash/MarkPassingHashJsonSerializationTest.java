@@ -76,7 +76,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         assertTrue(fingerprint1.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();
         MarkPassingHashFingerprint output1 = factory.fromJson(json1);
-        assertFalse("Original and de-serialized copy are equal", output1.matches(trackedRace1));
+        assertTrue("Original and de-serialized copy are equal",  output1.matches(trackedRace1));
     }
 
     @Test
