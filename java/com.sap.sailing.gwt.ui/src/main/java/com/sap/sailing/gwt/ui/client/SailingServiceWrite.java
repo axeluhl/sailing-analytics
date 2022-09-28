@@ -378,6 +378,9 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
             String regattaName) throws UnauthorizedException;
 
+    StrippedLeaderboardDTO createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName);
+    
     StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds) throws UnauthorizedException;
 

@@ -818,11 +818,10 @@ public class EventsResource extends AbstractSailingServerResource {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaName), regattaName,
                 new Callable<RegattaLeaderboard>() {
-
                     @Override
                     public RegattaLeaderboard call() throws Exception {
                         return getService()
-                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
+                                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
                     }
                 });
     }

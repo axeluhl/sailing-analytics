@@ -845,7 +845,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         row.totalDurationFoiledInSeconds = totalDurationFoiled==null?null:totalDurationFoiled.asSeconds();
     }
 
-    private LeaderboardDTOCache getLeaderboardDTOCache() {
+    protected LeaderboardDTOCache getLeaderboardDTOCache() {
         LeaderboardDTOCache result = this.leaderboardDTOCache;
         if (result == null) {
             synchronized (this) {

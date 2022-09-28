@@ -356,8 +356,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboardWithEliminations(String name, String displayName,
-            String regattaName,
-            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+            String regattaName, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+
+    void createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName,
+            AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 

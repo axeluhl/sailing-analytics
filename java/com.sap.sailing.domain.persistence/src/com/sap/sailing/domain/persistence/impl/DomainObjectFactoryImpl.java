@@ -233,6 +233,7 @@ import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithC
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -491,7 +492,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = leaderboardRegistry.getLeaderboardByName(leaderboardName);
         }
         if (result == null) {
-            String wrappedRegattaLeaderboardName = (String) dbLeaderboard
+            final String wrappedRegattaLeaderboardName = (String) dbLeaderboard
                     .get(FieldNames.WRAPPED_REGATTA_LEADERBOARD_NAME.name());
             if (wrappedRegattaLeaderboardName != null) {
                 result = loadRegattaLeaderboardWithEliminations(dbLeaderboard, leaderboardName,
@@ -510,7 +511,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         result = loadFlexibleLeaderboard(dbLeaderboard, resultDiscardingRule);
                     } else {
                         result = loadRegattaLeaderboard(leaderboardName, regattaName, dbLeaderboard,
-                                resultDiscardingRule, regattaRegistry);
+                                resultDiscardingRule, regattaRegistry, leaderboardRegistry);
                     }
                 }
                 if (result != null) {
@@ -590,14 +591,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private RegattaLeaderboard loadRegattaLeaderboard(String leaderboardName, String regattaName,
             Document dbLeaderboard, ThresholdBasedResultDiscardingRule resultDiscardingRule,
-            RegattaRegistry regattaRegistry) {
-        RegattaLeaderboard result = null;
+            RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
+        final RegattaLeaderboard result;
         Regatta regatta = regattaRegistry.getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
             logger.info("Couldn't find regatta " + regattaName
                     + " for corresponding regatta leaderboard. Not loading regatta leaderboard.");
+            result = null;
         } else {
-            result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
+            final String otherTieBreakingLeaderboardName = (String) dbLeaderboard.get(FieldNames.OTHER_TIEBREAKING_LEADERBOARD_NAME.name());
+            if (otherTieBreakingLeaderboardName == null) {
+                result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
+            } else {
+                result = new RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl(regatta, resultDiscardingRule,
+                        () -> (RegattaLeaderboard) leaderboardRegistry.getLeaderboardByName(otherTieBreakingLeaderboardName));
+            }
         }
         return result;
     }
