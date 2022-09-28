@@ -121,7 +121,8 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
         return optionalPreferredInstanceToDeployTo.map(host->{
             logger.info("Checking preferred instance "+host+" for eligibility");
             try {
-                return replicaSet.isEligibleForDeployment(host, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)
+                return landscapeService.isEligibleForDeployment(host, replicaSet.getServerName(), replicaSet.getPort(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
+                        optionalKeyName, privateKeyEncryptionPassphrase)
                     && isAcceptableAvailabilityZone(host.getAvailabilityZone(), replicaSet) ? host : null;
             } catch (Exception e) {
                 throw new RuntimeException(e);

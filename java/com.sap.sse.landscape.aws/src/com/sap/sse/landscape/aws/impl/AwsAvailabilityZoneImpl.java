@@ -40,4 +40,8 @@ public class AwsAvailabilityZoneImpl extends NamedImpl implements AwsAvailabilit
         return region;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() == null ? getId() : super.toString();
+    }
 }
