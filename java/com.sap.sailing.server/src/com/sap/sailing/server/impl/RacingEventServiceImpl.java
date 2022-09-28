@@ -2095,7 +2095,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                     new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isFleetsCanRunInParallel(), s.isStartsWithZeroScore(), s
                             .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
                             : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s
-                            .hasSplitFleetContiguousScoring(), s.getMaximumNumberOfDiscards()));
+                            .hasSplitFleetContiguousScoring(), s.getMaximumNumberOfDiscards(), s.isOneAlwaysStaysOne()));
         }
         return new RegattaCreationParametersDTO(result);
     }

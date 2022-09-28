@@ -116,7 +116,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         master.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
                 /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
-                Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
+                /* oneAlwaysStaysOne */ false, Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
         racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000,
                 new DefaultRaceTrackingHandler());
     }

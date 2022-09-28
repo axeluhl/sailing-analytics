@@ -411,7 +411,7 @@ public class RegattaDetailsComposite extends Composite {
                                                         seriesDescriptor.isStartsWithZeroScore(),
                                                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
                                                         seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
-                                                        series.getFleets(), new AsyncCallback<Void>() {
+                                                        seriesDescriptor.isOneAlwaysStaysOne(), series.getFleets(), new AsyncCallback<Void>() {
                                                     @Override
                                                     public void onFailure(Throwable caught) {
                                                         errorReporter.reportError("Error trying to update series " + series.getName() + ": "

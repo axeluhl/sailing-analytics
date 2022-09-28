@@ -1426,11 +1426,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Number maximumNumberOfDiscardsAsObject = (Number) dbSeries
                 .get(FieldNames.SERIES_MAXIMUM_NUMBER_OF_DISCARDS.name());
         final Integer maximumNumberOfDiscards = maximumNumberOfDiscardsAsObject == null ? null : maximumNumberOfDiscardsAsObject.intValue();
-        Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
-        Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries
+        final Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
+        final Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries
                 .get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
-        Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries
+        final Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries
                 .get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
+        final Boolean oneAlwaysStaysOne = (Boolean) dbSeries.get(FieldNames.SERIES_ONE_ALWAYS_STAYS_ONE.name());
         @SuppressWarnings("unchecked")
         final Iterable<Document> dbFleets = (Iterable<Document>) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         List<Fleet> fleets = loadFleets(dbFleets);
@@ -1453,6 +1454,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         series.setMaximumNumberOfDiscards(maximumNumberOfDiscards);
         if (firstColumnIsNonDiscardableCarryForward != null) {
             series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
+        }
+        if (oneAlwaysStaysOne != null) {
+            series.setOneAlwaysStaysOne(oneAlwaysStaysOne);
         }
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;

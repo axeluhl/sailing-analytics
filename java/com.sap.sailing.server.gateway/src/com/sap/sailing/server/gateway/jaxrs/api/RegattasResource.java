@@ -2645,14 +2645,15 @@ public class RegattasResource extends AbstractSailingServerResource {
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
-            String seriesName = (String) requestObject.get("seriesName");
-            String seriesNameNew = (String) requestObject.get("seriesNameNew");
-            boolean isMedal = (boolean) requestObject.get("isMedal");
-            boolean isFleetsCanRunInParallel = (boolean) requestObject.get("isFleetsCanRunInParallel");
-            boolean startsWithZeroScore = (boolean) requestObject.get("startsWithZeroScore");
-            boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
+            final String seriesName = (String) requestObject.get("seriesName");
+            final String seriesNameNew = (String) requestObject.get("seriesNameNew");
+            final boolean isMedal = (boolean) requestObject.get("isMedal");
+            final boolean isFleetsCanRunInParallel = (boolean) requestObject.get("isFleetsCanRunInParallel");
+            final boolean startsWithZeroScore = (boolean) requestObject.get("startsWithZeroScore");
+            final boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
                     .get("firstColumnIsNonDiscardableCarryForward");
-            boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
+            final boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
+            final boolean oneAlwaysStaysOne = (boolean) requestObject.get("oneAlwaysStaysOne");
 
             Integer maximumNumberOfDiscards = null;
             if (requestObject.containsKey("maximumNumberOfDiscards")) {
@@ -2680,7 +2681,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             getService().apply(new UpdateSeries(regatta.getRegattaIdentifier(), seriesName, seriesNameNew, isMedal,
                     isFleetsCanRunInParallel, resultDiscardingThresholds, startsWithZeroScore,
                     firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, maximumNumberOfDiscards,
-                    fleets));
+                    oneAlwaysStaysOne, fleets));
         } else {
             throw new IllegalStateException("RegattaName could not be resolved to regatta " + regattaName);
         }

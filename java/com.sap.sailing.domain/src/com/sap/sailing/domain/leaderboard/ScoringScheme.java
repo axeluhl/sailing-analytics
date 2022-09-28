@@ -187,4 +187,27 @@ public interface ScoringScheme extends Serializable {
         }
         return factor;
     }
+    
+    /**
+     * Computes a score corrected by a {@link #getScoreFactor(RaceColumn) column factor} and potentially other
+     * column-specific rules, such as that despite multiplying, the original score 1 is to map to 1 again.
+     * Respects {@link RaceColumn#isOneAlwaysStaysOne()} on the {@code raceColumn}.
+     * 
+     * @see #getOriginalScoreFromScoreScaledByFactor(RaceColumn, double)
+     * @see ScoringSchemeType#getScaledScore(double, double, boolean)
+     */
+    default double getScoreScaledByFactor(RaceColumn raceColumn, double originalScore) {
+        return ScoringSchemeType.getScaledScore(getScoreFactor(raceColumn), originalScore, raceColumn.isOneAlwaysStaysOne());
+    }
+    
+    /**
+     * "Un-scales" a score; the inverse of {@link #getScoreScaledByFactor(RaceColumn, double)}. Respects
+     * {@link RaceColumn#isOneAlwaysStaysOne()} on the {@code raceColumn}.
+     * 
+     * @see #getScoreScaledByFactor(RaceColumn, double)
+     * @see ScoringSchemeType#getUnscaledScore(double, double, boolean)
+     */
+    default double getOriginalScoreFromScoreScaledByFactor(RaceColumn raceColumn, double scaledScore) {
+        return ScoringSchemeType.getUnscaledScore(getScoreFactor(raceColumn), scaledScore, raceColumn.isOneAlwaysStaysOne());
+    }
 }

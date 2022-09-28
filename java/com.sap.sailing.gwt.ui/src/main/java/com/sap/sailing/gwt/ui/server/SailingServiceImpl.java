@@ -985,7 +985,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(), series.isFleetsCanRunInParallel(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
                         series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                        series.getMaximumNumberOfDiscards());
+                        series.getMaximumNumberOfDiscards(), series.isOneAlwaysStaysOne());
         return result;
     }
 
@@ -1003,7 +1003,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     raceColumn.isMedalRace(), raceColumn.getExplicitFactor(),
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                    raceColumn instanceof MetaLeaderboardColumn);
+                    raceColumn instanceof MetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             raceColumnDTOs.add(raceColumnDTO);
         }
         return raceColumnDTOs;
@@ -2492,7 +2492,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         raceColumn.getExplicitFactor(), leaderboard.getScoringScheme().getScoreFactor(raceColumn),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO, raceColumn instanceof MetaLeaderboardColumn);
+                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO, raceColumn instanceof MetaLeaderboardColumn,
+                        raceColumn.isOneAlwaysStaysOne());
                 final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 final RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
                     new RaceLogTrackingStateAnalyzer(raceLog).analyze();
@@ -4142,11 +4143,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     private SeriesParameters getSeriesParameters(SeriesDTO seriesDTO) {
-        SeriesParameters series = new SeriesParameters(false, false, false, null, seriesDTO.getMaximumNumberOfDiscards());
-        series.setFirstColumnIsNonDiscardableCarryForward(seriesDTO.isFirstColumnIsNonDiscardableCarryForward());
-        series.setHasSplitFleetContiguousScoring(seriesDTO.hasSplitFleetContiguousScoring());
-        series.setStartswithZeroScore(seriesDTO.isStartsWithZeroScore());
-        series.setDiscardingThresholds(seriesDTO.getDiscardThresholds());
+        SeriesParameters series = new SeriesParameters(seriesDTO.isFirstColumnIsNonDiscardableCarryForward(),
+                seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.isStartsWithZeroScore(),
+                seriesDTO.getDiscardThresholds(), seriesDTO.getMaximumNumberOfDiscards(),
+                seriesDTO.isOneAlwaysStaysOne());
         return series;
     }
     
@@ -4157,7 +4157,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 seriesCreationParams.put(series.getName(), new SeriesCreationParametersDTO(series.getFleets(),
                 false, true, seriesParameters.isStartswithZeroScore(), seriesParameters.isFirstColumnIsNonDiscardableCarryForward(),
                         seriesParameters.getDiscardingThresholds(), seriesParameters.isHasSplitFleetContiguousScoring(),
-                        seriesParameters.getMaximumNumberOfDiscards()));
+                        seriesParameters.getMaximumNumberOfDiscards(), seriesParameters.isOneAlwaysStaysOne()));
             }
         return seriesCreationParams;
     }

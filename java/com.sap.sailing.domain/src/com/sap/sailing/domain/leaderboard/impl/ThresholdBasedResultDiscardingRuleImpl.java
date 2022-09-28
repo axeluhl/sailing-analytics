@@ -100,7 +100,7 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                     sortedRaces.add(raceColumn);
                     final Double totalPoints = totalPointsSupplier.apply(raceColumn);
                     totalPointsForCompetitorPerColumn.put(raceColumn,
-                            totalPoints == null ? null : (totalPoints * scoringScheme.getScoreFactor(raceColumn)));
+                            totalPoints == null ? null : scoringScheme.getScoreScaledByFactor(raceColumn, totalPoints));
                 }
             }
             result = new HashSet<RaceColumn>();

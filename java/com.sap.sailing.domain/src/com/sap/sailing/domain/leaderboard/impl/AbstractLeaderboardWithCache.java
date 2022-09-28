@@ -419,7 +419,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                    isMetaLeaderboardColumn);
+                    isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
                 calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
             }
@@ -438,7 +438,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), getScoringScheme().getScoreFactor(raceColumn),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
+                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             }
             Future<List<CompetitorDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(

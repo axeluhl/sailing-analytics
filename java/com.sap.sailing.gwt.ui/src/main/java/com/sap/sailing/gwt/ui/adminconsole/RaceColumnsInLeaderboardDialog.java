@@ -110,7 +110,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         int racesCount = raceNameEntryFields.size();
         for(int i = 0; i < racesCount; i++) {
             String raceColumnName = raceNameEntryFields.get(i).getValue();
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(raceColumnName);
+            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(raceColumnName, /* oneAlwaysStaysOne */ false);
             raceColumnDTO.setMedalRace(isMedalRaceCheckboxes.get(i).getValue());
             racesWithFleet.add(raceColumnDTO);
         }

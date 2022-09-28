@@ -74,7 +74,7 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
     private int getWins(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> scores) {
         int wins = 0;
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> score : scores) {
-            if (Math.abs(score.getB() - maxPoints * getScoreFactor(score.getA())) < 0.0000001) {
+            if (Math.abs(score.getB() - getScoreScaledByFactor(score.getA(), maxPoints)) < 0.0000001) {
                 wins++;
             }
         }

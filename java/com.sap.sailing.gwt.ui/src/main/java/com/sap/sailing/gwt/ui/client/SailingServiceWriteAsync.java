@@ -480,7 +480,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
-            List<FleetDTO> fleets, AsyncCallback<Void> callback);
+            boolean oneAlwaysStaysOne, List<FleetDTO> fleets, AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
