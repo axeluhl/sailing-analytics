@@ -137,4 +137,8 @@ public class SeriesDTO extends NamedDTO {
     public boolean isOneAlwaysStaysOne() {
         return oneAlwaysStaysOne;
     }
+    
+    public void setOneAlwaysStaysOne(boolean oneAlwaysStaysOne) {
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
+    }
 }
