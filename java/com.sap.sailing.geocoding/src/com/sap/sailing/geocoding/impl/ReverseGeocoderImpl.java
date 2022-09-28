@@ -14,6 +14,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,10 +46,12 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private final int XKM_RADIUS = 5;
     private final int ROWS_PER_XKM_RADIUS = 15;
     
-    private final int MAX_ROW_NUMBER = 1000;
+    private final int MAX_ROW_NUMBER = 500;
     private final int MAX_RADIUS = 300;
 
     private QuadTree<Util.Triple<Position, Double, List<Placemark>>> cache = new QuadTree<Util.Triple<Position,Double,List<Placemark>>>();;
+    
+    private static final Logger logger = Logger.getLogger(ReverseGeocoderImpl.class.getName());
 
     @Override
     public Placemark getPlacemarkNearest(Position position) throws IOException, ParseException {
@@ -135,11 +139,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     public Placemark getPlacemark(String name, Comparator<Placemark> comp) throws IOException, ParseException {
         StringBuilder url = new StringBuilder(SEARCH_BY_NAME_SERVICE);
         url.append("name=" + URLEncoder.encode(name, "UTF-8"));
-        URLConnection connection = addUsernameParameterAndConnect(url);
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
-        final JSONParser parser = new JSONParser();
-        final JSONObject obj = (JSONObject) parser.parse(in);
-        final JSONArray geonames = (JSONArray) obj.get("geonames");
+        final JSONArray geonames = submitGeonamesRequestForJSONArrayResult(url);
         return geonames.stream().map(o->jsonToPlacemark((JSONObject) o)).sorted(comp).findFirst().orElse(null);
     }
 
@@ -242,14 +242,8 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     }
 
     private JSONArray callNearestService(Position position) throws MalformedURLException, IOException, ParseException {
-        StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
-        url.append("lat=" + Double.toString(position.getLatDeg()));
-        url.append("&lng=" + Double.toString(position.getLngDeg()));
-        URLConnection connection = addUsernameParameterAndConnect(url);
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(in);
-        JSONArray geonames = (JSONArray) obj.get("geonames");
+        StringBuilder url = generateRequestUrlNearbyPlaceService(position);
+        JSONArray geonames = submitGeonamesRequestForJSONArrayResult(url);
         return geonames;
     }
 
@@ -261,16 +255,33 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
     private JSONArray callNearbyService(Position position, double radius, int maxRows) throws MalformedURLException,
             IOException, ParseException {
+        StringBuilder url = generateRequestUrlNearbyPlaceService(position, radius, maxRows);
+        JSONArray geonames = submitGeonamesRequestForJSONArrayResult(url);
+        return geonames;
+    }
+    
+    private StringBuilder generateRequestUrlNearbyPlaceService(Position position) {
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
         url.append("lat=" + Double.toString(position.getLatDeg()));
         url.append("&lng=" + Double.toString(position.getLngDeg()));
+        return url;
+    }
+    
+    private StringBuilder generateRequestUrlNearbyPlaceService(Position position, double radius, int maxRows) {
+        StringBuilder url = generateRequestUrlNearbyPlaceService(position);
         url.append("&radius=" + Double.toString(radius));
         url.append("&maxRows=" + Integer.toString(maxRows));
+        return url;
+    }
+    
+    private JSONArray submitGeonamesRequestForJSONArrayResult(StringBuilder url) throws MalformedURLException, IOException, ParseException {
         URLConnection connection = addUsernameParameterAndConnect(url);
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(in);
         JSONArray geonames = (JSONArray) obj.get("geonames");
+        if (geonames == null)
+            logger.log(Level.WARNING, "Returning null value for geonames object: " + obj.toJSONString());
         return geonames;
     }
 
