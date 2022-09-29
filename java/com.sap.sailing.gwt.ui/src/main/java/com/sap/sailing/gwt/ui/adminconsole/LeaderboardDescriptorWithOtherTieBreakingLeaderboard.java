@@ -13,7 +13,7 @@ public class LeaderboardDescriptorWithOtherTieBreakingLeaderboard extends Leader
     
     public LeaderboardDescriptorWithOtherTieBreakingLeaderboard(String name, String displayName, ScoringSchemeType scoringScheme,
             int[] discardThresholds, String regattaName, Iterable<UUID> courseAreaIds, String otherTieBreakingLeaderboardName) {
-        super(otherTieBreakingLeaderboardName, displayName, scoringScheme, discardThresholds, regattaName, courseAreaIds);
+        super(name, displayName, scoringScheme, discardThresholds, regattaName, courseAreaIds);
         this.otherTieBreakingLeaderboardName = otherTieBreakingLeaderboardName;
     }
     
