@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
@@ -109,7 +108,6 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
     /**
      * Notice of Race (NOR) section 13.5 specifies for the series score: "If a tie still remains, it shall be broken in
      * favor of the boat that had the better place at the last Regatta sailed."
-     * @throws NoWindException 
      */
     @Override
     public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) {

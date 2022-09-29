@@ -1183,7 +1183,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     @Override
-    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
     }
 

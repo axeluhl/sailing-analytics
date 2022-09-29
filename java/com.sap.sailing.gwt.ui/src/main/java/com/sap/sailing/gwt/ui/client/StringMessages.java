@@ -2415,4 +2415,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String failedFetchingSelfServicePortalSession();
     String oneAlwaysStaysOne();
     String otherTieBreakingLeaderboard();
+    String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboard();
+    String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboardDescription();
 }
