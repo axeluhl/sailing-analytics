@@ -11,7 +11,7 @@ public class RegattaLeaderboardWithOtherTieBreakingLeaderboardEditDialog extends
     public RegattaLeaderboardWithOtherTieBreakingLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
             LeaderboardDescriptorWithOtherTieBreakingLeaderboard leaderboardDescriptor, StringMessages stringMessages, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptorWithOtherTieBreakingLeaderboard> callback) {
-        super(stringMessages.editRegattaLeaderboard(), leaderboardDescriptor, otherExistingLeaderboards, existingRegattas, stringMessages, errorReporter, callback);
+        super(stringMessages.editRegattaLeaderboardWithOtherTieBreakingLeaderboard(), leaderboardDescriptor, otherExistingLeaderboards, existingRegattas, stringMessages, errorReporter, callback);
         displayNameTextBox = createTextBox(leaderboardDescriptor.getDisplayName());
         displayNameTextBox.setVisibleLength(50);
         regattaListBox = createSortedRegattaListBox(existingRegattas, leaderboardDescriptor.getRegattaName());

@@ -466,6 +466,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String createRegattaLeaderboardWithOtherTieBreakingLeaderboard();
     String editFlexibleLeaderboard();
     String editRegattaLeaderboard();
+    String editRegattaLeaderboardWithEliminations();
+    String editRegattaLeaderboardWithOtherTieBreakingLeaderboard();
     String defaultRegatta();
     String useOverallLeaderboard();
     String overallStandings();
