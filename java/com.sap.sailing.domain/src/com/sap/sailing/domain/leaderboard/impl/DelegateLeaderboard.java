@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -7,7 +8,9 @@ import java.util.function.Supplier;
 
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 
-public class DelegateLeaderboard {
+public class DelegateLeaderboard implements Serializable {
+    private static final long serialVersionUID = -1764036951368356044L;
+
     private RegattaLeaderboard delegateLeaderboard;
     
     private transient final Supplier<RegattaLeaderboard> delegateLeaderboardSupplier;
