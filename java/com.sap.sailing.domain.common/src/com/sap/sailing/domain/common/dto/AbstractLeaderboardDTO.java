@@ -36,6 +36,10 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
      * Set to the non-<code>null</code> regatta name if this DTO represents a <code>RegattaLeaderboard</code>.
      */
     public String regattaName;
+    /**
+     * Set if this DTO represents a {@code RegattaLeaderboardWithOtherTieBreakingLeaderboard}
+     */
+    private String otherTieBreakingLeaderboardName;
     public String displayName;
     public List<CourseAreaDTO> courseAreas;
     public ScoringSchemeType scoringScheme;
@@ -110,6 +114,14 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
         } else {
             return competitorDisplayNames.get(competitor);
         }
+    }
+    
+    public String getOtherTieBreakingLeaderboardName() {
+        return otherTieBreakingLeaderboardName;
+    }
+
+    public void setOtherTieBreakingLeaderboardName(String otherTieBreakingLeaderboardName) {
+        this.otherTieBreakingLeaderboardName = otherTieBreakingLeaderboardName;
     }
 
     /**
@@ -436,6 +448,11 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
             if (other.getName() != null)
                 return false;
         } else if (!getName().equals(other.getName()))
+            return false;
+        if (getOtherTieBreakingLeaderboardName() == null) {
+            if (other.getOtherTieBreakingLeaderboardName() != null)
+                return false;
+        } else if (!getOtherTieBreakingLeaderboardName().equals(other.getOtherTieBreakingLeaderboardName()))
             return false;
         if (races == null) {
             if (other.races != null)

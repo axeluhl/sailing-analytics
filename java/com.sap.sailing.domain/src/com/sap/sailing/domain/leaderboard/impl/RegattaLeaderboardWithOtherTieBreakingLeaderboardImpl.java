@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.AbstractScoreCorrectionListenerWithDefaultAction;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
@@ -38,5 +39,10 @@ public class RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl extends Regat
     @Override
     public RegattaLeaderboard getOtherTieBreakingLeaderboard() {
         return otherTieBreakingLeaderboardProvider.getDelegateLeaderboard();
+    }
+    
+    @Override
+    public LeaderboardType getLeaderboardType() {
+        return LeaderboardType.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
     }
 }

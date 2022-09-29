@@ -422,6 +422,25 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         });
                 dialog.show();
                 break;
+            case RegattaLeaderboardWithOtherTieBreakingLeaderboard:
+                dialog = new RegattaLeaderboardWithOtherTieBreakingLeaderboardEditDialog(Collections.unmodifiableCollection(otherExistingLeaderboard),
+                        Collections.unmodifiableCollection(allRegattas),
+                        new LeaderboardDescriptorWithOtherTieBreakingLeaderboard(
+                                leaderboardDTO.getName(), leaderboardDTO.displayName, /* scoringScheme is provided by regatta, not leaderboard */ null,
+                                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, Util.mapToArrayList(leaderboardDTO.courseAreas, CourseAreaDTO::getId),
+                                leaderboardDTO.getOtherTieBreakingLeaderboardName()),
+                        stringMessages, errorReporter, new DialogCallback<LeaderboardDescriptorWithOtherTieBreakingLeaderboard>() {
+                            @Override
+                            public void cancel() {
+                            }
+
+                            @Override
+                            public void ok(LeaderboardDescriptorWithOtherTieBreakingLeaderboard result) {
+                                updateLeaderboard(oldLeaderboardName, result);
+                            }
+                        });
+                dialog.show();
+                break;
             case RegattaLeaderboardWithEliminations:
                 dialog = new RegattaLeaderboardWithEliminationsEditDialog(sailingServiceWrite, userService,
                         Collections.unmodifiableCollection(otherExistingLeaderboard),
