@@ -1524,6 +1524,9 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                         final Regatta candidatesRegatta = ((RegattaLeaderboard) candidateForRemoval).getRegatta();
                         if (candidatesRegatta == regatta) {
                             leaderboardsToRemove.add(candidateForRemoval);
+                        } else if (candidateForRemoval instanceof RegattaLeaderboardWithOtherTieBreakingLeaderboard &&
+                                ((RegattaLeaderboardWithOtherTieBreakingLeaderboard) candidateForRemoval).getOtherTieBreakingLeaderboard().getRegatta() == regatta) {
+                            leaderboardsToRemove.add(candidateForRemoval);
                         }
                     }
                 }

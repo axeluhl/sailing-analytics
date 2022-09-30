@@ -246,7 +246,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * Removes the leaderboard specified by {@code leaderboardName} as well as all delegating leaderboards that reference it,
-     * in particular those {@link DelegatingRegattaLeaderboardWithCompetitorElimination} which which the leaderboard specified
+     * in particular those {@link DelegatingRegattaLeaderboardWithCompetitorElimination} for which the leaderboard specified
      * by {@code leaderboardName} was their underlying regatta leaderboard. If no leaderboard named as specified by the
      * {@code leaderboardName} parameter exists, this method has no effect.
      */
