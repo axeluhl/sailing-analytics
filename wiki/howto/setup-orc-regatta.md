@@ -65,6 +65,68 @@ Also note the tool tips on the options as you hover your pointer over each one o
 * ORC Performance Curve with Individual Implied Wind (<2015): The ranking is based on the implied wind achieved by each individual boat; corrected times are based on mapping those implied wind values to a time allowance based on a scratch boat's performance curve. By default, the scratch boat is selected as the one with the least GPH value but can be overruled by setting a scratch boat explicitly.
 * ORC Performance Curve (>=2015, leader as baseline): same as the previous one, only that by default the scratch boat is selected as the leader in the race. For implied wind values between six and twenty knots this will mean that the leader's corrected time equals its elapsed time.
 
+#### contiguous scoring
+
+Contiguous scoring makes it possible to compare competitors across fleets. In order to make the comparison possible the following assumptions must be met:
+
+- The competitors are sailing on the same course around the same marks
+- The conditions (wind, waves, tide, drift) are the same (or do not differ so much that a comparison is invalid).
+- All fleets sail the same number of races and have equal discarding rules
+
+The contiguous scoring satisfies the following requirements:
+
+- The ranking on the leaderboard of a fleet does not differ from the ranking on the contiguous leaderboard.
+
+The following describes how the comparisons are made for the different ranking metrics:
+
+##### One-Design
+Two alternatives:
+1. Pull back fleet
+   1. Calculate a VMG for each fleet
+      1. Min
+      2. Max
+      3. Avg
+      4. Median
+   2. Get the minimum of timesailed and time between the start of the fleets. Called timeOffset from now on.
+   3. Compute a fleet specific distance by $$ OffsetDistance = fleetVMG \cdot timeOffset $$
+   4. Pull back every competitor for the calculated distance. Also around the marks.
+   5. Compare all competitors by their newly calculated Position
+2. Time on Time and Distance like
+   1. For every competitor in a fleet compute the time needed to reach the leader in the fleet. When passing a mark anticipate same performance, by just adding the time the faster competitor spent on the leg to the calculated time.
+   2. Use this calculated Time as calcTime@fastest and apply the model of TimeOnTimeAndDistance.
+##### Time-on-Time/Time-on-Distance
+For the contigous scoring of Time on Time and Time on Distance races the following steps are performed:
+1. For each fleet compute the leaderboard for the current race.
+2. From the calculated leaderboards extract the calcTime@Fastest (Fastest references the competitor furthest ahead in the current race of the fleet) for each competitor in the fleet.
+3. For every competitor (currentComp) compute a stretch factor as follows:
+   $$ stretchFactor = \frac{calcTime@FastestOfCurrentComp}{timeSailedByFastestCompetitor} $$
+4. For each fleet determine the fastest Competitor (the fastest competitor is the competitor where following statement holds: sailedTime = calcTime@fastest)
+5. Order the fastest competitors by their windward Distance sailed. If multiple competitors sailed the same windward distance order them by their time sailed. In the following the fastest competitor of all competitors is called absoluteFastestCompetitor.
+6. For each fastest competitor compute the time that is needed to reach the position of absoluteFastestCompetitor. This time is named timeToAdd.
+7. Compute calcTime@absolouteFurthest ahead for each competitor as follows:
+   $$ calcTime@absolouteFurthest = calcTime@furthestAhead + (timeToAdd \cdot stretchFactor)$$
+8. Compute the leaderboard by ordering the competitors by their calcTime@absolouteFurthest
+
+###### Justification for the stretch factor
+
+The stretch factor is needed to map the current performance of a competitor to the distance between the fastest comp in fleet and absoluteFastestCompetitor.
+A simpler justification for the stretching factor is possible if it is omitted first:
+$$ calcTime@absolouteFurthest = calcTime@furthestAhead + timeToAdd $$
+In this calculation it is assumed that from the fastest competitors position onwards every competitor is sailing with the  performance of the fastest competitor in a fleet. If we proceed with this assumption the performance of the fastest competitor could heavely influence the assuemed performance of the hole fleet. Espespially if the gap between the fastest competitor and the rest of the fleet is rather big. This would lead to a non representetive order of precedence on the Leaderboard across fleets.
+To overcome this issue the stretchFactor is introduced wich is supposed to reflect the performance of a competitor in relation to the fastest competitor within a fleet. Therfor the ratio between the calcTime@fastest and timeSailedByFastestComp is computed. By this procedure the ToT and ToD Factor of the competitors are considerd.
+###### Further ideas:
+
+- instead of computeing the time to the absoluteFastestCompetitor based on the fastestCompetitor in a race compute it based on the median competitor or the slowest competitor (or offer these types as options). In order to offer these opton the following steps would need to change:
+  - Step 3. Instead of using the timeSailedByFastestCompetitor use the clacTime@fastest of the median or slowest competitor.
+  - Step 6. From the position of the fastest competitor in the race compute the timeToAdd based on the slowest or median competitor.
+
+
+##### ORC Performance Curve >= 2015
+For PCS >= 2015, the delta is between allowance and sailed time is formed for every competitor. Subsequently, the percentage of the course that the competitor has already sailed is recorded. Finally, it is determined how large the delta would be if the competitor would continue sailing with his current performance until he reaches the finish. These computed deltas are than used for comperrison in the leaderboard.
+
+##### ORC Performance Curve < 2015
+Just order the competitors across all fleets by teir implied wind. In order to compute the calculated Times the screatchboat needs to be synced across all fleets. This results in different claculated Times on the leaderboards but still results in a correct ranking.
+
 ### Managing Certificates
 
 Before performance curve scoring does anything useful, measurement certificates need to be imported and assigned to the competitors in the regatta. It is also possible to handle per-race exceptions in case the race committee decides that for a boat different allowance shall apply in one race but not in others. Reasons could range from accounting for damages to short-term changes to the boat's configuration or a "regatta" that consists of races run across an entire season with new certificates being issued before all races of the "regatta" have completed.
