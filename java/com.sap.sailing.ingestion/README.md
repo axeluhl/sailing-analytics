@@ -58,6 +58,7 @@ You have to make sure to go each of the projects and install them to your local 
 
 Use then the following command to build the package which can be deployed to AWS:
 ```
+cd java/com.sap.sailing.ingestion
 mvn clean -Dmaven.test.skip=true package
 ```
 This will produce a JAR file in the project's ``bin`` folder. Deploy it using the following command. Use the function name for ``${function-name}``, such as ``FixIngestion`` or ``EndpointRegistration``, respectively:
