@@ -75,14 +75,13 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
     @Override
     public List<Placemark> getPlacemarksNear(Position position, double radius) throws IOException, ParseException {
-        List<Placemark> placemarks = null;
-        Util.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
+        final List<Placemark> placemarks;
+        final Util.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
         // Calculating the search radius and the maximum number of returning Placemarks
         double limitedRadius = Math.min(radius, MAX_RADIUS);
-        int radiusInt = (int) limitedRadius;
-        int xKmRadius = radiusInt / XKM_RADIUS;
-        int maxRows = (int) (ROWS_PER_XKM_RADIUS * Math.pow(2, xKmRadius));
-        maxRows = Math.min(maxRows, MAX_ROW_NUMBER);
+        final int radiusInt = (int) limitedRadius;
+        final int xKmRadius = radiusInt / XKM_RADIUS;
+        final int maxRows = (int) Math.min(ROWS_PER_XKM_RADIUS * Math.pow(2, xKmRadius), MAX_ROW_NUMBER);
         if (cachedPlacemarks != null && cachedPlacemarks.getB() >= limitedRadius) {
             if (cachedPlacemarks.getC().size() > maxRows) {
                 placemarks = cachedPlacemarks.getC().subList(0, maxRows);
@@ -99,23 +98,29 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
             } else {
                 searchPosition = position;
             }
-            JSONArray geonames = callNearbyService(searchPosition, limitedRadius, maxRows);
+            final JSONArray geonames = callNearbyService(searchPosition, limitedRadius, maxRows);
             if (geonames != null) {
                 Iterator<Object> iterator = geonames.iterator();
-                placemarks = iterator.hasNext() ? new ArrayList<Placemark>() : null;
-                while (iterator.hasNext()) {
-                    JSONObject object = (JSONObject) iterator.next();
-                    Placemark place = jsonToPlacemark(object);
-                    if (place != null) {
-                        placemarks.add(jsonToPlacemark(object));
+                if (iterator.hasNext()) {
+                    placemarks = new ArrayList<Placemark>();
+                    while (iterator.hasNext()) {
+                        JSONObject object = (JSONObject) iterator.next();
+                        Placemark place = jsonToPlacemark(object);
+                        if (place != null) {
+                            placemarks.add(jsonToPlacemark(object));
+                        }
                     }
+                    // If there are no cached placemarks for the requested Position just cache them, otherwise update the cache
+                    if (cachedPlacemarks == null) {
+                        cachePlacemarks(searchPosition, limitedRadius, placemarks);
+                    } else {
+                        updateCachedPlacemarks(searchPosition, limitedRadius, placemarks);
+                    }
+                } else {
+                    placemarks = null;
                 }
-            }
-            // If there are no cached placemarks for the requested Position just cache them, otherwise update the cache
-            if (cachedPlacemarks == null && placemarks != null) {
-                cachePlacemarks(searchPosition, limitedRadius, placemarks);
-            } else if (placemarks != null) {
-                updateCachedPlacemarks(searchPosition, limitedRadius, placemarks);
+            } else {
+                placemarks = null;
             }
         }
         return placemarks;
@@ -280,8 +285,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(in);
         JSONArray geonames = (JSONArray) obj.get("geonames");
-        if (geonames == null)
+        if (geonames == null) {
             logger.log(Level.WARNING, "Returning null value for geonames object: " + obj.toJSONString());
+        }
         return geonames;
     }
 
