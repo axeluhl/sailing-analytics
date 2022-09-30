@@ -31,6 +31,9 @@ Before you can deploy you need to make sure that you have created an access key 
 
 Deployment can easily be done by right clicking on the lambda class and selecting Amazon Web Services -> Upload function to AWS Lambda. Make sure to select the correct mapping of the class to the lambda endpoint. Also you need to select the IAM role arn:aws:iam::017363970217:role/fixstorageendpoint-lambda-role for ALL endpoints you are deploying.
 
+> Notice: With the current environment in Eclipse 2022-06, it is not possible to use the AWS Toolkit in Eclipse due the fact that it is built with 
+> Java 8 which is not allowed as an startup environment for Eclipse 2022-06. Use the described method for the deployment with Maven.
+
 Alternatively, build the project with Maven, using the following command:
 ```
 mvn -Dmaven.test.skip=true package
@@ -95,7 +98,7 @@ POST
 {
   "endpointUuid": "sailing-analytics-server-endpoint",
   "action": "register",
-  "endpointCallbackUrl": "https://test.test.de/v1/api/gps_fixes",
+  "endpointCallbackUrl": "https://test.test.de/sailingserver/api/v1/gps_fixes",
   "devicesUuid": [
     "2605a6ea-ae9c-4f95-866c-396aebe7c369"
   ]
@@ -110,7 +113,7 @@ curl --location --request POST 'https://endpoint-registration-eu-west2.sapsailin
 --data-raw '{
   "endpointUuid": "sailing-analytics-server-endpoint",
   "action": "register",
-  "endpointCallbackUrl": "http://ec2-18-130-80-242.eu-west-2.compute.amazonaws.com",
+  "endpointCallbackUrl": "http://ec2-18-130-80-242.eu-west-2.compute.amazonaws.com:8888/sailingserver/api/v1/gps_fixes",
   "devicesUuid": [
     "2605a6ea-ae9c-4f95-866c-396aebe7c369"
   ]
