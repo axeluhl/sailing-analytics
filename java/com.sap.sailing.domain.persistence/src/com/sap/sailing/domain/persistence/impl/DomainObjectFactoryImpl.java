@@ -3165,7 +3165,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            MarkPassingHashFingerprint result = new MarkPassingHashFingerprintImpl(json); //hier entsteht fehler
+            MarkPassingHashFingerprint result = new MarkPassingHashFingerprintImpl(json);
             fingerprintHashMap.put(raceIdentifier, result);
         }
         return fingerprintHashMap;

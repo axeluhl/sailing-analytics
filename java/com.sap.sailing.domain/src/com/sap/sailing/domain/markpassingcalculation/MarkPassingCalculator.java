@@ -59,10 +59,10 @@ public class MarkPassingCalculator {
     private final static ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     private final LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
     /**
-     * This calculatorVersion variable indicates the Version of the {@link MarkPassingCalculator} and must be changed manually when changing the calculator.
+     * This CALCULATOR_VERSION variable indicates the Version of the {@link MarkPassingCalculator} and must be changed manually when changing the calculator.
      * It should be changed by adding +1; 
      */
-    private final int calculatorVersion = 1; 
+    private final int CALCULATOR_VERSION = 1; 
     
     /**
      * An "end marker" that can be {@link #enqueueUpdate(StorePositionUpdateStrategy) enqueued} in order to tell the {@link Listen}
@@ -102,7 +102,7 @@ public class MarkPassingCalculator {
     private boolean listenerThreadStarted;
 
     /**
-     * Remember to change the {@link calculatorVersion} when changing the MarkPassingCalculator
+     * Remember to change the {@link CALCULATOR_VERSION} when changing the MarkPassingCalculator
      */
     public MarkPassingCalculator(DynamicTrackedRace race, boolean doListen, boolean waitForInitialMarkPassingCalculation) {
         if (doListen) {
@@ -552,6 +552,6 @@ public class MarkPassingCalculator {
     }
 
     public int getCalculatorVersion() {
-        return calculatorVersion;
+        return CALCULATOR_VERSION;
     }
 }

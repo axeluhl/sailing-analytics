@@ -48,16 +48,33 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
     }
 
     public MarkPassingHashFingerprintImpl(JSONObject json) {
-        this.calculatorVersion = (Integer) json.get(JSON_FIELDS.CALCULATOR_VERSION);
-        this.competitorHash = (Integer) json.get(JSON_FIELDS.COMPETITOR_HASH);
-        this.startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS));
-        this.endOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS));
-        this.startTimeReceived = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS));
-        this.startTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS));
-        this.finishTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS));
-        this.waypointsHash = (Integer) json.get(JSON_FIELDS.WAYPOINTS_HASH);
-        this.numberOfGPSFixes = (Integer) json.get(JSON_FIELDS.NUMBEROFGPSFIXES);
-        this.gpsFixesHash = (Integer) json.get(JSON_FIELDS.GPSFIXES_HASH);
+        if(json.get(JSON_FIELDS.CALCULATOR_VERSION) == null ) {
+            int calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION.toString())).intValue();
+            this.calculatorVersion = calculatorVersion;
+            this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH.toString())).intValue();
+            TimePoint startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.toString()));
+            this.startOfTracking = startOfTracking;
+            this.endOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS.toString()));
+            this.startTimeReceived = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS.toString()));
+            this.startTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS.toString()));
+            this.finishTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS.toString()));
+            this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH.toString())).intValue();
+            this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.toString())).intValue();
+            this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.toString())).intValue();
+        } else {
+            int calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION)).intValue();
+            this.calculatorVersion = calculatorVersion;
+            this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH)).intValue();
+            TimePoint startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS));
+            this.startOfTracking = startOfTracking;
+            this.endOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS));
+            this.startTimeReceived = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS));
+            this.startTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS));
+            this.finishTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS));
+            this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH)).intValue();
+            this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES)).intValue();
+            this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH)).intValue();
+        }
     }
 
     @Override

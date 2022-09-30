@@ -52,17 +52,13 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
                         ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA });
         trackedRace1 = getTrackedRace();
         super.setUp();
-        super.setUp("event_20110505_SailingTea", // Semifinale
-                /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c", /* liveUri */ null, /* storedUri */ null,
-                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
-                        ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA });
-        trackedRace2 = getTrackedRace();
     }
 
     @Test
     public void testLoadingToMongo() throws UnknownHostException, MongoException {
         MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
         MarkPassingHashFingerprint fingerprint = factory.createFingerprint(trackedRace1);
+        assertTrue(fingerprint.matches(trackedRace1));
         MongoClient myFirstMongo = newMongo();
         MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());
         RaceIdentifier raceIdentifier = trackedRace1.getRaceIdentifier();
