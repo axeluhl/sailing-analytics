@@ -92,6 +92,14 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource BB10MIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BENETEAU_FIRST_35.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource BeneteauFirst35Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BENETEAU_FIRST_45.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource BeneteauFirst45Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt1.png")
     @ImageOptions(preventInlining = true)
     ImageResource Brassfahrt1Icon();
