@@ -16,10 +16,14 @@ The current architecture consist of the following parts in eu-west-2 (London).
     - endpoint-registration-eu-west2.sapsailing.com
 - An ALB that serves as the target for the DNS entries and routes data to respective target groups (FixIngestionLambda-1786459421.eu-west-2.elb.amazonaws.com)
 - Two target groups that handle ALB traffic and proxies it to the lambdas
-- Two lambdas (arn:aws:lambda:eu-west-2:017363970217:function:FixIngestion and arn:aws:lambda:eu-west-2:017363970217:function:EndpointRegistration)
+- Three Lambdas
+    - FixIngestion (arn:aws:lambda:eu-west-2:017363970217:function:FixIngestion)
+    - EndpointRegistration (arn:aws:lambda:eu-west-2:017363970217:function:EndpointRegistration)
+    - FixCombination (arn:aws:lambda:eu-west-2:017363970217:function:FixCombination)
 - One S3 bucket to hold the lambda binaries (arn:aws:s3:::sapsailing-lambda-functions-bucket-eu-west-2)
 - One S3 bucket that holds single fixes (arn:aws:s3:::sapsailing-gps-fixes)
 - One database running as a ElastiCache instance on Redis (arn:aws:elasticache:eu-west-2:017363970217:replicationgroup:fixingestionrediscache)
+- A CloudWatch Event to trigger the execution of FixCombination Lambda (arn:aws:events:eu-west-2:017363970217:rule/FixCombinationLambda_Cron)
 
 ## Development
 
@@ -34,9 +38,27 @@ Deployment can easily be done by right clicking on the lambda class and selectin
 > Notice: With the current environment in Eclipse 2022-06, it is not possible to use the AWS Toolkit in Eclipse due the fact that it is built with 
 > Java 8 which is not allowed as an startup environment for Eclipse 2022-06. Use the described method for the deployment with Maven.
 
-Alternatively, build the project with Maven, using the following command:
+Alternatively, you can build the project with Maven, but you have to take some precautions to be able to build the package. The pom.xml of the project com.sap.sailing.ingestion declares dependencies to the following other projects of the codebase to reuse code for types, deserializers, etc.:
+- com.sap.sse.security.common
+- org.json.simple
+- com.sap.sailing.domain.common
+- com.sap.sse.common
+- com.sap.sailing.domain.shared.android
+- com.sap.sse.shared.android
+- com.sap.sse
+- com.sap.sailing.domain
+- com.sap.sailing.server.gateway.serialization
+- com.sap.sailing.server.gateway.serialization.shared.android
+
+You have to make sure to go each of the projects and install them to your local maven repository, so that the pom.xml of the ingestion project can use them. Make sure that you made a fresh build of your projects in Eclipse to avoid errors in the maven build process. For example the steps to install one of the projects to your local repository would be the following:
+- open the terminal in the project root directory
+- navigate to your desired package to install (`cd java/com.sap.sse.security.common/`)
+- execute `mvn clean install`
+- repeat the steps for the other projects
+
+Use then the following command to build the package which can be deployed to AWS:
 ```
-mvn -Dmaven.test.skip=true package
+mvn clean -Dmaven.test.skip=true package
 ```
 This will produce a JAR file in the project's ``bin`` folder. Deploy it using the following command. Use the function name for ``${function-name}``, such as ``FixIngestion`` or ``EndpointRegistration``, respectively:
 
@@ -168,7 +190,10 @@ curl --location --request POST 'https://fix-ingestion-eu-west2.sapsailing.com' \
     ]
 }'
 ```
+### FixCombination
 
+The FixCombination Lambda can be triggered by the defined CloudWatch Event `FixCombinationLambda_Cron` and can be activated in the Amazon EventBridge section of AWS. It collects single fixes 
+created by the `FixIngestion` Lambda to collections for further data operations.
 
 ## MFA based AWS session token
 
