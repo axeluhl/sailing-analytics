@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -151,7 +152,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * Assuming both competitors scored in the same number of races, compares the sorted scores based on World Sailing's
      * Racing Rules of Sailing (RRS) addendum A8.1:<p>
      * 
-     * <em>"A8.1 If there is a series-score tie between two or more boats, each boat’s race scores shall be listed in
+     * <em>"A8.1 If there is a series-score tie between two or more boats, each boat's race scores shall be listed in
      * order of best to worst, and at the first point(s) where there is a difference the tie shall be broken in favour
      * of the boat(s) with the best score(s). No excluded scores shall be used."</em>
      */
@@ -166,14 +167,14 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         final Set<RaceColumn> o1Discards = discardedRaceColumnsPerCompetitor.get(o1);
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o1ColumnAndScore : o1Scores) {
             if (includeDiscardedResults || !o1Discards.contains(o1ColumnAndScore.getA())) {
-                o1NetScores.add(new Pair<>(o1ColumnAndScore.getA(), o1ColumnAndScore.getB() / getScoreFactor(o1ColumnAndScore.getA())));
+                o1NetScores.add(new Pair<>(o1ColumnAndScore.getA(), getOriginalScoreFromScoreScaledByFactor(o1ColumnAndScore.getA(), o1ColumnAndScore.getB())));
             }
         }
         List<Pair<RaceColumn, Double>> o2NetScores = new ArrayList<>();
         final Set<RaceColumn> o2Discards = discardedRaceColumnsPerCompetitor.get(o2);
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o2ColumnAndScore : o2Scores) {
             if (includeDiscardedResults || !o2Discards.contains(o2ColumnAndScore.getA())) {
-                o2NetScores.add(new Pair<>(o2ColumnAndScore.getA(), o2ColumnAndScore.getB() / getScoreFactor(o2ColumnAndScore.getA())));
+                o2NetScores.add(new Pair<>(o2ColumnAndScore.getA(), getOriginalScoreFromScoreScaledByFactor(o2ColumnAndScore.getA(), o2ColumnAndScore.getB())));
             }
         }
         Collections.sort(o1NetScores, ruleA8_1ScoreComparator);
@@ -228,7 +229,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * <p>
      * 
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last race.
-     * Any remaining ties shall be broken by using the tied boats’ scores in the next-to-last race and so on until all
+     * Any remaining ties shall be broken by using the tied boats' scores in the next-to-last race and so on until all
      * ties are broken. These scores shall be used even if some of them are excluded scores."</em>
      * 
      * @param o1ScoresIncludingDiscarded
@@ -268,6 +269,11 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
 
     @Override
     public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) {
+        return 0;
+    }
+
+    @Override
+    public int compareByOtherTieBreakingLeaderboard(RegattaLeaderboardWithOtherTieBreakingLeaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) {
         return 0;
     }
 }

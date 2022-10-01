@@ -16,12 +16,12 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 
-public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog<LeaderboardDescriptor> {
+public abstract class RegattaLeaderboardDialog<LD extends LeaderboardDescriptor> extends AbstractLeaderboardDialog<LD> {
     protected ListBox regattaListBox;
     protected Collection<RegattaDTO> existingRegattas;
-    private Label regattaDefinesDiscardsLabel;
+    protected Label regattaDefinesDiscardsLabel;
 
-    protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
+    protected static class LeaderboardParameterValidator<LD extends LeaderboardDescriptor> implements Validator<LD> {
         protected final StringMessages stringMessages;
         protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
 
@@ -32,7 +32,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         }
 
         @Override
-        public String getErrorMessage(LeaderboardDescriptor leaderboardToValidate) {
+        public String getErrorMessage(LD leaderboardToValidate) {
             String errorMessage;
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
@@ -58,9 +58,9 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         }
     }
 
-    public RegattaLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringMessages,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
-        super(title, leaderboardDTO, stringMessages, validator, callback);
+    public RegattaLeaderboardDialog(String title, LD leaderboardDescriptor, Collection<RegattaDTO> existingRegattas, StringMessages stringMessages,
+            ErrorReporter errorReporter, LeaderboardParameterValidator<LD> validator,  DialogCallback<LD> callback) {
+        super(title, leaderboardDescriptor, stringMessages, validator, callback);
         this.existingRegattas = existingRegattas;
         regattaDefinesDiscardsLabel = new Label(stringMessages.regattaDefinesResultDiscardingRules());
     }
@@ -100,8 +100,8 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     }
     
     @Override
-    protected LeaderboardDescriptor getResult() {
-        LeaderboardDescriptor leaderboard = super.getResult();
+    protected LD getResult() {
+        LD leaderboard = super.getResult();
         leaderboard.setRegattaName(getSelectedRegatta() != null ? getSelectedRegatta().getName() : null);
         return leaderboard;
     }
@@ -109,13 +109,13 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-        Grid formGrid = new Grid(3,3);
+        Grid formGrid = new Grid(3, 3);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, createLabel(stringMessages.regatta()));
         formGrid.setWidget(0, 1, regattaListBox);
-        formGrid.setWidget(1,  0, createLabel(stringMessages.name()));
+        formGrid.setWidget(1, 0, createLabel(stringMessages.name()));
         formGrid.setWidget(1, 1, nameTextBox);
-        formGrid.setWidget(2,  0, createLabel(stringMessages.displayName()));
+        formGrid.setWidget(2, 0, createLabel(stringMessages.displayName()));
         formGrid.setWidget(2, 1, displayNameTextBox);
         mainPanel.add(formGrid);
         mainPanel.add(regattaDefinesDiscardsLabel);

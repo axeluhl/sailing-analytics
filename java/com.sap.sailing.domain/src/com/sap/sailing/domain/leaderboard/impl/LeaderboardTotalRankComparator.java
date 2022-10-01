@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
@@ -255,7 +256,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                                     if (result == 0) {
                                         result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
                                         if (result == 0) {
-                                            result = compareByArbitraryButStableCriteria(o1, o2);
+                                            if (getLeaderboard() instanceof RegattaLeaderboardWithOtherTieBreakingLeaderboard) {
+                                                result = scoringScheme.compareByOtherTieBreakingLeaderboard(
+                                                        (RegattaLeaderboardWithOtherTieBreakingLeaderboard) getLeaderboard(), o1, o2, timePoint);
+                                            }
+                                            if (result == 0) {
+                                                result = compareByArbitraryButStableCriteria(o1, o2);
+                                            }
                                         }
                                     }
                                 }
