@@ -29,8 +29,7 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
     private final int gpsFixesHash;
 
     private static enum JSON_FIELDS {
-        COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, START_TIME_RECEIVED_AS_MILLIS, START_TIME_FROM_RACE_LOG_AS_MILLIS,
-        FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_ID, CALCULATOR_VERSION
+        COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, START_TIME_RECEIVED_AS_MILLIS, START_TIME_FROM_RACE_LOG_AS_MILLIS, FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_ID, CALCULATOR_VERSION
     };
 
     public MarkPassingHashFingerprintImpl(TrackedRace trackedRace) {
@@ -39,57 +38,50 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
         this.startOfTracking = trackedRace.getStartOfTracking();
         this.endOfTracking = trackedRace.getEndOfTracking();
         this.startTimeReceived = trackedRace.getStartTimeReceived();
-        final Pair<TimePoint, TimePoint> startAndFinishedTimeFromRaceLogs = trackedRace.getStartAndFinishedTimeFromRaceLogs();
-        this.startTimeFromRaceLog = startAndFinishedTimeFromRaceLogs==null?null:startAndFinishedTimeFromRaceLogs.getA();
-        this.finishTimeFromRaceLog = startAndFinishedTimeFromRaceLogs==null?null:startAndFinishedTimeFromRaceLogs.getB();
+        final Pair<TimePoint, TimePoint> startAndFinishedTimeFromRaceLogs = trackedRace
+                .getStartAndFinishedTimeFromRaceLogs();
+        this.startTimeFromRaceLog = startAndFinishedTimeFromRaceLogs == null ? null
+                : startAndFinishedTimeFromRaceLogs.getA();
+        this.finishTimeFromRaceLog = startAndFinishedTimeFromRaceLogs == null ? null
+                : startAndFinishedTimeFromRaceLogs.getB();
         this.waypointsHash = calculateHashForWaypoints(trackedRace);
         this.numberOfGPSFixes = calculateHashForNumberOfGPSFixes(trackedRace);
         this.gpsFixesHash = calculateHashForGPSFixes(trackedRace);
     }
 
     public MarkPassingHashFingerprintImpl(JSONObject json) {
-        if(json.get(JSON_FIELDS.CALCULATOR_VERSION) == null ) {
-            int calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION.toString())).intValue();
-            this.calculatorVersion = calculatorVersion;
-            this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH.toString())).intValue();
-            TimePoint startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.toString()));
-            this.startOfTracking = startOfTracking;
-            this.endOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS.toString()));
-            this.startTimeReceived = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS.toString()));
-            this.startTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS.toString()));
-            this.finishTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS.toString()));
-            this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH.toString())).intValue();
-            this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.toString())).intValue();
-            this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.toString())).intValue();
-        } else {
-            int calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION)).intValue();
-            this.calculatorVersion = calculatorVersion;
-            this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH)).intValue();
-            TimePoint startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS));
-            this.startOfTracking = startOfTracking;
-            this.endOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS));
-            this.startTimeReceived = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS));
-            this.startTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS));
-            this.finishTimeFromRaceLog = TimePoint.of((Long) json.get(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS));
-            this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH)).intValue();
-            this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES)).intValue();
-            this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH)).intValue();
-        }
+        this.calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION.name())).intValue();
+        this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH.name())).intValue();
+        this.startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.name()));
+        this.endOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS.name()));
+        this.startTimeReceived = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS.name()));
+        this.startTimeFromRaceLog = TimePoint
+                .of((Long) json.get(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS.name()));
+        this.finishTimeFromRaceLog = TimePoint
+                .of((Long) json.get(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS.name()));
+        this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH.name())).intValue();
+        this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.name())).intValue();
+        this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.name())).intValue();
     }
 
     @Override
     public JSONObject toJson() {
         JSONObject result = new JSONObject();
-        result.put(JSON_FIELDS.CALCULATOR_VERSION, calculatorVersion);
-        result.put(JSON_FIELDS.COMPETITOR_HASH, competitorHash);
-        result.put(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS, startOfTracking==null?null:startOfTracking.asMillis());
-        result.put(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS, endOfTracking==null?null:endOfTracking.asMillis());
-        result.put(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS, startTimeReceived==null?null:startTimeReceived.asMillis());
-        result.put(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS, startTimeFromRaceLog==null?null:startTimeFromRaceLog.asMillis());
-        result.put(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, finishTimeFromRaceLog==null?null:finishTimeFromRaceLog.asMillis());
-        result.put(JSON_FIELDS.WAYPOINTS_HASH, waypointsHash);
-        result.put(JSON_FIELDS.NUMBEROFGPSFIXES, numberOfGPSFixes);
-        result.put(JSON_FIELDS.GPSFIXES_HASH, gpsFixesHash);
+        result.put(JSON_FIELDS.CALCULATOR_VERSION.name(), calculatorVersion);
+        result.put(JSON_FIELDS.COMPETITOR_HASH.name(), competitorHash);
+        result.put(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.name(),
+                startOfTracking == null ? null : startOfTracking.asMillis());
+        result.put(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS.name(),
+                endOfTracking == null ? null : endOfTracking.asMillis());
+        result.put(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS.name(),
+                startTimeReceived == null ? null : startTimeReceived.asMillis());
+        result.put(JSON_FIELDS.START_TIME_FROM_RACE_LOG_AS_MILLIS.name(),
+                startTimeFromRaceLog == null ? null : startTimeFromRaceLog.asMillis());
+        result.put(JSON_FIELDS.FINISH_TIME_FROM_RACE_LOG_AS_MILLIS.name(),
+                finishTimeFromRaceLog == null ? null : finishTimeFromRaceLog.asMillis());
+        result.put(JSON_FIELDS.WAYPOINTS_HASH.name(), waypointsHash);
+        result.put(JSON_FIELDS.NUMBEROFGPSFIXES.name(), numberOfGPSFixes);
+        result.put(JSON_FIELDS.GPSFIXES_HASH.name(), gpsFixesHash);
         return result;
     }
 
@@ -105,10 +97,13 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
         } else if (!Util.equalsWithNull(startTimeReceived, trackedRace.getStartTimeReceived())) {
             result = false;
         } else {
-            final Pair<TimePoint, TimePoint> startAndFinishedTimeFromRaceLogs = trackedRace.getStartAndFinishedTimeFromRaceLogs();
-            if (!Util.equalsWithNull(startTimeFromRaceLog, startAndFinishedTimeFromRaceLogs==null?null:startAndFinishedTimeFromRaceLogs.getA())) {
+            final Pair<TimePoint, TimePoint> startAndFinishedTimeFromRaceLogs = trackedRace
+                    .getStartAndFinishedTimeFromRaceLogs();
+            if (!Util.equalsWithNull(startTimeFromRaceLog,
+                    startAndFinishedTimeFromRaceLogs == null ? null : startAndFinishedTimeFromRaceLogs.getA())) {
                 result = false;
-            } else if (!Util.equalsWithNull(finishTimeFromRaceLog, startAndFinishedTimeFromRaceLogs==null?null:startAndFinishedTimeFromRaceLogs.getB())) {
+            } else if (!Util.equalsWithNull(finishTimeFromRaceLog,
+                    startAndFinishedTimeFromRaceLogs == null ? null : startAndFinishedTimeFromRaceLogs.getB())) {
                 result = false;
             } else if (waypointsHash != calculateHashForWaypoints(trackedRace)) {
                 result = false;
@@ -130,7 +125,7 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
         int result = calculator.getCalculatorVersion();
         return result;
     }
-    
+
     private int calculateHashForCompetitors(TrackedRace trackedRace) {
         int hashForCompetitors = 1023;
         for (Competitor c : trackedRace.getRace().getCompetitors()) {
