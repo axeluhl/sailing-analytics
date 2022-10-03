@@ -1437,7 +1437,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
         final Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries
                 .get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
-
         final Boolean hasCrossFleetMergedRankingObject = (Boolean) dbSeries
                 .get(FieldNames.SERIES_HAS_CROSS_FLEET_MERGED_RANKING.name());
         final Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries
