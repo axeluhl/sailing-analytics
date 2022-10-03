@@ -197,7 +197,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(10, 2);
+        Grid formGrid = new Grid(11, 2);
         panel.add(formGrid);
         int row = 0;
         formGrid.setWidget(row,  0, new Label(stringMessages.name() + ":"));
