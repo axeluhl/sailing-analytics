@@ -46,6 +46,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
     private CheckBox hasCrossFleetMergedRankingCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
+    private CheckBox oneAlwaysStaysOneCheckbox;
     private IntegerBox maximumNumberOfDiscardsBox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private final StringMessages stringMessages;
@@ -132,7 +133,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         for (String name : raceNamesEditor.getValue()) {
             RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, name);
             if (raceColumnDTO == null) {
-                raceColumnDTO = new RaceColumnInSeriesDTO(name, selectedSeries.getName(), regatta.getName());
+                raceColumnDTO = new RaceColumnInSeriesDTO(name, selectedSeries.getName(), regatta.getName(), selectedSeries.isOneAlwaysStaysOne());
             }
             races.add(raceColumnDTO);
         }
@@ -141,7 +142,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
                         : null, startWithZeroScoreCheckbox.getValue(),
                 firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue(),
-                hasCrossFleetMergedRankingCheckbox.getValue(), maximumNumberOfDiscardsBox.getValue());
+                hasCrossFleetMergedRankingCheckbox.getValue(), maximumNumberOfDiscardsBox.getValue(), oneAlwaysStaysOneCheckbox.getValue());
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
@@ -202,6 +203,11 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(selectedSeries.isFirstColumnIsNonDiscardableCarryForward());
         additionalWidgetPanel.add(firstColumnIsNonDiscardableCarryForwardCheckbox);
+
+        oneAlwaysStaysOneCheckbox = createCheckbox(stringMessages.oneAlwaysStaysOne());
+        oneAlwaysStaysOneCheckbox.ensureDebugId("OneAlwaysStaysOneCheckbox");
+        oneAlwaysStaysOneCheckbox.setValue(selectedSeries.isOneAlwaysStaysOne());
+        additionalWidgetPanel.add(oneAlwaysStaysOneCheckbox);
 
         final HorizontalPanel maximumNumberOfDiscardsPanel = new HorizontalPanel();
         maximumNumberOfDiscardsPanel.add(new Label(stringMessages.maximumNumberOfDiscards()));

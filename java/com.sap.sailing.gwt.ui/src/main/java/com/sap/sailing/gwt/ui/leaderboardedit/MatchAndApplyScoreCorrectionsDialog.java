@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -209,7 +210,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                                     officialCorrectionEntry.getMaxPointsReason());
                             if (officialCorrectionEntry.getScore() != null) {
                                 double officialTotalPointsWithFactorApplied = officialCorrectionEntry.getScore().doubleValue();
-                                double officialTotalPoints = officialTotalPointsWithFactorApplied / raceColumn.getEffectiveFactor();
+                                double officialTotalPoints = ScoringSchemeType.getUnscaledScore(raceColumn.getEffectiveFactor(), officialTotalPointsWithFactorApplied, raceColumn.isOneAlwaysStaysOne());
                                 result.addScoreUpdate(competitor, raceColumn, officialTotalPoints);
                             }
                         }
@@ -267,7 +268,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
                     final Double officialTotalPoints = officialCorrectionEntry == null ? null :
                         officialCorrectionEntry.getScore() == null ? null :
-                        officialCorrectionEntry.getScore() / raceColumn.getEffectiveFactor();
+                        ScoringSchemeType.getUnscaledScore(raceColumn.getEffectiveFactor(), officialCorrectionEntry.getScore(), raceColumn.isOneAlwaysStaysOne());
                     final MaxPointsReason officialMaxPointsReason = officialCorrectionEntry == null ? null :
                         officialCorrectionEntry.getMaxPointsReason();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();

@@ -25,6 +25,8 @@ public interface RaceColumnListener extends Serializable {
 
     void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking);
 
+    void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne);
+
     default boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return true;
     }

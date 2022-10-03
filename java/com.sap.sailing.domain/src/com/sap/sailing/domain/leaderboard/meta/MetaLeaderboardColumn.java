@@ -110,6 +110,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public boolean isOneAlwaysStaysOne() {
+        return false;
+    }
+
+    @Override
     public void releaseTrackedRace(Fleet fleet) {
     }
 
@@ -151,6 +156,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
         getRaceColumnListeners().notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+    }
+
+    @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        getRaceColumnListeners().notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
     }
 
     @Override

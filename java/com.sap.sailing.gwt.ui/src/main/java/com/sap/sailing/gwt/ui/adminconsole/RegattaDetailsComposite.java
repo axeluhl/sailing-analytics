@@ -220,6 +220,12 @@ public class RegattaDetailsComposite extends Composite {
                 return series.isFleetsCanRunInParallel() ? stringMessages.yes() : stringMessages.no();
             }
         };
+        TextColumn<SeriesDTO> isOneAlwaysStaysOneColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.isOneAlwaysStaysOne() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
         TextColumn<SeriesDTO> maximumNumberOfDiscardsColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -318,6 +324,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
         table.addColumn(hasCrossFleetMergedRankingColumn, stringMessages.hasCrossFleetMergedRanking());
         table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
+        table.addColumn(isOneAlwaysStaysOneColumn, stringMessages.oneAlwaysStaysOne());
         table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
         table.addColumn(actionsColumn, stringMessages.actions());
         return table;
@@ -360,6 +367,7 @@ public class RegattaDetailsComposite extends Composite {
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());
         final boolean maximumNumberOfDiscardsChanged = series.getMaximumNumberOfDiscards() != seriesDescriptor.getMaximumNumberOfDiscards();
+        final boolean oneAlwaysStaysOneChanged = series.isOneAlwaysStaysOne() != seriesDescriptor.isOneAlwaysStaysOne();
         final boolean seriesNameChanged = !series.getName().equals(seriesDescriptor.getSeriesName());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
@@ -413,13 +421,13 @@ public class RegattaDetailsComposite extends Composite {
                                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                                             if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                                                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
-                                                    || hasCrossFleetMergedRankingChanged || seriesNameChanged || maximumNumberOfDiscardsChanged) {
+                                                    || hasCrossFleetMergedRankingChanged || seriesNameChanged || maximumNumberOfDiscardsChanged || oneAlwaysStaysOneChanged) {
                                                 sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
                                                         seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                                                         seriesDescriptor.isStartsWithZeroScore(),
                                                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
                                                         seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.hasCrossFleetMergedRanking(), seriesDescriptor.getMaximumNumberOfDiscards(),
-                                                        series.getFleets(), new AsyncCallback<Void>() {
+                                                        seriesDescriptor.isOneAlwaysStaysOne(), series.getFleets(), new AsyncCallback<Void>() {
                                                     @Override
                                                     public void onFailure(Throwable caught) {
                                                         errorReporter.reportError("Error trying to update series " + series.getName() + ": "

@@ -272,6 +272,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        getRaceColumnListeners().notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+    }
+
+    @Override
     public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
         getRaceColumnListeners().notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
     }
@@ -495,7 +500,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             if (totalPoints == null) {
                 result = null;
             } else {
-                result = getScoringScheme().getScoreFactor(raceColumn) * totalPoints;
+                result = getScoringScheme().getScoreScaledByFactor(raceColumn, totalPoints);
             }
         }
         return result;
@@ -681,11 +686,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
         final Double correctedScoreScaledByColumnFactor = correctedScore == null ? null
-                : Double.valueOf((correctedScore * getScoringScheme().getScoreFactor(race)));
+                : Double.valueOf(getScoringScheme().getScoreScaledByFactor(race, correctedScore));
         return new EntryImpl(trackedRankProvider, correctedScoreScaledByColumnFactor, () -> correctedResults.getUncorrectedScore(),
                 correctedResults.isCorrected(),
-                discarded ? DOUBLE_0
-                        : correctedScore == null ? null : Double.valueOf(correctedScore * getScoringScheme().getScoreFactor(race)),
+                discarded ? DOUBLE_0 : correctedScoreScaledByColumnFactor,
                 correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
 
@@ -757,7 +761,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 final Double correctedScore = correctedResults.getCorrectedScore();
                 final Double correctedScoreScaledByColumnFactor = correctedScore == null ? null
-                        : Double.valueOf((correctedScore * getScoringScheme().getScoreFactor(raceColumn)));
+                        : Double.valueOf(getScoringScheme().getScoreScaledByFactor(raceColumn, correctedScore));
                 Entry entry = new EntryImpl(trackedRankProvider, correctedScoreScaledByColumnFactor,
                         () -> correctedResults.getUncorrectedScore(), correctedResults.isCorrected(),
                         discarded ? DOUBLE_0 : correctedScoreScaledByColumnFactor,

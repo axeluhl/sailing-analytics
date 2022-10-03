@@ -55,6 +55,16 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
     }
 
     @Override
+    public RacingEventServiceOperation<?> transformAddRegattaLeaderboardClientOp(CreateRegattaLeaderboardWithOtherTieBreakingLeaderboard addLeaderboard) {
+        return addLeaderboard;
+    }
+
+    @Override
+    public RacingEventServiceOperation<?> transformAddRegattaLeaderboardServerOp(CreateRegattaLeaderboardWithOtherTieBreakingLeaderboard addLeaderboard) {
+        return addLeaderboard;
+    }
+
+    @Override
     public RacingEventServiceOperation<?> transformRenameLeaderboardColumnClientOp(
             RenameLeaderboardColumn renameLeaderboardColumnClientOp) {
         return renameLeaderboardColumnClientOp;

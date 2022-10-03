@@ -24,10 +24,12 @@ public class SeriesCreationParametersDTO implements Serializable {
 
     private Integer maximumNumberOfDiscards;
 
+    private boolean oneAlwaysStaysOne;
+
     SeriesCreationParametersDTO() {}
 
     public SeriesCreationParametersDTO(List<FleetDTO> fleets, boolean isMedal, boolean isFleetsCanRunInParallel, boolean isStartsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
-            int[] discardingThresholds, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards) {
+            int[] discardingThresholds, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne) {
         super();
         this.fleets = fleets;
         this.isMedal = isMedal;
@@ -38,6 +40,7 @@ public class SeriesCreationParametersDTO implements Serializable {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.discardingThresholds = discardingThresholds;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     public List<FleetDTO> getFleets() {
@@ -74,5 +77,9 @@ public class SeriesCreationParametersDTO implements Serializable {
 
     public Integer getMaximumNumberOfDiscards() {
         return maximumNumberOfDiscards;
+    }
+
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
     }
 }

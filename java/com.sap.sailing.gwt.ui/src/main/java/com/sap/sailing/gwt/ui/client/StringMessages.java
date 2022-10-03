@@ -463,8 +463,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
     String createRegattaLeaderboardWithEliminations();
+    String createRegattaLeaderboardWithOtherTieBreakingLeaderboard();
     String editFlexibleLeaderboard();
     String editRegattaLeaderboard();
+    String editRegattaLeaderboardWithEliminations();
+    String editRegattaLeaderboardWithOtherTieBreakingLeaderboard();
     String defaultRegatta();
     String useOverallLeaderboard();
     String overallStandings();
@@ -2411,4 +2414,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String goToSelfServicePortalDialogTitle();
     String goToSelfServicePortalDialogText();
     String failedFetchingSelfServicePortalSession();
+    String oneAlwaysStaysOne();
+    String otherTieBreakingLeaderboard();
+    String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboard();
+    String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboardDescription();
 }

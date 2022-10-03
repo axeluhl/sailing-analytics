@@ -41,6 +41,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     protected CheckBox hasCrossFleetMergedRankingCheckbox;
     protected CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     protected CheckBox useSeriesResultDiscardingThresholdsCheckbox;
+    protected CheckBox oneAlwaysStaysOneCheckbox;
     protected IntegerBox maximumNumberOfDiscardsBox;
     protected final DiscardThresholdBoxes discardThresholdBoxes;
     protected ListEditorComposite<FleetDTO> fleetListComposite;
@@ -153,10 +154,11 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 SeriesWithFleetsCreateDialog.this.discardThresholdBoxes.getWidget().setVisible(event.getValue());
             }
         });
+        oneAlwaysStaysOneCheckbox = createCheckbox(stringMessages.oneAlwaysStaysOne());
+        oneAlwaysStaysOneCheckbox.ensureDebugId("OneAlwaysStaysOneCheckbox");
         Widget widget = discardThresholdBoxes.getWidget();
         widget.ensureDebugId("DiscardThresholdBoxes");
         widget.setVisible(false);
-
         initializeFleetListComposite(stringMessages);
     }
 
@@ -182,6 +184,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         series.setCrossFleetMergedRanking(hasCrossFleetMergedRankingCheckbox.getValue());
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
         series.setMaximumNumberOfDiscards(maximumNumberOfDiscardsBox.getValue());
+        series.setOneAlwaysStaysOne(oneAlwaysStaysOneCheckbox.getValue());
     	series.setFleets(fleetListComposite.getValue());
         series.setDiscardThresholds(useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds() : null);
         return series;
@@ -205,11 +208,11 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         formGrid.setWidget(row++, 1, hasSplitFleetContiguousScoringCheckbox);
         formGrid.setWidget(row++, 1, hasCrossFleetMergedRankingCheckbox);
         formGrid.setWidget(row++, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
+        formGrid.setWidget(row++, 1, oneAlwaysStaysOneCheckbox);
         formGrid.setWidget(row, 0, new Label(stringMessages.maximumNumberOfDiscards()));
         formGrid.setWidget(row++, 1, maximumNumberOfDiscardsBox);
         formGrid.setWidget(row++, 1, useSeriesResultDiscardingThresholdsCheckbox);
         formGrid.setWidget(row++, 1, discardThresholdBoxes.getWidget());
-
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(fleetListComposite, stringMessages.fleets());

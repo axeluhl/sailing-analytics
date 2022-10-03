@@ -187,4 +187,10 @@ public class RaceColumnListeners implements Serializable {
             listener.regattaLogEventAdded(event);
         }
     }
+
+    public void notifyListenersAboutOneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.oneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+        }
+    }
 }

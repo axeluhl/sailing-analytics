@@ -730,8 +730,8 @@ public class EventsResource extends AbstractSailingServerResource {
         getService().apply(new UpdateSeries(new RegattaName(regatta.getName()), "Default", "Default", defaultSeries.isMedal(),
                 defaultSeries.isFleetsCanRunInParallel(), defaultSeries.getDiscardingThresholds(),
                 defaultSeries.isStartsWithZero(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(),
-                defaultSeries.hasSplitFleetContiguousScoring(), defaultSeries.hasCrossFleetMergedRanking(),
-                defaultSeries.getMaximumNumberOfDiscards(), defaultSeries.getFleets()));
+                defaultSeries.hasSplitFleetContiguousScoring(), defaultSeries.hasCrossFleetMergedRanking(), defaultSeries.getMaximumNumberOfDiscards(),
+                defaultSeries.isOneAlwaysStaysOne(), defaultSeries.getFleets()));
     }
 
     private void addRaceColumns(String regattaName, String seriesName, int numberOfRaces) {
@@ -819,11 +819,10 @@ public class EventsResource extends AbstractSailingServerResource {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaName), regattaName,
                 new Callable<RegattaLeaderboard>() {
-
                     @Override
                     public RegattaLeaderboard call() throws Exception {
                         return getService()
-                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
+                                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
                     }
                 });
     }
@@ -871,7 +870,7 @@ public class EventsResource extends AbstractSailingServerResource {
         series.put(LeaderboardNameConstants.DEFAULT_SERIES_NAME, new SeriesCreationParametersDTO(
                 Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)),
                 /* isMedal */ false, /* isFleetsCanRunInParallel */ false, /* isStartsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
-                /* discardingThresholds */ null, /* hasSplitFleetContiguousScoring */ false, /* hasCrossFleetMergedRanking */ false, /* maximumNumberOfDiscards */ null));
+                /* discardingThresholds */ null, /* hasSplitFleetContiguousScoring */ false, /* hasCrossFleetMergedRanking */ false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false));
         return series;
     }
 

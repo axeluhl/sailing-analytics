@@ -465,7 +465,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
      * the {@code competitor} in this leaderboard.
      */
-    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint);
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some

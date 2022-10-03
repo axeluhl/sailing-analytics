@@ -159,8 +159,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                 stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true,
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
         registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
-                /* competitorsRefresher not needed; filled based on registrations */ null, 
-                /* boatsRefresher not needed */ null, stringMessages,
+                competitorsRefresher, boatsRefresher, stringMessages,
                 errorReporter, /* multiSelection */ true, /* enablePager */ false, /* filterCompetitorWithBoat */ false,
                 /* filterCompetitorsWithoutBoat */ false);
         registeredCompetitorsTable.getSelectionModel().addSelectionChangeHandler(event -> validateAndUpdate());

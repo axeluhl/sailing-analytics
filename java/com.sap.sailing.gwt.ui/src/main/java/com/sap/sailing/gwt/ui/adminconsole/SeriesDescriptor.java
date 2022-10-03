@@ -24,10 +24,10 @@ public class SeriesDescriptor {
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final Integer maximumNumberOfDiscards;
     private final int[] resultDiscardingThresholds;
-
+    private final boolean oneAlwaysStaysOne;
     public SeriesDescriptor(SeriesDTO series, String seriesName, List<RaceColumnDTO> races, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking,  Integer maximumNumberOfDiscards) {
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne) {
         this.seriesName = seriesName;
         this.series = series;
         this.races = races;
@@ -39,6 +39,7 @@ public class SeriesDescriptor {
         this.resultDiscardingThresholds = resultDiscardingThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     public SeriesDTO getSeries() {
@@ -83,5 +84,9 @@ public class SeriesDescriptor {
 
     public Integer getMaximumNumberOfDiscards() {
         return maximumNumberOfDiscards;
+    }
+
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
     }
 }
