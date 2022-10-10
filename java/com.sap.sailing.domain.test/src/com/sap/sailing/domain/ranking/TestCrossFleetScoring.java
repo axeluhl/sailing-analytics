@@ -345,10 +345,76 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
     @Test
     public void testTimeOnTimeFirstFleetRoundedMarkAndLeads() {
         Competitor[] expectedOrder = new Competitor[] { c1Yellow, c2Yellow,  c1Blue, c2Blue };
-        double[] sailedDistance = new double[] { 0.85, 0.9, 0.5, 0.1 };
+        double[] sailedDistance = new double[] { 0.4, 0.9, 0.5, 0.1 };
         List<Competitor> markRoundings = new ArrayList<>(); 
         markRoundings.add(c1Yellow); 
         markRoundings.add(c2Yellow); 
         testWithCourseCreation(expectedOrder, sailedDistance, markRoundings);
+    }
+    
+    /*
+     * Both Fleets have rounded the first mark no overtaking took place. The ranking has not changed either. 
+     */
+    @Test
+    public void testTimeOnTimeBothFleetsRoundedMarkAndNoOvertaking() {
+        TimePoint startOfRace, markRounding, timePointOfViewingTheLeaderboard = null;
+
+        for (int i = 0; i < trackedRaces.length; i++) {
+            startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10).times(i));
+            markRounding = startOfRace.plus(Duration.ONE_MINUTE.times(30));
+            timePointOfViewingTheLeaderboard = markRounding.plus(Duration.ONE_MINUTE.times(5));
+            DynamicTrackedRace trackedRace = trackedRaces[i];
+            CompetitorWithBoat c1, c2;
+            if (i == 0) {
+                c1 = c1Yellow;
+                c2 = c2Yellow;
+            } else {
+                c1 = c1Blue;
+                c2 = c2Blue;
+            }
+
+            trackedRace.getTrack(c1).add(new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace,
+                    new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45))));
+            trackedRace.getTrack(c2).add(new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace,
+                    new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(315))));
+
+            if (i == 0) {
+                // mark rounding c1Yellow
+                trackedRace.updateMarkPassings(c1, Arrays.<MarkPassing> asList(
+                        new MarkPassingImpl(startOfRace, start, c1), new MarkPassingImpl(markRounding, windward, c1)));
+                trackedRace.getTrack(c1).add(new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                        new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180))));
+                // mark rounding c2Yellow
+                trackedRace.updateMarkPassings(c2, Arrays.<MarkPassing> asList(
+                        new MarkPassingImpl(startOfRace, start, c2), new MarkPassingImpl(markRounding, windward, c2)));
+                trackedRace.getTrack(c2).add(new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                        new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180))));
+                //current position
+                trackedRace.getTrack(c1).add(new GPSFixMovingImpl(new DegreePosition(0.4, 0),
+                        timePointOfViewingTheLeaderboard, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45))));
+                trackedRace.getTrack(c2)
+                        .add(new GPSFixMovingImpl(new DegreePosition(0.9, 0),
+                                timePointOfViewingTheLeaderboard,
+                                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(315))));
+            } else {
+                trackedRace.getTrack(c1).add(new GPSFixMovingImpl(new DegreePosition(0.95, 0),
+                        timePointOfViewingTheLeaderboard, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45))));
+                trackedRace.getTrack(c2)
+                        .add(new GPSFixMovingImpl(new DegreePosition(0.4, 0),
+                                timePointOfViewingTheLeaderboard,
+                                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(315))));
+            }
+
+        }
+        // Both boats have climbed half of the first upwind beat; c1 is rated the faster boat (2.0), c2 has time-on-time
+        // factor 1.0.
+        // Therefore, c2 is expected to lead within a fleet after applying the corrections. In total the Blue fleet
+        // leads
+        final List<Competitor> rankedCompetitors = leaderboard
+                .getCompetitorsFromBestToWorst(timePointOfViewingTheLeaderboard);
+        assertEquals(c1Blue.getName(), rankedCompetitors.get(0).getName());
+        assertEquals(c2Blue.getName(), rankedCompetitors.get(1).getName());
+        assertEquals(c1Yellow.getName(), rankedCompetitors.get(2).getName());
+        assertEquals(c2Yellow.getName(), rankedCompetitors.get(3).getName());
     }
 }
