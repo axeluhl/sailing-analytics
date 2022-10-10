@@ -66,7 +66,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
                         ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA });
         trackedRace2 = getTrackedRace();
         calculator1 = new MarkPassingCalculator(trackedRace1, false, false);
-        calculator2 = new MarkPassingCalculator(trackedRace2, false,false);
+        calculator2 = new MarkPassingCalculator(trackedRace2, false, false);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         assertTrue(fingerprint1.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();
         MarkPassingHashFingerprint output1 = factory.fromJson(json1);
-        assertTrue("Original and de-serialized copy are equal",  output1.matches(trackedRace1));
+        assertTrue("Original and de-serialized copy are equal", output1.matches(trackedRace1));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
     }
 
-    // @Test
+    @Test
     public void testWaypointChangePassingInstruction() {
         MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
         MarkPassingHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
@@ -126,7 +126,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
     }
 
-    // @Test
+    @Test
     public void testControlPointChange() {
         MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
         MarkPassingHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);

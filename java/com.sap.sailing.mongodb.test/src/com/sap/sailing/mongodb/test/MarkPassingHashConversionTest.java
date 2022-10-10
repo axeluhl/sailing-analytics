@@ -64,7 +64,8 @@ public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
         RaceIdentifier raceIdentifier = trackedRace1.getRaceIdentifier();
         new MongoObjectFactoryImpl(firstDatabase).storeFingerprintForMarkPassingHash(fingerprint, raceIdentifier);
         DomainObjectFactory dF = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
-        HashMap<RaceIdentifier, MarkPassingHashFingerprint> fingerprintHashMap = dF.loadFingerprintsForMarkPassingHashes();
+        HashMap<RaceIdentifier, MarkPassingHashFingerprint> fingerprintHashMap = dF
+                .loadFingerprintsForMarkPassingHashes();
         MarkPassingHashFingerprint fingerprintAfterDB = fingerprintHashMap.get(trackedRace1.getRaceIdentifier());
         assertTrue("Original and de-serialized copy are equal", fingerprintAfterDB.matches(trackedRace1));
     }
