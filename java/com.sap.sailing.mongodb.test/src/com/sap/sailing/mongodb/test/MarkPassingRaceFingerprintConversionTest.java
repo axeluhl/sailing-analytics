@@ -29,12 +29,12 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 
-public class MarkPassingHashConversionTest extends OnlineTracTracBasedTest {
+public class MarkPassingRaceFingerprintConversionTest extends OnlineTracTracBasedTest {
     DynamicTrackedRaceImpl trackedRace1;
     DynamicTrackedRaceImpl trackedRace2;
     private final MongoDBConfiguration dbConfiguration;
 
-    public MarkPassingHashConversionTest() throws MalformedURLException, URISyntaxException {
+    public MarkPassingRaceFingerprintConversionTest() throws MalformedURLException, URISyntaxException {
         super();
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
     }
