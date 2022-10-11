@@ -70,7 +70,7 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
      */
     Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction);
 
-    Waypoint getExistingWaypointById(Waypoint waypointPrototype);
+    Waypoint getExistingWaypointById(Serializable waypointId);
 
     /**
      * Atomically checks if a waypoint by an equal {@link Waypoint#getId()} as <code>waypoint</code> exists in this domain factory's

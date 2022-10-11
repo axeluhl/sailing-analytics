@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test.markpassinghash;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -29,21 +30,21 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
-import com.sap.sailing.domain.markpassinghash.MarkPassingHashCalculationFactory;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintFactory;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTest {
+public class MarkPassingRaceFingerprintJsonSerializationTest extends OnlineTracTracBasedTest {
     DynamicTrackedRaceImpl trackedRace1;
     DynamicTrackedRaceImpl trackedRace2;
     MarkPassingCalculator calculator1;
     MarkPassingCalculator calculator2;
 
-    public MarkPassingHashJsonSerializationTest() throws MalformedURLException, URISyntaxException {
+    public MarkPassingRaceFingerprintJsonSerializationTest() throws MalformedURLException, URISyntaxException {
         super();
     }
 
@@ -71,19 +72,21 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
 
     @Test
     public void testJsonSerialization() {
-        MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
-        MarkPassingHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         assertTrue(fingerprint1.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();
-        MarkPassingHashFingerprint output1 = factory.fromJson(json1);
+        MarkPassingRaceFingerprint output1 = factory.fromJson(json1);
         assertTrue("Original and de-serialized copy are equal", output1.matches(trackedRace1));
+        assertEquals(fingerprint1, output1);
+        assertEquals(fingerprint1.hashCode(), output1.hashCode());
     }
-
+    
     @Test
     public void testJsonSerializationWithChangesInMarkFixes() {
         DynamicTrackedRaceImpl testRace = trackedRace2;
-        MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
-        MarkPassingHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         assertTrue(fingerprint1.matches(trackedRace2));
         // Change of the race should result in a different hash
         TimePoint epoch = new MillisecondsTimePoint(0l);
@@ -101,7 +104,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
             }
         }
         assertFalse(fingerprint1.matches(trackedRace2));
-        MarkPassingHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(testRace);
         assertFalse(fingerprint2.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();
         JSONObject json2 = fingerprint2.toJson();
@@ -110,15 +113,15 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
 
     @Test
     public void testWaypointChangePassingInstruction() {
-        MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
-        MarkPassingHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         assertTrue(fingerprint1.matches(trackedRace2));
         Waypoint wp = trackedRace2.getRace().getCourse().getFirstWaypoint();
         ControlPoint cP = wp.getControlPoint();
         WaypointImpl wpNew = new WaypointImpl(cP, PassingInstruction.Gate);
         trackedRace2.getRace().getCourse().removeWaypoint(0);
         trackedRace2.getRace().getCourse().addWaypoint(0, wpNew);
-        MarkPassingHashFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
         assertFalse(fingerprint1.matches(trackedRace2));
         assertFalse(fingerprint2.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();
@@ -128,8 +131,8 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
 
     @Test
     public void testControlPointChange() {
-        MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
-        MarkPassingHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         assertTrue(fingerprint1.matches(trackedRace2));
         Mark gate1 = new MarkImpl("Gate1");
         Mark gate2 = new MarkImpl("Gate2");
@@ -137,7 +140,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         Waypoint wpNew = new WaypointImpl(cp, PassingInstruction.None);
         trackedRace2.getRace().getCourse().removeWaypoint(0);
         trackedRace2.getRace().getCourse().addWaypoint(0, wpNew);
-        MarkPassingHashFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
         assertFalse(fingerprint1.matches(trackedRace2));
         assertFalse(fingerprint2.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();
@@ -149,8 +152,8 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
     public void testCompetitorFixChange() {
         DynamicTrackedRaceImpl testRace = trackedRace2;
         final DynamicTrackedRaceImpl secureRace = trackedRace2;
-        MarkPassingHashCalculationFactory factory = MarkPassingHashCalculationFactory.INSTANCE;
-        MarkPassingHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         assertTrue(fingerprint1.matches(trackedRace2));
         Competitor firstCompetitor = trackedRace2.getRace().getCompetitors().iterator().next();
         secureRace.getTrack(firstCompetitor).lockForRead();
@@ -166,7 +169,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         DegreePosition degPos = new DegreePosition(pos.getLatDeg() + 0.05, pos.getLngDeg() + 0.05);
         GPSFixMoving gpsM = new GPSFixMovingImpl(degPos, tp, speed);
         testRace.getTrack(firstCompetitor).add(gpsM, true);
-        MarkPassingHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(testRace);
         assertFalse(fingerprint1.matches(testRace));
         assertFalse(fingerprint2.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();

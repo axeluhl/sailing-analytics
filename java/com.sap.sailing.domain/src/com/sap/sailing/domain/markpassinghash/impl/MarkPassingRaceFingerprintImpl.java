@@ -8,7 +8,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassinghash.MarkPassingHashFingerprint;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -16,7 +16,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
-public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprint {
+public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprint {
     private final int calculatorVersion;
     private final int competitorHash;
     private final TimePoint startOfTracking;
@@ -32,7 +32,7 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
         COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, START_TIME_RECEIVED_AS_MILLIS, START_TIME_FROM_RACE_LOG_AS_MILLIS, FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_ID, CALCULATOR_VERSION
     };
 
-    public MarkPassingHashFingerprintImpl(TrackedRace trackedRace) {
+    public MarkPassingRaceFingerprintImpl(TrackedRace trackedRace) {
         this.calculatorVersion = getCalculatorVersion(trackedRace);
         this.competitorHash = calculateHashForCompetitors(trackedRace);
         this.startOfTracking = trackedRace.getStartOfTracking();
@@ -49,7 +49,7 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
         this.gpsFixesHash = calculateHashForGPSFixes(trackedRace);
     }
 
-    public MarkPassingHashFingerprintImpl(JSONObject json) {
+    public MarkPassingRaceFingerprintImpl(JSONObject json) {
         this.calculatorVersion = ((Number) json.get(JSON_FIELDS.CALCULATOR_VERSION.name())).intValue();
         this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH.name())).intValue();
         this.startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.name()));
@@ -188,5 +188,69 @@ public class MarkPassingHashFingerprintImpl implements MarkPassingHashFingerprin
             res = (res << 5) - res; // we want to detect changes in order
         }
         return res;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + calculatorVersion;
+        result = prime * result + competitorHash;
+        result = prime * result + ((endOfTracking == null) ? 0 : endOfTracking.hashCode());
+        result = prime * result + ((finishTimeFromRaceLog == null) ? 0 : finishTimeFromRaceLog.hashCode());
+        result = prime * result + gpsFixesHash;
+        result = prime * result + numberOfGPSFixes;
+        result = prime * result + ((startOfTracking == null) ? 0 : startOfTracking.hashCode());
+        result = prime * result + ((startTimeFromRaceLog == null) ? 0 : startTimeFromRaceLog.hashCode());
+        result = prime * result + ((startTimeReceived == null) ? 0 : startTimeReceived.hashCode());
+        result = prime * result + waypointsHash;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MarkPassingRaceFingerprintImpl other = (MarkPassingRaceFingerprintImpl) obj;
+        if (calculatorVersion != other.calculatorVersion)
+            return false;
+        if (competitorHash != other.competitorHash)
+            return false;
+        if (endOfTracking == null) {
+            if (other.endOfTracking != null)
+                return false;
+        } else if (!endOfTracking.equals(other.endOfTracking))
+            return false;
+        if (finishTimeFromRaceLog == null) {
+            if (other.finishTimeFromRaceLog != null)
+                return false;
+        } else if (!finishTimeFromRaceLog.equals(other.finishTimeFromRaceLog))
+            return false;
+        if (gpsFixesHash != other.gpsFixesHash)
+            return false;
+        if (numberOfGPSFixes != other.numberOfGPSFixes)
+            return false;
+        if (startOfTracking == null) {
+            if (other.startOfTracking != null)
+                return false;
+        } else if (!startOfTracking.equals(other.startOfTracking))
+            return false;
+        if (startTimeFromRaceLog == null) {
+            if (other.startTimeFromRaceLog != null)
+                return false;
+        } else if (!startTimeFromRaceLog.equals(other.startTimeFromRaceLog))
+            return false;
+        if (startTimeReceived == null) {
+            if (other.startTimeReceived != null)
+                return false;
+        } else if (!startTimeReceived.equals(other.startTimeReceived))
+            return false;
+        if (waypointsHash != other.waypointsHash)
+            return false;
+        return true;
     }
 }
