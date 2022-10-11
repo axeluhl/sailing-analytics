@@ -1136,6 +1136,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected void setFinishingTime(final TimePoint newFinishingTime) {
         finishingTime = newFinishingTime;
+        updated(newFinishingTime);
     }
 
     @Override
@@ -1145,6 +1146,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected void setFinishedTime(final TimePoint newFinishedTime) {
         finishedTime = newFinishedTime;
+        updated(newFinishedTime);
     }
 
     private TimePoint getLastPassingOfFinishLine() {

@@ -60,6 +60,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor;
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
+    private final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache;
     
     /**
      * Considers all of the leaderboard's columns in their state at <code>timePoint</code> for calculating the score and rank.
@@ -89,6 +90,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.timePoint = timePoint;
         this.scoringScheme = scoringScheme;
         this.nullScoresAreBetter = nullScoresAreBetter;
+        this.cache = cache;
         netPointsCache = new HashMap<>();
         totalPointsCache = new HashMap<>();
         discardedRaceColumnsPerCompetitor = new HashMap<>();
@@ -252,7 +254,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                                 result = compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints), o2, Collections.unmodifiableList(o2TotalPoints), timePoint);
                                 if (result == 0) {
                                     // compare by last race:
-                                    result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
+                                    result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2, timePoint, cache);
                                     if (result == 0) {
                                         result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
                                         if (result == 0) {

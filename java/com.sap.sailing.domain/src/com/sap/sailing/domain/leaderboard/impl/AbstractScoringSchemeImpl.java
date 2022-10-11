@@ -18,6 +18,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -231,7 +232,6 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last race.
      * Any remaining ties shall be broken by using the tied boats' scores in the next-to-last race and so on until all
      * ties are broken. These scores shall be used even if some of them are excluded scores."</em>
-     * 
      * @param o1ScoresIncludingDiscarded
      *            scores that include the points for those races that have been discarded (total points)
      * @param o2ScoresIncludingDiscarded
@@ -239,7 +239,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      */
     @Override
     public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,
-            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded, boolean nullScoresAreBetter, Competitor o1, Competitor o2) {
+            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded, boolean nullScoresAreBetter, Competitor o1, Competitor o2, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int result = 0;
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         ListIterator<Pair<RaceColumn, Double>> o1Iter = o1ScoresIncludingDiscarded.listIterator(o1ScoresIncludingDiscarded.size());
