@@ -37,8 +37,14 @@
                 available which uses the new type of leaderboard which can reference another leaderboard for tie-breaking.
                 Note that when choosing this scoring scheme for any leaderboard but one that references a tie-breaking
                 leaderboard, the tie-breaking leaderboard functionality will simply be ignored, making it equivalent
-                in behavior to the simpler "High Point System, Match Racing" scoring scheme.</li>
+                in behavior to the simpler "High Point System, Match Racing" scoring scheme. It does not by default double
+                scores in medal race columns. Instead of a regular RRS A8.1 score comparison based on sorting all
+                scores, this scoring scheme uses the last race's finishing order for tie breaking before resorting
+                to the other leaderboard referenced.</li>
             <li>Added boat classes "Beneteau First 35" and "Beneteau First 45" with their class logos.</li>
+            <li>Setting a race's finishing/finished time now also updates a tracked race's "newest event" time point,
+                helping with cache invalidation and getting used when determining a leaderboard's fall-back time point
+                when requesting it for the "live" time point.</li>
           </ul>
           <h2 class="articleSubheadline">July 2022</h2>
           <ul class="bulletList">
