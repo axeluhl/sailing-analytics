@@ -946,6 +946,7 @@ Replicator {
     @Override
     public void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint,
             Map<Competitor, Map<Waypoint, MarkPassing>> markPassings) {
+        markPassingRaceFingerprints.put(raceIdentifier, fingerprint);
         mongoObjectFactory.storeMarkPassings(raceIdentifier, fingerprint, markPassings);
     }
 

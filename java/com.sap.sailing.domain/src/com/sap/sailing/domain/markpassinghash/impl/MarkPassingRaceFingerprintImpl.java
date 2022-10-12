@@ -169,7 +169,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
             final GPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getTrack(m);
             markTrack.lockForRead();
             try {
-                for (GPSFix gf : markTrack.getFixes()) {
+                for (GPSFix gf : markTrack.getRawFixes()) {
                     res = res ^ gf.getTimePoint().hashCode();
                     res = res ^ gf.getPosition().hashCode();
                 }
@@ -181,7 +181,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
             final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
             competitorTrack.lockForRead();
             try {
-                for (GPSFixMoving gfm : competitorTrack.getFixes()) {
+                for (GPSFixMoving gfm : competitorTrack.getRawFixes()) {
                     res = res ^ gfm.getTimePoint().hashCode();
                     res = res ^ gfm.getPosition().hashCode();
                     res = res ^ gfm.getSpeed().getBearing().hashCode();
