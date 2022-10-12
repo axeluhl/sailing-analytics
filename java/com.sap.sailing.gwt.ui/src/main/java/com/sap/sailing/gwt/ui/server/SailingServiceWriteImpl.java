@@ -313,6 +313,7 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboardWithEliminations;
+import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
@@ -983,6 +984,22 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
+    public StrippedLeaderboardDTO createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName) {
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaIdentifier), leaderboardDisplayName,
+                new Callable<StrippedLeaderboardDTO>() {
+                    @Override
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(
+                                getService().apply(new CreateRegattaLeaderboardWithOtherTieBreakingLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds,
+                                        otherTieBreakingLeaderboardName)),
+                                false, false);
+                    }
+                });
+    }
+
+    @Override
     public StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThresholds, List<UUID> newCourseAreaIds) {
         SecurityUtils.getSubject().checkPermission(
@@ -1620,7 +1637,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
+            Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne, List<FleetDTO> fleets) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
@@ -1628,7 +1645,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, isFleetsCanRunInParallel, resultDiscardingThresholds,
                         startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
-                        maximumNumberOfDiscards, fleets));
+                        maximumNumberOfDiscards, oneAlwaysStaysOne, fleets));
     }
 
     @Override
@@ -1700,7 +1717,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     protected RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
         RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getName(),
-                raceColumnInSeries.getSeries().getName(), raceColumnInSeries.getRegatta().getName());
+                raceColumnInSeries.getSeries().getName(), raceColumnInSeries.getRegatta().getName(),
+                raceColumnInSeries.isOneAlwaysStaysOne());
         fillRaceColumnDTO(raceColumnInSeries, raceColumnInSeriesDTO);
         return raceColumnInSeriesDTO;
     }

@@ -29,11 +29,12 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private final boolean seriesNameChanged;
     private final String newSeriesName;
     private final Integer maximumNumberOfDiscards;
+    private final boolean oneAlwaysStaysOne;
 
     public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
+            Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne, List<FleetDTO> fleets) {
         super(regattaIdentifier, seriesName);
         this.seriesNameChanged = !seriesName.equals(newSeriesName);
         this.newSeriesName = newSeriesName;
@@ -45,6 +46,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
         this.fleets = fleets;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     @Override
@@ -64,6 +66,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoring);
         series.setMaximumNumberOfDiscards(maximumNumberOfDiscards);
+        series.setOneAlwaysStaysOne(oneAlwaysStaysOne);
         if (series.getRegatta().isPersistent()) {
             toState.updateStoredRegatta(series.getRegatta());
         }

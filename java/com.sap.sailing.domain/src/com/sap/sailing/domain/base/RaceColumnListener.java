@@ -23,6 +23,8 @@ public interface RaceColumnListener extends Serializable {
 
     void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring);
 
+    void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne);
+
     default boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return true;
     }

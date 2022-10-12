@@ -1,11 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor> extends DataEntryDialog<LD> {
@@ -17,7 +23,7 @@ public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor
     protected DiscardThresholdBoxes discardThresholdBoxes;
 
     public AbstractLeaderboardDialog(String title, LD leaderboardDescriptor, StringMessages stringMessages,
-            Validator<LD> validator,  DialogCallback<LD> callback) {
+            Validator<LD> validator, DialogCallback<LD> callback) {
         super(title, null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         nameTextBox = createTextBox(leaderboardDescriptor.getName());
         nameTextBox.setVisibleLength(50);
@@ -59,6 +65,28 @@ public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor
                     result = scoringSchemeType;
                     break;
                 }
+            }
+        }
+        return result;
+    }
+    
+    protected ListBox createSortedRegattaLeaderboardsListBox(Collection<StrippedLeaderboardDTO> existingLeaderboards, String preSelectedRegattaName) {
+        ListBox result = createListBox(false);
+        // sort the regatta names
+        List<StrippedLeaderboardDTO> sortedRegattaLeaderboards = new ArrayList<>();
+        for (StrippedLeaderboardDTO leaderboard : existingLeaderboards) {
+            sortedRegattaLeaderboards.add(leaderboard);
+        }
+        Collections.sort(sortedRegattaLeaderboards, (rl1, rl2) -> rl1.getName().compareTo(rl2.getName()));
+        result.addItem(stringMessages.pleaseSelectARegatta());
+        int i=1;
+        for (StrippedLeaderboardDTO leaderboard : sortedRegattaLeaderboards) {
+            if (leaderboard.type.isRegattaLeaderboard()) {
+                result.addItem(leaderboard.getName(), leaderboard.getName());
+                if (preSelectedRegattaName != null && leaderboard.getName().equals(preSelectedRegattaName)) {
+                    result.setSelectedIndex(i);
+                }
+                i++;
             }
         }
         return result;

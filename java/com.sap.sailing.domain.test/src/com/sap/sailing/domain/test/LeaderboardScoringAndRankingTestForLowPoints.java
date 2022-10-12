@@ -23,7 +23,6 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
@@ -41,12 +40,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardScoringAndRankingTestBase {
     private static final double EPSILON = 0.000001;
-
-    protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
-            Regatta regatta, String leaderboardName, int[] discardingThresholds) {
-        return new DelegatingRegattaLeaderboardWithCompetitorElimination(
-                () -> createLeaderboard(regatta, discardingThresholds), leaderboardName);
-    }
 
     private void executePreSeries(List<Competitor> yellow, List<Competitor> blue, TimePoint now) {
         RaceColumn qColumn = series.get(0).getRaceColumnByName("Q");

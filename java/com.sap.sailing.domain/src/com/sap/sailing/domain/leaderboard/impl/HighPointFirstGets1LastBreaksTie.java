@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -146,7 +147,7 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
     @Override
     public int compareByLastRace(List<Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,
             List<Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded, boolean nullScoresAreBetter, Competitor o1,
-            Competitor o2) {
+            Competitor o2, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return 0;
     }
 }
