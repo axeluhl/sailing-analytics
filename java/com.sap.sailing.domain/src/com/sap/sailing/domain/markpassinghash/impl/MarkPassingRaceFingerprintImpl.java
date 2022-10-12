@@ -9,7 +9,6 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -33,7 +32,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
     };
 
     public MarkPassingRaceFingerprintImpl(TrackedRace trackedRace) {
-        this.calculatorVersion = getCalculatorVersion(trackedRace);
+        this.calculatorVersion = MarkPassingCalculator.CALCULATOR_VERSION;
         this.competitorHash = calculateHashForCompetitors(trackedRace);
         this.startOfTracking = trackedRace.getStartOfTracking();
         this.endOfTracking = trackedRace.getEndOfTracking();
@@ -88,7 +87,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
     @Override
     public boolean matches(TrackedRace trackedRace) {
         final boolean result;
-        if (!Util.equalsWithNull(calculatorVersion, getCalculatorVersion(trackedRace))) {
+        if (!Util.equalsWithNull(calculatorVersion, MarkPassingCalculator.CALCULATOR_VERSION)) {
             result = false;
         } else if (!Util.equalsWithNull(startOfTracking, trackedRace.getStartOfTracking())) {
             result = false;
@@ -117,12 +116,6 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
                 result = true;
             }
         }
-        return result;
-    }
-
-    private int getCalculatorVersion(TrackedRace trackedRace) {
-        MarkPassingCalculator calculator = new MarkPassingCalculator((DynamicTrackedRace) trackedRace, false, false);
-        int result = calculator.getCalculatorVersion();
         return result;
     }
 

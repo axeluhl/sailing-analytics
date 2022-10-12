@@ -188,6 +188,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardWithOtherTieBre
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -256,7 +257,6 @@ import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPrefe
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
-import com.sap.sailing.server.interfaces.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -355,7 +355,7 @@ import com.sap.sse.util.ThreadPoolUtil;
 
 public class RacingEventServiceImpl
 extends AbstractReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>
-implements RacingEventService, ClearStateTestSupport, RegattaListener, LeaderboardRegistry, MarkPassingRaceFingerprintRegistry,
+implements RacingEventService, ClearStateTestSupport, RegattaListener, LeaderboardRegistry,
 Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
@@ -1031,11 +1031,11 @@ Replicator {
                                 DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
                                 boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
                                 Optional<ThreadLocalTransporter> threadLocalTransporter,
-                                TrackingConnectorInfo trackingConnectorInfo) {
+                                TrackingConnectorInfo trackingConnectorInfo, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
                             final DynamicTrackedRace trackedRace = super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                             delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                                             millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                                            useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnectorInfo);
+                                            useMarkPassingCalculator, raceLogResolver, threadLocalTransporter, trackingConnectorInfo, markPassingRaceFingerprintRegistry);
                             getSecurityService().migrateOwnership(trackedRace);
                             trackedRace.runWhenDoneLoading(
                                     ()->numberOfTrackedRacesRestoredDoneLoading.incrementAndGet());
@@ -2021,11 +2021,11 @@ Replicator {
                 if (regatta == null) {
                     // create tracker and use an existing or create a default regatta
                     tracker = params.createRaceTracker(this, windStore, /* raceLogResolver */ this, /* leaderboardGroupResolver */ this, timeoutInMilliseconds,
-                            raceTrackingHandler);
+                            raceTrackingHandler, /* markPassingRaceFingerprintRegistry */ this);
                 } else {
                     // use the regatta selected by the RaceIdentifier regattaToAddTo
                     tracker = params.createRaceTracker(regatta, this, windStore, /* raceLogResolver */ this, /* leaderboardGroupResolver */ this, timeoutInMilliseconds,
-                            raceTrackingHandler);
+                            raceTrackingHandler, /* markPassingRaceFingerprintRegistry */ this);
                     assert tracker.getRegatta() == regatta;
                 }
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
@@ -2197,7 +2197,7 @@ Replicator {
                 /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator, /* raceLogResolver */ this,
                 Optional.of(this
                         .getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()),
-                trackingConnectorInfo);
+                trackingConnectorInfo, /* markPassingRaceFingerprintRegistry */ this);
     }
 
     private void ensureRegattaHasRaceAdditionListener(DynamicTrackedRegatta trackedRegatta) {

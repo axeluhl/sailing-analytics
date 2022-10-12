@@ -105,8 +105,9 @@ public interface ThreadPoolUtil {
     
     /**
      * Uses the {@code executor}'s {@link ExecutorService#invokeAll(java.util.Collection) invokeAll} method to execute
-     * all {@code tasks}. All exceptions that occur are logged, using the {@code logLevel} provided, using as the log
-     * message the message template, parameterized with the exception message.
+     * all {@code tasks}, returning only after all have completed normally or failed with an exception. All exceptions
+     * that occur are logged, using the {@code logLevel} provided, using as the log message the message template,
+     * parameterized with the exception message.
      * 
      * @param messageTemplate
      *            a message string that must contain a single {@code %s} parameter placeholder that will be substituted

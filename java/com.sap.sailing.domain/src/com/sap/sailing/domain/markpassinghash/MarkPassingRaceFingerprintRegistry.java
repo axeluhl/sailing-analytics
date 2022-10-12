@@ -1,4 +1,4 @@
-package com.sap.sailing.server.interfaces;
+package com.sap.sailing.domain.markpassinghash;
 
 import java.util.Map;
 
@@ -6,7 +6,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -34,6 +33,14 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public interface MarkPassingRaceFingerprintRegistry {
     void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings);
 
+    /**
+     * Looks for a fingerprint for which mark passings have been stored for the race identified by
+     * {@code raceIdentifier}.
+     * 
+     * @return {@code null} if no mark passings have been stored in this registry for the race identified by
+     *         {@code raceIdentifier}, otherwise the race fingerprint representing the state of the race at which the
+     *         mark passings stored in this registry were computed.
+     */
     MarkPassingRaceFingerprint getMarkPassingRaceFingerprint(RaceIdentifier raceIdentifier);
     
     /**

@@ -66,8 +66,8 @@ public class MarkPassingRaceFingerprintJsonSerializationTest extends OnlineTracT
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
                         ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA });
         trackedRace2 = getTrackedRace();
-        calculator1 = new MarkPassingCalculator(trackedRace1, false, false);
-        calculator2 = new MarkPassingCalculator(trackedRace2, false, false);
+        calculator1 = new MarkPassingCalculator(trackedRace1, false, false, /* markPassingRaceFingerprintRegistry */ null);
+        calculator2 = new MarkPassingCalculator(trackedRace2, false, false, /* markPassingRaceFingerprintRegistry */ null);
     }
 
     @Test

@@ -351,7 +351,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl<RaceLogConne
                     params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                     boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
                     /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
-                    new TrackingConnectorInfoImpl(RaceLogTrackingAdapter.NAME, RaceLogTrackingAdapter.DEFAULT_URL, /* no webUrl */ null));
+                    new TrackingConnectorInfoImpl(RaceLogTrackingAdapter.NAME, RaceLogTrackingAdapter.DEFAULT_URL, /* no webUrl */ null), /* markPassingRaceFingerprintRegistry */ null);
             notifyRaceCreationListeners();
             logger.info(String.format("Started tracking race-log race (%s)", raceLog));
             // this wakes up all waiting race handles
