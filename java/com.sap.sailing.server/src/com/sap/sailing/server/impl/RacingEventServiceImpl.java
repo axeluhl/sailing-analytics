@@ -100,6 +100,7 @@ import com.sap.sailing.domain.base.CompetitorAndBoatStore.BoatUpdateListener;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore.CompetitorUpdateListener;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -945,9 +946,9 @@ Replicator {
 
     @Override
     public void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint,
-            Map<Competitor, Map<Waypoint, MarkPassing>> markPassings) {
+            Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course) {
         markPassingRaceFingerprints.put(raceIdentifier, fingerprint);
-        mongoObjectFactory.storeMarkPassings(raceIdentifier, fingerprint, markPassings);
+        mongoObjectFactory.storeMarkPassings(raceIdentifier, fingerprint, markPassings, course);
     }
 
     @Override
@@ -956,10 +957,10 @@ Replicator {
     }
 
     @Override
-    public Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier) {
+    public Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course) {
         final Map<Competitor, Map<Waypoint, MarkPassing>> result;
         if (markPassingRaceFingerprints.containsKey(raceIdentifier)) {
-            result = domainObjectFactory.loadMarkPassings(raceIdentifier);
+            result = domainObjectFactory.loadMarkPassings(raceIdentifier, course);
         } else {
             result = null;
         }

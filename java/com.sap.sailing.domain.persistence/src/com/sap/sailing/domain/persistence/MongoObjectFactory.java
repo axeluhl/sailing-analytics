@@ -15,6 +15,7 @@ import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -241,6 +242,7 @@ public interface MongoObjectFactory {
      *            identifies the race to which the mark passings belong
      * @param fingerprint
      *            a composite fingerprint of the race in the state at which the mark passings were captured
+     * @param course TODO
      */
-    void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings);
+    void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course);
 }

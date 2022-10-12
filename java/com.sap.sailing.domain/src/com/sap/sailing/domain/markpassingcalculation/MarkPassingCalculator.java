@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -115,7 +116,7 @@ public class MarkPassingCalculator {
      * If not {@code null} then upon {@link #resume()} this mark passing calculator will look for a stored set of mark
      * passings for the {@link #race} using this registry. When such a set is found, the race's fingerprint is tried to
      * match against the {@link #race}. If it's a match then the mark passings are
-     * {@link MarkPassingRaceFingerprintRegistry#loadMarkPassings(com.sap.sailing.domain.common.RaceIdentifier) loaded}
+     * {@link MarkPassingRaceFingerprintRegistry#loadMarkPassings(com.sap.sailing.domain.common.RaceIdentifier, Course) loaded}
      * from the registry and all update events queued in the {@link #queue} are cleared. Otherwise, or if this is
      * {@code null}, the mark passings are calculated normally.
      */
@@ -594,7 +595,7 @@ public class MarkPassingCalculator {
                         final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = race.getMarkPassings(/* waitForLatestUpdates */ true);
                         markPassingRaceFingerprintRegistry.storeMarkPassings(race.getRaceIdentifier(),
                                 MarkPassingRaceFingerprintFactory.INSTANCE.createFingerprint(race),
-                                markPassings);
+                                markPassings, race.getRace().getCourse());
                     }, "Waiting for mark passings for "+race.getName()+" after having resumed to store the results in registry")
                     .start();
                 }
@@ -603,8 +604,9 @@ public class MarkPassingCalculator {
     }
 
     private void updateMarkPassingsFromRegistry() {
-        for (final Entry<Competitor, Map<Waypoint, MarkPassing>> e : markPassingRaceFingerprintRegistry.loadMarkPassings(race.getRaceIdentifier()).entrySet()) {
-            race.updateMarkPassings(e.getKey(), e.getValue().values().stream().sorted(TimedComparator.INSTANCE)::iterator);
+        for (final Entry<Competitor, Map<Waypoint, MarkPassing>> e : markPassingRaceFingerprintRegistry.loadMarkPassings(
+                race.getRaceIdentifier(), race.getRace().getCourse()).entrySet()) {
+            race.updateMarkPassings(e.getKey(), e.getValue().values().stream().sorted(TimedComparator.INSTANCE).collect(Collectors.toList()));
         }
     }
 
