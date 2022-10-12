@@ -403,7 +403,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     /**
      * @see #loadRaceIdentifier(Document)
      */
-    private void addRaceIdentifierToQuery(Document query, RaceIdentifier raceIdentifier) {
+    static void addRaceIdentifierToQuery(Document query, RaceIdentifier raceIdentifier) {
         query.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getRegattaName());
         query.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
     }

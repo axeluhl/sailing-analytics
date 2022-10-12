@@ -1985,15 +1985,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public void storeMarkPassings(RaceIdentifier raceIdentification, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings) {
+    public void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings) {
         MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
         JSONObject fingerprintjson = fingerprint.toJson();
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
         final Document result = new Document();
         final Document fingerprintDoc = Document.parse(fingerprintjson.toString());
         result.put(FieldNames.MARK_PASSINGS_FINGERPRINT.name(), fingerprintDoc);
-        storeRaceIdentifier(result, raceIdentification);
+        storeRaceIdentifier(result, raceIdentifier);
         final List<Document> markPassingsDoc = storeMarkPassings(markPassings);
         result.put(FieldNames.MARK_PASSINGS.name(), markPassingsDoc);
-        markPassingCollection.insertOne(result);
+        markPassingCollection.replaceOne(query, result, new ReplaceOptions().upsert(true));
     }
 }

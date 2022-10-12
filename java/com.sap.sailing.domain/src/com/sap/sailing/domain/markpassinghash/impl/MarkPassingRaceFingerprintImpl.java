@@ -2,6 +2,8 @@ package com.sap.sailing.domain.markpassinghash.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -14,6 +16,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprint {
     private final int calculatorVersion;
@@ -23,12 +26,15 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
     private final TimePoint endOfTracking;
     private final TimePoint startTimeFromRaceLog;
     private final TimePoint finishTimeFromRaceLog;
+    private final int fixedAndSuppressedMarkPassingsFromRaceLogHash;
     private final int waypointsHash;
     private final int numberOfGPSFixes;
     private final int gpsFixesHash;
 
     private static enum JSON_FIELDS {
-        COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, START_TIME_RECEIVED_AS_MILLIS, START_TIME_FROM_RACE_LOG_AS_MILLIS, FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, GPSFIXES_HASH, RACE_ID, CALCULATOR_VERSION
+        COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, START_TIME_RECEIVED_AS_MILLIS,
+        START_TIME_FROM_RACE_LOG_AS_MILLIS, FINISH_TIME_FROM_RACE_LOG_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES,
+        GPSFIXES_HASH, RACE_ID, CALCULATOR_VERSION, FIXED_AND_SUPPRESSED_MARK_PASSINGS_FROM_RACE_LOG_HASH
     };
 
     public MarkPassingRaceFingerprintImpl(TrackedRace trackedRace) {
@@ -46,6 +52,21 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
         this.waypointsHash = calculateHashForWaypoints(trackedRace);
         this.numberOfGPSFixes = calculateHashForNumberOfGPSFixes(trackedRace);
         this.gpsFixesHash = calculateHashForGPSFixes(trackedRace);
+        this.fixedAndSuppressedMarkPassingsFromRaceLogHash = calculateFixedAndSuppressedMarkPassingsFromRaceLogHash(trackedRace);
+    }
+
+    private int calculateFixedAndSuppressedMarkPassingsFromRaceLogHash(TrackedRace trackedRace) {
+        int result = 1023;
+        for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+            for (final Triple<Competitor, Integer, TimePoint> triple : new MarkPassingDataFinder(raceLog).analyze()) {
+                result ^= triple.getA().getId().hashCode();
+                result ^= triple.getB();
+                if (triple.getC() != null) {
+                    result ^= triple.getC().hashCode();
+                }
+            }
+        }
+        return result;
     }
 
     public MarkPassingRaceFingerprintImpl(JSONObject json) {
@@ -61,6 +82,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
         this.waypointsHash = ((Number) json.get(JSON_FIELDS.WAYPOINTS_HASH.name())).intValue();
         this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.name())).intValue();
         this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.name())).intValue();
+        this.fixedAndSuppressedMarkPassingsFromRaceLogHash = ((Number) json.get(JSON_FIELDS.FIXED_AND_SUPPRESSED_MARK_PASSINGS_FROM_RACE_LOG_HASH.name())).intValue();
     }
 
     @Override
@@ -81,6 +103,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
         result.put(JSON_FIELDS.WAYPOINTS_HASH.name(), waypointsHash);
         result.put(JSON_FIELDS.NUMBEROFGPSFIXES.name(), numberOfGPSFixes);
         result.put(JSON_FIELDS.GPSFIXES_HASH.name(), gpsFixesHash);
+        result.put(JSON_FIELDS.FIXED_AND_SUPPRESSED_MARK_PASSINGS_FROM_RACE_LOG_HASH.name(), fixedAndSuppressedMarkPassingsFromRaceLogHash);
         return result;
     }
 
@@ -109,6 +132,8 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
             } else if (competitorHash != calculateHashForCompetitors(trackedRace)) {
                 result = false;
             } else if (numberOfGPSFixes != calculateHashForNumberOfGPSFixes(trackedRace)) {
+                result = false;
+            } else if (fixedAndSuppressedMarkPassingsFromRaceLogHash != calculateFixedAndSuppressedMarkPassingsFromRaceLogHash(trackedRace)) {
                 result = false;
             } else if (gpsFixesHash != calculateHashForGPSFixes(trackedRace)) {
                 result = false;
@@ -177,7 +202,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
             for (Mark m : marks) {
                 res = res ^ m.getId().hashCode();
             }
-            res = res ^ p.getPassingInstructions().hashCode();
+            res = res ^ p.getPassingInstructions().name().hashCode();
             res = (res << 5) - res; // we want to detect changes in order
         }
         return res;
@@ -197,6 +222,7 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
         result = prime * result + ((startTimeFromRaceLog == null) ? 0 : startTimeFromRaceLog.hashCode());
         result = prime * result + ((startTimeReceived == null) ? 0 : startTimeReceived.hashCode());
         result = prime * result + waypointsHash;
+        result = prime * result + fixedAndSuppressedMarkPassingsFromRaceLogHash;
         return result;
     }
 
@@ -243,6 +269,8 @@ public class MarkPassingRaceFingerprintImpl implements MarkPassingRaceFingerprin
         } else if (!startTimeReceived.equals(other.startTimeReceived))
             return false;
         if (waypointsHash != other.waypointsHash)
+            return false;
+        if (fixedAndSuppressedMarkPassingsFromRaceLogHash != other.fixedAndSuppressedMarkPassingsFromRaceLogHash)
             return false;
         return true;
     }

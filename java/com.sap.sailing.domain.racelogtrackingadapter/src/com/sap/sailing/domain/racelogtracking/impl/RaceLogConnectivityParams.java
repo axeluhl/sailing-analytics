@@ -90,7 +90,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
         }
         DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
         return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver, this, trackedRegattaRegistry,
-                raceTrackingHandler);
+                raceTrackingHandler, markPassingRaceFingerprintRegistry);
     }
 
     @Override
