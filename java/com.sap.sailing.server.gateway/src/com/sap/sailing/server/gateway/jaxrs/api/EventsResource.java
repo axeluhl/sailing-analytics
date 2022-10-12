@@ -730,7 +730,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 defaultSeries.isFleetsCanRunInParallel(), defaultSeries.getDiscardingThresholds(),
                 defaultSeries.isStartsWithZero(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(),
                 defaultSeries.hasSplitFleetContiguousScoring(), defaultSeries.getMaximumNumberOfDiscards(),
-                defaultSeries.getFleets()));
+                defaultSeries.isOneAlwaysStaysOne(), defaultSeries.getFleets()));
     }
     
     private void addRaceColumns(String regattaName, String seriesName, int numberOfRaces) {
@@ -818,11 +818,10 @@ public class EventsResource extends AbstractSailingServerResource {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaName), regattaName,
                 new Callable<RegattaLeaderboard>() {
-
                     @Override
                     public RegattaLeaderboard call() throws Exception {
                         return getService()
-                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
+                                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
                     }
                 });
     }
@@ -867,10 +866,8 @@ public class EventsResource extends AbstractSailingServerResource {
     
     private LinkedHashMap<String, SeriesCreationParametersDTO> createDefaultSeriesCreationParameters(String regattaName,int numberOfRaces ) {
         final LinkedHashMap<String, SeriesCreationParametersDTO> series = new LinkedHashMap<>();
-
         series.put("Default", new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, null));
-
+                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, null, /* oneAlwaysStaysOne */ false));
         return series;
     }
 

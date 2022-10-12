@@ -90,6 +90,11 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     }
 
     @Override
+    default void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        defaultAction(); 
+    }
+
+    @Override
     default void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
         defaultAction(); 
     }

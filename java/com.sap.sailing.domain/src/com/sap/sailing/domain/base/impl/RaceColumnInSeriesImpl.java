@@ -72,6 +72,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     }
 
     @Override
+    public boolean isOneAlwaysStaysOne() {
+        return getSeries().isOneAlwaysStaysOne();
+    }
+
+    @Override
     public Series getSeries() {
         return series;
     }

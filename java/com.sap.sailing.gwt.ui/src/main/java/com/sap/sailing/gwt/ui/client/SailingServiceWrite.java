@@ -271,7 +271,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
-            List<FleetDTO> fleets) throws UnauthorizedException;
+            boolean oneAlwaysStaysOne, List<FleetDTO> fleets) throws UnauthorizedException;
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, List<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
@@ -378,6 +378,9 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
             String regattaName) throws UnauthorizedException;
 
+    StrippedLeaderboardDTO createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName);
+    
     StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds) throws UnauthorizedException;
 

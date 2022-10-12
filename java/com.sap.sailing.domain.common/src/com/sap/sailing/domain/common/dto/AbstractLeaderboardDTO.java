@@ -36,6 +36,10 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
      * Set to the non-<code>null</code> regatta name if this DTO represents a <code>RegattaLeaderboard</code>.
      */
     public String regattaName;
+    /**
+     * Set if this DTO represents a {@code RegattaLeaderboardWithOtherTieBreakingLeaderboard}
+     */
+    private String otherTieBreakingLeaderboardName;
     public String displayName;
     public List<CourseAreaDTO> courseAreas;
     public ScoringSchemeType scoringScheme;
@@ -110,6 +114,14 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
         } else {
             return competitorDisplayNames.get(competitor);
         }
+    }
+    
+    public String getOtherTieBreakingLeaderboardName() {
+        return otherTieBreakingLeaderboardName;
+    }
+
+    public void setOtherTieBreakingLeaderboardName(String otherTieBreakingLeaderboardName) {
+        this.otherTieBreakingLeaderboardName = otherTieBreakingLeaderboardName;
     }
 
     /**
@@ -196,7 +208,6 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
      * ensures that a fleet named <code>fleetName</code> is present. If it's not present yet, it's added to the race
      * column's fleet name list. The <code>trackedRaceIdentifier</code> and <code>race</code> are associated with the
      * column for the fleet identified by <code>fleetName</code>.
-     * 
      * @param explicitFactor
      *            factor by which to multiply the race column's points for the overall score; if <code>null</code>, the
      *            default will be determined by whether or not the column is marked as medal race
@@ -212,15 +223,16 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
      *            {@link RaceColumnInSeriesDTO}
      * @param fleetDTO
      *            must not be null
+     * @param oneAlwaysStaysOne TODO
      */
     public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
             String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace,
-            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race, boolean isMetaLeaderboardColumn) {
+            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race, boolean isMetaLeaderboardColumn, boolean oneAlwaysStaysOne) {
         assert fleetDTO != null;
         RaceColumnDTO raceColumnDTO = getRaceColumnByName(raceColumnName);
         if (raceColumnDTO == null) {
             raceColumnDTO = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName, medalRace,
-                explicitFactor, regattaName, seriesName, isMetaLeaderboardColumn);
+                explicitFactor, regattaName, seriesName, isMetaLeaderboardColumn, oneAlwaysStaysOne);
             races.add(raceColumnDTO);
         }
         raceColumnDTO.setEffectiveFactor(effectiveFactor);
@@ -240,9 +252,9 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
     }
 
     public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, String regattaName,
-            String seriesName, boolean isMetaLeaderboardColumn) {
+            String seriesName, boolean isMetaLeaderboardColumn, boolean oneAlwaysStaysOne) {
         final RaceColumnDTO raceColumn = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName,
-                medalRace, /* explicit factor */ null, regattaName, seriesName, isMetaLeaderboardColumn);
+                medalRace, /* explicit factor */ null, regattaName, seriesName, isMetaLeaderboardColumn, oneAlwaysStaysOne);
         races.add(raceColumn);
         return raceColumn;
     }
@@ -436,6 +448,11 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Secured
             if (other.getName() != null)
                 return false;
         } else if (!getName().equals(other.getName()))
+            return false;
+        if (getOtherTieBreakingLeaderboardName() == null) {
+            if (other.getOtherTieBreakingLeaderboardName() != null)
+                return false;
+        } else if (!getOtherTieBreakingLeaderboardName().equals(other.getOtherTieBreakingLeaderboardName()))
             return false;
         if (races == null) {
             if (other.races != null)
