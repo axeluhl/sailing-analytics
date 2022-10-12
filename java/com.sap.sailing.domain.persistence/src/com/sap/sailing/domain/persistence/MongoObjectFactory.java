@@ -242,7 +242,6 @@ public interface MongoObjectFactory {
      *            identifies the race to which the mark passings belong
      * @param fingerprint
      *            a composite fingerprint of the race in the state at which the mark passings were captured
-     * @param course TODO
      */
     void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course);
 }

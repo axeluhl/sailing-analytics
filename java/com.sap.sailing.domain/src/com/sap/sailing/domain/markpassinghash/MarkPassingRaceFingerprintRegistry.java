@@ -49,7 +49,6 @@ public interface MarkPassingRaceFingerprintRegistry {
      * {@code (}{@link #getMarkPassingRaceFingerprint(RaceIdentifier) getMarkPassingRaceFingerprint(raceIdentifier)}{@code )}<p>
      * 
      * If a mark passing race fingerprint is known for {@code raceIdentifier} in this registry and the 
-     * @param course TODO
      */
     Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course);
 }
