@@ -93,6 +93,7 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
 
     private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors,
             Function<Competitor, Double> timeOnDistanceAllowance) {
+        //create Competitors and their fleets.
         final ArrayList<Series> series = new ArrayList<>();
         for (String FleetName : new String[] { "Yellow", "Blue" }) {
             CompetitorWithBoat c1 = TrackBasedTest.createCompetitorWithBoat("Fast" + FleetName + "Boat");
@@ -103,6 +104,7 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                     .collect(Collectors.toMap(Competitor::getName, competitor -> competitor)));
 
         }
+        //create the Race and Regatta. The Regatta get ToT as metric. 
         final List<String> raceColumnNames = new ArrayList<>();
         raceColumnNames.add("R1");
         final Series zeroRankSeries = new SeriesImpl("zero Rank", /* isMedal */false,
@@ -115,7 +117,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                 /* startDate */ null, /* endDate */ null, series, /* persistent */false,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* course area */null,
                 OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
-
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         // create a two-lap upwind/downwind course:
@@ -131,7 +132,7 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
         finish = new WaypointImpl(leeGate);
         waypoints.add(finish);
         Course course = new CourseImpl("Test Course", waypoints);
-
+        // for each fleet add a race to the race column. Sailed on the same course
         for (Map.Entry<Fleet, List<CompetitorWithBoat>> fleetAndCompetitors : fleets.entrySet()) {
             final RaceColumn r1Column = series.get(0).getRaceColumnByName("R1");
             final Map<Competitor, Boat> competitorsAndBoats = TrackBasedTest
@@ -162,12 +163,19 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
         }
     }
 
-    private void testOnStartLeg(String[] expectedCompetitorOrder,
+    /**
+     *  Apply the GPSFixes and Markroundings given in {@code competitorsAndMarkPassingsWithGpsFixes} for each competitor. 
+     *  Afterwards test if the Competitors are in the same order as in the {@code expectedCompetitorOrder} when viewing the Leaderboard at {@code timePointOfViewingTheLeaderboard}.
+     *  
+     * @param expectedCompetitorOrder The Names of the Competitors in the expected order
+     * @param competitorsAndMarkPassingsWithGpsFixes Structure of markpassings and GPS Fixes for each competitor. 
+     * @param timePointOfViewingTheLeaderboard TimePoint at which the leaderboard is viewed. 
+     */
+    private void testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(String[] expectedCompetitorOrder,
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
             TimePoint timePointOfViewingTheLeaderboard) {
 
-        for (Map.Entry<DynamicTrackedRace, List<CompetitorWithBoat>> trackedRaceAndCompetitors : trackedRaces
-                .entrySet()) {
+        for (Map.Entry<DynamicTrackedRace, List<CompetitorWithBoat>> trackedRaceAndCompetitors : trackedRaces.entrySet()) {
             DynamicTrackedRace trackedRace = trackedRaceAndCompetitors.getKey();
             for (Competitor competitor : trackedRaceAndCompetitors.getValue()) {
                 trackedRace.updateMarkPassings(competitor,
@@ -191,39 +199,77 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
         }
     }
 
-    private Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes(
-            Collection<CompetitorWithBoat> collection) {
+    /**
+     * Generate the structure of MarkPassings and GpsFixes for the competitors given in {@code competitors}.
+     * @param competitors Collection of competitors for wich the structure should be generated. 
+     * @return MarkPassing and gpsFix Structure for all {@code competitors}
+     */
+    private Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> generateCompetitorsAndMarkPassingsWithGpsFixes(
+            Collection<CompetitorWithBoat> competitors) {
         Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassings = new HashMap<>();
-        for (Competitor competitor : collection) {
+        for (Competitor competitor : competitors) {
             competitorsAndMarkPassings.put(competitor,
                     new Pair<List<MarkPassing>, List<GPSFixMovingImpl>>(new ArrayList<>(), new ArrayList<>()));
         }
         return competitorsAndMarkPassings;
 
     }
+    /**
+     * 
+     * @param competitorsAndMarkPassingsWithGpsFixes DataStructure where the markPassing and gpsFix should be added 
+     * @param competitor Competitor for which the markpassing and gpsFix should be added
+     * @param markPassing markPassing to be added
+     * @param gpsFix gpsFix to be added
+     */
+    private void addMarkPassingAndGPSFix(
+            Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
+            Competitor competitor, MarkPassingImpl markPassing, GPSFixMovingImpl gpsFix) {
+        competitorsAndMarkPassingsWithGpsFixes.get(competitor).getA().add(markPassing);
+        competitorsAndMarkPassingsWithGpsFixes.get(competitor).getB().add(gpsFix);
+    }
 
+    /**
+     * Add StartMarkPassing for all competitors at the given timepoint 
+     * 
+     * @param competitorsAndMarkPassingsWithGpsFixes
+     * @param competitorNames
+     * @param startOfRace
+     */
     private void addStartMarkPassing(
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
             Iterable<String> competitorNames, TimePoint startOfRace) {
         for (String competitorName : competitorNames) {
             Competitor competitor = competitors.get(competitorName);
-            competitorsAndMarkPassingsWithGpsFixes.get(competitor).getA()
-                    .add(new MarkPassingImpl(startOfRace, start, competitor));
-            competitorsAndMarkPassingsWithGpsFixes.get(competitor).getB()
-                    .add(new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace,
-                            new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45))));
+            MarkPassingImpl markPassing = new MarkPassingImpl(startOfRace, start, competitor);
+            GPSFixMovingImpl gpsFix = new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace,
+                    new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45)));
+            addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, competitor, markPassing, gpsFix);
+
         }
     }
 
+    /**
+     * Add StartMarkPassings for both fleets 10 Minutes apart 
+     * @param competitorsAndMarkPassingsWithGpsFixes
+     * @param startOfRace
+     */
     private void addStartMarkPassing10MinutesApart(
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
             TimePoint startOfRace) {
-        addStartMarkPassing(competitorsAndMarkPassingsWithGpsFixes, Arrays.asList("FastBlueBoat", "FastBlueBoat"),
+        addStartMarkPassing(competitorsAndMarkPassingsWithGpsFixes, Arrays.asList("FastYellowBoat", "SlowYellowBoat"),
                 startOfRace);
-        addStartMarkPassing(competitorsAndMarkPassingsWithGpsFixes, Arrays.asList("FastBlueBoat", "FastBlueBoat"),
+        addStartMarkPassing(competitorsAndMarkPassingsWithGpsFixes, Arrays.asList("FastBlueBoat", "SlowBlueBoat"),
                 startOfRace.plus(Duration.ONE_MINUTE.times(10)));
     }
 
+    /**
+     * Append gpsFix for Competitor for the given TimePoint to the DataStructure
+     * 
+     * @param competitorsAndMarkPassingsWithGpsFixes
+     * @param competitorName
+     * @param position
+     * @param timePoint
+     */
     private void appendGPSFixForCompetitor(
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
             String competitorName, DegreePosition position, TimePoint timePoint) {
@@ -233,19 +279,19 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
 
     }
 
-    /*
+    /**
      * The fleet launched second has completely overtaken the fleet launched first. The distance between the fleets is
-     * so large that the fleet that started second is in front. Within the fleets, c1 and c2 have sailed the same
-     * distance, so c2 is ahead due to the ToT factor. This leads to the following ranking: SlowBlueBoat, FastBlueBoat,
-     * SlowBlueBoat, FastBlueBoat
+     * so large that the fleet that started second is in front. Within the fleets, the slow and fast competitors have sailed the same
+     * distance, so the slow competitor is ahead due to the ToT factor. 
+     * This leads to the following ranking: SlowBlueBoat, FastBlueBoat, SlowBlueBoat, FastBlueBoat
      */
     @Test
-    public void testTimeOnTimeWithFactorSecondFleetOvertookFirstFleetCompetitorsInFleetHaveSameSailedDistance() {
+    public void testCrossFleetScoringForTimeOnTimeSecondFleetOvertookFirstFleetOnFirstLegAllCompetitorsHaveSailedTheSameDistance() {
         String[] expectedOrder = new String[] { "SlowBlueBoat", "FastBlueBoat", "SlowYellowBoat", "FastYellowBoat" };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.2, 0),
@@ -256,23 +302,23 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.75, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 
-    /*
+    /**
      * The fleet launched second has completely overtaken the fleet launched first. The distance between the fleets is
-     * so large that the fleet that started second is in front. Within the fleets, c2 has covered minimally less
-     * distance than c1. However, due to the ToT factor, c2 is still ahead of c1. This leads to the following ranking:
-     * "SlowBlueBoat", "FastBlueBoat", "SlowYellowBoat", c1Yellow
+     * so large that the fleet that started second is in front. Within the fleets, the slow competitor has sailed minimally less
+     * distance than the fast compeitor. However, due to the ToT factor, the slow competitors are still ahead of the fast competitors. 
+     * This leads to the following ranking: "SlowBlueBoat", "FastBlueBoat", "SlowYellowBoat", "FastYellowBoat"
      */
 
     @Test
-    public void testTimeOnTimeWithFactorSecondFleetOvertookFirstFleetCompetitorsInFleetHaveDifferentSailedDistancesC2Leeds() {
+    public void testCrossFleetScoringForTimeOnTimeSecondFleetOvertookFirstFleetOnFirstLegAllFastCompetitorsSaildFurtherThanSlowButSlowOvertookFastDueToToT() {
         String[] expectedOrder = new String[] { "SlowBlueBoat", "FastBlueBoat", "SlowYellowBoat", "FastYellowBoat" };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.2, 0),
@@ -283,47 +329,47 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.74, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 
-    /*
-     * The competitor c1Blue has a large distance advantage over the other competitors. While c2Blue sails just behind
-     * c1Yellow. c2Yewllow is again spatially behind c2Blue. Due to the ToT factors the following ranking results:
-     * "FastBlueBoat","SlowBlueBoat", "FastYellowBoat", "SlowYellowBoat"
+    /**
+     * The competitor fastBlue has a large distance advantage over the other competitors. While slowBlue sails just behind
+     * fastYellow. slowYewllow is again spatially behind slowBlue. 
+     * This leads to the following ranking: "FastBlueBoat","SlowBlueBoat", "FastYellowBoat", "SlowYellowBoat"
      */
 
     @Test
-    public void testTimeOnTimeWithFactorSecondFleetOvertookFirstFleetCompetitorsInFleetHaveDifferentSailedDistancesC1Leads() {
+    public void testCrossFleetScoringForTimeOnTimeFastBlueOvertookFleet() {
         String[] expectedOrder = new String[] { "FastBlueBoat", "SlowBlueBoat", "FastYellowBoat", "SlowYellowBoat" };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.4, 0),
                 timePointOfViewingTheLeaderboard);
-        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowYellowBoat", new DegreePosition(0.19, 0),
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowYellowBoat", new DegreePosition(0.1, 0),
                 timePointOfViewingTheLeaderboard);
-        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastBlueBoat", new DegreePosition(0.75, 0),
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastBlueBoat", new DegreePosition(0.9, 0),
                 timePointOfViewingTheLeaderboard);
-        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.374, 0),
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.39, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 
-    /*
-     * The competitors c1Yewllow and c1Blue as well as c2Yellow and c2Blue sailed the same distance. The distance
-     * between c1 and c2 is such that the ToT factors put the c2 boats in the lead, resulting in the following ranking:
-     * "SlowYellowBoat", "SlowBlueBoat", "FastYellowBoat", c1Blue
+    /**
+     * The competitors fastYellow and fastBlue sailed the same distance. Same is true for slowYellow and slowBlue. The distance
+     * between the fast and slow competitors is such that the ToT factors put the slow boats in the lead, resulting in the following ranking:
+     * "SlowBlueBoat","SlowYellowBoat", "FastBlueBoat","FastYellowBoat"
      */
     @Test
-    public void testTimeOnTimeWithFactorC1BlueOvertookC1YellowAndC2BlueOvertookC2Yellow() {
-        String[] expectedOrder = new String[] { "FastBlueBoat", "SlowBlueBoat", "FastYellowBoat", "SlowYellowBoat" };
+    public void testCrossFleetScoringForTimeOnTimeSlowBoatsOvertookFastBoats() {
+        String[] expectedOrder = new String[] {  "SlowBlueBoat","SlowYellowBoat", "FastBlueBoat","FastYellowBoat"  };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.5, 0),
@@ -334,21 +380,21 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.3, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 
-    /*
-     * The competitors c1Yewllow and c1Blue as well as c2Yellow and c2Blue sailed the same distance. The distance
-     * between c1 and c2 is such that the ToT factors put the c1 boats in the lead, resulting in the following ranking:
-     * "FastYellowBoat", "FastBlueBoat", "SlowYellowBoat", "SlowBlueBoat"
+    /**
+     * The competitors fastYellow and fastBlue sailed the same distance. Same is true for slowYellow and slowBlue. The distance
+     * between the fast and slow competitors is such that the ToT factors put the fast boats in the lead, resulting in the following ranking:
+     * "FastBlueBoat", "FastYellowBoat", "SlowBlueBoat", "SlowYellowBoat"
      */
     @Test
-    public void testTimeOnTimeWithFactor2() {
-        String[] expectedOrder = new String[] { "FastYellowBoat", "SlowYellowBoat", "FastBlueBoat", "SlowBlueBoat" };
+    public void testCrossFleetScoringForTimeOnTimeSlowBoatsBehindFastBoats() {
+        String[] expectedOrder = new String[] { "FastBlueBoat", "FastYellowBoat", "SlowBlueBoat", "SlowYellowBoat" };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.5, 0),
@@ -359,20 +405,20 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.2, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 
-    /*
-     * c1Blue has overtaken c2Yellow. However, C2Blue is still behind c2Yewllow, resulting in the following order:
-     * "FastYellowBoat", "FastBlueBoat", "SlowYellowBoat", c2Blue
+    /**
+     *  fastBlue has overtaken fastYellow but is still spatially behind fastYellow, resulting in the following order:
+     *  "FastBlueBoat", "FastYellowBoat", "SlowYellowBoat", "SlowBlueBoat"
      */
     @Test
-    public void testTimeOnTimeWithFactorC1BlueOvertookC2Yellow() {
-        String[] expectedOrder = new String[] { "FastYellowBoat", "FastBlueBoat", "SlowYellowBoat", "SlowBlueBoat" };
+    public void testCrossFleetScoringForTimeOnTimeFastBlueHasOvertakenFastYellowButIsStillSpatiallBehindFastYellow() {
+        String[] expectedOrder = new String[] { "FastBlueBoat", "FastYellowBoat", "SlowYellowBoat", "SlowBlueBoat" };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.5, 0),
@@ -383,54 +429,142 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.12, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 
-    /*
-     * c1Blue has caught up to c2Yellow enough to lead to an overtake on the leaderboard. C2Blue continues behind
-     * c2Yewllow, resulting in the following order:
+    /**
+     * fastBlue has caught up to slowYellow enough to lead to an overtake on the leaderboard. slowBlue continues behind
+     * slowYellow, resulting in the following order: "FastBlueBoat","FastYellowBoat",  "SlowYellowBoat", "SlowBlueBoat"
      */
 
     @Test
-    public void testTimeOnTimeWithFactor3() {
-        String[] expectedOrder = new String[] { "FastYellowBoat", "FastBlueBoat", "SlowYellowBoat", "SlowBlueBoat" };
+    public void testCrossFleetScoringForTimeOnTimeFastBlueHasOvertakenFastYellowButIsStillSpatiallBehindSlowYellow() {
+        String[] expectedOrder = new String[] { "FastBlueBoat","FastYellowBoat",  "SlowYellowBoat", "SlowBlueBoat" };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
+                competitors.values());
+        addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.72, 0),
+                timePointOfViewingTheLeaderboard);
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowYellowBoat", new DegreePosition(0.2, 0),
+                timePointOfViewingTheLeaderboard);
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastBlueBoat", new DegreePosition(0.19, 0),
+                timePointOfViewingTheLeaderboard);
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.04, 0),
+                timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+    }
+
+    /**
+     * Just a normal race without overtaking
+     */
+    @Test
+    public void testCrossFleetScoringForTimeOnTimeAllFastBoatsPerformTheSameAndAllSlowBoatsPerformTheSame() {
+        String[] expectedOrder = new String[] { "FastBlueBoat", "FastYellowBoat", "SlowBlueBoat", "SlowYellowBoat" };
+        TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
+        TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
+        setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.5, 0),
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowYellowBoat", new DegreePosition(0.2, 0),
                 timePointOfViewingTheLeaderboard);
-        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastBlueBoat", new DegreePosition(0.19, 0),
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastBlueBoat", new DegreePosition(0.416666666, 0),
                 timePointOfViewingTheLeaderboard);
-        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.09, 0),
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.1666666666, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 
-    /*
-     * Just a normal race without overtaking
+    /**
+     * First Fleet has already rounded the mark and leads. While the fastBoats are Ahead of the slow Boats
      */
     @Test
-    public void testTimeOnTimeWithFactor5() {
-        String[] expectedOrder = new String[] { "FastBlueBoat", "FastYellowBoat", "SlowBlueBoat", "SlowYellowBoat" };
+    public void testTimeOnTimeFirstFleetRoundedMarkAndLeads() {
+        String[] expectedOrder = new String[] { "FastYellowBoat", "SlowYellowBoat", "FastBlueBoat", "SlowBlueBoat" };
         TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
+        TimePoint markRounding = startOfRace.plus(Duration.ONE_MINUTE.times(30));
         TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
         setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
-        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = competitorsAndMarkPassingsWithGpsFixes(
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
                 competitors.values());
         addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
-        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.5, 0),
+        // markRounding for FastYellow
+        Competitor fastYellow = competitors.get("FastYellowBoat");
+        MarkPassingImpl markPassingFastYellow = new MarkPassingImpl(markRounding, windward, fastYellow);
+        GPSFixMovingImpl gpsFixFastYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+        addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, fastYellow, markPassingFastYellow, gpsFixFastYellow);
+        // markRounding for SlowYellow
+        Competitor slowYellow = competitors.get("SlowYellowBoat");
+        MarkPassingImpl markPassingSlowYellow = new MarkPassingImpl(markRounding, windward, slowYellow);
+        GPSFixMovingImpl gpsFixSlowYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+        addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, slowYellow, markPassingSlowYellow, gpsFixSlowYellow);
+        // add current Position
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.4, 0),
                 timePointOfViewingTheLeaderboard);
-        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowYellowBoat", new DegreePosition(0.1, 0),
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowYellowBoat", new DegreePosition(0.9, 0),
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastBlueBoat", new DegreePosition(0.5, 0),
                 timePointOfViewingTheLeaderboard);
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.1, 0),
                 timePointOfViewingTheLeaderboard);
-        testOnStartLeg(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+        //test
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
+    }
+    
+    /**
+     * Both Fleets have rounded the first mark. FastBlue has overtaken SlowYellow
+     */
+    @Test
+    public void testTimeOnTimeBothFleetsRoundedMarkAndNoOvertaking() {
+        String[] expectedOrder = new String[] { "FastYellowBoat", "FastBlueBoat", "SlowYellowBoat" , "SlowBlueBoat" };
+        TimePoint startOfRace = referenceTimePoint.plus(Duration.ONE_MINUTE.times(10));
+        TimePoint markRounding = startOfRace.plus(Duration.ONE_MINUTE.times(30));
+        TimePoint timePointOfViewingTheLeaderboard = startOfRace.plus(Duration.ONE_HOUR);
+        setUp(c -> c.getName().contains("Fast") ? 2.0 : 1.0, c -> 0.0);
+        Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes = generateCompetitorsAndMarkPassingsWithGpsFixes(
+                competitors.values());
+        addStartMarkPassing10MinutesApart(competitorsAndMarkPassingsWithGpsFixes, startOfRace);
+        // markRounding for FastYellow
+        Competitor fastYellow = competitors.get("FastYellowBoat");
+        MarkPassingImpl markPassingFastYellow = new MarkPassingImpl(markRounding, windward, fastYellow);
+        GPSFixMovingImpl gpsFixFastYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+        addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, fastYellow, markPassingFastYellow, gpsFixFastYellow);
+        // markRounding for SlowYellow
+        Competitor slowYellow = competitors.get("SlowYellowBoat");
+        MarkPassingImpl markPassingSlowYellow = new MarkPassingImpl(markRounding, windward, slowYellow);
+        GPSFixMovingImpl gpsFixSlowYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+        addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, slowYellow, markPassingSlowYellow, gpsFixSlowYellow);
+        // markRounding for FastBlue
+        Competitor fastBlue = competitors.get("FastYellowBoat");
+        MarkPassingImpl markPassingFastBlue = new MarkPassingImpl(markRounding, windward, fastBlue);
+        GPSFixMovingImpl gpsFixFastBlue = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+        addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, fastBlue, markPassingFastBlue, gpsFixFastBlue);
+        // markRounding for SlowYellow
+        Competitor slowBlue = competitors.get("SlowYellowBoat");
+        MarkPassingImpl markPassingSlowslowBlue = new MarkPassingImpl(markRounding, windward, slowBlue);
+        GPSFixMovingImpl gpsFixSlowslowBlue = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+        addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, slowBlue, markPassingSlowslowBlue, gpsFixSlowslowBlue);
+        // add current Position
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.1, 0),
+                timePointOfViewingTheLeaderboard);
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowYellowBoat", new DegreePosition(0.4, 0),
+                timePointOfViewingTheLeaderboard);
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastBlueBoat", new DegreePosition(0.5, 0),
+                timePointOfViewingTheLeaderboard);
+        appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "SlowBlueBoat", new DegreePosition(0.9, 0),
+                timePointOfViewingTheLeaderboard);
+        //test
+        testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(expectedOrder, competitorsAndMarkPassingsWithGpsFixes, timePointOfViewingTheLeaderboard);
     }
 }
