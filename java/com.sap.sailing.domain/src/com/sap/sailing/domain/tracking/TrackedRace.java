@@ -532,6 +532,21 @@ public interface TrackedRace
     }
 
     /**
+     * Fetches all mark passings for all competitors from this tracked race.
+     *
+     * @see #getMarkPassings(Competitor, boolean)
+     */
+    default Map<Competitor, Map<Waypoint, MarkPassing>> getMarkPassings(boolean waitForLatestUpdates) {
+        final Map<Competitor, Map<Waypoint, MarkPassing>> result = new HashMap<>();
+        for (final Competitor competitor : getRace().getCompetitors()) {
+            for (final MarkPassing markPassing : getMarkPassings(competitor, waitForLatestUpdates)) {
+                result.computeIfAbsent(competitor, k->new HashMap<>()).put(markPassing.getWaypoint(), markPassing);
+            }
+        }
+        return result;
+    }
+
+    /**
      * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.
      * See also bug 1370 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1370). This is necessary because the
      * code that executes a course update will first ask the course's write lock and then relay execution to the

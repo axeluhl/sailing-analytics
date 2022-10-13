@@ -452,6 +452,8 @@ Replicator {
 
     private final ConcurrentHashMap<RaceIdentifier, MarkPassingRaceFingerprint> markPassingRaceFingerprints;
 
+    private final ConcurrentHashMap<RaceIdentifier, MarkPassingRaceFingerprint> markPassingRaceFingerprints;
+
     /**
      * See {@link #leaderboardsByNameLock}
      */
@@ -917,8 +919,8 @@ Replicator {
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
-        // Stores all events which run through a data migration
         loadMarkPassingRaceFingerprints();
+        // Stores all events which run through a data migration
         // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
         for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
             if (eventAndRequireStoreFlag.getB()) {
