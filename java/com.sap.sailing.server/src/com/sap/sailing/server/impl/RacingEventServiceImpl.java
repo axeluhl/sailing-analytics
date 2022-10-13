@@ -187,6 +187,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -255,6 +256,7 @@ import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPrefe
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
+import com.sap.sailing.server.interfaces.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -353,7 +355,8 @@ import com.sap.sse.util.ThreadPoolUtil;
 
 public class RacingEventServiceImpl
 extends AbstractReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>
-implements RacingEventService, ClearStateTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
+implements RacingEventService, ClearStateTestSupport, RegattaListener, LeaderboardRegistry, MarkPassingRaceFingerprintRegistry,
+Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -446,6 +449,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     private final ConcurrentHashMap<String, Set<LeaderboardGroup>> leaderboardGroupsByName;
 
     private final ConcurrentHashMap<UUID, LeaderboardGroup> leaderboardGroupsByID;
+
+    private final ConcurrentHashMap<RaceIdentifier, MarkPassingRaceFingerprint> markPassingRaceFingerprints;
 
     /**
      * See {@link #leaderboardsByNameLock}
@@ -879,8 +884,9 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         leaderboardGroupsByName = new ConcurrentHashMap<>();
         leaderboardGroupsByID = new ConcurrentHashMap<>();
         leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for " + this, /* fair */false);
-        leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
+        leaderboardsByName = new ConcurrentHashMap<>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for " + this, /* fair */false);
+        markPassingRaceFingerprints = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
@@ -912,6 +918,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
         // Stores all events which run through a data migration
+        loadMarkPassingRaceFingerprints();
         // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
         for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
             if (eventAndRequireStoreFlag.getB()) {
@@ -930,6 +937,32 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         if (anniversaryRaceDeterminator.isEnabled()) {
             this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
         }
+    }
+
+    private void loadMarkPassingRaceFingerprints() {
+        markPassingRaceFingerprints.putAll(domainObjectFactory.loadFingerprintsForMarkPassingHashes());
+    }
+
+    @Override
+    public void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint,
+            Map<Competitor, Map<Waypoint, MarkPassing>> markPassings) {
+        mongoObjectFactory.storeMarkPassings(raceIdentifier, fingerprint, markPassings);
+    }
+
+    @Override
+    public MarkPassingRaceFingerprint getMarkPassingRaceFingerprint(RaceIdentifier raceIdentifier) {
+        return markPassingRaceFingerprints.get(raceIdentifier);
+    }
+
+    @Override
+    public Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier) {
+        final Map<Competitor, Map<Waypoint, MarkPassing>> result;
+        if (markPassingRaceFingerprints.containsKey(raceIdentifier)) {
+            result = domainObjectFactory.loadMarkPassings(raceIdentifier);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     public ClassLoaderRegistry getMasterDataClassLoaders() {
