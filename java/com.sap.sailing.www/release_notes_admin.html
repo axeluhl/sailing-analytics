@@ -25,6 +25,11 @@
                 <div class="innerContent">
           <h2 class="articleSubheadline">September 2022</h2>
           <ul class="bulletList">
+            <li>Bug fix: when moving replicas from dedicated to shared instances, now their memory configuration
+                (absolute or relative) is propagated into their configuration correctly.</li>
+          </ul>
+          <h2 class="articleSubheadline">September 2022</h2>
+          <ul class="bulletList">
             <li>Series within a regatta now support a configuration option that, regardless a race column factor,
                 keeps the 1.0 score as 1.0, scaling the other scores accordingly. For example, the scores 1, 2, 3, ...
                 with a column factor of 2 would then be mapped to 1, 3, 5, ... Use this, e.g., to model iQFOil
