@@ -452,8 +452,6 @@ Replicator {
 
     private final ConcurrentHashMap<RaceIdentifier, MarkPassingRaceFingerprint> markPassingRaceFingerprints;
 
-    private final ConcurrentHashMap<RaceIdentifier, MarkPassingRaceFingerprint> markPassingRaceFingerprints;
-
     /**
      * See {@link #leaderboardsByNameLock}
      */

@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -515,21 +514,6 @@ public interface TrackedRace
      *            {@link MarkPassingCalculator }to block the thread until all calculations will be finished.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates);
-
-    /**
-     * Fetches all mark passings for all competitors from this tracked race.
-     *
-     * @see #getMarkPassings(Competitor, boolean)
-     */
-    default Map<Competitor, Map<Waypoint, MarkPassing>> getMarkPassings(boolean waitForLatestUpdates) {
-        final Map<Competitor, Map<Waypoint, MarkPassing>> result = new HashMap<>();
-        for (final Competitor competitor : getRace().getCompetitors()) {
-            for (final MarkPassing markPassing : getMarkPassings(competitor, waitForLatestUpdates)) {
-                result.computeIfAbsent(competitor, k->new HashMap<>()).put(markPassing.getWaypoint(), markPassing);
-            }
-        }
-        return result;
-    }
 
     /**
      * Fetches all mark passings for all competitors from this tracked race.
