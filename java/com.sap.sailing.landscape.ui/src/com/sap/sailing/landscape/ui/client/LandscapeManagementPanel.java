@@ -357,7 +357,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         Collections.singleton(applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_REPLICA_ON_SHARED_INSTANCE,
                 applicationReplicaSetToUpgrade -> switchToReplicaOnSharedInstance(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
+                        Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY,
                 applicationReplicaSetToUpgrade -> switchToAutoScalingReplicasOnly(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
@@ -399,8 +399,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsButtonPanel.add(useOnlyAutoScalingReplicasButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> useSharedInsteadOfDedicatedAutoScalingReplicasButton = new SelectedElementsCountingButton<>(
                 stringMessages.switchToReplicaOnSharedInstance(), applicationReplicaSetsTable.getSelectionModel(),
-                e->switchToReplicaOnSharedInstance(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
-                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+                e->switchToReplicaOnSharedInstance(stringMessages, applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> scaleAutoScalingReplicasUpDown = new SelectedElementsCountingButton<>(
                 stringMessages.scaleAutoScalingReplicasUpOrDown(), applicationReplicaSetsTable.getSelectionModel(),
@@ -563,7 +562,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         }
     }
 
-    private void switchToReplicaOnSharedInstance(StringMessages stringMessages, String selectedObject, Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
+    private void switchToReplicaOnSharedInstance(StringMessages stringMessages, Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
         new SwitchToReplicaOnSharedInstanceDialog(stringMessages, errorReporter, landscapeManagementService,
                 new DialogCallback<SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions>() {
                     @Override
