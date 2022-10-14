@@ -222,6 +222,11 @@ public class LandscapeServiceImpl implements LandscapeService {
         logger.info("Deploying replica for application replica set "+replicaSet.getName()+" to host "+hostToDeployTo);
         return spinUpReplicaAndRegisterInPublicTargetGroup(hostToDeployTo.getRegion(), replicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase, replicaReplicationBearerToken,
                 /* processLauncher: */ (AppConfigBuilderT replicaConfigurationBuilder)->{
+                    if (optionalMemoryInMegabytesOrNull != null) {
+                        replicaConfigurationBuilder.setMemoryInMegabytes(optionalMemoryInMegabytesOrNull);
+                    } else if (optionalMemoryTotalSizeFactorOrNull != null) {
+                        replicaConfigurationBuilder.setMemoryTotalSizeFactor(optionalMemoryTotalSizeFactorOrNull);
+                    }
                     // the process launcher uses the DeployProcessOnMultiServer procedure to launch the process based on the replica config 
                     DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcessBuilder =
                             DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> builder(replicaConfigurationBuilder, hostToDeployTo);
