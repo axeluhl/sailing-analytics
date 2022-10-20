@@ -189,12 +189,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor) throws NoWindException {
+    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor) throws NoWindException {
         return null;
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint,
+    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
@@ -454,7 +454,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         return null;
     }
 
@@ -704,7 +704,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 

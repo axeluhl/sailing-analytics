@@ -1,9 +1,13 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -140,32 +144,50 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? 0
-                : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
-                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : 0;
-    }
+        if(trackedRace == null || !trackedRace.hasStarted(timePoint)) {
+            return 0; 
+        }
+        if(race.hasCrossFleetMergedRanking()) {
+            HashMap<Integer, List<Fleet>> groupedFleets = new HashMap<>(); 
+            for (Fleet fleet : race.getFleets()) {
+                groupedFleets.get(fleet.getOrdering()).add(fleet);
+            }
+            if(groupedFleets.get(race.getFleetOfCompetitor(competitor).getOrdering()).size() > 0) {
+                // more than one fleet of the same rank -> need to merge these fleets
+                TreeMap<Competitor, RankComparable> competitorsAndRankComparables = new TreeMap<>(); 
+                for(Fleet fleet : groupedFleets.get(race.getFleetOfCompetitor(competitor).getOrdering())) {
+                    // just get the RankComparables because I intend to rewrite this part
+                    for (Map.Entry<Competitor, Pair<Integer, RankComparable>> entry : race.getTrackedRace(fleet).getCompetitorsFromBestToWorstAndRankComparable(timePoint).entrySet()) {
+                        competitorsAndRankComparables.put(entry.getKey(), entry.getValue().getB());
+                    }
+                }
+                
+                Iterator<Competitor> competitorsIterator =  competitorsAndRankComparables.keySet().iterator();
+                
+                for (int i = 0, numberOfDisqualificationsOfBetterRankedCompetitors = 0; competitorsIterator.hasNext(); i++) {
+                    if(competitorsIterator.next().equals(competitor)) {
+                        // need to adapt this method for mulitple fleets?
+                        return i-numberOfDisqualificationsOfBetterRankedCompetitors;
+                    }
 
-    /**
-     * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
-     * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
-     * competitors ranked worse by the tracking system need to have their rank corrected by one.
-     *
-     * @param trackedRace
-     *            the race to which the rank refers; look for disqualifications / max points reasons in this column
-     * @param timePoint
-     *            time point at which to consider disqualifications (not used yet because currently we don't remember
-     *            <em>when</em> a competitor was disqualified)
-     * @param rank
-     *            a competitors rank according to the tracking system
-     *
-     * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for
-     *         <code>race</code>, or otherwise a rank improved (lowered) by the number of disqualifications of
-     *         competitors whose tracked rank is better (lower) than <code>rank</code>.
-     */
-    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
-            TimePoint timePoint, int rank) {
-        return improveByDisqualificationsOfBetterRankedCompetitors(raceColumn,
-                trackedRace, timePoint, new Pair<>(rank, new RankComparableRank(rank))).getA();
+                    MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
+                            competitor, race, timePoint);
+                    if (isSuppressed(competitor) ||
+                            (maxPointsReasonForBetterCompetitor != null
+                            && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
+                            && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
+                        numberOfDisqualificationsOfBetterRankedCompetitors += 1;
+                    }
+                }
+                //error that needs to be handeld
+                return 0;
+            } else {
+                // just one fleet for the given rank -> no merge needed just use the normal behavior
+                return improveByDisqualificationsOfBetterRankedCompetitors(race,trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache));
+            }
+        } else {
+            return improveByDisqualificationsOfBetterRankedCompetitors(race,trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache));
+        }
     }
 
     /**
@@ -186,13 +208,13 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      *         <code>race</code>, or otherwise a <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of disqualifications of
      *         competitors whose tracked rank is better (lower) than <code>rank</code> while the {@link RankComparable} is consistent with the new Rank.
      */
-    private Pair<Integer, RankComparable<?>> improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
-            TimePoint timePoint, Pair<Integer, RankComparable<?>> rank) {
-        Pair<Integer, RankComparable<?>> correctedRank = rank;
+    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
+            TimePoint timePoint, int rank) {
+        int correctedRank = rank;
         Iterable<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
         int betterCompetitorRank = 1;
         Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
-        while (betterCompetitorRank < rank.getA() && ci.hasNext()) {
+        while (betterCompetitorRank < rank && ci.hasNext()) {
             final Competitor betterTrackedCompetitor = ci.next();
             MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
                     betterTrackedCompetitor, raceColumn, timePoint);
@@ -200,7 +222,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                     (maxPointsReasonForBetterCompetitor != null
                     && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
                     && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
-                correctedRank = new Pair<>(correctedRank.getA() - 1, correctedRank.getB());
+                correctedRank = correctedRank - 1;
             }
             betterCompetitorRank++;
         }

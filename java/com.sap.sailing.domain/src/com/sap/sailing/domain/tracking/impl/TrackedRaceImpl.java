@@ -1584,13 +1584,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Pair<Integer,RankComparable<?>> getRankAndRankComparable(Competitor competitor){
+    public Pair<Integer,RankComparable> getRankAndRankComparable(Competitor competitor){
         return getRankAndRankComparable(competitor, MillisecondsTimePoint.now());
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache){
-        final Pair<Integer, RankComparable<?>> result;
+    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache){
+        final Pair<Integer, RankComparable> result;
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings.isEmpty()) {
             result = new Pair<>(0, new RankComparableRank(0));
@@ -1607,8 +1607,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 result = new Pair<>(0, new RankComparableRank(0));
             } else {
                 // A new Pair must be created because pairs can not be changed.
-                Pair<Integer, RankComparable<?>> rankingInfo = getCompetitorsFromBestToWorstAndRankComparable(timePoint, cache).get(competitor);
-                result = new Pair<Integer, RankComparable<?>>(rankingInfo.getA() + 1, rankingInfo.getB());
+                Pair<Integer, RankComparable> rankingInfo = getCompetitorsFromBestToWorstAndRankComparable(timePoint, cache).get(competitor);
+                result = new Pair<Integer, RankComparable>(rankingInfo.getA() + 1, rankingInfo.getB());
             }
         }
         return result;
@@ -1644,12 +1644,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         return getCompetitorsFromBestToWorstAndRankComparable(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint timePoint;
         // normalize the time point to get cache hits when asking for time points that are later than
         // the last time point affected by any event received for this tracked race
@@ -1700,7 +1700,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         final Iterator<Competitor> it = rankedCompetitors.iterator();
-        final LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> temp = new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>();
+        final LinkedHashMap<Competitor, Pair<Integer, RankComparable>> temp = new LinkedHashMap<Competitor, Pair<Integer, RankComparable>>();
         for (int i = 0; it.hasNext(); i++) {
             temp.put(it.next(), new Pair<>(i, new RankComparableRank(i)));
         }

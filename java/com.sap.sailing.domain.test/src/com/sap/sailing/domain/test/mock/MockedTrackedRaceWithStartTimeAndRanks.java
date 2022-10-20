@@ -234,12 +234,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor) throws NoWindException {
+    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor) throws NoWindException {
         return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint,
+    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
     }
@@ -473,7 +473,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         return null;
     }
 
@@ -750,7 +750,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 

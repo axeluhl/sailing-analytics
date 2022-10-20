@@ -132,6 +132,14 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
         return getSeries().hasSplitFleetContiguousScoring();
     }
 
+    /**
+     * Delegates to {@link Series#hasCrossFleetMergedRanking()}.
+     */
+    @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return getSeries().hasCrossFleetMergedRanking();
+    }
+
     @Override
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
         final RaceExecutionOrderProvider result;

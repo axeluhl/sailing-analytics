@@ -96,7 +96,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @author I518097
      *
      */
-    public class RankComparableRank implements RankComparable<RankComparableRank> {
+    public class RankComparableRank implements RankComparable{
         private final Integer rank;
 
         public RankComparableRank(Integer rank) {
@@ -108,16 +108,22 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         }
 
         @Override
-        public int compareTo(RankComparableRank o) {
-            if (rank == 0) {
-                return 1; // the other RankComparable is better because this RankComparable has not started
-            } else {
-                if (o.rank == 0) {
-                    return -1; // this RankComparable is better (lower rank) than the other one because the other one
-                               // has not started
+        public int compareTo(RankComparable o) {
+            if (o instanceof RankComparableRank) {
+                RankComparableRank otherRankComparableRank = (RankComparableRank) o; 
+                if (rank == 0) {
+                    return 1; // the other RankComparable is better because this RankComparable has not started
                 } else {
-                    return rank - o.rank; // normal integer compare
+                    if (otherRankComparableRank.rank == 0) {
+                        return -1; // this RankComparable is better (lower rank) than the other one because the other one
+                                   // has not started
+                    } else {
+                        return rank - otherRankComparableRank.rank; // normal integer compare
+                    }
                 }
+            }else {
+                // error handling needed 
+                return 0; 
             }
         }
     }

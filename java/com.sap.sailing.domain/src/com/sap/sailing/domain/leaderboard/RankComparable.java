@@ -8,5 +8,5 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * RankComparable makes it possible to compare {@link Competitor}s across fleets and therefore regardless of their {@link TrackedRace}. 
  * The type of comparison (time-based, distance-based or other metrics) depends on the {@link RankingMetric} used.
  */
-public interface RankComparable<T extends RankComparable<T>> extends Comparable<T> {
+public interface RankComparable extends Comparable<RankComparable> {
 }

@@ -113,9 +113,9 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst = new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>();
-        competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(), new Pair<>(1,new RankComparableRank(1)));
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable>> competitorsFromBestToWorst = new LinkedHashMap<Competitor, Pair<Integer, RankComparable>>();
+        competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(), new Pair<Integer, RankComparable>(1,new RankComparableRank(1)));
         return competitorsFromBestToWorst;
     }
 
