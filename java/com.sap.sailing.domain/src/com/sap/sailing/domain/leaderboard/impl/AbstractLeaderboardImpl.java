@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,36 +147,66 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        if(trackedRace == null || !trackedRace.hasStarted(timePoint)) {
-            return 0; 
+        if(trackedRace == null || trackedRace.hasStarted(timePoint) == false) {
+            return 0;
         }
+        // if the race has not set the flag hasCrossFleetMergedRanking we can use the ranks of each race to compute the scores.
+        // if on the other hand the flag is set, we first need to order the competitors after their rankComparables. After that we can assign scores.
         if(race.hasCrossFleetMergedRanking()) {
-            HashMap<Integer, List<Fleet>> groupedFleets = new HashMap<>(); 
+            // group fleets by their ordering in order to check if the hasCrossFleetMergedRanking has an effect or is irrelevant.
+            HashMap<Integer, List<Fleet>> groupedFleets = new HashMap<>();
             for (Fleet fleet : race.getFleets()) {
                 groupedFleets.get(fleet.getOrdering()).add(fleet);
             }
             if(groupedFleets.get(race.getFleetOfCompetitor(competitor).getOrdering()).size() > 0) {
                 // more than one fleet of the same rank -> need to merge these fleets
-                TreeMap<Competitor, RankComparable> competitorsAndRankComparables = new TreeMap<>(); 
+                List<LinkedHashMap<Competitor, Pair<Integer, RankComparable>>> competitorsFromBestToWorstAndRankComparableByFleet = new ArrayList<>();
                 for(Fleet fleet : groupedFleets.get(race.getFleetOfCompetitor(competitor).getOrdering())) {
                     // just get the RankComparables because I intend to rewrite this part
-                    for (Map.Entry<Competitor, Pair<Integer, RankComparable>> entry : race.getTrackedRace(fleet).getCompetitorsFromBestToWorstAndRankComparable(timePoint).entrySet()) {
-                        competitorsAndRankComparables.put(entry.getKey(), entry.getValue().getB());
+                    competitorsFromBestToWorstAndRankComparableByFleet.add(race.getTrackedRace(fleet).getCompetitorsFromBestToWorstAndRankComparable(timePoint));
+                }
+                LinkedList<Pair<Competitor, RankComparable>> competitorsAndRankComparables = new LinkedList<>();
+                
+                // I tried my best.... 
+                // merge first two fleets
+                Iterator<Map.Entry<Competitor, Pair<Integer, RankComparable>>> itListA =  competitorsFromBestToWorstAndRankComparableByFleet.get(0).entrySet().iterator();
+                Iterator<Map.Entry<Competitor, Pair<Integer, RankComparable>>> itListB =  competitorsFromBestToWorstAndRankComparableByFleet.get(1).entrySet().iterator();
+                Map.Entry<Competitor, Pair<Integer, RankComparable>> valueA = (itListA.hasNext() ? itListA.next() : null);
+                Map.Entry<Competitor, Pair<Integer, RankComparable>> valueB = (itListB.hasNext() ? itListB.next() : null);
+                while (valueA != null || valueB!= null) {
+                    if (valueB == null || (valueA != null && valueA.getValue().getB().compareTo(valueB.getValue().getB()) <= 0)) {
+                        competitorsAndRankComparables.add(new Pair<>(valueA.getKey(), valueA.getValue().getB()));
+                        valueA = (itListA.hasNext() ? itListA.next() : null);
+                    } else {
+                        competitorsAndRankComparables.add(new Pair<>(valueB.getKey(), valueB.getValue().getB()));
+                        valueB = (itListB.hasNext() ? itListB.next() : null);
                     }
                 }
+                // merge the rest of the fleets
+                for(int i = 3; i <= competitorsFromBestToWorstAndRankComparableByFleet.size(); i++) {
+                    Iterator<Map.Entry<Competitor, Pair<Integer, RankComparable>>> itList =  competitorsFromBestToWorstAndRankComparableByFleet.get(i).entrySet().iterator();
+                    int indexInSortedList = 0; 
+                    while(itList.hasNext()) {
+                        Map.Entry<Competitor, Pair<Integer, RankComparable>> nextValue = itList.next();
+                        while(competitorsAndRankComparables.get(indexInSortedList) != null && competitorsAndRankComparables.get(indexInSortedList).getB().compareTo(nextValue.getValue().getB()) > 0) {
+                            indexInSortedList++;
+                        }
+                        competitorsAndRankComparables.add(indexInSortedList, new Pair<>(nextValue.getKey(), nextValue.getValue().getB()));
+                    }
+                }
+
                 
-                Iterator<Competitor> competitorsIterator =  competitorsAndRankComparables.keySet().iterator();
-                
-                for (int i = 0, numberOfDisqualificationsOfBetterRankedCompetitors = 0; competitorsIterator.hasNext(); i++) {
-                    if(competitorsIterator.next().equals(competitor)) {
-                        // need to adapt this method for mulitple fleets?
-                        return i-numberOfDisqualificationsOfBetterRankedCompetitors;
+                Iterator<Pair<Competitor, RankComparable>> competitorsIterator =  competitorsAndRankComparables.iterator();
+                for (int rank = 1, numberOfDisqualificationsOfBetterRankedCompetitors = 0; competitorsIterator.hasNext(); rank++) {
+                    Competitor currentCompetitor = competitorsIterator.next().getA();
+                    if(currentCompetitor.equals(competitor)) {
+                        return rank-numberOfDisqualificationsOfBetterRankedCompetitors;
                     }
 
                     MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
-                            competitor, race, timePoint);
-                    if (isSuppressed(competitor) ||
-                            (maxPointsReasonForBetterCompetitor != null
+                            currentCompetitor, race, timePoint);
+                    if (isSuppressed(currentCompetitor) ||( 
+                            maxPointsReasonForBetterCompetitor != null
                             && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
                             && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
                         numberOfDisqualificationsOfBetterRankedCompetitors += 1;
