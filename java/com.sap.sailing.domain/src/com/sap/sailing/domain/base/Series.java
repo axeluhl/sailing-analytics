@@ -140,6 +140,9 @@ public interface Series extends SeriesBase {
      */
     boolean hasCrossFleetMergedRanking();
 
+    /**
+     * @see #hasCrossFleetMergedRanking()
+     */
     void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking);
 
     /**
