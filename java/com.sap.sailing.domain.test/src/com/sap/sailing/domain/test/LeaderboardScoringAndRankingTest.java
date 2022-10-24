@@ -2179,7 +2179,6 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         // third fleet has 2 missing boats
         double diffX2 = 7.0 / 5.0;
         double[] expectedResultsFleet3 = { 8, 8 - diffX2 * 1, 8 - diffX2 * 2, 8 - diffX2 * 3, 8 - diffX2 * 4, 1 };
-
         // check first race
         Iterator<Competitor> rankedCompetitorsFleet1 = r1Fleet1.getCompetitorsFromBestToWorst(later).iterator();
         int i = 0;
@@ -2190,7 +2189,6 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             i++;
         }
         assertEquals(8, i);
-
         // check second race
         Iterator<Competitor> rankedCompetitorsFleet2 = r1Fleet2.getCompetitorsFromBestToWorst(later).iterator();
         i = 0;
@@ -2201,7 +2199,6 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             i++;
         }
         assertEquals(7, i);
-
         // checked third race
         Iterator<Competitor> rankedCompetitorsFleet3 = r1Fleet3.getCompetitorsFromBestToWorst(later).iterator();
         i = 0;
@@ -2215,12 +2212,10 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
 
         List<Competitor> allCompetitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitorsCount, allCompetitorsFromBestToWorst.size());
-
         // check that the fleet winners have all 8 points
         assertEquals(8.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(0), later), 0.000000001);
         assertEquals(8.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(1), later), 0.000000001);
         assertEquals(8.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(2), later), 0.000000001);
-
         // check that the fleet looser have all 1 point
         assertEquals(1.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(competitorsCount-1), later), 0.000000001);
         assertEquals(1.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(competitorsCount-2), later), 0.000000001);

@@ -474,7 +474,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        return null;
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable>> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, Util.Pair<Integer,RankComparable>>();
+        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1), new Pair<>(i, new RankComparableRank(i)));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
     }
 
     @Override
@@ -746,12 +750,16 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return null;
+        return competitorsFromBestToWorst;
     }
 
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return null;
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable>> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, Util.Pair<Integer,RankComparable>>();
+        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1), new Pair<>(i, new RankComparableRank(i)));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
     }
 
     @Override
