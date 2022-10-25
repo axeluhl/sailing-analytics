@@ -163,15 +163,21 @@ public class LocalServerManagementPanel extends SimplePanel {
         final boolean hasGroupOwner = ownership != null && ownership.getTenantOwner() != null;
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
-        groupOwnerInfo.setHref(hasGroupOwner ?
-                UriUtils.fromString("#"+UserGroupManagementPlace.class.getSimpleName()+":"+AbstractFilterablePlace.FILTER_KEY+"="+ownership.getTenantOwner().getName()+
-                                    "&"+AbstractFilterablePlace.SELECT_EXACT_KEY+"="+ownership.getTenantOwner().getId().toString()) :
-                null);
+        if (hasGroupOwner) {
+            groupOwnerInfo.setHref(
+                    UriUtils.fromString("#"+UserGroupManagementPlace.class.getSimpleName()+":"+AbstractFilterablePlace.FILTER_KEY+"="+ownership.getTenantOwner().getName()+
+                                        "&"+AbstractFilterablePlace.SELECT_EXACT_KEY+"="+ownership.getTenantOwner().getId().toString()));
+        } else {
+            groupOwnerInfo.setHref("javascript:;");
+        }
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
-        userOwnerInfo.setHref(hasGroupOwner ?
-                UriUtils.fromString("#"+UserManagementPlace.class.getSimpleName()+":"+AbstractFilterablePlace.FILTER_KEY+"="+ownership.getUserOwner().getName()+
-                                    "&"+AbstractFilterablePlace.SELECT_EXACT_KEY+"="+ownership.getUserOwner().getName()) :
-                null);
+        if (hasUserOwner) {
+            userOwnerInfo.setHref(
+                    UriUtils.fromString("#"+UserManagementPlace.class.getSimpleName()+":"+AbstractFilterablePlace.FILTER_KEY+"="+ownership.getUserOwner().getName()+
+                                        "&"+AbstractFilterablePlace.SELECT_EXACT_KEY+"="+ownership.getUserOwner().getName()));
+        } else {
+            userOwnerInfo.setHref("javascript:;");
+        }
         // Update changeability
         isSelfServiceServerCheckbox.setEnabled(userService.hasServerPermission(DefaultActions.CHANGE_ACL));
         // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
