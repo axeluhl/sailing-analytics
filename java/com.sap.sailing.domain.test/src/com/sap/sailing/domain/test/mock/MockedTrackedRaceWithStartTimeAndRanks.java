@@ -43,7 +43,8 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
-import com.sap.sailing.domain.leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
+import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -231,17 +232,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return competitorsFromBestToWorst.indexOf(competitor) + 1;
-    }
-
-    @Override
-    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor) throws NoWindException {
-        return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
-    }
-
-    @Override
-    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
     }
 
     @Override
@@ -473,10 +463,19 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable>> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, Util.Pair<Integer,RankComparable>>();
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
+        LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, RankAndRankComparable>();
         for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
-            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1), new Pair<>(i, new RankComparableRank(i)));
+            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1),new RankAndRankComparable(i, new RankComparableRank(i)));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
+    }
+    
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
+        List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<CompetitorAndRankComparable>();
+        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitorsFromBestToWorst.get(i-1), new RankComparableRank(i)));
         }
         return competitorsFromBestToWorstAndRankComparable;
     }
@@ -754,10 +753,19 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable>> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, Util.Pair<Integer,RankComparable>>();
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, RankAndRankComparable>();
         for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
-            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1), new Pair<>(i, new RankComparableRank(i)));
+            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1), new RankAndRankComparable( i, new RankComparableRank(i)));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
+    }
+    
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<CompetitorAndRankComparable>();
+        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitorsFromBestToWorst.get(i-1), new RankComparableRank(i)));
         }
         return competitorsFromBestToWorstAndRankComparable;
     }

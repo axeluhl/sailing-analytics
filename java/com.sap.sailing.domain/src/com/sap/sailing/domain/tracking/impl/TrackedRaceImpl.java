@@ -38,6 +38,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
@@ -118,8 +119,9 @@ import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
-import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
+import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
@@ -291,7 +293,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private static final int MAX_COMPETITOR_RANKINGS_CACHE_SIZE = 10;
 
-    private transient LinkedHashMap<TimePoint, List<Competitor>> competitorRankings;
+    private transient LinkedHashMap<TimePoint, LinkedHashMap<Competitor, RankAndRankComparable>> competitorRankings;
 
     /**
      * The locks managed here correspond with the {@link #competitorRankings} structure. When
@@ -428,6 +430,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * time-on-distance, combination thereof or a more complicated scheme such as ORC Performance Curve, the ranking
      * process needs to take into account the competitor-specific correction factors defined in the measurement
      * certificate.
+     * 
+     * The RankingMetric for all {@link TrackedRace} within one {@link Regatta} must be the same. 
      */
     private final RankingMetric rankingMetric;
 
@@ -481,6 +485,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     /**
      * Constructs the tracked race with a configurable ranking metric.
+     * All {@link TrackedRace}s use the same {@link RankingMetric}. This is given by the fact that this constructor is only called in the {@link DynamicTrackedRaceImpl#DynamicTrackedRaceImpl(TrackedRegatta, RaceDefinition, Iterable, WindStore, long, long, long, long, boolean, RankingMetricConstructor, RaceLogAndTrackedRaceResolver, TrackingConnectorInfo)} constructor wich its self is only called from {@link TrackedRegattaImpl#createTrackedRace(RaceDefinition, Iterable, WindStore, long, long, long, com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet, boolean, RaceLogAndTrackedRaceResolver, Optional, TrackingConnectorInfo)}
      * @param rankingMetricConstructor
      *            the function that creates the ranking metric, passing this tracked race as argument. Callers may use a
      *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
@@ -686,11 +691,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         };
     }
 
-    private LinkedHashMap<TimePoint, List<Competitor>> createCompetitorRankingsCache() {
-        return new LinkedHashMap<TimePoint, List<Competitor>>() {
+    private LinkedHashMap<TimePoint, LinkedHashMap<Competitor, RankAndRankComparable>> createCompetitorRankingsCache() {
+        return new LinkedHashMap<TimePoint, LinkedHashMap<Competitor, RankAndRankComparable>>() {
             private static final long serialVersionUID = -6044369612727021861L;
             @Override
-            protected boolean removeEldestEntry(Entry<TimePoint, List<Competitor>> eldest) {
+            protected boolean removeEldestEntry(Entry<TimePoint, LinkedHashMap<Competitor, RankAndRankComparable>> eldest) {
                 return size() > MAX_COMPETITOR_RANKINGS_CACHE_SIZE;
             }
         };
@@ -1580,20 +1585,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getRankAndRankComparable(competitor, timePoint, cache).getA();
-    }
-
-    @Override
-    public Pair<Integer,RankComparable> getRankAndRankComparable(Competitor competitor){
-        return getRankAndRankComparable(competitor, MillisecondsTimePoint.now());
-    }
-
-    @Override
-    public Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache){
-        final Pair<Integer, RankComparable> result;
+        final int result;
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings.isEmpty()) {
-            result = new Pair<>(0, new RankComparableRank(0));
+            result = 0;
         } else {
             final boolean hasNoMarkPassingAtOrBeforeTimePoint;
             lockForRead(markPassings);
@@ -1604,11 +1599,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (hasNoMarkPassingAtOrBeforeTimePoint) {
                 // no mark passing at or before timePoint; competitor has not started / participated yet
-                result = new Pair<>(0, new RankComparableRank(0));
+                result = 0;
             } else {
-                // A new Pair must be created because pairs can not be changed.
-                Pair<Integer, RankComparable> rankingInfo = getCompetitorsFromBestToWorstAndRankComparable(timePoint, cache).get(competitor);
-                result = new Pair<Integer, RankComparable>(rankingInfo.getA() + 1, rankingInfo.getB());
+                result = getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).get(competitor).getRank();
             }
         }
         return result;
@@ -1640,16 +1633,30 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getCompetitorsFromBestToWorstAndRankComparable(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint)).keySet();
+        return getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint)).keySet();
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        return getCompetitorsFromBestToWorstAndRankComparable(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
+        return getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).entrySet()
+                .stream().map(e -> new CompetitorAndRankComparable(e.getKey(), e.getValue().getRankComparable())).collect(Collectors.toList());
+                
+    }
+
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
+        return getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint).entrySet()
+                .stream().map(e -> new CompetitorAndRankComparable(e.getKey(), e.getValue().getRankComparable())).collect(Collectors.toList());
+    }
+    
+    @Override
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint timePoint;
         // normalize the time point to get cache hits when asking for time points that are later than
         // the last time point affected by any event received for this tracked race
@@ -1667,7 +1674,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 competitorRankingsLocks.put(timePoint, readWriteLock);
             }
         }
-        List<Competitor> rankedCompetitors;
+        LinkedHashMap<Competitor, RankAndRankComparable> rankedCompetitors;
         synchronized (competitorRankings) {
             rankedCompetitors = competitorRankings.get(timePoint);
         }
@@ -1681,12 +1688,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         // RaceRankComparator requires course read lock
                         getRace().getCourse().lockForRead();
                         try {
+                            // here the rankingmetrics need to return the RankComparables so that they could be ranked accordingly. 
                             Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
-                            rankedCompetitors = new ArrayList<Competitor>();
+                            List<Competitor> tempList = new ArrayList<Competitor>();
                             for (Competitor c : getRace().getCompetitors()) {
-                                rankedCompetitors.add(c);
+                                tempList.add(c);
                             }
-                            Collections.sort(rankedCompetitors, comparator);
+                            Collections.sort(tempList, comparator);
+                            final Iterator<Competitor> it = tempList.iterator();
+                            rankedCompetitors = new LinkedHashMap<Competitor, RankAndRankComparable>();
+                            for (int i = 1; it.hasNext(); i++) {
+                                rankedCompetitors.put(it.next(), new RankAndRankComparable(i, new RankComparableRank(i)));
+                            }
                         } finally {
                             getRace().getCourse().unlockAfterRead();
                         }
@@ -1699,12 +1712,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 LockUtil.unlockAfterWrite(readWriteLock);
             }
         }
-        final Iterator<Competitor> it = rankedCompetitors.iterator();
-        final LinkedHashMap<Competitor, Pair<Integer, RankComparable>> temp = new LinkedHashMap<Competitor, Pair<Integer, RankComparable>>();
-        for (int i = 0; it.hasNext(); i++) {
-            temp.put(it.next(), new Pair<>(i, new RankComparableRank(i)));
-        }
-        return temp;
+        return rankedCompetitors;
     }
 
     @Override

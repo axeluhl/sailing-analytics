@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,8 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
+import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -303,33 +306,6 @@ public interface TrackedRace
     }
 
     int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
-
-    /**
-     * Computes the competitor's rank in this race for the current time as {@link Pair#getA() A} and a metric for the
-     * rank as {@link Pair#getB() B}. The metric is represented by a {@link RankComparable} and enables a later
-     * comparison of the participants regardless of their fleet. If the race hasn't {@link #hasStarted(TimePoint)
-     * started} yet, the result is undefined. Ordering competitors across fleets based on these {@link RankComparable}s
-     * must be consistent with the ordering by rank within each of those fleets.
-     *
-     * @return <code>(0,0)</code> in case the {@link Competitor} has not started / participated yet. A Pair
-     *         <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the
-     *         {@link RankingMetric} . The rank starts with 1 for the winner.
-     */
-    Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor) throws NoWindException;
-
-    /**
-     * Computes the competitor's rank in this race for the provided {@link TimePoint} as A and a metric for the rank as B.
-     * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their rank.
-     * If the race hasn't {@link #hasStarted(TimePoint) started} yet, the result is undefined.
-     *
-     * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.
-     *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric} . The rank starts with 1 for the winner.
-     */
-    default Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor, TimePoint timePoint) {
-        return getRankAndRankComparable(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
-    }
-
-    Pair<Integer, RankComparable> getRankAndRankComparable(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
@@ -832,7 +808,7 @@ public interface TrackedRace
      *
      * @return If no ranking can be computed for the given {@link TimePoint} an empty LinkeHashMap is returned not null.
      */
-    LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint);
+    LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint);
 
     /**
      * Same as {@link #getCompetitorsFromBestToWorstAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
@@ -840,7 +816,22 @@ public interface TrackedRace
      *
      * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link LinkedHashMap} is returned not null.
      */
-    LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    
+    /**
+     * Returns the competitors of this tracked race, according to their ranking (iteration order) and their RankComparables. 
+     *
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty  {@link List} is returned not null.
+     */
+    List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint);
+    
+    /**
+     * Same as {@link #getCompetitorsFromBestToWorstAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
+     * bearing values.
+     *
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link List} is returned not null.
+     */
+    List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose

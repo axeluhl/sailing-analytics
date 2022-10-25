@@ -1,0 +1,26 @@
+package com.sap.sailing.domain.leaderboard.impl;
+
+import com.sap.sailing.domain.leaderboard.RankComparable;
+
+public class RankAndRankComparable implements Comparable<RankAndRankComparable> {
+    private final Integer rank; 
+    private final RankComparable rankComparable;
+    
+    public RankAndRankComparable(Integer rank, RankComparable rankComparable) {
+        this.rank = rank;
+        this.rankComparable = rankComparable;
+    }
+    
+    public Integer getRank() {
+        return rank;
+    }
+    
+    public RankComparable getRankComparable() {
+        return rankComparable;
+    }
+    
+    @Override
+    public int compareTo(RankAndRankComparable o) {
+        return rankComparable.compareTo(o.getRankComparable());
+    } 
+}

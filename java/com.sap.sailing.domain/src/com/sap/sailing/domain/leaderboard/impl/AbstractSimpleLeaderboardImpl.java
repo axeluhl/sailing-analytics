@@ -548,19 +548,6 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> totalPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
-            /*
-             * Wenn ich es richtig verstanden habe, wird hier getCorrectedScore erst Aufgerufen, damit nicht für einen Competitor A mit festgesetztem Score ein Rang errechnet wird, der später eh wieder überschrieben wird. 
-             * Wenn allerdings für einen Competitor B im weiteren Verlauf diese Methode aufgerufen wird, dann wird über die getRank Methode später eh für jeden Competitor ein Rang errechnet und in den Cache gepackt. 
-             * Erst danach kommt dan improve by Disqualification wo der Rang dann nach der Unnötigen Berechnung angepasst wird. 
-             */
-            /*
-             * Der Score der aus get TotalPoints kommt schließt immer alle Flotten mit ein und korrigiert die Scores bereits entsprechend. 
-             */
-            /*
-             * Um nicht ein riesen Fass auf zu machen müsste hier eigentlich nichts angefasst werden. 
-             * Idealerweise, würde aus get TotalPoints und damit aus getCorrectedScore bereits der Score rauskommen, der nach dem Mergen raus kommt, da sonst alle Methoden angepasst werden müssen, 
-             * die getTotalPoints verwenden was sehr viele sind. 
-             */
             Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, cache);
             if (totalPoints != null) {
                 totalPointsAndFleet.put(competitor, new com.sap.sse.common.Util.Pair<Double, Fleet>(totalPoints,

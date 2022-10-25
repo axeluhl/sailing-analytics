@@ -17,10 +17,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
-import com.sap.sailing.domain.leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 
 public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private static final long serialVersionUID = -8587203762630194172L;
@@ -113,9 +112,9 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
 
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable>> competitorsFromBestToWorst = new LinkedHashMap<Competitor, Pair<Integer, RankComparable>>();
-        competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(), new Pair<Integer, RankComparable>(1,new RankComparableRank(1)));
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
+        LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorst = new LinkedHashMap<Competitor, RankAndRankComparable>();
+        competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(),new RankAndRankComparable(1,  new RankComparableRank(1)));
         return competitorsFromBestToWorst;
     }
 
