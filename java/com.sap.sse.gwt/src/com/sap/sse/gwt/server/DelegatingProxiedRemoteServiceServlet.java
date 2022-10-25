@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.server;
 
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -22,9 +21,9 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
 
     /**
      * Overwritten version of {@link RemoteServiceServlet#processCall(RPCRequest)} that calls
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, Writer)} instead of
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} instead of
      * {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}.
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, Writer)} in turn calls
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} in turn calls
      * {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)} which subclasses can override
      * in order to customize result serialization, e.g., by picking a cached serialized version.
      */
