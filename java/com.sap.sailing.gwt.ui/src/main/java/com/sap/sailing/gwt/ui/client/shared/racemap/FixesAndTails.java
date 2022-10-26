@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sse.common.ColorMapper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -249,13 +250,13 @@ public class FixesAndTails {
      *            request.
      * 
      */
-    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> fixesForCompetitors,
+    protected void updateFixes(Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, //TODO Not being used
             long timeForPositionTransitionMillis, boolean detailTypeChanged) {
         if (detailTypeChanged) {
             resetDetailValueSearch();
         }
-        for (final Map.Entry<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : fixesForCompetitors.entrySet()) {
+        for (final Map.Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 final CompetitorDTO competitor = e.getKey();
                 List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(competitor);
@@ -270,7 +271,7 @@ public class FixesAndTails {
                     // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
                     final Triggerable triggerable = new Triggerable(()->clearTail(competitor));
                     registerTriggerable(competitor, triggerable);
-                    fixesForCompetitor.addAll(e.getValue());
+                    Util.addAll(e.getValue(), fixesForCompetitor);
                     overlapsWithKnownFixes.put(competitor, true); // In case this was only one part of a split request, the next request *does* have an overlap
                     minDetailValueFix.remove(competitor);
                     maxDetailValueFix.remove(competitor);
@@ -331,7 +332,7 @@ public class FixesAndTails {
      *            If this list contains an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} fix, that fix must be the last in
      *            the list
      */
-    private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType> mergeThis, final long timeForPositionTransitionMillis) {
+    private void mergeFixes(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable mergeThis, final long timeForPositionTransitionMillis) {
         List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixes.get(competitorDTO);
         final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
         int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1

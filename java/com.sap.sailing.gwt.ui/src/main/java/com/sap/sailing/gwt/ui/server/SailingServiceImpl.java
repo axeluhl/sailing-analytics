@@ -344,6 +344,7 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -1769,7 +1770,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         } else {
             estimatedDuration = null;
         }
-        final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
+        final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositions = getBoatPositionsInternal(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName,
                 leaderboardGroupId);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
@@ -1837,12 +1838,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
-    private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
+    private Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId)
             throws NoWindException {
         Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
-        Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
+        Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> result = new HashMap<>();
         final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache> cachesByTimePoint = new ConcurrentHashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
@@ -1852,7 +1853,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
                     CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                     List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
-                    result.put(competitorDTO, fixesForCompetitor);
+                    result.put(competitorDTO, new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(fixesForCompetitor));
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
