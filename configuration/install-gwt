@@ -1,0 +1,26 @@
+#!/bin/bash
+SAILING_GIT_ROOT="${1}"
+GWT_VERSION=2.11.0
+GWT="${TMP}/gwt"
+GWT_ROOT="${TMP}/gwt/trunk"
+mkdir -p "${GWT_ROOT}"
+cd "${GWT}"
+git clone git@github.com:axeluhl/gwt.git -b issue-7987-compatibility trunk
+git clone https://github.com/gwtproject/tools.git
+git clone git@github.com:axeluhl/gwt-maven-plugin.git -b 2.11.0
+cd ${GWT_ROOT}
+ant clean dist-dev -Dgwt.version=${GWT_VERSION}
+cp build/dist/gwt-${GWT_VERSION}.zip /tmp
+cd /tmp
+rm -rf gwt-${GWT_VERSION}
+unzip gwt-${GWT_VERSION}.zip
+cd gwt-${GWT_VERSION}
+cp gwt-dev.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.dev/lib/gwt-dev.jar
+cp gwt-user.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.user/lib/gwt-user.jar
+cp gwt-servlet.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet.jar
+cp gwt-servlet-deps.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet-deps.jar
+for i in dev user servlet; do
+  mvn install:install-file -Dfile=gwt-${i}.jar -DgroupId=org.gwtproject -DartifactId=gwt-${i} -Dversion=${GWT_VERSION} -Dpackaging=jar
+done
+cd ${GWT_ROOT}/../gwt-maven-plugin
+mvn install
