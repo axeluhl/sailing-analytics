@@ -44,12 +44,14 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * object equipped only with the parameters needed to construct the sequence on the fly.
  * <p>
  * 
- * Most likely, the server side will use the proxy parameters and not hold the full list of
- * {@link GPSFixDTOWithSpeedWindTackAndLegType} objects. This will save memory on the server side (see also <a href=
+ * The server side uses {@code @GwtIncompatible} fields and types and will use the proxy parameters and not hold the
+ * full list of {@link GPSFixDTOWithSpeedWindTackAndLegType} objects. This will save memory on the server side (see also
+ * <a href=
  * "https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5077">https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5077</a>)
  * because the DTOs will be short-lived, and the serialization stream writer used to send the object to the client will
  * only have to hold on to the small proxy object in its object table and not all the DTOs constructed on the fly. The
  * design goal is to preserve memory by only actually producing the {@link GPSFixDTOWithSpeedWindTackAndLegType} objects
+ * during serialization into primitive values on the server side, on the fly, and then again
  * when de-serializing on the client. All fields are {@code transient}, and a custom field serializer is used for a
  * highly proprietary, very compact and memory-conserving serialization process.
  * <p>
@@ -143,11 +145,6 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable implements IsSerializa
         return selector.getIterator();
     }
 
-    @GwtIncompatible
-    private Iterator<GPSFixDTOWithSpeedWindTackAndLegType> createProxyIterator() {
-        return new ProxyIterator();
-    }
-    
     /**
      * A little trick with regards to @GwtIncompatible and the {@link ProxyIterator} which cannot compile for GWT due to
      * its server-side dependencies: The default implementation of {@link #getIterator()} in this class assumes that
