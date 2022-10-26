@@ -21,9 +21,9 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
 
     /**
      * Overwritten version of {@link RemoteServiceServlet#processCall(RPCRequest)} that calls
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} instead of
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, RPCRequest, TimePoint)} instead of
      * {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}.
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} in turn calls
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, RPCRequest, TimePoint)} in turn calls
      * {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)} which subclasses can override
      * in order to customize result serialization, e.g., by picking a cached serialized version.
      */
@@ -35,16 +35,19 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
             try {
                 onAfterRequestDeserialized(rpcRequest);
                 return invokeAndEncodeResponse(delegate, rpcRequest.getMethod(), rpcRequest.getParameters(),
-                        rpcRequest.getSerializationPolicy(), rpcRequest.getFlags());
+                        rpcRequest.getSerializationPolicy(), rpcRequest.getFlags(), rpcRequest, startOfProcessCall);
             } catch (IncompatibleRemoteServiceException ex) {
+                afterProcessCall(rpcRequest, startOfProcessCall);
                 log("An IncompatibleRemoteServiceException was thrown while processing this call.", ex);
                 return RPC.encodeResponseForFailedRequest(rpcRequest, ex);
             } catch (RpcTokenException tokenException) {
+                afterProcessCall(rpcRequest, startOfProcessCall);
                 log("An RpcTokenException was thrown while processing this call.", tokenException);
                 return RPC.encodeResponseForFailedRequest(rpcRequest, tokenException);
             }
-        } finally {
+        } catch (Throwable e) {
             afterProcessCall(rpcRequest, startOfProcessCall);
+            throw e;
         }
     }
 
@@ -52,10 +55,9 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
      * Similar to {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}, but
      * calls {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)}, giving subclasses
      * a way to override result serialization.
-     * @param writer the writer to serialize the output to
      */
     private String invokeAndEncodeResponse(Object target, Method serviceMethod, Object[] args,
-            SerializationPolicy serializationPolicy, int flags) throws SerializationException {
+            SerializationPolicy serializationPolicy, int flags, RPCRequest rpcRequest, TimePoint startOfProcessCall) throws SerializationException {
         if (serviceMethod == null) {
             throw new NullPointerException("serviceMethod");
         }
@@ -64,6 +66,7 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
         }
         try {
             Object result = serviceMethod.invoke(target, args);
+            afterProcessCall(rpcRequest, startOfProcessCall);
             return encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
         } catch (IllegalAccessException e) {
             SecurityException securityException = new SecurityException(formatIllegalAccessErrorMessage(target, serviceMethod));
@@ -75,6 +78,7 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
             throw securityException;
         } catch (InvocationTargetException e) {
             // Try to encode the caught exception
+            afterProcessCall(rpcRequest, startOfProcessCall);
             Throwable cause = resolveCause(e);
             logger.log(Level.SEVERE, "Uncaught exception, forwarded to client", cause);
             try {
