@@ -23,3 +23,4 @@ for i in dev user servlet; do
 done
 cd ${GWT_ROOT}/../gwt-maven-plugin
 mvn install
+rm -rf "${GWT}"
