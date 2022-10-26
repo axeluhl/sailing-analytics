@@ -5,7 +5,7 @@ GWT="`mktemp -t -d gwt.XXXXX`"
 GWT_ROOT="${GWT}/trunk"
 cd "${GWT}"
 echo "GWT directory: ${GWT}"
-git clone git@github.com:axeluhl/gwt.git -b issue-7987-compatibility trunk
+git clone https://github.com/axeluhl/gwt.git -b issue-7987-compatibility trunk
 git clone https://github.com/gwtproject/tools.git
 git clone git@github.com:axeluhl/gwt-maven-plugin.git -b 2.11.0
 cd ${GWT_ROOT}
