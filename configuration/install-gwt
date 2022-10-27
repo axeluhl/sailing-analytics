@@ -20,11 +20,11 @@ cp gwt-user.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.user/lib/gwt-user.jar
 cp gwt-servlet.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet.jar
 cp gwt-servlet-deps.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet-deps.jar
 for i in dev user servlet; do
-  mvn install:install-file -Dfile=gwt-${i}.jar -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-$i-${GWT_VERSION}.pom"
+  mvn --batch-mode install:install-file -Dfile=gwt-${i}.jar -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-$i-${GWT_VERSION}.pom"
 done
 mkdir -p ~/.m2/repository/org/gwtproject/gwt/${GWT_VERSION}
-mvn install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom"
-mvn install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom"
+mvn --batch-mode install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom"
+mvn --batch-mode install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom"
 cd ${GWT_ROOT}/../gwt-maven-plugin
-mvn install
+mvn --batch-mode install
 rm -rf "${GWT}"
