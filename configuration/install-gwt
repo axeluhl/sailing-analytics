@@ -7,7 +7,7 @@ cd "${GWT}"
 echo "GWT directory: ${GWT}"
 git clone https://github.com/axeluhl/gwt.git -b issue-7987-compatibility trunk
 git clone https://github.com/gwtproject/tools.git
-git clone https://github.com/axeluhl/gwt-maven-plugin.git -b 2.11.0
+git clone https://github.com/axeluhl/gwt-maven-plugin.git -b ${GWT_VERSION}
 cd ${GWT_ROOT}
 ant clean dist-dev -Dgwt.version=${GWT_VERSION}
 cp build/dist/gwt-${GWT_VERSION}.zip /tmp
@@ -20,8 +20,11 @@ cp gwt-user.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.user/lib/gwt-user.jar
 cp gwt-servlet.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet.jar
 cp gwt-servlet-deps.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet-deps.jar
 for i in dev user servlet; do
-  mvn install:install-file -Dfile=gwt-${i}.jar -DgroupId=org.gwtproject -DartifactId=gwt-${i} -Dversion=${GWT_VERSION} -Dpackaging=jar
+  mvn install:install-file -Dfile=gwt-${i}.jar -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-$i-${GWT_VERSION}.pom"
 done
+mkdir -p ~/.m2/repository/org/gwtproject/gwt/${GWT_VERSION}
+mvn install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom"
+mvn install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom"
 cd ${GWT_ROOT}/../gwt-maven-plugin
 mvn install
 rm -rf "${GWT}"
