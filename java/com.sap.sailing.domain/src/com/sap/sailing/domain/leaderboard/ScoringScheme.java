@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -94,7 +95,7 @@ public interface ScoringScheme extends Serializable {
      *            scores of the second competitor, in the order of race columns in the leaderboard
      * @param discardedRaceColumnsPerCompetitor
      *            for each competitor holds the result of {@link Leaderboard#getResultDiscardingRule()
-     *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(...)}. This accelerates things considerable because we do not have to make this expensive calculation
      *            for each competitor again.
      */
@@ -117,10 +118,12 @@ public interface ScoringScheme extends Serializable {
      * <p>
      * 
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
-     * race. Any remaining ties shall be broken by using the tied boats’ scores in the next-to-last race and so on until
+     * race. Any remaining ties shall be broken by using the tied boats' scores in the next-to-last race and so on until
      * all ties are broken. These scores shall be used even if some of them are excluded scores."</em>
+     * @param timePoint TODO
+     * @param cache TODO
      */
-    int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2);
+    int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Under certain circumstances, a scoring scheme may decide that the scores of a column are not (yet) to be used
@@ -140,6 +143,8 @@ public interface ScoringScheme extends Serializable {
      * @throws NoWindException 
      */
     int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
+    
+    int compareByOtherTieBreakingLeaderboard(RegattaLeaderboardWithOtherTieBreakingLeaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
 
     /**
      * Returning {@code true} makes the number of wins in a medal series the primary ranking criteria.
@@ -186,5 +191,28 @@ public interface ScoringScheme extends Serializable {
             factor = raceColumn.isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.0;
         }
         return factor;
+    }
+    
+    /**
+     * Computes a score corrected by a {@link #getScoreFactor(RaceColumn) column factor} and potentially other
+     * column-specific rules, such as that despite multiplying, the original score 1 is to map to 1 again.
+     * Respects {@link RaceColumn#isOneAlwaysStaysOne()} on the {@code raceColumn}.
+     * 
+     * @see #getOriginalScoreFromScoreScaledByFactor(RaceColumn, double)
+     * @see ScoringSchemeType#getScaledScore(double, double, boolean)
+     */
+    default double getScoreScaledByFactor(RaceColumn raceColumn, double originalScore) {
+        return ScoringSchemeType.getScaledScore(getScoreFactor(raceColumn), originalScore, raceColumn.isOneAlwaysStaysOne());
+    }
+    
+    /**
+     * "Un-scales" a score; the inverse of {@link #getScoreScaledByFactor(RaceColumn, double)}. Respects
+     * {@link RaceColumn#isOneAlwaysStaysOne()} on the {@code raceColumn}.
+     * 
+     * @see #getScoreScaledByFactor(RaceColumn, double)
+     * @see ScoringSchemeType#getUnscaledScore(double, double, boolean)
+     */
+    default double getOriginalScoreFromScoreScaledByFactor(RaceColumn raceColumn, double scaledScore) {
+        return ScoringSchemeType.getUnscaledScore(getScoreFactor(raceColumn), scaledScore, raceColumn.isOneAlwaysStaysOne());
     }
 }

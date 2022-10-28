@@ -178,7 +178,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * 
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
-     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) throws NoWindException;
@@ -433,13 +433,13 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
      * the {@code competitor} in this leaderboard.
      */
-    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint);
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
      * computational effort compared to fetching all entries separately, particularly because all
      * {@link #isDiscarded(Competitor, RaceColumn, TimePoint) discarded races} of a competitor are computed in one
-     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)} only once.
+     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)} only once.
      * Note that in order to get the {@link #getNetPoints(Competitor, TimePoint) total points} for a competitor
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
@@ -630,7 +630,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * 
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
-     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,

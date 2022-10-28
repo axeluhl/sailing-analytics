@@ -163,16 +163,16 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      * When a {@link TrackedRace} moves into state {@link TrackedRaceStatusEnum#LOADING}, it shall call
      * this method on all its tracks to allow them to skip validity cache updates which, when done at massive
      * scale, are too expensive because they keep invalidating neighbors' validity and need some time to
-     * find those neighbors. When leading state LOADING, {@link #resumeValidityCaching()} must be called.
+     * find those neighbors. When leading state LOADING, {@link #resumeValidityAndMaxSpeedCaching()} must be called.
      */
-    void suspendValidityCaching();
+    void suspendValidityAndMaxSpeedCaching();
 
     /**
      * When a {@link TrackedRace} moves out of state {@link TrackedRaceStatusEnum#LOADING}, it shall call
      * this method on all its tracks to allow them to invalidate all validity caching so far in order to
      * have everything re-calculated when needed.
      */
-    void resumeValidityCaching();
+    void resumeValidityAndMaxSpeedCaching();
     
     /**
      * Gets a list of speed with bearing steps considering the provided time range. The bearings are retrieved by means

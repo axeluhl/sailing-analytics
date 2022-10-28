@@ -271,16 +271,16 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     }
 
     @Override
-    public Waypoint getExistingWaypointById(Waypoint waypointPrototype) {
+    public Waypoint getExistingWaypointById(Serializable waypointId) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
             Waypoint result = null;
-            Reference<Waypoint> ref = waypointCache.get(waypointPrototype.getId());
+            Reference<Waypoint> ref = waypointCache.get(waypointId);
             if (ref != null) {
                 result = ref.get();
                 if (result == null) {
                     // waypoint was finalized; remove entry from cache
-                    waypointCache.remove(waypointPrototype.getId());
+                    waypointCache.remove(waypointId);
                 }
             }
             return result;

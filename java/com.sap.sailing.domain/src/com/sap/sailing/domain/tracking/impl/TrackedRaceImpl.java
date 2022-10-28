@@ -1134,6 +1134,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected void setFinishingTime(final TimePoint newFinishingTime) {
         finishingTime = newFinishingTime;
+        updated(newFinishingTime);
     }
 
     @Override
@@ -1143,6 +1144,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     protected void setFinishedTime(final TimePoint newFinishedTime) {
         finishedTime = newFinishedTime;
+        updated(newFinishedTime);
     }
     
     private TimePoint getLastPassingOfFinishLine() {
@@ -3030,10 +3032,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private void suspendAllCachesNotUpdatingWhileLoading() {
         cachesSuspended = true;
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
-            competitorTrack.suspendValidityCaching();
+            competitorTrack.suspendValidityAndMaxSpeedCaching();
         }
         for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
-            markTrack.suspendValidityCaching();
+            markTrack.suspendValidityAndMaxSpeedCaching();
         }
         if (markPassingCalculator != null) {
             markPassingCalculator.suspend();
@@ -3046,10 +3048,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         cachesSuspended = false;
         shortTimeWindCache.clearCache();
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
-            competitorTrack.resumeValidityCaching();
+            competitorTrack.resumeValidityAndMaxSpeedCaching();
         }
         for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
-            markTrack.resumeValidityCaching();
+            markTrack.resumeValidityAndMaxSpeedCaching();
         }
         if (markPassingCalculator != null) {
             markPassingCalculator.resume();

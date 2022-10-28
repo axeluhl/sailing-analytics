@@ -130,7 +130,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         if (result == null) {
             throw new IllegalStateException("This didn't work. No database resulted from importing "+sourceDatabase+" into "+targetDatabase);
         }
-        final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(2, "MongoDB MD5 Hasher "+UUID.randomUUID());
+        final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(2, "MongoDB MD5 Hasher "+UUID.randomUUID(),
+                /* executeExistingDelayedTasksAfterShutdownPolicy */ true);
         final Future<String> sourceMd5 = executor.submit(()->sourceDatabase.getMD5Hash());
         final Future<String> targetMd5 = executor.submit(()->targetDatabase.getMD5Hash());
         executor.shutdown();

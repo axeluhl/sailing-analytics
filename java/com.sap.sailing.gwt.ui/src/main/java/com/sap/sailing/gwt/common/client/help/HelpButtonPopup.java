@@ -32,8 +32,8 @@ class HelpButtonPopup extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         this.popupPanel.addStyleName(resources.style().popup());
         this.popupPanel.setWidget(this);
-		this.textUi.setInnerText(description);
-		this.linkUi.setHref(url);
+        this.textUi.setInnerText(description);
+        this.linkUi.setHref(url);
     }
 
     void showRelativeTo(final Widget relativeTo) {

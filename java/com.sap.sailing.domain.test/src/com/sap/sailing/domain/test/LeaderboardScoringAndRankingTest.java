@@ -57,7 +57,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -85,11 +84,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRankingTestBase {
-    protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
-            Regatta regatta, String leaderboardName, int[] discardingThresholds) {
-        return new DelegatingRegattaLeaderboardWithCompetitorElimination(()->createLeaderboard(regatta, discardingThresholds), leaderboardName);
-    }
-
     @Test
     public void testOneStartedRaceWithDifferentScores() throws NoWindException {
         List<Competitor> competitors = createCompetitors(10);

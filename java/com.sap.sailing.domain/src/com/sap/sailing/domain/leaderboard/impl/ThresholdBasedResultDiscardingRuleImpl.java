@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -80,14 +81,15 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
 
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
-            Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint) {
-        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+            Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint, ScoringScheme scoringScheme) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, scoringScheme, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
                 Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint,
-                Function<RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+                ScoringScheme scoringScheme, Function<RaceColumn, Double> totalPointsSupplier,
+                WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
         final Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
@@ -96,7 +98,9 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
             for (final RaceColumn raceColumn : raceColumnsToConsider) {
                 if (raceColumn.isDiscardable()) {
                     sortedRaces.add(raceColumn);
-                    totalPointsForCompetitorPerColumn.put(raceColumn, totalPointsSupplier.apply(raceColumn));
+                    final Double totalPoints = totalPointsSupplier.apply(raceColumn);
+                    totalPointsForCompetitorPerColumn.put(raceColumn,
+                            totalPoints == null ? null : scoringScheme.getScoreScaledByFactor(raceColumn, totalPoints));
                 }
             }
             result = new HashSet<RaceColumn>();

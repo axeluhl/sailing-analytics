@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Region;
@@ -121,4 +122,10 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * is temporarily reduced by no more than one replica at a time.
      */
     void restartAllReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    /**
+     * @return {@code true} if this replica set is the one that this method is being run on. See
+     * {@link ServerInfo}.
+     */
+    boolean isLocalReplicaSet();
 }

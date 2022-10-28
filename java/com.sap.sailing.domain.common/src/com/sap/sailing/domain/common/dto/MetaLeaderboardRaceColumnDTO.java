@@ -7,7 +7,7 @@ public class MetaLeaderboardRaceColumnDTO extends RaceColumnDTO {
     MetaLeaderboardRaceColumnDTO() {} // for GWT RPC serialization only
     
     public MetaLeaderboardRaceColumnDTO(String name) {
-        super(name);
+        super(name, /* oneAlwaysStaysOne */ false);
     }
 
     private static final long serialVersionUID = 6152752963316150432L;

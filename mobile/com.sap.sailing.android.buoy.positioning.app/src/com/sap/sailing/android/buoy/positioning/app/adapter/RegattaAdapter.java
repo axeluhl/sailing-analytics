@@ -20,7 +20,7 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
         TextView name = (TextView) view.findViewById(R.id.regattaName);
         if (name != null) {
             String text = cursor
-                    .getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
+                    .getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
             name.setText(text);
         }
     }

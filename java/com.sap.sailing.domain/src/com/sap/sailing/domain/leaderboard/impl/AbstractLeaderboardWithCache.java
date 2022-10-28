@@ -419,7 +419,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                    isMetaLeaderboardColumn);
+                    isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
                 calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
             }
@@ -438,7 +438,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), getScoringScheme().getScoreFactor(raceColumn),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
+                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             }
             Future<List<CompetitorDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(
@@ -509,7 +509,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
             result.competitors.add(competitorDTO);
-            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
+            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint, getScoringScheme());
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
                 // in case boats can't change set the also the boat on the row to simplify access
                 if (result.canBoatsOfCompetitorsChangePerRace == false && row.boat == null) {
@@ -845,7 +845,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         row.totalDurationFoiledInSeconds = totalDurationFoiled==null?null:totalDurationFoiled.asSeconds();
     }
 
-    private LeaderboardDTOCache getLeaderboardDTOCache() {
+    protected LeaderboardDTOCache getLeaderboardDTOCache() {
         LeaderboardDTOCache result = this.leaderboardDTOCache;
         if (result == null) {
             synchronized (this) {
@@ -1183,7 +1183,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     @Override
-    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
     }
 
