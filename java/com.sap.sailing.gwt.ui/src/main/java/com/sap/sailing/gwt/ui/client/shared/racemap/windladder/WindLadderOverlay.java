@@ -126,7 +126,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             boolean inXBounds = -outerHalfWidth < xn && xn < outerHalfWidth;
             boolean inYBounds = -outerHalfHeight < yn && yn < outerHalfHeight;
             if (!inXBounds || !inYBounds) {
-                GWT.log("Bounds");
                 return false;
             }
         }
@@ -218,13 +217,13 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         ctx.scale(patternScale, patternScale);
         // Draw pattern onto mask
         ctx.fill();
-        // DEBUG Draw a debug square in the center of the canvas
-        ctx.restore();
-        ctx.beginPath();
-        ctx.translate(canvasWidth / 2, canvasHeight / 2);
-        ctx.rect(-2, -2, 4, 4);
-        ctx.setFillStyle("red");
-        ctx.fill();
+//        // DEBUG Draw a debug square in the center of the canvas
+//        ctx.restore();
+//        ctx.beginPath();
+//        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+//        ctx.rect(-2, -2, 4, 4);
+//        ctx.setFillStyle("red");
+//        ctx.fill();
         drawnPatternSize = tileSize * patternScale;
     }
 
