@@ -37,6 +37,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
     protected double previousOnAxisOffset;
 
     protected boolean redraw = true;
+    protected int transitionDisableCountdown;
 
     public WindLadderOverlay(WindLadder windLadder, MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
@@ -86,10 +87,12 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             Point offsetVector = Point.newInstance(onAxisOffset * windUnitVector.getX(), onAxisOffset * windUnitVector.getY());
 
             canAnimate = isInBounds(this.windBearing, offsetVector);
-            if (canAnimate) {
-                setCanvasPosition(getWidgetPosLeft() + offsetVector.getX(), getWidgetPosTop() + offsetVector.getY());
+            setCanvasPosition(getWidgetPosLeft() + offsetVector.getX(), getWidgetPosTop() + offsetVector.getY());
+            if (transitionDisableCountdown > 0) {
+                transitionDisableCountdown -= 1;
+            } else {
+                updateTransition(timeForPositionTransitionMillis);
             }
-            updateTransition(timeForPositionTransitionMillis);
             if (redraw) redraw();
             draw();
         }
@@ -150,7 +153,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         wantedLength = Math.max(wantedLength, 10.0); // Limit to sizes >= 10 m
         wantedLength *= 2.0; // The complete pattern is made up of 2 bars (one visible, one not)
         double scale = wantedLength / patternSizeMeters;
-        GWT.log("Scale: " + patternSizeMeters + " -> " + wantedLength + " -> " + scale);
         return scale;
     }
 
@@ -161,6 +163,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             setCanvasSettings();
             drawToCanvas();
             redraw = false;
+            transitionDisableCountdown = 3;
         }
     }
 
