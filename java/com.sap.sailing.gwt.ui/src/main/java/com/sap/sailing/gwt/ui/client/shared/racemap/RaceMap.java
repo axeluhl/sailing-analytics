@@ -116,7 +116,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickF
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sailing.gwt.ui.client.shared.racemap.windladder.WindLadderOverlay;
+import com.sap.sailing.gwt.ui.client.shared.racemap.windladder.WindLadder;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
@@ -331,7 +331,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final Map<String, HandlerRegistration> courseMarkClickHandlers;
 
-    private WindLadderOverlay windLadderOverlay;
+    private WindLadder windLadder;
 
     /**
      * Maps from the {@link MarkDTO#getIdAsString() mark's ID converted to a string} to the corresponding {@link MarkDTO}
@@ -2113,18 +2113,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
                         windFix = windTrackDTO.windFixes.get(0);
                     }
-                    if (windLadderOverlay == null) {
-                        windLadderOverlay = new WindLadderOverlay(map, 0 /* TODO z-index */, coordinateSystem);
-                        windLadderOverlay.addToMap();
+                    if (windLadder == null) {
+                        windLadder = new WindLadder(map, 0 /* TODO z-index */, coordinateSystem);
                     }
-                    windLadderOverlay.update(windFix, competitorPosition, timeForPositionTransitionMillis);
-                    if (!windLadderOverlay.isVisible()) {
-                        windLadderOverlay.setVisible(true);
+                    windLadder.update(windFix, competitorPosition, timeForPositionTransitionMillis);
+                    if (!windLadder.isVisible()) {
+                        windLadder.setVisible(true);
                     }
                 }
             }
-        } else if (windLadderOverlay != null && windLadderOverlay.isVisible()) {
-            windLadderOverlay.setVisible(false);
+        } else if (windLadder != null && windLadder.isVisible()) {
+            windLadder.setVisible(false);
         }
     }
 
