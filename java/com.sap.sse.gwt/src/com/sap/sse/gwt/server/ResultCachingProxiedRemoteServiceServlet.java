@@ -100,6 +100,7 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
                    try {
                        // append the cached payload to the writer
                        RPC.getResponseWriter().append(v);
+                       RPC.finishResponse();
                        written[0] = true;
                        return v;
                    } catch (IOException e) {
