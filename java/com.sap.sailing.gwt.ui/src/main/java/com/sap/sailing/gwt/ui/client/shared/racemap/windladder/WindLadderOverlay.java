@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
  */
 public class WindLadderOverlay extends FullCanvasOverlay {
     protected static final WindLadderResources RESOURCES = GWT.create(WindLadderResources.class);
-    protected static final double TEXTURE_ALPHA = 0.5d;
+    protected static final double TEXTURE_ALPHA = 0.4d;
     protected static final double CANVAS_RESERVE = 0.5;
 
     protected WindLadder windLadder;
@@ -31,18 +31,17 @@ public class WindLadderOverlay extends FullCanvasOverlay {
     protected Double windBearing;
     protected Position fixPosition;
 
-    protected boolean drawPatternHalfOffset;
     protected Double drawnPatternSize;
 
-    protected Double previousOnAxisOffset;
+    protected double previousFixPointWindwardDistance;
+    protected double previousOnAxisOffset;
 
     protected boolean redraw = true;
 
-    public WindLadderOverlay(WindLadder windLadder, MapWidget map, int zIndex, CoordinateSystem coordinateSystem,
-            boolean drawPatternOffset) {
+    public WindLadderOverlay(WindLadder windLadder, MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
+        this.map.addZoomChangeHandler(event -> this.onZoomChange());
         this.windLadder = windLadder;
-        this.drawPatternHalfOffset = drawPatternOffset;
     }
 
     public boolean update(Double windBearing, Position fixPosition, long timeForPositionTransitionMillis) {
@@ -66,31 +65,30 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         }
         if (mapProjection != null && this.windBearing != null && this.fixPosition != null && tileGen.getReady()) {
             // Rotation
-            //TODO Check if rotation can be animated or return false instead
             setCanvasRotation(Math.toDegrees(this.windBearing));
+
             // Offset from centered position
             Point fixPointInMap = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(this.fixPosition));
             Point windUnitVector = Point.newInstance(-Math.sin(-this.windBearing), -Math.cos(-this.windBearing));
             // Dot product of the two vectors above
             final double fixPointWindwardDistance = fixPointInMap.getX() * windUnitVector.getX() + fixPointInMap.getY() * windUnitVector.getY();
-            double onAxisOffset = fixPointWindwardDistance % drawnPatternSize;
-            onAxisOffset = onAxisOffset < 0.0 ? onAxisOffset + drawnPatternSize : onAxisOffset; // Full modulus instead of remainder
-            onAxisOffset = onAxisOffset > drawnPatternSize / 2.0 ? onAxisOffset - drawnPatternSize : onAxisOffset; // Center around 0
-//            if (drawPatternHalfOffset) {
-//                onAxisOffset += drawnPatternSize / 2.0;
-//            }
-            Point offsetVector = Point.newInstance(onAxisOffset * windUnitVector.getX(), onAxisOffset * windUnitVector.getY());
-            // Detect pattern jump
-            if (previousOnAxisOffset != null && Math.abs(onAxisOffset - previousOnAxisOffset) > drawnPatternSize / 2.0) {
-                canAnimate = false;
+            final double fixPointWindwardDistanceChange = fixPointWindwardDistance - previousFixPointWindwardDistance;
+            previousFixPointWindwardDistance = fixPointWindwardDistance;
+            double onAxisOffset;
+            if (redraw) {
+                onAxisOffset = fixPointWindwardDistance % drawnPatternSize;
+                onAxisOffset = onAxisOffset < 0.0 ? onAxisOffset + drawnPatternSize : onAxisOffset; // Full modulus instead of remainder
+                onAxisOffset = onAxisOffset > drawnPatternSize / 2.0 ? onAxisOffset - drawnPatternSize : onAxisOffset; // Center around 0
+            } else {
+                onAxisOffset = previousOnAxisOffset + fixPointWindwardDistanceChange;
             }
             previousOnAxisOffset = onAxisOffset;
+            Point offsetVector = Point.newInstance(onAxisOffset * windUnitVector.getX(), onAxisOffset * windUnitVector.getY());
+
+            canAnimate = isInBounds(this.windBearing, offsetVector);
             if (canAnimate) {
                 setCanvasPosition(getWidgetPosLeft() + offsetVector.getX(), getWidgetPosTop() + offsetVector.getY());
             }
-//            if (canAnimate) {
-//                canAnimate = isInBounds(this.windBearing, offsetVector);
-//            }
             updateTransition(timeForPositionTransitionMillis);
             if (redraw) redraw();
             draw();
@@ -103,14 +101,8 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         // the bounds of the canvas. 0, 0 will be the center of the canvas.
         final double outerHalfWidth = getCanvas().getElement().getClientWidth() / 2.0;
         final double outerHalfHeight = getCanvas().getElement().getClientHeight() / 2.0;
-        if (this.mapWidth == null) {
-            this.mapWidth = getMap().getDiv().getClientWidth();
-        }
-        if (this.mapHeight == null) {
-            this.mapHeight = getMap().getDiv().getClientHeight();
-        }
-        final double innerHalfWidth = mapWidth / 2.0;
-        final double innerHalfHeight = mapHeight / 2.0;
+        final double innerHalfWidth = getMapWidth() / 2.0;
+        final double innerHalfHeight = getMapHeight() / 2.0;
         Point[] innerCorners = new Point[4];
         innerCorners[0] = Point.newInstance(-innerHalfWidth, -innerHalfHeight); // TL
         innerCorners[1] = Point.newInstance(innerHalfWidth, -innerHalfHeight); // TR
@@ -147,9 +139,18 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         Position pos2 = coordinateSystem
                 .getPosition(mapProjection.fromDivPixelToLatLng(Point.newInstance(patternSize, 0)));
         final double patternSizeMeters = pos1.getDistance(pos2).getMeters();
-        final double boatLength = 6.4d;
-        double scale = boatLength * 10 / patternSizeMeters; //TODO Adaptive
-        GWT.log("Scale: " + patternSize + " -> " + scale);
+        //final double pixelsPerMeter = patternSize / patternSizeMeters;
+        //TODO Use multiple of boat size instead?
+
+        // Changes at what zoom levels we will jump to the next length
+        // (increase when zooming out tends to generate patterns that are too small)
+        final double mult = 1.8; 
+        // Gets the nearest power of 10
+        double wantedLength = Math.pow(10.0, Math.round(Math.log10(patternSizeMeters * mult)));
+        wantedLength = Math.max(wantedLength, 10.0); // Limit to sizes >= 10 m
+        wantedLength *= 2.0; // The complete pattern is made up of 2 bars (one visible, one not)
+        double scale = wantedLength / patternSizeMeters;
+        GWT.log("Scale: " + patternSizeMeters + " -> " + wantedLength + " -> " + scale);
         return scale;
     }
 
@@ -168,12 +169,8 @@ public class WindLadderOverlay extends FullCanvasOverlay {
      */
     @Override
     public void setCanvasSettings() {
-        if (mapWidth == null) {
-            mapWidth = getMap().getDiv().getClientWidth();
-        }
-        if (mapHeight == null) {
-            mapHeight = getMap().getDiv().getClientHeight();
-        }
+        mapWidth = getMap().getDiv().getClientWidth();
+        mapHeight = getMap().getDiv().getClientHeight();
         int size = Math.max(mapWidth, mapHeight);
         int reserve = (int) (size * CANVAS_RESERVE);
         int sizeWithReserve = size + reserve;
@@ -205,7 +202,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         final int canvasHeight = canvas.getCoordinateSpaceHeight();
         final int tileSize = 16; // tileGen.getHeight(); //TODO returns a wrong number at startup
         final double patternScale = calculatePatternScale(tileSize);
-        final double patternOffset = drawPatternHalfOffset ? patternScale / 2.0 : 0.0;
         Context2d ctx = canvas.getContext2d();
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         // Change composite mode
@@ -215,17 +211,17 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         // Prepare pattern texture
         ctx.setFillStyle(ctx.createPattern(tileGen.getTile(), Repetition.REPEAT));
         ctx.rect(0, 0, canvasWidth, canvasHeight);
-        ctx.translate(canvasWidth / 2 + patternOffset, canvasHeight / 2 + patternOffset);
+        ctx.translate(canvasWidth / 2, canvasHeight / 2);
         ctx.scale(patternScale, patternScale);
         // Draw pattern onto mask
         ctx.fill();
-//        // DEBUG Draw a debug square in the center of the canvas
-//        ctx.restore();
-//        ctx.beginPath();
-//        ctx.translate(canvasWidth / 2, canvasHeight / 2);
-//        ctx.rect(-2, -2, 4, 4);
-//        ctx.setFillStyle("red");
-//        ctx.fill();
+        // DEBUG Draw a debug square in the center of the canvas
+        ctx.restore();
+        ctx.beginPath();
+        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+        ctx.rect(-2, -2, 4, 4);
+        ctx.setFillStyle("red");
+        ctx.fill();
         drawnPatternSize = tileSize * patternScale;
     }
 
@@ -248,6 +244,11 @@ public class WindLadderOverlay extends FullCanvasOverlay {
     @Override
     protected void drawCenterChanged() {
         update(null, null, -1);
+        windLadder.forceSwap();
+    }
+
+    protected void onZoomChange() {
+        windLadder.forceSwap();
     }
 
     @Override
@@ -259,5 +260,19 @@ public class WindLadderOverlay extends FullCanvasOverlay {
                 WindLadderOverlay.this.onAttach();
             }
         };
+    }
+
+    protected int getMapWidth() {
+        if (mapWidth == null) {
+            mapWidth = getMap().getDiv().getClientWidth();
+        }
+        return mapWidth;
+    }
+
+    protected int getMapHeight() {
+        if (mapHeight == null) {
+            mapHeight = getMap().getDiv().getClientHeight();
+        }
+        return mapHeight;
     }
 }

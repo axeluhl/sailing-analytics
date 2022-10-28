@@ -41,8 +41,8 @@ public class WindLadder extends DoubleCanvasBuffer<WindLadderOverlay> {
         super();
         this.coordinateSystem = coordinateSystem;
         this.buffer = new WindLadderOverlay[BUFFER_SIZE];
-        this.buffer[0] = new WindLadderOverlay(this, map, zIndex, coordinateSystem, /* drawPatternOffset */ false);
-        this.buffer[1] = new WindLadderOverlay(this, map, zIndex, coordinateSystem, /* drawPatternOffset */ true);
+        this.buffer[0] = new WindLadderOverlay(this, map, zIndex, coordinateSystem);
+        this.buffer[1] = new WindLadderOverlay(this, map, zIndex, coordinateSystem);
         this.apply(overlay -> overlay.setVisible(false));
         this.setVisible(true);
         this.addToMap();
