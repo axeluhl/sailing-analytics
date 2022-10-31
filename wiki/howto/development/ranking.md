@@ -9,7 +9,7 @@ In the ScoreCorrection the Ranks of the races are transferred to scores by calli
 
 If crossFleetMergedRanking is enabled this case is handeled in the getTrackedRank method of the AbstractLeaderboardImpl class.
 
-# Flotten Handling
+# Fleet Handling
 
 It is possible to create series within a regatta, which in turn can consist of several fleets. The scoring of
 the two settings that influence the ranking with multiple fleets are described below.
@@ -21,7 +21,7 @@ ContigousScoring affects the behavior of ranking Competitors that are in Fleets 
 
 ### Enabled
 
-When contigousScoring is enabled, a competitor's rank is adjusted as if all competitors from better fleets were ahead of him. Example for LowPoint: effectiveRank = rankInFleet + numberOfCompetitorsInBetterFleets. A fleet with a low rank is always better than a fleet with a high rank. Except for fleets with rank 0, which are excluded from the ContigousScoring setting and are not affected themself nor do they affect other fleets.
+When contigousScoring is enabled, a competitor's rank is adjusted as if all competitors from better fleets were ahead of him. Example for LowPoint: effectiveRank = rankInFleet + numberOfCompetitorsInBetterFleets. A fleet with a low rank is always better than a fleet with a high rank. Except for fleets with rank 0, which are excluded from the ContigousScoring setting and are not affected themselves nor do they affect other fleets.
 
 Example for contigousScoring = true and crossFleetMergeRanking = false. Each fleet consists of 10 competitors. Vertical dots indicate that the competitors of the upper fleets come next.
 
@@ -143,16 +143,16 @@ Three alternatives:
    4. Pull back every competitor for the calculated distance. Also around the marks.
    5. Compare all competitors by their newly calculated Position
 2. Pull ahead fleet
-3. Calculate a VMG for each fleet
-   1. Min
-   2. Max
-   3. Avg
-   4. Median
-4. Get the minimum of timesailed and time between the start of the fleets. Called timeOffset from now on.
-5. Compute a fleet specific distance by $$ OffsetDistance = fleetVMG \cdot timeOffset $$
-6. Pull ahead every competitor for the calculated distance. Also around the marks.
-7. Compare all competitors by their newly calculated Position
-8. Time on Time and Distance like
+   1. Calculate a VMG for each fleet
+      1. Min
+      2. Max
+      3. Avg
+      4. Median
+   2. Get the minimum of timesailed and time between the start of the fleets. Called timeOffset from now on.
+   3. Compute a fleet specific distance by $$ OffsetDistance = fleetVMG \cdot timeOffset $$
+   4. Pull ahead every competitor for the calculated distance. Also around the marks.
+   5. Compare all competitors by their newly calculated Position
+3. Time on Time and Distance like
    1. For every competitor in a fleet compute the time needed to reach the leader in the fleet. When passing a mark anticipate same performance, by just adding the time the faster competitor spent on the leg to the calculated time.
    2. Use this calculated Time as calcTime@fastest and apply the model of TimeOnTimeAndDistance.
 
