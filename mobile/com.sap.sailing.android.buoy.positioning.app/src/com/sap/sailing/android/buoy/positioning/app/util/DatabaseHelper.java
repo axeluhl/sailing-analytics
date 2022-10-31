@@ -51,9 +51,9 @@ public class DatabaseHelper {
                 Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (lc != null) {
             if (lc.moveToFirst()) {
-                leaderboard.rowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
-                leaderboard.name = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_NAME));
-                leaderboard.serverUrl = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_SERVER_URL));
+                leaderboard.rowId = lc.getInt(lc.getColumnIndexOrThrow(BaseColumns._ID));
+                leaderboard.name = lc.getString(lc.getColumnIndexOrThrow(Leaderboard.LEADERBOARD_NAME));
+                leaderboard.serverUrl = lc.getString(lc.getColumnIndexOrThrow(Leaderboard.LEADERBOARD_SERVER_URL));
             }
             lc.close();
         }
@@ -67,8 +67,8 @@ public class DatabaseHelper {
                 CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (uc != null) {
             if (uc.moveToFirst()) {
-                checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
-                checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
+                checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndexOrThrow(BaseColumns._ID));
+                checkinUrlInfo.urlString = uc.getString(uc.getColumnIndexOrThrow(CheckinUri.CHECKIN_URI_VALUE));
             }
             uc.close();
         }
@@ -83,7 +83,7 @@ public class DatabaseHelper {
             mc.moveToFirst();
             while (!mc.isAfterLast()) {
                 final String markName = mc.getString((mc.getColumnIndex(Mark.MARK_NAME)));
-                final String markIdAsString = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
+                final String markIdAsString = mc.getString(mc.getColumnIndexOrThrow(Mark.MARK_ID));
                 final Serializable markId = UUIDHelper.tryUuidConversion(markIdAsString);
                 MarkInfo markInfo = new MarkInfo(markId, markName,
                         mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))), checkinDigest);
@@ -102,9 +102,9 @@ public class DatabaseHelper {
         if (mpc != null) {
             mpc.moveToFirst();
             while (!mpc.isAfterLast()) {
-                long timeStamp = mpc.getLong(mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP));
-                double longitude = mpc.getDouble(mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE));
-                double latitude = mpc.getDouble(mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE));
+                long timeStamp = mpc.getLong(mpc.getColumnIndexOrThrow(MarkPing.MARK_PING_TIMESTAMP));
+                double longitude = mpc.getDouble(mpc.getColumnIndexOrThrow(MarkPing.MARK_PING_LONGITUDE));
+                double latitude = mpc.getDouble(mpc.getColumnIndexOrThrow(MarkPing.MARK_PING_LATITUDE));
                 MarkPingInfo markPingInfo = new MarkPingInfo(markID, GPSFixImpl.create(longitude, latitude, timeStamp),
                         mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
                 marks.add(markPingInfo);
