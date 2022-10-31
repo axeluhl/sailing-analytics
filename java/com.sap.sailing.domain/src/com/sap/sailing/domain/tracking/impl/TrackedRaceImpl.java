@@ -1601,7 +1601,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // no mark passing at or before timePoint; competitor has not started / participated yet
                 result = 0;
             } else {
-                result = getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).get(competitor).getRank();
+                RankAndRankComparable rankAndRankComparable = getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).get(competitor);
+                if(competitor == null) {
+                    result = 0;
+                }else {
+                    result = rankAndRankComparable.getRank(); 
+                }
             }
         }
         return result;
@@ -1630,6 +1635,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
+   // defaults im interface anschauen 
+        
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
@@ -1689,6 +1696,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         getRace().getCourse().lockForRead();
                         try {
                             // here the rankingmetrics need to return the RankComparables so that they could be ranked accordingly. 
+                            // encapsulate sorting providing etc. in a method of the Ranking metric. To Update this cache 
                             Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
                             List<Competitor> tempList = new ArrayList<Competitor>();
                             for (Competitor c : getRace().getCompetitors()) {
@@ -1696,9 +1704,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             }
                             Collections.sort(tempList, comparator);
                             final Iterator<Competitor> it = tempList.iterator();
-                            rankedCompetitors = new LinkedHashMap<Competitor, RankAndRankComparable>();
+                            rankedCompetitors = new LinkedHashMap<>();
                             for (int i = 1; it.hasNext(); i++) {
-                                rankedCompetitors.put(it.next(), new RankAndRankComparable(i, new RankComparableRank(i)));
+                                rankedCompetitors.put(it.next(),  new RankAndRankComparable(i, /* TODO*/ new RankComparableRank(i)));
                             }
                         } finally {
                             getRace().getCourse().unlockAfterRead();

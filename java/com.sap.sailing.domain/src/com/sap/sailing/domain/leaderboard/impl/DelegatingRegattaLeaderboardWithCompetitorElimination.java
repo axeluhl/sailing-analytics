@@ -484,7 +484,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     /**
      * Before being serialized, ensure that the leaderboard supplier has been used
      * to resolve the leaderboard.
-     * @throws IOException
      */
     private void writeObject(ObjectOutputStream oos) throws IOException {
         getDelegateLeaderboard();

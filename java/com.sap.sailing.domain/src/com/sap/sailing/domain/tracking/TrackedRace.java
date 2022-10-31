@@ -803,7 +803,7 @@ public interface TrackedRace
     Competitor getCompetitorOfBoat(Boat boat);
 
     /**
-     * Returns the competitors of this tracked race, according to their ranking (iteration order). Competitors whose
+     * Returns the competitors of this tracked race, according to their ranking within in this Race (iteration order). Competitors whose
      * {@link #getRank} is 0 will be sorted "worst".
      *
      * @return If no ranking can be computed for the given {@link TimePoint} an empty LinkeHashMap is returned not null.
@@ -811,7 +811,7 @@ public interface TrackedRace
     LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint);
 
     /**
-     * Same as {@link #getCompetitorsFromBestToWorstAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
+     * Same as {@link #getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
      *
      * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link LinkedHashMap} is returned not null.
@@ -819,7 +819,7 @@ public interface TrackedRace
     LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     /**
-     * Returns the competitors of this tracked race, according to their ranking (iteration order) and their RankComparables. 
+     * Returns the competitors and their RankComparables of this tracked race, according to their ranking within in this Race (iteration order). 
      *
      * @return If no ranking can be computed for the given {@link TimePoint} an empty  {@link List} is returned not null.
      */

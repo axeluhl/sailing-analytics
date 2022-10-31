@@ -22,6 +22,7 @@ public class CompetitorAndRankComparable implements Comparable<CompetitorAndRank
     public RankComparable getRankComparable() {
         return rankComparable;
     }
+    
     public Competitor getCompetitor() {
         return competitor;
     }
