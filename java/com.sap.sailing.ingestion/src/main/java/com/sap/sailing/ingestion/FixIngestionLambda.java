@@ -20,7 +20,6 @@ import org.json.simple.parser.ParseException;
 import org.redisson.api.RMap;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.gson.Gson;
 import com.sap.sailing.domain.common.DeviceIdentifier;

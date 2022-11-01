@@ -29,6 +29,8 @@ The current architecture consist of the following parts in eu-west-2 (London).
 
 Development takes place in Eclipse running on Java 8. Make sure to install the official plugin from https://aws.amazon.com/eclipse/. Lambdas are classes that need to implement a specific interface and a method that gets called upon execution. See https://docs.aws.amazon.com/lambda/latest/dg/java-handler.html for documentation. For our lambdas we have opted to use the RequestStreamHandler that just provides us with the binary stream. This makes it easier to accept different types of inputs (e.g. a GPS fix and a Bravo fix).
 
+As the project is currently in development, the CloudWatch Event for the FixCombination Lambda is disabled. When you want to test the functionality of the Lambda, trigger a test on the AWS page for the Lambda itself or activate the Event in the Event Bridge console of AWS.
+
 ## Deployment
 
 Before you can deploy you need to make sure that you have created an access key and stored the key to your machine. If you use a MFA token then make sure to read the last section of this document.
@@ -38,25 +40,24 @@ Deployment can easily be done by right clicking on the lambda class and selectin
 > Notice: With the current environment in Eclipse 2022-06, it is not possible to use the AWS Toolkit in Eclipse due the fact that it is built with 
 > Java 8 which is not allowed as an startup environment for Eclipse 2022-06. Use the described method for the deployment with Maven.
 
-Alternatively, you can build the project with Maven, but you have to take some precautions to be able to build the package. The pom.xml of the project com.sap.sailing.ingestion declares dependencies to the following other projects of the codebase to reuse code for types, deserializers, etc.:
-- com.sap.sse.security.common
+Alternatively, you can build the project with Maven, but you have to take some precautions to be able to build the package. The pom.xml of the project ``com.sap.sailing.ingestion`` declares dependencies to the following other projects of the codebase to reuse code for types, deserializers, etc.:
 - org.json.simple
 - com.sap.sailing.domain.common
 - com.sap.sse.common
 - com.sap.sailing.domain.shared.android
 - com.sap.sse.shared.android
-- com.sap.sse
-- com.sap.sailing.domain
 - com.sap.sailing.server.gateway.serialization
 - com.sap.sailing.server.gateway.serialization.shared.android
 
-You have to make sure to go each of the projects and install them to your local maven repository, so that the pom.xml of the ingestion project can use them. Make sure that you made a fresh build of your projects in Eclipse to avoid errors in the maven build process. For example the steps to install one of the projects to your local repository would be the following:
-- open the terminal in the project root directory
-- navigate to your desired package to install (`cd java/com.sap.sse.security.common/`)
-- execute `mvn clean install`
-- repeat the steps for the other projects
-
-Use then the following command to build the package which can be deployed to AWS:
+You have to make sure that each of the projects is installed to your local maven repository, so that the pom.xml of the ingestion project can use them. For this case there exists a new profile ``with-aws-lambda`` in the pom.xml of the java directory (java/pom.xml) which can be used to install all the required dependencies to your local maven repository. But to use this pom effectively it is useful to know which profiles are currently active in your environment to be able to exclude the ones you don't want. Go to the root directory of the git repository and use the following command to display all active profiles:
+```
+mvn help:active-profiles
+``` 
+Afterwards, you can use the following command to activate the new profile and to disable the other ones.
+```
+mvn clean -Dmaven.test.skip=true install -Pwith-aws-lambda,-sailing.analytics,-with-not-android-relevant,-non-leandi
+```
+In this example, the profiles ``sailing.analytics``, ``with-not-android-relevant`` and ``non-leandi`` will be disabled. This command will also create the ``bin`` folder in the project directory ``java/com.sap.sailing.ingestion`` and install the resulting JAR files to your local maven repository. When the dependencies of the project are changed please also make sure to update the java pom.xml respectively. After the initial install of the dependencies it is also possible to use the following command to build the package which can be deployed to AWS:
 ```
 cd java/com.sap.sailing.ingestion
 mvn clean -Dmaven.test.skip=true package
