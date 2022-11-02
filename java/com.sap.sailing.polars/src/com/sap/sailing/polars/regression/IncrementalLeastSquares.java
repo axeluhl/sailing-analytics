@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 
 /**
  * Support incremental regression linear in one variable but potentially of higher order.
