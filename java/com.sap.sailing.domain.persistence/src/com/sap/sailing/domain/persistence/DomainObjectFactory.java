@@ -15,6 +15,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -232,6 +233,7 @@ public interface DomainObjectFactory {
     /**
      * For races that have a {@link MarkPassingRaceFingerprint} stored in the database (see {@link #loadFingerprintsForMarkPassingHashes()})
      * a caller can load the corresponding mark passings with this method.
+     * @param course TODO
      */
-    Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier);
+    Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course);
 }

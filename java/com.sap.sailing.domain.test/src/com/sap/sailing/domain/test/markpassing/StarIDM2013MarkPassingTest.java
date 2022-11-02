@@ -49,7 +49,7 @@ public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
     }
 
     private void testWholeRace5() throws InvalidDateException {
-        new MarkPassingCalculator(getTrackedRace(), false, /* waitForInitialMarkPassingCalculation */ true); // do our calculation, injecting into TrackedRace
+        new MarkPassingCalculator(getTrackedRace(), false, /* waitForInitialMarkPassingCalculation */ true, /* markPassingRaceFingerprintRegistry */ null); // do our calculation, injecting into TrackedRace
         final Competitor GER7897 = getCompetitorByName("Tusch, Frank,Winkelmann, Sven");
         // the start mark passing of Tuschi and Sven is a bit dubious; TracTrac sees them over the line at 2013-05-04T14:50:10+0200
         // but at that time the pin end still seems to be moving to port, and the track seems to pass the pin end on the outside;
