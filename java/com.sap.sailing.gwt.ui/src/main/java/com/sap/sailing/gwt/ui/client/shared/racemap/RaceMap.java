@@ -2106,9 +2106,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (settings.isShowWindLadder() && map != null && raceMapDataDTO != null && lastCombinedWindTrackInfoDTO != null) {
             Pair<Integer, CompetitorDTO> bestVisibleCompetitor = getBestVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
             if (bestVisibleCompetitor != null) {
-                List<GPSFixDTOWithSpeedWindTackAndLegType> fixes = raceMapDataDTO.boatPositions.get(bestVisibleCompetitor.getB());
+                final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixes = raceMapDataDTO.boatPositions.get(bestVisibleCompetitor.getB());
                 if (fixes != null) {
-                    Position competitorPosition = fixes.get(fixes.size() - 1).position;
+                    Position competitorPosition = fixes.last().position;
                     WindTrackInfoDTO windTrackDTO = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(bestVisibleCompetitor.getA() - 1); // Zero based
                     WindDTO windFix = null;
                     if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
