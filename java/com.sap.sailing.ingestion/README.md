@@ -74,18 +74,31 @@ You have to make sure that each of the projects is installed to your local maven
 mvn help:active-profiles
 ``` 
 Afterwards, you can use the following command to activate the new profile and to disable the other ones.
+
 ```
 mvn clean -Dmaven.test.skip=true install -Pwith-aws-lambda,-sailing.analytics,-with-not-android-relevant,-non-leandi
 ```
+
 In this example, the profiles ``sailing.analytics``, ``with-not-android-relevant`` and ``non-leandi`` will be disabled. This command will also create the ``bin`` folder in the project directory ``java/com.sap.sailing.ingestion`` and install the resulting JAR files to your local maven repository. When the dependencies of the project are changed please also make sure to update the java pom.xml respectively. After the initial install of the dependencies it is also possible to use the following command to build the package which can be deployed to AWS:
 ```
 cd java/com.sap.sailing.ingestion
 mvn clean -Dmaven.test.skip=true package
 ```
-This will produce a JAR file in the project's ``bin`` folder. Deploy it using the following command. Use the function name for ``${function-name}``, such as ``FixIngestion`` or ``EndpointRegistration``, respectively:
+This will produce a JAR file in the project's ``bin`` folder. To deploy it, you need to have a valid AWS session token in your environment. See the `configuration/aws-automation/awsmfalogon.sh` script that you need to invoke with the ARN of your MFA device and the MFA token that you read from your MFA app, for example, in your GIT root:
 
 ```
-aws lambda update-function-code --function-name ${function-name} --zip-file fileb://java/com.sap.sailing.ingestion/bin/com.sap.sailing.ingestion-1.0.0-SNAPSHOT.jar
+. configuration/aws-automation/awsmfalogon.sh "arn:aws:iam::017363970217:mfa/axeluhl" 123456
+```
+
+where `123456` is the example MFA token produced, e.g., by your authenticator app. To find out the ARN of your MFA device, go to [https://us-east-1.console.aws.amazon.com/iam/home#/users/yourusername?section=security_credentials](https://us-east-1.console.aws.amazon.com/iam/home#/users/yourusername?section=security_credentials) and copy the ARN from "Assigned MFA device". It should be something like `arn:aws:iam::017363970217:mfa/yourusername`. As you're "sourcing" the script using the "." notation, you will end up with a few `AWS_...` variables in your environment that encode the MFA session token and access key.
+
+You also need to be aware of the AWS region you'd like to deploy the lambdas to. Please always use the ``--region`` parameter to avoid any ambiguity.
+
+
+Deploy it using the following command. Use the function name for ``${function-name}``, such as ``FixIngestion`` or ``EndpointRegistration``, respectively:
+
+```
+aws --region eu-west-2 lambda update-function-code --function-name ${function-name} --zip-file fileb://java/com.sap.sailing.ingestion/bin/com.sap.sailing.ingestion-1.0.0-SNAPSHOT.jar
 ```
 
 The output should look something like this:
