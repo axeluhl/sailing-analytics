@@ -120,7 +120,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         Map<Competitor, Map<Waypoint, MarkPassing>> computedPasses = new HashMap<>();
         // Get calculatedMarkPasses
         long time = System.currentTimeMillis();
-        MarkPassingCalculator mpc = new MarkPassingCalculator(getTrackedRace(), false, /* waitForInitialMarkPassingCalculation */ true);
+        MarkPassingCalculator mpc = new MarkPassingCalculator(getTrackedRace(), false, /* waitForInitialMarkPassingCalculation */ true, /* markPassingRaceFingerprintRegistry */ null);
         time = System.currentTimeMillis() - time;
 
         for (Competitor c : getRace().getCompetitors()) {

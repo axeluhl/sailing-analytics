@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -119,6 +120,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl<SwissTim
     private final TMDMessageQueue tmdMessageQueue;
 
     private final RaceLogAndTrackedRaceResolver raceLogResolver;
+    
+    private final MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry;
 
     /**
      * If set to a non-{@code null}, non-{@link String#isEmpty() empty} value, updates about start time changes, course
@@ -138,22 +141,24 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl<SwissTim
     protected SwissTimingRaceTrackerImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
-            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
+            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler,
+            MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore,
-                regattaLogStore, raceLogResolver, connectivityParams, raceTrackingHandler);
+                regattaLogStore, raceLogResolver, connectivityParams, raceTrackingHandler, markPassingRaceFingerprintRegistry);
     }
 
     protected SwissTimingRaceTrackerImpl(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
             SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, RaceLogAndTrackedRaceResolver raceLogResolver,
-            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
+            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
         this.raceTrackingHandler = raceTrackingHandler;
         this.tmdMessageQueue = new TMDMessageQueue(this);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
+        this.markPassingRaceFingerprintRegistry = markPassingRaceFingerprintRegistry;
         final Regatta effectiveRegatta;
         // Try to find a pre-associated event based on the Race ID
         if (regatta == null) {
@@ -540,7 +545,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl<SwissTim
                 }
             }, useInternalMarkPassingAlgorithm, raceLogResolver,
                     /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
-                    new TrackingConnectorInfoImpl(SwissTimingAdapter.NAME, SwissTimingAdapter.DEFAULT_URL,/*no api connection to query the webUrl*/ null));
+                    new TrackingConnectorInfoImpl(SwissTimingAdapter.NAME, SwissTimingAdapter.DEFAULT_URL,/*no api connection to query the webUrl*/ null), markPassingRaceFingerprintRegistry);
             addUpdateHandlers();
             notifyRaceCreationListeners();
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
