@@ -233,8 +233,11 @@ import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithC
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
+import com.sap.sailing.domain.markpassinghash.impl.MarkPassingRaceFingerprintImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -246,10 +249,12 @@ import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorWithBoatRefJsonDeserializer;
@@ -394,6 +399,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
+    
+    /**
+     * @see #loadRaceIdentifier(Document)
+     */
+    private void addRaceIdentifierToQuery(Document query, RaceIdentifier raceIdentifier) {
+        query.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getRegattaName());
+        query.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
+    }
 
     static void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
         windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1), new IndexOptions().name("windbyrace").background(false)); // for new programmatic access
@@ -491,7 +504,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = leaderboardRegistry.getLeaderboardByName(leaderboardName);
         }
         if (result == null) {
-            String wrappedRegattaLeaderboardName = (String) dbLeaderboard
+            final String wrappedRegattaLeaderboardName = (String) dbLeaderboard
                     .get(FieldNames.WRAPPED_REGATTA_LEADERBOARD_NAME.name());
             if (wrappedRegattaLeaderboardName != null) {
                 result = loadRegattaLeaderboardWithEliminations(dbLeaderboard, leaderboardName,
@@ -510,7 +523,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         result = loadFlexibleLeaderboard(dbLeaderboard, resultDiscardingRule);
                     } else {
                         result = loadRegattaLeaderboard(leaderboardName, regattaName, dbLeaderboard,
-                                resultDiscardingRule, regattaRegistry);
+                                resultDiscardingRule, regattaRegistry, leaderboardRegistry);
                     }
                 }
                 if (result != null) {
@@ -590,14 +603,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private RegattaLeaderboard loadRegattaLeaderboard(String leaderboardName, String regattaName,
             Document dbLeaderboard, ThresholdBasedResultDiscardingRule resultDiscardingRule,
-            RegattaRegistry regattaRegistry) {
-        RegattaLeaderboard result = null;
+            RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
+        final RegattaLeaderboard result;
         Regatta regatta = regattaRegistry.getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
             logger.info("Couldn't find regatta " + regattaName
                     + " for corresponding regatta leaderboard. Not loading regatta leaderboard.");
+            result = null;
         } else {
-            result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
+            final String otherTieBreakingLeaderboardName = (String) dbLeaderboard.get(FieldNames.OTHER_TIEBREAKING_LEADERBOARD_NAME.name());
+            if (otherTieBreakingLeaderboardName == null) {
+                result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
+            } else {
+                result = new RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl(regatta, resultDiscardingRule,
+                        () -> (RegattaLeaderboard) leaderboardRegistry.getLeaderboardByName(otherTieBreakingLeaderboardName));
+            }
         }
         return result;
     }
@@ -1426,11 +1446,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Number maximumNumberOfDiscardsAsObject = (Number) dbSeries
                 .get(FieldNames.SERIES_MAXIMUM_NUMBER_OF_DISCARDS.name());
         final Integer maximumNumberOfDiscards = maximumNumberOfDiscardsAsObject == null ? null : maximumNumberOfDiscardsAsObject.intValue();
-        Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
-        Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries
+        final Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
+        final Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries
                 .get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
-        Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries
+        final Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries
                 .get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
+        final Boolean oneAlwaysStaysOne = (Boolean) dbSeries.get(FieldNames.SERIES_ONE_ALWAYS_STAYS_ONE.name());
         @SuppressWarnings("unchecked")
         final Iterable<Document> dbFleets = (Iterable<Document>) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         List<Fleet> fleets = loadFleets(dbFleets);
@@ -1453,6 +1474,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         series.setMaximumNumberOfDiscards(maximumNumberOfDiscards);
         if (firstColumnIsNonDiscardableCarryForward != null) {
             series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
+        }
+        if (oneAlwaysStaysOne != null) {
+            series.setOneAlwaysStaysOne(oneAlwaysStaysOne);
         }
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
@@ -3146,5 +3170,70 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
         return raceTrackingConnectivityParamsServiceFinder;
     }
+    
+    @Override
+    public Map<RaceIdentifier, MarkPassingRaceFingerprint> loadFingerprintsForMarkPassingHashes() {
+        final MongoCollection<Document> markPassingsCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
+        markPassingsCollection.createIndex(new Document()
+                .append(FieldNames.EVENT_NAME.name(), 1)
+                .append(FieldNames.RACE_NAME.name(), 1),
+            new IndexOptions()
+                .unique(true)
+                .name("markpassingsbyeventandrace")
+                .background(false));
+        final Map<RaceIdentifier, MarkPassingRaceFingerprint> fingerprintHashMap = new HashMap<>();
+        for (final Document currentDocument : markPassingsCollection.find()) {
+            final Pair<RaceIdentifier, MarkPassingRaceFingerprint> fingerprint = loadMarkPassingsFingerprint(currentDocument);
+            if (fingerprint != null && fingerprint.getB() != null) {
+                fingerprintHashMap.put(fingerprint.getA(), fingerprint.getB());
+            }
+        }
+        return fingerprintHashMap;
+    }
 
+    private Pair<RaceIdentifier, MarkPassingRaceFingerprint> loadMarkPassingsFingerprint(final Document currentDocument) {
+        final RaceIdentifier raceIdentifier = loadRaceIdentifier(currentDocument);
+        MarkPassingRaceFingerprint fingerprint;
+        try {
+            final JSONObject json = Helpers.toJSONObjectSafe(
+                    new JSONParser().parse(((Document) currentDocument.get(FieldNames.MARK_PASSINGS_FINGERPRINT.name())).toJson()));
+            fingerprint = new MarkPassingRaceFingerprintImpl(json);
+        } catch (JsonDeserializationException | ParseException e) {
+            logger.log(Level.WARNING, "Problem de-serializing mark passings from document; ignoring", e);
+            fingerprint = null;
+        }
+        return new Pair<>(raceIdentifier, fingerprint);
+    }
+
+    @Override
+    public Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier) {
+        final Map<Competitor, Map<Waypoint, MarkPassing>> result;
+        final Document query = new Document();
+        addRaceIdentifierToQuery(query, raceIdentifier);
+        final MongoCollection<Document> markPassingsCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
+        final Document doc = markPassingsCollection.find(query).first();
+        if (doc != null) {
+            result = new HashMap<>();
+            final List<Document> markPassingsDoc = doc.getList(FieldNames.MARK_PASSINGS.name(), Document.class);
+            for (final Document markPassingsForOneCompetitorDoc : markPassingsDoc) {
+                final Serializable competitorId = markPassingsForOneCompetitorDoc.get(FieldNames.COMPETITOR_ID.name(), Serializable.class);
+                final Competitor competitor = baseDomainFactory.getExistingCompetitorById(competitorId);
+                for (final Document markPassingForWaypoint : markPassingsForOneCompetitorDoc.getList(FieldNames.MARK_PASSINGS.name(), Document.class)) {
+                    final Pair<Waypoint, MarkPassing> waypointAndMarkPassing = loadWaypointAndMarkPassing(competitor, markPassingForWaypoint);
+                    result.computeIfAbsent(competitor, c->new HashMap<>()).put(waypointAndMarkPassing.getA(), waypointAndMarkPassing.getB());
+                }
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    private Pair<Waypoint, MarkPassing> loadWaypointAndMarkPassing(Competitor competitor, Document markPassingForWaypoint) {
+        final Serializable waypointId = markPassingForWaypoint.get(FieldNames.WAYPOINT_ID.name(), Serializable.class);
+        final Waypoint waypoint = baseDomainFactory.getExistingWaypointById(waypointId);
+        final TimePoint timePoint = TimePoint.of(markPassingForWaypoint.getLong(FieldNames.TIME_AS_MILLIS.name()));
+        final MarkPassing markPassing = new MarkPassingImpl(timePoint, waypoint, competitor);
+        return new Pair<>(waypoint, markPassing);
+    }
 }

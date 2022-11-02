@@ -25,7 +25,7 @@ public class CreateRegattaLeaderboardWithEliminations extends AbstractLeaderboar
             result = toState.addRegattaLeaderboardWithEliminations(getLeaderboardName(), leaderboardDisplayName,
                     (RegattaLeaderboard) toState.getLeaderboardByName(fullRegattaLeaderboardName));
         } else {
-            logger.warning("Cannot replicate creation of flexible leaderboard "+getLeaderboardName()+" because it already exists in the replica");
+            logger.warning("Cannot replicate creation of regatta leaderboard "+getLeaderboardName()+" because it already exists in the replica");
         }
         return result;
     }

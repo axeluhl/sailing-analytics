@@ -577,6 +577,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        raceColumnListeners.notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+    }
+
+    @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return raceColumnListeners.canAddRaceColumnToContainer(raceColumn);
     }
