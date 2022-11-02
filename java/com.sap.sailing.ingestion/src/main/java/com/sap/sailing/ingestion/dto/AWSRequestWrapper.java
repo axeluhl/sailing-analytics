@@ -6,7 +6,7 @@ import java.util.Base64;
 import com.google.gson.Gson;
 
 /**
- * In most cases requests coming to a lambda will be serialized into JSON. That means that all fields a HTTP requets
+ * In most cases requests coming to a lambda will be serialized into JSON. That means that all fields a HTTP request
  * normally has can be found inside the JSON. This implementation just provides the body and the method.
  * 
  * <pre>

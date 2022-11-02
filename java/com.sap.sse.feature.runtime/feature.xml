@@ -969,4 +969,18 @@
          version="1.5.3"
          unpack="false"/>
 
+   <plugin
+         id="com.google.gson"
+         download-size="0"
+         install-size="0"
+         version="2.8.9.v20220111-1409"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.gson.source"
+         download-size="0"
+         install-size="0"
+         version="2.8.9.v20220111-1409"
+         unpack="false"/>
+
 </feature>
