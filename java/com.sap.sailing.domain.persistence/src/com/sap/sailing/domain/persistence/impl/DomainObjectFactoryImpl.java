@@ -158,6 +158,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -403,7 +404,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     /**
      * @see #loadRaceIdentifier(Document)
      */
-    private void addRaceIdentifierToQuery(Document query, RaceIdentifier raceIdentifier) {
+    static void addRaceIdentifierToQuery(Document query, RaceIdentifier raceIdentifier) {
         query.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getRegattaName());
         query.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
     }
@@ -3206,7 +3207,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier) {
+    public Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course) {
         final Map<Competitor, Map<Waypoint, MarkPassing>> result;
         final Document query = new Document();
         addRaceIdentifierToQuery(query, raceIdentifier);
@@ -3219,7 +3220,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final Serializable competitorId = markPassingsForOneCompetitorDoc.get(FieldNames.COMPETITOR_ID.name(), Serializable.class);
                 final Competitor competitor = baseDomainFactory.getExistingCompetitorById(competitorId);
                 for (final Document markPassingForWaypoint : markPassingsForOneCompetitorDoc.getList(FieldNames.MARK_PASSINGS.name(), Document.class)) {
-                    final Pair<Waypoint, MarkPassing> waypointAndMarkPassing = loadWaypointAndMarkPassing(competitor, markPassingForWaypoint);
+                    final Pair<Waypoint, MarkPassing> waypointAndMarkPassing = loadWaypointAndMarkPassing(competitor, markPassingForWaypoint, course);
                     result.computeIfAbsent(competitor, c->new HashMap<>()).put(waypointAndMarkPassing.getA(), waypointAndMarkPassing.getB());
                 }
             }
@@ -3229,9 +3230,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Pair<Waypoint, MarkPassing> loadWaypointAndMarkPassing(Competitor competitor, Document markPassingForWaypoint) {
-        final Serializable waypointId = markPassingForWaypoint.get(FieldNames.WAYPOINT_ID.name(), Serializable.class);
-        final Waypoint waypoint = baseDomainFactory.getExistingWaypointById(waypointId);
+    private Pair<Waypoint, MarkPassing> loadWaypointAndMarkPassing(Competitor competitor, Document markPassingForWaypoint, Course course) {
+        final int waypointIndex = markPassingForWaypoint.getInteger(FieldNames.INDEX_OF_PASSED_WAYPOINT.name());
+        final Waypoint waypoint = Util.get(course.getWaypoints(), waypointIndex);
         final TimePoint timePoint = TimePoint.of(markPassingForWaypoint.getLong(FieldNames.TIME_AS_MILLIS.name()));
         final MarkPassing markPassing = new MarkPassingImpl(timePoint, waypoint, competitor);
         return new Pair<>(waypoint, markPassing);

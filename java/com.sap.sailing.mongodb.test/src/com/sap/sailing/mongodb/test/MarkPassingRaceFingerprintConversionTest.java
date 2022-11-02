@@ -67,12 +67,12 @@ public class MarkPassingRaceFingerprintConversionTest extends OnlineTracTracBase
         MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());
         RaceIdentifier raceIdentifier = trackedRace1.getRaceIdentifier();
         final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = trackedRace1.getMarkPassings(/* waitForLatestUpdates */ true);
-        new MongoObjectFactoryImpl(firstDatabase).storeMarkPassings(raceIdentifier, fingerprint, markPassings);
+        new MongoObjectFactoryImpl(firstDatabase).storeMarkPassings(raceIdentifier, fingerprint, markPassings, trackedRace1.getRace().getCourse());
         DomainObjectFactory dF = PersistenceFactory.INSTANCE.getDomainObjectFactory(dbConfiguration.getService(), getDomainFactory().getBaseDomainFactory());
         Map<RaceIdentifier, MarkPassingRaceFingerprint> fingerprintHashMap = dF.loadFingerprintsForMarkPassingHashes();
         MarkPassingRaceFingerprint fingerprintAfterDB = fingerprintHashMap.get(trackedRace1.getRaceIdentifier());
         assertTrue("Original and de-serialized copy are equal", fingerprintAfterDB.matches(trackedRace1));
-        final Map<Competitor, Map<Waypoint, MarkPassing>> markPassingsLoaded = dF.loadMarkPassings(trackedRace1.getRaceIdentifier());
+        final Map<Competitor, Map<Waypoint, MarkPassing>> markPassingsLoaded = dF.loadMarkPassings(trackedRace1.getRaceIdentifier(), trackedRace1.getRace().getCourse());
         assertEquals(markPassings, markPassingsLoaded);
     }
 }
