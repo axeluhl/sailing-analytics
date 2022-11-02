@@ -120,6 +120,7 @@
         <module>com.sap.sse.feature.runtime</module>
         <module>com.sap.sailing.competitorimport</module>
         <module>com.sap.sailing.domain</module>
+        <module>com.sap.sailing.awssensorfixstore</module>
         <module>com.sap.sailing.geocoding</module>
         <module>com.sap.sailing.datamining.provider</module>
         <module>com.sap.sailing.datamining</module>
@@ -384,6 +385,35 @@
         </plugin>
       </plugins>
     </build>
+  </profile>
+  <profile>
+    <id>with-aws-lambda</id>
+    <modules>
+      <module>com.google.gwt.dev</module>
+      <module>com.sap.sse.common</module>
+      <module>com.sap.sse.datamining.annotations</module>
+      <module>com.googlecode.java-diff-utils</module>
+      <module>com.sap.sailing.domain</module>
+      <module>com.sap.sailing.geocoding</module>
+      <module>com.sap.sse.datamining.shared</module>
+      <module>com.sap.sse</module>
+      <module>com.sap.sailing.declination</module>
+      <module>com.sap.sse.security</module>
+      <module>com.sap.sse.operationaltransformation</module>
+      <module>com.sap.sse.mail</module>
+      <module>com.sap.sse.replication.interfaces</module>
+      <module>com.sap.sse.security.persistence</module>
+      <module>com.sap.sse.security.interface</module>
+      <module>com.sap.sse.mongodb</module>
+      <module>com.sap.sse.replication</module>
+      <module>com.sap.sse.replication.persistence</module>
+      <module>com.sap.sailing.shared.server</module>
+      <module>com.sap.sailing.shared.persistence</module>
+      <module>com.sap.sailing.server.gateway.interfaces</module>
+      <module>com.sap.sailing.server.gateway.serialization</module>
+      <module>com.sap.sailing.server.gateway.serialization.shared.android</module>
+      <module>com.sap.sailing.ingestion</module>
+    </modules>
   </profile>
 </profiles>
 

@@ -150,6 +150,7 @@ import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigu
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DetailType;
@@ -215,6 +216,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -264,7 +266,6 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
@@ -325,6 +326,7 @@ import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
@@ -1567,6 +1569,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 polarDiagram = null;
             }
             result = polarDiagram != null;
+        }
+        return result;
+    }
+
+    @Override
+    public BearingWithConfidenceDTO getManeuverAngle(BoatClassDTO boatClassDto, ManeuverType maneuverType, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException, UnauthorizedException {
+        // TODO SecurityService
+        BearingWithConfidenceDTO result = null;
+        if (boatClassDto != null && maneuverType != null && (maneuverType == ManeuverType.TACK
+                || maneuverType == ManeuverType.JIBE) && windSpeed != null) {
+            BoatClass boatClass = baseDomainFactory.getBoatClass(boatClassDto.getName());
+            final PolarDataService polarDataService = getService().getPolarDataService();
+            result = new BearingWithConfidenceDTO(polarDataService.getManeuverAngle(boatClass, maneuverType,
+                    windSpeed));
         }
         return result;
     }
