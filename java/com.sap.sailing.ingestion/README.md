@@ -41,11 +41,31 @@ Deployment can easily be done by right clicking on the lambda class and selectin
 > Java 8 which is not allowed as an startup environment for Eclipse 2022-06. Use the described method for the deployment with Maven.
 
 Alternatively, you can build the project with Maven, but you have to take some precautions to be able to build the package. The pom.xml of the project ``com.sap.sailing.ingestion`` declares dependencies to the following other projects of the codebase to reuse code for types, deserializers, etc.:
+- com.google.gwt.dev
 - org.json.simple
-- com.sap.sailing.domain.common
 - com.sap.sse.common
-- com.sap.sailing.domain.shared.android
+- com.sap.sse.datamining.annotations
 - com.sap.sse.shared.android
+- com.googlecode.java-diff-utils
+- com.sap.sailing.domain
+- com.sap.sailing.domain.common
+- com.sap.sailing.domain.shared.android
+- com.sap.sailing.geocoding
+- com.sap.sse.datamining.shared
+- com.sap.sse
+- com.sap.sailing.declination
+- com.sap.sse.security
+- com.sap.sse.operationaltransformation
+- com.sap.sse.mail
+- com.sap.sse.replication.interfaces
+- com.sap.sse.security.persistence
+- com.sap.sse.security.interface
+- com.sap.sse.mongodb
+- com.sap.sse.replication
+- com.sap.sse.replication.persistence
+- com.sap.sailing.shared.server
+- com.sap.sailing.shared.persistence
+- com.sap.sailing.server.gateway.interfaces
 - com.sap.sailing.server.gateway.serialization
 - com.sap.sailing.server.gateway.serialization.shared.android
 
