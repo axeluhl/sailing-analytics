@@ -13,7 +13,7 @@ import com.sap.sse.common.Named;
  * <p>
  * 
  * There may be restrictions for the {@link Named#getName() name} that a shard can have, for example it could be
- * possible that shard names with quotes or bracked in them are not permitted; the name is expected to be human-readable
+ * possible that shard names with quotes or brackets in them are not permitted; the name is expected to be human-readable
  * and meaningful.
  * 
  * @author Axel Uhl (D043530)

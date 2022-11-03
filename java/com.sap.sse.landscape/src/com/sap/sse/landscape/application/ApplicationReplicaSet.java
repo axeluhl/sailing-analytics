@@ -69,7 +69,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
     /**
      * Moves a {@link Scope} with all its content from {@code source} into this replica set. The process may fail with
      * an exception, e.g., for connectivity or permission reasons, or---if the {@code failUponDiff} parameter is set to
-     * {@code true}--- for differences found when comparing the result in this replica set with the original content at
+     * {@code true}---for differences found when comparing the result in this replica set with the original content at
      * {@code source}. The {@code removeFromSourceUponSuccess} and {@code setRemoveReferenceInSourceUponSuccess} parameters
      * control how to proceed after successful import.
      * 
@@ -79,17 +79,6 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
             boolean failUponDiff, boolean removeFromSourceUponSuccess, boolean setRemoveReferenceInSourceUponSuccess);
     
     void removeScope(Scope<ShardingKey> scope);
-    
-    /**
-     * Creates a "remote server reference" on this application replica set pointing to the {@code to} replica set. If a
-     * non-{@code null} sequence of {@link Scope}s is provided then the {@code includeOrExcludeScopes} flag decides
-     * whether the reference shall only <em>include</em> those scopes ({@code true}) or it should list all scopes
-     * <em>except those listed in {@code scopes}</em> ({@code false}) instead.
-     */
-    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> to,
-            Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes);
-    
-    void removeRemoteReference(String name);
     
     /**
      * Tells this replica set whether read requests may also be addressed at the master node in case there are one or
