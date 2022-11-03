@@ -222,6 +222,11 @@ public class LandscapeServiceImpl implements LandscapeService {
         logger.info("Deploying replica for application replica set "+replicaSet.getName()+" to host "+hostToDeployTo);
         return spinUpReplicaAndRegisterInPublicTargetGroup(hostToDeployTo.getRegion(), replicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase, replicaReplicationBearerToken,
                 /* processLauncher: */ (AppConfigBuilderT replicaConfigurationBuilder)->{
+                    if (optionalMemoryInMegabytesOrNull != null) {
+                        replicaConfigurationBuilder.setMemoryInMegabytes(optionalMemoryInMegabytesOrNull);
+                    } else if (optionalMemoryTotalSizeFactorOrNull != null) {
+                        replicaConfigurationBuilder.setMemoryTotalSizeFactor(optionalMemoryTotalSizeFactorOrNull);
+                    }
                     // the process launcher uses the DeployProcessOnMultiServer procedure to launch the process based on the replica config 
                     DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcessBuilder =
                             DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> builder(replicaConfigurationBuilder, hostToDeployTo);
@@ -1466,5 +1471,29 @@ public class LandscapeServiceImpl implements LandscapeService {
             throw new TimeoutException("Could determine set of ready auto-scaling replicas of replica set "+
                     replicaSet.getName()+" within timeout period "+LandscapeService.WAIT_FOR_HOST_TIMEOUT);
         }
+    }
+
+    /**
+     * Checks whether the {@code host} is eligbile for deploying a process of an application replica set named
+     * as defined by {@code serverName}, listening on the application port specified by {@code port}.
+     */
+    @Override
+    public <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> optionalTimeout,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        boolean result;
+        if (host.isManagedByAutoScalingGroup()) {
+            result = false;
+        } else {
+            result = true;
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = host.getApplicationProcesses(optionalTimeout,
+                    Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+            for (final SailingAnalyticsProcess<ShardingKey> applicationProcess : applicationProcesses) {
+                if (applicationProcess.getPort() == port || applicationProcess.getServerName(optionalTimeout, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase).equals(serverName)) {
+                    result = false;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }

@@ -22,6 +22,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -153,7 +154,7 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     public void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String swissTimingUrl, String raceName,
             String raceID, String boatClassName, TrackerManager trackerManager,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
         trackerManager
                 .addRace(regattaToAddTo, new SwissTimingReplayConnectivityParameters(link, swissTimingUrl, raceName,

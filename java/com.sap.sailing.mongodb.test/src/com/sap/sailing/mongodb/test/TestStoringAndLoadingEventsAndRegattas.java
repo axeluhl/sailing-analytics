@@ -680,6 +680,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Regatta regatta = createRegattaAndAddRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()),
                 boatClass, regattaStartDate, regattaEndDate, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), OneDesignRankingMetric::new);
         regatta.getSeriesByName("Medal").setStartsWithZeroScore(true);
+        regatta.getSeriesByName("Medal").setOneAlwaysStaysOne(true);
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         mof.storeRegatta(regatta);
         
@@ -687,6 +688,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertFalse(loadedRegatta.getSeriesByName("Qualifying").isStartsWithZeroScore());
         assertTrue(loadedRegatta.getSeriesByName("Medal").isStartsWithZeroScore());
+        assertTrue(loadedRegatta.getSeriesByName("Medal").isOneAlwaysStaysOne());
     }
 
     @Test

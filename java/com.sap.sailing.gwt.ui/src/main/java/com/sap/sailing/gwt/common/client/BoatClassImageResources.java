@@ -78,19 +78,27 @@ public interface BoatClassImageResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_41S.png")
     @ImageOptions(preventInlining = true)
-    ImageResource BavariaCruiser41S();
+    ImageResource BavariaCruiser41SIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_45.png")
     @ImageOptions(preventInlining = true)
-    ImageResource BavariaCruiser45();
+    ImageResource BavariaCruiser45Icon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_46.png")
     @ImageOptions(preventInlining = true)
-    ImageResource BavariaCruiser46();
+    ImageResource BavariaCruiser46Icon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BB10M.png")
     @ImageOptions(preventInlining = true)
     ImageResource BB10MIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BENETEAU_FIRST_35.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource BeneteauFirst35Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BENETEAU_FIRST_45.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource BeneteauFirst45Icon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt1.png")
     @ImageOptions(preventInlining = true)

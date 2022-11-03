@@ -91,6 +91,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
@@ -122,13 +123,16 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -399,6 +403,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private void storeRegattaLeaderboard(RegattaLeaderboard leaderboard, Document dbLeaderboard) {
         dbLeaderboard.put(FieldNames.REGATTA_NAME.name(), leaderboard.getRegatta().getName());
+        if (leaderboard instanceof RegattaLeaderboardWithOtherTieBreakingLeaderboard) {
+            dbLeaderboard.put(FieldNames.OTHER_TIEBREAKING_LEADERBOARD_NAME.name(),
+                    ((RegattaLeaderboardWithOtherTieBreakingLeaderboard) leaderboard).getOtherTieBreakingLeaderboard().getName());
+        }
     }
 
     private void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard, Document dbLeaderboard) {
@@ -798,6 +806,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSeries.put(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name(), s.hasSplitFleetContiguousScoring());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name(), s.isStartsWithZeroScore());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnIsNonDiscardableCarryForward());
+        dbSeries.put(FieldNames.SERIES_ONE_ALWAYS_STAYS_ONE.name(), s.isOneAlwaysStaysOne());
         BasicDBList dbFleets = new BasicDBList();
         for (Fleet fleet : s.getFleets()) {
             dbFleets.add(storeFleet(fleet));
@@ -1958,5 +1967,38 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         return storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
+    
+    private List<Document> storeMarkPassings(Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course) {
+        final List<Document> result = new ArrayList<>();
+        for (final Entry<Competitor, Map<Waypoint, MarkPassing>> e : markPassings.entrySet()) {
+            final Document competitorMarkPassings = new Document();
+            competitorMarkPassings.put(FieldNames.COMPETITOR_ID.name(), e.getKey().getId());
+            final List<Document> markPassingsList = new ArrayList<>();
+            for (final Entry<Waypoint, MarkPassing> f : e.getValue().entrySet()) {
+                final Document markPassingDoc = new Document();
+                markPassingDoc.put(FieldNames.INDEX_OF_PASSED_WAYPOINT.name(), course.getIndexOfWaypoint(f.getKey()));
+                markPassingDoc.put(FieldNames.TIME_AS_MILLIS.name(), f.getValue().getTimePoint().asMillis());
+                markPassingsList.add(markPassingDoc);
+            }
+            competitorMarkPassings.put(FieldNames.MARK_PASSINGS.name(), markPassingsList);
+            result.add(competitorMarkPassings);
+        }
+        return result;
+    }
 
+    @Override
+    public void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint,
+            Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course) {
+        MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
+        JSONObject fingerprintjson = fingerprint.toJson();
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
+        final Document result = new Document();
+        final Document fingerprintDoc = Document.parse(fingerprintjson.toString());
+        result.put(FieldNames.MARK_PASSINGS_FINGERPRINT.name(), fingerprintDoc);
+        storeRaceIdentifier(result, raceIdentifier);
+        final List<Document> markPassingsDoc = storeMarkPassings(markPassings, course);
+        result.put(FieldNames.MARK_PASSINGS.name(), markPassingsDoc);
+        markPassingCollection.replaceOne(query, result, new ReplaceOptions().upsert(true));
+    }
 }

@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.common;
 
 public enum LeaderboardType {
-    RegattaLeaderboard(false, true), RegattaMetaLeaderboard(true, true),
+    RegattaLeaderboard(false, true),
+    RegattaMetaLeaderboard(true, true),
     RegattaLeaderboardWithEliminations(false, true),
-    FlexibleLeaderboard(false, false), FlexibleMetaLeaderboard(true, false);
+    RegattaLeaderboardWithOtherTieBreakingLeaderboard(false, true),
+    FlexibleLeaderboard(false, false),
+    FlexibleMetaLeaderboard(true, false);
     
     boolean isRegattaLeaderboard;
     boolean isMetaLeaderboard;

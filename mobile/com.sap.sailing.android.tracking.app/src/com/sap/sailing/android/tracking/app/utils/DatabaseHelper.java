@@ -54,7 +54,7 @@ public class DatabaseHelper {
         if (cursor != null) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                String checkinUrl = cursor.getString(cursor.getColumnIndex(Checkin.CHECKIN_URI_VALUE));
+                String checkinUrl = cursor.getString(cursor.getColumnIndexOrThrow(Checkin.CHECKIN_URI_VALUE));
                 if (!checkinUrls.contains(checkinUrl)) {
                     checkinUrls.add(checkinUrl);
                 }
@@ -73,13 +73,13 @@ public class DatabaseHelper {
                 new String[] { checkinDigest }, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                event.name = cursor.getString(cursor.getColumnIndex(Event.EVENT_NAME));
-                event.imageUrl = cursor.getString(cursor.getColumnIndex(Event.EVENT_IMAGE_URL));
-                event.startMillis = cursor.getLong(cursor.getColumnIndex(Event.EVENT_DATE_START));
-                event.endMillis = cursor.getLong(cursor.getColumnIndex(Event.EVENT_DATE_END));
-                event.server = cursor.getString(cursor.getColumnIndex(Event.EVENT_SERVER));
-                event.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-                event.id = cursor.getString(cursor.getColumnIndex(Event.EVENT_ID));
+                event.name = cursor.getString(cursor.getColumnIndexOrThrow(Event.EVENT_NAME));
+                event.imageUrl = cursor.getString(cursor.getColumnIndexOrThrow(Event.EVENT_IMAGE_URL));
+                event.startMillis = cursor.getLong(cursor.getColumnIndexOrThrow(Event.EVENT_DATE_START));
+                event.endMillis = cursor.getLong(cursor.getColumnIndexOrThrow(Event.EVENT_DATE_END));
+                event.server = cursor.getString(cursor.getColumnIndexOrThrow(Event.EVENT_SERVER));
+                event.rowId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+                event.id = cursor.getString(cursor.getColumnIndexOrThrow(Event.EVENT_ID));
             }
 
             cursor.close();
@@ -95,11 +95,11 @@ public class DatabaseHelper {
                 Competitor.COMPETITOR_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                competitor.name = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_DISPLAY_NAME));
-                competitor.countryCode = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE));
-                competitor.sailId = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_SAIL_ID));
-                competitor.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-                competitor.id = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_ID));
+                competitor.name = cursor.getString(cursor.getColumnIndexOrThrow(Competitor.COMPETITOR_DISPLAY_NAME));
+                competitor.countryCode = cursor.getString(cursor.getColumnIndexOrThrow(Competitor.COMPETITOR_COUNTRY_CODE));
+                competitor.sailId = cursor.getString(cursor.getColumnIndexOrThrow(Competitor.COMPETITOR_SAIL_ID));
+                competitor.rowId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+                competitor.id = cursor.getString(cursor.getColumnIndexOrThrow(Competitor.COMPETITOR_ID));
             }
 
             cursor.close();
@@ -115,9 +115,9 @@ public class DatabaseHelper {
                 Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                leaderboard.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-                leaderboard.name = cursor.getString(cursor.getColumnIndex(Leaderboard.LEADERBOARD_NAME));
-                leaderboard.displayName = cursor.getString(cursor.getColumnIndex(Leaderboard.LEADERBOARD_DISPLAY_NAME));
+                leaderboard.rowId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+                leaderboard.name = cursor.getString(cursor.getColumnIndexOrThrow(Leaderboard.LEADERBOARD_NAME));
+                leaderboard.displayName = cursor.getString(cursor.getColumnIndexOrThrow(Leaderboard.LEADERBOARD_DISPLAY_NAME));
             }
 
             cursor.close();
@@ -134,9 +134,9 @@ public class DatabaseHelper {
                 Checkin.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (uc != null) {
             if (uc.moveToFirst()) {
-                checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
-                checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(Checkin.CHECKIN_URI_VALUE));
-                checkinUrlInfo.type = uc.getInt(uc.getColumnIndex(Checkin.CHECKIN_TYPE));
+                checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndexOrThrow(BaseColumns._ID));
+                checkinUrlInfo.urlString = uc.getString(uc.getColumnIndexOrThrow(Checkin.CHECKIN_URI_VALUE));
+                checkinUrlInfo.type = uc.getInt(uc.getColumnIndexOrThrow(Checkin.CHECKIN_TYPE));
             }
 
             uc.close();
@@ -152,8 +152,8 @@ public class DatabaseHelper {
                 AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (markCursor != null) {
             if (markCursor.moveToFirst()) {
-                markInfo.markId = markCursor.getString(markCursor.getColumnIndex(AnalyticsContract.Mark.MARK_ID));
-                markInfo.markName = markCursor.getString(markCursor.getColumnIndex(AnalyticsContract.Mark.MARK_NAME));
+                markInfo.markId = markCursor.getString(markCursor.getColumnIndexOrThrow(AnalyticsContract.Mark.MARK_ID));
+                markInfo.markName = markCursor.getString(markCursor.getColumnIndexOrThrow(AnalyticsContract.Mark.MARK_NAME));
             }
 
             markCursor.close();
@@ -168,9 +168,9 @@ public class DatabaseHelper {
                 AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (boatCursor != null) {
             if (boatCursor.moveToFirst()) {
-                boatInfo.boatId = boatCursor.getString(boatCursor.getColumnIndex(AnalyticsContract.Boat.BOAT_ID));
-                boatInfo.boatName = boatCursor.getString(boatCursor.getColumnIndex(AnalyticsContract.Boat.BOAT_NAME));
-                boatInfo.boatColor = boatCursor.getString(boatCursor.getColumnIndex(AnalyticsContract.Boat.BOAT_COLOR));
+                boatInfo.boatId = boatCursor.getString(boatCursor.getColumnIndexOrThrow(AnalyticsContract.Boat.BOAT_ID));
+                boatInfo.boatName = boatCursor.getString(boatCursor.getColumnIndexOrThrow(AnalyticsContract.Boat.BOAT_NAME));
+                boatInfo.boatColor = boatCursor.getString(boatCursor.getColumnIndexOrThrow(AnalyticsContract.Boat.BOAT_COLOR));
             }
             boatCursor.close();
         }

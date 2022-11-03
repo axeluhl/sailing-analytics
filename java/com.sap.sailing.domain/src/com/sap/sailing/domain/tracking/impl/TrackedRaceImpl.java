@@ -109,6 +109,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
@@ -123,7 +124,7 @@ import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -471,10 +472,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
+            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo,
+            MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForWindEstimationCacheInvalidation,
-                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackingConnectorInfo);
+                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackingConnectorInfo,
+                markPassingRaceFingerprintRegistry);
     }
     
     /**
@@ -483,12 +486,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            the function that creates the ranking metric, passing this tracked race as argument. Callers may use a
      *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
      *            {@link TrackedRace} argument.
+     * @param markPassingRaceFingerprintRegistry TODO
      */
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo,
+            MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         distancesFromStarboardSideOfStartLineProjectedOntoLineCache = new ConcurrentHashMap<>();
         distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes = new ConcurrentHashMap<>();
@@ -608,7 +613,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         if (useInternalMarkPassingAlgorithm) {
-            markPassingCalculator = createMarkPassingCalculator();
+            markPassingCalculator = createMarkPassingCalculator(markPassingRaceFingerprintRegistry);
             this.trackedRegatta.addRaceListener(new RaceListener() {
                 @Override
                 public void raceAdded(TrackedRace trackedRace) {}
@@ -1134,6 +1139,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected void setFinishingTime(final TimePoint newFinishingTime) {
         finishingTime = newFinishingTime;
+        updated(newFinishingTime);
     }
 
     @Override
@@ -1143,6 +1149,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     protected void setFinishedTime(final TimePoint newFinishedTime) {
         finishedTime = newFinishedTime;
+        updated(newFinishedTime);
     }
     
     private TimePoint getLastPassingOfFinishLine() {
@@ -3804,7 +3811,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return competitorSpeedWhenPassingStart;
     }
     
-    protected abstract MarkPassingCalculator createMarkPassingCalculator();
+    protected abstract MarkPassingCalculator createMarkPassingCalculator(MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry);
     
     @Override
     public boolean isUsingMarkPassingCalculator() {

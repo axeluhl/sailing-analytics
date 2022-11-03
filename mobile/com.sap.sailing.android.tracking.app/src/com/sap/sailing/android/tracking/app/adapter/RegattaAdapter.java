@@ -22,28 +22,28 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
         TextView regattaName = ViewHelper.get(view, R.id.regattaName);
         if (regattaName != null) {
             String regattaNameText = cursor
-                    .getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
+                    .getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
             regattaName.setText(regattaNameText);
         }
         TextView regattaEvent = ViewHelper.get(view, R.id.regatta_event);
         if (regattaEvent != null) {
             String regattaEventText = "";
-            regattaEventText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_NAME));
+            regattaEventText += cursor.getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Event.EVENT_NAME));
             regattaEvent.setText(regattaEventText);
         }
         TextView detail = ViewHelper.get(view, R.id.regatta_detail);
         if (detail != null) {
             String detailText = "";
-            int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
+            int type = cursor.getInt(cursor.getColumnIndexOrThrow(AnalyticsContract.Checkin.CHECKIN_TYPE));
             if (type == CheckinUrlInfo.TYPE_COMPETITOR) {
                 detailText += cursor
-                        .getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME));
+                        .getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME));
             } else if (type == CheckinUrlInfo.TYPE_MARK) {
-                detailText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_NAME));
+                detailText += cursor.getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Mark.MARK_NAME));
             } else if (type == CheckinUrlInfo.TYPE_BOAT) {
-                detailText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Boat.BOAT_NAME));
+                detailText += cursor.getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Boat.BOAT_NAME));
                 ViewHelper.setColors(detail,
-                        cursor.getString(cursor.getColumnIndex(AnalyticsContract.Boat.BOAT_COLOR)));
+                        cursor.getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Boat.BOAT_COLOR)));
             }
             detail.setText(detailText);
         }

@@ -392,4 +392,7 @@ public interface LandscapeService {
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> changeAutoScalingReplicasInstanceType(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             InstanceType instanceType) throws Exception;
+
+    <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> waitForProcessTimeout,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }
