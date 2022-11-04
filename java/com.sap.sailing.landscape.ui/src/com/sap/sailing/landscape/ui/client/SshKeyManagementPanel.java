@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sse.common.Util;
@@ -162,6 +163,10 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
             }
         });
+    }
+    
+    public void addSshKeySelectionChangedHandler(SelectionChangeEvent.Handler handler) {
+        sshKeyTable.getSelectionModel().addSelectionChangeHandler(handler);
     }
     
     public String getPassphraseForPrivateKeyDecryption() {

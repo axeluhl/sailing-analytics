@@ -370,9 +370,15 @@ public class LandscapeManagementPanel extends SimplePanel {
         final HorizontalPanel applicationReplicaSetsButtonPanel = new HorizontalPanel();
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsButtonPanel);
         final Button applicationReplicaSetsRefreshButton = new Button(stringMessages.refresh());
+        disableButtonWhenSSHKeyIsNotSelected(applicationReplicaSetsRefreshButton);
         applicationReplicaSetsButtonPanel.add(applicationReplicaSetsRefreshButton);
         applicationReplicaSetsRefreshButton.addClickHandler(e->refreshApplicationReplicaSetsTable());
         final Button addApplicationReplicaSetButton = new Button(stringMessages.add());
+        disableButtonWhenSSHKeyIsNotSelected(addApplicationReplicaSetButton);
+        sshKeyManagementPanel.addSshKeySelectionChangedHandler(event -> {
+            disableButtonWhenSSHKeyIsNotSelected(addApplicationReplicaSetButton);
+            disableButtonWhenSSHKeyIsNotSelected(applicationReplicaSetsRefreshButton);
+        });
         applicationReplicaSetsButtonPanel.add(addApplicationReplicaSetButton);
         addApplicationReplicaSetButton.addClickHandler(e->createApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> removeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
@@ -472,6 +478,10 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+    }
+    
+    private void disableButtonWhenSSHKeyIsNotSelected(Button button) {
+        button.setEnabled(sshKeyManagementPanel.getSelectedKeyPair() != null);
     }
     
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
