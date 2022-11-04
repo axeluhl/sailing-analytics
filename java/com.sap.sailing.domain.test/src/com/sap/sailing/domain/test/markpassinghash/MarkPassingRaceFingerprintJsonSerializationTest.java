@@ -9,11 +9,18 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -25,6 +32,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -60,14 +68,16 @@ public class MarkPassingRaceFingerprintJsonSerializationTest extends OnlineTracT
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
                         ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA });
         trackedRace1 = getTrackedRace();
+        trackedRace1.attachRaceLog(new RaceLogImpl(UUID.randomUUID()));
         super.setUp();
         super.setUp("event_20110505_SailingTea", // Semifinale
                 /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c", /* liveUri */ null, /* storedUri */ null,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
                         ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA });
         trackedRace2 = getTrackedRace();
-        calculator1 = new MarkPassingCalculator(trackedRace1, false, false);
-        calculator2 = new MarkPassingCalculator(trackedRace2, false, false);
+        trackedRace2.attachRaceLog(new RaceLogImpl(UUID.randomUUID()));
+        calculator1 = new MarkPassingCalculator(trackedRace1, false, false, /* markPassingRaceFingerprintRegistry */ null);
+        calculator2 = new MarkPassingCalculator(trackedRace2, false, false, /* markPassingRaceFingerprintRegistry */ null);
     }
 
     @Test
@@ -140,6 +150,74 @@ public class MarkPassingRaceFingerprintJsonSerializationTest extends OnlineTracT
         Waypoint wpNew = new WaypointImpl(cp, PassingInstruction.None);
         trackedRace2.getRace().getCourse().removeWaypoint(0);
         trackedRace2.getRace().getCourse().addWaypoint(0, wpNew);
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
+        assertFalse(fingerprint1.matches(trackedRace2));
+        assertFalse(fingerprint2.matches(trackedRace1));
+        JSONObject json1 = fingerprint1.toJson();
+        JSONObject json2 = fingerprint2.toJson();
+        assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+    }
+
+    @Test
+    public void testFixedMarkPassingAddition() {
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        assertTrue(fingerprint1.matches(trackedRace2));
+        trackedRace2.getAttachedRaceLogs().iterator().next().add(new RaceLogFixedMarkPassingEventImpl(TimePoint.now(), new LogEventAuthorImpl("me", 0),
+                trackedRace2.getRace().getCompetitors().iterator().next(), /* pPassId */ 1, TimePoint.now(), 0));
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
+        assertFalse(fingerprint1.matches(trackedRace2));
+        assertFalse(fingerprint2.matches(trackedRace1));
+        JSONObject json1 = fingerprint1.toJson();
+        JSONObject json2 = fingerprint2.toJson();
+        assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+    }
+
+    @Test
+    public void testFixedMarkPassingRevocation() throws NotRevokableException {
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("me", 0);
+        final RaceLogFixedMarkPassingEvent fixedMarkPassingEvent = new RaceLogFixedMarkPassingEventImpl(TimePoint.now(), author,
+                trackedRace2.getRace().getCompetitors().iterator().next(), /* pPassId */ 1, TimePoint.now(), 0);
+        trackedRace1.getAttachedRaceLogs().iterator().next().add(fixedMarkPassingEvent);
+        trackedRace2.getAttachedRaceLogs().iterator().next().add(fixedMarkPassingEvent);
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        assertTrue(fingerprint1.matches(trackedRace2));
+        trackedRace2.getAttachedRaceLogs().iterator().next().revokeEvent(author, fixedMarkPassingEvent);
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
+        assertFalse(fingerprint1.matches(trackedRace2));
+        assertFalse(fingerprint2.matches(trackedRace1));
+        JSONObject json1 = fingerprint1.toJson();
+        JSONObject json2 = fingerprint2.toJson();
+        assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+    }
+
+    @Test
+    public void testMarkPassingSuppressionAddition() {
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        assertTrue(fingerprint1.matches(trackedRace2));
+        trackedRace2.getAttachedRaceLogs().iterator().next().add(new RaceLogSuppressedMarkPassingsEventImpl(TimePoint.now(), new LogEventAuthorImpl("me", 0),
+                trackedRace2.getRace().getCompetitors().iterator().next(), /* pPassId */ 1, 0));
+        MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
+        assertFalse(fingerprint1.matches(trackedRace2));
+        assertFalse(fingerprint2.matches(trackedRace1));
+        JSONObject json1 = fingerprint1.toJson();
+        JSONObject json2 = fingerprint2.toJson();
+        assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+    }
+
+    @Test
+    public void testMarkPassingSuppressionAdditionRevocation() throws NotRevokableException {
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("me", 0);
+        final RaceLogSuppressedMarkPassingsEvent fixedMarkPassingEvent = new RaceLogSuppressedMarkPassingsEventImpl(TimePoint.now(), author,
+                trackedRace2.getRace().getCompetitors().iterator().next(), /* pPassId */ 1, 0);
+        trackedRace1.getAttachedRaceLogs().iterator().next().add(fixedMarkPassingEvent);
+        trackedRace2.getAttachedRaceLogs().iterator().next().add(fixedMarkPassingEvent);
+        MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
+        MarkPassingRaceFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        assertTrue(fingerprint1.matches(trackedRace2));
+        trackedRace2.getAttachedRaceLogs().iterator().next().revokeEvent(author, fixedMarkPassingEvent);
         MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
         assertFalse(fingerprint1.matches(trackedRace2));
         assertFalse(fingerprint2.matches(trackedRace1));

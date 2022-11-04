@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -69,15 +70,15 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler) {
+            RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds,
-                raceTrackingHandler);
+                raceTrackingHandler, markPassingRaceFingerprintRegistry);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
             WindStore windStore, RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler) {
+            RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
             regatta = trackedRegattaRegistry.getOrCreateDefaultRegatta(
@@ -89,7 +90,7 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
         }
         DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
         return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver, this, trackedRegattaRegistry,
-                raceTrackingHandler);
+                raceTrackingHandler, markPassingRaceFingerprintRegistry);
     }
 
     @Override

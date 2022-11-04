@@ -474,7 +474,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             int currentJobNr = 0;
             final int nrOfJobs = Util.size(effectiveRangeToLoad);
             final MultiJobProgressUpdater progressUpdater = new MultiJobProgressUpdater(nrOfJobs);
-            
             for (TimeRange timeRange : effectiveRangeToLoad) {
                 final int jobNr = currentJobNr;
                 loadFixes(timeRange, event, p -> {
@@ -483,7 +482,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 }, stopCallback);
                 currentJobNr++;
             }
-        
         }
     }
     
