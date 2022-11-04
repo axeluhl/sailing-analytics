@@ -51,4 +51,6 @@ public interface MarkPassingRaceFingerprintRegistry {
      * If a mark passing race fingerprint is known for {@code raceIdentifier} in this registry and the 
      */
     Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course);
+    
+    void removeStoredMarkPassings(RaceIdentifier raceIdentifier);
 }
