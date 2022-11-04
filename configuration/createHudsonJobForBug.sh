@@ -44,7 +44,7 @@ if [[ "$OSTYPE" == *"$OS_FOR_GSED"* ]]; then
   echo "Using gsed"
   gsed -i'' -e 's|<description>..*</description>|<description>This is the build job for \&lt;a href=\&quot;'$BUGZILLA_BASE'/show_bug.cgi?id='$BUG_ID'\&quot;\&gt;Bug '$BUG_ID'\&lt;/a\&gt;</description>|' -e 's|<disabled>true</disabled>|<disabled>false</disabled>|' "$CONFIGFILE"
 else
-  sed -i -e 's|<description>..*</description>|<description>This is the build job for \&lt;a href=\&quot;'$BUGZILLA_BASE'/show_bug.cgi?id='$BUG_ID'\&quot;\&gt;Bug '$BUG_ID'\&lt;/a\&gt;</description>|' -e 's|<disabled>true</disabled>|<disabled>false</diabled>|' "$CONFIGFILE"
+  sed -i -e 's|<description>..*</description>|<description>This is the build job for \&lt;a href=\&quot;'$BUGZILLA_BASE'/show_bug.cgi?id='$BUG_ID'\&quot;\&gt;Bug '$BUG_ID'\&lt;/a\&gt;</description>|' -e 's|<disabled>true</disabled>|<disabled>false</disabled>|' "$CONFIGFILE"
 fi
 
 if [ "$SKIP_TESTS" = "1" ]; then
