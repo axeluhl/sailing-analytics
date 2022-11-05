@@ -5,7 +5,7 @@ import java.util.List;
 
 public class EndpointDTO implements Serializable {
     private static final long serialVersionUID = 3115461658787136449L;
-    
+
     public final static String REGISTER_ACTION = "register";
     public final static String UNREGISTER_ACTION = "unregister";
 
@@ -16,6 +16,14 @@ public class EndpointDTO implements Serializable {
     private String action;
     private String endpointCallbackUrl;
     private List<String> devicesUuid;
+
+    public EndpointDTO(String endpointUuid, String action, String endpointCallbackUrl, List<String> devicesUuid) {
+        super();
+        this.endpointUuid = endpointUuid;
+        this.action = action;
+        this.endpointCallbackUrl = endpointCallbackUrl;
+        this.devicesUuid = devicesUuid;
+    }
 
     public String getEndpointUuid() {
         return endpointUuid;
@@ -48,7 +56,7 @@ public class EndpointDTO implements Serializable {
     public void setAction(String action) {
         this.action = action;
     }
-    
+
     public boolean isRegisterAction() {
         return getAction().equalsIgnoreCase(REGISTER_ACTION);
     }
@@ -56,17 +64,17 @@ public class EndpointDTO implements Serializable {
     public boolean isUnRegisterAction() {
         return getAction().equalsIgnoreCase(UNREGISTER_ACTION);
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (o == this)
             return true;
         if (!(o instanceof EndpointDTO))
             return false;
-        EndpointDTO other = (EndpointDTO)o;
+        EndpointDTO other = (EndpointDTO) o;
         return getEndpointUuid().equals(other.getEndpointUuid());
     }
-    
+
     @Override
     public int hashCode() {
         return getEndpointUuid().hashCode();
