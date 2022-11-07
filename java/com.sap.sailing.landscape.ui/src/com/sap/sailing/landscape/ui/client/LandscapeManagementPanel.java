@@ -29,8 +29,6 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -117,7 +115,6 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final SimpleBusyIndicator applicationReplicaSetsBusy;
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
-    private final ListBox regionListBox;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
     
@@ -142,12 +139,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         awsCredentialsAndSshKeys.add(awsCredentialsPanel);
         mfaLoginWidget = new AwsMfaLoginWidget(landscapeManagementService, errorReporter, userService, stringMessages);
         mfaLoginWidget.addListener(validSession->refreshAllThatNeedsAwsCredentials());
-        awsCredentialsPanel.add(mfaLoginWidget);
-        
-        regionListBox = new ListBox();
-        regionListBox.addItem("Test");
-        
-        
+        awsCredentialsPanel.add(mfaLoginWidget);       
         regionsTable = new TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -170,9 +162,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         }, stringMessages.region(), new NaturalComparator());
         final CaptionPanel regionsCaptionPanel = new CaptionPanel(stringMessages.region());
-        //regionsCaptionPanel.add(regionsTable);
-        regionsCaptionPanel.add(regionListBox);
-        
+        regionsCaptionPanel.add(regionsTable); 
         mainPanel.add(regionsCaptionPanel);
         refreshRegionsTable(userService);
         // MongoDB endpoints:
@@ -1298,10 +1288,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                 });
             }
         });
-    }
-    
-    private void refreshRegionsListBox(UserService userService) {
-        
     }
     
     private void refreshAllThatNeedsAwsCredentials() {
