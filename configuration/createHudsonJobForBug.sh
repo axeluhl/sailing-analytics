@@ -32,23 +32,48 @@ RESPONSE_HEADERS=$(mktemp responseheadersXXXX)
 HUDSON_BASE_URL=https://hudson.sapsailing.com
 BUGZILLA_BASE=https://bugzilla.sapsailing.com/bugzilla
 COPY_TEMPLATE_JOB=CopyTemplate
+OS_FOR_GSED="darwin"
 read -p "Username: " USERNAME
 read -s -p "Password: " PASSWORD
 echo
 COPY_TEMPLATE_CONFIG_URL="$HUDSON_BASE_URL/job/$COPY_TEMPLATE_JOB/config.xml"
 curl -s -X GET $COPY_TEMPLATE_CONFIG_URL -u "$USERNAME:$PASSWORD" -o "$CONFIGFILE"
-sed -i -e 's|<description>..*</description>|<description>This is the build job for \&lt;a href=\&quot;'$BUGZILLA_BASE'/show_bug.cgi?id='$BUG_ID'\&quot;\&gt;Bug '$BUG_ID'\&lt;/a\&gt;</description>|' -e 's|<disabled>true</disabled>|<disabled>false</disabled>|' "$CONFIGFILE"
+
+# On macosx is gnu-sed needed
+if [[ "$OSTYPE" == *"$OS_FOR_GSED"* ]]; then
+  echo "Using gsed"
+  gsed -i'' -e 's|<description>..*</description>|<description>This is the build job for \&lt;a href=\&quot;'$BUGZILLA_BASE'/show_bug.cgi?id='$BUG_ID'\&quot;\&gt;Bug '$BUG_ID'\&lt;/a\&gt;</description>|' -e 's|<disabled>true</disabled>|<disabled>false</disabled>|' "$CONFIGFILE"
+else
+  sed -i -e 's|<description>..*</description>|<description>This is the build job for \&lt;a href=\&quot;'$BUGZILLA_BASE'/show_bug.cgi?id='$BUG_ID'\&quot;\&gt;Bug '$BUG_ID'\&lt;/a\&gt;</description>|' -e 's|<disabled>true</disabled>|<disabled>false</disabled>|' "$CONFIGFILE"
+fi
+
 if [ "$SKIP_TESTS" = "1" ]; then
-  sed -i -e 's|<command>\([^<]*\)build *</command>|<command>\1-t build</command>|' "$CONFIGFILE"
+  if [[ "$OSTYPE" == *"$OS_FOR_GSED"* ]]; then
+    gsed -i'' -e 's|<command>\([^<]*\)build *</command>|<command>\1-t build</command>|' "$CONFIGFILE"
+  else
+    sed -i -e 's|<command>\([^<]*\)build *</command>|<command>\1-t build</command>|' "$CONFIGFILE"
+  fi
 fi
 if [ "$BUILD_RELEASE" = "1" ]; then
-  sed -i -e 's|<command>\([^<]*\)</command>|<command>\1 \&amp;\&amp; PATH=/usr/local/bin:${PATH} configuration/buildAndUpdateProduct.sh -n bug'$BUG_ID' -w trac@sapsailing.com -u release</command>|' "$CONFIGFILE"
+  if [[ "$OSTYPE" == *"$OS_FOR_GSED"* ]]; then
+    gsed -i'' -e 's|<command>\([^<]*\)</command>|<command>\1 \&amp;\&amp; PATH=/usr/local/bin:${PATH} configuration/buildAndUpdateProduct.sh -n bug'$BUG_ID' -w trac@sapsailing.com -u release</command>|' "$CONFIGFILE"
+  else
+    sed -i -e 's|<command>\([^<]*\)</command>|<command>\1 \&amp;\&amp; PATH=/usr/local/bin:${PATH} configuration/buildAndUpdateProduct.sh -n bug'$BUG_ID' -w trac@sapsailing.com -u release</command>|' "$CONFIGFILE"
+  fi
 fi
-sed -i -e '/<branches>$/{
-N
-N
-s|<name>[^<]*</name>|<name>bug'$BUG_ID'</name>|
-}' "$CONFIGFILE"
+if [[ "$OSTYPE" == *"$OS_FOR_GSED"* ]]; then
+  gsed -i'' -e '/<branches>$/{
+  N
+  N
+  s|<name>[^<]*</name>|<name>bug'$BUG_ID'</name>|
+  }' "$CONFIGFILE"
+else
+  sed -i -e '/<branches>$/{
+  N
+  N
+  s|<name>[^<]*</name>|<name>bug'$BUG_ID'</name>|
+  }' "$CONFIGFILE"
+fi
 curl -D "$RESPONSE_HEADERS" -s -XPOST "$HUDSON_BASE_URL/createItem?name=bug$BUG_ID" -u "$USERNAME:$PASSWORD" --data-binary "@$CONFIGFILE" -H "Content-Type:text/xml" >/dev/null 2>/dev/null
 RESPONSE_CODE=$(cat "$RESPONSE_HEADERS" | head -n 1 | cut -d ' ' -f2 )
 if [[ "$RESPONSE_CODE" =~ 2.. ]]; then
