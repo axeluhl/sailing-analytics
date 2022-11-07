@@ -50,6 +50,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
@@ -897,7 +898,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
-        return null;
+        return getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
      
     @Override
@@ -907,7 +908,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
-        return null;
+        return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override

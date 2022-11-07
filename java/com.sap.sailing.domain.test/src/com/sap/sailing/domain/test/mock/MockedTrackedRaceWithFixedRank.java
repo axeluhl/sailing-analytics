@@ -107,14 +107,16 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
 
     @Override
-    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return Collections.singletonList(competitorsAndBoats.keySet().iterator().next());
     }
 
     @Override
-    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorst = new LinkedHashMap<Competitor, RankAndRankComparable>();
-        competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(),new RankAndRankComparable(1,  new RankComparableRank(1)));
+        competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(), new RankAndRankComparable(1, new RankComparableRank(1)));
         return competitorsFromBestToWorst;
     }
 

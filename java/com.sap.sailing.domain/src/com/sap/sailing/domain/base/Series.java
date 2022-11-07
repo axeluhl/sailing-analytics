@@ -135,7 +135,7 @@ public interface Series extends SeriesBase {
      * When a column has more than one fleet there are two different options for scoring it when the fleets are of the
      * same rank. Either the scoring scheme is applied to all fleets of the same rank at the same time and competitors
      * compete across the fleets; or the scoring scheme is applied to each fleet separately, leading to the best score
-     * being awarded  as many times as there are fleets of the same rank. For the latter case, this field is
+     * being awarded as many times as there are fleets of the same rank. For the latter case, this field is
      * <code>false</code> which is also the default.
      */
     boolean hasCrossFleetMergedRanking();
