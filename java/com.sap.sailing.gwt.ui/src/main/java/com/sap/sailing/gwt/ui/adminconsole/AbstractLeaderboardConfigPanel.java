@@ -353,13 +353,13 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         hPanel.setWidth("100%");
-        hPanel.setSpacing(6);
+        hPanel.setSpacing(5);
         hPanel.add(reloadAllRaceLogs);
         Label helpLabel = new Label(stringMessages.helptextLinkingRaces());
-        helpLabel.setWidth("780");
+        helpLabel.setWidth("85%");
         hPanel.add(helpLabel);
         hPanel.add(new HelpButton(HelpButtonResources.INSTANCE,
-                stringMessages.videoGuide(), "https://youtu.be/dQw4w9WgXcQ"));
+                stringMessages.videoGuide(), "https://vimeo.com/768053778/922b629cc4"));
         vPanel.add(hPanel);
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
