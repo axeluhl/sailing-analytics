@@ -91,6 +91,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
@@ -1967,7 +1968,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return storeRegattaLogEvent(regattaLikeIdentifier, document);
     }
     
-    private List<Document> storeMarkPassings(Map<Competitor, Map<Waypoint, MarkPassing>> markPassings) {
+    private List<Document> storeMarkPassings(Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course) {
         final List<Document> result = new ArrayList<>();
         for (final Entry<Competitor, Map<Waypoint, MarkPassing>> e : markPassings.entrySet()) {
             final Document competitorMarkPassings = new Document();
@@ -1975,7 +1976,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             final List<Document> markPassingsList = new ArrayList<>();
             for (final Entry<Waypoint, MarkPassing> f : e.getValue().entrySet()) {
                 final Document markPassingDoc = new Document();
-                markPassingDoc.put(FieldNames.WAYPOINT_ID.name(), f.getKey().getId());
+                markPassingDoc.put(FieldNames.INDEX_OF_PASSED_WAYPOINT.name(), course.getIndexOfWaypoint(f.getKey()));
                 markPassingDoc.put(FieldNames.TIME_AS_MILLIS.name(), f.getValue().getTimePoint().asMillis());
                 markPassingsList.add(markPassingDoc);
             }
@@ -1985,15 +1986,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public void storeMarkPassings(RaceIdentifier raceIdentification, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings) {
+    @Override
+    public void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint,
+            Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course) {
         MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
         JSONObject fingerprintjson = fingerprint.toJson();
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
         final Document result = new Document();
         final Document fingerprintDoc = Document.parse(fingerprintjson.toString());
         result.put(FieldNames.MARK_PASSINGS_FINGERPRINT.name(), fingerprintDoc);
-        storeRaceIdentifier(result, raceIdentification);
-        final List<Document> markPassingsDoc = storeMarkPassings(markPassings);
+        storeRaceIdentifier(result, raceIdentifier);
+        final List<Document> markPassingsDoc = storeMarkPassings(markPassings, course);
         result.put(FieldNames.MARK_PASSINGS.name(), markPassingsDoc);
-        markPassingCollection.insertOne(result);
+        markPassingCollection.replaceOne(query, result, new ReplaceOptions().upsert(true));
+    }
+    
+    @Override
+    public void removeMarkPassings(RaceIdentifier raceIdentifier) {
+        MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
+        markPassingCollection.deleteOne(query);
     }
 }

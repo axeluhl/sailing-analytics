@@ -2373,6 +2373,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String landscape();
     String identifier();
     String selectARole();
+    String showWindLadder();
+    String windLadderOverride();
+    String windLadderManeuverAngle();
     String raceOfficerOnVessel();
     String shoreControl();
     String demoMode();

@@ -43,7 +43,8 @@ public class SwissTimingReplayConnectivityParamsHandler extends AbstractRaceTrac
     private final SecurityService securityService;
 
     public SwissTimingReplayConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            DomainFactory domainFactory, SwissTimingReplayService replayService, SecurityService securityService) {
+            DomainFactory domainFactory, SwissTimingReplayService replayService,
+            SecurityService securityService) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;

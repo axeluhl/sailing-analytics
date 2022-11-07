@@ -31,7 +31,7 @@ public class MarkPassingCalculatorTest {
     private static class MyMarkPassingCalculator extends MarkPassingCalculator {
         public MyMarkPassingCalculator(DynamicTrackedRace race, boolean doListen,
                 boolean waitForInitialMarkPassingCalculation) {
-            super(race, doListen, waitForInitialMarkPassingCalculation);
+            super(race, doListen, waitForInitialMarkPassingCalculation, /* markPassingRaceFingerprintRegistry */ null);
         }
 
         @Override
