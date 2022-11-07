@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -153,6 +154,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     private final boolean useInternalMarkPassingAlgorithm;
     
     private final RaceLogAndTrackedRaceResolver raceLogResolver;
+    
+    private final MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry;
 
     private final String raceName;
     
@@ -183,14 +186,16 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
      *            be obtained from {@link #getTracker()}. This tracker's {@link RaceTracker.RaceCreationListener}s will
      *            be {@link SwissTimingReplayRaceTracker#notifyRaceCreationListeners() notified} when this adapter has
      *            created the race.
+     * @param markPassingRaceFingerprintRegistry TODO
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceName, String raceIdForRaceDefinition,
             BoatClass boatClass, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, TrackerConstructor trackerConstructor,
-            RaceTrackingHandler raceTrackingHandler) {
+            RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         this.tracker = trackerConstructor == null ? null : trackerConstructor.createTracker(this);
         this.raceLogResolver = raceLogResolver;
+        this.markPassingRaceFingerprintRegistry = markPassingRaceFingerprintRegistry;
         // when the race is created, notify the tracker's race creation listeners
         this.dynamicRaceDefinitionSet = trackerConstructor == null ? null : (race, trackedRace)->this.tracker.notifyRaceCreationListeners();
         this.raceName = raceName;
@@ -418,7 +423,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                     /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                     /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
                     /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
-                    new TrackingConnectorInfoImpl(SwissTimingAdapter.NAME, SwissTimingAdapter.DEFAULT_URL,/*no api connection to query the webUrl*/ null));
+                    new TrackingConnectorInfoImpl(SwissTimingAdapter.NAME, SwissTimingAdapter.DEFAULT_URL,/*no api connection to query the webUrl*/ null), markPassingRaceFingerprintRegistry);
             trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
             TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
             if (bestStartTimeKnownSoFar != null) {

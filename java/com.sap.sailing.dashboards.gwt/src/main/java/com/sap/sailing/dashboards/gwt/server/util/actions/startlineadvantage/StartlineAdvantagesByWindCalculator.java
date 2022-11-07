@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;

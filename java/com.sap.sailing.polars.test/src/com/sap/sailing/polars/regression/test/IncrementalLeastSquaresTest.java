@@ -12,7 +12,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 

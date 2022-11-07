@@ -129,7 +129,8 @@ public class RaceColumnCacheTest extends AbstractLeaderboardTest {
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
                 new HashSet<Sideline>(), EmptyWindStore.INSTANCE, 5000, 20000, 20000,
                 /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null));
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null,
+                /* markPassingRaceFingerprintRegistry */ null));
         return spyedTrackedRace;
     }
 

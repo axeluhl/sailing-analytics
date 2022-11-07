@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -57,7 +58,6 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
 import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
