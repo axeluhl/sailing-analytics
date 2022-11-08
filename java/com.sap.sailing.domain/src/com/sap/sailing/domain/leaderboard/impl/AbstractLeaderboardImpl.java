@@ -144,7 +144,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
         final int trackedRank;
-        if (trackedRace == null || trackedRace.hasStarted(timePoint) == false) {
+        if (trackedRace == null || !trackedRace.hasStarted(timePoint)) {
             // return 0 if the race has not started or no tracked race is available
             trackedRank = 0;
         } else {

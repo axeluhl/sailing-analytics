@@ -22,6 +22,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -138,37 +139,47 @@ public class LeaderboardDiscardingRulesTest {
     public void testDiscardingRulesForMultipleEquallyBadRacesWithHighPointScoringScheme() throws NoWindException {
         racingEventService.removeLeaderboard(LEADERBOARDNAME);
         racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new HighPoint(), Collections.emptySet());
-        FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
+        final FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
-        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", /* typicallyStartsUpwind */ true);
-
-        CompetitorWithBoat rasmus = AbstractLeaderboardTest.createCompetitorWithBoat("Rasmus");
-        final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
+        final CompetitorWithBoat c1 = AbstractLeaderboardTest.createCompetitorWithBoat("C1");
+        final CompetitorWithBoat c2 = AbstractLeaderboardTest.createCompetitorWithBoat("C2");
+        final CompetitorWithBoat rasmus = AbstractLeaderboardTest.createCompetitorWithBoat("Rasmus");
+        final CompetitorWithBoat jes = AbstractLeaderboardTest.createCompetitorWithBoat("Jes");
+        final CompetitorWithBoat nobody = AbstractLeaderboardTest.createCompetitorWithBoat("Nobody");
+        // R1:
+        final MockedTrackedRaceWithFixedRankAndManyCompetitors race1 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(c1, /* rank */ 1, /* started */ true);
+        race1.addCompetitorWithBoat(rasmus); // score 2.0
         leaderboard.addRace(race1, "R1", /* medalRace */false);
-        final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
+        // R2:
+        final MockedTrackedRaceWithFixedRankAndManyCompetitors race2 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(c1, /* rank */ 1, /* started */ true);
+        race2.addCompetitorWithBoat(rasmus); // score 2.0
         leaderboard.addRace(race2, "R2", /* medalRace */false);
-
-        CompetitorWithBoat jes = AbstractLeaderboardTest.createCompetitorWithBoat("Jes");
-        final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 2, /* started */ true, boatClass); // score 2.0
+        // R3:
+        final MockedTrackedRaceWithFixedRankAndManyCompetitors race3 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(c1, /* rank */ 1, /* started */ true);
+        race3.addCompetitorWithBoat(jes); // score 2.0
         leaderboard.addRace(race3, "R3", /* medalRace */false);
-        final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 3, /* started */ true, boatClass); // score 1.0
+        // R4:
+        final MockedTrackedRaceWithFixedRankAndManyCompetitors race4 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(c1, /* rank */ 1, /* started */ true);
+        race4.addCompetitorWithBoat(c2);
+        race4.addCompetitorWithBoat(jes); // score 3.0
         leaderboard.addRace(race4, "R4", /* medalRace */false);
-        
-        CompetitorWithBoat nobody = AbstractLeaderboardTest.createCompetitorWithBoat("Nobody");
-        final TrackedRace race5 = new MockedTrackedRaceWithFixedRank(nobody, /* rank */ 3, /* started */ true, boatClass); // score 1.0
+        // R5:
+        final MockedTrackedRaceWithFixedRankAndManyCompetitors race5 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(c1, /* rank */ 1, /* started */ true);
+        race5.addCompetitorWithBoat(c2);
+        race5.addCompetitorWithBoat(nobody); // score 3.0
         leaderboard.addRace(race5, "R5", /* medalRace */false);
-
+        // correct a few scores:
         leaderboard.getScoreCorrection().correctScore(rasmus, leaderboard.getRaceColumnByName("R3"), 2.0);
         leaderboard.getScoreCorrection().correctScore(rasmus, leaderboard.getRaceColumnByName("R4"), 2.0);
         leaderboard.getScoreCorrection().correctScore(jes, leaderboard.getRaceColumnByName("R1"), 3.0);
         leaderboard.getScoreCorrection().correctScore(jes, leaderboard.getRaceColumnByName("R2"), 3.0);
-        
-        TimePoint now = MillisecondsTimePoint.now();
+        // now test:
+        final TimePoint now = MillisecondsTimePoint.now();
         // Jes scores better than Rasmus in this case because Jes's two discards are 1.0/2.0, keeping 3.0/3.0
         // whereas Rasmus is to discard two of the four 2.0 results, keeping 2.0/2.0, being two points worse than Hunger:
-        double netPointsRasmus = leaderboard.getNetPoints(rasmus, now);
-        double netPointsJes = leaderboard.getNetPoints(jes, now);
-        assertEquals(3, Util.size(leaderboard.getCompetitors()));
+        final double netPointsRasmus = leaderboard.getNetPoints(rasmus, now);
+        final double netPointsJes = leaderboard.getNetPoints(jes, now);
+        assertEquals(5, Util.size(leaderboard.getCompetitors())); // c1, c2, Rasmus, Jes, Nobody
         assertEquals(3.+3., netPointsJes, 0.0000000001);
         assertEquals(2.+2., netPointsRasmus,  0.000000001);
     }
