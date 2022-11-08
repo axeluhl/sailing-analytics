@@ -112,7 +112,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         this.regatta = regatta;
         this.startTime = startTime;
         // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
-        this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
+        this.competitorsFromBestToWorst = new ArrayList<>(competitorsFromBestToWorst);
         BoatClass boatClass = new BoatClassImpl("49er", /* upwind start */ true);
         competitorsAndBoats = new HashMap<>();
         int i = 1;
@@ -225,7 +225,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
+    public int getRank(Competitor competitor) {
         return competitorsFromBestToWorst.indexOf(competitor) + 1;
     }
 
@@ -464,18 +464,20 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
-        LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, RankAndRankComparable>();
-        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
-            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1),new RankAndRankComparable(i, new RankComparableRank(i)));
+        final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<>();
+        for (int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.put(competitor, new RankAndRankComparable(getRank(competitor), new RankComparableRank(getRank(competitor))));
         }
         return competitorsFromBestToWorstAndRankComparable;
     }
     
     @Override
     public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<CompetitorAndRankComparable>();
-        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
-            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitorsFromBestToWorst.get(i-1), new RankComparableRank(i)));
+        final List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<>();
+        for (int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitor, new RankComparableRank(getRank(competitor))));
         }
         return competitorsFromBestToWorstAndRankComparable;
     }
@@ -754,9 +756,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, RankAndRankComparable>();
-        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
-            competitorsFromBestToWorstAndRankComparable.put(competitorsFromBestToWorst.get(i-1), new RankAndRankComparable( i, new RankComparableRank(i)));
+        final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, RankAndRankComparable>();
+        for (int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.put(competitor, new RankAndRankComparable(getRank(competitor), new RankComparableRank(getRank(competitor))));
         }
         return competitorsFromBestToWorstAndRankComparable;
     }
@@ -765,7 +768,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<CompetitorAndRankComparable>();
         for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
-            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitorsFromBestToWorst.get(i-1), new RankComparableRank(i)));
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitor, new RankComparableRank(getRank(competitor))));
         }
         return competitorsFromBestToWorstAndRankComparable;
     }

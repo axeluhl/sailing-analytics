@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -161,12 +162,16 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                     }
                 }
                 if (fleetsOfSameOrderAsCompetitorsFleet.size() > 1) {
+                    Integer originalRank = null;
                     // more than one fleet of the same rank -> need to merge these fleets
-                    List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<>();
+                    final List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<>();
                     for (Fleet fleet : fleetsOfSameOrderAsCompetitorsFleet) {
-                        List<CompetitorAndRankComparable> currentCompetitorsAndRankcomparables = race
-                                .getTrackedRace(fleet).getCompetitorsFromBestToWorstAndRankComparable(timePoint);
-                        competitorsFromBestToWorstAndRankComparable.addAll(currentCompetitorsAndRankcomparables);
+                        for (final java.util.Map.Entry<Competitor, RankAndRankComparable> e : race.getTrackedRace(fleet).getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).entrySet()) {
+                            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(e.getKey(), e.getValue().getRankComparable()));
+                            if (e.getKey() == competitor) {
+                                originalRank = e.getValue().getRank();
+                            }
+                        }
                     }
                     // A merge sort might be faster because the Lists in competitorsFromBestToWorstAndRankComparable are
                     // already ordered
@@ -174,15 +179,22 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                     Iterator<Competitor> competitorsIterator = competitorsFromBestToWorstAndRankComparable.stream()
                             .map(v -> v.getCompetitor()).iterator();
                     trackedRank = getRankImprovedByDisqualificationsOfBetterRankedCompetitors(competitor, race,
-                            timePoint, competitorsIterator);
+                            timePoint, originalRank, competitorsIterator);
                 } else {
+                    final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankAndRankComparable =
+                            trackedRace.getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache);
                     // just one fleet for the given rank -> no merge needed just use the normal behavior
                     trackedRank = getRankImprovedByDisqualificationsOfBetterRankedCompetitors(competitor, race,
-                            timePoint, trackedRace.getCompetitorsFromBestToWorst(timePoint, cache).iterator());
+                            timePoint, competitorsFromBestToWorstAndRankAndRankComparable.get(competitor).getRank(),
+                            competitorsFromBestToWorstAndRankAndRankComparable.keySet().iterator());
                 }
             } else {
-                trackedRank = getRankImprovedByDisqualificationsOfBetterRankedCompetitors(competitor, race, timePoint,
-                        trackedRace.getCompetitorsFromBestToWorst(timePoint, cache).iterator());
+                final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankAndRankComparable =
+                        trackedRace.getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache);
+                // just one fleet for the given rank -> no merge needed just use the normal behavior
+                trackedRank = getRankImprovedByDisqualificationsOfBetterRankedCompetitors(competitor, race,
+                        timePoint, competitorsFromBestToWorstAndRankAndRankComparable.get(competitor).getRank(),
+                        competitorsFromBestToWorstAndRankAndRankComparable.keySet().iterator());
             }
         }
         return trackedRank;
@@ -201,32 +213,38 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * @param timePoint
      *            time point at which to consider disqualifications (not used yet because currently we don't remember
      *            <em>when</em> a competitor was disqualified)
+     * @param originalRank TODO
      * @param competitorsFromBestToWorst
      *            An iterator that contains all competitors through which the rank of the given competitor can be improved.
-     *
      * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked competitors exist for
      *         <code>race</code>, or otherwise a <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of disqualifications of
      *         competitors whose tracked rank is better (lower) than <code>rank</code> while the {@link RankComparable} is consistent with the new Rank.
      */
     private int getRankImprovedByDisqualificationsOfBetterRankedCompetitors(Competitor competitor, RaceColumn race,
-            TimePoint timePoint, Iterator<Competitor> competitorsFromBestToWorst) {
-        int rank = 1;
-        int numberOfDisqualificationsOfBetterRankedCompetitors = 0;
-        while (competitorsFromBestToWorst.hasNext()) {
-            Competitor currentCompetitor = competitorsFromBestToWorst.next();
-            if (competitor.equals(currentCompetitor)) {
-                break;
+            TimePoint timePoint, Integer originalRank, Iterator<Competitor> competitorsFromBestToWorst) {
+        final int result;
+        if (originalRank == null || originalRank == 0) {
+            result = 0;
+        } else {
+            int rank = 1;
+            int numberOfDisqualificationsOfBetterRankedCompetitors = 0;
+            while (competitorsFromBestToWorst.hasNext()) {
+                Competitor currentCompetitor = competitorsFromBestToWorst.next();
+                if (competitor.equals(currentCompetitor)) {
+                    break;
+                }
+                MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection()
+                        .getMaxPointsReason(currentCompetitor, race, timePoint);
+                if (isSuppressed(currentCompetitor) || (maxPointsReasonForBetterCompetitor != null
+                        && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
+                        && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
+                    numberOfDisqualificationsOfBetterRankedCompetitors++;
+                }
+                rank++;
             }
-            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection()
-                    .getMaxPointsReason(currentCompetitor, race, timePoint);
-            if (isSuppressed(currentCompetitor) || (maxPointsReasonForBetterCompetitor != null
-                    && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
-                    && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
-                numberOfDisqualificationsOfBetterRankedCompetitors++;
-            }
-            rank++;
+            result = rank - numberOfDisqualificationsOfBetterRankedCompetitors;
         }
-        return rank - numberOfDisqualificationsOfBetterRankedCompetitors;
+        return result;
     }
 
     // Note: no need to redefine isMedalRaceChanged because that doesn't affect the competitorsCache

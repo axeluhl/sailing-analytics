@@ -52,8 +52,9 @@ import com.sap.sse.common.Util;
  * <p>
  * 
  * Should a planned heat not be sailed then all competitors assigned to that heat will obtain equal points based on the
- * average of the ranks for which they would have sailed. For example, if the final heat cannot be sailed, all
- * competitors who qualified for the final race obtain the average of 0.7, 2, 3, 4, 5, 6, 7 and 8 points (4.46 points).
+ * average of the ranks for which they would have sailed. For a final not sailed, the exceptional 0.7 points for the
+ * winner are then replaced by a 1.0. For example, if the final heat cannot be sailed, all competitors who qualified for
+ * the final race obtain the average of 1, 2, 3, 4, 5, 6, 7 and 8 points (4.5 points).
  * <p>
  * 
  * During live tracking promotions cannot generally be decided due to the race committee's decision authority.
@@ -63,8 +64,9 @@ import com.sap.sse.common.Util;
  * which technically needs to be expressed by assigning the competitors to their heat in the next round. As soon as this
  * happens, the scores in the heat from which a competitor got promoted are set to <code>null</code>, and a score
  * corresponding to the average points given to the competitors of the heat to which the competitor got promoted is
- * inferred for that heat. Only when the race in that next heat produces non-zero ranks, the scoring rules for that
- * heat are applied again normally.<p>
+ * inferred for that heat. Only when the race in that next heat produces non-zero ranks, the scoring rules for that heat
+ * are applied again normally.
+ * <p>
  * 
  * The regatta is expected to be modeled such that fleet ordering numbers are used in a special way. Ordering
  * <code>1</code> is to be used to identify the Final heat, <code>2</code> for the Losers Final heat. For each earlier

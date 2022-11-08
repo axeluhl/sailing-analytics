@@ -23,4 +23,9 @@ public class RankAndRankComparable implements Comparable<RankAndRankComparable> 
     public int compareTo(RankAndRankComparable o) {
         return rankComparable.compareTo(o.getRankComparable());
     } 
+
+    @Override
+    public String toString() {
+        return "RankAndRankComparable [rank=" + rank + ", rankComparable=" + rankComparable + "]";
+    }
 }

@@ -1583,13 +1583,13 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
 
     @Test
     public void testElminationScoringSchemeWithFinalNotSailed() throws NoWindException {
-        Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+        final Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07));
-        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        Competitor[] c = createCompetitors(64).toArray(new Competitor[64]);
+        final Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        final Competitor[] c = createCompetitors(64).toArray(new Competitor[64]);
         // first round with 64 competitors, eight per heat:
-        Competitor[][] competitorsForHeatsInRound1 = new Competitor[8][];
+        final Competitor[][] competitorsForHeatsInRound1 = new Competitor[8][];
         TimePoint later = null;
         for (int heat=0; heat<8; heat++) {
             competitorsForHeatsInRound1[heat] = new Competitor[8];
@@ -1599,7 +1599,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), /* withScores */ true, competitorsForHeatsInRound1[heat]);
         }
         // quarter-finals has promoted top four competitors of first round in heats with eight competitors each:
-        Competitor[][] competitorsForHeatsInQuarterFinals = new Competitor[4][];
+        final Competitor[][] competitorsForHeatsInQuarterFinals = new Competitor[4][];
         for (int heat=0; heat<4; heat++) {
             competitorsForHeatsInQuarterFinals[heat] = new Competitor[8];
             for (int i=0; i<8; i++) {
@@ -1608,7 +1608,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             later = createAndAttachTrackedRaces(series.get(1), "Heat "+(heat+9), /* withScores */ true, competitorsForHeatsInQuarterFinals[heat]);
         }
         // semi-finals has promoted top four competitors of quarter finals which are the top four of each other first-round heat:
-        Competitor[][] competitorsForHeatsInSemiFinals = new Competitor[2][];
+        final Competitor[][] competitorsForHeatsInSemiFinals = new Competitor[2][];
         for (int heat=0; heat<2; heat++) {
             competitorsForHeatsInSemiFinals[heat] = new Competitor[8];
             for (int i=0; i<8; i++) {
@@ -1619,7 +1619,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         // finals has promoted top four competitors of semi finals which are the top four of first and fifth first-round heats
         // for the final, and the top four of the first round's third and seventh heat; we assume here that the finals have not
         // been sailed and therefore expect the scores to be obtained by interpolating, using 1.0 instead of 0.7 for averaging.
-        Competitor[][] competitorsForHeatsInFinals = new Competitor[2][];
+        final Competitor[][] competitorsForHeatsInFinals = new Competitor[2][];
         for (int heat=0; heat<2; heat++) {
             competitorsForHeatsInFinals[heat] = new Competitor[8];
             for (int i=0; i<8; i++) {
