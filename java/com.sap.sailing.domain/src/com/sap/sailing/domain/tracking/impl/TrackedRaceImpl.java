@@ -1588,12 +1588,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
-    @Override
-    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final int result;
+    private boolean hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint(Competitor competitor, TimePoint timePoint) {
+        final boolean hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint;
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings.isEmpty()) {
-            result = 0;
+            hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint = true;
         } else {
             final boolean hasNoMarkPassingAtOrBeforeTimePoint;
             lockForRead(markPassings);
@@ -1602,16 +1601,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             } finally {
                 unlockAfterRead(markPassings);
             }
-            if (hasNoMarkPassingAtOrBeforeTimePoint) {
-                // no mark passing at or before timePoint; competitor has not started / participated yet
+            hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint = hasNoMarkPassingAtOrBeforeTimePoint;
+        }
+        return hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint;
+    }
+    
+    @Override
+    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final int result;
+        if (hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint(competitor, timePoint)) {
+            result = 0;
+        } else {
+            final RankAndRankComparable rankAndRankComparable = getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).get(competitor);
+            if (competitor == null) {
                 result = 0;
             } else {
-                RankAndRankComparable rankAndRankComparable = getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).get(competitor);
-                if(competitor == null) {
-                    result = 0;
-                }else {
-                    result = rankAndRankComparable.getRank(); 
-                }
+                result = rankAndRankComparable.getRank(); 
             }
         }
         return result;
@@ -1640,8 +1645,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
-   // defaults im interface anschauen 
-        
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
@@ -1702,8 +1705,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         try {
                             // here the rankingmetrics need to return the RankComparables so that they could be ranked accordingly. 
                             // encapsulate sorting providing etc. in a method of the Ranking metric. To Update this cache 
-                            Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
-                            List<Competitor> tempList = new ArrayList<Competitor>();
+                            final Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
+                            final List<Competitor> tempList = new ArrayList<Competitor>();
                             for (Competitor c : getRace().getCompetitors()) {
                                 tempList.add(c);
                             }
@@ -1711,7 +1714,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             final Iterator<Competitor> it = tempList.iterator();
                             rankedCompetitors = new LinkedHashMap<>();
                             for (int i = 1; it.hasNext(); i++) {
-                                rankedCompetitors.put(it.next(),  new RankAndRankComparable(i, /* TODO*/ new RankComparableRank(i)));
+                                final Competitor competitor = it.next();
+                                final int rank = hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint(competitor, timePoint) ? 0 : i;
+                                rankedCompetitors.put(competitor, new RankAndRankComparable(rank, /* TODO bug5147 */ new RankComparableRank(rank)));
                             }
                         } finally {
                             getRace().getCourse().unlockAfterRead();
