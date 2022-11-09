@@ -29,7 +29,6 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -157,7 +156,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         };
         sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
-                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel());       
+                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel());
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
         sshKeysCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         regionsTable.addColumn(new TextColumn<String>() {
@@ -385,15 +384,9 @@ public class LandscapeManagementPanel extends SimplePanel {
         final HorizontalPanel applicationReplicaSetsButtonPanel = new HorizontalPanel();
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsButtonPanel);
         final Button applicationReplicaSetsRefreshButton = new Button(stringMessages.refresh());
-        disableButtonWhenSsHKeyIsNotSelected(applicationReplicaSetsRefreshButton);
         applicationReplicaSetsButtonPanel.add(applicationReplicaSetsRefreshButton);
         applicationReplicaSetsRefreshButton.addClickHandler(e->refreshApplicationReplicaSetsTable());
         final Button addApplicationReplicaSetButton = new Button(stringMessages.add());
-        disableButtonWhenSsHKeyIsNotSelected(addApplicationReplicaSetButton);
-        sshKeyManagementPanel.addSshKeySelectionChangedHandler(event -> {
-            disableButtonWhenSsHKeyIsNotSelected(addApplicationReplicaSetButton);
-            disableButtonWhenSsHKeyIsNotSelected(applicationReplicaSetsRefreshButton);
-        });
         applicationReplicaSetsButtonPanel.add(addApplicationReplicaSetButton);
         addApplicationReplicaSetButton.addClickHandler(e->createApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> removeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
@@ -490,33 +483,43 @@ public class LandscapeManagementPanel extends SimplePanel {
             refreshAllThatNeedsAwsCredentials();
             storeRegionSelection(userService, selectedRegion);
         });
-        sshKeyManagementPanel.addSshKeySelectionChangedHandler(event -> {
-            //Disable buttons..
-            disableButtonWhenSsHKeyIsNotSelected(addApplicationReplicaSetButton);
-            disableButtonWhenSsHKeyIsNotSelected(applicationReplicaSetsRefreshButton);
-            //set panels to invisible
-            disablePanelWhenSshKeyIsNotSelected(applicationReplicaSetsCaptionPanel);
-            disablePanelWhenSshKeyIsNotSelected(machineImagesCaptionPanel);
-            disablePanelWhenSshKeyIsNotSelected(mongoEndpointsCaptionPanel);
-            
+        AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    sshKeyManagementPanel.setPassphraseValidation(result.booleanValue(),stringMessages);
+                    addApplicationReplicaSetButton.setVisible(result);
+                    applicationReplicaSetsRefreshButton.setVisible(result);
+                    applicationReplicaSetsCaptionPanel.setVisible(result);
+                    machineImagesCaptionPanel.setVisible(result);
+                    mongoEndpointsCaptionPanel.setVisible(result);
+                }
+
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(stringMessages.passphraseCheckError());
+                };
+            };
+        sshKeyManagementPanel.addSshKeySelectionChangedHandler(event->{
+            validatePassphrase(stringMessages,validatePassphraseCallback);
         });
+        sshKeyManagementPanel.addOnPassphraseChangedListener(event -> {
+            validatePassphrase(stringMessages,validatePassphraseCallback);
+        });
+        validatePassphrase(stringMessages,validatePassphraseCallback);
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
     
-    private void disablePanelWhenSshKeyIsNotSelected(Widget widget) {
-        widget.setVisible(sshKeyManagementPanel.getSelectedKeyPair() != null);
-        
-    }
-    
-    private void disableButtonWhenSsHKeyIsNotSelected(Button button) {
-        button.setEnabled(sshKeyManagementPanel.getSelectedKeyPair() != null);
-    }
-    
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
         applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
                 !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO->arsDTO.isLocalReplicaSet(userService)).findAny().isPresent()));
+    }
+    
+    private void validatePassphrase(StringMessages stringMessages, AsyncCallback<Boolean> callback) {
+        landscapeManagementService.verifyPassphrase(regionsTable.getSelectionModel().getSelectedObject(),
+                sshKeyManagementPanel.getSelectedKeyPair(),
+                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), callback);
+
     }
 
     private void moveMasterToOtherInstance(StringMessages stringMessages, String regionId, Set<SailingApplicationReplicaSetDTO<String>> replicaSetsForWhichToMoveMaster) {
