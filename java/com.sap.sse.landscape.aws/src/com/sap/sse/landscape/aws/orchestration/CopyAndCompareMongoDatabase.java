@@ -4,10 +4,12 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -134,6 +136,9 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                 /* executeExistingDelayedTasksAfterShutdownPolicy */ true);
         final Future<String> sourceMd5 = executor.submit(()->sourceDatabase.getMD5Hash());
         final Future<String> targetMd5 = executor.submit(()->targetDatabase.getMD5Hash());
+        if (!executor.awaitTermination(Landscape.WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS)) {
+            logger.warning("Waiting for the executor for comparing DB hashes has timed out. Still shutting it down. Getting hashes may fail now.");
+        }
         executor.shutdown();
         if (sourceMd5.get().equals(targetMd5.get())) {
             logger.info("Databases "+sourceDatabase+" and "+targetDatabase+" have equal MD5 hash "+sourceMd5.get()+".");
