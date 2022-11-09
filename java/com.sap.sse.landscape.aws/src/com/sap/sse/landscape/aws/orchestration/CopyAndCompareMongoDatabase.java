@@ -136,11 +136,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                 /* executeExistingDelayedTasksAfterShutdownPolicy */ true);
         final Future<String> sourceMd5 = executor.submit(()->sourceDatabase.getMD5Hash());
         final Future<String> targetMd5 = executor.submit(()->targetDatabase.getMD5Hash());
-        if (!executor.awaitTermination(Landscape.WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS)) {
-            logger.warning("Waiting for the executor for comparing DB hashes has timed out. Still shutting it down. Getting hashes may fail now.");
-        }
-        executor.shutdown();
-        if (sourceMd5.get().equals(targetMd5.get())) {
+        if (sourceMd5.get(Landscape.WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS).equals(targetMd5.get(Landscape.WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS))) {
             logger.info("Databases "+sourceDatabase+" and "+targetDatabase+" have equal MD5 hash "+sourceMd5.get()+".");
             if (dropSourceAfterSuccessfulCopy) {
                 logger.info("Removing "+sourceDatabase+" and "+Util.joinStrings(", ", additionalDatabasesToDelete));
@@ -153,5 +149,6 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             throw new IllegalStateException("Import failed; hashes are different. "+sourceDatabase+" has "+sourceMd5.get()+
                     ", "+targetDatabase+" has "+targetMd5.get());
         }
+        executor.shutdown();
     }
 }
