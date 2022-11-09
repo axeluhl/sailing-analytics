@@ -303,7 +303,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return getLandscapeService().getLandscape();
     }
     
-    // verifies keyphrase to key. Returns true if both match and returns false if they do not match, key is invalid, or key is null
+    @Override
     public Boolean verifyPassphrase(String regionId, SSHKeyPairDTO key, String privateKeyEncryptionPassphrase) {
         final JSch jsch = new JSch();
         final boolean res;

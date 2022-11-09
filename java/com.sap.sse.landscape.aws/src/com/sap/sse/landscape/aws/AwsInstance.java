@@ -61,5 +61,5 @@ public interface AwsInstance<ShardingKey> extends Host {
         return (AwsRegion) Host.super.getRegion();
     }
     
-    public boolean verifySshKey( Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase); 
+    boolean verifySshKey(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase); 
 }

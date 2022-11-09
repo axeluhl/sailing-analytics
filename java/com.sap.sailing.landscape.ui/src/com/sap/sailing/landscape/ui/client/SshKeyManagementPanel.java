@@ -143,7 +143,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 }));
         sshKeyTable.addColumn(sshKeyPairActionColumn);
         add(sshKeyTable);
-        passphraseText =new Label(stringMessages.sshPrivateKeyPassphraseForSelectedKeyPair());
+        passphraseText = new Label(stringMessages.sshPrivateKeyPassphraseForSelectedKeyPair());
         add(passphraseText);
         add(sshPrivateKeyPassphrase);
         add(passphraseStatus);
