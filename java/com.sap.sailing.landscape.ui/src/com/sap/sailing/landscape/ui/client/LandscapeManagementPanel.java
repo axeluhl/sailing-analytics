@@ -492,6 +492,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                     applicationReplicaSetsCaptionPanel.setVisible(result);
                     machineImagesCaptionPanel.setVisible(result);
                     mongoEndpointsCaptionPanel.setVisible(result);
+                    if(result) {
+                        refreshApplicationReplicaSetsTable();
+                    }
                 }
 
                 public void onFailure(Throwable caught) {
