@@ -32,16 +32,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
 public interface LandscapeService {
     /**
-     * The timeout for a host to come up
-     */
-    Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(30));
-    
-    /**
-     * The timeout for a running process to respond
-     */
-    Optional<Duration> WAIT_FOR_PROCESS_TIMEOUT = Optional.of(Duration.ONE_MINUTE);
-    
-    /**
      * The timeout for a Master Data Import (MDI) to complete
      */
     Optional<Duration> MDI_TIMEOUT = Optional.of(Duration.ONE_HOUR.times(6));
