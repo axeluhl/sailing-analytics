@@ -213,7 +213,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * @param timePoint
      *            time point at which to consider disqualifications (not used yet because currently we don't remember
      *            <em>when</em> a competitor was disqualified)
-     * @param originalRank TODO
      * @param competitorsFromBestToWorst
      *            An iterator that contains all competitors through which the rank of the given competitor can be improved.
      * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked competitors exist for
@@ -246,8 +245,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         }
         return result;
     }
-
-    // Note: no need to redefine isMedalRaceChanged because that doesn't affect the competitorsCache
 
     @Override
     public Long getDelayToLiveInMillis() {

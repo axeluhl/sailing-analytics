@@ -149,7 +149,6 @@ public interface DomainFactory {
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param markPassingRaceFingerprintRegistry TODO
      */
     TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
@@ -161,7 +160,6 @@ public interface DomainFactory {
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)},
      * only that a predefined {@link Regatta} is used to hold the resulting races.
-     * @param markPassingRaceFingerprintRegistry TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogAndTrackedRaceResolver raceLogResolver,
@@ -184,8 +182,6 @@ public interface DomainFactory {
      *            must have been created before through
      *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
      *            the {@link IEvent} can't be established
-     * @param markPassingRaceFingerprintRegistry TODO
-     * @param raceAndCompetitorStatusWithRaceLogReconciler TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
      *            this call
@@ -218,7 +214,6 @@ public interface DomainFactory {
      *            actually created by this call. This happens while still in the {@code synchronized(raceCache)} block,
      *            therefore before calls waiting for the race (e.g., {@link #getAndWaitForRaceDefinition(UUID)}) return
      *            the race.
-     * @param markPassingRaceFingerprintRegistry TODO
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
             String raceName, BoatClass boatClass, Map<Competitor, Boat> competitorBoats,
@@ -241,8 +236,6 @@ public interface DomainFactory {
 
     /**
      * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
-     * @param markPassingRaceFingerprintRegistry TODO
-     * @param raceAndCompetitorStatusWithRaceLogReconciler TODO
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
             long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
@@ -296,7 +289,6 @@ public interface DomainFactory {
      *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
      *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
      *            races if since the last connection the race was migrated to a replay file format.
-     * @param useOfficialEventsToUpdateRaceLog TODO
      */
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,

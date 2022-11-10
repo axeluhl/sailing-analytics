@@ -483,11 +483,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     /**
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints from
      * the previous course definition in the racelog.
-     *
-     * @param priority
-     *            TODO
-     * @throws UnauthorizedException,
-     *             NotFoundException
      */
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority)

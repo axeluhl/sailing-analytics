@@ -120,8 +120,6 @@ public interface ScoringScheme extends Serializable {
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
      * race. Any remaining ties shall be broken by using the tied boats' scores in the next-to-last race and so on until
      * all ties are broken. These scores shall be used even if some of them are excluded scores."</em>
-     * @param timePoint TODO
-     * @param cache TODO
      */
     int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 

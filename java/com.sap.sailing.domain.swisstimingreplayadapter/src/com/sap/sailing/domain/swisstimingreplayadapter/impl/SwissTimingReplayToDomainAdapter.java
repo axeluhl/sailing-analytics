@@ -186,7 +186,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
      *            be obtained from {@link #getTracker()}. This tracker's {@link RaceTracker.RaceCreationListener}s will
      *            be {@link SwissTimingReplayRaceTracker#notifyRaceCreationListeners() notified} when this adapter has
      *            created the race.
-     * @param markPassingRaceFingerprintRegistry TODO
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceName, String raceIdForRaceDefinition,
             BoatClass boatClass, DomainFactory domainFactory,

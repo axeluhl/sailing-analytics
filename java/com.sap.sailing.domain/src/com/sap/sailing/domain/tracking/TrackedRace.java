@@ -1068,7 +1068,6 @@ public interface TrackedRace
      *
      * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
      * which both suggest the boat may not have made a serious attempt to start.
-     * @param maxPointsReasonSupplier TODO
      */
     Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
 
@@ -1079,7 +1078,6 @@ public interface TrackedRace
      *
      * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
      * which both suggest the boat may not have made a serious attempt to start.
-     * @param maxPointsReasonSupplier TODO
      */
     Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
 

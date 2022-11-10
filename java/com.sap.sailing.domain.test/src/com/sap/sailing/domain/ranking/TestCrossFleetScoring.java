@@ -16,7 +16,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
@@ -71,7 +70,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-@Ignore("bug5147: first ensuring that we have no regressions; then using this as test-first driver")
+//@Ignore("bug5147: first ensuring that we have no regressions; then using this as test-first driver")
 public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase {
     private final BoatClass boatClass = new BoatClassImpl(BoatClassMasterdata.PIRATE);
     private final TimePoint referenceTimePoint = MillisecondsTimePoint.now();
@@ -81,27 +80,33 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
     private Waypoint windward;
     private Waypoint finish;
     private final Map<DynamicTrackedRace, List<CompetitorWithBoat>> trackedRaces = new HashMap<>();
-    final Map<Fleet, List<CompetitorWithBoat>> fleets = new HashMap<>();
+    final Map<Fleet, List<CompetitorWithBoat>> fleetsAndCompetitors = new HashMap<>();
     private final Map<String, CompetitorWithBoat> competitors = new HashMap<>();
 
+    /**
+     * Creates a regatta with a regatta leaderboard that has a single series with two fleets, Yellow and Blue. The
+     * series is set to use cross-fleet merged ranking. Two competitors are assigned to each fleet, and a single race
+     * column "R1" is created with a tracked race per fleet. The course is a simple windward-leeward course with one
+     * lap (start/finish line - windward mark - start/finish line). Wind is set such that the upwind leg really happens
+     * to point towards the direction the wind is coming from.
+     */
     private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors,
             Function<Competitor, Double> timeOnDistanceAllowance) {
-        //create Competitors and their fleets.
+        // create Competitors and their fleets.
         final ArrayList<Series> series = new ArrayList<>();
         for (String FleetName : new String[] { "Yellow", "Blue" }) {
             CompetitorWithBoat c1 = TrackBasedTest.createCompetitorWithBoat("Fast" + FleetName + "Boat");
             CompetitorWithBoat c2 = TrackBasedTest.createCompetitorWithBoat("Slow" + FleetName + "Boat");
             List<CompetitorWithBoat> competitorsForFleet = Arrays.asList(c1, c2);
-            fleets.put(new FleetImpl(FleetName, 0), competitorsForFleet);
+            fleetsAndCompetitors.put(new FleetImpl(FleetName, 0), competitorsForFleet);
             competitors.putAll(competitorsForFleet.stream()
                     .collect(Collectors.toMap(Competitor::getName, competitor -> competitor)));
-
         }
-        //create the Race and Regatta. The Regatta get ToT as metric. 
+        // create the Race and Regatta. The Regatta shall use ToT as metric. 
         final List<String> raceColumnNames = new ArrayList<>();
         raceColumnNames.add("R1");
         final Series zeroRankSeries = new SeriesImpl("zero Rank", /* isMedal */false,
-                /* isFleetsCanRunInParallel */ true, fleets.keySet(), raceColumnNames,
+                /* isFleetsCanRunInParallel */ true, fleetsAndCompetitors.keySet(), raceColumnNames,
                 /* trackedRegattaRegistry */ null);
         zeroRankSeries.setCrossFleetMergedRanking(true);
         series.add(zeroRankSeries);
@@ -126,12 +131,12 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
         waypoints.add(finish);
         Course course = new CourseImpl("Test Course", waypoints);
         // for each fleet add a race to the race column. Sailed on the same course
-        for (Map.Entry<Fleet, List<CompetitorWithBoat>> fleetAndCompetitors : fleets.entrySet()) {
+        for (Map.Entry<Fleet, List<CompetitorWithBoat>> fleetAndCompetitors : fleetsAndCompetitors.entrySet()) {
             final RaceColumn r1Column = series.get(0).getRaceColumnByName("R1");
             final Map<Competitor, Boat> competitorsAndBoats = TrackBasedTest
                     .createCompetitorAndBoatsMap(fleetAndCompetitors.getValue()
                             .toArray(new CompetitorWithBoat[fleetAndCompetitors.getValue().size()]));
-            RaceDefinition race = new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats);
+            RaceDefinition race = new RaceDefinitionImpl("R1 "+fleetAndCompetitors.getKey().getName(), course, boatClass, competitorsAndBoats);
             DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race,
                     Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0,
                     /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
@@ -167,7 +172,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
     private void testForConfigurationInCompetitorsAndMarkPassingsWithGpsFixes(String[] expectedCompetitorOrder,
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
             TimePoint timePointOfViewingTheLeaderboard) {
-
         for (Map.Entry<DynamicTrackedRace, List<CompetitorWithBoat>> trackedRaceAndCompetitors : trackedRaces.entrySet()) {
             DynamicTrackedRace trackedRace = trackedRaceAndCompetitors.getKey();
             for (Competitor competitor : trackedRaceAndCompetitors.getValue()) {
@@ -178,11 +182,8 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                     trackedRace.getTrack(competitor).add(gpsPosition);
                 }
             }
-
         }
-
-        final List<Competitor> rankedCompetitors = leaderboard
-                .getCompetitorsFromBestToWorst(timePointOfViewingTheLeaderboard);
+        final List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(timePointOfViewingTheLeaderboard);
         Iterator<Competitor> it = rankedCompetitors.iterator();
         for (String currentCompetitor : expectedCompetitorOrder) {
             if (it.hasNext())
@@ -208,7 +209,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
 
     }
     /**
-     * 
      * @param competitorsAndMarkPassingsWithGpsFixes DataStructure where the markPassing and gpsFix should be added 
      * @param competitor Competitor for which the markpassing and gpsFix should be added
      * @param markPassing markPassing to be added
@@ -223,10 +223,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
 
     /**
      * Add StartMarkPassing for all competitors at the given timepoint 
-     * 
-     * @param competitorsAndMarkPassingsWithGpsFixes
-     * @param competitorNames
-     * @param startOfRace
      */
     private void addStartMarkPassing(
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
@@ -243,8 +239,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
 
     /**
      * Add StartMarkPassings for both fleets 10 Minutes apart 
-     * @param competitorsAndMarkPassingsWithGpsFixes
-     * @param startOfRace
      */
     private void addStartMarkPassing10MinutesApart(
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
@@ -257,11 +251,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
 
     /**
      * Append gpsFix for Competitor for the given TimePoint to the DataStructure
-     * 
-     * @param competitorsAndMarkPassingsWithGpsFixes
-     * @param competitorName
-     * @param position
-     * @param timePoint
      */
     private void appendGPSFixForCompetitor(
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
@@ -304,7 +293,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
      * distance than the fast compeitor. However, due to the ToT factor, the slow competitors are still ahead of the fast competitors. 
      * This leads to the following ranking: "SlowBlueBoat", "FastBlueBoat", "SlowYellowBoat", "FastYellowBoat"
      */
-
     @Test
     public void testCrossFleetScoringForTimeOnTimeSecondFleetOvertookFirstFleetOnFirstLegAllFastCompetitorsSaildFurtherThanSlowButSlowOvertookFastDueToToT() {
         String[] expectedOrder = new String[] { "SlowBlueBoat", "FastBlueBoat", "SlowYellowBoat", "FastYellowBoat" };
@@ -330,7 +318,6 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
      * fastYellow. slowYewllow is again spatially behind slowBlue. 
      * This leads to the following ranking: "FastBlueBoat","SlowBlueBoat", "FastYellowBoat", "SlowYellowBoat"
      */
-
     @Test
     public void testCrossFleetScoringForTimeOnTimeFastBlueOvertookFleet() {
         String[] expectedOrder = new String[] { "FastBlueBoat", "SlowBlueBoat", "FastYellowBoat", "SlowYellowBoat" };

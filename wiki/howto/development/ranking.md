@@ -68,7 +68,7 @@ Beispiel ContigousScoring= False crossFleetMergedRanking=False
 
 ## crossFleetMergedRanking
 
-If there are multiple fleets with the same rank, corssFleetMergedRanking decides how to rank within that group.
+If there are multiple fleets with the same rank, crossFleetMergedRanking decides how to rank within that group.
 
 ### Enabled
 
@@ -116,7 +116,7 @@ Example ContigousScoring= True crossFleetMergedRanking=True
 
 If crossFleetMergedRanking is deactivated, the ranks in a fleet are assigned twice. It is then sorted by the order of the sum of the points, using the points of the single race. For Examples look at contigousScoring
 
-## Explenation of RankComparables
+## Explanation of RankComparables
 
 In order to make the comparison across fleets possible that are not based on the rank within a race RankComparables are used. In order to work the following assumptions must be met:
 
@@ -124,7 +124,7 @@ In order to make the comparison across fleets possible that are not based on the
 - The conditions (wind, waves, tide, drift) are the same (or do not differ so much that a comparison is invalid).
 - All fleets sail the same number of races and have equal discarding rules
 
-Therefor the order of the RankComparables for one Fleet is guaranteed to result in the same ordering as the Ordering that is returned by getCompetitorsFromBestToWorst on a race basis. This also holds when looking at a Leaderboard with multiple Fleets of the same rank and crossFleetMergedRanking set to true. (the ordering within one fleet on the leaderboard is the same as if just a leaderboard for one fleet would have been created)
+Therefore the order of the RankComparables for one Fleet is guaranteed to result in the same ordering as the Ordering that is returned by getCompetitorsFromBestToWorst on a race basis. This also holds when looking at a Leaderboard with multiple Fleets of the same rank and crossFleetMergedRanking set to true. (the ordering within one fleet on the leaderboard is the same as if just a leaderboard for one fleet would have been created)
 
 The following describes how the comparisons are made for the different ranking metrics:
 
@@ -138,8 +138,8 @@ Three alternatives:
       2. Max
       3. Avg
       4. Median
-   2. Get the minimum of timesailed and time between the start of the fleets. Called timeOffset from now on.
-   3. Compute a fleet specific distance by $$ OffsetDistance = fleetVMG \cdot timeOffset $$
+   2. Get the minimum of time sailed and time between the start of the fleets. Called timeOffset from now on.
+   3. Compute a fleet-specific distance by $$ OffsetDistance = fleetVMG \cdot timeOffset $$
    4. Pull back every competitor for the calculated distance. Also around the marks.
    5. Compare all competitors by their newly calculated Position
 2. Pull ahead fleet
@@ -181,14 +181,14 @@ To overcome this issue the stretchFactor is introduced wich is supposed to refle
 
 #### Further ideas:
 
-- instead of computeing the time to the absoluteFastestCompetitor based on the fastestCompetitor in a race compute it based on the median competitor or the slowest competitor (or offer these types as options). In order to offer these opton the following steps would need to change:
+- instead of computing the time to the absoluteFastestCompetitor based on the fastestCompetitor in a race compute it based on the median competitor or the slowest competitor (or offer these types as options). In order to offer these opton the following steps would need to change:
   - Step 3. Instead of using the timeSailedByFastestCompetitor use the clacTime@fastest of the median or slowest competitor.
   - Step 6. From the position of the fastest competitor in the race compute the timeToAdd based on the slowest or median competitor.
 
 ### ORC Performance Curve >= 2015
 
-For PCS >= 2015, the delta is between allowance and sailed time is formed for every competitor. Subsequently, the percentage of the course that the competitor has already sailed is recorded. Finally, it is determined how large the delta would be if the competitor would continue sailing with his current performance until he reaches the finish. These computed deltas are than used for comperrison in the leaderboard.
+For PCS >= 2015, the delta between allowance and sailed time is formed for every competitor. Subsequently, the percentage of the course that the competitor has already sailed is recorded. Finally, it is determined how large the delta would be if the competitor continued sailing with his current performance until he reaches the finish. These computed deltas are then used for comparison in the leaderboard.
 
 ### ORC Performance Curve < 2015
 
-Just order the competitors across all fleets by teir implied wind. In order to compute the calculated Times the screatchboat needs to be synced across all fleets. This results in different claculated Times on the leaderboards but still results in a correct ranking.
+Just order the competitors across all fleets by their implied wind. In order to have calculated times reflect the merged order then a common scratch boat would have to be chosen for converting the implied wind values to times. But this would lead to different calculated times in the individual races compared to the merged view, and this makes things more complicated than necessary. Also, a common scratch boat can still be chosen for those races manually, providing a clean solution to this problem. With the implied wind as the sorting criteria it is also easy for users to select this column and validate and comprehend the ordering.

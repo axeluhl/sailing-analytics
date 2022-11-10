@@ -233,7 +233,6 @@ public interface DomainObjectFactory {
     /**
      * For races that have a {@link MarkPassingRaceFingerprint} stored in the database (see {@link #loadFingerprintsForMarkPassingHashes()})
      * a caller can load the corresponding mark passings with this method.
-     * @param course TODO
      */
     Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course);
 }
