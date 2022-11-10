@@ -77,6 +77,27 @@ public class SSHKeyPair extends NamedImpl implements Named, WithQualifiedObjectI
         return result;
     }
     
+    /**
+     * Returns a{@link boolean} whether the passphrase was valid and correct.
+     * 
+     * @param passphrase
+     *            entered by the user in the textfield and should be correct for decrypting the selected ssh-private
+     *            key, returns false if this passphrase could not be used for decrypting the key or if the format is not
+     *            valid/supported
+     */
+    public boolean checkPassphrase(JSch jsch, byte[] passphrase) {
+        boolean res;
+        try {
+            // return false if key is not loaded properly or has the wrong format
+            final KeyPair result = KeyPair.load(jsch, getEncryptedPrivateKey(), getPublicKey());
+            // return false if result is not decrypted
+            res = result.decrypt(passphrase);
+        } catch (JSchException e) {
+            res = false;
+        }
+        return res;
+    }
+    
     public String getRegionId() {
         return regionId;
     }

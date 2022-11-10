@@ -29,6 +29,7 @@ import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.LandscapeService;
@@ -300,6 +301,24 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private AwsLandscape<String> getLandscape() {
         checkLandscapeManageAwsPermission();
         return getLandscapeService().getLandscape();
+    }
+    
+    @Override
+    public Boolean verifyPassphrase(String regionId, SSHKeyPairDTO key, String privateKeyEncryptionPassphrase) {
+        final JSch jsch = new JSch();
+        final boolean res;
+        if (key == null) {
+            res = false;
+        } else {
+            final SSHKeyPair keypair = getLandscape().getSSHKeyPair(new AwsRegion(regionId, getLandscape()),
+                    key.getName());
+            if (keypair == null) {
+                res = false;
+            } else {
+                res = keypair.checkPassphrase(jsch, privateKeyEncryptionPassphrase.getBytes());
+            }
+        }
+        return res;
     }
 
     @Override
