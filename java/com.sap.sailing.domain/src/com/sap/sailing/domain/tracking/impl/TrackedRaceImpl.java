@@ -1695,34 +1695,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (rankedCompetitors == null) {
             LockUtil.lockForWrite(readWriteLock);
             try {
+                rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
+                                                                       // write lock after updating the cache
                 if (rankedCompetitors == null) {
-                    rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
-                                                                           // write lock after updating the cache
-                    if (rankedCompetitors == null) {
-                        // RaceRankComparator requires course read lock
-                        getRace().getCourse().lockForRead();
-                        try {
-                            // here the rankingmetrics need to return the RankComparables so that they could be ranked accordingly. 
-                            // encapsulate sorting providing etc. in a method of the Ranking metric. To Update this cache 
-                            final Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
-                            final List<Competitor> tempList = new ArrayList<Competitor>();
-                            for (Competitor c : getRace().getCompetitors()) {
-                                tempList.add(c);
-                            }
-                            Collections.sort(tempList, comparator);
-                            final Iterator<Competitor> it = tempList.iterator();
-                            rankedCompetitors = new LinkedHashMap<>();
-                            for (int i = 1; it.hasNext(); i++) {
-                                final Competitor competitor = it.next();
-                                final int rank = hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint(competitor, timePoint) ? 0 : i;
-                                rankedCompetitors.put(competitor, new RankAndRankComparable(rank, /* TODO bug5147 */ new RankComparableRank(rank)));
-                            }
-                        } finally {
-                            getRace().getCourse().unlockAfterRead();
+                    // RaceRankComparator requires course read lock
+                    getRace().getCourse().lockForRead();
+                    try {
+                        // here the rankingmetrics need to return the RankComparables so that they could be ranked accordingly. 
+                        // encapsulate sorting providing etc. in a method of the Ranking metric. To Update this cache 
+                        final Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
+                        final List<Competitor> tempList = new ArrayList<Competitor>();
+                        for (Competitor c : getRace().getCompetitors()) {
+                            tempList.add(c);
                         }
-                        synchronized (competitorRankings) {
-                            competitorRankings.put(timePoint, rankedCompetitors);
+                        Collections.sort(tempList, comparator);
+                        final Iterator<Competitor> it = tempList.iterator();
+                        rankedCompetitors = new LinkedHashMap<>();
+                        for (int i = 1; it.hasNext(); i++) {
+                            final Competitor competitor = it.next();
+                            final int rank = hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint(competitor, timePoint) ? 0 : i;
+                            rankedCompetitors.put(competitor, new RankAndRankComparable(rank, /* TODO bug5147 */ new RankComparableRank(rank)));
                         }
+                    } finally {
+                        getRace().getCourse().unlockAfterRead();
+                    }
+                    synchronized (competitorRankings) {
+                        competitorRankings.put(timePoint, rankedCompetitors);
                     }
                 }
             } finally {
