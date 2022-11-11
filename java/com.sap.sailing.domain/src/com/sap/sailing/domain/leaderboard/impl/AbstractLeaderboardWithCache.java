@@ -487,7 +487,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         trackedRace.getRace().getCourse().lockForRead();
                         try {
                             for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache));
+                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache)); // TODO bug5147: leg ranks may also need to be merged across equal-weighted fleets if RaceColumn.hasCrossFleetMergedRanking() is true
                             }
                         } finally {
                             trackedRace.getRace().getCourse().unlockAfterRead();

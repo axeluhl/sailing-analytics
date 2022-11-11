@@ -4,7 +4,68 @@
 The following diagram describes how the ranks are calculated. Note the notes and the constraints they contain.
 ![Sequenz diagram of the rank calculation](SequenzDiagram%20rank%20calculation.png)
 
-## comment on the diagram
+Or as text:
+
+- AbstractLeaderboardWithCache.computeDTO
+    - for every RaceColumn:
+        - AbstractSimpleLeaderboardImpl.getCompetitorsFromBestToWorst(RaceColumn)
+            - for each Competitor:
+                - AbstractSimpleLeaderboardImpl.getTotalPoints(competitor, raceColumn)
+                    - ScoreCorrection.get[Un]CorrectedScore(...)
+                        - AbstractLeaderboardImpl.getTrackedRank(competitor, raceColumn)
+                            - TrackedRaceImpl.getCompetitorsFromBestToWorstAndRankAndRankComparable() (CACHING 10 results by time point)
+                                - RankingMetric.getRaceRankingComparator()
+                                - sort competitors with race ranking comparator (O(n*log(n)) with partly expensive computations per competitor such as windward distance to go)
+                                - build result list of Competitor/RankAndRankComparable
+                            - AbstractLeaderboardImpl.getRankImprovedByDisqualificationsOfBetterRankedCompetitors(...) (O(n), finding competitor in list from best to worst)
+    - for every leg (if leg details are active):
+        - TrackedLegImpl.getRanks(...)
+            - TrackedLegImpl.getCompetitorTracksOrderedByRank
+                - RankingMetric.getLegRankingComparator(trackedLeg)
+                - sort competitors in leg based on leg RankingMetric's ranking comparator (O(n*log(n))
+                TODO: this leg rank part is missing a merging across fleets if requested; again, a RankComparable would be required.
+    - AbstractSimpleLeaderboardImpl.getCompetitorsFromBestToWorst()
+        - AbstractSimpleLeaderboardImpl.getLeaderboardTotalRankComparator()
+            - for all Competitors / RaceColumns:
+                - AbstractSimpleLeaderboardImpl.getTotalPoints(competitor, raceColumn)
+                    - ScoreCorrection.get[Un]CorrectedScore(...)
+                        - AbstractLeaderboardImpl.getTrackedRank(competitor, raceColumn)
+                            - TrackedRaceImpl.getCompetitorsFromBestToWorstAndRankAndRankComparable() (CACHING 10 results by time point)
+                                - RankingMetric.getRaceRankingComparator()
+                                - sort competitors with race ranking comparator (O(n*log(n)) with partly expensive computations per competitor such as windward distance to go)
+                                - build result list of Competitor/RankAndRankComparable
+                            - AbstractLeaderboardImpl.getRankImprovedByDisqualificationsOfBetterRankedCompetitors(...) (O(n), finding competitor in list from best to worst)
+                - AbstractSimpleLeaderboardImpl.getNetPoints(competitor, raceColumn)
+                    - AbstractSimpleLeaderboardImpl.getTotalPoints(competitor, raceColumn)
+                        - ScoreCorrection.get[Un]CorrectedScore(...)
+                            - AbstractLeaderboardImpl.getTrackedRank(competitor, raceColumn)
+                                - TrackedRaceImpl.getCompetitorsFromBestToWorstAndRankAndRankComparable() (CACHING 10 results by time point)
+                                    - RankingMetric.getRaceRankingComparator()
+                                    - sort competitors with race ranking comparator (O(n*log(n)) with partly expensive computations per competitor such as windward distance to go)
+                                    - build result list of Competitor/RankAndRankComparable
+                                - AbstractLeaderboardImpl.getRankImprovedByDisqualificationsOfBetterRankedCompetitors(...) (O(n), finding competitor in list from best to worst)
+            - sort by total rank comparator
+    - for each competitor from the getCompetitorsFromBestToWorst() result:
+        - if race details requested then RankingMetric.getRankingInfo()
+        - AbstractSimpleLeaderboardImpl.getEntry(competitor, raceColumn)
+            - ScoreCorrection.getCorrectedScore(...)
+                - AbstractLeaderboardImpl.getTrackedRank(competitor, raceColumn)
+                    - TrackedRaceImpl.getCompetitorsFromBestToWorstAndRankAndRankComparable() (CACHING 10 results by time point)
+                        - RankingMetric.getRaceRankingComparator()
+                        - sort competitors with race ranking comparator (O(n*log(n)) with partly expensive computations per competitor such as windward distance to go)
+                        - build result list of Competitor/RankAndRankComparable
+                    - AbstractLeaderboardImpl.getRankImprovedByDisqualificationsOfBetterRankedCompetitors(...) (O(n), finding competitor in list from best to worst)
+
+It is obvious that the getTotalPoints(competitor, raceColumn) sequence is invoked four times in the worst case if there are no score corrections:
+
+1. for the `getCompetitorsFromBestToWorst(RaceColumn)` part to fill a corresponding DTO structure for the client
+2. for the `LeaderboardTotalRankComparator` that requires all points, e.g., for tie-breaking
+3. for the net points calculation triggered by `LeaderboardTotalRankComparator`, required for tie-breaking rules based on non-discarded points
+4. when building the `Entry` objects in `AbstractSimpleLeaderboardImpl` which again contain the total points
+
+The problem probably doesn't create too much overhead currently because of the caching that happens inside TrackedRaceImpl.getCompetitorsFromBestToWorstAndRankAndRankComparable(). Yet, it would obviously be better to compute the total points only once for all Competitors/RaceColumns and share the results along the path.
+
+## Comment on the Diagram
 In the ScoreCorrection the Ranks of the races are transferred to scores by calling the scoring scheme. Within the scoring schemes the contigousScoring is handled if it is enabled. This place was chosen, because the scores need to be adapted in different ways for the different scoring schemes (HighPoint, LowPoint). The case of disabled contigousScoring is handled in the leaderboard because it can be done based on the fleets alone.
 
 If crossFleetMergedRanking is enabled this case is handeled in the getTrackedRank method of the AbstractLeaderboardImpl class.

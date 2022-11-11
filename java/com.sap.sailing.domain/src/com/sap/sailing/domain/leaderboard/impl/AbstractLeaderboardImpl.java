@@ -203,8 +203,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     /**
      * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
      * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
-     * competitors ranked worse by the tracking system need to have their rank corrected by one. The {@link RankComparable} must also
-     * consider the {@link MaxPointsReason} so that the behavior remains consistent.
+     * competitors ranked worse by the tracking system need to have their rank corrected by one. The
+     * {@link RankComparable} must also consider the {@link MaxPointsReason} so that the behavior remains consistent.
      *
      * @param competitor
      *            the competitor whose rank is to be improved
@@ -213,11 +213,18 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * @param timePoint
      *            time point at which to consider disqualifications (not used yet because currently we don't remember
      *            <em>when</em> a competitor was disqualified)
+     * @param originalRank
+     *            the rank that the {@link TrackedRace} assigned to the {@code competitor}; 0 means no rank known; note
+     *            that for cross-fleet merged ranking a non-0 {@code originalRank} will not correspond to the result
+     *            immediately but must be determined based on the ordering in {@code competitorsFromBestToWorst}
      * @param competitorsFromBestToWorst
-     *            An iterator that contains all competitors through which the rank of the given competitor can be improved.
-     * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked competitors exist for
-     *         <code>race</code>, or otherwise a <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of disqualifications of
-     *         competitors whose tracked rank is better (lower) than <code>rank</code> while the {@link RankComparable} is consistent with the new Rank.
+     *            An iterator that contains all competitors through which the rank of the given competitor can be
+     *            improved.
+     * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked
+     *         competitors exist for <code>race</code>, or otherwise a
+     *         <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of
+     *         disqualifications of competitors whose tracked rank is better (lower) than <code>rank</code> while the
+     *         {@link RankComparable} is consistent with the new Rank.
      */
     private int getRankImprovedByDisqualificationsOfBetterRankedCompetitors(Competitor competitor, RaceColumn race,
             TimePoint timePoint, Integer originalRank, Iterator<Competitor> competitorsFromBestToWorst) {
