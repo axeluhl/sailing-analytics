@@ -1654,27 +1654,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (rankedCompetitors == null) {
             LockUtil.lockForWrite(readWriteLock);
             try {
-                if (rankedCompetitors == null) {
-                    rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
-                                                                           // write lock after updating the cache
-                    if (rankedCompetitors == null) {
-                        // RaceRankComparator requires course read lock
-                        getRace().getCourse().lockForRead();
-                        try {
-                            Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
-                            rankedCompetitors = new ArrayList<Competitor>();
-                            for (Competitor c : getRace().getCompetitors()) {
-                                rankedCompetitors.add(c);
-                            }
-                            Collections.sort(rankedCompetitors, comparator);
-                        } finally {
-                            getRace().getCourse().unlockAfterRead();
-                        }
-                        synchronized (competitorRankings) {
-                            competitorRankings.put(timePoint, rankedCompetitors);
-                        }
-                    }
-                }
+		rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
+								       // write lock after updating the cache
+		if (rankedCompetitors == null) {
+		    // RaceRankComparator requires course read lock
+		    getRace().getCourse().lockForRead();
+		    try {
+			Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
+			rankedCompetitors = new ArrayList<Competitor>();
+			for (Competitor c : getRace().getCompetitors()) {
+			    rankedCompetitors.add(c);
+			}
+			Collections.sort(rankedCompetitors, comparator);
+		    } finally {
+			getRace().getCourse().unlockAfterRead();
+		    }
+		    synchronized (competitorRankings) {
+			competitorRankings.put(timePoint, rankedCompetitors);
+		    }
+		}
             } finally {
                 LockUtil.unlockAfterWrite(readWriteLock);
             }

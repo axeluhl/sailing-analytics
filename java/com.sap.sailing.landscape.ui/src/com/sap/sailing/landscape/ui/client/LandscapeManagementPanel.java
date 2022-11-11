@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -125,6 +126,9 @@ public class LandscapeManagementPanel extends SimplePanel {
      */
     private static final Duration DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS = Duration.ONE_MINUTE.times(5);
     private static final int DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS = 5;
+    
+    //Spacing for Setupbar (AWS/SSH/REGION)
+    private static final int DEFAULT_SETUPBAR_HEIGHT = 300;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -136,10 +140,11 @@ public class LandscapeManagementPanel extends SimplePanel {
         final HorizontalPanel awsCredentialsAndSshKeys = new HorizontalPanel();
         mainPanel.add(awsCredentialsAndSshKeys);
         final CaptionPanel awsCredentialsPanel = new CaptionPanel(stringMessages.awsCredentials());
+        awsCredentialsPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         awsCredentialsAndSshKeys.add(awsCredentialsPanel);
         mfaLoginWidget = new AwsMfaLoginWidget(landscapeManagementService, errorReporter, userService, stringMessages);
         mfaLoginWidget.addListener(validSession->refreshAllThatNeedsAwsCredentials());
-        awsCredentialsPanel.add(mfaLoginWidget);
+        awsCredentialsPanel.add(mfaLoginWidget);       
         regionsTable = new TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -153,8 +158,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
                 landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel());
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
-        awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
-        sshKeysCaptionPanel.add(sshKeyManagementPanel);
+        sshKeysCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         regionsTable.addColumn(new TextColumn<String>() {
             @Override
             public String getValue(String s) {
@@ -162,9 +166,19 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         }, stringMessages.region(), new NaturalComparator());
         final CaptionPanel regionsCaptionPanel = new CaptionPanel(stringMessages.region());
-        regionsCaptionPanel.add(regionsTable);
-        mainPanel.add(regionsCaptionPanel);
+        final SimplePanel regionPanel = new  SimplePanel();
+        final ScrollPanel regionScrollPanel = new ScrollPanel();
+        regionsCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
+        regionScrollPanel.setHeight("" + (DEFAULT_SETUPBAR_HEIGHT - 35)  + "px");
+        regionScrollPanel.setAlwaysShowScrollBars(true);
+        regionPanel.add(regionsTable);
+        regionScrollPanel.add(regionPanel);
+        regionsCaptionPanel.add(regionScrollPanel); 
+        awsCredentialsAndSshKeys.add(regionsCaptionPanel);
         refreshRegionsTable(userService);
+        awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
+        sshKeysCaptionPanel.add(sshKeyManagementPanel);
+        
         // MongoDB endpoints:
         mongoEndpointsTable = new TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
@@ -469,6 +483,31 @@ public class LandscapeManagementPanel extends SimplePanel {
             refreshAllThatNeedsAwsCredentials();
             storeRegionSelection(userService, selectedRegion);
         });
+        AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    sshKeyManagementPanel.setPassphraseValidation(result.booleanValue(),stringMessages);
+                    addApplicationReplicaSetButton.setVisible(result);
+                    applicationReplicaSetsRefreshButton.setVisible(result);
+                    applicationReplicaSetsCaptionPanel.setVisible(result);
+                    machineImagesCaptionPanel.setVisible(result);
+                    mongoEndpointsCaptionPanel.setVisible(result);
+                    if(result) {
+                        refreshApplicationReplicaSetsTable();
+                    }
+                }
+
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(stringMessages.passphraseCheckError());
+                };
+            };
+        sshKeyManagementPanel.addSshKeySelectionChangedHandler(event->{
+            validatePassphrase(stringMessages,validatePassphraseCallback);
+        });
+        sshKeyManagementPanel.addOnPassphraseChangedListener(event -> {
+            validatePassphrase(stringMessages,validatePassphraseCallback);
+        });
+        validatePassphrase(stringMessages,validatePassphraseCallback);
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
@@ -477,6 +516,13 @@ public class LandscapeManagementPanel extends SimplePanel {
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
         applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
                 !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO->arsDTO.isLocalReplicaSet(userService)).findAny().isPresent()));
+    }
+    
+    private void validatePassphrase(StringMessages stringMessages, AsyncCallback<Boolean> callback) {
+        landscapeManagementService.verifyPassphrase(regionsTable.getSelectionModel().getSelectedObject(),
+                sshKeyManagementPanel.getSelectedKeyPair(),
+                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), callback);
+
     }
 
     private void moveMasterToOtherInstance(StringMessages stringMessages, String regionId, Set<SailingApplicationReplicaSetDTO<String>> replicaSetsForWhichToMoveMaster) {

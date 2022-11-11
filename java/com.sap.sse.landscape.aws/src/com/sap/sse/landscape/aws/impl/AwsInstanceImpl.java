@@ -285,4 +285,15 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     public String toString() {
         return getInstanceId();
     }
+
+    @Override
+    public boolean verifySshKey( Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
+        final String keyName = optionalKeyName.orElseGet(()->getInstance().keyName()); // the SSH key pair name that can be used to log on
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
+        if (keyPair == null) {
+            return false;
+        }
+        final JSch jsch = new JSch();
+        return keyPair.checkPassphrase(jsch, privateKeyEncryptionPassphrase);
+    }
 }

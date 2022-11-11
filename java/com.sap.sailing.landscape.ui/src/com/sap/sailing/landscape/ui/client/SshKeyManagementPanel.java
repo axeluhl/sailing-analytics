@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sse.common.Util;
@@ -47,6 +49,8 @@ public class SshKeyManagementPanel extends VerticalPanel {
     private final BusyIndicator sshKeyLoadingBusy;
     private final ErrorReporter errorReporter;
     private final RefreshableSingleSelectionModel<String> regionSelectionModel;
+    private final Label passphraseStatus;
+    private final Label passphraseText;
     
     public SshKeyManagementPanel(StringMessages stringMessages, UserService userService,
             LandscapeManagementWriteServiceAsync landscapeManagementService, AdminConsoleTableResources tableResources,
@@ -56,6 +60,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
         this.landscapeManagementService = landscapeManagementService;
         this.errorReporter = errorReporter;
         this.sshPrivateKeyPassphrase = new PasswordTextBox();
+        this.passphraseStatus = new Label();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredLandscapeTypes.SSH_KEY);
         add(buttonPanel);
         final Button addButton = buttonPanel.addCreateAction(stringMessages.add(), ()->{
@@ -138,8 +143,10 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 }));
         sshKeyTable.addColumn(sshKeyPairActionColumn);
         add(sshKeyTable);
-        add(new Label(stringMessages.sshPrivateKeyPassphraseForSelectedKeyPair()));
+        passphraseText = new Label(stringMessages.sshPrivateKeyPassphraseForSelectedKeyPair());
+        add(passphraseText);
         add(sshPrivateKeyPassphrase);
+        add(passphraseStatus);
         sshKeyLoadingBusy = new SimpleBusyIndicator();
         add(sshKeyLoadingBusy);
         buttonPanel.addRemoveAction(stringMessages.remove(), sshKeyTable.getSelectionModel(), /* withConfirmation */ true, ()->{
@@ -162,6 +169,16 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
             }
         });
+        addSshKeySelectionChangedHandler(event -> {
+            boolean value = sshKeyTable.getSelectionModel().getSelectedObject() != null;
+            sshPrivateKeyPassphrase.setVisible(value);
+            passphraseText.setVisible(value);
+            passphraseStatus.setVisible(value);
+        } );
+    }
+    
+    public void addSshKeySelectionChangedHandler(SelectionChangeEvent.Handler handler) {
+        sshKeyTable.getSelectionModel().addSelectionChangeHandler(handler);
     }
     
     public String getPassphraseForPrivateKeyDecryption() {
@@ -247,4 +264,14 @@ public class SshKeyManagementPanel extends VerticalPanel {
     public SSHKeyPairDTO getSelectedKeyPair() {
         return sshKeyTable.getSelectionModel().getSelectedObject();
     }
+    
+    public void addOnPassphraseChangedListener(ChangeHandler handler) {
+        sshPrivateKeyPassphrase.addChangeHandler(handler);
+    }
+    
+    public void setPassphraseValidation(boolean isValid, com.sap.sse.gwt.adminconsole.StringMessages stringMessages) {
+        passphraseStatus.setText(isValid ?  stringMessages.validPassphrase(): stringMessages.invalidPassphrase());
+        passphraseStatus.getElement().getStyle().setColor(isValid ?  "green": "red");
+    }
+    
 }
