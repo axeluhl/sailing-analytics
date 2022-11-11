@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
@@ -70,7 +71,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-//@Ignore("bug5147: first ensuring that we have no regressions; then using this as test-first driver")
+@Ignore("bug5147: first ensuring that we have no regressions; then using this as test-first driver")
 public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase {
     private final BoatClass boatClass = new BoatClassImpl(BoatClassMasterdata.PIRATE);
     private final TimePoint referenceTimePoint = MillisecondsTimePoint.now();
