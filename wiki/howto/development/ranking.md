@@ -56,7 +56,7 @@ Or as text:
                         - build result list of Competitor/RankAndRankComparable
                     - AbstractLeaderboardImpl.getRankImprovedByDisqualificationsOfBetterRankedCompetitors(...) (O(n), finding competitor in list from best to worst)
 
-It is obvious that the getTotalPoints(competitor, raceColumn) sequence is invoked four times in the worst case if there are no score corrections:
+It is obvious that the `getTotalPoints(competitor, raceColumn)` sequence is invoked four times in the worst case if there are no score corrections:
 
 1. for the `getCompetitorsFromBestToWorst(RaceColumn)` part to fill a corresponding DTO structure for the client
 2. for the `LeaderboardTotalRankComparator` that requires all points, e.g., for tie-breaking
