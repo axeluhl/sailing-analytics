@@ -16,7 +16,7 @@ public class UnmergedOperationsQueue<O extends Operation<S>, S> {
     
     public UnmergedOperationsQueue() {
 	numberOfFirstInList = 0;
-	unmergedOperations = new ArrayList<O>(5);
+	unmergedOperations = new ArrayList<>(5);
     }
     
     /**

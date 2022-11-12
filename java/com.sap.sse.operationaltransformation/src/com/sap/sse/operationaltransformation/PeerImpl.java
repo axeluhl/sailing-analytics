@@ -49,14 +49,14 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * confirmed, the first operation from the queue is removed because operations sent
      * from this peer to the remote peer are processed in order.
      */
-    private final ConcurrentMap<Peer<O, S>, UnmergedOperationsQueue<O, S>> unmergedOperationsForPeer = new ConcurrentHashMap<Peer<O, S>, UnmergedOperationsQueue<O, S>>();
+    private final ConcurrentMap<Peer<O, S>, UnmergedOperationsQueue<O, S>> unmergedOperationsForPeer = new ConcurrentHashMap<>();
     
     /**
      * Remembers per peer how many of that peer's operations this peer has already
      * applied locally. Access happens while {@code synchronized} on {@code this} object's monitor.
      */
-    private final Map<Peer<O, S>, Integer> numberOfMergedOperations = new HashMap<Peer<O, S>, Integer>();
-
+    private final Map<Peer<O, S>, Integer> numberOfMergedOperations = new HashMap<>();
+    
     private final Transformer<S, O> transformer;
     
     /**
@@ -103,7 +103,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 
     private ExecutorService createMerger() {
         return ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(1,
-                this.getClass().getName() + " " + name + UUID.randomUUID());
+                this.getClass().getName() + " " + name + " " + UUID.randomUUID());
     }
 
     private Transformer<S, O> getTransformer() {
@@ -115,7 +115,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	if (role == Role.CLIENT && getPeers().size() > 0) {
 	    throw new RuntimeException("A client must be connected to at most one server");
 	}
-	unmergedOperationsForPeer.put(peer, new UnmergedOperationsQueue<O, S>());
+	unmergedOperationsForPeer.put(peer, new UnmergedOperationsQueue<>());
 	numberOfMergedOperations.put(peer, 0);
 	return getCurrentState();
     }
@@ -214,19 +214,19 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 		// remember the number of merged operations while still in synchronized block
 		final int numberOfMergedOpsForPeer = numberOfMergedOperations.get(peer);
 		scheduleTask(new Runnable() {
-		    public void run() {
-			/* 
-			 * Thoughts on locking: The peer runs the following apply(...) call synchronized.
-			 * Therefore, it can't take other apply calls (local or from other peers) during
-			 * that time. It may, though, have pending tasks in its updatePeers that can
-			 * continue to run. This may include updates for this peer which would be received
-			 * by this peer's apply(...) method.
-			 * 
-			 * FIXME since this Runnable is not synchronized, this could lead to the numberOfMergedOpsForPeer to change before this is executed...
-			 */
-			peer.apply(PeerImpl.this, operation, numberOfMergedOpsForPeer);
-			// TODO what to do if apply throws a RuntimeException?
-		    }
+                    public void run() {
+                        /*
+                         * Thoughts on locking: The peer runs the following apply(...) call synchronized. Therefore,
+                         * it can't take other apply calls (local or from other peers) during that time. It may,
+                         * though, have pending tasks in its updatePeers that can continue to run. This may include
+                         * updates for this peer which would be received by this peer's apply(...) method.
+                         * 
+                         * FIXME since this Runnable is not synchronized, this could lead to the
+                         * numberOfMergedOpsForPeer to change before this is executed...
+                         */
+                        peer.apply(PeerImpl.this, operation, numberOfMergedOpsForPeer);
+                        // TODO what to do if apply throws a RuntimeException?
+                    }
 		});
 	    }
 	}
@@ -268,7 +268,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	});
     }
 
-    private void taskScheduled() {
+    private synchronized void taskScheduled() {
         logger.fine(""+this+" taskScheduled incrementing scheduleOrRunning from "+scheduledOrRunning+" to "+(scheduledOrRunning+1)); 
 	scheduledOrRunning++;
     }
