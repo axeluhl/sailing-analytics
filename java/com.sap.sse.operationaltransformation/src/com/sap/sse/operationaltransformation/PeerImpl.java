@@ -109,7 +109,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     private Transformer<S, O> getTransformer() {
         return transformer;
     }
-    
+
     @Override
     public S addPeer(Peer<O, S> peer) {
 	if (role == Role.CLIENT && getPeers().size() > 0) {
@@ -119,15 +119,15 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	numberOfMergedOperations.put(peer, 0);
 	return getCurrentState();
     }
-    
+
     private Collection<Peer<O, S>> getPeers() {
 	return unmergedOperationsForPeer.keySet();
     }
-    
+
     public S getCurrentState() {
 	return currentState;
     }
-    
+
     @Override
     public synchronized void apply(O operation) {
 	taskScheduled();
@@ -182,6 +182,8 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
             if (transformedOp != null) {
                 currentState = transformedOp.applyTo(currentState); // produce a new current state
             }
+            // TODO / FIXME: what if the source.confirm(...) call below crosses over with an apply(...) call that source is trying to send to this?
+            // source would then transform an original or incoming operation 
             final int numberOfMergedOperationsFromSource = numberOfMergedOperations.get(source) + 1;
             numberOfMergedOperations.put(source, numberOfMergedOperationsFromSource);
             // It's important that the following call to confirm is synchronized with the
@@ -231,7 +233,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	    }
 	}
     }
-    
+
     public String toString() {
 	if (name != null) {
 	    return name;
@@ -241,7 +243,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
 
     @Override
-    public void confirm(Peer<O, S> source, int numberOfMergedOperations) {
+    public synchronized void confirm(Peer<O, S> source, int numberOfMergedOperations) {
 	unmergedOperationsForPeer.get(source).confirm(numberOfMergedOperations);
     }
 
