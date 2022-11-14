@@ -601,7 +601,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 		    cp $i $i.bak
 		    cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
 		    mv $i.sed $i
-		    
 		done
 	    fi
 	else
