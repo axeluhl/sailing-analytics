@@ -668,7 +668,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "BUILD_TOOLS_VERSION=$BUILD_TOOLS_VERSION"
         TARGET_API_VERSION=`grep "targetSdk = " build.gradle | cut -d "=" -f 2 | sed 's/ //g'`
         echo "TARGET_API_VERSION=$TARGET_API_VERSION"
+        echo "Updating Android SDK at ${ANDROID_HOME}"
         $SDK_MANAGER --update --sdk_root=${ANDROID_HOME} && yes | $SDK_MANAGER --licenses
+        echo "Getting Android build-tools, platform-tools and platform ${TARGET_API_VERSION}"
         $SDK_MANAGER --sdk_root=${ANDROID_HOME} "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
 
         # TODO: make distinction available for gradle builds as well
