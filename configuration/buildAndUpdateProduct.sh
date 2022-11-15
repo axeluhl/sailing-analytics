@@ -679,6 +679,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         # Use the following line for regular builds with no staged Nexus artifacts:
         # mobile_extra="-P -with-not-android-relevant -P with-mobile"
 
+        echo "Building apps with Gradle..."
         ./gradlew build
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
