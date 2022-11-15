@@ -669,7 +669,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         TARGET_API_VERSION=`grep "targetSdk = " build.gradle | cut -d "=" -f 2 | sed 's/ //g'`
         echo "TARGET_API_VERSION=$TARGET_API_VERSION"
         $SDK_MANAGER --update --sdk_root=${ANDROID_HOME} && yes | $SDK_MANAGER --licenses
-        $SDK_MANAGER "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
+        $SDK_MANAGER --sdk_root=${ANDROID_HOME} "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
 
         # TODO: make distinction available for gradle builds as well
         # Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
