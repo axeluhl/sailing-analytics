@@ -48,7 +48,7 @@ extends AwsInstance<ShardingKey> {
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * @param rethrowExceptions
-     *            whether an occurring exception should be rethrown. Necessary if it is necessary to know whether any 
+     *            whether an occurring exception should be rethrown. Necessary if it is necessary to know whether any
      *            processes are running or not. Exception means that they were just not properly detected.
      */
     Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
