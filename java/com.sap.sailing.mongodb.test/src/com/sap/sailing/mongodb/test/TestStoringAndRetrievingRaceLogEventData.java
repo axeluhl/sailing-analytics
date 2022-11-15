@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.net.UnknownHostException;
 
 import org.bson.Document;
+import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTest {
     private static final String RACELOG_TEST_COLLECTION = "racelog_test_collection";
@@ -68,7 +70,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
     }
 
     @Test
-    public void storeRaceLogFlagEvent() throws UnknownHostException, MongoException, InterruptedException {
+    public void storeRaceLogFlagEvent() throws UnknownHostException, MongoException, InterruptedException, JsonDeserializationException, ParseException {
         TimePoint now = MillisecondsTimePoint.now();
         RaceLogFlagEvent rcEvent = new RaceLogFlagEventImpl(now, author, 0, Flags.AP, Flags.ALPHA, true);
         {

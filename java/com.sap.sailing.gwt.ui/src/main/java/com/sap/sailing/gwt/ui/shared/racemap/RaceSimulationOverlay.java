@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
@@ -30,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -62,19 +65,24 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private int raceLeg = 0;
     private long requestedSimulationVersion = 0;
     private Canvas simulationLegend;
+    private final Runnable disableRaceSimulator;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem) {
+    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier,
+            SailingServiceAsync sailingService, StringMessages stringMessages,
+            AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem,
+            Runnable disableRaceSimulator) {
         super(map, zIndex, coordinateSystem);
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.asyncActionsExecutor = asyncActionsExecutor;
+        this.disableRaceSimulator = disableRaceSimulator;
         this.colors = new ColorPaletteGenerator();
         this.pathNameFormatter = new PathNameFormatter(stringMessages);
     }
     
     public void updateLeg(int newLeg, boolean clearCanvas, long newVersion) {
-        if (((newLeg != raceLeg)||((newLeg == raceLeg)&&(newVersion > this.getVersion()))) && (this.isVisible())) {
+        if ((newLeg != raceLeg || (newLeg == raceLeg && newVersion > this.getVersion())) && this.isVisible()) {
             if (newLeg != raceLeg) {
                 raceLeg = newLeg;
                 requestedSimulationVersion = 0;                
@@ -89,7 +97,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     }
 
     public LegIdentifier getLegIdentifier() {
-        return new LegIdentifierImpl(raceIdentifier, String.valueOf(raceLeg));
+        return new LegIdentifierImpl(raceIdentifier, raceLeg);
     }
     
     public long getVersion() {
@@ -197,10 +205,10 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 }
             }
             ctxt.stroke();
-            SimulatorWindDTO start = points.get(0);
-            long timeStep = simulationResult.getTimeStep();
+            final SimulatorWindDTO start = points.get(0);
+            final Duration timeStep = simulationResult.getTimeStep();
             for (SimulatorWindDTO point : points) {
-                if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
+                if (start.timepoint.until(point.timepoint).asMillis() % timeStep.asMillis() != 0) {
                     continue;
                 }
                 Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
@@ -330,15 +338,17 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     }
     
     public void simulate(int leg) {
-        LegIdentifier legIdentifier = new LegIdentifierImpl(raceIdentifier, String.valueOf(leg));
+        LegIdentifier legIdentifier = new LegIdentifierImpl(raceIdentifier, leg);
         GetSimulationAction getSimulation = new GetSimulationAction(sailingService, legIdentifier);
         asyncActionsExecutor.execute(getSimulation, GET_SIMULATION_CATEGORY,
                 new MarkedAsyncCallback<>(new AsyncCallback<SimulatorResultsDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO: add corresponding message to string-messages
-                        // Notification.error(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                        Notification.notify(GET_SIMULATION_CATEGORY, NotificationType.WARNING);
+                        Notification.notify(stringMessages.errorFetchingSimulationData(caught.getMessage()),
+                                NotificationType.ERROR);
+                        if (caught instanceof UnauthorizedException) {
+                            disableRaceSimulator.run();
+                        }
                     }
 
                     @Override
@@ -348,11 +358,11 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                             if ((result.getPaths() != null) && (result.getVersion() >= requestedSimulationVersion) && (result.getLeg() == raceLeg)) {
                                 simulationResult = result;
                                 PathDTO[] paths = result.getPaths();
-                                if (result.getLegDuration() > 0) {
+                                if (result.getLegDuration().compareTo(Duration.NULL) > 0) {
                                     racePath = new PathDTO("0#Race Leader");
                                     List<SimulatorWindDTO> racePathPoints = new ArrayList<SimulatorWindDTO>();
                                     racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint));
-                                    racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint + result.getLegDuration()));
+                                    racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint.plus(result.getLegDuration())));
                                     racePath.setPoints(racePathPoints);
                                 } else {
                                     racePath = null;

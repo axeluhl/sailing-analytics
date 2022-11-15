@@ -10,11 +10,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -29,10 +29,12 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -42,6 +44,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
@@ -81,10 +84,14 @@ public class TestFarthestAheadWithSkippedMarkPassing {
     private Waypoint windward;
     private Waypoint finish;
     
-    private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
-        CompetitorWithBoat fastCompetitor = TrackBasedTest.createCompetitorWithBoat("FastBoat");
+    private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Duration> timeOnDistanceAllowances) {
+        DynamicCompetitorWithBoat fastCompetitor = (DynamicCompetitorWithBoat) TrackBasedTest.createCompetitorWithBoat("FastBoat");
+        fastCompetitor.setTimeOnTimeFactor(timeOnTimeFactors.apply(fastCompetitor));
+        fastCompetitor.setTimeOnDistanceAllowancePerNauticalMile(timeOnDistanceAllowances.apply(fastCompetitor));
         c1 = fastCompetitor;
-        CompetitorWithBoat slowCompetitor = TrackBasedTest.createCompetitorWithBoat("SlowBoat");
+        DynamicCompetitorWithBoat slowCompetitor = (DynamicCompetitorWithBoat) TrackBasedTest.createCompetitorWithBoat("SlowBoat");
+        slowCompetitor.setTimeOnTimeFactor(timeOnTimeFactors.apply(slowCompetitor));
+        slowCompetitor.setTimeOnDistanceAllowancePerNauticalMile(timeOnDistanceAllowances.apply(slowCompetitor));
         c2 = slowCompetitor;
         trackedRace = createTrackedRace(TrackBasedTest.createCompetitorAndBoatsMap(fastCompetitor, slowCompetitor));
         rankingMetric = trackedRace.getRankingMetric();
@@ -97,14 +104,17 @@ public class TestFarthestAheadWithSkippedMarkPassing {
         BoatClassImpl boatClass = new BoatClassImpl("Some Handicap Boat Class", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* courseArea */ null, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* courseArea */ null,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
         MarkImpl left = new MarkImpl("Left lee gate buoy");
         MarkImpl right = new MarkImpl("Right lee gate buoy");
-        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate");
+        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate", "Lee Gate");
         Mark windwardMark = new MarkImpl("Windward mark");
         start = new WaypointImpl(leeGate);
         waypoints.add(start);
@@ -118,7 +128,7 @@ public class TestFarthestAheadWithSkippedMarkPassing {
                 /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
-                tr->new OneDesignRankingMetric(tr), mock(RaceLogResolver.class));
+                tr->new OneDesignRankingMetric(tr), mock(RaceLogAndTrackedRaceResolver.class), null, /* markPassingRaceFingerprintRegistry */ null);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(1, 0);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(0, -0.000001), timePointForFixes));
@@ -136,7 +146,7 @@ public class TestFarthestAheadWithSkippedMarkPassing {
      */
     @Test
     public void testWithOneMarkPassingOnly() {
-        setUp(c -> c==c1 ? 2.0 : 1.0, c -> 0.0);
+        setUp(c -> c==c1 ? 2.0 : 1.0, c -> Duration.NULL);
         final TimePoint startOfRace = MillisecondsTimePoint.now();
         final TimePoint middleOfFirstLeg = startOfRace.plus(Duration.ONE_HOUR.times(3));
         trackedRace.updateMarkPassings(
@@ -169,7 +179,7 @@ public class TestFarthestAheadWithSkippedMarkPassing {
      */
     @Test
     public void testWithTwoMarkPassingsForC1AndSkippedStartForC2() {
-        setUp(c -> c==c1 ? 2.0 : 1.0, c -> 0.0);
+        setUp(c -> c==c1 ? 2.0 : 1.0, c -> Duration.NULL);
         final TimePoint startOfRace = MillisecondsTimePoint.now();
         final TimePoint endOfFirstLeg = startOfRace.plus(Duration.ONE_HOUR.times(3));
         final TimePoint middleOfSecondLeg = endOfFirstLeg.plus(Duration.ONE_MINUTE.times(10));

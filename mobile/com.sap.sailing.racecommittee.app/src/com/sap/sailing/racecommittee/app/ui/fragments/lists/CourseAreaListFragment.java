@@ -1,12 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-
-import android.app.Activity;
-import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.text.TextUtils;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -17,14 +15,21 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+
 public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
 
-    private Serializable parentEventId;
+    private Serializable eventId;
 
-    public static CourseAreaListFragment newInstance(Serializable eventId) {
-        CourseAreaListFragment fragment = new CourseAreaListFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(AppConstants.EventIdTag, eventId);
+    public static CourseAreaListFragment newInstance(Serializable eventId, @Nullable String uuid) {
+        final CourseAreaListFragment fragment = new CourseAreaListFragment();
+        final Bundle args = new Bundle();
+        args.putSerializable(AppConstants.EXTRA_EVENT_ID, eventId);
+        if (!TextUtils.isEmpty(uuid)) {
+            args.putSerializable(AppConstants.EXTRA_COURSE_UUID, uuid);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -32,23 +37,28 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
+        final Bundle args = getArguments();
+        if (args != null) {
+            eventId = getArguments().getSerializable(AppConstants.EXTRA_EVENT_ID);
+        }
     }
 
     @Override
-    protected ItemSelectedListener<CourseArea> attachListener(Activity activity) {
-        if (activity instanceof CourseAreaSelectedListenerHost) {
-            CourseAreaSelectedListenerHost listener = (CourseAreaSelectedListenerHost) activity;
+    protected ItemSelectedListener<CourseArea> attachListener(Context context) {
+        if (context instanceof CourseAreaSelectedListenerHost) {
+            CourseAreaSelectedListenerHost listener = (CourseAreaSelectedListenerHost) context;
             return listener.getCourseAreaSelectionListener();
         }
 
-        throw new IllegalStateException(String
-            .format("%s cannot be attached to a instance of %s", CourseAreaListFragment.class.getName(), activity.getClass().getName()));
+        throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
+                CourseAreaListFragment.class.getName(), context.getClass().getName()));
     }
 
     @Override
-    protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(ReadonlyDataManager manager) {
-        return manager.createCourseAreasLoader(parentEventId, this);
+    protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(
+            ReadonlyDataManager manager
+    ) {
+        return manager.createCourseAreasLoader(eventId, this);
     }
 
     @Override
@@ -64,6 +74,17 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
             for (String allowedCourse : courses) {
                 if ("*".equals(allowedCourse) || allowedCourse.equals(item.getText())) {
                     item.setDisabled(false);
+                }
+            }
+        }
+
+        final Bundle args = getArguments();
+        if (args != null && mSelectedIndex == -1) {
+            final String uuid = args.getString(AppConstants.EXTRA_COURSE_UUID);
+            for (CourseArea area : data) {
+                if (area.getId().toString().equals(uuid)) {
+                    selectItem(area, true);
+                    break;
                 }
             }
         }

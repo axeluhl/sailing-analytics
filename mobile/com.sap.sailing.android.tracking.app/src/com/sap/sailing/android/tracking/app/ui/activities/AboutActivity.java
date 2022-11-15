@@ -1,12 +1,12 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.view.Menu;
-
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.AboutFragment;
+
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.view.Menu;
 
 public class AboutActivity extends BaseActivity {
 

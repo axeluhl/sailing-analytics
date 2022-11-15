@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -21,11 +22,9 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
@@ -39,6 +38,9 @@ import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRow
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsOfRaceGroupSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializer;
+import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
@@ -72,10 +74,16 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         RaceGroupFactory raceGroupFactory = new RaceGroupFactory();
         final Set<Regatta> regattasForWhichRegattaLeaderboardsWereAdded = new HashSet<>();
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-            if (filterCourseArea.equals(leaderboard.getDefaultCourseArea())) {
+            if (Util.contains(leaderboard.getCourseAreas(), filterCourseArea)) {
+                SecurityUtils.getSubject()
+                        .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.READ));
                 if (leaderboard instanceof RegattaLeaderboard && !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
                     result.add(serializer.serialize(raceGroupFactory.convert((RegattaLeaderboard) leaderboard)));
-                    regattasForWhichRegattaLeaderboardsWereAdded.add(((RegattaLeaderboard) leaderboard).getRegatta());
+
+                    final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+                    SecurityUtils.getSubject()
+                            .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.READ));
+                    regattasForWhichRegattaLeaderboardsWereAdded.add(regatta);
                 } else if (leaderboard instanceof FlexibleLeaderboard) {
                     result.add(serializer.serialize(raceGroupFactory.convert((FlexibleLeaderboard) leaderboard)));
                 }
@@ -84,7 +92,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         // now add only those RegattaLeaderboardWithEliminations for which the original RegattaLeaderboard hasn't been added
         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
             if (leaderboard instanceof RegattaLeaderboardWithEliminations &&
-                    filterCourseArea.equals(leaderboard.getDefaultCourseArea()) && 
+                    Util.contains(leaderboard.getCourseAreas(), filterCourseArea) && 
                     !regattasForWhichRegattaLeaderboardsWereAdded.contains(((RegattaLeaderboardWithEliminations) leaderboard).getRegatta())) {
                 result.add(serializer.serialize(raceGroupFactory.convert((RegattaLeaderboardWithEliminations) leaderboard)));
             }
@@ -102,8 +110,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     }
 
     private static JsonSerializer<RaceGroup> createSerializer(UUID clientUuid) {
-        return new RaceGroupJsonSerializer(new BoatClassJsonSerializer(), new CourseAreaJsonSerializer(),
-                RegattaConfigurationJsonSerializer.create(),
+        return new RaceGroupJsonSerializer(new BoatClassJsonSerializer(), RegattaConfigurationJsonSerializer.create(),
                 new SeriesWithRowsOfRaceGroupSerializer(new SeriesWithRowsJsonSerializer(
                         new RaceRowsOfSeriesWithRowsSerializer(new RaceRowJsonSerializer(new FleetJsonSerializer(
                                 new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer(clientUuid), 

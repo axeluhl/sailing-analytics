@@ -4,6 +4,6 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientF
 import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 
-public interface UserProfileClientFactory
-        extends SailingClientFactory, WithAuthenticationManager, ClientFactoryWithDispatchAndErrorAndUserService {
+public interface UserProfileClientFactory extends SailingClientFactory, WithAuthenticationManager,
+        ClientFactoryWithDispatchAndErrorAndUserService {
 }

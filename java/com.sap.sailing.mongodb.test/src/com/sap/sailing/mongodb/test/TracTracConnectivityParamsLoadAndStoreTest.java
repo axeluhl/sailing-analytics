@@ -49,7 +49,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
                 delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 /* raceLogStore */ null, /* regattaLogStore */ null, DomainFactory.INSTANCE, tracTracUsername, tracTracPassword,
                 raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false,
-                /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* useOfficialEventsToUpdateRaceLog */ true);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(tracTracParams);
         // load
@@ -76,6 +76,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         assertEquals(tracTracParams.getTrackerID(), tracTracParamsReadFromDB.getTrackerID());
         assertEquals(tracTracParams.isTrackWind(), tracTracParamsReadFromDB.isTrackWind());
         assertEquals(tracTracParams.isCorrectWindDirectionByMagneticDeclination(), tracTracParamsReadFromDB.isCorrectWindDirectionByMagneticDeclination());
+        assertEquals(((RaceTrackingConnectivityParametersImpl) tracTracParams).isUseOfficialEventsToUpdateRaceLog(), tracTracParamsReadFromDB.isUseOfficialEventsToUpdateRaceLog());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(tracTracParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();

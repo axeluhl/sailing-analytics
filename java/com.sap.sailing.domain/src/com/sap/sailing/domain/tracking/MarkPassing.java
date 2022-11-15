@@ -4,6 +4,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sse.common.Timed;
 
+/**
+ * Mark passings have an {@link #equals(Object)} and {@link #hashCode()} implementation based
+ * on their content, not their identity.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface MarkPassing extends Timed {
     Waypoint getWaypoint();
 

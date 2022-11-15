@@ -167,11 +167,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         Util.Triple<A, B, C> event = null;
         while (event == null || !isStopEvent(event)) {
             try {
-                event = queue.take();
-                if (!isStopEvent(event)) {
-                    handleEvent(event);
-                }
                 final Set<LoadingQueueDoneCallBack> callBacks;
+                event = queue.take();
                 synchronized (loadingQueueDoneCallBacks) {
                     if (getSimulator() != null) {
                         // when simulator is running, loading is considered finished and all callbacks will
@@ -186,6 +183,9 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                         // currently consumed and notify if any are found
                         callBacks = loadingQueueDoneCallBacks.remove(event);
                     }
+                }
+                if (!isStopEvent(event)) {
+                    handleEvent(event);
                 }
                 if (callBacks != null) {
                     for (LoadingQueueDoneCallBack callback : callBacks) {
@@ -247,6 +247,12 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     @Override
     public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
         synchronized (loadingQueueDoneCallBacks) {
+            // Synchronization: If the following peekLast() call returns an element that is consumed just before the
+            // callback is added to loadingQueueDoneCallbacks then the callback will still be triggered because the
+            // run() method also synchronizes on loadingQueueDoneCallBacks before checking for any call back to be
+            // triggered for the event just consumed. Worst case: the event is taken from the queue but not yet
+            // handled. In this case the peekLast() call will already return null and execute the loadingQueueDone(this)
+            // callback already although the event's handling has not completed yet.
             Triple<A, B, C> lastInQueue = queue.peekLast();
             // when simulator is attached, consider loading already done; the simulator simulates "live" tracking
             if (lastInQueue == null || getSimulator() != null) {

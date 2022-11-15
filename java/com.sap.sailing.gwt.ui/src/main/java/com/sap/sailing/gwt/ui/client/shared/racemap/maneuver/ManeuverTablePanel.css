@@ -1,9 +1,12 @@
 .maneuverPanel {
-    margin-top: 1em;
-    margin-right: 3em;
-    overflow: auto;
+    position: relative;
 }
 .contentContainer {
+    padding-right: 3em;
+    overflow: auto;
+    position: absolute;
+    top: 1em;
+    bottom: 0;
     padding-left: .5em;
     display: inline-block;
     width: 100%;
@@ -34,7 +37,8 @@
     background-color: transparent;
     background-size: contain;
     border: none;
-    position: fixed;
+    position: absolute;
+    top: 1em;
     right: 1em;
 }
 

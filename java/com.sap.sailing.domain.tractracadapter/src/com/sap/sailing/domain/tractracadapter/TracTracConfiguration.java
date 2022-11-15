@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.tractracadapter;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Configuration parameters that can be used to connect to a TracTrac event / race.
@@ -7,7 +12,7 @@ package com.sap.sailing.domain.tractracadapter;
  * @author Axel Uhl (D043530)
  *
  */
-public interface TracTracConfiguration {
+public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
     String getName();
     
     String getJSONURL();
@@ -33,4 +38,26 @@ public interface TracTracConfiguration {
      * @return the TracTrac password
      */
     String getTracTracPassword();
+
+    String getCreatorName();
+
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    default HasPermissions getPermissionType() {
+        return SecuredDomainType.TRACTRAC_ACCOUNT;
+    }
+
+    // TODO it would be nice to factor the redundancy with TracTracConfigurationWithSecurityDTO.getTypeRelativeObjectIdentifier but it would require introducing a new .common bundle
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getJSONURL(), getCreatorName());
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl, String username) {
+        return username == null ? new TypeRelativeObjectIdentifier(jsonUrl)
+                : new TypeRelativeObjectIdentifier(jsonUrl, username);
+    }
 }

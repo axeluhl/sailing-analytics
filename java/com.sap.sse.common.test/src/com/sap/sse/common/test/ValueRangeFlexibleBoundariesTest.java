@@ -21,7 +21,7 @@ public class ValueRangeFlexibleBoundariesTest {
     public void setUp() {
         // a ten percent range at each end of an original range of length 10, so length 1 at each end,
         // spread symmetrically around the min/max value
-        valueRange = new ValueRangeFlexibleBoundaries(-5.0, 5.0, 0.10);
+        valueRange = new ValueRangeFlexibleBoundaries(-5.0, 5.0, 0.10, 0.5);
         minLeft = -6.0;
         maxRight = 6.0;
         listener = mock(ValueRangeFlexibleBoundariesChangedListener.class);
@@ -81,6 +81,16 @@ public class ValueRangeFlexibleBoundariesTest {
         valueRange.setMinMax(-5.0, 20.0);
         Double newMaxRight = 22.5;
         Double newMinLeft = -7.5;
+        assertEquals(newMaxRight, (Double) valueRange.getMaxRight());
+        assertEquals(newMinLeft, (Double) valueRange.getMinLeft());
+        verify(listener, times(1)).onValueRangeBoundariesChanged();
+    }
+    
+    @Test
+    public void testMinimumHalfBoundaryWidth() {
+        valueRange.setMinMax(5.0, 6.0);
+        Double newMaxRight = 6.5;
+        Double newMinLeft = 4.5;
         assertEquals(newMaxRight, (Double) valueRange.getMaxRight());
         assertEquals(newMinLeft, (Double) valueRange.getMinLeft());
         verify(listener, times(1)).onValueRangeBoundariesChanged();

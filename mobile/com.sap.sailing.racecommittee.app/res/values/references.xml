@@ -15,6 +15,7 @@
     <item name="race_finished_buttons" type="layout">@layout/race_finished_buttons_hor</item>
     <item name="race_finished_desc" type="layout">@layout/race_finished_desc_hor</item>
     <item name="race_finishing_button" type="layout">@layout/race_finishing_button_normal</item>
+    <item name="race_finishing_revoke_button" type="layout">@layout/race_revoke_finishing_button_normal</item>
     <item name="race_individual_recall" type="layout">@layout/race_individual_recall_normal</item>
     <item name="race_list_header" type="layout">@layout/race_list_header_normal</item>
     <item name="race_list_list" type="layout">@layout/race_list_list_top</item>
@@ -23,6 +24,7 @@
     <item name="race_panel_setup" type="layout">@layout/race_panel_setup_hor_1</item>
     <item name="race_panel_time" type="layout">@layout/race_panel_time_normal</item>
     <item name="race_penalty_button_bar" type="layout">@layout/race_penalty_button_bar_normal</item>
+    <item name="race_positioning" type="layout">@layout/race_tracking_list_normal</item>
     <item name="race_tracking_list" type="layout">@layout/race_tracking_list_normal</item>
     <item name="race_schedule_button" type="layout">@layout/race_schedule_button_normal</item>
     <item name="race_schedule_course_marks" type="layout">@layout/race_schedule_course_marks_normal</item>
@@ -35,9 +37,7 @@
     <item name="wind_view" type="layout">@layout/wind_view_normal</item>
     <item name="system_information_view" type="layout">@layout/system_information_view_normal</item>
 
-    <item name="compass_back_dark" type="drawable">@drawable/compass_back_normal_light</item>
-    <item name="compass_back_light" type="drawable">@drawable/compass_back_normal_light</item>
-    <item name="compass_needle_dark" type="drawable">@drawable/compass_needle_normal_light</item>
-    <item name="compass_needle_light" type="drawable">@drawable/compass_needle_normal_light</item>
+    <item name="compass_back" type="drawable">@drawable/compass_back_normal</item>
+    <item name="compass_needle" type="drawable">@drawable/compass_needle_normal</item>
 
 </resources>

@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
 import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
 
 public class Activator implements BundleActivator {
@@ -19,8 +19,7 @@ public class Activator implements BundleActivator {
         final String mongoClientURI = context.getProperty(MongoDBConfiguration.MONGO_URI);
         if (mongoClientURI != null) {
             logger.info("found "+MongoDBConfiguration.MONGO_URI+"="+mongoClientURI);
-            newConfiguration = new MongoDBConfiguration(new MongoClientURI(
-                    context.getProperty(MongoDBConfiguration.MONGO_URI), MongoDBConfiguration.getDefaultOptionsBuilder()));
+            newConfiguration = new MongoDBConfiguration(new ConnectionString(context.getProperty(MongoDBConfiguration.MONGO_URI)));
         } else {
             final String databaseNameProperty = context.getProperty(MongoDBConfiguration.MONGO_DB_NAME);
             final String databaseName;
@@ -56,7 +55,5 @@ public class Activator implements BundleActivator {
     
     @Override
     public void stop(BundleContext context) throws Exception {
-        
     }
-
 }

@@ -24,11 +24,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
@@ -57,6 +58,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -73,6 +75,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
@@ -124,14 +127,14 @@ public class SensorFixStoreAndLoadTest {
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat("Boat1", "Boat1", boatClass, "GER 1", null);
-    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("Boat2", "Boat2", boatClass, "GER 2", null);
+    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat("Boat1", "Boat1", boatClass, "GER 1", null, /* storePersistently */ true);
+    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("Boat2", "Boat2", boatClass, "GER 2", null, /* storePersistently */ true);
     private final Competitor compNotPartOfRace = DomainFactory.INSTANCE.getOrCreateCompetitor("comp3", "comp3", null, null, null, null,
-            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
     protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
 
@@ -149,12 +152,10 @@ public class SensorFixStoreAndLoadTest {
         raceLog = new RaceLogImpl("racelog");
         raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(START_OF_TRACKING), author, 0));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(END_OF_TRACKING), author, 0));
-        
         regattaLog = new RegattaLogImpl("regattalog");
-
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory);
-
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
+                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author,
                 new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author,
@@ -167,10 +168,13 @@ public class SensorFixStoreAndLoadTest {
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
+        regatta.getRegatta().setControlTrackingFromStartAndFinishTimes(true);
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class));
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null);
     }
 
     private void dropPersistedData() {
@@ -444,13 +448,13 @@ public class SensorFixStoreAndLoadTest {
                 }
                 throw new IllegalArgumentException("Unknown event type");
             }
-        });
+        }, /* removeOutliersFromCompetitorTracks */ false);
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
         if (expected == 0) {
             if (track != null) {
-        track.lockForRead();
+                track.lockForRead();
                 try {
                     assertTrue(size(track.getRawFixes()) == 0);
                 } finally {
@@ -460,10 +464,10 @@ public class SensorFixStoreAndLoadTest {
         } else {
             track.lockForRead();
             try {
-        assertEquals(expected, size(track.getRawFixes()));
+                assertEquals(expected, size(track.getRawFixes()));
             } finally {
-        track.unlockAfterRead();
-    }
+                track.unlockAfterRead();
+            }
         }
     }
 
@@ -738,7 +742,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
         raceLog.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(START_OF_TRACKING), author, 0, 
-                new MillisecondsTimePoint(START_OF_TRACKING)));
+                new MillisecondsTimePoint(START_OF_TRACKING), /* courseAreaId */ null));
         assertNotNull(trackedRace.getStartOfTracking());
         trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
@@ -801,7 +805,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 
     @Test
@@ -817,7 +821,7 @@ public class SensorFixStoreAndLoadTest {
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 
     @Test
@@ -834,7 +838,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
     @Test
@@ -853,7 +857,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 
     private class StatusTransitionListener extends AbstractRaceChangeListener {

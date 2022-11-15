@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOr
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
-import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.gwt.client.ColorTextBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -23,7 +23,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     private final BoatDTO boatToEdit;
     private final TextBox nameTextBox;
     private final SuggestBox boatClassNameBox;
-    private final TextBox displayColorTextBox;
+    private final ColorTextBox displayColorTextBox;
     private final TextBox sailIdTextBox;
     private final StringMessages stringMessages;
 
@@ -50,10 +50,32 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                             result = stringMessages.pleaseEnterASailNumberOrABoatName();
                         } else if (valueToValidate.getColor() != null && valueToValidate.getColor() instanceof InvalidColor) {
                             result = valueToValidate.getColor().getAsHtml();
-                        } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
+                        } else if (boatClassWasChanged(valueToValidate, boatToEdit)
+                                && (valueToValidate.getBoatClass().getName() == null
+                                        || valueToValidate.getBoatClass().getName().isEmpty())) {
+                            // only validate if boat class changed
                             result = stringMessages.pleaseEnterABoatClass();
                         }
                         return result;
+                    }
+
+                    private boolean boatClassWasChanged(BoatDTO boatToValidate, BoatDTO originalBoat) {
+                        boolean changed = false;
+                        if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() != null) {
+                            // boat class has been added
+                            changed = true;
+                        } else if (boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() == null) {
+                            //
+                            changed = true;
+                        } else if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() == null) {
+                            // this is a create dialog, the boat class was just created
+                            changed = true;
+                        } else if (originalBoat.getBoatClass().getName()
+                                .equals(boatToValidate.getBoatClass().getName())) {
+                            // boat class exists and stayed the same
+                            changed = false;
+                        }
+                        return changed;
                     }
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("BoatEditDialog");
@@ -70,7 +92,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
         }
         this.nameTextBox = createTextBox(boatToEdit.getName());
         nameTextBox.ensureDebugId("NameTextBox");
-        this.displayColorTextBox = createTextBox(boatToEdit.getColor() == null ? "" : boatToEdit.getColor().getAsHtml()); 
+        this.displayColorTextBox = createColorTextBox(boatToEdit.getColor()); 
         this.sailIdTextBox = createTextBox(boatToEdit.getSailId());
         sailIdTextBox.ensureDebugId("SailIdTextBox");
     }
@@ -81,7 +103,10 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     }
 
     /**
-     * Encodes an invalid color; can be used 
+     * Encodes an invalid color; can be used to transport an exception during parsing of a color string.
+     * {@link #getAsHtml()} returns a localized message about an invalid color that uses the exception's
+     * {@link Exception#getMessage() message} as user hint.
+     * 
      * @author Axel Uhl (D043530)
      *
      */
@@ -118,14 +143,10 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     @Override
     protected BoatDTO getResult() {
         Color color;
-        if (displayColorTextBox.getValue() == null || displayColorTextBox.getValue().isEmpty()) {
-            color = null;
+        if (displayColorTextBox.isValid()) {
+            color = displayColorTextBox.getColor();
         } else {
-            try {
-                color = new RGBColor(displayColorTextBox.getText());
-            } catch (IllegalArgumentException iae) {
-                color = new InvalidColor(iae);
-            }
+            color = new InvalidColor(new IllegalArgumentException(displayColorTextBox.getValue()));
         }
         BoatClassDTO boatClass = new BoatClassDTO(boatClassNameBox.getValue(), Distance.NULL, Distance.NULL);
         BoatDTO boat = new BoatDTO(boatToEdit.getIdAsString(), nameTextBox.getValue(), boatClass, sailIdTextBox.getValue(), color);

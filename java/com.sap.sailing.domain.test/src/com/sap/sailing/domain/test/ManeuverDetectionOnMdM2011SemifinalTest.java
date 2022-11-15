@@ -2,10 +2,8 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -35,8 +33,6 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBasedTest {
 
@@ -49,7 +45,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         super.setUp("event_20110505_SailingTea", // Semifinale
                 /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c",

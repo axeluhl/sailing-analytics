@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,9 +13,11 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -23,21 +26,32 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
@@ -48,45 +62,157 @@ public class CompetitorsResource extends AbstractSailingServerResource {
      */
     private static final int MAX_SIZE_IN_MB = 5;
 
-    public static JSONObject getCompetitorJSON(Competitor competitor) {
-        // see http://wiki.sapsailing.com/wiki/info/api/api-v1#tracking-app-api-v1_check-in-information_competitor-information-in-general
-        JSONObject json = new JSONObject();
-        json.put(CompetitorJsonConstants.FIELD_ID, competitor.getId().toString());
-        json.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
-        if (competitor.hasBoat()) {
-            json.put(CompetitorJsonConstants.FIELD_SAIL_ID, ((CompetitorWithBoat) competitor).getBoat().getSailID());
-        }
-        json.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
-        final Nationality nationality = competitor.getTeam().getNationality();
-        json.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality==null?null:nationality.getThreeLetterIOCAcronym());
-        json.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE, nationality==null?null:nationality.getCountryCode().getTwoLetterISOCode());
-        json.put(CompetitorJsonConstants.FIELD_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-        if (competitor.getFlagImage() != null) {
-            json.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE, competitor.getFlagImage().toString());
-        }
-        if (competitor.getTeam().getImage() != null) {
-            json.put(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI, competitor.getTeam().getImage().toString());
-        }
-        return json;
-    }
-
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{competitorId}")
-    public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString) {
+    public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString,
+            @QueryParam("secret") String secret, @QueryParam("leaderboardName") String leaderboardName) {
         Response response;
-        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                competitorIdAsString);
+        Competitor competitor = getService().getCompetitorAndBoatStore()
+                .getExistingCompetitorByIdAsString(competitorIdAsString);
         if (competitor == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
+            response = Response
+                    .status(Status.NOT_FOUND).entity("Could not find a competitor with id '"
+                            + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
-            String jsonString = getCompetitorJSON(competitor).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
+            boolean competitorInRegatta = false;
+            if (skip) {
+                Regatta regatta = getService().getRegattaByName(leaderboardName);
+                competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
+            }
+            if (!(skip && competitorInRegatta)) {
+                getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
+            }
+            response = Response.ok(streamingOutput(CompetitorJsonSerializer.create().serialize(competitor))).build();
         }
         return response;
     }
+
+    @PUT
+    @Produces("application/json;charset=UTF-8")
+    @Path("{competitorId}")
+    public Response updateCompetitor(@PathParam("competitorId") String competitorIdAsString, String json) {
+        if (json == null || json.isEmpty()) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing competitor data.").type(MediaType.TEXT_PLAIN)
+                    .build();
+        }
+        Object competitorObject;
+        try {
+            competitorObject = new JSONParser().parse(json);
+            if (competitorObject == null || !(competitorObject instanceof JSONObject)) {
+                throw new IllegalArgumentException();
+            }
+        } catch (ParseException | IllegalArgumentException pe) {
+            return Response.status(Status.BAD_REQUEST).entity("Competitor data is required to be given as json object")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        final JSONObject competitorJson = (JSONObject) competitorObject;
+        Response response;
+        final Competitor competitor = getService().getCompetitorAndBoatStore()
+                .getExistingCompetitorByIdAsString(competitorIdAsString);
+        if (competitor == null) {
+            response = Response
+                    .status(Status.NOT_FOUND).entity("Could not find a competitor with id '"
+                            + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            if (getSecurityService().hasCurrentUserUpdatePermission(competitor)) {
+                final Color color;
+                try {
+                    color = competitorJson.containsKey(CompetitorJsonConstants.FIELD_DISPLAY_COLOR)
+                            ? createColorFromString((String) competitorJson.get(CompetitorJsonConstants.FIELD_DISPLAY_COLOR))
+                            : competitor.getColor();
+                } catch (IllegalArgumentException iae) {
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(String.format("invalid color %s", iae.getMessage())).type(MediaType.TEXT_PLAIN)
+                            .build();
+                }
+                final URI flagImageUri;
+                try {
+                    flagImageUri = competitorJson.containsKey(CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI)
+                            ? createURIFromString(
+                                    (String) competitorJson.get(CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI))
+                            : competitor.getFlagImage();
+                } catch (URISyntaxException use) {
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(String.format("invalid %s %s", CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI,
+                                    competitorJson.get(CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI)))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                final URI teamImageUri;
+                try {
+                    teamImageUri = competitorJson.containsKey(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI)
+                            ? createURIFromString(
+                                    (String) competitorJson.get(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI))
+                            : competitor.getTeam() != null ? competitor.getTeam().getImage() : null;
+                } catch (URISyntaxException use) {
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(String.format("invalid %s %s", CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI,
+                                    competitorJson.get(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI)))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                final Nationality nationality;
+                try {
+                    nationality = competitorJson.containsKey(CompetitorJsonConstants.FIELD_NATIONALITY)
+                            ? createNationalityFromString(
+                                    (String) competitorJson.get(CompetitorJsonConstants.FIELD_NATIONALITY))
+                            : competitor.getNationality();
+                } catch (IllegalArgumentException e) {
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(String.format("invalid %s %s", CompetitorJsonConstants.FIELD_NATIONALITY,
+                                    competitorJson.get(CompetitorJsonConstants.FIELD_NATIONALITY)))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                final Double timeOnTimeFactor;
+                try {
+                    timeOnTimeFactor = competitorJson.containsKey(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR)
+                            ? createDoubleFromObject(
+                                    competitorJson.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR))
+                            : competitor.getTimeOnTimeFactor();
+                } catch (IllegalArgumentException iae) {
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(String.format("invalid %s %s", CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR,
+                                    competitorJson.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR)))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                final Duration duration;
+                try {
+                    duration = competitorJson.containsKey(
+                            CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE)
+                                    ? createDurationFromObject(competitorJson.get(
+                                            CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE))
+                                    : competitor.getTimeOnDistanceAllowancePerNauticalMile();
+                } catch (IllegalArgumentException iae) {
+                    return Response.status(Status.BAD_REQUEST).entity(String.format("invalid %s %s",
+                            CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                            competitorJson.get(
+                                    CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE)))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                final Competitor updatedCompetitor = getService().apply(new UpdateCompetitor(competitorIdAsString,
+                        (String) competitorJson.getOrDefault(CompetitorJsonConstants.FIELD_NAME, competitor.getName()),
+                        (String) competitorJson
+                                .getOrDefault(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName()),
+                        color,
+                        (String) competitorJson.getOrDefault(CompetitorJsonConstants.FIELD_EMAIL,
+                                competitor.getEmail()),
+                        nationality, teamImageUri, flagImageUri, timeOnTimeFactor, duration, (String) competitorJson
+                                .getOrDefault(CompetitorJsonConstants.FIELD_SEARCHTAG, competitor.getSearchTag())));
+                response = Response.ok(streamingOutput(CompetitorJsonSerializer.create().serialize(updatedCompetitor)))
+                        .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            } else {
+                response = Response.status(Status.FORBIDDEN)
+                        .entity("Not allowed to update competitor with id '"
+                                + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+        }
+        return response;
+    }
+
 
     @GET
     @Produces("application/json;charset=UTF-8")
@@ -107,8 +233,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         TeamJsonSerializer teamJsonSerializer = new TeamJsonSerializer(new PersonJsonSerializer(
                 new NationalityJsonSerializer()));
         JSONObject teamJson = teamJsonSerializer.serialize(team);
-        String json = teamJson.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(teamJson)).build();
     }
 
     /**
@@ -124,7 +249,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Path("{competitor-id}/team/image")
     @Produces("application/json;charset=UTF-8")
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
-            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) throws IOException {
+            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes,
+            @QueryParam("secret") String secret, @QueryParam("leaderboardName") String leaderboardName) throws IOException {
         RacingEventService service = getService();
         CompetitorAndBoatStore store = service.getCompetitorAndBoatStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
@@ -133,6 +259,15 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity("Could not find competitor with id " +
                             StringEscapeUtils.escapeHtml(competitorId)).type(MediaType.TEXT_PLAIN).build());
+        }
+        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
+        boolean competitorInRegatta = false;
+        if (skip) {
+            Regatta regatta = getService().getRegattaByName(leaderboardName);
+            competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
+        }
+        if (!(skip && competitorInRegatta)) {
+            getSecurityService().checkCurrentUserUpdatePermission(competitor);
         }
         String fileExtension = "";
         if (fileType.equals("image/jpeg")) {
@@ -160,14 +295,58 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
-        getService().getCompetitorAndBoatStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
-                competitor.getColor(), competitor.getEmail(), 
-                competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
-                /* timeOnTimeFactor */ competitor.getTimeOnTimeFactor(),
-                /* timeOnDistanceAllowancePerNauticalMile */ competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
+        getService().apply(new UpdateCompetitor(competitorId, competitor.getName(), competitor.getShortName(),
+                competitor.getColor(), competitor.getEmail(), competitor.getTeam().getNationality(), imageUri,
+                competitor.getFlagImage(), /* timeOnTimeFactor */ competitor.getTimeOnTimeFactor(),
+                /* timeOnDistanceAllowancePerNauticalMile */ competitor.getTimeOnDistanceAllowancePerNauticalMile(),
+                competitor.getSearchTag()));
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
         JSONObject result = new JSONObject();
         result.put(DeviceMappingConstants.JSON_TEAM_IMAGE_URI, imageUri.toString());
         return result.toString();
+    }
+
+    private Color createColorFromString(final String colorString) {
+        if (colorString == null || colorString.length() == 0) {
+            return null;
+        } else {
+            return new RGBColor(colorString);
+        }
+    }
+
+    private URI createURIFromString(final String uriString) throws URISyntaxException {
+        if (uriString == null || uriString.length() == 0) {
+            return null;
+        } else {
+            return new URI(uriString);
+        }
+    }
+
+    private Nationality createNationalityFromString(final String nationalityString) {
+        if (nationalityString == null || nationalityString.length() == 0) {
+            return null;
+        } else {
+            return new NationalityImpl(nationalityString);
+        }
+    }
+
+    private Double createDoubleFromObject(final Object number) {
+        if (number == null) {
+            return null;
+        } else if (number instanceof Number) {
+            return ((Number) number).doubleValue();
+        } else {
+            throw new IllegalArgumentException("invalid double value");
+        }
+    }
+
+    private Duration createDurationFromObject(final Object number) {
+        if (number == null) {
+            return null;
+        } else if (number instanceof Number) {
+            return new SecondsDurationImpl(((Number) number).doubleValue());
+        } else {
+            throw new IllegalArgumentException("invalid duration in seconds value");
+        }
     }
 }

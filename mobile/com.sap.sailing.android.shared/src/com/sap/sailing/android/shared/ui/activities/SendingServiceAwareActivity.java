@@ -1,12 +1,14 @@
 package com.sap.sailing.android.shared.ui.activities;
 
-import java.util.Date;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,23 +21,32 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.Mes
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
 import com.sap.sailing.android.shared.util.PrefUtils;
 
+import java.util.Date;
+
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
 
-    private class MessageSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
+    private static final String TAG = SendingServiceAwareActivity.class.getName();
+
+    private MessageSendingService mService;
+    private boolean mBound = false;
+
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
+        public void onServiceConnected(ComponentName name, IBinder service) {
             MessageSendingBinder binder = (MessageSendingBinder) service;
-            sendingService = binder.getService();
-            boundSendingService = true;
-            sendingService.setMessageSendingServiceLogger(this);
-            updateSendingServiceInformation();
+            mService = binder.getService();
+            mService.setMessageSendingServiceLogger(logger);
+            mBound = true;
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName arg) {
-            boundSendingService = false;
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mBound = false;
         }
+    };
 
+    private final MessageSendingServiceLogger logger = new MessageSendingServiceLogger() {
         @Override
         public void onMessageSentSuccessful() {
             updateSendingServiceInformation();
@@ -45,70 +56,84 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         public void onMessageSentFailed() {
             updateSendingServiceInformation();
         }
-    }
+    };
 
-    private static final String TAG = SendingServiceAwareActivity.class.getName();
-
-    protected MenuItem menuItemLive;
-    protected int menuItemLiveId = -1;
-
-    protected boolean boundSendingService = false;
-    protected MessageSendingService sendingService;
-    private MessageSendingServiceConnection sendingServiceConnection;
-
-    private String sendingServiceStatus = "";
-
-    public SendingServiceAwareActivity() {
-        this.sendingServiceConnection = new MessageSendingServiceConnection();
-    }
+    private MenuItem mMenuItemLive;
+    private String mStatus = "";
 
     @Override
     public void onStart() {
         super.onStart();
-
         Intent intent = new Intent(this, MessageSendingService.class);
-        bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-        if (boundSendingService) {
-            unbindService(sendingServiceConnection);
-            boundSendingService = false;
-        }
+        unbindService(connection);
+        mService = null;
+        mBound = false;
     }
 
-    protected void updateSendingServiceInformation() {
-        if (menuItemLive == null)
-            return;
+    public boolean isBound() {
+        return mBound;
+    }
 
-        if (!boundSendingService)
-            return;
-
-        int errorCount = sendingService.getDelayedIntentsCount();
-        if (errorCount > 0) {
-            menuItemLive.setIcon(R.drawable.ic_menu_share_red);
-            Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
-            sendingServiceStatus = getString(R.string.sending_waiting, errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
-        } else {
-            menuItemLive.setIcon(R.drawable.ic_menu_share);
-            sendingServiceStatus = getString(R.string.sending_no_waiting);
-        }
+    @Nullable
+    public MessageSendingService getService() {
+        return mService;
     }
 
     /**
-     * @return the resource ID for the options menu, {@code 0} if none.
-     * The menu item displaying the connection status is added automatically.
+     * @return the resource ID for the options menu, {@code 0} if none. The menu item displaying the connection status
+     * is added automatically.
      */
     protected abstract int getOptionsMenuResId();
 
+    protected Drawable getMenuItemLiveDrawable() {
+        return ContextCompat.getDrawable(this, R.drawable.ic_menu_share);
+    }
+
+    protected Drawable getMenuItemLiveErrorDrawable() {
+        return ContextCompat.getDrawable(this, R.drawable.ic_menu_share_red);
+    }
+
+    @StringRes
+    protected int getStatusTextResId() {
+        return R.string.sending_waiting;
+    }
+
+    protected void updateSendingServiceInformation() {
+        if (mMenuItemLive == null) {
+            ExLog.w(this, TAG, "updateSendingServiceInformation -> menuItemLive==null");
+            return;
+        }
+
+        if (!mBound) {
+            ExLog.w(this, TAG, "updateSendingServiceInformation -> !boundSendingService");
+            return;
+        }
+
+        int errorCount = mService.getDelayedIntentsCount();
+        if (errorCount > 0) {
+            ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount > 0");
+            mMenuItemLive.setIcon(getMenuItemLiveErrorDrawable());
+            Date lastSuccessfulSend = mService.getLastSuccessfulSend();
+            mStatus = getString(getStatusTextResId(), errorCount,
+                    lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
+        } else {
+            ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount <= 0");
+            mMenuItemLive.setIcon(getMenuItemLiveDrawable());
+            mStatus = getString(R.string.sending_no_waiting);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+        final MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu_live_status, menu);
-        menuItemLive = menu.findItem(R.id.options_menu_live);
+        mMenuItemLive = menu.findItem(R.id.options_menu_live);
         if (getOptionsMenuResId() != 0) {
             inflater.inflate(getOptionsMenuResId(), menu);
         }
@@ -132,8 +157,9 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         return super.onPrepareOptionsMenu(menu);
     }
 
-    private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", PrefUtils.getString(this, R.string.preference_server_url_key,
-                R.string.preference_server_url_default), sendingServiceStatus);
+    protected String getLiveIconText() {
+        return getString(R.string.connected_to_wp,
+                PrefUtils.getString(this, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                mStatus, mBound ? "bound" : "unbound");
     }
 }

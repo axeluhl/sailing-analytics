@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:background="@drawable/spinner_background_light"
+        android:background="@drawable/spinner_background"
         android:spinnerMode="dropdown" />
 
     <Button

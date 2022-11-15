@@ -24,13 +24,15 @@ public class TrackedLegRetrievalProcessor extends AbstractRetrievalProcessor<Has
     protected Iterable<HasTrackedLegContext> retrieveData(HasTrackedRaceContext element) {
         Collection<HasTrackedLegContext> trackedLegsWithContext = new ArrayList<>();
         int legNumber = 1;
-        for (TrackedLeg trackedLeg : element.getTrackedRace().getTrackedLegs()) {
-            if (isAborted()) {
-                break;
+        if(element != null && element.getTrackedRace() != null) {
+            for (TrackedLeg trackedLeg : element.getTrackedRace().getTrackedLegs()) {
+                if (isAborted()) {
+                    break;
+                }
+                HasTrackedLegContext trackedLegWithContext = new TrackedLegWithContext(element, trackedLeg, legNumber);
+                trackedLegsWithContext.add(trackedLegWithContext);
+                legNumber++;
             }
-            HasTrackedLegContext trackedLegWithContext = new TrackedLegWithContext(element, trackedLeg, legNumber);
-            trackedLegsWithContext.add(trackedLegWithContext);
-            legNumber++;
         }
         return trackedLegsWithContext;
     }

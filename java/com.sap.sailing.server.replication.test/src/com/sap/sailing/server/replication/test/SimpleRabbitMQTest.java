@@ -3,8 +3,9 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -16,35 +17,37 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 
 public class SimpleRabbitMQTest {
     private final static String QUEUE_NAME = "hello";
     
-    private Map<Consumer, String> received;
+    private ConcurrentMap<Consumer, String> received;
     private ConnectionFactory factory;
     private Connection connection;
     private Channel channel;
     
     @Before
-    public void setUp() throws IOException {
-        received = new HashMap<Consumer, String>();
-        factory = new ConnectionFactory();
+    public void setUp() throws IOException, TimeoutException {
+        received = new ConcurrentHashMap<Consumer, String>();
+        factory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         factory.setHost("localhost");
         connection = factory.newConnection();
         channel = connection.createChannel();
     }
     
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws IOException, TimeoutException {
         channel.close();
         connection.close();
     }
     
     @Test
-    public void testSendReceiveHelloWorld() throws IOException, InterruptedException {
+    public void testSendReceiveHelloWorld() throws IOException, InterruptedException, TimeoutException {
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         final Consumer consumer = new QueueConsumer(QUEUE_NAME);
         new Thread(consumer).start();
+        Thread.sleep(100); // make sure both consumers are waiting
         String message = "Hello World!";
         channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
         consumer.waitUntilReceived(1000);
@@ -52,13 +55,14 @@ public class SimpleRabbitMQTest {
     }
     
     @Test
-    public void testSendReceiveHelloWorldToTwoNodes() throws IOException, InterruptedException {
+    public void testSendReceiveHelloWorldToTwoNodes() throws IOException, InterruptedException, TimeoutException {
         final String EXCHANGE_NAME = "updates";
         channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
         final Consumer consumer1 = new ExchangeConsumer(EXCHANGE_NAME);
         final Consumer consumer2 = new ExchangeConsumer(EXCHANGE_NAME);
         new Thread(consumer1).start();
         new Thread(consumer2).start();
+        Thread.sleep(100); // make sure both consumers are waiting
         String message = "Hello World!";
         channel.basicPublish(EXCHANGE_NAME, /* queue name */ "", null, message.getBytes());
         Thread.sleep(1000);
@@ -74,8 +78,8 @@ public class SimpleRabbitMQTest {
         private final QueueingConsumer consumer;
         private boolean receivedFinished;
         
-        protected Consumer() throws IOException {
-            ConnectionFactory factory = new ConnectionFactory();
+        protected Consumer() throws IOException, TimeoutException {
+            ConnectionFactory factory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
             factory.setHost("localhost");
             connection = factory.newConnection();
             channel = connection.createChannel();
@@ -116,6 +120,8 @@ public class SimpleRabbitMQTest {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -123,7 +129,7 @@ public class SimpleRabbitMQTest {
     private class QueueConsumer extends Consumer {
         private final String queueName;
 
-        public QueueConsumer(String queueName) throws IOException {
+        public QueueConsumer(String queueName) throws IOException, TimeoutException {
             super();
             this.queueName = queueName;
             getChannel().queueDeclare(queueName, false, false, false, null);
@@ -138,7 +144,7 @@ public class SimpleRabbitMQTest {
     private class ExchangeConsumer extends Consumer {
         private final String queueName;
 
-        public ExchangeConsumer(String exchangeName) throws IOException {
+        public ExchangeConsumer(String exchangeName) throws IOException, TimeoutException {
             super();
             this.queueName = getChannel().queueDeclare().getQueue();
             getChannel().exchangeDeclare(exchangeName, "fanout");

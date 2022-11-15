@@ -7,7 +7,7 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
 
 /**
- * Interface for styling {@link TaggingPanel} and its content.
+ * Interface for styling {@link TaggingComponent} and its content.
  */
 public interface TaggingPanelResources extends CellList.Resources, CellTable.Resources {
     static final TaggingPanelResources INSTANCE = GWT.create(TaggingPanelResources.class);
@@ -15,7 +15,7 @@ public interface TaggingPanelResources extends CellList.Resources, CellTable.Res
     @Source("com/sap/sailing/gwt/ui/client/images/share.png")
     ImageResource shareIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
+    @Source("com/sap/sse/gwt/client/images/edit.png")
     ImageResource editIcon();
 
     @Source("com/sap/sse/gwt/client/images/remove.png")

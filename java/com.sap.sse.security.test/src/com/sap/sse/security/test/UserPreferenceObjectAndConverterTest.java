@@ -3,6 +3,7 @@ package com.sap.sse.security.test;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,11 +11,10 @@ import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
-
-import org.junit.Assert;
 
 public class UserPreferenceObjectAndConverterTest {
     
@@ -33,7 +33,7 @@ public class UserPreferenceObjectAndConverterTest {
     private static final String serializedPref2 = prefConverter.toPreferenceString(pref2);
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException {
+    public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException, UserManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         MongoDatabase db = service.getDB();
@@ -41,7 +41,7 @@ public class UserPreferenceObjectAndConverterTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        store = new UserStoreImpl();
+        store = new UserStoreImpl("TestDefaultTenant");
     }
 
     @Test
@@ -109,9 +109,11 @@ public class UserPreferenceObjectAndConverterTest {
     
     /**
      * There was a bug that caused the preferences not to be removed when a user was deleted.
+     * @throws UserGroupManagementException 
+     * @throws TenantManagementException 
      */
     @Test
-    public void deleteUserWithPreferenceObjectTest() throws UserManagementException {
+    public void deleteUserWithPreferenceObjectTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, email);
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreferenceObject(user1, prefKey1, pref1);
@@ -120,7 +122,7 @@ public class UserPreferenceObjectAndConverterTest {
     }
     
     @Test
-    public void removeConverterTest() throws UserManagementException {
+    public void removeConverterTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, email);
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreference(user1, prefKey1, serializedPref1);

@@ -56,7 +56,9 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         regattas.add("Day2");
         final Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, null, null, venueName, isPublic, UUID.randomUUID());
         final String leaderboardGroupName = "LGName";
-        LeaderboardGroup lg = master.apply(new CreateLeaderboardGroup(leaderboardGroupName, "LGDescription", /* displayGroupsInReverseOrder */
+        UUID newGroupid = UUID.randomUUID();
+        LeaderboardGroup lg = master.apply(new CreateLeaderboardGroup(newGroupid, leaderboardGroupName,
+                "LGDescription", /* displayGroupsInReverseOrder */
                 "displayName", /* leaderboardNames */
                 false, Collections.<String> emptyList(), /* overallLeaderboardScoringSchemeType */
                 /* overallLeaderboardDiscardThresholds */null, null));
@@ -99,13 +101,11 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()})[0];
-
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
         assertNotNull(replicatedEvent);
         assertEquals(replicatedEvent.getName(), eventName);
         assertEquals(Util.size(replicatedEvent.getVenue().getCourseAreas()), 1);
-
         CourseArea replicatedCourseArea = Util.get(replicatedEvent.getVenue().getCourseAreas(), 0);
         assertEquals(replicatedCourseArea.getId(), masterCourseArea.getId());
         assertEquals(replicatedCourseArea.getName(), courseArea);

@@ -37,7 +37,7 @@ public class StoreAndLoadBoatsTest extends AbstractMongoDBTest {
     @Before
     public void setUp() {
         // clear the domainFactory competitor store for a clean start:
-        domainFactory = new DomainFactoryImpl((srlid)->null);
+        domainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
     }
     
     private void dropBoatCollection() {

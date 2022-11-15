@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
 import com.sap.sailing.domain.common.Position;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class PlacemarkDTO extends NamedDTO {
     private static final long serialVersionUID = -6734956459060435983L;
@@ -11,7 +12,8 @@ public class PlacemarkDTO extends NamedDTO {
     /**
      * Constructor for serialization.
      */
-    PlacemarkDTO() {}
+    @Deprecated
+    PlacemarkDTO() {} // for GWT RPC serialization only
 
     public PlacemarkDTO(String name, String countryCode, Position position, long population) {
         super(name);

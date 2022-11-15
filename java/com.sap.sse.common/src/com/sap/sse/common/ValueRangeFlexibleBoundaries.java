@@ -13,7 +13,7 @@ import java.util.Set;
  * <p>
  * 
  * When the range is initialized or updated, the ranges for the minimum and the maximum value at each end of the overall
- * range are determined symmetrically around the minimum/maximum value, with a given {@link #percentage} of the absolute
+ * range are determined symmetrically around the minimum/maximum value, with the {@link Math#max(double, double)} given {@link #percentage} of the absolute
  * difference between the minimum and maximum value as leeway either way. This percentage is provided to this class's
  * constructor. For example, if the overall range is -5..5, its length is 10. If a 10% (0.1) leeway is configured, this
  * means that 10% of the length of 10 which equals 1 is provided around each extremal value, yielding a range from
@@ -39,8 +39,8 @@ import java.util.Set;
  * {@link #addListener(ValueRangeFlexibleBoundariesChangedListener) added} will be notified.
  * <p>
  * 
- * A ValueRangeFlexibleBoundaries needs an initialMin, an initialMax and a percentage that indicates the width of the
- * value range surrounding initialMin and Max.
+ * A ValueRangeFlexibleBoundaries needs an initialMin, an initialMax, a percentage that indicates the width of the
+ * value range surrounding initialMin and Max and minimumHalfBoundaryWidth.
  * 
  * @author D073259 (Alessandro Stoltenberg)
  *
@@ -53,11 +53,13 @@ public class ValueRangeFlexibleBoundaries {
     private double min;
     private double max;
     private final double percentage;
+    private final double minimumHalfBoundaryWidth;
     private double halfBoundaryWidth;
     private final Set<ValueRangeFlexibleBoundariesChangedListener> valueRangeChangedListeners;
 
-    public ValueRangeFlexibleBoundaries(double initialMin, double initialMax, double percentage) {
+    public ValueRangeFlexibleBoundaries(double initialMin, double initialMax, double percentage, double minimumHalfBoundaryWidth) {
         this.percentage = percentage;
+        this.minimumHalfBoundaryWidth = minimumHalfBoundaryWidth;
         valueRangeChangedListeners = new HashSet<>();
         min = initialMin;
         max = initialMax;
@@ -65,7 +67,7 @@ public class ValueRangeFlexibleBoundaries {
     }
     
     private void update() {
-        halfBoundaryWidth = (max - min) * (percentage);
+        halfBoundaryWidth = Math.max((max - min) * (percentage), minimumHalfBoundaryWidth);
         minLeft = min - halfBoundaryWidth;
         maxLeft = min + halfBoundaryWidth;
         minRight = max - halfBoundaryWidth;

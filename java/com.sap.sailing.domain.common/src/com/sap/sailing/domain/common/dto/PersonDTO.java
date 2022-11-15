@@ -3,12 +3,15 @@ package com.sap.sailing.domain.common.dto;
 import java.util.Date;
 import java.util.Objects;
 
+import com.sap.sse.security.shared.dto.NamedDTO;
+
 public class PersonDTO extends NamedDTO {
     private static final long serialVersionUID = 7248019801310303654L;
     private Date dateOfBirth;
     private String description;
     private String nationalityThreeLetterIOCAcronym;
 
+    @Deprecated
     PersonDTO() {} // for GWT de-serialization only
 
     public PersonDTO(String name, Date dateOfBirth, String description, String nationalityThreeLetterIOCAcronym) {

@@ -9,7 +9,7 @@ import org.bson.Document;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sse.filestorage.FileStorageServicePropertyStore;
 import com.sap.sse.mongodb.MongoDBService;
 
@@ -29,12 +29,13 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
         Document index = new Document().append(FieldNames.SERVICE_NAME.name(), 1)
                 .append(FieldNames.PROPERTY_NAME.name(), 1);
         try {
-        	propertiesCollection.createIndex(index, new IndexOptions().name("unique service name/property name combination").unique(true));
-        } catch (Exception e)  {
-        	logger.info("Problem creating index, probably due to index format change; dropping indexes and creating again...");
-        	// could be that the index was created with different properties; need to remove and create again:
-        	propertiesCollection.dropIndexes();
-        	propertiesCollection.createIndex(index, new IndexOptions().name("unique service name/property name combination").unique(true));
+            propertiesCollection.createIndex(index,
+                    new IndexOptions().name("svcpropnameunique").unique(true).background(false));
+        } catch (Exception e) {
+            logger.info("Problem creating index, probably due to index format change; dropping indexes and creating again...");
+            // could be that the index was created with different properties; need to remove and create again:
+            propertiesCollection.dropIndexes();
+            propertiesCollection.createIndex(index, new IndexOptions().name("svcpropnameunique").unique(true).background(false));
         }
         activeServiceCollection = dbService.getDB().getCollection(ACTIVE_SERVICE_COLLECTION_NAME);
     }
@@ -59,7 +60,7 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
                 .append(FieldNames.PROPERTY_VALUE.name(), propertyValue);
         Document query = new Document().append(FieldNames.SERVICE_NAME.name(), serviceName)
                 .append(FieldNames.PROPERTY_NAME.name(), propertyName);
-        propertiesCollection.replaceOne(query, obj, new UpdateOptions().upsert(true));
+        propertiesCollection.replaceOne(query, obj, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -75,6 +76,6 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
     public void writeActiveService(String serviceName) {
         Document obj = new Document(FieldNames.SERVICE_NAME.name(), serviceName);
         Document query = new Document();
-        activeServiceCollection.replaceOne(query, obj, new UpdateOptions().upsert(true));
+        activeServiceCollection.replaceOne(query, obj, new ReplaceOptions().upsert(true));
     }
 }

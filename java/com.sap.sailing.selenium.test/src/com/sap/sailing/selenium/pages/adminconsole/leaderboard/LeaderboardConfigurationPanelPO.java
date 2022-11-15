@@ -73,8 +73,16 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "LeaderboardDetailsPanel")
     private WebElement leaderboardDetailsPanel;
     
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardRefreshButton")
+    private WebElement leaderboardRefreshButton;
+    
     public LeaderboardConfigurationPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
+    }
+    
+    public void refreshLeaderboard() {
+        this.leaderboardRefreshButton.click();
+        waitForAjaxRequests();        
     }
     
     public FlexibleLeaderboardCreateDialogPO startCreatingFlexibleLeaderboard() {
@@ -90,6 +98,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         FlexibleLeaderboardCreateDialogPO dialog = startCreatingFlexibleLeaderboard();
         dialog.setName(name);
         dialog.pressOk();
+        waitUntil(() -> findLeaderboard(name) != null);
     }
     
     public RegattaLeaderboardCreateDialogPO startCreatingRegattaLeaderboard() {
@@ -107,7 +116,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     public void deleteLeaderboard(String leaderboard) {
         LeaderboardEntryPO entry = findLeaderboard(leaderboard);
         if (entry != null) {
-            WebElement removeAction = ActionsHelper.findRemoveAction(entry.getWebElement());
+            WebElement removeAction = ActionsHelper.findDeleteAction(entry.getWebElement());
             removeAction.click();
             ActionsHelper.acceptAlert(this.driver);
             waitForAjaxRequests();
@@ -133,6 +142,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     }
     
     public LeaderboardDetailsPanelPO getLeaderboardDetails(String leaderboard) {
+        waitForAjaxRequests();
         LeaderboardEntryPO entry = findLeaderboard(leaderboard);
         if (entry == null) {
             return null;

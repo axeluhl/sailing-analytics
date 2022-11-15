@@ -21,7 +21,8 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceMapSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 6283369783437892096L;
-    
+
+    public static final String PARAM_SHOW_SATELLITE_LAYER = "showSatelliteLayer";
     public static final String PARAM_SHOW_MAPCONTROLS = "showMapControls";
     public static final String PARAM_SHOW_COURSE_GEOMETRY = "showCourseGeometry";
     public static final String PARAM_MAP_ORIENTATION_WIND_UP = "windUp";
@@ -29,8 +30,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
     public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
     public static final String PARAM_BUOY_ZONE_RADIUS_IN_METERS = "buoyZoneRadiusInMeters";
+    public static final String PARAM_SHOW_WIND_LADDER = "showWindLadder";
 
     public static final Distance DEFAULT_BUOY_ZONE_RADIUS = new MeterDistance(15);
+
+    private BooleanSetting showSatelliteLayer;
 
     private BooleanSetting showDouglasPeuckerPoints;
 
@@ -73,7 +77,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     private BooleanSetting windUp;
     
     private BooleanSetting showEstimatedDuration;
-    
+
+    private BooleanSetting showWindLadder;
+
     /**
      * The factor by which the start count down shown at one side of the start line shall be scaled compared to the
      * other small info overlays such as the course geometry. Defaults to 1.0.
@@ -82,6 +88,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     @Override
     protected void addChildSettings() {
+        showSatelliteLayer = new BooleanSetting(PARAM_SHOW_SATELLITE_LAYER, this, false);
         showMapControls = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
         helpLinesSettings = new RaceMapHelpLinesSettings("helpLinesSettings", this);
         windUp = new BooleanSetting(PARAM_MAP_ORIENTATION_WIND_UP, this, false);
@@ -89,6 +96,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showWindStreamletOverlay = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false);
         showWindStreamletColors = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false);
         showSimulationOverlay = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
+        showWindLadder = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
         zoomSettings = new RaceMapZoomSettings("zoomSettings", this);
         transparentHoverlines = new BooleanSetting("transparentHoverlines", this, false);
         hoverlineStrokeWeight = new IntegerSetting("hoverlineStrokeWeight", this, 15);
@@ -97,7 +105,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
         maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
-        showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false);
+        showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false); 
         startCountDownFontSizeScaling = new DoubleSetting("startCountDownFontSizeScaling", this, 1.0);
         showManeuverLossVisualization = new BooleanSetting("showManeuverLossVisualization", this, false);
     }
@@ -110,7 +118,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Distance buoyZoneRadius, Boolean showOnlySelectedCompetitors, Boolean showSelectedCompetitorsInfo,
             Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
             Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,
-            Boolean showEstimatedDuration, Double startCountDownFontSizeScaling, Boolean showManeuverLossVisualization) {
+            Boolean showEstimatedDuration, Double startCountDownFontSizeScaling, Boolean showManeuverLossVisualization,
+            Boolean showSatelliteLayer, Boolean showWindLadder) {
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);
@@ -129,6 +138,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showEstimatedDuration.setValue(showEstimatedDuration);
         this.startCountDownFontSizeScaling.setValue(startCountDownFontSizeScaling);
         this.showManeuverLossVisualization.setValue(showManeuverLossVisualization);
+        this.showSatelliteLayer.setValue(showSatelliteLayer);
+        this.showWindLadder.setValue(showWindLadder);
     }
 
     public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
@@ -137,11 +148,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return raceMapSetting;
     }
 
-    private RaceMapSettings(boolean showMapControls, boolean showCourseGeometry, boolean windUp, Distance buoyZoneRadius, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
-        this(showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, buoyZoneRadius, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
+    private RaceMapSettings(boolean showSatelliteLayer, boolean showMapControls, boolean showCourseGeometry, boolean windUp, Distance buoyZoneRadius, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+        this(showSatelliteLayer, showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, buoyZoneRadius, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }
 
-    private RaceMapSettings(boolean showMapControls, RaceMapHelpLinesSettings helpLineSettings, boolean windUp, Distance buoyZoneRadius, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+    private RaceMapSettings(boolean showSatelliteLayer, boolean showMapControls, RaceMapHelpLinesSettings helpLineSettings, boolean windUp, Distance buoyZoneRadius, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
         this(
                 new RaceMapZoomSettings(),
                 helpLineSettings,
@@ -160,9 +171,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showDouglasPeuckerPoints */ false,
                 /* showEstimatedDuration*/ false,
                 /* startCountDownFontSizeScaling */ 1.0,
-                /* showManeuverLossVisualization */ false);
+                /* showManeuverLossVisualization */ false,
+                /* showSatelliteLayer */ showSatelliteLayer,
+                /* showWindLadder */ false);
     }
-    
+
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
         final Set<HelpLineTypes> helpLineTypes = new HashSet<>();
         Util.addAll(new RaceMapHelpLinesSettings().getVisibleHelpLineTypes(), helpLineTypes);
@@ -203,7 +216,36 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
              /* showDouglasPeuckerPoints */ settings.isShowDouglasPeuckerPoints(),
              /* showEstimatedDuration */ settings.isShowEstimatedDuration(),
              /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling(),
-             /* showManeuverLossLineVisualization */ settings.isShowManeuverLossVisualization());
+             /* showManeuverLossLineVisualization */ settings.isShowManeuverLossVisualization(),
+             /* showSatelliteLayer */ settings.isShowSatelliteLayer(),
+             /* showWindLadder */ settings.isShowWindLadder());
+    }
+
+    /**
+     * copy constructor that produces a new settings object that equals the one passed as argument but takes the
+     * showSimulationOverlay from the second parameter
+     */
+    public RaceMapSettings(RaceMapSettings settings, boolean showSimulationOverlay) {
+        this(/* zoomSettings */ settings.getZoomSettings(),
+                /* <br> helpLinesSettings */ settings.getHelpLinesSettings(),
+                /* transparentHoverlines */ settings.getTransparentHoverlines(),
+                /* hoverlineStrokeWeight */ settings.getHoverlineStrokeWeight(),
+                /* tailLengthInMilliseconds */ settings.getTailLengthInMilliseconds(),
+                /* <br> windUp */ settings.isWindUp(),
+                /* buoyZoneRadius */ settings.getBuoyZoneRadius(),
+                /* showOnlySelectedCompetitors */ settings.isShowOnlySelectedCompetitors(),
+                /* showSelectedCompetitorsInfo */ settings.isShowSelectedCompetitorsInfo(),
+                /* showWindStreamletColors */ settings.isShowWindStreamletColors(),
+                /* showWindStreamletOverlay */ settings.isShowWindStreamletOverlay(),
+                /* showSimulationOverlay */ showSimulationOverlay,
+                /* <br> showMapControls */ settings.isShowMapControls(),
+                /* maneuverTypesToShow */ settings.getManeuverTypesToShow(),
+                /* showDouglasPeuckerPoints */ settings.isShowDouglasPeuckerPoints(),
+                /* showEstimatedDuration */ settings.isShowEstimatedDuration(),
+                /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling(),
+                /* showManeuverLossLineVisualization */ settings.isShowManeuverLossVisualization(),
+                /* showSatelliteLayer */ settings.isShowSatelliteLayer(),
+                /* showWindLadder */ settings.isShowWindLadder());
     }
 
     /**
@@ -295,7 +337,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints(),settings.isShowEstimatedDuration(),
                 settings.getStartCountDownFontSizeScaling(),
-                settings.isShowManeuverLossVisualization());
+                settings.isShowManeuverLossVisualization(),
+                settings.isShowSatelliteLayer(),
+                settings.isShowWindLadder());
         return newRaceMapSettings;
     }
 
@@ -305,6 +349,14 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
 
     public boolean isShowMapControls() {
         return showMapControls.getValue();
+    }
+
+    public boolean isShowSatelliteLayer() {
+        return showSatelliteLayer.getValue();
+    }
+
+    public boolean isShowWindLadder() {
+        return showWindLadder.getValue();
     }
 
     public static HashSet<ManeuverType> getDefaultManeuvers() {
@@ -319,6 +371,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             boolean defaultForShowCourseGeometry, boolean defaultForMapOrientationWindUp,
             boolean defaultForViewShowStreamlets, boolean defaultForViewShowStreamletColors,
             boolean defaultForViewShowSimulation) {
+        final boolean showSatelliteLayer = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_SATELLITE_LAYER, false /* default */);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, defaultForShowMapControls /* default */);
         final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COURSE_GEOMETRY, defaultForShowCourseGeometry /* default */);
         final boolean windUp = GwtHttpRequestUtils.getBooleanParameter(PARAM_MAP_ORIENTATION_WIND_UP, defaultForMapOrientationWindUp /* default */);
@@ -326,11 +379,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         final boolean showWindStreamletColors = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLET_COLORS, defaultForViewShowStreamletColors /* default */);
         final boolean showSimulationOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, defaultForViewShowSimulation /* default */);
         final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(PARAM_BUOY_ZONE_RADIUS_IN_METERS, DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */);
-        return new RaceMapSettings(showMapControls, showCourseGeometry, windUp, new MeterDistance(buoyZoneRadiusInMeters), showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
+        return new RaceMapSettings(showSatelliteLayer, showMapControls, showCourseGeometry, windUp, new MeterDistance(buoyZoneRadiusInMeters), showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }
 
     public Set<ManeuverType> getManeuverTypesToShow() {
-        return Util.createSet(maneuverTypesToShow.getValues());
+        return Util.asSet(maneuverTypesToShow.getValues());
     }
 
     public boolean isShowEstimatedDuration() {

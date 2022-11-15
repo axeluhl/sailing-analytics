@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -28,6 +29,7 @@ public abstract class StageTeaserBand extends Composite {
     @UiField SpanElement bandSubtitle;
     @UiField Anchor actionLink;
     @UiField DivElement isLiveDiv;
+    @UiField DataByLogo dataByLogo;
 
     private final DesktopPlacesNavigator placeNavigator;
     private final EventStageDTO event;
@@ -41,6 +43,8 @@ public abstract class StageTeaserBand extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         isLiveDiv.getStyle().setDisplay(Display.NONE);
+        
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
 
         eventNavigation = placeNavigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
     }

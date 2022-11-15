@@ -173,7 +173,8 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
                 result = null;
             } else {
                 if (isReach(finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)) {
-                    result = bearingOrReverseDependingOnXTEToOther(pinEndPosition, bearingFromBoatMarkToPinEnd.reverse(), previousWaypointPosition);
+                    result = bearingFromBoatMarkToPinEnd == null ? null :
+                        bearingOrReverseDependingOnXTEToOther(pinEndPosition, bearingFromBoatMarkToPinEnd.reverse(), previousWaypointPosition);
                 } else {
                     final boolean pinEndOnPortWhenApproachingLine = pinEndPosition.crossTrackError(previousWaypointPosition, previousWaypointPosition.getBearingGreatCircle(boatMarkPosition)).compareTo(Distance.NULL) < 0;
                     result = getWindFrom(finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind,
@@ -196,10 +197,17 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
 
     private Bearing bearingOrReverseDependingOnXTEToOther(Position pos, Bearing bearing, Position other) {
         final Bearing result;
-        if (pos.crossTrackError(other, bearing).compareTo(Distance.NULL) > 0) {
-            result = bearing.reverse();
+        if (bearing == null) {
+            // no start line bearing is known; assume that the start boat is on the
+            // starboard side of the line and that the line is approximately
+            // perpendicular to the bearing to the next mark:
+            result = pos.getBearingGreatCircle(other).add(new DegreeBearingImpl(-90));
         } else {
-            result = bearing;
+            if (pos.crossTrackError(other, bearing).compareTo(Distance.NULL) > 0) {
+                result = bearing.reverse();
+            } else {
+                result = bearing;
+            }
         }
         return result;
     }

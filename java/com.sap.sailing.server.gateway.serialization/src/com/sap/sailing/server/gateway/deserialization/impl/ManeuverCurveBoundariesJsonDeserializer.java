@@ -6,11 +6,11 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.impl.ManeuverCurveBoundariesImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveBoundariesJsonSerializer;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 /**
  * 
@@ -30,11 +30,14 @@ public class ManeuverCurveBoundariesJsonDeserializer implements JsonDeserializer
         Double directionChangeInDegrees = (Double) object
                 .get(ManeuverCurveBoundariesJsonSerializer.DIRECTION_CHANGE_IN_DEGREES);
         Double lowestSpeedInKnots = (Double) object.get(ManeuverCurveBoundariesJsonSerializer.LOWEST_SPEED_IN_KNOTS);
+        Double highestSpeedInKnots = (Double) object.get(ManeuverCurveBoundariesJsonSerializer.HIGHEST_SPEED_IN_KNOTS);
         return new ManeuverCurveBoundariesImpl(new MillisecondsTimePoint(timePointBeforeMillis),
                 new MillisecondsTimePoint(timePointAfterMillis),
                 new KnotSpeedWithBearingImpl(speedBeforeInKnots, new DegreeBearingImpl(cogBefore)),
                 new KnotSpeedWithBearingImpl(speedAfterInKnots, new DegreeBearingImpl(cogAfter)),
-                directionChangeInDegrees, new KnotSpeedImpl(lowestSpeedInKnots));
+                directionChangeInDegrees, new KnotSpeedImpl(lowestSpeedInKnots),
+                //TODO remove null check after master merge of this branch
+                highestSpeedInKnots == null ? null : new KnotSpeedImpl(highestSpeedInKnots));
     }
 
 }

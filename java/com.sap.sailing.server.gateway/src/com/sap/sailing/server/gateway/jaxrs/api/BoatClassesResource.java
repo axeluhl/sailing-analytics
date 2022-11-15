@@ -13,8 +13,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 
 @Path("/v1/boatclasses")
 public class BoatClassesResource extends AbstractSailingServerResource {
@@ -28,7 +28,7 @@ public class BoatClassesResource extends AbstractSailingServerResource {
             final JSONObject jsonBoatClass = boatClassJsonSerializer.serialize(boatClass);
             result.add(jsonBoatClass);
         }
-        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -42,9 +42,8 @@ public class BoatClassesResource extends AbstractSailingServerResource {
                     .entity("Could not find a boat with id '" + StringEscapeUtils.escapeHtml(boatClassName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
-            BoatClassJsonSerializer boatClassJsonSerializer = new BoatClassJsonSerializer();
-            String jsonString = boatClassJsonSerializer.serialize(boatClass).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            final BoatClassJsonSerializer boatClassJsonSerializer = new BoatClassJsonSerializer();
+            response = Response.ok(streamingOutput(boatClassJsonSerializer.serialize(boatClass))).build();
         }
         return response;
     }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
 
+import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_FLEET_NAME;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +21,7 @@ import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompet
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public abstract class RegattaCompetitionPresenter
         implements RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>,
@@ -29,9 +32,11 @@ public abstract class RegattaCompetitionPresenter
     
     private Map<RegattaCompetitionSeriesView, Map<RegattaCompetitionFleetView, 
             Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO>>> structure = new HashMap<>();
+    private final PaywallResolver paywallResolver;
 
-    public RegattaCompetitionPresenter(RegattaCompetitionView view) {
+    public RegattaCompetitionPresenter(RegattaCompetitionView view, PaywallResolver paywallResolver) {
         this.view = view;
+        this.paywallResolver = paywallResolver;
     }
 
     @Override
@@ -48,7 +53,9 @@ public abstract class RegattaCompetitionPresenter
                 Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO> raceMap = new HashMap<>();
                 fleetMap.put(fleetView, raceMap);
                 for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
-                    RegattaCompetitionRaceView raceView = fleetView.addRaceView(race, this);
+                    final String fleetName = fleet.getFleet().getFleetName();
+                    RegattaCompetitionRaceView raceView = fleetView.addRaceView(race,
+                            fleetName == null ? DEFAULT_FLEET_NAME : fleetName, this);
                     raceMap.put(raceView, race);
                 }
             }
@@ -99,5 +106,12 @@ public abstract class RegattaCompetitionPresenter
     }
     
     protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
+    
+    protected abstract String getMapAndWindChartUrl(String leaderboardName, String raceName, String fleetName);
+
+    public PaywallResolver getPaywallResolver() {
+        return paywallResolver;
+    }
+
 
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
+import java.util.Collections;
+
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -40,10 +42,14 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
 
     public LeaderboardGroupMetaLeaderboard(LeaderboardGroup leaderboardGroup, ScoringScheme scoringScheme,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL, scoringScheme, resultDiscardingRule);
+        super(getOverallLeaderboardName(leaderboardGroup.getName()), scoringScheme, resultDiscardingRule);
         this.leaderboardGroup = leaderboardGroup;
         leaderboardGroup.addLeaderboardGroupListener(this);
         registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
+    }
+
+    public static String getOverallLeaderboardName(String leaderboardGroupName) {
+        return leaderboardGroupName + " " + LeaderboardNameConstants.OVERALL;
     }
 
     public void registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards() {
@@ -87,8 +93,8 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return null;
+    public Iterable<CourseArea> getCourseAreas() {
+        return Collections.emptySet();
     }
     
     @Override

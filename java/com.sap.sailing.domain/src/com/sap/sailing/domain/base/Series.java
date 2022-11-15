@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -57,10 +58,6 @@ public interface Series extends SeriesBase {
     
     RaceColumnInSeries addRaceColumn(int insertIndex, String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry);
 
-    void moveRaceColumnUp(String raceColumnName);
-    
-    void moveRaceColumnDown(String raceColumnName);
-    
     void removeRaceColumn(String raceColumnName);
     
     /**
@@ -115,6 +112,9 @@ public interface Series extends SeriesBase {
      */
     boolean isStartsWithZeroScore();
     
+    /**
+     * @see #isStartsWithZeroScore()
+     */
     void setStartsWithZeroScore(boolean startsWithZeroScore);
 
     boolean isFirstColumnIsNonDiscardableCarryForward();
@@ -129,6 +129,23 @@ public interface Series extends SeriesBase {
      */
     boolean hasSplitFleetContiguousScoring();
 
+    /**
+     * @see #hasSplitFleetContiguousScoring()
+     */
     void setSplitFleetContiguousScoring(boolean hasSplitFleetScore);
 
+    /**
+     * When scores in this series are scaled by some factor, either based on an {@link RaceColumn#getExplicitFactor()
+     * explicit column factor}, or implicitly, e.g., because the {@link ScoringScheme} mandates the
+     * doubling of medal race scores and this series {@link #isMedal() represents a medal series}, then some
+     * configurations still want the 1.0 score still to be 1.0. For example, with a column factor of 2.0 scores 1, 2, 3
+     * would end up as 1, 3, 5; or with a column factor of 3.0 scores 1, 2, 3 would end up as 1, 4, 7. This method tells
+     * whether this column shall apply such a scheme.
+     */
+    boolean isOneAlwaysStaysOne();
+    
+    /**
+     * @see #isOneAlwaysStaysOne()
+     */
+    void setOneAlwaysStaysOne(boolean oneAlwaysStaysOne);
 }

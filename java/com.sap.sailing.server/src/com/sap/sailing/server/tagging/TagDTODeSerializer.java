@@ -113,17 +113,6 @@ public class TagDTODeSerializer {
     }
 
     /**
-     * Serializes single {@link TagDTO tag} to json object.
-     * 
-     * @param tag
-     *            tag to be seriaized
-     * @return json object
-     */
-    public String serializeTag(TagDTO tag) {
-        return serialize(tag).toJSONString();
-    }
-
-    /**
      * Serializes list of {@link TagDTO tags} to json array.
      * 
      * @param tags
@@ -206,7 +195,7 @@ public class TagDTODeSerializer {
 
     /**
      * Combines <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> to a unique key.
-     * Used to store private tags in {@link com.sap.sse.security.UserStore UserStore}.
+     * Used to store private tags in {@link com.sap.sse.security.interfaces.UserStore UserStore}.
      * 
      * @param leaderboardName
      *            leaderboard name

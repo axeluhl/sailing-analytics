@@ -1,10 +1,11 @@
 package com.sap.sailing.gwt.home.desktop.places.whatsnew;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 public class WhatsNewPlace extends AbstractBasePlace {
-    public enum WhatsNewNavigationTabs { SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, PostRaceAnalytics, TrainingDiary, SailingSimulator };
+    public enum WhatsNewNavigationTabs { SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, TrainingDiary, SailingSimulator };
     private final WhatsNewNavigationTabs navigationTab;
     private final static String PARAM_NAVIGATION_TAB = "navigationTab"; 
 
@@ -15,7 +16,7 @@ public class WhatsNewPlace extends AbstractBasePlace {
     }
 
     public WhatsNewPlace(WhatsNewNavigationTabs navigationTab) {
-        super(PARAM_NAVIGATION_TAB, navigationTab.name());
+        super(Util.<String, String>mapBuilder().put(PARAM_NAVIGATION_TAB, navigationTab.name()).build());
         this.navigationTab = navigationTab;
     }
 

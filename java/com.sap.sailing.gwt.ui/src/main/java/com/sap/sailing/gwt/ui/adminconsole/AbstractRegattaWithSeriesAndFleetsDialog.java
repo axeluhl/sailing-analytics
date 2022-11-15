@@ -1,28 +1,35 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.EnumSet;
 
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.common.client.RandomString;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -30,6 +37,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Uses a {@link RegattaDTO} to initialize the view. {@link #getRegattaDTO()} can be used by implementations of
@@ -41,27 +51,33 @@ import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
  * @param <T>
  */
 public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithDateTimeBox<T> {
-
+    protected final SailingServiceAsync sailingService; 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
-
     protected final DateAndTimeInput startDateBox;
     protected final DateAndTimeInput endDateBox;
     protected final ListBox scoringSchemeListBox;
-    protected final ListBox courseAreaListBox;
+    protected final CourseAreaSelection courseAreaSelection;
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
     protected final CheckBox controlTrackingFromStartAndFinishTimesCheckBox;
+    protected final CheckBox autoRestartTrackingUponCompetitorSetChangeCheckBox;
     protected final DoubleBox buoyZoneRadiusInHullLengthsDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
-
-    protected final List<EventDTO> existingEvents;
+    protected final ListBox competitorRegistrationTypeListBox;
+    protected final Iterable<EventDTO> existingEvents;
     private EventDTO defaultEvent;
+    private RegistrationLinkWithQRCode registrationLinkWithQRCode;
+    protected final CaptionPanel secretPanel;
+    private final UserService userService;
 
-    public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, 
+    public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, UserService userService,
+            RegattaDTO regatta, Iterable<SeriesDTO> series, Iterable<EventDTO> existingEvents, EventDTO correspondingEvent,
             String title, String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
+        this.sailingService = sailingService;
+        this.userService = userService;
         this.stringMessages = stringMessages;
         this.regatta = regatta;
         this.defaultEvent = correspondingEvent;
@@ -94,15 +110,78 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         controlTrackingFromStartAndFinishTimesCheckBox = createCheckbox(stringMessages.controlTrackingFromStartAndFinishTimes());
         controlTrackingFromStartAndFinishTimesCheckBox.ensureDebugId("ControlTrackingFromStartAndFinishTimesCheckBox");
         controlTrackingFromStartAndFinishTimesCheckBox.setValue(regatta.controlTrackingFromStartAndFinishTimes);
-
+        autoRestartTrackingUponCompetitorSetChangeCheckBox = createCheckbox(stringMessages.autoRestartTrackingUponCompetitorSetChange());
+        autoRestartTrackingUponCompetitorSetChangeCheckBox.ensureDebugId("AutoRestartTrackingUponCompetitorSetChangeCheckBox");
+        autoRestartTrackingUponCompetitorSetChangeCheckBox.setValue(regatta.autoRestartTrackingUponCompetitorSetChange);
         buoyZoneRadiusInHullLengthsDoubleBox = createDoubleBox(regatta.buoyZoneRadiusInHullLengths, 10);
         buoyZoneRadiusInHullLengthsDoubleBox.ensureDebugId("BuoyZoneRadiusInHullLengthsDoubleBox");
-
-        courseAreaListBox = createListBox(false);
-        courseAreaListBox.ensureDebugId("CourseAreaListBox");
-        courseAreaListBox.setEnabled(false);
+        courseAreaSelection = new CourseAreaSelection(stringMessages, this);
+        courseAreaSelection.ensureDebugId("CourseAreaListBox");
+        courseAreaSelection.setEnabled(false);
         this.seriesEditor = createSeriesEditor(series);
         setupEventAndCourseAreaListBoxes(stringMessages);
+        competitorRegistrationTypeListBox = createListBox(false);
+        competitorRegistrationTypeListBox.ensureDebugId("CompetitorRegistrationTypeListBox");
+        EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
+        competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
+        // Registration Link
+        registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
+        if (regatta.registrationLinkSecret == null) {
+            final String secret = RandomString.createRandomSecret(20);
+            registrationLinkWithQRCode.setSecret(secret);
+            regatta.registrationLinkSecret = secret;
+        } else {
+            registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
+        }
+        // secret panel
+        final TextBox secretTextBox = createTextBox(regatta.registrationLinkSecret, 30);
+        secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
+        createSecretPanel(stringMessages, secretPanel, secretTextBox);
+    }
+
+    private void createSecretPanel(final StringMessages stringMessages, final CaptionPanel secretPanel,
+            final TextBox secretTextBox) {
+        final VerticalPanel secretPanelContent = new VerticalPanel();
+        secretPanel.add(secretPanelContent);
+        // explain Label with description of secret
+        final Label secretExplainLabel = new Label(stringMessages.registrationLinkSecretExplain());
+        secretPanelContent.add(secretExplainLabel);
+        secretExplainLabel.setWordWrap(true);
+        // Label
+        Label secretLabel = new Label(stringMessages.registrationLinkSecret() + ":");
+        // Textbox
+        secretTextBox.ensureDebugId("SecretTextBox");
+        secretTextBox.addChangeHandler(e -> validateSecret(stringMessages, secretTextBox));
+        // Generate-Button
+        final Button generateSecretButton = new Button(stringMessages.registrationLinkSecretGenerate(),
+                new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        final String randomString = RandomString.createRandomSecret(20);
+                        registrationLinkWithQRCode.setSecret(randomString);
+                        secretTextBox.setText(randomString);
+                        validateSecret(stringMessages, secretTextBox);
+                    }
+                });
+        generateSecretButton.ensureDebugId("GenerateSecretButton");
+        // add all to grid
+        final Grid secretPanelFormGrid = new Grid(1, 3);
+        secretPanelFormGrid.setWidget(0, 0, secretLabel);
+        secretPanelFormGrid.setWidget(0, 1, secretTextBox);
+        secretPanelFormGrid.setWidget(0, 2, generateSecretButton);
+        secretPanelContent.add(secretPanelFormGrid);
+    }
+
+    private void validateSecret(final StringMessages stringMessages, final TextBox secretTextBox) {
+        if (secretTextBox.getText() == null || secretTextBox.getText().equals("")) {
+            getStatusLabel().setText(stringMessages.invalidSecret());
+            getStatusLabel().setStyleName("errorLabel");
+            getOkButton().setEnabled(false);
+        }
+        else {
+            getOkButton().setEnabled(true);
+        }
+        registrationLinkWithQRCode.setSecret(secretTextBox.getText());
     }
 
     /**
@@ -146,7 +225,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(9, 2);
+        Grid formGrid = new Grid(12, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label(stringMessages.timeZone() + ":"));
@@ -160,25 +239,26 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(4, 0, new Label(stringMessages.event() + ":"));
         formGrid.setWidget(4, 1, sailingEventsListBox);
         formGrid.setWidget(5, 0, new Label(stringMessages.courseArea() + ":"));
-        formGrid.setWidget(5, 1, courseAreaListBox);
+        formGrid.setWidget(5, 1, courseAreaSelection);
         formGrid.setWidget(6, 0, new Label(stringMessages.useStartTimeInference() + ":"));
         formGrid.setWidget(6, 1, useStartTimeInferenceCheckBox);
         formGrid.setWidget(7, 0, new Label(stringMessages.controlTrackingFromStartAndFinishTimes() + ":"));
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
-        formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
-        formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
+        formGrid.setWidget(8, 0, new Label(stringMessages.autoRestartTrackingUponCompetitorSetChange() + ":"));
+        formGrid.setWidget(8, 1, autoRestartTrackingUponCompetitorSetChangeCheckBox);
+        formGrid.setWidget(9, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
+        formGrid.setWidget(9, 1, buoyZoneRadiusInHullLengthsDoubleBox);
+        formGrid.setWidget(10, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
+        formGrid.setWidget(10, 1, competitorRegistrationTypeListBox);
+
+        panel.add(secretPanel);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
 
     protected void setCourseAreaInRegatta(RegattaDTO regatta) {
-        CourseAreaDTO courseArea = getSelectedCourseArea();
-        if (courseArea == null) {
-            regatta.defaultCourseAreaUuid = null;
-        } else {
-            regatta.defaultCourseAreaUuid = courseArea.id;
-            regatta.defaultCourseAreaName = courseArea.getName();
-        }
+        regatta.courseAreas = new ArrayList<>();
+        Util.addAll(getSelectedCourseAreas(), regatta.courseAreas);
     }
 
     public ScoringSchemeType getSelectedScoringSchemeType() {
@@ -189,33 +269,34 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return null;
     }
 
-    private boolean isCourseAreaInEvent(EventDTO event, UUID courseAreaId) {
+    private boolean isAnyOfTheCourseAreasInEvent(EventDTO event, Iterable<CourseAreaDTO> courseAreas) {
+        final boolean result;
         if (event.venue == null) {
-            return false;
+            result = false;
+        } else {
+            result = Util.containsAny(event.venue.getCourseAreas(), courseAreas);
         }
-        for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-            if (courseArea.id.equals(courseAreaId)) {
-                return true;
-            }
-        }
-        return false;
+        return result;
     }
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
-        sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
-        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
-            sailingEventsListBox.addItem(event.getName());
+        sailingEventsListBox.addItem(stringMessages.selectSailingEvent(), stringMessages.selectSailingEvent());
+        final Iterable<EventDTO> eventsSortedByName = Util.stream(existingEvents)
+                .filter(event->userService.hasPermission(event, DefaultActions.UPDATE))
+                .sorted(Util.naturalNamedComparator(/* caseSensitive */ true))::iterator;
+        for (EventDTO event : eventsSortedByName) {
+            sailingEventsListBox.addItem(event.getName(), event.getId().toString());
             if (defaultEvent != null) {
-                if (defaultEvent.getName().equals(event.getName())) {
+                if (defaultEvent.getId().equals(event.getId())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
-                    //select default course area, 2 elements as first is please select course area string
-                    if (courseAreaListBox.getItemCount() == 2){
-                        courseAreaListBox.setSelectedIndex(1);
+                    if (event.venue.getCourseAreas().size() == 1) {
+                        // select the single course area as the default:
+                        courseAreaSelection.setSelected(event.venue.getCourseAreas().iterator().next(), true);
                     }
                 }
-            } else { 
-                if (isCourseAreaInEvent(event, regatta.defaultCourseAreaUuid)) {
+            } else {
+                if (isAnyOfTheCourseAreasInEvent(event, regatta.courseAreas)) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
                 }
@@ -234,23 +315,22 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     }
 
     protected void setCourseAreaSelection() {
-        EventDTO selectedEvent = getSelectedEvent();
-        courseAreaListBox.clear();
-        courseAreaListBox.setEnabled(false);
+        final EventDTO selectedEvent = getSelectedEvent();
+        courseAreaSelection.removeAll();
+        courseAreaSelection.setEnabled(false);
         if (selectedEvent != null) {
             fillCourseAreaListBox(selectedEvent);
         }
     }
 
     protected void fillCourseAreaListBox(EventDTO selectedEvent) {
-        courseAreaListBox.addItem(stringMessages.selectCourseArea());
-        for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
-            courseAreaListBox.addItem(courseArea.getName(), courseArea.id.toString());
-            if (courseArea.id.equals(regatta.defaultCourseAreaUuid)) {
-                courseAreaListBox.setSelectedIndex(courseAreaListBox.getItemCount() - 1);
-            }
+        for (final CourseAreaDTO courseAreaInEvent : selectedEvent.venue.getCourseAreas()) {
+            courseAreaSelection.addCourseArea(courseAreaInEvent);
         }
-        courseAreaListBox.setEnabled(true);
+        for (final CourseAreaDTO courseAreaForRegatta : regatta.courseAreas) {
+            courseAreaSelection.setSelected(courseAreaForRegatta, true);
+        }
+        courseAreaSelection.setEnabled(true);
     }
 
     public EventDTO getSelectedEvent() {
@@ -259,7 +339,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (selIndex > 0) { // the zero index represents the 'no selection' text
             String itemValue = sailingEventsListBox.getValue(selIndex);
             for (EventDTO eventDTO : existingEvents) {
-                if (eventDTO.getName().equals(itemValue)) {
+                if (eventDTO.getId().toString().equals(itemValue)) {
                     result = eventDTO;
                     break;
                 }
@@ -268,32 +348,22 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return result;
     }
 
-    public CourseAreaDTO getSelectedCourseArea() {
-        CourseAreaDTO result = null;
-        EventDTO event = getSelectedEvent();
-        int selIndex = courseAreaListBox.getSelectedIndex();
-        if (selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
-            String selectedCourseAreaIdAsString = courseAreaListBox.getValue(selIndex);
-            for (CourseAreaDTO courseAreaDTO : event.venue.getCourseAreas()) {
-                if (courseAreaDTO.id.toString().equals(selectedCourseAreaIdAsString)) {
-                    result = courseAreaDTO;
-                    break;
-                }
-            }
-        }
-        return result;
+    public Iterable<CourseAreaDTO> getSelectedCourseAreas() {
+        return courseAreaSelection.getSelectedCourseAreas();
     }
     
-    public RegattaDTO getRegattaDTO() {
-        RegattaDTO result = new RegattaDTO();
+    public RegattaDTO getRegattaDTO(String name) {
+        RegattaDTO result = new RegattaDTO(name, getSelectedScoringSchemeType());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
-        result.scoringScheme = getSelectedScoringSchemeType();
         result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         result.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesCheckBox.getValue();
+        result.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChangeCheckBox.getValue();
         result.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
+        result.competitorRegistrationType = CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue());
+        result.registrationLinkSecret = registrationLinkWithQRCode.getSecret();
         return result;
     }
 

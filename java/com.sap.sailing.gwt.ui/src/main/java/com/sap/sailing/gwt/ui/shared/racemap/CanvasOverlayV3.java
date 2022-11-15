@@ -348,10 +348,10 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setLeft(x, Unit.PX);
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
-    
+
     protected void setCanvasRotation(double rotationInDegrees) {
         setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
-        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate("+Math.round(rotationInDegrees)+"deg)");
+        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate(" + rotationInDegrees + "deg)");
     }
 
     protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, Distance length) {
@@ -381,9 +381,8 @@ public abstract class CanvasOverlayV3 {
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
         Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));
-        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
-        Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
-
+        Point pointX = projection.fromLatLngToDivPixel(posWithDistanceX);
+        Point pointY = projection.fromLatLngToDivPixel(posWithDistanceY);
         return Size.newInstance(Math.abs(pointX.getX() - pointCenter.getX()), Math.abs(pointY.getY() - pointCenter.getY()));
     }
     

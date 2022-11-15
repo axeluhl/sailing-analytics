@@ -10,7 +10,7 @@ There are three different types of log files produced by the server landscape un
 
  - Apache log files (access_log, error_log, ...)
 
- - Amazon EC2 Elastic Load Balancer (ELB) logs (017363970217_elasticloadbalancing_eu-west-1_ELBGermanLeague_20151118T1320Z_52.18.137.128_18dpodfi.log)
+ - Amazon EC2 Elastic Load Balancer (ELB) logs (017363970217_elasticloadbalancing_eu-west-1_ELBGermanLeague_20151118T1320Z_52.18.137.128_18dpodfi.log) or more recently Application Load Balancer (ALB) logs.
 
 ### Java Server Logs
 
@@ -62,9 +62,9 @@ Still, in order to provide the true client IP in the log files, we use the `X-Fo
 
 This uses the SetEnvIf module, tries to match an IP address at the start of the `X-Forwarded-For` header field, and if found, assigns it to the `original_client_ip` variable. This variable, in turn, decides which of the two `CustomLog` directives is applied to the request. If the variable is set, instead of using the regular `%h` field for the client IP, the variable value is logged by `%{original_client_ip}`.
 
-### Amazon EC2 Elastic Load Balancer (ELB) Logs
+### Amazon EC2 Elastic / Application Load Balancer (ELB / ALB) Logs
 
-An Amazon ELB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available.
+An Amazon ELB or ALB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available.
 
 The format for these logs is
 
@@ -72,13 +72,110 @@ The format for these logs is
 timestamp elb client:port backend:port request_processing_time backend_processing_time response_processing_time elb_status_code backend_status_code received_bytes sent_bytes "request" "user_agent" ssl_cipher ssl_protocol
 </pre>
 
+and it has changed over time, mostly being extended at the end, also for the ALB logs.
+
 It seems a good idea to always capture these logs for archiving purposes. They end up on an S3 bucket, and by default we use `sapsailing-access-logs`.
 
 Content can be synced from there to a local directory using the following command:
 
 ``s3cmd sync s3://sapsailing-access-logs/elb-access-logs ./elb-access-logs/``
 
-Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`. The corresponding cron job is defined in `/etc/cron.daily/syncEC2ElbLogs` which is a script also found in git in the `configuration/` folder.
+Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`. The corresponding cron job was defined in `/etc/cron.daily/syncEC2ElbLogs` which was a script also found in git in the `configuration/` folder.
+
+We have now started to analyze those ALB logs using Amazon Athena. See [https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query](https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query) for details. CloudWatch and Lambda are being used to automatically trigger some form of log analysis every month. See the CloudWatch event rule ``RunALBLogAnalysis`` and how it triggers the Lambda named [RunALBLogAnalysis](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) and the [Lambda function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) containing the queries and configuration.
+
+In order to cope with the data volume in our logs, a technique called "partition projection" is required. Another annoyance is that AWS extended the ALB log format somewhen in 2019, adding six more fields (redirect_url, lambda_error_reason, target_port_list, target_status_code_list, classification, classification_reason) to each log entry. Therefore, table definitions that span this format change need to handle the additional six fields as optional. For each bucket containing ALB logs (usually one per region) a database table must be created, like this:
+<pre>
+CREATE EXTERNAL TABLE IF NOT EXISTS alb_log_partition_projection_old_and_new (
+type string,
+time string,
+elb string,
+client_ip string,
+client_port int,
+target_ip string,
+target_port int,
+request_processing_time double,
+target_processing_time double,
+response_processing_time double,
+elb_status_code string,
+target_status_code string,
+received_bytes bigint,
+sent_bytes bigint,
+request_verb string,
+request_url string,
+request_proto string,
+user_agent string,
+ssl_cipher string,
+ssl_protocol string,
+target_group_arn string,
+trace_id string,
+domain_name string,
+chosen_cert_arn string,
+matched_rule_priority string,
+request_creation_time string,
+actions_executed string,
+redirect_url string,
+lambda_error_reason string,
+target_port_list string,
+target_status_code_list string,
+classification string,
+classification_reason string
+)
+PARTITIONED BY(year int, month int, day int)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+WITH SERDEPROPERTIES (
+'serialization.format' = '1',
+'input.regex' =
+'([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) \"([^ ]*) ([^ ]*) (- |[^ ]*)\" \"([^\"]*)\" ([A-Z0-9-]+) ([A-Za-z0-9.-]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" ([-.0-9]*) ([^ ]*) \"([^\"]*)\"(.*)(.*)(.*)(.*)(.*)(.*)')
+LOCATION 's3://sapsailing-access-logs/AWSLogs/017363970217/elasticloadbalancing/eu-west-1'
+TBLPROPERTIES (
+'has_encrypted_data'='false',
+'projection.day.digits'='2',
+'projection.day.range'='01,31',
+'projection.day.type'='integer',
+'projection.enabled'='true',
+'projection.month.digits'='2',
+'projection.month.range'='01,12',
+'projection.month.type'='integer',
+'projection.year.digits'='4',
+'projection.year.range'='2017,2100',
+'projection.year.type'='integer',
+"storage.location.template" = "s3://sapsailing-access-logs/AWSLogs/017363970217/elasticloadbalancing/eu-west-1/${year}/${month}/${day}"
+)
+</pre>
+Replace the bucket and region name in the ``s3://`` URL as well as the table name accordingly. Note how the optional trailing six fields are "matched" by the trailing combination ``(.*)(.*)(.*)(.*)(.*)(.*)`` in the regular expression. It will inaccurately and greedily match all trailing fields into the ``redirect_url`` field, including any quotes, and the five remaining fields can be expected to remain empty. (The challenge in modeling these optional components properly in the regular expression is that the match groups need to correspond to the table fields exactly; so nesting parenthesized match groups is not an option here. Also, all tables united with the ``union all`` construct need to expose exactly the same set of fields.)
+
+The queries then have to unite the tables to consider in the query. Example:
+<pre>
+with union_table AS 
+    (select *
+    from alb_log_partition_projection_old_and_new
+    union all
+    select *
+    from alb_log_tokyo2020_ap_northeast_1_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_ap_southeast_2_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_eu_west_3_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_us_east_1_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_us_west_1_partition_projection),
+    daycounts as (SELECT domain_name, date_trunc('day', parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z')) as day, count(*) as requests_per_unique_visitor_per_day
+                   FROM union_table
+                   GROUP by domain_name, client_ip, user_agent, 2)
+select domain_name, date_trunc('year', day) as year, count(requests_per_unique_visitor_per_day) as unique_visitors_per_year, avg(requests_per_unique_visitor_per_day) as average_requests_per_unique_visitor_per_day
+from daycounts
+group by domain_name, date_trunc('year', day)
+ORDER by year DESC, unique_visitors_per_year DESC
+</pre>
+which will compute the unique visitors per year across six log buckets.
+
+The results of the queries triggered by the cron job end up in [this S3 folder](https://s3.console.aws.amazon.com/s3/buckets/sapsailing-access-logs/query-results/?region=eu-west-1&tab=overview).
 
 ### Broken or Partly Missing Logs and How We Recover
 

@@ -17,7 +17,6 @@ public abstract class AbstractServerWithSingleServiceReplicationTest<ReplicableI
     protected ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator;
     protected ReplicationMasterDescriptor  masterDescriptor;
     
-    
     public AbstractServerWithSingleServiceReplicationTest(AbstractServerReplicationTestSetUp<ReplicableInterface, ReplicableImpl> testSetUp) {
         this.testSetUp = testSetUp;
     }

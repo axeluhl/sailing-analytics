@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPattern;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class WindPatternDTO extends NamedDTO {
 
@@ -9,8 +9,8 @@ public class WindPatternDTO extends NamedDTO {
 
     private WindPattern pattern;
     
-    public WindPatternDTO() {
-    }
+    @Deprecated
+    WindPatternDTO() {} // for GWT RPC serialization only
     
     public WindPatternDTO(WindPattern pattern) {
         super(pattern.name());

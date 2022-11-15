@@ -13,16 +13,17 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -84,7 +85,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     private boolean first = true;
                     
                     @Override
-                    public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+                    public void gotControlPassings(long timestamp, IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
                         logger.info("Received control passings "+controlPassings+" for competitor "+raceCompetitor);
                         if (first) {
                             logger.info("Was first");
@@ -120,9 +121,10 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /* trackedRegattaRegistry */null,
-                mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
-                null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
+                mock(RaceLogAndTrackedRaceResolver.class), /* markPassingRaceFingerprintRegistry */ null, mock(LeaderboardGroupResolver.class), /* courseDesignUpdateURI */null, /* tracTracPassword */
+                /* tracTracUsername */null, null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false,
+                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, new DefaultRaceTrackingHandler(),
+                /* raceAndCompetitorStatusWithRaceLogReconciler */ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
             addReceiverToStopDuringTearDown(r);
         }

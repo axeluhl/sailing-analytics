@@ -19,6 +19,8 @@ import com.sap.sse.common.Util.Pair;
  * nth race will stay the same.
  */
 public interface AnniversaryRaceDeterminator {
+    /** value of the system property for enabling anniversary calculation */
+    public static final String ANNIVERSARY_FLAG = "AnniversaryRaceDeterminator.enabled";
     /**
      * Interface for checker classes which are passed to the {@link AnniversaryRaceDeterminatorImpl}'s constructor in order to
      * determine anniversary numbers based on the {@link AnniversaryChecker#update(int) provided race count}.
@@ -77,4 +79,11 @@ public interface AnniversaryRaceDeterminator {
     void clear();
 
     void addAnniversary(int anniversaryToCheck, Pair<DetailedRaceInfo, AnniversaryType> anniversaryData);
+
+    /**
+     * Indicates if anniversary calculation is enabled for this instance.
+     * @return gives back true when system property for anniversary calculation is set to true
+     * @see AnniversaryRaceDeterminator#ANNIVERSARY_FLAG
+     */
+    boolean isEnabled();
 }

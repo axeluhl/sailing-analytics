@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.regatta.impl;
 
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -32,7 +33,7 @@ public abstract class RegattaLogEventListener implements RegattaLogEventVisitor 
     public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
         eventAdded(event);
     }
-    
+
     @Override
     public void visit(RegattaLogDeviceBoatMappingEvent event) {
         eventAdded(event);
@@ -72,9 +73,14 @@ public abstract class RegattaLogEventListener implements RegattaLogEventVisitor 
     public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
         eventAdded(event);
     }
-    
+
     @Override
     public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
+        eventAdded(event);
+    }
+
+    @Override
+    public void visit(RegattaLogORCCertificateAssignmentEvent event) {
         eventAdded(event);
     }
 }

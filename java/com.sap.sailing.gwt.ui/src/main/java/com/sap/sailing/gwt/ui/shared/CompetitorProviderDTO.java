@@ -4,15 +4,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class CompetitorProviderDTO extends NamedDTO {
     private static final long serialVersionUID = -8911619278385485713L;
 
     private Map<String, Set<String>> hasCompetitorsForRegattasInEvent;
 
-    public CompetitorProviderDTO() {
-    }
+    @Deprecated
+    CompetitorProviderDTO() {} // for GWT RPC serialization only
 
     public CompetitorProviderDTO(String name, Map<String, Set<String>> hasCompetitorsForRegattasInEvent) {
         super(name);

@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.filter.Filter;
@@ -35,9 +35,9 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
     private final CustomizableFilterablePanel<BoatDTO> filterField;
     private final Set<BoatDTO> boatsRegisteredWithRegatta;
     
-    public CompactBoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
+    public CompactBoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<BoatDTO>() {
                     @Override
                     public boolean representSameEntity(BoatDTO dto1, BoatDTO dto2) {
@@ -132,7 +132,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return comparator.compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
-        filterField = new CustomizableFilterablePanel<BoatDTO>(new ArrayList<>(), getDataProvider()) {
+        filterField = new CustomizableFilterablePanel<BoatDTO>(new ArrayList<>(), getDataProvider(), stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(BoatDTO boat) {
                 List<String> string = new ArrayList<String>();
@@ -198,7 +198,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
         final AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>> myCallback = new AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(raceColumnName, fleetName, leaderboardName, caught.getMessage()));
+                errorReporter.reportError(getStringMessages().unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(raceColumnName, fleetName, leaderboardName, caught.getMessage()));
             }
 
             @Override
@@ -206,15 +206,15 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 filterBoats(result.values());
             }
         };
-        sailingService.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
+        sailingServiceWrite.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
         updateBoatRegistrationsForLeaderboard(leaderboardName);
     }
 
     private void updateBoatRegistrationsForLeaderboard(String leaderboardName) {
-        sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, new AsyncCallback<Collection<BoatDTO>>() {
+        sailingServiceWrite.getBoatRegistrationsForLeaderboard(leaderboardName, new AsyncCallback<Collection<BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.unableToObtainBoatsRegisteredWith(leaderboardName, caught.getMessage()));
+                errorReporter.reportError(getStringMessages().unableToObtainBoatsRegisteredWith(leaderboardName, caught.getMessage()));
             }
 
             @Override
@@ -230,7 +230,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
      * The latter will be used when the corresponding filter is activated.
      */
     public void refreshBoatList(String leaderboardName) {
-        sailingService.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+        sailingServiceWrite.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getAllBoats() - Failure: " + caught.getMessage());

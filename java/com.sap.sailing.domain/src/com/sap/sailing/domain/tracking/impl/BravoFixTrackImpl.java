@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalableDistance;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -85,7 +86,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
 
         @Override
-        public void gpsFixReceived(GPSFixMoving fix, ItemType item, boolean firstFixInTrack) {
+        public void gpsFixReceived(GPSFixMoving fix, ItemType item, boolean firstFixInTrack, AddResult addedOrReplaced) {
             assert item == getTrackedItem();
             foilingDistanceCache.invalidateAllAtOrLaterThan(fix.getTimePoint());
         }
@@ -332,7 +333,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         if (!hasExtendedFixes) {
             return null;
         }
-        final com.sap.sse.common.Util.Function<BravoFix, ScalableValue<I, T>> converter =
+        final Function<BravoFix, ScalableValue<I, T>> converter =
               fix -> {
                   if (!(fix instanceof BravoExtendedFix)) {
                       return null;
@@ -361,7 +362,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private <T, I> T getValueFromBravoFixSkippingNullValues(
             final TimePoint timePoint, final Function<BravoFix, T> getter,
             Function<T, ScalableValue<I, T>> converterToScalableValue) {
-        final com.sap.sse.common.Util.Function<BravoFix, ScalableValue<I, T>> converter =
+        final Function<BravoFix, ScalableValue<I, T>> converter =
                 fix -> {
                     return converterToScalableValue.apply(getter.apply(fix));  
                 };

@@ -32,7 +32,10 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
     }
 
     @Override
-    public Iterable<Pair<Competitor, CompetitorAllocation>> getCompetitors(Flight flight, Group group) {
+    public Iterable<Pair<Competitor, CompetitorAllocation>> getCompetitors(Flight flight, Group group) throws PairingListCreationException{
+        if (competitors.isEmpty()) {
+            throw new PairingListCreationException();
+        }
         final int[][] competitorIndices = pairingListTemplate.getPairingListTemplate();
         final int flightIndex = Util.indexOf(competitionFormat.getFlights(), flight);
         final int groupIndex = Util.indexOf(competitionFormat.getGroups(flight), group);
@@ -44,13 +47,19 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
         final List<Pair<Competitor, CompetitorAllocation>> result = new ArrayList<>();
         for (int slot = 0; slot < competitorIndicesInRace.size(); slot++) {
             final Integer index = competitorIndicesInRace.get(slot);
-            if (index >= 0) {
-                result.add(new Pair<Competitor, CompetitorAllocation>(competitors.get(index),
-                        Util.get(competitionFormat.getCompetitorAllocation(), slot)));
+            final Competitor competitor;
+            if (index >= 0 && competitors.size() > index) {
+                competitor = competitors.get(index);
             } else {
-                result.add(new Pair<Competitor, CompetitorAllocation>(null, 
-                        Util.get(competitionFormat.getCompetitorAllocation(), slot)));
+                competitor = null;
             }
+            final CompetitorAllocation allocation;
+            if (Util.size(competitionFormat.getCompetitorAllocation()) > slot) {
+                allocation = Util.get(competitionFormat.getCompetitorAllocation(), slot);
+            } else {
+                allocation = null;
+            }
+            result.add(new Pair<Competitor, CompetitorAllocation>(competitor, allocation));
         }
         return result;
     }

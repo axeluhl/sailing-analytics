@@ -2,6 +2,8 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.impl.TimeRangeImpl;
+
 /**
  * A range between two {@link TimePoint}s, including the {@link #from()} time point and excluding the {@link #to} time
  * point. A time range is {@link #isEmpty()} if its {@link #from()} and {@link #to()} are equal.
@@ -11,6 +13,20 @@ import java.io.Serializable;
  *
  */
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
+    /**
+     * @param from
+     *            if {@code null}, the time range is considered open on its "left" end, and all {@link TimePoint}s at or
+     *            after {@link TimePoint#BeginningOfTime} and at or before {@code to} are considered {@link #includes
+     *            included} in this time range.
+     * @param toExclusive
+     *            if {@code null}, the time range is considered open on its "right" end, and all {@link TimePoint}s at
+     *            or before {@link TimePoint#EndOfTime} and at or after {@code from} are considered {@link #includes
+     *            included} in this time range.
+     */
+    static TimeRange create(TimePoint from, TimePoint toExclusive) {
+        return new TimeRangeImpl(from, toExclusive);
+    }
+    
     /**
      * @return a valid, non-{@code null} time point marking the inclusive beginning of this time range.
      * {@link #includes(TimePoint) includes(from())} always returns {@code true}.
@@ -27,9 +43,7 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     /**
      * Also returns true if (either or both) the from or to timepoints are equal.
-     * E.g. 10-100 lies within 10-00, and 10-50 lies within 10-100.
-     * @param other
-     * @return
+     * E.g. 10-100 lies within 5-100, and 10-50 lies within 10-100.
      */
     boolean liesWithin(TimeRange other);
     
@@ -43,6 +57,8 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean includes(TimePoint timePoint);
     
+    boolean includes(Timed timed);
+
     /**
      * @return {@code true} if and only if at least one {@link TimePoint} exists that is {@link #includes(TimePoint) included} in
      * both, {@code this} and the {@code other} time range. This in particular means that an {@link #isEmpty() empty}
@@ -61,9 +77,13 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean startsBefore(TimeRange other);
     
+    boolean startsBefore(TimePoint other);
+    
     boolean startsAtOrAfter(TimePoint timePoint);
     
     boolean startsAfter(TimeRange other);
+
+    boolean startsAfter(TimePoint timePoint);
     
     boolean endsAfter(TimeRange other);
     
@@ -105,6 +125,9 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     /**
      * Intersection of the two ranges, only possible if {@code other} {@link #intersects()} this range.
+     * 
+     * @return {@code null} if the {@code other} time range does not {@link #intersects(TimeRange) intersect} with this
+     *         time range; the intersection time range otherwise.
      */
     TimeRange intersection(TimeRange other);
     
@@ -123,4 +146,21 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * Short for {@link #from()}.{@link TimePoint#until(TimePoint) until}({@link #to()}).
      */
     Duration getDuration();
+
+    /**
+     * Produces a {@link TimeRange} that {@link TimeRange#includes(TimeRange) includes} {@code this} and
+     * {@link TimeRange#includes(TimePoint) includes} {@code timePoint}. If {@code this} time range already
+     * {@link #includes(TimePoint)} {@code timePoint}, {@code this} is returned. If {@code timePoint}
+     * is {@code null}, {@code this} time range is returned unmodified.
+     */
+    TimeRange extend(TimePoint timePoint);
+
+    /**
+     * Produces a {@link TimeRange} that {@link TimeRange#includes(TimeRange) includes} both, {@code this} and
+     * {@code other}. Other than {@link #union(TimeRange)}, this will also work in case {@code other} does not
+     * {@link #touches(TimeRange) touch} {@code this} time range. If {@code this} already {@link #includes(TimeRange)}
+     * {@code other}, {@code this} time range is returned.
+     */
+    TimeRange extend(TimeRange other);
+
 }

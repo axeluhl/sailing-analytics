@@ -6,10 +6,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * The {@link #hashCode()} and {@link #equals(Object)} methods are based solely on the {@link #dbId} field.
@@ -21,7 +26,7 @@ import com.sap.sse.common.media.MimeType;
  * @author Jens Rommel (D047974)
  * 
  */
-public class MediaTrack implements Serializable {
+public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
 
     private static final long serialVersionUID = 1L;
 
@@ -49,8 +54,6 @@ public class MediaTrack implements Serializable {
     public TimePoint startTime;
     public Duration duration;
     public MimeType mimeType;
-    @Deprecated
-    public Status status = Status.UNDEFINED;
     public Set<RegattaAndRaceIdentifier> assignedRaces;
 
     public MediaTrack() {
@@ -77,7 +80,7 @@ public class MediaTrack implements Serializable {
     }
 
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + " - " + assignedRaces + " - " + startTime + " [" + duration + status + ']'; 
+        return title + " - " + url + " [" + typeToString() + ']' + " - " + assignedRaces + " - " + startTime + " [" + duration + ']'; 
     }
 
     public TimePoint deriveEndTime() {
@@ -138,24 +141,33 @@ public class MediaTrack implements Serializable {
     }
 
     public boolean beginsAfter(Date date) {
-        if (date == null) {
-            return false;
-        } else if (startTime.asDate().after(date)) {
-            return true;
-        } else {
-            return false;
-        }
+        return startTime != null && date != null && startTime.asDate().after(date);
     }
 
     public boolean endsBefore(Date date) {
-        if (date == null) {
-            return false;
-        } else if (duration == null) {
-            return false; //null-duration implies open-ended!
-        } else if (deriveEndTime().asDate().before(date)) {
-            return true;
-        } else {
-            return false;
-        }
+        return date != null && deriveEndTime() != null && deriveEndTime().asDate().before(date);
+    }
+
+    @Override
+    public String getName() {
+        return title;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.MEDIA_TRACK;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(dbId);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String dbId) {
+        return new TypeRelativeObjectIdentifier(dbId);
     }
 }

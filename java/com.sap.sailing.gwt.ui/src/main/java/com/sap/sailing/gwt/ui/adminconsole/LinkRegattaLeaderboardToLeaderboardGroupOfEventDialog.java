@@ -20,7 +20,7 @@ public class LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog extends DataE
     public LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter, StrippedLeaderboardDTO leaderboard, EventDTO event, DialogCallback<LeaderboardGroupDTO> callback) {
         super(stringMessages.linkLeaderboardToLeaderboardGroupOfEvent(),
-                /*message*/ stringMessages.doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(leaderboard.name, event.getName()),
+                /*message*/ stringMessages.doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(leaderboard.getName(), event.getName()),
                 stringMessages.yes(), stringMessages.no(),
                 /*validator*/ new Validator<LeaderboardGroupDTO>() {
                     @Override
@@ -38,7 +38,7 @@ public class LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog extends DataE
         leaderboardGroupsBox = createListBox(/* isMultipleSelect */ false);
         for (final LeaderboardGroupDTO lgDTO : event.getLeaderboardGroups()) {
             this.leaderboardGroups.add(lgDTO);
-            this.leaderboardGroupsBox.addItem(lgDTO.getName());
+            this.leaderboardGroupsBox.addItem(lgDTO.getName(), lgDTO.getId().toString());
         }
     }
     

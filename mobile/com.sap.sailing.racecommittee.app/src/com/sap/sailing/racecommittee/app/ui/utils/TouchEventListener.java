@@ -36,39 +36,39 @@ public class TouchEventListener {
         }
 
         switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mInXRange = true;
-                mInYRange = true;
-                view.getParent().requestDisallowInterceptTouchEvent(true);
-                mStartX = event.getX();
-                mStartY = event.getY();
-                return true;
+        case MotionEvent.ACTION_DOWN:
+            mInXRange = true;
+            mInYRange = true;
+            view.getParent().requestDisallowInterceptTouchEvent(true);
+            mStartX = event.getX();
+            mStartY = event.getY();
+            return true;
 
-            case MotionEvent.ACTION_MOVE:
-                boolean inLimit = false;
-                if (mInXRange) {
-                    inLimit = Math.abs(event.getX() - mStartX) <= mTouchSlop;
-                    mInXRange = inLimit;
-                } else {
-                    view.getParent().requestDisallowInterceptTouchEvent(false);
-                }
-                if (mInYRange) {
-                    mInYRange = Math.abs(event.getY() - mStartY) <= mTouchSlop;
-                }
-                return inLimit;
-
-            case MotionEvent.ACTION_UP:
+        case MotionEvent.ACTION_MOVE:
+            boolean inLimit = false;
+            if (mInXRange) {
+                inLimit = Math.abs(event.getX() - mStartX) <= mTouchSlop;
+                mInXRange = inLimit;
+            } else {
                 view.getParent().requestDisallowInterceptTouchEvent(false);
-                if (mInXRange && mEnabled) {
-                    if (mClickRunnable != null) {
-                        mClickRunnable.run();
-                        return true;
-                    }
-                }
-                break;
+            }
+            if (mInYRange) {
+                mInYRange = Math.abs(event.getY() - mStartY) <= mTouchSlop;
+            }
+            return inLimit;
 
-            default:
-                break;
+        case MotionEvent.ACTION_UP:
+            view.getParent().requestDisallowInterceptTouchEvent(false);
+            if (mInXRange && mEnabled) {
+                if (mClickRunnable != null) {
+                    mClickRunnable.run();
+                    return true;
+                }
+            }
+            break;
+
+        default:
+            break;
         }
         return false;
     }

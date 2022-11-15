@@ -13,10 +13,10 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.impl.ReplicationReceiverImpl;
 
 public class PrematureOperationReceiptTest extends AbstractServerReplicationTest {
-    private static ReplicationReceiver replicator;
+    private static ReplicationReceiverImpl replicator;
     
     public PrematureOperationReceiptTest() {
         super(new ServerReplicationTestSetUp());

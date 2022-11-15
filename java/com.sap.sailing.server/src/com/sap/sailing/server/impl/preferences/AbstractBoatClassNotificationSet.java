@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserStore;
 
 /**
  * {@link PreferenceObjectBasedNotificationSet} for associations of {@link BoatClass} to a set of users to notify about

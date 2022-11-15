@@ -36,4 +36,11 @@ public interface ManeuverDetector {
      */
     List<Maneuver> detectManeuvers();
 
+    /**
+     * Gets track's start time point, end time point and the time point of last raw fix.
+     * 
+     * @return {@code null} when there are no appropriate fixes contained within the analyzed track
+     */
+    TrackTimeInfo getTrackTimeInfo();
+
 }

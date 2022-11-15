@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/coursetemplates</h2>
+
+<b>Description:</b>
+<p>The service creates a new course template.</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Input format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>name: the name to set for the course template<br>
+            allMarkTemplates: A set of all mark templates being part of the course template. Any mark template being part of at least one waypoint must be included. Additional mark templates that are not part of the waypoint sequence may be included as spare marks. For each entry, the following properties can be defined:
+            <ul>
+                <li>id (required): The UUID of the existing mark template</li>
+                <li>associatedRoleId (optional): For mark templates that are used in the waypoint sequence, an optional but unique role may be specified by its ID.</li>
+            </ul>
+            waypoints: An ordered sequence of waypoints that form the layout of the course template. For each waypoint, the following properties can be specified:
+            <ul>
+                <li>passingInstruction (required): For single mark waypoints, this can be one of [None, Port, Starboard, Single_Unknown, FixedBearing]. For mark pairs, this can be one of [None, Gate, Line, Offset].</li>
+                <li>markTemplateIds (required): List of UUIDs of the relevant mark templates. May specify one or two mark templates.</li>
+                <li>controlPointName (depends): For mark pairs this specifies the control point name. For single mark waypoints this is not used.</li>
+            </ul>
+            </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>optionalImageURL: URL pointing to the desired course template image<br>
+            optionalRepeatablePart: JSON object that if given defines the part of the sequence that can be repeated in lap. The following properties must be given:
+            <ul>
+                <li>zeroBasedIndexOfRepeatablePartStart (required): offset of the first waypoint to include in the repeatable part. Must not be out of range for 0 &lt;= i &lt; count(waypoints).</li>
+                <li>zeroBasedIndexOfRepeatablePartEnd (required): offset of the first waypoint that comes after the repeatable part. Must not be out of range for 1 &lt;= i &lt;= count(waypoints) and must be &gt; zeroBasedIndexOfRepeatablePartStart.</li>
+            </ul>
+            tags: An set of String tags
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/coursetemplates">http://www.sapsailing.com/sailingserver/api/v1/coursetemplates</a><br>
+            Example payload:<br>
+            <pre>
+{
+    "name": "my-special-course-template",
+    "optionalImageURL": "http:\/\/www.sapsailing.com\/my-course-image.jpeg",
+    "allMarkTemplates": [
+        {
+            "id": "9e6061d1-9217-4624-b464-8e2749d6e1c8",
+            "associatedRole": "Startboat"
+        },
+        {
+            "id": "e881e64b-8bdd-46af-be83-062ac6befd68",
+            "associatedRole": "Pinend"
+        },
+        {
+            "id": "46186c8e-335e-4c90-8b2d-7cd5ca6d304c",
+            "associatedRole": "1"
+        },
+        {
+            "id": "c29bdc51-451c-41a1-8d79-4fc986178e2b",
+            "associatedRole": "4p"
+        },
+        {
+            "id": "def5bd01-3681-4550-8648-894c12ed7d50",
+            "associatedRole": "4s"
+        },
+        {
+            "id": "73cc7728-b931-4ab1-88a1-684871f27faa"
+        }
+    ],
+    "waypoints": [
+        {
+            "controlPointName": "Start\/End",
+            "passingInstruction": "Line",
+            "markTemplateIds": [
+                "9e6061d1-9217-4624-b464-8e2749d6e1c8",
+                "e881e64b-8bdd-46af-be83-062ac6befd68"
+            ]
+        },
+        {
+            "controlPointName": null,
+            "passingInstruction": "Port",
+            "markTemplateIds": [
+                "46186c8e-335e-4c90-8b2d-7cd5ca6d304c"
+            ]
+        },
+        {
+            "controlPointName": null,
+            "passingInstruction": "Gate",
+            "markTemplateIds": [
+                "def5bd01-3681-4550-8648-894c12ed7d50",
+                "c29bdc51-451c-41a1-8d79-4fc986178e2b"
+            ]
+        },
+        {
+            "controlPointName": null,
+            "passingInstruction": "Port",
+            "markTemplateIds": [
+                "46186c8e-335e-4c90-8b2d-7cd5ca6d304c"
+            ]
+        },
+        {
+            "controlPointName": "Start\/End",
+            "passingInstruction": "Line",
+            "markTemplateIds": [
+                "9e6061d1-9217-4624-b464-8e2749d6e1c8",
+                "e881e64b-8bdd-46af-be83-062ac6befd68"
+            ]
+        }
+    ],
+    "optionalRepeatablePart": {
+        "zeroBasedIndexOfRepeatablePartStart": 1,
+        "zeroBasedIndexOfRepeatablePartEnd": 3
+    },
+    "tags": ["tag1", "tag2"]
+}
+</pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import org.bson.Document;
 
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.Wind;
@@ -29,7 +30,7 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
     @Override
     public void windDataReceived(Wind wind) {
         Document windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedRace.getRace(), regattaName, windSource, wind);
-        windTracksCollection.insertOne(windTrackEntry);
+        windTracksCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).insertOne(windTrackEntry);
     }
 
     @Override

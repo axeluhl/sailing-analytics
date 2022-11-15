@@ -7,12 +7,12 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class WindJsonDeserializer implements JsonDeserializer<Wind> {
     private JsonDeserializer<Position> positionDeserializer;
@@ -22,10 +22,8 @@ public class WindJsonDeserializer implements JsonDeserializer<Wind> {
     }
 
     public Wind deserialize(JSONObject object) throws JsonDeserializationException {
-        
         JSONObject positionJsonObject = Helpers.getNestedObjectSafe(object, WindJsonSerializer.FIELD_POSITION);
-        Position position = positionDeserializer.deserialize(positionJsonObject);
-        
+        Position position = positionJsonObject == null ? null : positionDeserializer.deserialize(positionJsonObject);
         Number timeStamp = (Number) object.get(WindJsonSerializer.FIELD_TIMEPOINT);
         Number direction = (Number) object.get(WindJsonSerializer.FIELD_DIRECTION);
         if (direction == null) {

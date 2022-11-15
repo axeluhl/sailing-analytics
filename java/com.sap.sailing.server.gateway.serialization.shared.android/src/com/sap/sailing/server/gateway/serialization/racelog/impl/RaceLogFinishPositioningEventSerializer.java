@@ -8,12 +8,15 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public abstract class RaceLogFinishPositioningEventSerializer extends BaseRaceLogEventSerializer {
     public static final String FIELD_POSITIONED_COMPETITORS = "positionedCompetitors";
     public static final String FIELD_COMPETITOR_ID = "competitorId";
     public static final String FIELD_COMPETITOR_NAME = "competitorName";
+    public static final String FIELD_COMPETITOR_SHORT_NAME = "competitorShortName";
+    public static final String FIELD_COMPETITOR_BOAT_NAME = "competitorBoatName";
+    public static final String FIELD_COMPETITOR_BOAT_SAIL_ID = "competitorBoatSailId";
     public static final String FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON = "maxPointsReason";
     public static final String FIELD_SCORE = "score";
     public static final String FIELD_COMMENT = "comment";
@@ -42,7 +45,10 @@ public abstract class RaceLogFinishPositioningEventSerializer extends BaseRaceLo
             for (CompetitorResult positionedCompetitor : positionedCompetitors) {
                 JSONObject jsonPositionedCompetitor = new JSONObject();
                 jsonPositionedCompetitor.put(FIELD_COMPETITOR_ID, positionedCompetitor.getCompetitorId().toString());
-                jsonPositionedCompetitor.put(FIELD_COMPETITOR_NAME, positionedCompetitor.getCompetitorDisplayName());
+                jsonPositionedCompetitor.put(FIELD_COMPETITOR_NAME, positionedCompetitor.getName());
+                jsonPositionedCompetitor.put(FIELD_COMPETITOR_SHORT_NAME, positionedCompetitor.getShortName());
+                jsonPositionedCompetitor.put(FIELD_COMPETITOR_BOAT_NAME, positionedCompetitor.getBoatName());
+                jsonPositionedCompetitor.put(FIELD_COMPETITOR_BOAT_SAIL_ID, positionedCompetitor.getBoatSailId());
                 jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getMaxPointsReason().name());
                 jsonPositionedCompetitor.put(FIELD_SCORE, positionedCompetitor.getScore());
                 jsonPositionedCompetitor.put(FIELD_COMMENT, positionedCompetitor.getComment());

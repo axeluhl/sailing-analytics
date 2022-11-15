@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_bar"
-        android:layout_below="@id/header_bar"
+        android:layout_alignParentTop="true"
         android:layout_marginBottom="@dimen/default_margin_half"
         android:layout_marginRight="@dimen/side_padding"
         android:gravity="center"

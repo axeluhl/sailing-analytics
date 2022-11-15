@@ -21,8 +21,6 @@ public class Stage extends Composite {
     
     private static StageUiBinder uiBinder = GWT.create(StageUiBinder.class);
 
-    private List<StageTeaser> stageTeaserComposites;
-
     @UiField DivElement stageContainer;
     @UiField WidgetCarousel widgetCarousel;
 
@@ -36,10 +34,10 @@ public class Stage extends Composite {
         widgetCarousel.setShowArrows(false);
         if (!showDots) stageContainer.getStyle().setHeight(100, Unit.PCT);
         widgetCarousel.setShowDots(showDots);
-        stageTeaserComposites = new ArrayList<StageTeaser>();
     }
 
     public void setFeaturedEvents(List<? extends EventLinkAndMetadataDTO> list) {
+        final List<Widget> stageWidgets = new ArrayList<>();
         for (EventLinkAndMetadataDTO event : list) {
             switch (event.getStageType()) {
             case POPULAR:
@@ -52,8 +50,8 @@ public class Stage extends Composite {
                 stageTeaser = new UpcomingEventStageTeaser(event, placeNavigator);
                 break;
             }
-            widgetCarousel.addWidget(stageTeaser);
-            stageTeaserComposites.add(stageTeaser);
+            stageWidgets.add(stageTeaser);
         }
+        widgetCarousel.setWidgets(stageWidgets);
     }
 }

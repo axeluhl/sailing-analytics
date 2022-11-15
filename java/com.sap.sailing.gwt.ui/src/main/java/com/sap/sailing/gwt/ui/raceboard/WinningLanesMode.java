@@ -76,7 +76,9 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowDouglasPeuckerPoints(),
                 defaultSettings.isShowEstimatedDuration(),
                 defaultSettings.getStartCountDownFontSizeScaling(),
-                defaultSettings.isShowManeuverLossVisualization());
+                defaultSettings.isShowManeuverLossVisualization(),
+                defaultSettings.isShowSatelliteLayer(),
+                defaultSettings.isShowWindLadder());
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {
@@ -125,7 +127,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
             adjustLeaderboardSettings();
         }
         if (getLeaderboardForSpecificTimePoint() == null && tailLength != null && getLeaderboard() != null && getRaceColumn() != null) {
-            loadLeaderboardForSpecificTimePoint(getLeaderboard().name, getRaceColumn().getName(), getTimer().getTime());
+            loadLeaderboardForSpecificTimePoint(getLeaderboard().getName(), getRaceColumn().getName(), getTimer().getTime());
         }
         if (!adjustedCompetitorSelection && getLeaderboardForSpecificTimePoint() != null && getCompetitorsInRace() != null) {
             stopReceivingCompetitorsInRace();

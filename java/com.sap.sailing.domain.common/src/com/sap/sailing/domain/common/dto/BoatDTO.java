@@ -3,9 +3,16 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.WithID;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
-public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice {
+public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializable, MappableToDevice, SecuredDTO {
     private static final long serialVersionUID = -4076992788294272162L;
 
     private String idAsString;
@@ -13,8 +20,9 @@ public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice 
     private String sailId;
     private Color color;
 
-    // for GWT
-    public BoatDTO() {}
+    public BoatDTO() {
+        super("");
+    }
 
     public BoatDTO(String idAsString, String name, BoatClassDTO boatClass, String sailId) {
         this(idAsString, name, boatClass, sailId, null);
@@ -41,8 +49,17 @@ public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice 
         return idAsString;
     }
 
+    @Override
+    public Serializable getId() {
+        return getIdAsString();
+    }
+
     public BoatClassDTO getBoatClass() {
         return boatClass;
+    }
+    
+    public void setBoatClass(BoatClassDTO boatClass) {
+        this.boatClass = boatClass;
     }
     
     public String getDisplayName() {
@@ -106,6 +123,22 @@ public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice 
     
     @Override
     public String toString() {
-        return getName() == null ? (getBoatClass().getName() + " / " + getSailId()) : getName();
+        return "BoatDTO [idAsString=" + idAsString + ", boatClass=" + boatClass + ", sailId=" + sailId + ", color="
+                + color + "]";
     }
+    
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.BOAT;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(idAsString);
+    }
+
 }

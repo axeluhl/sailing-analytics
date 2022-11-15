@@ -110,6 +110,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public boolean isOneAlwaysStaysOne() {
+        return false;
+    }
+
+    @Override
     public void releaseTrackedRace(Fleet fleet) {
     }
 
@@ -146,6 +151,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+    }
+
+    @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        getRaceColumnListeners().notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
     }
 
     @Override
@@ -186,6 +196,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+    }
+
+    @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        getRaceColumnListeners().notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
     }
 
     @Override
@@ -324,18 +339,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public void disableCompetitorRegistrationOnRaceLog(Fleet fleetByName) {
-    }
-
-    /**
-     * When the leaderboard name changes, notify this to this object's {@link RaceColumnListener}s as a
-     * change of this race column's name, but only if no {@link Leaderboard#getDisplayName() display name}
-     * is set because that would take precedence over the regular name.
-     */
-    @Override
-    public void nameChanged(String oldName, String newName) {
-        if (leaderboard.getDisplayName() == null) {
-            getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(this, oldName, newName);
-        }
     }
 
     /**

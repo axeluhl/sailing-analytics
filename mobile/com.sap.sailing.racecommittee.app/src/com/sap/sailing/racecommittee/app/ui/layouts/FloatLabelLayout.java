@@ -16,6 +16,8 @@ package com.sap.sailing.racecommittee.app.ui.layouts;
  * limitations under the License.
  */
 
+import com.sap.sailing.racecommittee.app.R;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -35,11 +37,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.sap.sailing.racecommittee.app.R;
-
 /**
- * Layout which an {@link android.widget.EditText} to show a floating label when the hint is hidden
- * due to the user inputting text.
+ * Layout which an {@link android.widget.EditText} to show a floating label when the hint is hidden due to the user
+ * inputting text.
  *
  * @see <a href="https://dribbble.com/shots/1254439--GIF-Mobile-Form-Interaction">Matt D. Smith on Dribble</a>
  * @see <a href="http://bradfrostweb.com/blog/post/float-label-pattern/">Brad Frost's blog post</a>
@@ -75,17 +75,13 @@ public class FloatLabelLayout extends LinearLayout {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.FloatLabelLayout);
 
-        int leftPadding = a.getDimensionPixelSize(
-                R.styleable.FloatLabelLayout_floatLabelPaddingLeft,
+        int leftPadding = a.getDimensionPixelSize(R.styleable.FloatLabelLayout_floatLabelPaddingLeft,
                 dipsToPix(DEFAULT_LABEL_PADDING_LEFT));
-        int topPadding = a.getDimensionPixelSize(
-                R.styleable.FloatLabelLayout_floatLabelPaddingTop,
+        int topPadding = a.getDimensionPixelSize(R.styleable.FloatLabelLayout_floatLabelPaddingTop,
                 dipsToPix(DEFAULT_LABEL_PADDING_TOP));
-        int rightPadding = a.getDimensionPixelSize(
-                R.styleable.FloatLabelLayout_floatLabelPaddingRight,
+        int rightPadding = a.getDimensionPixelSize(R.styleable.FloatLabelLayout_floatLabelPaddingRight,
                 dipsToPix(DEFAULT_LABEL_PADDING_RIGHT));
-        int bottomPadding = a.getDimensionPixelSize(
-                R.styleable.FloatLabelLayout_floatLabelPaddingBottom,
+        int bottomPadding = a.getDimensionPixelSize(R.styleable.FloatLabelLayout_floatLabelPaddingBottom,
                 dipsToPix(DEFAULT_LABEL_PADDING_BOTTOM));
         mHint = a.getText(R.styleable.FloatLabelLayout_floatLabelHint);
 
@@ -96,17 +92,15 @@ public class FloatLabelLayout extends LinearLayout {
         ViewCompat.setPivotX(mLabel, 0f);
         ViewCompat.setPivotY(mLabel, 0f);
 
-        mLabel.setTextAppearance(context,
-                a.getResourceId(R.styleable.FloatLabelLayout_floatLabelTextAppearance,
-                        android.R.style.TextAppearance_Small));
+        mLabel.setTextAppearance(context, a.getResourceId(R.styleable.FloatLabelLayout_floatLabelTextAppearance,
+                android.R.style.TextAppearance_Small));
         a.recycle();
 
         addView(mLabel, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
         mInterpolator = AnimationUtils.loadInterpolator(context,
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                    ? android.R.interpolator.fast_out_slow_in
-                    : android.R.anim.decelerate_interpolator);
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? android.R.interpolator.fast_out_slow_in
+                        : android.R.anim.decelerate_interpolator);
     }
 
     @Override
@@ -137,10 +131,12 @@ public class FloatLabelLayout extends LinearLayout {
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         // Add focus listener to the EditText so that we can notify the label that it is activated.
@@ -211,13 +207,8 @@ public class FloatLabelLayout extends LinearLayout {
             ViewCompat.setScaleX(mLabel, scale);
             ViewCompat.setScaleY(mLabel, scale);
 
-            ViewCompat.animate(mLabel)
-                    .translationY(0f)
-                    .scaleY(1f)
-                    .scaleX(1f)
-                    .setDuration(ANIMATION_DURATION)
-                    .setListener(null)
-                    .setInterpolator(mInterpolator).start();
+            ViewCompat.animate(mLabel).translationY(0f).scaleY(1f).scaleX(1f).setDuration(ANIMATION_DURATION)
+                    .setListener(null).setInterpolator(mInterpolator).start();
         } else {
             mLabel.setVisibility(VISIBLE);
         }
@@ -235,19 +226,14 @@ public class FloatLabelLayout extends LinearLayout {
             ViewCompat.setScaleY(mLabel, 1f);
             ViewCompat.setTranslationY(mLabel, 0f);
 
-            ViewCompat.animate(mLabel)
-                    .translationY(mLabel.getHeight())
-                    .setDuration(ANIMATION_DURATION)
-                    .scaleX(scale)
-                    .scaleY(scale)
-                    .setListener(new ViewPropertyAnimatorListenerAdapter() {
+            ViewCompat.animate(mLabel).translationY(mLabel.getHeight()).setDuration(ANIMATION_DURATION).scaleX(scale)
+                    .scaleY(scale).setListener(new ViewPropertyAnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(View view) {
                             mLabel.setVisibility(INVISIBLE);
                             mEditText.setHint(mHint);
                         }
-                    })
-                    .setInterpolator(mInterpolator).start();
+                    }).setInterpolator(mInterpolator).start();
         } else {
             mLabel.setVisibility(INVISIBLE);
             mEditText.setHint(mHint);
@@ -258,7 +244,6 @@ public class FloatLabelLayout extends LinearLayout {
      * Helper method to convert dips to pixels.
      */
     private int dipsToPix(float dps) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dps,
-                getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dps, getResources().getDisplayMetrics());
     }
 }

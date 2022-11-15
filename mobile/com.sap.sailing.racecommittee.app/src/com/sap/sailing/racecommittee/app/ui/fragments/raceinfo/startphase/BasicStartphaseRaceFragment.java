@@ -8,14 +8,13 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 public class BasicStartphaseRaceFragment extends BaseStartphaseRaceFragment<BasicRacingProcedure> {
 
     public static BasicStartphaseRaceFragment newInstance() {
-        BasicStartphaseRaceFragment fragment = new BasicStartphaseRaceFragment();
-        return fragment;
+        return new BasicStartphaseRaceFragment();
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
     }
 }

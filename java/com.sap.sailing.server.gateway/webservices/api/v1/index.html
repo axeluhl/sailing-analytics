@@ -23,6 +23,16 @@ and you would only fetch the content for the event you're interested in, even if
 In all subsequent explanations, you may replace the "www.sapsailing.com" hostname by an according per-event host
 name to make sure you get to the event you're interested in.
 </p>
+<p>
+<b>ATTRIBUTION / BRANDING:</b> If you make use of this API, SAP requires you to include SAP branding in any
+end-user facing interface or document that is based on the data, information and insights you obtain through
+the use of this API. A good place to get started regarding SAP branding tips is
+<a href="https://www.sapbrandtools.com/">www.sapbrandtools.com</a>. Please also note that those APIs granting
+access to the original position and weather data requires the accessing user account to have special permissions.
+</p>
+<p>
+For questions and support please get in touch through <a href="mailto:support@sapsailing.com">support@sapsailing.com</a>.
+</p>
 <div style="height: 1em;"></div>
 <table>
 <thead>
@@ -33,282 +43,416 @@ name to make sure you get to the event you're interested in.
 </thead>
 <tbody>
 	<tr>
-		<td><a href="eventCreateEvent.html">/api/v1/events/createEvent</a></td>
+		<td><a href="eventCreateEvent.html">/sailingserver/api/v1/events/createEvent</a></td>
 		<td>Creates a new event</td>
 	</tr>
+	   <tr>
+        <td><a href="eventDeleteDoc.html">/sailingserver/api/v1/events/{event-id}/</a></td>
+        <td>Deletes and Event</td>
+    </tr>
 	<tr>
-		<td><a href="eventUpdate].html">/api/v1/events/{event-id}/update</a></td>
+		<td><a href="eventUpdate.html">/sailingserver/api/v1/events/{event-id}/update</a></td>
 		<td>Updates an existing event</td>
 	</tr>
+    <tr>
+        <td><a href="eventMigrate.html">/sailingserver/api/v1/events/{event-id}/migrate</a></td>
+        <td>Migrates an existing event</td>
+    </tr>
 	<tr>
-		<td><a href="eventGetDoc.html">/api/v1/events</a></td>
+		<td><a href="eventsGetDoc.html">/sailingserver/api/v1/events</a></td>
 		<td>Gets all events</td>
 	</tr>
 	<tr>
-		<td><a href="eventGetDoc.html">/api/v1/events/{id}</a></td>
+		<td><a href="eventGetDoc.html">/sailingserver/api/v1/events/{id}</a></td>
 		<td>Gets the details of an event</td>
 	</tr>
 	<tr>
-		<td><a href="eventRaceStatesGetDoc.html">/api/v1/events/{id}/racestates</a></td>
+		<td><a href="eventRaceStatesGetDoc.html">/sailingserver/api/v1/events/{id}/racestates</a></td>
 		<td>Gets the race states of all races of an event</td>
 	</tr>
 	<tr>
-		<td><a href="regattasGetDoc.html">/api/v1/regattas</a></td>
+		<td><a href="regattasGetDoc.html">/sailingserver/api/v1/regattas</a></td>
 		<td>Gets all regattas</td>
 	</tr>
 	<tr>
-		<td><a href="regattaGetDoc.html">/api/v1/regattas/{name}</a></td>
+		<td><a href="regattaGetDoc.html">/sailingserver/api/v1/regattas/{name}</a></td>
 		<td>Gets the details of a regatta</td>
 	</tr>
+	   <tr>
+        <td><a href="regattaDeleteDoc.html">/sailingserver/api/v1/regattas/{name}</a></td>
+        <td>Delete the regatta and all regatta leaderboards</td>
+    </tr>
 	<tr>
-		<td><a href="racesGetDoc.html">/api/v1/regattas/{name}/races</a></td>
+		<td><a href="regattaUpdateDoc.html">/sailingserver/api/v1/regattas/{name}</a></td>
+		<td>Updates the details of a regatta</td>
+	</tr>
+	<tr>
+		<td><a href="racesGetDoc.html">/sailingserver/api/v1/regattas/{name}/races</a></td>
 		<td>Gets the list of races in a regatta</td>
 	</tr>
 	<tr>
-		<td><a href="entriesGetDoc.html">/api/v1/regattas/{name}/entries</a></td>
+		<td><a href="entriesGetDoc.html">/sailingserver/api/v1/regattas/{name}/entries</a></td>
 		<td>Gets the entries of a regatta</td>
 	</tr>
 	<tr>
-		<td><a href="raceEntriesGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/entries</a></td>
+		<td><a href="raceEntriesGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/entries</a></td>
 		<td>Gets the entries of a race</td>
 	</tr>
 	<tr>
-		<td><a href="raceBearingOfFirstLegGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/firstlegbearing</a></td>
+		<td><a href="raceBearingOfFirstLegGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/firstlegbearing</a></td>
 		<td>Gets the bearing of the first leg</td>
 	</tr>
 	<tr>
-		<td><a href="raceMarkPassingsGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/markpassings</a></td>
+		<td><a href="raceMarkPassingsGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/markpassings</a></td>
 		<td>Gets all mark passings of a race, by competitor and by waypoint</td>
 	</tr>
 	<tr>
-		<td><a href="raceCompetitorPositionsGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/competitors/positions</a></td>
+		<td><a href="raceCompetitorPositionsGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/competitors/positions</a></td>
 		<td>Gets the GPS positions of the competitors of a race</td>
 	</tr>
 	<tr>
-		<td><a href="raceCompetitorLiveGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/competitors/live</a></td>
+		<td><a href="raceCompetitorLiveGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/competitors/live</a></td>
 		<td>Gets some competitor information (e.g current rank, current leg) for a live race</td>
 	</tr>
 	<tr>
-		<td><a href="raceCompetitorLegsGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/competitors/legs</a></td>
+		<td><a href="raceCompetitorLegsGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/competitors/legs</a></td>
 		<td>Gets some leg information (e.g. rank, distance traveled) for all competitors of a race</td>
 	</tr>
 	<tr>
-		<td><a href="raceMarkPositionsGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/marks/positions</a></td>
+		<td><a href="raceMarkPositionsGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/marks/positions</a></td>
 		<td>Gets all GPS positions of the course marks of a race</td>
 	</tr>
 	<tr>
-		<td><a href="raceCourseGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/course</a></td>
+		<td><a href="raceCourseGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/course</a></td>
 		<td>Gets the course of a race</td>
 	</tr>
 	<tr>
-		<td><a href="raceTimesGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/times</a></td>
+		<td><a href="raceCourseGetByRegattaStructureDoc.html">/sailingserver/api/v1/regattas/{regattaname}/structure/{raceColumn}/{fleet}/course</a></td>
+		<td>Gets the course of a race by using the regatta structure</td>
+	</tr>
+	<tr>
+		<td><a href="raceStartanalysisGet.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/startanalysis</a></td>
+		<td>Obtains start analysis parameters for the competitors, such as start delay, distance to line at gun, etc.</td>
+	</tr>
+	<tr>
+		<td><a href="raceTimesGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/times</a></td>
 		<td>Gets the timing data for a race, including the start/end times, the tracking start/end times
 		    as well as the "split times" or "mark passing times" of the first competitor rounding each mark.</td>
 	</tr>
 	<tr>
-		<td><a href="raceTargetTimeGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/targettime</a></td>
+		<td><a href="raceTargetTimeGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/targettime</a></td>
 		<td>Gets the estimated target time of a race</td>
 	</tr>
 	<tr>
-		<td><a href="raceWindGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/wind</a></td>
+		<td><a href="raceWindGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/wind</a></td>
 		<td>Gets all GPS positions and data values for the wind of a race</td>
 	</tr>
 	<tr>
-		<td><a href="regattasDataMiningGetDoc.html">/api/v1/regattas/datamining</a></td>
+		<td><a href="regattasDataMiningGetDoc.html">/sailingserver/api/v1/regattas/datamining</a></td>
 		<td>Gets all query identifiers for regattas</td>
 	</tr>
 	<tr>
-		<td><a href="regattaRunQueryGetDoc.html">/api/v1/regattas/{regattaname}/datamining/{queryidentifier}</a></td>
+		<td><a href="regattaRunQueryGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/datamining/{queryidentifier}</a></td>
 		<td>Executes the query for the regatta and gets the result</td>
 	</tr>
 	<tr>
-		<td><a href="regattaAddRaceColumns.html">/api/v1/regattas/{regattaname}/addracecolumns</a></td>
+		<td><a href="regattaAddRaceColumns.html">/sailingserver/api/v1/regattas/{regattaname}/addracecolumns</a></td>
 		<td>Adds one or more race columns to a regatta</td>
 	</tr>
 	<tr>
-		<td><a href="regattaRemoveRaceColumn.html">/api/v1/regattas/{regattaname}/removeracecolumn</a></td>
+		<td><a href="regattaRemoveRaceColumn.html">/sailingserver/api/v1/regattas/{regattaname}/removeracecolumn</a></td>
 		<td>Removes a race column from a regatta</td>
 	</tr>
 	<tr>
-		<td><a href="regattaCompetitorsGet.html">/api/v1/regattas/{regattaname}/competitors</a></td>
+		<td><a href="regattaCompetitorsGet.html">/sailingserver/api/v1/regattas/{regattaname}/competitors</a></td>
 		<td>Obtains the competitors participating in a regatta</td>
 	</tr>
-    <tr>
-        <td><a href="regattaUpdateOrCreateSeries.html">/api/v1/regattas/updateOrCreateSeries</a></td>
-        <td>Creates a Series in an regatta, and configures the Series it contains</td>
-    </tr>
+	<tr>
+		<td><a href="regattaWindsummaryGet.html">/sailingserver/api/v1/regattas/{regattaname}/windsummary</a></td>
+		<td>Obtains a summary of the wind conditions for one or more races in the regatta</td>
+	</tr>
+        <tr>
+                <td><a href="regattaUpdateOrCreateSeries.html">/sailingserver/api/v1/regattas/updateOrCreateSeries</a></td>
+        	<td>Creates a Series in an regatta, and configures the Series it contains</td>
+        </tr>
    <tr>
-        <td><a href="regattasCompetitorsCreateAndAddWithBoat.html">/api/v1/regattas/{regattaname}/competitors/createandaddwithboat</a></td>
+        <td><a href="regattasCompetitorsCreateAndAddWithBoat.html">/sailingserver/api/v1/regattas/{regattaname}/competitors/createandaddwithboat</a></td>
         <td>Creates a competitor using an already exising boat and adds it to the regatta</td>
    </tr>
    <tr>
-        <td><a href="regattasCompetitorsCreateAndAdd.html">/api/v1/regattas/{regattaname}/competitors/createandadd</a></td>
+        <td><a href="regattasCompetitorsCreateAndAdd.html">/sailingserver/api/v1/regattas/{regattaname}/competitors/createandadd</a></td>
         <td>Creates a competitor and adds it to the regatta</td>
     </tr>
 	<tr>
-		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/add</td>
+		<td><a href="regattasCompetitorAdd.html">/sailingserver/api/v1/regattas/{regattaname}/competitors/{competitorId}/add</a></td>
 		<td>Registers a competitor with a regatta (POST)</td>
 	</tr>
 	<tr>
-		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/remove</td>
+		<td>/sailingserver/api/v1/regattas/{regattaname}/competitors/{competitorId}/remove</td>
 		<td>Removes a competitor from a regatta (POST)</td>
 	</tr>
 	<tr>
-		<td><a href="raceRunQueryGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/datamining/{queryidentifier}</a></td>
+		<td><a href="regattaUpdateCompetitorToDHandicapPostDoc.html">/sailingserver/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToDHandicap</a></td>
+		<td>Updates a competitor's time on distance allowance per nautical mile handicap value. (POST)</td>
+	</tr>
+	<tr>
+		<td><a href="regattaUpdateCompetitorToTHandicapPostDoc.html">/sailingserver/api/v1/regattas/{regattaname}/competitors/{competitorId}/updateToTHandicap</a></td>
+		<td>Updates a competitor's time on time handicap value. (POST)</td>
+	</tr>
+    <tr>
+        <td><a href="regattasTrackingDevicesPost.html">/sailingserver/api/v1/regattas/{regattaName}/tracking_devices</a></td>
+        <td>Gets the status for one or all tracking devices associated to a regatta (POST)</td>
+    </tr>
+	<tr>
+		<td><a href="raceRunQueryGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/datamining/{queryidentifier}</a></td>
 		<td>Executes the query for the race and gets the result</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardgroupsGetDoc.html">/api/v1/leaderboardgroups</a></td>
+		<td><a href="leaderboardgroupsGetDoc.html">/sailingserver/api/v1/leaderboardgroups</a></td>
 		<td>Gets all leaderboard groups</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardgroupGetDoc.html">/api/v1/leaderboardgroups/{name}</a></td>
+		<td><a href="leaderboardgroupGetDoc.html">/sailingserver/api/v1/leaderboardgroups/{name}</a></td>
 		<td>Gets the details of a group of leaderboards</td>
 	</tr>
+    <tr>
+        <td><a href="leaderboardGroupMigrate.html">/sailingserver/api/v1/leaderboardgroups/{name}/migrate</a></td>
+        <td>Migrates an existing leaderboardGroup</td>
+    </tr>
 	<tr>
-		<td><a href="leaderboardsGetDoc.html">/api/v1/leaderboards</a></td>
+		<td><a href="leaderboardsGetDoc.html">/sailingserver/api/v1/leaderboards</a></td>
 		<td>Gets all leaderboards</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardGetDoc.html">/api/v1/leaderboards/{name}</a></td>
+		<td><a href="leaderboardGetDoc.html">/sailingserver/api/v1/leaderboards/{name}</a></td>
 		<td>Gets the details of a leaderboard</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardCheckinPostDoc.html">/api/v1/leaderboards/{name}/device_mappings/start</a></td>
+		<td><a href="leaderboardUpdateDoc.html">/sailingserver/api/v1/leaderboards/{name}/update</a></td>
+		<td>Modifies attributes of a leaderboard</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardUpdateCompetitorDisplayNameDoc.html">/sailingserver/api/v1/leaderboards/{name}/updateCompetitorDisplayName</a></td>
+		<td>Modifies the display name of a competitor in the scope of a leaderboard</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardCheckinPostDoc.html">/sailingserver/api/v1/leaderboards/{name}/device_mappings/start</a></td>
 		<td>Tracking App Device Checkin on leaderboard</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardCheckoutPostDoc.html">/api/v1/leaderboards/{name}/device_mappings/end</a></td>
+		<td><a href="leaderboardCheckoutPostDoc.html">/sailingserver/api/v1/leaderboards/{name}/device_mappings/end</a></td>
 		<td>Tracking App Device Checkout on leaderboard</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardCompetitorGetDoc.html">/api/v1/leaderboards/{name}/competitors/{id}</a></td>
+		<td><a href="leaderboardCompetitorGetDoc.html">/sailingserver/api/v1/leaderboards/{name}/competitors/{id}</a></td>
 		<td>Gets the details of a competitor in the context of a leaderboard</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardRaceAutocourse.html">/api/v1/leaderboards/{name}/autocourse</a></td>
+		<td><a href="leaderboardRaceAutocourse.html">/sailingserver/api/v1/leaderboards/{name}/autocourse</a></td>
 		<td>Automatically infers a trivial course for a race to have something to start with.</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardRaceMarksGetDoc.html">/api/v1/leaderboards/{name}/marks</a></td>
+		<td><a href="leaderboardRaceMarksGetDoc.html">/sailingserver/api/v1/leaderboards/{name}/marks</a></td>
 		<td>Gets the marks of a race (from the RaceLog and if possible the TrackedRace)</td>
 	</tr>
+	<tr>
+		<td><a href="leaderboardRaceMarkGetDoc.html">/sailingserver/api/v1/leaderboards/{name}/marks/{markId}</a></td>
+		<td>Gets a defined mark</td>
+	</tr>
     <tr>
-        <td><a href="leaderboardRaceStartorderGetDoc.html">/api/v1/leaderboards/{name}/startorder</a></td>
+        <td><a href="leaderboardRaceStartorderGetDoc.html">/sailingserver/api/v1/leaderboards/{name}/startorder</a></td>
         <td>Gets the order in which competitors have started or are expected to start for a race</td>
     </tr>
 	<tr>
-		<td><a href="leaderboardRaceSetTrackingTimes.html">/api/v1/leaderboards/{name}/settrackingtimes</a></td>
+		<td><a href="leaderboardRaceSetStartTimeAndRacingProcedure.html">/sailingserver/api/v1/leaderboards/{name}/starttime</a></td>
+		<td>Sets the race start time and racing procedure in the race log (PUT)</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardRaceGetStartTimeAndRacingProcedure.html">/sailingserver/api/v1/leaderboards/{name}/starttime</a></td>
+		<td>Fetches a race's start time and racing procedure, as well as the current pass in the race log (GET).</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardRaceSetTrackingTimes.html">/sailingserver/api/v1/leaderboards/{name}/settrackingtimes</a></td>
 		<td>Modifies the race's tracking interval</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardRaceStartTracking.html">/api/v1/leaderboards/{name}/starttracking</a></td>
+		<td><a href="leaderboardRaceStartTracking.html">/sailingserver/api/v1/leaderboards/{name}/starttracking</a></td>
 		<td>Starts tracking for a race log / smart phone-tracked race</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardRaceStopTracking.html">/api/v1/leaderboards/{name}/stoptracking</a></td>
+		<td><a href="leaderboardRaceStopTracking.html">/sailingserver/api/v1/leaderboards/{name}/stoptracking</a></td>
 		<td>Stops tracking for a race</td>
 	</tr>
     <tr>
-        <td><a href="leaderboardRaceRemove.html">/api/v1/leaderboards/{name}/removeTrackedRace</a></td>
+        <td><a href="leaderboardRaceRemove.html">/sailingserver/api/v1/leaderboards/{name}/removeTrackedRace</a></td>
         <td>Removes a tracked race</td>
     </tr>
     <tr>
-        <td><a href="leaderboardRaceDenoteForTracking.html">/api/v1/leaderboards/{name}/denoteForTracking</a></td>
+        <td><a href="leaderboardRaceDenoteForTracking.html">/sailingserver/api/v1/leaderboards/{name}/denoteForTracking</a></td>
         <td>Denotes a race for tracking</td>
     </tr>
     <tr>
-        <td><a href="leaderboardRaceEnableRaceLogForCompetitorRegistration.html">/api/v1/leaderboards/{name}/leaderboardRaceEnableRaceLogForCompetitorRegistration</a></td>
+        <td><a href="leaderboardRaceEnableRaceLogForCompetitorRegistration.html">/sailingserver/api/v1/leaderboards/{name}/leaderboardRaceEnableRaceLogForCompetitorRegistration</a></td>
         <td>Enables racelog useage for competitor registration</td>
     </tr>
+    <tr>
+        <td><a href="leaderboardMigrate.html">/sailingserver/api/v1/leaderboards/{name}/migrate</a></td>
+        <td>Migrates an existing leaderboard</td>
+    </tr>
 	<tr>
-		<td><a href="leaderboardMarkGpsFixesPostDoc.html">/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a></td>
+		<td><a href="leaderboardMarkGpsFixesPostDoc.html">/sailingserver/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a></td>
 		<td>Pings the location of a mark via the RegattaLog</td>
 	</tr>
 	<tr>
-		<td><a href="gpsFixesPostDoc.html">/api/v1/gps_fixes</a></td>
+		<td><a href="gpsFixesPostDoc.html">/sailingserver/api/v1/gps_fixes</a></td>
 		<td>Adds GPS-fixes that originated from a device with a unique identifier</td>
 	</tr>
 	<tr>
-		<td><a href="competitorGetDoc.html">/api/v1/competitors/{id}</a></td>
+		<td><a href="competitorGetDoc.html">/sailingserver/api/v1/competitors/{id}</a></td>
 		<td>Gets the details of a competitor</td>
 	</tr>
 	<tr>
-		<td><a href="competitorTeamGetDoc.html">/api/v1/competitors/{id}/team</a></td>
+        <td><a href="competitorUpdateDoc.html">/sailingserver/api/v1/competitors/{id}</a></td>
+        <td>Updates the details of a competitor</td>
+    </tr>
+	<tr>
+		<td><a href="competitorTeamGetDoc.html">/sailingserver/api/v1/competitors/{id}/team</a></td>
 		<td>Gets the details of a competitor's team</td>
 	</tr>
 	<tr>
-		<td><a href="competitorTeamImagePostDoc.html">/api/v1/competitors/{id}/team/image</a></td>
+		<td><a href="competitorTeamImagePostDoc.html">/sailingserver/api/v1/competitors/{id}/team/image</a></td>
 		<td>Sets the team image</td>
 	</tr>
     <tr>
-        <td><a href="maneuversGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/maneuvers</a></td>
+        <td><a href="maneuversGetDoc.html">/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/maneuvers</a></td>
         <td>Gets all maneuvers performed by all competitors of a race</td>
     </tr>
     <tr>
-        <td><a href="statisticsGetDoc.html">/api/v1/statistics/years?[years={year}[&amp;years={year}]]</a></td>
+        <td><a href="statisticsGetDoc.html">/sailingserver/api/v1/statistics/years?[years={year}[&amp;years={year}]]</a></td>
         <td>Gets statistics regarding regattas and races grouped by years</td>
     </tr>
     <tr>
-        <td><a href="allRacesGetDoc.html">/api/v1/trackedRaces/allRaces</a></td>
+        <td><a href="allRacesGetDoc.html">/sailingserver/api/v1/trackedRaces/allRaces</a></td>
         <td>Gets all TrackedRaces found on the local instance as well as the collected TrackedRaces from all remote instances
             and provides them in a list sorted by race start time, together with a sequence number for each one. This is a
             simple way to check how many races have been tracked altogether and which one may be an "anniversary race."
         </td>
     </tr>
     <tr>
-        <td><a href="getRacesGetDoc.html">/api/v1/trackedRaces/getRaces</a></td>
+        <td><a href="getRacesGetDoc.html">/sailingserver/api/v1/trackedRaces/getRaces</a></td>
         <td>Gets all TrackedRaces found on the local instance with a valid start time.</td>
     </tr>
     <tr>
-        <td><a href="raceDetailsGetDoc.html">/api/v1/trackedRaces/raceDetails</a></td>
+        <td><a href="raceDetailsGetDoc.html">/sailingserver/api/v1/trackedRaces/raceDetails</a></td>
         <td>Gets more information about a specified RegattaAndRace identifier</td>
     </tr>
     <tr>
-        <td><a href="boatclasses.html">/api/v1/boatclasses</a></td>
+        <td><a href="boatclasses.html">/sailingserver/api/v1/boatclasses</a></td>
         <td>Obtains information about all or a single boat class</td>
     </tr>
     <tr>
-        <td><a href="boats.html">/api/v1/boats</a></td>
+        <td><a href="boats.html">/sailingserver/api/v1/boats/{id}</a></td>
         <td>Obtains information about a single boat</td>
     </tr>
     <tr>
-        <td><a href="putWind.html">/api/v1/wind/putWind</a></td>
+        <td><a href="countrycodes.html">/sailingserver/api/v1/countrycodes</a></td>
+        <td>Obtains information about all country codes known by the system</td>
+    </tr>
+    <tr>
+        <td><a href="putWind.html">/sailingserver/api/v1/wind/putWind</a></td>
         <td>Allows to add wind values to 1-x races, similar to AdminConsole</td>
     </tr>
     <tr>
-        <td><a href="addCompetitorToRace.html">/api/v1/mark/addCompetitorToRace</a></td>
+        <td><a href="addCompetitorToRace.html">/sailingserver/api/v1/mark/addCompetitorToRace</a></td>
         <td>Updates the competitor registrations</td>
     </tr>
     <tr>
-        <td><a href="addCourseDefinitionToRaceLog.html">/api/v1/mark/addCourseDefinitionToRaceLog</a></td>
+        <td><a href="addCourseDefinitionToRaceLog.html">/sailingserver/api/v1/mark/addCourseDefinitionToRaceLog</a></td>
         <td>Allows to create a Coursedefinition that is then inserted into the racelog</td>
     </tr>
     <tr>
-        <td><a href="addMarkFix.html">/api/v1/mark/addMarkFix</a></td>
+        <td><a href="addMarkFix.html">/sailingserver/api/v1/mark/addMarkFix</a></td>
         <td>Adds a fix to a specified Mark, the Marks uuid must be known</td>
     </tr>
     <tr>
-        <td><a href="addMarkToRegatta.html">/api/v1/mark/addMarkToRegatta</a></td>
+        <td><a href="addMarkToRegatta.html">/sailingserver/api/v1/mark/addMarkToRegatta</a></td>
         <td>Adds a Mark to a specified Regatta</td>
     </tr>
     <tr>
-        <td><a href="tagsCRUDDoc.html">/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a></td>
+        <td><a href="revokeMarkOnRegatta.html">/sailingserver/api/v1/mark/revokeMarkOnRegatta</a></td>
+        <td>Revokes a Mark from a specified Regatta</td>
+    </tr>
+    <tr>
+        <td><a href="searchMarksByMarkPropertiesObject.html">/sailingserver/api/v1/mark/searchMarksByMarkPropertiesObject</a></td>
+        <td>Searches for Marks, that originated from a specified MarkProperties object.</td>
+    </tr>
+    <tr>
+        <td><a href="tagsCRUDDoc.html">/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a></td>
         <td>Gets, creates, updates and deletes tags.</td>
     </tr>
-        <tr>
-        <td><a href="preferencesPut.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Stores a document into the preferences of a user</td>
+    <tr>
+        <td><a href="status.html">/sailingserver/api/v1/status</a></td>
+        <td>Returns a status description for the "RacingEventService" core service</td>
     </tr>
+    <tr>
+        <td><a href="trackedeventsGetDoc.html">/sailingserver/api/v1/trackedevents</a></td>
+        <td>Gets all tracked events with the associated device-to-competitor/boat/mark elements for the current user.</td>
     </tr>
-        <tr>
-        <td><a href="preferencesGet.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Retrives a document that was stored into the preferences of a user</td>
+    <tr>
+        <td><a href="trackedeventsPutDoc.html">/sailingserver/api/v1/trackedevents</a></td>
+        <td>Create or update a tracked event for the current user.</td>
     </tr>
+    <tr>
+        <td><a href="trackedeventsPostDoc.html">/sailingserver/api/v1/trackedevents</a></td>
+        <td>Update the archived status of a tracked event for the current user.</td>
     </tr>
-        <tr>
-        <td><a href="preferencesDelete.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
-        <td>Removes a document from the preferences of a user</td>
+    <tr>
+        <td><a href="trackedeventsDeleteDoc.html">/sailingserver/api/v1/trackedevents</a></td>
+        <td>Delete a tracked event for the current user.</td>
+    </tr>
+    <tr>
+        <td><a href="trackingDeviceStatusGet.html">/sailingserver/api/v1/tracking_devices/{deviceUUID}</a></td>
+        <td>Gets the status of an app based tracking device (POST)</td>
+    </tr>
+    <tr>
+        <td><a href="trackingDeviceStatusesGet.html">/sailingserver/api/v1/tracking_devices</a></td>
+        <td>Gets the status of multiple app based tracking devices (POST)</td>
+    </tr>
+    <tr>
+        <td><a href="courseConfigurationCreateCourse.html">/sailingserver/api/v1/courseconfiguration/createCourse/{regattaName}/{raceColumn}/{fleet}</a></td>
+        <td>Creates a course based on a course configuration.</td>
+    </tr>
+    <tr>
+        <td><a href="courseConfigurationCreateCourseTemplate.html">/sailingserver/api/v1/courseconfiguration/createCourseTemplate</a></td>
+        <td>Creates a course template based on a course configuration.</td>
+    </tr>
+    <tr>
+        <td><a href="courseConfigurationGetFromCourse.html">/sailingserver/api/v1/courseconfiguration/getFromCourse/{regattaName}/{raceColumn}/{fleet}</a></td>
+        <td>Gets the course from a race defined by regattaName, raceColumn and fleet and returns it as course configuration.</td>
+    </tr>
+    <tr>
+        <td><a href="masterdataimport.html">/sailingserver/api/v1/masterdataimport</a></td>
+        <td>Triggers a master data import from a remote server.</td>
+    </tr>
+    <tr>
+        <td><a href="remoteserverreferenceGet.html">/sailingserver/api/v1/remoteserverreference</a></td>
+        <td>Lists the remote server references pointing to other servers</td>
+    </tr>
+    <tr>
+        <td><a href="remoteserverreferenceAdd.html">/sailingserver/api/v1/remoteserverreference/add</a></td>
+        <td>Adds a remote server reference to a server.</td>
+    </tr>
+    <tr>
+        <td><a href="remoteserverreferenceRemove.html">/sailingserver/api/v1/remoteserverreference/remove</a></td>
+        <td>Removes a remote server reference from a server.</td>
+    </tr>
+    <tr>
+        <td><a href="remoteserverreferenceUpdate.html">/sailingserver/api/v1/remoteserverreference/update</a></td>
+        <td>Updates / modifies a remote server reference on a server.</td>
+    </tr>
+    <tr>
+        <td><a href="compareServers.html">/sailingserver/api/v1/compareservers</a></td>
+        <td>Compares the content of two servers.</td>
     </tr>
 </tbody>
 </table>

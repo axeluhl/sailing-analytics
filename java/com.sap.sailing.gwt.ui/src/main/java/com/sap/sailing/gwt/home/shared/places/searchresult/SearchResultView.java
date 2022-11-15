@@ -11,6 +11,8 @@ public interface SearchResultView extends IsWidget {
     
     void updateSearchResult(String searchText, Collection<SearchResultDTO> searchResultItems);
     
+    void setBusy(boolean busy);
+    
     public interface Presenter {
        
     }

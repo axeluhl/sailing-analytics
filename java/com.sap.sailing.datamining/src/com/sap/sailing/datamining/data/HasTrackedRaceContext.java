@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -18,8 +20,14 @@ public interface HasTrackedRaceContext {
     @Connector(scanForStatistics=false)
     public HasLeaderboardContext getLeaderboardContext();
     
+    /**
+     * May be {@code null}
+     */
     public TrackedRace getTrackedRace();
     
+    /**
+     * May be {@code null}
+     */
     @Connector(messageKey="Regatta", ordinal=0)
     public Regatta getRegatta();
     
@@ -40,6 +48,24 @@ public interface HasTrackedRaceContext {
     
     @Dimension(messageKey="AdvantageousEndOfLine", ordinal=7)
     public NauticalSide getAdvantageousEndOfLine();
+    
+    @Statistic(messageKey="AdvantageOfStarboardSideOfStartLine")
+    public Distance getAdvantageOfStarboardSideOfStartline();
+    
+    @Statistic(messageKey="TrueWindAngleOfStartLineSeenFromStarboardSide")
+    public Bearing getTrueWindAngleOfStartLineFromStarboardSide();
+    
+    @Statistic(messageKey="StartLineLength")
+    public Distance getStartLineLength();
+    
+    @Statistic(messageKey="FinishLineLength")
+    public Distance getFinishLineLength();
+    
+    @Statistic(messageKey="BiasAtStartOfRace", resultDecimals=2)
+    Double getStartLineBiasInMetersAtStartOfRace();
+    
+    @Statistic(messageKey="Bias30SecondsAfterRaceStart", resultDecimals=2)
+    Double getStartLineBiasInMeters30SecondsAfterRaceStart();
     
     @Dimension(messageKey="MedalRace", ordinal=8)
     public Boolean isMedalRace();
@@ -63,5 +89,4 @@ public interface HasTrackedRaceContext {
     public Double getRelativeScoreForCompetitor(Competitor competitor);
     
     public Integer getRankAtFinishForCompetitor(Competitor competitor);
-    
 }

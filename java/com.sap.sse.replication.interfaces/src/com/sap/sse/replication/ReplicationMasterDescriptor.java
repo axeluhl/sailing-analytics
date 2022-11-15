@@ -1,10 +1,10 @@
 package com.sap.sse.replication;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
@@ -12,17 +12,13 @@ import com.rabbitmq.client.QueueingConsumer;
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
  * 
- * TODO bug 2465: add the set of {@link Replicable}s that are replicated from the master represented by this descriptor,
- * considering that this may be a subset only of the replicables running on this instance or the master server. Example:
- * replicating only the SecurityService from some other server but being a master regarding all other Replicables.
- * 
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
 public interface ReplicationMasterDescriptor {
 
-    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws MalformedURLException, UnsupportedEncodingException;
-    
+    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws Exception;
+
     URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException;
 
     /**
@@ -53,7 +49,7 @@ public interface ReplicationMasterDescriptor {
      * Then, adds a consumer to the queue just created and starts consuming. The caller may keep calling
      * {@link QueueingConsumer#nextDelivery()} on the consumer returned in order to obtain the next message.
      */
-    QueueingConsumer getConsumer() throws IOException;
+    QueueingConsumer getConsumer() throws IOException, TimeoutException;
 
     String getExchangeName();
 
@@ -69,8 +65,19 @@ public interface ReplicationMasterDescriptor {
     /**
      * @return a RabbitMQ channel created with the replication connectivity parameters defined by this descriptor
      */
-    Channel createChannel() throws IOException;
+    Channel createChannel() throws IOException, TimeoutException;
 
     Iterable<Replicable<?, ?>> getReplicables();
+
+    String getBearerToken();
+    
+    /**
+     * A heuristic deciding whether to use HTTPS or HTTP depending on the port on which the master is listening.
+     * 
+     * @return "https" or "https"
+     */
+    static String getHttpRequestProtocol(int port) {
+        return port%1000==443?"https":"http";
+    }
 
 }

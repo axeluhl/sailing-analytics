@@ -3,6 +3,12 @@ package com.sap.sailing.domain.common.dto;
 import java.util.ArrayList;
 
 public class MetaLeaderboardRaceColumnDTO extends RaceColumnDTO {
+    @Deprecated
+    MetaLeaderboardRaceColumnDTO() {} // for GWT RPC serialization only
+    
+    public MetaLeaderboardRaceColumnDTO(String name) {
+        super(name, /* oneAlwaysStaysOne */ false);
+    }
 
     private static final long serialVersionUID = 6152752963316150432L;
     

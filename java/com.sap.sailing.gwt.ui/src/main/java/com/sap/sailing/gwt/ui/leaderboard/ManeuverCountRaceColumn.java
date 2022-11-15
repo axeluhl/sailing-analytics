@@ -9,15 +9,15 @@ import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
 public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     private final StringMessages stringMessages;

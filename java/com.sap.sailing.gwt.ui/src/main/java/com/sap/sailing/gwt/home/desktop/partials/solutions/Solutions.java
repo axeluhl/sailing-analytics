@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,7 +38,6 @@ public class Solutions extends Composite {
     @UiField Anchor raceAnchor;
     @UiField Anchor inSightAnchor;
     @UiField Anchor buoyPingerAnchor;
-    @UiField Anchor postRaceAnchor;
     @UiField Anchor simulatorAnchor;
 
     @UiField DivElement sapInSailingDiv;
@@ -45,7 +45,6 @@ public class Solutions extends Composite {
     @UiField DivElement raceDiv;
     @UiField DivElement inSightDiv;
     @UiField DivElement buoyPingerDiv;
-    @UiField DivElement postRaceDiv;
     @UiField DivElement simulatorDiv;
 
     @UiField Anchor sailingAnalyticsDetailsAnchor;
@@ -59,14 +58,12 @@ public class Solutions extends Composite {
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
     private final PlaceNavigation<SolutionsPlace> inSightAppNavigation;
     private final PlaceNavigation<SolutionsPlace> buoyPingerAppNavigation;
-    private final PlaceNavigation<SolutionsPlace> postRaceAnalyticsNavigation;
     private final PlaceNavigation<SolutionsPlace> sailingSimulatorNavigation; 
     
     private final SolutionsNavigationTabs navigationTab;
     
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppDetailsNavigation;
-    private final PlaceNavigation<WhatsNewPlace> inSightAppDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> buoyPingerAppDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> simulatorAppDetailsNavigation;
     private final DesktopPlacesNavigator placesNavigator;
@@ -79,13 +76,12 @@ public class Solutions extends Composite {
 
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
-        inSightAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);
         buoyPingerAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.BuoyPingerApp);
         simulatorAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator);
         
         sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
         raceCommitteeAppDetailsAnchor.setHref(raceCommitteeAppDetailsNavigation.getTargetUrl());
-        inSightAppDetailsAnchor.setHref(inSightAppDetailsNavigation.getTargetUrl());
+        inSightAppDetailsAnchor.setHref("https://sail-insight.com");
         buoyPingerAppDetailsAnchor.setHref(buoyPingerAppDetailsNavigation.getTargetUrl());
         simulatorAppDetailsAnchor.setHref(simulatorAppDetailsNavigation.getTargetUrl());
 
@@ -94,7 +90,6 @@ public class Solutions extends Composite {
         raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceManagerApp);
         inSightAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.InSightApp);
         buoyPingerAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.BuoyPingerApp);
-        postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
         sailingSimulatorNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingSimulator);
 
         sapInSailingAnchor.setHref(sapInSailingNavigation.getTargetUrl());
@@ -102,7 +97,6 @@ public class Solutions extends Composite {
         raceAnchor.setHref(raceCommitteeAppNavigation.getTargetUrl());
         inSightAnchor.setHref(inSightAppNavigation.getTargetUrl());
         buoyPingerAnchor.setHref(buoyPingerAppNavigation.getTargetUrl());
-        postRaceAnchor.setHref(postRaceAnalyticsNavigation.getTargetUrl());
         simulatorAnchor.setHref(sailingSimulatorNavigation.getTargetUrl());
     }
 
@@ -144,12 +138,6 @@ public class Solutions extends Composite {
         handleClickEventWithLocalNavigation(e, buoyPingerAppNavigation);
     }
 
-    @UiHandler("postRaceAnchor")
-    public void scrollToPostRace(ClickEvent e) {
-        scrollToView(SolutionsNavigationTabs.PostRaceAnalytics);
-        handleClickEventWithLocalNavigation(e, postRaceAnalyticsNavigation);
-    }
-
     @UiHandler("simulatorAnchor")
     public void scrollToSimulator(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.SailingSimulator);
@@ -167,30 +155,29 @@ public class Solutions extends Composite {
     }
 
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
+        final int actualScrollLeft = Window.getScrollLeft();
         if (navigationTab == null) {
             sapInSailingDiv.scrollIntoView();
+            Window.scrollTo(actualScrollLeft, 0);
         } else {
             switch (navigationTab) {
             case BuoyPingerApp:
-                buoyPingerDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, buoyPingerDiv.getAbsoluteTop());
                 break;
             case InSightApp:
-                inSightDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, inSightDiv.getAbsoluteTop());
                 break;
             case SapInSailing:
-                sapInSailingDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, 0);
                 break;
             case SailingAnalytics:
-                sailingAnalyticsDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, sailingAnalyticsDiv.getAbsoluteTop());
                 break;
             case RaceManagerApp:
-                raceDiv.scrollIntoView();
-                break;
-            case PostRaceAnalytics:
-                postRaceDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, raceDiv.getAbsoluteTop());
                 break;
             case SailingSimulator:
-                simulatorDiv.scrollIntoView();
+                Window.scrollTo(actualScrollLeft, simulatorDiv.getAbsoluteTop());
                 break;
             }
         }

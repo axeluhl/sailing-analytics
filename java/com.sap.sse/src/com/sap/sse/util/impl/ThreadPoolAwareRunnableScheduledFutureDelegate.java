@@ -50,4 +50,13 @@ public class ThreadPoolAwareRunnableScheduledFutureDelegate<V> extends KnowsExec
     public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         return future.get(timeout, unit);
     }
+
+    @Override
+    public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {
+        if (future instanceof KnowsExecutor) {
+            // transitively announce the executor to the contained future:
+            ((KnowsExecutor) future).setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
+        }
+        super.setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
+    }
 }

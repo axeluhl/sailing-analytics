@@ -1,38 +1,34 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
  * the {@link AdminConsoleEntryPoint}.
  */
 public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite {
-    final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
     private Button btnUntrack;
     private Button btnRemoveRace;
     private Button btnSetDelayToLive;
@@ -40,12 +36,9 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private ExportPopup exportPopup;
     private boolean actionButtonsEnabled;
 
-    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService,
-            final ErrorReporter errorReporter,
-            final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
-        this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
+    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context, final Presenter presenter,
+            final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
+        super(parent, context, presenter, stringMessages, hasMultiSelection);       
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();
     }
@@ -72,12 +65,12 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(Util.createList(races)), caught.getMessage()));
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(Util.asList(races)), caught.getMessage()));
                     }
         
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
+                        regattaRefresher.reloadAndCallFillAll();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.racesStoppedTracking(racesToStopTracking);
                         }
@@ -99,7 +92,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
+                        regattaRefresher.reloadAndCallFillAll();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.racesRemoved(regattaNamesAndRaceNames);
                         }
@@ -142,27 +135,12 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             });
             btnExport.setEnabled(false);
             trackedRacesButtonPanel.add(btnExport);
-            
-            btnRemoveRace = new Button(stringMessages.remove());
-            btnRemoveRace.ensureDebugId("RemoveRaceButton");
-            btnRemoveRace.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if(askUserForConfirmation()){
-                        removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet());
-                    }
-                }
 
-                private boolean askUserForConfirmation() {
-                    if(refreshableSelectionModel.itemIsSelectedButNotVisible(raceTable.getVisibleItems())){
-                        final String trackedRaceNames =  refreshableSelectionModel.getSelectedSet().stream().map(e -> e.getRegattaName()+" - "+e.getName()).collect(Collectors.joining("\n"));
-                        return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleTrackedRaces(trackedRaceNames));
-                    }
-                    return true;
-                }
-                    
-            });
-            btnRemoveRace.setEnabled(false);
+            btnRemoveRace = new SelectedElementsCountingButton<RaceDTO>(stringMessages.remove(),
+                    refreshableSelectionModel, /* element name mapper */ e -> e.getRegattaName() + " - " + e.getName(),
+                    StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
+                    (event) -> removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet()));
+            btnRemoveRace.ensureDebugId("RemoveRaceButton");
             trackedRacesButtonPanel.add(btnRemoveRace);
         }
     }
@@ -175,12 +153,29 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 btnRemoveRace.setText(stringMessages.remove());
                 btnUntrack.setEnabled(false);
                 btnExport.setEnabled(false);
+                btnSetDelayToLive.setEnabled(false);
             } else {
-                btnRemoveRace.setEnabled(true);
-                final int numberOfItemsSelected = refreshableSelectionModel.getSelectedSet().size();
+                final int numberOfItemsSelected = selectedRaces.size();
                 btnRemoveRace.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
-                btnUntrack.setEnabled(true);
-                btnExport.setEnabled(true);
+
+                boolean canUpdateAll = true;
+                boolean canDeleteAll = true;
+                boolean canExportAll = true;
+                for (RaceDTO race : selectedRaces) {
+                    if (!userService.hasPermission(race, DefaultActions.UPDATE)) {
+                        canUpdateAll = false;
+                    }
+                    if (!userService.hasPermission(race, DefaultActions.DELETE)) {
+                        canDeleteAll = false;
+                    }
+                    if (!userService.hasPermission(race, SecuredDomainType.TrackedRaceActions.EXPORT)) {
+                        canExportAll = false;
+                    }
+                }
+                btnSetDelayToLive.setEnabled(canUpdateAll);
+                btnRemoveRace.setEnabled(canDeleteAll);
+                btnUntrack.setEnabled(canUpdateAll);
+                btnExport.setEnabled(canExportAll);
             }
         }
     }

@@ -5,11 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
@@ -21,6 +23,8 @@ import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvide
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public interface EventViewBase extends IsWidget {
 
@@ -29,9 +33,9 @@ public interface EventViewBase extends IsWidget {
     void setQuickFinderValues(String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries);
 
     void hideQuickfinder();
-    
+
     void setSailorInfos(String description, String buttonLabel, String url);
-    
+
     void setWindfinderNavigations(Iterable<SpotDTO> spotData);
 
     void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
@@ -39,25 +43,35 @@ public interface EventViewBase extends IsWidget {
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider,
             RegattaRacesNavigationProvider, SeriesEventRacesNavigationProvider, RegattaOverviewNavigationProvider,
             SeriesEventLeaderboardOverviewNavigationProvider, NewsItemLinkProvider {
-        
+
         EventContext getCtx();
 
         SailingDispatchSystem getDispatch();
-        
+
         ErrorAndBusyClientFactory getErrorAndBusyClientFactory();
-        
+
         PlaceNavigation<?> getEventNavigation();
-        
+
         PlaceNavigation<?> getMediaPageNavigation();
-        
+
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
+        String getMapAndWindChartUrl(RaceMetadataDTO<?> metadata);
+
+        String getMapAndWindChartUrl(String leaderboardName, String raceName, String fleetName);
+
         String getRegattaId();
-        
+
         RegattaMetadataDTO getRegatta();
 
         EventViewDTO getEventDTO();
 
         boolean isMultiRegattaEvent();
+
+        EventBus getEventBus();
+
+        UserService getUserService();
+        
+        SubscriptionServiceFactory getSubscriptionServiceFactory();
     }
 }

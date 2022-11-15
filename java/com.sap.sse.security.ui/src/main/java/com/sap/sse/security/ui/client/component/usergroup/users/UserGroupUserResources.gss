@@ -1,0 +1,9 @@
+.userDefinitionSuggest {
+    max-width: 9em;
+    margin-right: 5px;
+}
+
+.filterUsers {
+    margin-top: 5px;
+    margin-left: 5px;
+}

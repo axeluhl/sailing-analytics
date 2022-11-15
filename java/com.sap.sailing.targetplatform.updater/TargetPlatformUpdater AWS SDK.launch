@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/com.sap.sailing.targetplatform.updater"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.equinox.launcher.Main"/>
+<stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="com.sap.sailing.targetplatform.updater"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-consolelog -nosplash -verbose -application org.eclipse.equinox.p2.publisher.UpdateSitePublisher -metadataRepository &quot;file:/${project_loc:com.amazon.aws.aws-java-api.updatesite}/target/repository&quot; -artifactRepository &quot;file:/${project_loc:com.amazon.aws.aws-java-api.updatesite}/target/repository&quot; -source &quot;${project_loc:com.amazon.aws.aws-java-api.updatesite}&quot; -publishArtifacts -publishArtifactRepository -compress -noDefaultIUs"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.targetplatform.updater"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-jar ${eclipse_home}plugins/org.eclipse.equinox.launcher_1.5.700.v20200207-2156.jar"/>
+</launchConfiguration>

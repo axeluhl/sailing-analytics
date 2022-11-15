@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.impl.ApproximateTime;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 
 /**
  * Supports lock management for {@link NamedReentrantReadWriteLock} which is a specialization of
@@ -49,13 +49,6 @@ import com.sap.sse.util.impl.ApproximateTime;
  */
 public class LockUtil {
     private enum ReadOrWrite { READ, WRITE };
-    
-    /**
-     * Can be replaced with java.util.function.Supplier when we can consistently use Java 8.
-     */
-    public interface RunnableWithResult<T> {
-        T run();
-    }
     
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
@@ -474,6 +467,42 @@ public class LockUtil {
             return runnable.run();
         } finally {
             unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <T, E extends Throwable> T executeWithWriteLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E {
+        lockForWrite(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <E extends Throwable> void executeWithWriteLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E {
+        lockForWrite(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <T, E extends Throwable> T executeWithReadLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E {
+        lockForRead(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterRead(lock);
+        }
+    }
+    
+    public static <E extends Throwable> void executeWithReadLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E {
+        lockForRead(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterRead(lock);
         }
     }
 }

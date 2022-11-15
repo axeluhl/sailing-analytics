@@ -25,7 +25,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
 
     public CameraView(Context context) {
         super(context);
-        
+
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -54,7 +54,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         if (camera == null) {
             return;
         }
-        
+
         try {
             camera.setPreviewDisplay(surfaceHolder);
             requestLayout();
@@ -113,7 +113,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
     }
-    
+
     private ShutterCallback shutterSoundCallback = new ShutterCallback() {
         @Override
         public void onShutter() {

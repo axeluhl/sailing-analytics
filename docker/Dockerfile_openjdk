@@ -1,0 +1,8 @@
+FROM buildpack-deps:stretch-scm
+LABEL maintainer=axel.uhl@sap.com
+
+ENV PATH=${PATH}:/opt/sapjvm_8/bin
+ENV JAVA_HOME=/opt/sapjvm_8
+WORKDIR /opt
+RUN apt-get update \
+ && apt-get install -y wget unzip openjdk-8-jdk

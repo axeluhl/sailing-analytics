@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,9 +74,15 @@ public class OperationalTransformationTest {
     }
     
     public static class StringState {
-	private String state;
-	private UUID id;
+	final private String state;
+	final private UUID id;
 
+	public StringState(String state) {
+	    super();
+	    id = UUID.randomUUID();
+	    this.state = state;
+	}
+	
 	public String getState() {
 	    return state;
 	}
@@ -90,16 +97,10 @@ public class OperationalTransformationTest {
 	    return getState().hashCode() ^ id.hashCode();
 	}
 
-	public StringState(String state) {
-	    super();
-	    id = UUID.randomUUID();
-	    this.state = state;
-	}
-	
 	public StringState apply(StringInsertOperation operation) {
-	    String s = this.getState().substring(0, operation.getPos()) +
+	    final String s = this.getState().substring(0, operation.getPos()) +
 	    			operation.getS()+this.getState().substring(operation.getPos());
-	    StringState result = new StringState(s);
+	    final StringState result = new StringState(s);
 	    return result;
 	}
 
@@ -107,10 +108,6 @@ public class OperationalTransformationTest {
 	    return id;
 	}
 
-	protected void setId(UUID id) {
-	    this.id = id;
-	}
-	
 	public String toString() {
 	    return "\""+getState()+"\" @ "+getId();
 	}
@@ -144,6 +141,22 @@ public class OperationalTransformationTest {
     }
 
     @Test
+    public void testInsertAtBeginningAndEndTransformation() throws InterruptedException {
+        server.apply(new StringInsertOperation(0, "0123456789"));
+        server.waitForNotRunning();
+        client2.apply(new StringInsertOperation(10, "def"));
+        client2.waitForNotRunning();
+        client1.apply(new StringInsertOperation(0, "abc"));
+        client1.waitForNotRunning();
+        client2.waitForNotRunning();
+        server.waitForNotRunning();
+        assertEquals(server.getCurrentState().getState(), client1.getCurrentState().getState());
+        assertEquals(server.getCurrentState().getState(), client2.getCurrentState().getState());
+        assertEquals(16, server.getCurrentState().getState().length());
+        assertEquals("abc0123456789def", server.getCurrentState().getState());
+    }
+
+    @Test
     public void testTwoMassInserts() {
 	final int COUNT = 100;
 	for (int i = 0; i < COUNT; i++) {
@@ -163,34 +176,37 @@ public class OperationalTransformationTest {
      * the insert position and the string to be inserted.
      */
     @Test
-    public void testRandomInserts() {
+    public void testRandomInserts() throws InterruptedException {
 	final int COUNT = 100;
-	Random r = new Random();
-	int totalLength = 0;
-	for (int i = 0; i < COUNT; i++) {
-	    for (int j = r.nextInt(10); j > 0; j--) {
-		byte[] b = new byte[r.nextInt(10)];
-		r.nextBytes(b);
-		String s = Base64.encode(b);
-		client1.apply(new StringInsertOperation(
-			r.nextInt(client1.getCurrentState().getState().length()+1), s));
-		totalLength += s.length();
-	    }
-	    for (int j = r.nextInt(10); j > 0; j--) {
-		byte[] b = new byte[r.nextInt(10)];
-		r.nextBytes(b);
-		String s = Base64.encode(b);
-		client2.apply(new StringInsertOperation(
-			r.nextInt(client2.getCurrentState().getState().length()+1), s));
-		totalLength += s.length();
-	    }
-	}
+	final Random r = new Random();
+	final AtomicInteger totalLength = new AtomicInteger(0);
+	final Thread client1FillingThread = new Thread(()->addStringsToClient(COUNT, client1, totalLength, r));
+	client1FillingThread.start();
+	final Thread client2FillingThread = new Thread(()->addStringsToClient(COUNT, client2, totalLength, r));
+	client2FillingThread.start();
+	client1FillingThread.join();
+	client2FillingThread.join();
 	client1.waitForNotRunning();
 	client2.waitForNotRunning();
 	server.waitForNotRunning();
 	assertEquals(server.getCurrentState().getState(), client1.getCurrentState().getState());
 	assertEquals(server.getCurrentState().getState(), client2.getCurrentState().getState());
-	assertEquals(totalLength, server.getCurrentState().getState().length());
+	assertEquals(totalLength.get(), server.getCurrentState().getState().length());
+    }
+
+    private void addStringsToClient(int count, Peer<StringInsertOperation, StringState> client, AtomicInteger totalLength, Random r) {
+        for (int i = 0; i < count; i++) {
+            for (int j = r.nextInt(10); j > 0; j--) {
+                byte[] b = new byte[r.nextInt(10)];
+                r.nextBytes(b);
+                String s = Base64.encode(b);
+                synchronized (client) {
+                    client.apply(new StringInsertOperation(
+                            r.nextInt(client.getCurrentState().getState().length()+1), s));
+                }
+                totalLength.addAndGet(s.length());
+            }
+        }
     }
 
     @Test
@@ -211,5 +227,4 @@ public class OperationalTransformationTest {
 	assertEquals(server.getCurrentState().getState(), server2.getCurrentState().getState());
 	assertEquals(6*COUNT, server2.getCurrentState().getState().length());
     }
-
 }

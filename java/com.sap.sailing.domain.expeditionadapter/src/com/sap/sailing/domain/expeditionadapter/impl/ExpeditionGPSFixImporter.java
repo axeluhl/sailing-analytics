@@ -25,8 +25,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class ExpeditionGPSFixImporter implements GPSFixImporter {
     private static final String LAT_COLUMN_HEADING = ExpeditionExtendedDataImporterImpl.COL_NAME_LAT;
     private static final String LON_COLUMN_HEADING = ExpeditionExtendedDataImporterImpl.COL_NAME_LON;
-    private static final String COG_COLUMN_HEADING = "Cog";
-    private static final String SOG_COLUMN_HEADING = "Sog";
+    private static final String COG_COLUMN_HEADING = "cog";
+    private static final String SOG_COLUMN_HEADING = "sog";
 
     @Override
     public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,

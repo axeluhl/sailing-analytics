@@ -9,24 +9,17 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
+public class RegattaLeaderboardCreateDialog<LD extends LeaderboardDescriptor> extends RegattaLeaderboardDialog<LD> {
 
     public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards,
-            Collection<RegattaDTO> existingRegattas, StringMessages stringMessages, ErrorReporter errorReporter,
-            DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringMessages,
-                errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards),
+            Collection<RegattaDTO> existingRegattas, LD initialLeaderboardDescriptor, StringMessages stringMessages,
+            ErrorReporter errorReporter, DialogCallback<LD> callback) {
+        super(stringMessages.createRegattaLeaderboard(), initialLeaderboardDescriptor, existingRegattas, stringMessages,
+                errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator<LD>(stringMessages, existingLeaderboards),
                 callback);
-        nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("NameTextBox");
-        nameTextBox.setVisibleLength(50);
-        // the name of the regatta leaderboard will be derived from the selected regatta
-        nameTextBox.setEnabled(false);
-
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);
-
         regattaListBox = createSortedRegattaListBox(existingRegattas, null);
         regattaListBox.ensureDebugId("RegattaListBox");
         regattaListBox.addChangeHandler(new ChangeHandler() {
@@ -34,11 +27,11 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
                 int selectedIndex = regattaListBox.getSelectedIndex();
                 if (selectedIndex > 0) {
                     nameTextBox.setText(regattaListBox.getValue(selectedIndex)); 
+                    validateAndUpdate();
                 }
                 adjustVisibilityOfResultDiscardingRuleComponent();
             }
         });
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
     }
-
 }

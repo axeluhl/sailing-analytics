@@ -8,11 +8,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.RaceRankComparator;
 import com.sap.sailing.domain.tracking.impl.WindwardToGoComparator;
@@ -20,28 +21,31 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
-public class OneDesignRankingMetric extends AbstractRankingMetric {
+public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
     private static final long serialVersionUID = -8141113385324184349L;
     
-    public final static RankingMetricConstructor CONSTRUCTOR = OneDesignRankingMetric::new;
-
     public OneDesignRankingMetric(TrackedRace trackedRace) {
         super(trackedRace);
     }
 
     @Override
-    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public RankingMetrics getType() {
+        return RankingMetrics.ONE_DESIGN;
+    }
+
+    @Override
+    public Comparator<Competitor> getRaceRankingComparator(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new RaceRankComparator(getTrackedRace(), timePoint, cache);
     }
 
     @Override
     public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg,
-            TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new WindwardToGoComparator(trackedLeg, timePoint, cache);
     }
 
     @Override
-    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingCache cache) {
+    public Duration getGapToLeaderInOwnTime(RankingMetric.RankingInfo rankingInfo, Competitor competitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         // When the competitor is in the same leg as the leader (which in this ranking metric is always the boat
         // farthest ahead) then the competitor's duration to reach the current leader's position is estimated based on the
         // competitor's average VMG on the current leg.
@@ -51,8 +55,6 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
         // because otherwise the competitor would not be considered in this leg anymore. In this case, the mark passing
         // times for finishing the leg are compared between competitor and leader.
         final Duration result;
-        final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(competitor,
-                rankingInfo.getTimePoint());
         final Competitor to = rankingInfo.getCompetitorFarthestAhead();
         final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(to, rankingInfo.getTimePoint());
         if (currentLegTo == null) {
@@ -64,52 +66,25 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
             // not work properly because it considers both on the same leg and therefore doesn't restrict the time to when to finished
             // the leg and looks at the excess time.
             final Waypoint lastWaypoint = getTrackedRace().getRace().getCourse().getLastWaypoint();
-            if (tosLegFinishingTime != null && !tosLegFinishingTime.after(rankingInfo.getTimePoint()) &&
-                    currentLegTo.getTrackedLeg().getLeg().getTo() == lastWaypoint) {
-                // to has finished the race
-                if (currentLegWho == null) {
-                    result = null;
-                } else {
-                    final TimePoint whosLegFinishingTime = currentLegWho.getFinishTime();
-                    if (whosLegFinishingTime != null && !whosLegFinishingTime.after(rankingInfo.getTimePoint())) {
-                        // both have finished their leg; this means both have finished the race because otherwise this wouldn't be
-                        // who's current leg
-                        result = tosLegFinishingTime.until(whosLegFinishingTime);
-                    } else {
-                        final Duration etaNextMark = currentLegWho.getEstimatedTimeToNextMark(rankingInfo.getTimePoint(), WindPositionMode.EXACT);
-                        if (etaNextMark == null) {
-                            result = null;
-                        } else {
-                            final Duration timeToTookToFinishRaceStartingAtNextMark;
-                            final Waypoint whosNextMark = currentLegWho.getTrackedLeg().getLeg().getTo();
-                            if (whosNextMark == lastWaypoint) {
-                                // who is in the last leg; the ETA to who's next mark is the solution
-                                timeToTookToFinishRaceStartingAtNextMark = Duration.NULL;
-                            } else {
-                                // after passing the next mark, who still needs to travel about the same time that to
-                                // traveled after passing the next mark until finishing the race
-                                final MarkPassing tosMarkPassingForWhosNextMark = getTrackedRace().getMarkPassing(to, whosNextMark);
-                                timeToTookToFinishRaceStartingAtNextMark = tosMarkPassingForWhosNextMark == null ? null :
-                                    tosMarkPassingForWhosNextMark.getTimePoint().until(tosLegFinishingTime);
-                            }
-                            if (timeToTookToFinishRaceStartingAtNextMark == null) {
-                                result = null;
-                            } else {
-                                final TimePoint etaAtFinish = rankingInfo.getTimePoint().plus(etaNextMark.plus(timeToTookToFinishRaceStartingAtNextMark));
-                                result = tosLegFinishingTime.until(etaAtFinish);
-                            }
-                        }
-                    }
-                }
+            
+            final Duration howLongWhoNedsToReachTosPosition = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+            if (howLongWhoNedsToReachTosPosition == null) {
+                result = null;
             } else {
-                result = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+                if (tosLegFinishingTime != null && !tosLegFinishingTime.after(rankingInfo.getTimePoint()) &&
+                        currentLegTo.getTrackedLeg().getLeg().getTo() == lastWaypoint) {
+                    final Duration howLongAgoToPassedTheFinishLine = tosLegFinishingTime.until(rankingInfo.getTimePoint());
+                    result = howLongWhoNedsToReachTosPosition.plus(howLongAgoToPassedTheFinishLine);
+                } else {
+                    result = howLongWhoNedsToReachTosPosition;
+                }
             }
         }
         return result;
     }
 
     @Override
-    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public Duration getCorrectedTime(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getActualTimeSinceStartOfRace(competitor, timePoint);
     }
 
@@ -118,7 +93,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
      * reach her current position since passing <code>fromWaypoint</code>.
      */
     @Override
-    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingCache cache) {
+    protected Duration getDurationToReachAtEqualPerformance(Competitor who, Competitor to, Waypoint fromWaypoint, TimePoint timePointOfTosPosition, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final MarkPassing whenToPassedFromWaypoint = getTrackedRace().getMarkPassing(to, fromWaypoint);
         validateGetDurationToReachAtEqualPerformanceParameters(to, fromWaypoint, timePointOfTosPosition, whenToPassedFromWaypoint);
         return whenToPassedFromWaypoint.getTimePoint().until(timePointOfTosPosition);
@@ -132,12 +107,12 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
 
     @Override
     public Duration getLegGapToLegLeaderInOwnTime(TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint,
-            final RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+            final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return trackedLegOfCompetitor.getGapToLeader(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
     }
 
     @Override
-    public RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingCache cache) {
+    public RankingInfo getRankingInfo(final TimePoint timePoint, final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new AbstractRankingInfo(timePoint) {
             private static final long serialVersionUID = 25689357311324825L;
 
@@ -166,7 +141,13 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                     }
 
                     @Override
-                    public Duration getActualTime() {
+                    public Duration getDurationSinceStartOfRaceUntilTimePoint() {
+                        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+                        return startOfRace==null?null:startOfRace.until(getTimePoint());
+                    }
+
+                    @Override
+                    public Duration getTimeElapsed() {
                         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
                         final Duration result;
                         if (startOfRace == null) {
@@ -182,7 +163,7 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                      */
                     @Override
                     public Duration getCorrectedTime() {
-                        return getActualTime();
+                        return getTimeElapsed();
                     }
 
                     @Override
@@ -197,7 +178,6 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                     public Duration getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead() {
                         return getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead();
                     }
-                    
                 };
             }
 
@@ -212,5 +192,4 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
             }
         };
     }
-    
 }

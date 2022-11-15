@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.manage2sail.resultimport.AbstractManage2SailProvider;
 import com.sap.sailing.manage2sail.resultimport.CompetitorDocumentProvider;
-import com.sap.sailing.manage2sail.resultimport.CompetitorImporter;
+import com.sap.sailing.manage2sail.resultimport.Manage2SailCompetitorProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sse.common.Util;
@@ -40,8 +40,8 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON+".txt")));
-        final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
+        when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON+".txt")));
+        final Manage2SailCompetitorProvider competitorImporter = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE, resultUrlRegistry);
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().containsKey("YES - Young Europeans Sailing 2013"));
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("YES - Young Europeans Sailing 2013").contains("29er"));
         final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("YES - Young Europeans Sailing 2013", null); // get competitors for all regattas in event
@@ -55,8 +55,8 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTestNoResultsYet() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json.txt")));
-        final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
+        when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json.txt")));
+        final CompetitorProvider competitorImporter = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE, resultUrlRegistry) {
             private static final long serialVersionUID = 6450491595924905L;
 
             @Override
@@ -79,8 +79,8 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTestNoResultsYetAndDivisionEmpty() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json.txt")));
-        final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
+        when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json.txt")));
+        final CompetitorProvider competitorImporter = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE, resultUrlRegistry) {
             private static final long serialVersionUID = -7647297718831584969L;
 
             @Override

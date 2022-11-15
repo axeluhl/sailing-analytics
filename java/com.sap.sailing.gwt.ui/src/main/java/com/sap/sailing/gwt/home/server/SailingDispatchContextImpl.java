@@ -18,7 +18,7 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.User;
+import com.sap.sse.security.shared.impl.User;
 
 @GwtIncompatible
 public class SailingDispatchContextImpl implements SailingDispatchContext {
@@ -84,6 +84,11 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
         return request;
     }
     
+    @Override
+    public SecurityService getSecurityService() {
+        return securityService;
+    }
+
     @Override
     public URL getRequestBaseURL() throws DispatchException {
         return HomeServiceUtil.getRequestBaseURL(request);

@@ -9,7 +9,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
 /**
- * Serializes and deserializes {@link TagButton tag-buttons} to save them in the {@link com.sap.sse.security.UserStore
+ * Serializes and deserializes {@link TagButton tag-buttons} to save them in the {@link com.sap.sse.security.interfaces.UserStore
  * UserStore}.
  */
 public class TagButtonJsonDeSerializer {

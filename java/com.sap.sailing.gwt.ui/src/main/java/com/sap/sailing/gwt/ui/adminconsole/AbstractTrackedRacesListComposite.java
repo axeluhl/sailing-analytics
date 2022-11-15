@@ -1,7 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,11 +40,14 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
+import com.sap.sailing.gwt.ui.client.Refresher;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -54,15 +62,24 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
-        RegattasDisplayer {
+public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> {
 
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
 
     private final boolean multiSelection;
 
     protected RefreshableSelectionModel<RaceDTO> refreshableSelectionModel;
+    
+    protected final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
     
     protected CellTable<RaceDTO> raceTable;
 
@@ -72,18 +89,22 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private Label noTrackedRacesLabel;
 
-    protected final SailingServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingService;
     protected final ErrorReporter errorReporter;
-    protected final RegattaRefresher regattaRefresher;
+    protected final Refresher<RegattaDTO> regattaRefresher;
     protected final StringMessages stringMessages;
 
     private Button btnRefresh;
 
-    private CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
+    protected CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
 
     protected TrackedRacesSettings settings;
 
     private ListBox listBoxRegattas;
+
+    protected final UserService userService;
+    
+    private final Displayer<RegattaDTO> regattasDisplayer;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -93,15 +114,16 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService,
-            final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
-            final StringMessages stringMessages, boolean hasMultiSelection) {
+            final Presenter presenter, final StringMessages stringMessages, boolean hasMultiSelection) {
         super(parent, context);
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
+        this.regattasDisplayer = result->fillRegattas(result);
+        this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
+        this.sailingService = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
+        this.regattaRefresher = presenter.getRegattasRefresher();
         this.multiSelection = hasMultiSelection;
         this.stringMessages = stringMessages;
+        this.userService = presenter.getUserService();
     }
 
     public void setRegattaFilterValue(String regattaName) {
@@ -144,7 +166,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         raceList = raceTableWrapper.getDataProvider();
-        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceList) {            
+        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceList, stringMessages) {
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -188,6 +210,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         
         filterPanel.add(filterablePanelRaces);
         filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+        filterablePanelRaces.setUpdatePermissionFilterForCheckbox(race -> userService.hasPermission(race, DefaultActions.UPDATE));
 
         refreshableSelectionModel = raceTableWrapper.getSelectionModel();
         setupTableColumns(stringMessages, raceTableWrapper.getColumnSortHandler());
@@ -212,7 +235,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                regattaRefresher.fillRegattas();
+                regattaRefresher.reloadAndCallFillAll();
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
@@ -395,6 +418,69 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
+
+        SecuredDTOOwnerColumn.configureOwnerColumns(raceTable, columnSortHandler, stringMessages);
+
+        final HasPermissions type = SecuredDomainType.TRACKED_RACE;
+        final AccessControlledActionsColumn<RaceDTO, RegattaConfigImagesBarCell> actionsColumn = create(
+                new RegattaConfigImagesBarCell(stringMessages), userService);
+        final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
+                race -> {}, stringMessages);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
+
+        final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementWriteService(), type, regatta -> {},
+                stringMessages);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
+
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DefaultActions.DELETE,
+                this::removeAndUntrackRace);
+
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_STOP_TRACKING, DefaultActions.UPDATE,
+                this::stopTrackingRace);
+
+        raceTable.addColumn(actionsColumn, stringMessages.actions());
+    }
+
+    private void removeAndUntrackRace(final RaceDTO race) {
+        final RegattaNameAndRaceName name = (RegattaNameAndRaceName) race.getRaceIdentifier();
+        sailingService.removeAndUntrackRaces(Arrays.asList(name),
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages
+                                .errorRemovingRace(name != null ? name.toString() : "<null>", caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.reloadAndCallFillAll();
+                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                            listener.racesRemoved(Arrays.asList(name));
+                        }
+                    }
+                }));
+    }
+
+    void stopTrackingRace(final RaceDTO race) {
+        final RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+        sailingService.stopTrackingRaces(Arrays.asList(raceIdentifier),
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(
+                                raceIdentifier != null ? raceIdentifier.toString() : "<null>", caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.reloadAndCallFillAll();
+                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                            listener.racesStoppedTracking(Arrays.asList(raceIdentifier));
+                        }
+                    }
+                }));
     }
 
     @Override
@@ -430,7 +516,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    regattaRefresher.fillRegattas();
+                                    regattaRefresher.reloadAndCallFillAll();
                                 }
                             }
                     ));
@@ -480,11 +566,14 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     public void clearSelection() {
         refreshableSelectionModel.clear();
     }
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
 
     /**
      * @param regattas
      */
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
         displayRaceTableUI(regattas);

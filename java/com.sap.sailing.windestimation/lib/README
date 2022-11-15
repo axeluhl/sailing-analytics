@@ -1,0 +1,9 @@
+The library smile-score-1.5.2.jar has been patched!!!
+The class files smile.feature.FeatureTransform and smile.feature.Standardizer
+were removed from jar in order to overwrite those classes and make them Serializable
+(see com.sap.sailing.windestimation/src/smile/feature/). The removal was necessary
+due to OSGI environment. The next release version of SMILE will already include
+Serialization support for the aforementioned classes, which means that the patch will
+be obsolete. When 1.5.3 comes out, replace the 1.5.2 jars with the official 1.5.3 jars.
+Furthermore, delete com.sap.sailing.windestimation/src/smile folder with patched
+source files.

@@ -6,8 +6,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.resource.SharedAuthenticationResources;
-import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.userprofile.shared.userdetails.AbstractUserDetails;
 
 /**

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="empty" translatable="false"></string>
     <string name="log_file_template" translatable="false">sap_insight_log_%s.txt</string>
     <string name="crash_file_name" translatable="false">sap_insight_crash_%s.txt</string>
@@ -35,18 +35,9 @@
     <string name="error_could_not_complete_operation_on_server_try_again">Could not complete operation on server. Please try again.</string>
     <string name="error_sending_team_image_to_server">Error: Could not send team image to server.</string>
     <string name="regatta_starts_in">Regatta starts in:</string>
-    <plurals name="hour">
-        <item quantity="one">Hour</item>
-        <item quantity="other">Hours</item>
-    </plurals>
-    <plurals name="minute">
-        <item quantity="one">Minute</item>
-        <item quantity="other">Minutes</item>
-    </plurals>
-    <plurals name="day">
-        <item quantity="one">Day</item>
-        <item quantity="other">Days</item>
-    </plurals>
+    <string name="hours">Hours:</string>
+    <string name="minutes">Minutes:</string>
+    <string name="days">Days:</string>
     <string name="please_listen_to_announcements">Please listen to announcements</string>
     <string name="close">Close</string>
     <string name="thank_you_you_successfully_participated">Thank you! You have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
@@ -72,4 +63,5 @@
     <string name="content_description_flag_icon" translatable="false">flag icon</string>
     <string name="tracking_notification_text">Currently Tracking %s</string>
     <string name="waiting_for_gps">Waiting for GPS</string>
+    <string name="service_info" translatable="false">SAP Sail InSight Service</string>
 </resources>

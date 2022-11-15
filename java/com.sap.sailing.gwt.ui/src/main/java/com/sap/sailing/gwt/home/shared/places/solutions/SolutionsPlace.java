@@ -7,15 +7,16 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle, HasMobileVersion {
 
     public enum SolutionsNavigationTabs {
-        SapInSailing, SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, PostRaceAnalytics, SailingSimulator
+        SapInSailing, SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, SailingSimulator
     };
     private final SolutionsNavigationTabs navigationTab;
     private final static String PARAM_NAVIGATION_TAB = "navigationTab";
@@ -67,7 +68,7 @@ public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitl
     }
 
     public SolutionsPlace(SolutionsNavigationTabs navigationTab) {
-        super(PARAM_NAVIGATION_TAB, navigationTab.name());
+        super(Util.<String, String>mapBuilder().put(PARAM_NAVIGATION_TAB, navigationTab.name()).build());
         this.navigationTab = navigationTab;
         this.invokedFromCalendar = false;
     }

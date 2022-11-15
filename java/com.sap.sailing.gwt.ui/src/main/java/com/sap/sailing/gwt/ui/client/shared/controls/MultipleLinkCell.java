@@ -112,14 +112,13 @@ public class MultipleLinkCell extends AbstractCell<List<MultipleLinkCell.CellLin
     public void onBrowserEvent(Context context, Element parent, List<MultipleLinkCell.CellLink> value,
             NativeEvent event, ValueUpdater<List<MultipleLinkCell.CellLink>> valueUpdater) {
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
-
         if (isBlockLinkEvent) {
             event.preventDefault();
             EventTarget eventTarget = event.getEventTarget();
             if (parent.isOrHasChild(Element.as(eventTarget))) {
                 Element el = Element.as(eventTarget);
                 if (el.getNodeName().equalsIgnoreCase("a")) {
-                    onLinkClickHandler.update(el.getInnerText());
+                    onLinkClickHandler.update(el.getAttribute("target"));
                 }
             }
         }
@@ -128,20 +127,18 @@ public class MultipleLinkCell extends AbstractCell<List<MultipleLinkCell.CellLin
     @Override
     public void render(com.google.gwt.cell.client.Cell.Context context, List<MultipleLinkCell.CellLink> links,
             SafeHtmlBuilder sb) {
-        if (links.isEmpty()) {
-            return;
-        }
-        SafeHtml rendered;
-        boolean isFirst = true;
-        for (CellLink link : links) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                sb.appendHtmlConstant("<br>");
+        if (!links.isEmpty()) {
+            SafeHtml rendered;
+            boolean isFirst = true;
+            for (CellLink link : links) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    sb.appendHtmlConstant("<br>");
+                }
+                rendered = linkTemplates.cell(link.getTarget(), UriUtils.fromString(link.getHref()), link.getText());
+                sb.append(rendered);
             }
-            rendered = linkTemplates.cell(link.getTarget(), UriUtils.fromString(link.getHref()), link.getText());
-            sb.append(rendered);
         }
     }
-
 }

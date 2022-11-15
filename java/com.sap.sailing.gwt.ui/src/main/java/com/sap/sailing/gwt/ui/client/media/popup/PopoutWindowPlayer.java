@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerContainer;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
@@ -18,7 +18,7 @@ public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements 
     private final JavaScriptObject playerWindow;
     private final PlayerCloseListener popupCloseHandler;
 
-    protected PopoutWindowPlayer(MediaTrack mediaTrack, PlayerCloseListener popupCloseListener) {
+    protected PopoutWindowPlayer(MediaTrackWithSecurityDTO mediaTrack, PlayerCloseListener popupCloseListener) {
         super(mediaTrack);
         this.popupCloseHandler = popupCloseListener;
         

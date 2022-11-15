@@ -16,8 +16,8 @@ public class CompetitorNameComparator implements Comparator<Map.Entry<Competitor
 
     @Override
     public int compare(Map.Entry<Competitor, Boat> leftCompetitor, Map.Entry<Competitor, Boat> rightCompetitor) {
-        if (leftCompetitor != null && leftCompetitor.getKey() != null &&
-            rightCompetitor != null && rightCompetitor.getKey() != null) {
+        if (leftCompetitor != null && leftCompetitor.getKey() != null && rightCompetitor != null
+                && rightCompetitor.getKey() != null) {
             Competitor left = leftCompetitor.getKey();
             Competitor right = rightCompetitor.getKey();
 

@@ -7,16 +7,16 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class CompetitorAndBoatJsonDeserializer implements JsonDeserializer<Pair<DynamicCompetitor, Boat>> {
     private final JsonDeserializer<DynamicCompetitor> competitorDeserializer;
     private final JsonDeserializer<DynamicBoat> boatDeserializer;
     
-    public static CompetitorAndBoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
+    public static CompetitorAndBoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
         return new CompetitorAndBoatJsonDeserializer(CompetitorJsonDeserializer.create(baseDomainFactory), BoatJsonDeserializer.create(baseDomainFactory));
     }
 

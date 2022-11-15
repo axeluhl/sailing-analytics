@@ -206,5 +206,9 @@
   background: #333;
 }
 
+.stageteaser_databylogo_container{
+ padding-top: .4em;
+}
+
 @external slick-dots, slick-active;
 

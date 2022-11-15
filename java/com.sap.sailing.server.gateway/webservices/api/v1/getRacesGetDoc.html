@@ -12,8 +12,13 @@
 <h2>URL: /api/v1/trackedRaces/getRaces</h2>
 
 <b>Description:</b>
-<p>Gets all TrackedRaces found on the local instance, and optionally (depending on the "transitive" parameter) its remote servers.
+<p>Please note: calling this interface using HTTP GET is deprecated. Use HTTP POST instead.
+Gets all TrackedRaces found on the local instance, and optionally (depending on the "transitive" parameter) its remote servers.
 Only those TrackedRaces are contained that are reachable by any Event and have GPS data and a valid startOfRace.</p>
+<p>Optionally a list of event UUIDs together with a predicate can be provided. The returned races list will be filtered by the 
+given ids. The predicate specifies the behavior of the filter.
+</p>
+<p>Example: api/v1/trackedRaces/getRaces?transitive=true&events=b1e78f52-ce52-4b71-ac30-452599faf4a1,ee4f04d0-c02c-449c-91cb-606aa5b0480e&pred=incl</p>
 <br/>
 <table>
     <tr>
@@ -30,13 +35,65 @@ Only those TrackedRaces are contained that are reachable by any Event and have G
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>
-		<div>transitive (true or false) - determines whether the races from other servers referenced remotely shall be collected in the response</div>
-        </td>
-    </tr>
+   <td>
+    <div>
+     <ul>
+      <li>transitive (true or false; defaults to false) - determines whether the races
+       from other servers referenced remotely shall be collected in the
+       response</li>
+       <li>events: comma separated list of UUIDs depicting an event</li>
+       <li>pred: depicts the semantic of the filtering, when "incl" only races belonging to the depicted event UUIDs are 
+       returned. When "excl" is provided the filtering behaves vice versa.</li>
+     </ul>
+    </div>
+   </td>
+  </tr>
     <tr>
         <td>Request method:</td>
-        <td>GET</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/getRaces">http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/getRaces</a></td>
+    </tr>
+</table>
+<br/>
+<p>Alternatively the interface can be called using http POST method. The parameters must be then provided within the request body as URL encoded form parameters (see https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST).</p>
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Request Content-Type:</td>
+        <td>application/x-www-form-urlencoded</td>
+    </tr>
+    <tr>
+        <td>Optional body parameters:</td>
+   <td>
+    <div>
+     <ul>
+      <li>transitive (true or false) - determines whether the races
+       from other servers referenced remotely shall be collected in the
+       response</li>
+       <li>events: comma separated list of UUIDs depicting an event</li>
+       <li>pred: depicts the semantic of the filtering, when "incl" only races belonging to the depicted event UUIDs are 
+       returned. When "excl" is provided the filtering behaves vice versa.</li>
+     </ul>
+    </div>
+   </td>
+  </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
     </tr>
     <tr>
         <td>Example:</td>

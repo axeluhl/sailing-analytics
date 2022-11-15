@@ -6,12 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import android.content.Context;
-import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceScreen;
-
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.R;
@@ -19,6 +13,12 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sse.common.util.NaturalComparator;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceClickListener;
+import android.support.v7.preference.PreferenceScreen;
 
 public class RegattaSpecificPreferenceFragment extends BasePreferenceFragment {
 

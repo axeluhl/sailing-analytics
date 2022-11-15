@@ -49,7 +49,8 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
 
     protected DeviceMappingWithRegattaLogEvent<ItemT> createMapping(DeviceIdentifier device, ItemT item,
             TimePoint from, TimePoint toInclusive, Serializable originalEventId, RegattaLogDeviceMappingEvent<ItemT> event) {
-        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from, toInclusive, /* inclusive */ true),
+        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from,
+                toInclusive != null && toInclusive.before(from) ? from : toInclusive, /* inclusive */ true),
                 Collections.singletonList(originalEventId), event);
     }
 
@@ -76,16 +77,22 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
 
     protected void findUnrevokedMappingAndClosingEvents(Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events,
             Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents) {
-        for (RegattaLogEvent e : getLog().getUnrevokedEvents()) {
-            if (e instanceof RegattaLogDeviceMappingEvent && isValidMapping(((RegattaLogDeviceMappingEvent<?>) e))) {
-                @SuppressWarnings("unchecked")
-                RegattaLogDeviceMappingEvent<ItemT> mappingEvent = (RegattaLogDeviceMappingEvent<ItemT>) e;
-                getMappingEventsForItem(events, mappingEvent.getMappedTo()).add(mappingEvent);
-            } else if (e instanceof RegattaLogCloseOpenEndedDeviceMappingEvent) {
-                //a higher priority closing events for the same mapping event overwrites the lower priority one
-                RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = (RegattaLogCloseOpenEndedDeviceMappingEvent) e;
-                closingEvents.put(closingEvent.getDeviceMappingEventId(), closingEvent);
+        final RegattaLog regattaLog = getLog();
+        regattaLog.lockForRead();
+        try {
+            for (RegattaLogEvent e : regattaLog.getUnrevokedEvents()) {
+                if (e instanceof RegattaLogDeviceMappingEvent && isValidMapping(((RegattaLogDeviceMappingEvent<?>) e))) {
+                    @SuppressWarnings("unchecked")
+                    RegattaLogDeviceMappingEvent<ItemT> mappingEvent = (RegattaLogDeviceMappingEvent<ItemT>) e;
+                    getMappingEventsForItem(events, mappingEvent.getMappedTo()).add(mappingEvent);
+                } else if (e instanceof RegattaLogCloseOpenEndedDeviceMappingEvent) {
+                    //a higher priority closing events for the same mapping event overwrites the lower priority one
+                    RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = (RegattaLogCloseOpenEndedDeviceMappingEvent) e;
+                    closingEvents.put(closingEvent.getDeviceMappingEventId(), closingEvent);
+                }
             }
+        } finally {
+            regattaLog.unlockAfterRead();
         }
     }
     

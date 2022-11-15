@@ -7,6 +7,7 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -30,7 +31,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
@@ -165,8 +166,13 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
                 @Override
                 public void render(Context context, SailorProfileDTO value, SafeHtmlBuilder sb) {
                     for (BoatClassDTO boatclass : value.getBoatclasses()) {
-                        sb.append(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(BoatClassImageResolver
-                                .getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
+                        SafeStylesBuilder safeStylesBuilder = new SafeStylesBuilder();
+                        safeStylesBuilder.appendTrustedString(
+                                SharedSailorProfileResources.TRUSTED_BUILD_BOAT_CLASS_ICON_STYLE_STRING);
+                        safeStylesBuilder.backgroundImage(
+                                BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri());
+                        sb.append(SharedSailorProfileResources.TEMPLATES
+                                .buildBoatclassIcon(safeStylesBuilder.toSafeStyles()));
                     }
                 }
             }) {

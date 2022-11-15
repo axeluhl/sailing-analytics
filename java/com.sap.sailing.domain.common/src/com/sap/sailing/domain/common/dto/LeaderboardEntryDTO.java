@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
@@ -108,6 +110,12 @@ public class LeaderboardEntryDTO implements Serializable {
      * race up to the leg's end, regardless of where the leading and fastest boat are.
      */
     public Duration gapToLeaderInOwnTime;
+    
+    /**
+     * The time sailed since the race start time. When the competitor represented by this record has finished the
+     * race, this will be the duration between race start time and the time when the competitor finished the race. 
+     */
+    public Duration timeSailedSinceRaceStart;
 
     /**
      * The corrected time spent in the race; usually based on the current time and distance, calculated by the {@link RankingMetric}.
@@ -116,11 +124,26 @@ public class LeaderboardEntryDTO implements Serializable {
     public Duration calculatedTime;
     
     /**
+     * If this is a leaderboard entry for an ORC Performance Curve Scoring (PCS) race,
+     * the field holds the so-called "implied wind" as a speed. It is the wind speed with which,
+     * according to its polar, the competitor would have sailed the part of the course sailed
+     * so far in the time elapsed so far. For ORC PCS before 2015 this was the primary ranking
+     * criterion. Since 2015, however, implied wind has lost in significance because it is
+     * used only to compute a default wind speed by maximizing all implied wind values of all
+     * competitors in the race, and then using this wind speed to determine the time allowance
+     * for each competitor so that a different between time elapsed and the allowance can then
+     * be used for ranking.
+     */
+    public Speed impliedWind;
+    
+    /**
      * The corrections applied to the time and distance sailed when the competitor would have reached the
      * competitor farthest ahead, based on average VMG on the current leg and equal performance to the boat
      * farthest ahead for all subsequent legs.
      */
     public Duration calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
+    
+    public SpeedWithBearing currentSpeedAndCourseOverGround;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -594,9 +617,12 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((averageSignedCrossTrackErrorInMeters == null) ? 0
                 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + ((boat == null) ? 0 : boat.hashCode());
+        result = prime * result + ((timeSailedSinceRaceStart == null) ? 0 : timeSailedSinceRaceStart.hashCode());
         result = prime * result + ((calculatedTime == null) ? 0 : calculatedTime.hashCode());
         result = prime * result + ((calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) ? 0
                 : calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.hashCode());
+        result = prime * result + ((currentSpeedAndCourseOverGround == null) ? 0
+                : currentSpeedAndCourseOverGround.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime * result + ((distanceToStarboardSideOfStartLineInMeters == null) ? 0
                 : distanceToStarboardSideOfStartLineInMeters.hashCode());
@@ -666,6 +692,11 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!boat.equals(other.boat))
             return false;
+        if (timeSailedSinceRaceStart == null) {
+            if (other.timeSailedSinceRaceStart != null)
+                return false;
+        } else if (!timeSailedSinceRaceStart.equals(other.timeSailedSinceRaceStart))
+            return false;
         if (calculatedTime == null) {
             if (other.calculatedTime != null)
                 return false;
@@ -676,6 +707,12 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead
                 .equals(other.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead))
+            return false;
+        if (currentSpeedAndCourseOverGround == null) {
+            if (other.currentSpeedAndCourseOverGround != null)
+                return false;
+        } else if (!currentSpeedAndCourseOverGround
+                .equals(other.currentSpeedAndCourseOverGround))
             return false;
         if (discarded != other.discarded)
             return false;

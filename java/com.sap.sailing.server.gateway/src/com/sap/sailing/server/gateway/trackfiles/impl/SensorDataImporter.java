@@ -46,7 +46,6 @@ public class SensorDataImporter {
      *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
      *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
      *            importer is selected on a per-file basis.
-     * @return 
      * 
      * @throws IOException
      */
@@ -96,7 +95,7 @@ public class SensorDataImporter {
 
     private void storeFixes(Iterable<DoubleVectorFix> fixes, DeviceIdentifier deviceIdentifier) {
         try {
-            service.getSensorFixStore().storeFixes(deviceIdentifier, fixes);
+            service.getSensorFixStore().storeFixes(deviceIdentifier, fixes, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
         }

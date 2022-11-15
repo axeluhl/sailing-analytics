@@ -80,7 +80,6 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
     @Override
     public void removeFromMap() {
         super.removeFromMap();
-        
         if (timer != null) {
             timer.removeTimeListener(this);
         }
@@ -88,14 +87,13 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
     
     public void setWindField(final WindFieldDTO windField) {
         this.windFieldDTO = windField;
-
         timePointWindDTOMap.clear();
         if (windField != null) {
             for(final SimulatorWindDTO w : windField.getMatrix()) {
-                if (!timePointWindDTOMap.containsKey(w.timepoint)) {
-                    timePointWindDTOMap.put(w.timepoint, new LinkedList<SimulatorWindDTO>());
+                if (!timePointWindDTOMap.containsKey(w.timepoint.asMillis())) {
+                    timePointWindDTOMap.put(w.timepoint.asMillis(), new LinkedList<SimulatorWindDTO>());
                 }
-                timePointWindDTOMap.get(w.timepoint).add(w);
+                timePointWindDTOMap.get(w.timepoint.asMillis()).add(w);
             }
         }
     }

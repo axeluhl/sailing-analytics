@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.pairinglist.CompetitionFormat;
@@ -14,29 +17,67 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.util.ThreadPoolUtil;
 
+/**
+ * Three pass algorithm to construct a good pairing list. The main goal is to assign competitors to groups within
+ * flights and to boats within the group. The following criteria are relevant:
+ * <ol>
+ * <li>Competing against a randomized set of competitors, such that one competitor meets all other competitors with
+ * appproximately equal frequency</li>
+ * <li>Competing on the different boats with approximately equal frequency</li>
+ * <li>Avoiding "unnecessary" boat changes at flight boundaries</li>
+ * </ol>
+ * Trying to meet these partially contradictory goals happens in three passes:
+ * <ol>
+ * <li>In the first pass, the assignments of competitors to races/groups/flights is computed.</li>
+ * <li>The assignment of competitors to boats is calculated such that the assignment frequencies are approximately
+ * balanced. A parameter controls how much boat assignment quality to sacrifice in favor of the next step, aming to
+ * reduce the number of boat changes.</li>
+ * <li>Find a good order of groups in a flight that reduces the number of boat changes at flight boundaries.</li>
+ * </ol>
+ * 
+ * 
+ * @author Robin Kuck
+ *
+ */
 public class PairingListTemplateImpl implements PairingListTemplate {
-
+    private static final Logger logger = Logger.getLogger(PairingListTemplateImpl.class.getName());
+    
     private final Random random = new Random();
     private final int[][] pairingListTemplate;
-    private final double standardDev;
+    private final double standardDev, boatAssignmentsQuality;
     private final int flightMultiplier;
+    
+    /**
+     * A tolerance threshold specifying how much deviation between the best (minimum) allocation count and the
+     * allocation count of the boat used in previous flight is considered acceptable. Example: If the best boat
+     * has been used only once and the boat used in the previous flight has already been used three times, this
+     * number has to be greater than (3-1)=2 to allow the competitor to be allocated the same boat as in the
+     * previous flight.
+     */
+    private final int boatChangeFactor;
+    private final int boatchanges;
     private final int dummies;
     private final ExecutorService executorService = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     private final int iterations;
-    
+
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
         // setting iterations to default of 100.000
-        this(pairingFrameProvider, 100000, 0);
-    }
-    
-    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flightMultiplier) {
-        // setting iterations to default of 100.000
-        this(pairingFrameProvider, 100000, flightMultiplier);
+        this(pairingFrameProvider, /* iterations */ 100000, /* flight multiplier */ 1, /* boat change factor */ 0);
     }
 
-    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier) {
+    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flightMultiplier) {
+        // setting iterations to default of 100.000
+        this(pairingFrameProvider, /* iterations */ 100000, flightMultiplier, /* boat change factor */ 0);
+    }
+
+    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flighMultiplier, int boatChangeFactor) {
+        this(pairingFrameProvider, /* iterations */ 100000, flighMultiplier, boatChangeFactor);
+    }
+
+    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier, int boatChangeFactor) {
         this.iterations = iterations;
         this.flightMultiplier = flightMultiplier;
+        this.boatChangeFactor = boatChangeFactor;
         if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
                 pairingFrameProvider.getCompetitorsCount())) {
             if (pairingFrameProvider.getCompetitorsCount() % pairingFrameProvider.getGroupsCount() != 0) {
@@ -45,35 +86,48 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             } else {
                 dummies = 0;
             }
+            this.pairingListTemplate = createPairingListTemplate(flightMultiplier, pairingFrameProvider);
+            final int boatChangesFromPairingList = this.getBoatChangesFromPairingList(this.pairingListTemplate,
+                    pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
+                    pairingFrameProvider.getCompetitorsCount());
             if (flightMultiplier <= 1) {
-                this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
-                        pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-                this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
-                        new int[pairingFrameProvider.getCompetitorsCount()
-                                + dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
-                this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
+                this.boatchanges = boatChangesFromPairingList;
             } else {
-                this.pairingListTemplate = this.createPairingListTemplate(
-                        pairingFrameProvider.getFlightsCount() / flightMultiplier,
-                        pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-                this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
-                        new int[pairingFrameProvider.getCompetitorsCount()
-                                + dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
-                this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
+                this.boatchanges = boatChangesFromPairingList * flightMultiplier
+                        + flightMultiplier * (this.getMatches(this.pairingListTemplate[pairingListTemplate.length - 1],
+                                this.pairingListTemplate[0]));
             }
+            this.standardDev = this.calcStandardDev(
+                    incrementAssociations(this.pairingListTemplate, new int[pairingFrameProvider.getCompetitorsCount()
+                            + dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
+            this.boatAssignmentsQuality = this.calcStandardDev(getBoatAssignments(this.pairingListTemplate,
+                    new int[pairingFrameProvider.getCompetitorsCount()
+                            + dummies][(pairingFrameProvider.getCompetitorsCount() + dummies)
+                                    / pairingFrameProvider.getGroupsCount()]));
+            this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
         } else {
             throw new IllegalArgumentException("Wrong arguments for creating a pairing list template: count of flights "
                     + "has to be greater than 0; count of groups has to be greater than 1; count of competitors has to "
                     + "be greater than 1; count of competitors has to be greater than count of groups");
         }
     }
-    // Used to convert a TemplateDTO to PairingListTemplate
-    public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier) {
+
+    private int[][] createPairingListTemplate(int flightMultiplier, PairingFrameProvider pairingFrameProvider) {
+        return this.createPairingListTemplate(pairingFrameProvider.getFlightsCount() / flightMultiplier,
+                pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
+    }
+
+    /**
+     * Used to convert a {@code PairingListeTemplateDTO} to {@link PairingListTemplate}
+     */
+    public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier, int boatChangeFactor) {
         this.pairingListTemplate = template;
-        int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length + 1);
+        int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length);
+        if (groupCount != (competitorsCount / this.pairingListTemplate[0].length)) {
+            groupCount++;
+        }
         this.dummies = groupCount - (competitorsCount % groupCount);
         int dummyIndex = 0;
-        
         for (int[] group : this.pairingListTemplate) {
             for (int competitorNumber = 0; competitorNumber < group.length; competitorNumber++) {
                 if (group[competitorNumber] < 0) {
@@ -83,15 +137,17 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         dummyIndex = 0;
                     }
                 }
-                
             }
         }
-        
-        this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate, 
+        this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
                 new int[competitorsCount + this.dummies][competitorsCount + this.dummies]));
+        this.boatAssignmentsQuality = this.calcStandardDev(getBoatAssignments(template,
+                new int[competitorsCount + this.dummies][(competitorsCount + this.dummies) / groupCount]));
+        this.boatchanges = this.getBoatChangesFromPairingList(template, template.length / groupCount, groupCount, competitorsCount);
         this.resetDummies(this.pairingListTemplate, competitorsCount + this.dummies);
         this.iterations = 100000;
         this.flightMultiplier = flightMultiplier;
+        this.boatChangeFactor = boatChangeFactor;
     }
 
     @Override
@@ -100,8 +156,19 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     @Override
+    public double getBoatAssignmentsQuality() {
+        return this.boatAssignmentsQuality;
+    }
+
+    @Override
+    public int getBoatChanges() {
+        return this.boatchanges;
+    }
+
+    @Override
     public <Flight, Group, Competitor, CompetitorAllocation> PairingList<Flight, Group, Competitor, CompetitorAllocation> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) throws PairingListCreationException {
+            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat)
+            throws PairingListCreationException {
         return new PairingListImpl<>(this, competitionFormat);
     }
 
@@ -113,40 +180,35 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     /**
      * Creates a pairing list template.
      * 
-     * <p>The generation of pairing list templates follow two general steps:</p>
+     * <p>
+     * The generation of pairing list templates follow two general steps:
+     * </p>
      * <ol>
-     *          <li>
-     *                  The <b>general algorithm</b> of creating a pairing list works as follows: <br \>
-     *                  The decision, who to put into pairing list template, is taken by looking at our <b>associations</b> 
-     *                  (The association matrix describes how often the competitors encounter each other). The algorithm 
-     *                  of creating a single group follows the following steps:
-     *                  <ol>
-     *                          <li>First of all, we generate a random seed, which affects the following generation. The 
-     *                              seed describes a competitor number. By setting the first competitor in the first group 
-     *                              of a flight, we can now go on and select the rest of competitor to put in the pairing 
-     *                              list. </li>
-     *                          <li>When filling up a single group of a flight, we iterate over all competitors and check 
-     *                              whether the competitor is already set in this group. Elsewise, we go on finding the 
-     *                              smallest sum of encounters with the remaining competitors in association matrix and 
-     *                              the smallest maximum of encounters. By checking these condition, in the end we will 
-     *                              get a well distributed pairing list template. </li>
-     *                  </ol>
-     *                  This is how the algorithm will be applied to the groups: In the first group the random seed will
-     *                  be set to the first assignment. The other assignment are generated the way describes above. The 
-     *                  remaining groups unless the last one will be filled up the way the algorithm follows. In the last
-     *                  group, we just place the remaining competitors that are not listed in the other groups.
-     *          </li>
-     *          <li>
-     *                  Unfortunately, there is no systematic way of generating a well distributed pairing list. Since
-     *                  we use a random generated seed, this algorithm is not deterministic and it works like the trial and 
-     *                  error principle: We commit a count of iterations to the algorithm to create as much pairing list 
-     *                  templates as committed and return the best (see JavaDoc of getQuality()).<br \>
-     *                  Since we want to improve the performance of this algorithm, we started to work with <b>concurrency</b>.
-     *                  First we generate the amount of needed seed combinations (in default case 100.000) and sort them, so seed combinations 
-     *                  with equal seeds for the first x flights are grouped. After dividing the seeds in that groups we start a task for each group.
-     *                  The task generates a pairinglist for every seed combination and returns the best. after that we only have to search the best
-     *                  of all tasks an return it.
-     *           </li>
+     * <li>The <b>general algorithm</b> of creating a pairing list works as follows: <br \> The decision, who to put
+     * into pairing list template, is taken by looking at our <b>associations</b> (The association matrix describes how
+     * often the competitors encounter each other). The algorithm of creating a single group follows the following
+     * steps:
+     * <ol>
+     * <li>First of all, we generate a random seed, which affects the following generation. The seed describes a
+     * competitor number. By setting the first competitor in the first group of a flight, we can now go on and select
+     * the rest of competitor to put in the pairing list.</li>
+     * <li>When filling up a single group of a flight, we iterate over all competitors and check whether the competitor
+     * is already set in this group. Elsewise, we go on finding the smallest sum of encounters with the remaining
+     * competitors in association matrix and the smallest maximum of encounters. By checking these condition, in the end
+     * we will get a well distributed pairing list template.</li>
+     * </ol>
+     * This is how the algorithm will be applied to the groups: In the first group the random seed will be set to the
+     * first assignment. The other assignment are generated the way describes above. The remaining groups unless the
+     * last one will be filled up the way the algorithm follows. In the last group, we just place the remaining
+     * competitors that are not listed in the other groups.</li>
+     * <li>Unfortunately, there is no systematic way of generating a well distributed pairing list. Since we use a
+     * random generated seed, this algorithm is not deterministic and it works like the trial and error principle: We
+     * commit a count of iterations to the algorithm to create as much pairing list templates as committed and return
+     * the best (see JavaDoc of getQuality()).<br \> Since we want to improve the performance of this algorithm, we
+     * started to work with <b>concurrency</b>. First we generate the amount of needed seed combinations (in default
+     * case 100.000) and sort them, so seed combinations with equal seeds for the first x flights are grouped. After
+     * dividing the seeds in that groups we start a task for each group. The task generates a pairinglist for every seed
+     * combination and returns the best. after that we only have to search the best of all tasks an return it.</li>
      * </ol>
      * </p>
      * 
@@ -181,23 +243,22 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     bestPLT = currentPLT;
                     bestDev = currentStandardDev;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.WARNING, "Caught exception waiting for the seed creation", e);
             }
         }
-        bestPLT = this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
-        bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitorCount);
+        this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
+        this.improveAssignmentChanges(bestPLT, flightCount, groupCount, competitorCount);
         if (flightMultiplier > 1) {
             bestPLT = this.multiplyFlights(bestPLT, flightCount, groupCount, competitorCount);
         }
         futures.clear();
-
         return bestPLT;
     }
-    
+
     /**
-     * Divides the allSeeds array into parts with seed combinations that starts with the same seeds. The parts
-     * are sized according to the thread pool size used so as to achieve reasonable concurrency. 
+     * Divides the allSeeds array into parts with seed combinations that starts with the same seeds. If there are to
+     * less flights this method cuts the off Seeds into 4000 parts to avoid to less Tasks.
      * 
      * @param equalSeeds
      *            number of equal seeds at the beginning of seed combinations which should be grouped. Attention: If
@@ -219,44 +280,55 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return output;
     }
-    
+
     /**
      * Fast sorting algorithm to sort a huge amount of seeds in max <code>n*log(n)</code> time. Uses counting sort.
+     * Steps through the flights of all seeds in reverse order, starting with the seeds' last flight and uses counting
+     * sort to sort by that flight. Counting sort is stable, so the sort order of flights already sorted is preserved
+     * for equal keys for the next flight. Counting sort works by storing the counts of each element in order to produce
+     * an array of insert indices into the output array for each distinct seed value. The values range from
+     * {@code 0..competitorCount-1}. The insert indices are obtained by aggregating across the counts. Element 0 always
+     * starts at index 0; subsequent elements start at the index of the previous element plus the count of the previous
+     * element. As the seeds are inserted into the output array, the insert indices keep getting incremented.
      * 
      * @param allSeeds
-     *            array of seeds, that should be sorted
+     *            array of seeds that should be sorted; the contents of the array may be altered by this method in an
+     *            undefined way; always use the array returned by this method.
      * @param competitorCount
      *            highest value inside the complete array. Needed for counting sort.
-     * @return sorted array with seed combinations
+     * @return sorted array with seed combinations; may be identical to {@code allSeeds} but with element order possibly
+     *         changed, but may also be a different array
      */
     protected int[][] radixSort(int[][] allSeeds, int competitorCount) {
-        int m = allSeeds[0].length;
-        for (int i = m - 1; i > -1; i--) {
-            allSeeds = this.countSort(allSeeds, i, competitorCount);
+        int lengthOfASeed = allSeeds[0].length;
+        int[][] output = new int[allSeeds.length][allSeeds[0].length];
+        int[] count = new int[competitorCount];
+        int[] writeIndexInOutput = new int[competitorCount];
+        for (int i = lengthOfASeed - 1; i >= 0; i--) { // go backwards for "LSD" radix sort (least significant digit)
+            Arrays.fill(count, 0); // quicker than re-allocating a new array each loop
+            for (int[] seed : allSeeds) {
+                count[seed[i]]++;
+            }
+            writeIndexInOutput[0] = 0;
+            for (int z = 1; z < count.length; z++) {
+                writeIndexInOutput[z] = writeIndexInOutput[z - 1] + count[z-1];
+            }
+            // now count[x-1] represents the first insert position in output for the seeds that have value x at their position i;
+            // count[x]-1 represents the last insert position in output for the seeds with value x at their position i;
+            // It is important now to keep the element order stable within the same "bucket" (seeds with same value at position i),
+            // so the placement of seeds in output needs to match the iteration order in allSeeds
+            for (int[] seed : allSeeds) {
+                output[writeIndexInOutput[seed[i]]++] = seed;
+            }
+            int[][] tmp = allSeeds;
+            allSeeds = output;
+            output = tmp; // re-use array of same dimensions for next loop, avoiding expensive allocation with value filling
         }
         return allSeeds;
     }
 
-    private int[][] countSort(int[][] allSeeds, int i, int competitorCount) {
-        int[][] output = new int[allSeeds.length][allSeeds[0].length];
-        int[] count = new int[competitorCount];
-        for (int[] j : allSeeds) {
-            count[j[i]]++;
-        }
-        for (int z = 1; z < count.length; z++) {
-            count[z] += count[z - 1];
-        }
-        for (int z = allSeeds.length - 1; z >= 0; z--) {
-            output[--count[allSeeds[z][i]]] = allSeeds[z];
-        }
-        return output;
-    }
-
     private boolean checkValues(int flights, int groups, int competitors) {
-        if ((flights > 0) && (groups > 0) && (competitors > 1) && (competitors >= groups)) {
-            return true;
-        }
-        return false;
+        return ((flights > 0) && (groups > 0) && (competitors > 1) && (competitors >= groups));
     }
 
     /**
@@ -266,10 +338,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *            count of flights
      * @param competitors
      *            count of competitors
-     * @param count number of seeds needed in the result array
+     * @param count
+     *            number of seeds needed in the result array
      * @return int array of random competitors
      */
-    
+
     private int[] generateSeeds(int flights, int competitors, int count) {
         int[] seeds = new int[count];
         Arrays.fill(seeds, 0);
@@ -313,24 +386,29 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             return createSinglePariringListTemplate(flights, groups, competitors, seeds);
         }
     }
-    
+
     /**
-     * Generates a single flight, that depends on a specific seed. 
+     * Generates a single flight, that depends on a specific seed.
      * 
-     * @param flightCount count of flights
-     * @param groupCount count of groups in flight
-     * @param competitorCount count of competitors
-     * @param currentAssociations current matrix that describes how often a competitor competed
-     *                             against another competitor. 
-     * @param seed generation bases on this competitor number.
+     * @param flightCount
+     *            count of flights
+     * @param groupCount
+     *            count of groups in flight
+     * @param competitorCount
+     *            count of competitors
+     * @param currentAssociations
+     *            current matrix that describes how often a competitor competed against another competitor.
+     * @param seed
+     *            generation bases on this competitor number.
      * 
      * @return generated flight as <code>int[groups][competitors / groups]</code> array
      */
     protected int[][] createFlight(int groupCount, int competitorCount, int[][] currentAssociations, int seed) {
         int[][] flightColumn = new int[groupCount][competitorCount / groupCount];
-
-        // filling the array with -1, because our competitor number starts at 0. So if we later ask, whether the
-        // competitor number 0 is already in our actual flight, it would say, that it is so. By filling up the array
+        // filling the array with -1, because our competitor number starts at 0.
+        // So if we later ask, whether the
+        // competitor number 0 is already in our actual flight, it would say,
+        // that it is so. By filling up the array
         // with -2, we can avoid this.
         for (int[] group : flightColumn) {
             Arrays.fill(group, -1);
@@ -353,7 +431,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         flightColumn[0][assignmentIndex] = competitorIndex;
                         associationSum = sumsOf3rdDemension[competitorIndex];
                         associationHigh[0] = maxValues[competitorIndex];
-
                     }
                 }
                 contains[flightColumn[0][assignmentIndex]] = true;
@@ -371,18 +448,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     if (!contains[competitorIndex]) {
                         flightColumn[groupIndex][0] = competitorIndex;
                         contains[flightColumn[groupIndex][0]] = true;
-                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, sumsOf3rdDemension, 0,
-                                competitorCount);
-                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, maxValues, 0,
-                                competitorCount);
+                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, sumsOf3rdDemension, 0, competitorCount);
+                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, maxValues, 0, competitorCount);
                         break;
                     }
                 }
-
                 for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[groupIndex] = Integer.MAX_VALUE;
-
                     for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
                         if (sumsOf3rdDemension[competitorIndex] <= associationSum && !contains[competitorIndex]
                                 && maxValues[competitorIndex] <= associationHigh[groupIndex]) {
@@ -413,28 +486,31 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return flightColumn;
     }
-    
+
     /**
-     * This method is called in every task to generate a number of different pairing lists 
-     * to compare and choose the best. 
+     * This method is called in every task to generate a number of different pairing lists to compare and choose the
+     * best.
      * 
-     * @param flightCount count of flights
-     * @param groupCount count of groups in flight
-     * @param competitorCount count of competitors
-     * @param iterationCount repetitions of generating pairing lists
-     * @param currentPLT constant generated flights
-     * @param associations current matrix that describes how often a competitor competed
-     *                      against another competitor. 
+     * @param flightCount
+     *            count of flights
+     * @param groupCount
+     *            count of groups in flight
+     * @param competitorCount
+     *            count of competitors
+     * @param iterationCount
+     *            repetitions of generating pairing lists
+     * @param currentPLT
+     *            constant generated flights
+     * @param associations
+     *            current matrix that describes how often a competitor competed against another competitor.
      * @return best complete pairing list out of given iterations
      */
-    private int[][] createSinglePariringListTemplate(int flightCount, int groupCount, int competitorCount,
-            int[][] seeds) {
+    private int[][] createSinglePariringListTemplate(int flightCount, int groupCount, int competitorCount, int[][] seeds) {
         int[][] bestPLT = new int[flightCount * groupCount][competitorCount / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
         int[][] bestAssociations = new int[competitorCount][competitorCount];
         for (int x = 0; x < seeds[0].length; x++) {
-            int[][] flightColumn = this.createFlight(groupCount, competitorCount, bestAssociations,
-                    seeds[seeds.length - 1][x]);
+            int[][] flightColumn = this.createFlight(groupCount, competitorCount, bestAssociations, seeds[seeds.length - 1][x]);
             for (int z = 0; z < flightColumn.length; z++) {
                 System.arraycopy(flightColumn[z], 0, bestPLT[x * groupCount + z], 0, flightColumn[0].length);
             }
@@ -470,7 +546,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *            int array on which the assignment will be written
      * @return matrix that represents the assignment associations
      */
-    protected int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
+    protected int[][] getBoatAssignments(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
                 associations[group[i]][i] += 1;
@@ -481,121 +557,146 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     /**
      * Switches competitors inside a group to improve competitor allocations. Method does not change the order of groups
-     * or flights. The standard deviation of team associations will not be influenced by this method. After executing
-     * the method the assignment should be well distributed.
+     * or flights. The standard deviation of team associations will not be influenced by this method.<p>
      * 
-     * @param pairinglist
-     *            current pairing list
-     * @param flights
+     * As the allocations are defined, they are counted. A competitor will be allocated to a boat ideally based on
+     * minimum count so far. However, if a tolerance for reducing the number of boat changes has been allowed for,
+     * less than optimal boats can be selected, given the count deviates less than the tolerance from the optimum.
+     * The tolerance is defined by {@link #boatChangeFactor}.
+     * 
+     * @param pairingList
+     *            current pairing list, improved in place by this method
+     * @param numberOflights
      *            count of flights
-     * @param groups
+     * @param numberOfGroups
      *            count of groups
-     * @param competitors
+     * @param numberOfCompetitors
      *            count of competitors
-     * @return improved pairing list template
      */
-    protected int[][] improveCompetitorAllocations(final int[][] pairinglist, int flights, int groups, int competitors) {
-        int[][] assignments = this.getAssignmentAssociations(pairinglist, new int[competitors][competitors / groups]);
-        double neededAssigments = flights / (competitors / groups);
-        double bestDev = Double.POSITIVE_INFINITY;
-        int[][] bestPLT = new int[flights * groups][competitors / groups];
-        for (int iteration = 0; iteration < 10; iteration++) {
-            for (int zGroup = 0; zGroup < pairinglist.length; zGroup++) {
-                int[][] groupAssignments = new int[competitors / groups][competitors / groups];
-                for (int zPlace = 0; zPlace < (competitors / groups); zPlace++) {
-                    System.arraycopy(assignments[pairinglist[zGroup][zPlace]], 0, groupAssignments[zPlace], 0,
-                            (competitors / groups));
-                }
-                for (int zPlace = 0; zPlace < competitors * 50; zPlace++) {
-                    int[] position = this.findWorstValuePosition(groupAssignments, (int) neededAssigments);
-                    if (groupAssignments[position[0]][position[1]] > neededAssigments - 1
-                            && groupAssignments[position[0]][position[1]] < neededAssigments + 1) {
-                        break;
-                    } else if (groupAssignments[position[0]][position[1]] < neededAssigments) {
-                        int temp = 0;
-                        temp = pairinglist[zGroup][position[1]];
-                        pairinglist[zGroup][position[1]] = pairinglist[zGroup][position[0]];
-                        pairinglist[zGroup][position[0]] = temp;
-                        assignments = this.getAssignmentAssociations(pairinglist,
-                                new int[competitors][competitors / groups]);
-                        for (int x = 0; x < (competitors / groups); x++) {
-                            System.arraycopy(assignments[pairinglist[zGroup][x]], 0, groupAssignments[x], 0,
-                                    (competitors / groups));
-                        }
-                    } else {
-                        if (position[0] == position[1]) {
-                            int temp = 0;
-                            temp = pairinglist[zGroup][this.findMinValuePosition(groupAssignments[position[0]])];
-                            pairinglist[zGroup][this.findMinValuePosition(
-                                    groupAssignments[position[0]])] = pairinglist[zGroup][position[0]];
-                            pairinglist[zGroup][position[0]] = temp;
-                            assignments = this.getAssignmentAssociations(pairinglist,
-                                    new int[competitors][competitors / groups]);
-                            for (int x = 0; x < (competitors / groups); x++) {
-                                System.arraycopy(assignments[pairinglist[zGroup][x]], 0, groupAssignments[x], 0,
-                                        (competitors / groups));
-                            }
-                        } else {
-                            groupAssignments[position[0]][position[1]] = -1;
-                        }
+    private void improveCompetitorAllocations(int[][] pairingList, int numberOflights, int numberOfGroups, int numberOfCompetitors) {
+        final int numberOfBoats = numberOfCompetitors / numberOfGroups;
+        // 1. Index: competitors, 2. Index: boats; Values represent the number of assignment of a competitor to a boat
+        int[][] boatAllocationCount = new int[numberOfCompetitors][numberOfBoats];
+        for (int raceIndex = 0; raceIndex < pairingList.length; raceIndex++) {
+            final int currentFlightIndex = raceIndex / numberOfGroups;
+            final int previousFlight = currentFlightIndex - 1;
+            // records the competitor index at the boat index to which the competitor shall be assigned in the current race
+            int[] targetAssignmentsForOriginalCompetitorSlots = new int[numberOfBoats];
+            for (int i=0; i<numberOfBoats; i++) {
+                targetAssignmentsForOriginalCompetitorSlots[i] = -1; // -1 means boat is still available
+            }
+            for (int competitorSlotIndex = 0; competitorSlotIndex < numberOfBoats; competitorSlotIndex++) {
+                int competitorIndex = pairingList[raceIndex][competitorSlotIndex];
+                int[] allocationCountPerBoatForCurrentCompetitor = boatAllocationCount[competitorIndex];
+                int minimumAllocationCount = Integer.MAX_VALUE;
+                int minimiumAvailableAllocationCount = Integer.MAX_VALUE;
+                int boatIndexOfAvailableBoatWithMinimumAllocationCount = -1;
+                for (int boatIndex=0; boatIndex<numberOfBoats; boatIndex++) {
+                    if (allocationCountPerBoatForCurrentCompetitor[boatIndex] < minimumAllocationCount) {
+                        minimumAllocationCount = allocationCountPerBoatForCurrentCompetitor[boatIndex];
+                    }
+                    // check separately for the minimum among the *available* boats:
+                    if (targetAssignmentsForOriginalCompetitorSlots[boatIndex] == -1 && allocationCountPerBoatForCurrentCompetitor[boatIndex] < minimiumAvailableAllocationCount) {
+                        boatIndexOfAvailableBoatWithMinimumAllocationCount = boatIndex;
+                        minimiumAvailableAllocationCount = allocationCountPerBoatForCurrentCompetitor[boatIndex];
                     }
                 }
-                final double standardDev = this.calcStandardDev(pairinglist);
-                if (standardDev < bestDev) {
-                    bestDev = standardDev;
-                    bestPLT = pairinglist;
+                assert boatIndexOfAvailableBoatWithMinimumAllocationCount != -1;
+                if (currentFlightIndex > 0) {
+                    int boatIndexOfCurrentCompetitorInPreviousFlight = getBoatIndexInFlight(pairingList, numberOfGroups, competitorIndex, previousFlight);
+                    // check whether the boat that the competitor was allocated for the previous flight is still available in this flight:
+                    if (targetAssignmentsForOriginalCompetitorSlots[boatIndexOfCurrentCompetitorInPreviousFlight] == -1) {
+                        // find out how much worse it would be compared to selecting the boat with the minimum allocation count
+                        // if we placed the current competitor onto the same boat as in the previous flight:
+                        int allocationCountDeviationForBoatOfPreviousFlight = allocationCountPerBoatForCurrentCompetitor[boatIndexOfCurrentCompetitorInPreviousFlight] -
+                                minimumAllocationCount;
+                        if (allocationCountDeviationForBoatOfPreviousFlight < boatChangeFactor) {
+                            targetAssignmentsForOriginalCompetitorSlots[boatIndexOfCurrentCompetitorInPreviousFlight] = competitorIndex;
+                        } else {
+                            // it would be too expensive boat-allocation-distribution-wise to place the current competitor onto the
+                            // boat used in the previous flight; allocate the competitor to the first available boat that has the
+                            // least allocation count for that competitor so far:
+                            targetAssignmentsForOriginalCompetitorSlots[boatIndexOfAvailableBoatWithMinimumAllocationCount] = competitorIndex;
+                        }
+                    } else {
+                        // the boat used in the previous flight by the current competitor is not available anymore in this flight;
+                        // assign to the least used boat available:
+                        targetAssignmentsForOriginalCompetitorSlots[boatIndexOfAvailableBoatWithMinimumAllocationCount] = competitorIndex;
+                    }
+                } else { // we're in the first flight (index 0), so we cannot consider any boat allocation of any previous flight
+                    targetAssignmentsForOriginalCompetitorSlots[boatIndexOfAvailableBoatWithMinimumAllocationCount] = competitorIndex;
+                }
+            }
+            // now targetAssignmentsForOriginalCompetitorSlots holds the desired assignments for the current race;
+            // adjust pairing list and update boatAllocationCount:
+            for (int competitorSlotIndex = 0; competitorSlotIndex < numberOfBoats; competitorSlotIndex++) {
+                pairingList[raceIndex][competitorSlotIndex] = targetAssignmentsForOriginalCompetitorSlots[competitorSlotIndex];
+                boatAllocationCount[targetAssignmentsForOriginalCompetitorSlots[competitorSlotIndex]][competitorSlotIndex]++;
+            }
+        }
+    }
+
+    private int getBoatIndexInFlight(int[][] pairingList, int numberOfGroups, int competitorIndex, int previousFlight) {
+        for (int raceIndex=previousFlight*numberOfGroups; raceIndex<previousFlight*numberOfGroups+numberOfGroups; raceIndex++) {
+            for (int boatIndex=0; boatIndex<pairingList[raceIndex].length; boatIndex++) {
+                if (competitorIndex == pairingList[raceIndex][boatIndex]) {
+                    return boatIndex;
                 }
             }
         }
-        return bestPLT;
+        throw new IllegalStateException("Previous flight "+previousFlight+" unexpectedly did not contain competitor "+competitorIndex);
     }
-    
+
     /**
-     * Improves the Assignment changes between two flights by switching the groups inside a flight. Competitors and
-     * their assignment will not be changed.
+     * Improves the Assignment changes between two flights by switching the groups inside two flights that are behind
+     * each other. Competitors and their assignment will not be changed.
      * 
      * @param pairingList
-     *            complete pairingListTemplate which needs to be improved; will be modified in place and then returned
+     *            complete pairingListTemplate which needs to be improved and which is modified in place by this method
      * @param flights
      *            number of flights which was used to generate the pairingListTemplate
      * @param competitors
      *            number of competitors which was used to generate the pairingListTemplate
      * 
-     * @return the improved pairingListTemplate; identical to the {@code pairingList} parameter and returned only for convenience
+     * @return the improved pairingListTemplate
      */
-    private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
-        int boatChanges[] = new int[flights - 1];
-        for (int i = 1; i < flights; i++) {
-            int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
-            int[] groupNext = new int[pairingList[0].length];
-            int bestMatchesIndex = -1;
+    private void improveAssignmentChanges(int[][] pairingList, int flights, int groups, int competitors) {
+        final int numberOfGroupsPerFlight = pairingList.length / flights;
+        for (int flightIndex = 1; flightIndex < flights; flightIndex++) {
+            // last group of previous flight
+            int bestMatchesIndexInCurrentFlight = -1;
+            int bestMatchesIndexInPreviousFlight = -1;
             int bestMatch = 0;
-            for (int j = 0; j < pairingList.length / flights; j++) {
-                System.arraycopy(pairingList[i * pairingList.length / flights + j], 0, groupNext, 0, groupNext.length);
-                int currentMatch = this.getMatches(groupPrev, groupNext);
-                if (currentMatch > bestMatch) {
-                    bestMatch = currentMatch;
-                    bestMatchesIndex = j;
+            for (int groupIndexInPreviousFlight = 1; groupIndexInPreviousFlight < numberOfGroupsPerFlight; groupIndexInPreviousFlight++) {
+                int[] groupPrev = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + groupIndexInPreviousFlight];
+                for (int groupIndexInCurrentFlight = 0; groupIndexInCurrentFlight < numberOfGroupsPerFlight; groupIndexInCurrentFlight++) {
+                    int[] candidateForFirstGroupInCurrentFlight = pairingList[flightIndex * numberOfGroupsPerFlight + groupIndexInCurrentFlight];
+                    int currentMatch = this.getMatches(groupPrev, candidateForFirstGroupInCurrentFlight);
+                    if (currentMatch > bestMatch) {
+                        bestMatch = currentMatch;
+                        bestMatchesIndexInCurrentFlight = groupIndexInCurrentFlight;
+                        bestMatchesIndexInPreviousFlight = groupIndexInPreviousFlight;
+                    }
                 }
             }
-            if (bestMatchesIndex > 0) { // for ==0 nothing needs to be done; the group that matches the last group
-                // of the previous flight best is already the first in its flight
-                int[] temp = new int[pairingList[0].length];
-                System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
-                System.arraycopy(pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
-                        pairingList[i * pairingList.length / flights], 0, groupNext.length);
-                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
-                        temp.length);
+            // no need to swap if best match is already in first position of flight
+            if (bestMatchesIndexInCurrentFlight > 0) {
+                int[] temp = pairingList[flightIndex * numberOfGroupsPerFlight];
+                pairingList[flightIndex * numberOfGroupsPerFlight] = pairingList[flightIndex * numberOfGroupsPerFlight + bestMatchesIndexInCurrentFlight];
+                pairingList[flightIndex * numberOfGroupsPerFlight + bestMatchesIndexInCurrentFlight] = temp;
             }
-            boatChanges[i - 1] = groupNext.length - bestMatch;
+            if (bestMatchesIndexInPreviousFlight > 0 && bestMatchesIndexInPreviousFlight < numberOfGroupsPerFlight - 1) {
+                int[] temp = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + numberOfGroupsPerFlight - 1];
+                pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + numberOfGroupsPerFlight - 1] = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + bestMatchesIndexInPreviousFlight];
+                pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + bestMatchesIndexInPreviousFlight] = temp;
+            }
         }
-        return pairingList;
     }
 
     private int getMatches(int[] arr1, int[] arr2) {
         int matches = 0;
-        for (int value : arr1) {
-            if (this.contains(arr2, value)) {
+        for (int i = 0; i < arr1.length; i++) {
+            if (arr1[i] == arr2[i]) {
                 matches++;
             }
         }
@@ -603,14 +704,19 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     /**
-     * Duplicates flights specified by flightMultiplier, e.g.: <br /><br />
+     * Duplicates flights specified by flightMultiplier, e.g.: <br />
+     * <br />
      * 
      * Flight 1, Flight2, Flight3 ... -> Flight 1, FLight 1, Flight 1..., Flight 2, Flight 2, Flight 2...
-     *  
-     * @param bestPLT the best {@link PairingListTemplate}
-     * @param flightCount count of flights
-     * @param groupCount count of groups
-     * @param competitorCount count of competitors
+     * 
+     * @param bestPLT
+     *            the best {@link PairingListTemplate}
+     * @param flightCount
+     *            count of flights
+     * @param groupCount
+     *            count of groups
+     * @param competitorCount
+     *            count of competitors
      * @return returns the duplicated {@link PairingListTemplate}
      */
     private int[][] multiplyFlights(int[][] bestPLT, int flightCount, int groupCount, int competitorCount) {
@@ -625,64 +731,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return result;
     }
-    
-    /**
-     * Returns an index that has the greatest difference to neededAssignments
-     * 
-     * @param groupAssignments array that contains the values
-     * @param neededAssigments reference value
-     * @return int array with 2 indices that represent row and column of the worst value
-     */
-    private int[] findWorstValuePosition(int[][] groupAssignments, int neededAssigments) {
-        int[] worstValuePos = new int[2];
-        int worstValue = 0;
-        for (int i = 0; i < groupAssignments.length; i++) {
-            for (int z = 0; z < groupAssignments[0].length; z++) {
-                if (groupAssignments[i][z] >= 0) {
-                    if (Math.abs(groupAssignments[i][z] - neededAssigments) > worstValue) {
-                        worstValuePos[0] = i;
-                        worstValuePos[1] = z;
-                        worstValue = Math.abs(groupAssignments[i][z] - neededAssigments);
-                    }
-                }
-            }
-        }
-        return worstValuePos;
-    }
-    
-    /**
-     * Checks if an array contains a specific value
-     * 
-     * @param arr {@link Array} in which the value might exist
-     * @param value value to search for
-     * @return true, if the value is found, else false
-     */
-    private boolean contains(int[] arr, int value) {
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] == value) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    private int findMinValuePosition(int[] arr) {
-        int temp = Integer.MAX_VALUE;
-        int position = -1;
-        for (int z = 0; z < arr.length; z++) {
-            if (arr[z] < temp) {
-                position = z;
-                temp = arr[z];
-            }
-        }
-        return position;
-    }
-    
     /**
      * Returns a random number between min and max.
      * 
-     * @param min lower bound
-     * @param max upper bound
+     * @param min
+     *            lower bound
+     * @param max
+     *            upper bound
      * @return a random number
      */
     private int getRandomIntegerBetweenZeroAndMax(int max) {
@@ -717,7 +773,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return associations;
     }
-    
+
     /**
      * Opposite to <code>incremetAssociations</code>. This method reduces the matrix <code>associtaions</code> by the
      * given pairinglist/flight.
@@ -729,7 +785,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return the modified associations matrix
      */
     public int[][] decrementAssociations(int[][] pairingList, int[][] associations) {
-        for (int[] group: pairingList) {
+        for (int[] group : pairingList) {
             for (int i = 0; i < group.length; i++) {
                 for (int j = 0; j < group.length; j++) {
                     if (group[i] == group[j]) {
@@ -744,22 +800,20 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     /**
-     * Calculates the standard deviation from all numbers in association matrix.
-     * The method ignores all numbers smaller 0, because senseless values are marked 
-     * with -1.
-     * The return value is used to compare the quality of different pairing list templates.
+     * Calculates the standard deviation from all numbers in association matrix. The method ignores all numbers smaller
+     * 0, because senseless values are marked with -1. The return value is used to compare the quality of different
+     * pairing list templates.
      * 
-     * @param associations association describes a 2 dimensional array of integers, which contains the information 
-     *                      about how often the teams play against each other
+     * @param associations
+     *            association describes a 2 dimensional array of integers, which contains the information about how
+     *            often the teams play against each other
      * @return standardDev returns how much the association values deviate from each other
      */
     protected double calcStandardDev(int[][] associations) {
         double standardDev = 0;
-        int k = associations[0][0],     // first value of association array
-            n = 0,                      // count of elements in association array
-            exp = 0,                    
-            exp2 = 0;                   
-
+        int k = associations[0][0], // first value of association array
+                n = 0, // count of elements in association array
+                exp = 0, exp2 = 0;
         for (int i = 0; i < associations.length; i++) {
             for (int j = 0; j < associations[0].length; j++) {
                 if (associations[i][j] < 0) {
@@ -774,7 +828,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         standardDev = Math.sqrt((exp2 - (Math.pow(exp, 2)) / n) / n);
         return standardDev;
     }
-    
+
     /**
      * This Method replaces the given number of dummy competitors with -1, so they are not longer valid and could not be
      * read on client side.
@@ -800,5 +854,16 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
         }
         return bestPLT;
+    }
+
+    protected int getBoatChangesFromPairingList(int[][] pairinglist, int flightcount, int groupcount, int competitorcount) {
+        int sumOfBoatchanges = 0;
+        for (int groupindex = groupcount - 1; groupindex < flightcount * groupcount; groupindex += groupcount) {
+            if (groupindex + 1 < pairinglist.length) {
+                sumOfBoatchanges += ((competitorcount / groupcount)
+                        - this.getMatches(pairinglist[groupindex], pairinglist[groupindex + 1]));
+            }
+        }
+        return sumOfBoatchanges;
     }
 }

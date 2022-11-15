@@ -9,6 +9,7 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sse.common.Speed;
@@ -19,7 +20,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * Re-calculating the maximum speed over a {@link GPSFixTrack} is time consuming. When the track grows the way it
@@ -88,7 +89,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      * outside of the invalidation interval, crop cache entry's interval such that it's overlap-free, otherwise remove.
      */
     @Override
-    public void gpsFixReceived(FixType fix, ItemType item, boolean firstFixInTrack) {
+    public void gpsFixReceived(FixType fix, ItemType item, boolean firstFixInTrack, AddResult addedOrReplaced) {
         // find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that interval, produces "fix"
         TimeRange invalidationInterval = track.getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(fix);
         LockUtil.lockForWrite(lock);

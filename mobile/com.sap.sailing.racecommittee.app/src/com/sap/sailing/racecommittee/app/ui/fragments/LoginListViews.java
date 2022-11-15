@@ -1,13 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +21,10 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
@@ -73,7 +75,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         ArrayList<View> above_position = new ArrayList<>();
         above_position.add(event_layout);
         above_position.add(area_layout);
-        mPositionContainer = new ToggleContainer(view, position_fragment, position_header, position_text, above_position);
+        mPositionContainer = new ToggleContainer(view, position_fragment, position_header, position_text,
+                above_position);
 
         // add listeners to the click areas
         if (event_header != null) {
@@ -86,7 +89,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             position_header.setOnClickListener(this);
         }
 
-        mSignUp = (Button) view.findViewById(R.id.login_submit);
+        mSignUp = view.findViewById(R.id.login_submit);
         if (mSignUp != null) {
             mSignUp.setOnClickListener(this);
         }
@@ -98,8 +101,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
-        filter.addAction(AppConstants.INTENT_ACTION_RESET);
+        filter.addAction(AppConstants.ACTION_TOGGLE);
+        filter.addAction(AppConstants.ACTION_RESET);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mListener, filter);
     }
 
@@ -117,7 +120,15 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             case R.id.event_header:
                 mCourseAreaContainer.close();
                 mPositionContainer.close();
-                mEventContainer.toggle();
+                final boolean expanded = mEventContainer.toggle();
+                final Fragment fragment = requireFragmentManager().findFragmentById(R.id.event_fragment);
+                if (fragment instanceof EventListFragment) {
+                    if (expanded) {
+                        ((EventListFragment) fragment).onExpanded();
+                    } else {
+                        ((EventListFragment) fragment).onCollapsed();
+                    }
+                }
                 break;
 
             case R.id.area_header:
@@ -162,7 +173,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         private AppUtils mAppUtils;
 
-        public ToggleContainer(View rootView, FrameLayout frame, RelativeLayout header, TextView text, List<View> layouts) {
+        public ToggleContainer(View rootView, FrameLayout frame, RelativeLayout header, TextView text,
+                               List<View> layouts) {
             mRootView = rootView;
             mFrame = frame;
             mText = text;
@@ -172,14 +184,15 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             mAppUtils = AppUtils.with(getActivity());
         }
 
-        public void toggle() {
+        public boolean toggle() {
             final int[] pos = new int[2];
 
             if (mFrame != null && mFrame.getLayoutParams() != null) {
                 // open the frame
                 if (mFrame.getLayoutParams().height == 0) {
                     mFrame.getLocationOnScreen(pos);
-                    if ((mAppUtils.isPhone() && mAppUtils.isLandscape()) || (mAppUtils.isPhone() && mAppUtils.isHDPI())) {
+                    if ((mAppUtils.isPhone() && mAppUtils.isLandscape())
+                            || (mAppUtils.isPhone() && mAppUtils.isHDPI())) {
                         if (mLayouts != null) {
                             for (View view : mLayouts) {
                                 setVisibility(view, View.GONE);
@@ -191,15 +204,17 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
                     mFrame.getLayoutParams().height = ScreenHelper.on(getActivity()).getScreenHeight() - pos[1];
                     mFrame.requestLayout();
                     setVisibility(mText, View.GONE);
+                    return true;
                 } else {
                     close();
                 }
             }
+            return false;
         }
 
         public void close() {
             if (mFrame != null && mFrame.getLayoutParams() != null) {
-                if ((!mAppUtils.is10inch() && mAppUtils.isLandscape()) || mAppUtils.isPhone() && mAppUtils.isHDPI() ) {
+                if ((!mAppUtils.is10inch() && mAppUtils.isLandscape()) || mAppUtils.isPhone() && mAppUtils.isHDPI()) {
                     if (mLayouts != null) {
                         for (View view : mLayouts) {
                             setVisibility(view, View.VISIBLE);
@@ -237,20 +252,20 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             switch (action) {
-                case AppConstants.INTENT_ACTION_TOGGLE:
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
+                case AppConstants.ACTION_TOGGLE:
+                    String data = intent.getStringExtra(AppConstants.EXTRA_DEFAULT);
+                    if (AppConstants.ACTION_TOGGLE_EVENT.equals(data)) {
                         onClick(mEventContainer.getHeader());
                     }
-                    if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
+                    if (AppConstants.ACTION_TOGGLE_AREA.equals(data)) {
                         onClick(mCourseAreaContainer.getHeader());
                     }
-                    if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
+                    if (AppConstants.ACTION_TOGGLE_POSITION.equals(data)) {
                         onClick(mPositionContainer.getHeader());
                     }
                     break;
 
-                case AppConstants.INTENT_ACTION_RESET:
+                case AppConstants.ACTION_RESET:
                     mSignUp.setEnabled(false);
                     break;
 

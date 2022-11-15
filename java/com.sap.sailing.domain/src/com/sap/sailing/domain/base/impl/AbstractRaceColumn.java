@@ -236,6 +236,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 TrackedRace trackedRace = getTrackedRace(fleet);
                 if (trackedRace != null) {
                     trackedRace.attachRaceLog(raceLog);
+                    RegattaLog regattaLog = getRegattaLog();
+                    if (regattaLog != null) {
+                        trackedRace.attachRegattaLog(regattaLog);
+                    }
                 }
             }, /* prio */0);
             // because this will add the race log to the tracked race's attachedRaceLogs collection again, and
@@ -385,18 +389,27 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         }
         Set<Competitor> competitorSet = new HashSet<Competitor>();
         Util.addAll(competitors, competitorSet);
-        RaceLog raceLog = getRaceLog(fleet);
-        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
-            if (event instanceof RegisterCompetitorEvent) {
-                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
-                if (competitorSet.contains(registerEvent.getCompetitor())) {
-                    try {
-                        raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event,
-                                "unregistering competitor because no longer selected for registration");
-                    } catch (NotRevokableException e) {
-                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
+        final RaceLog raceLog = getRaceLog(fleet);
+        final Set<RaceLogEvent> competitorRegistrationEventsToRevoke = new HashSet<>();
+        raceLog.lockForRead();
+        try {
+            for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
+                if (event instanceof RegisterCompetitorEvent) {
+                    RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
+                    if (competitorSet.contains(registerEvent.getCompetitor())) {
+                        competitorRegistrationEventsToRevoke.add(event);
                     }
                 }
+            }
+        } finally {
+            raceLog.unlockAfterRead();
+        }
+        for (final RaceLogEvent eventToRevoke : competitorRegistrationEventsToRevoke) {
+            try {
+                raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, eventToRevoke,
+                        "unregistering competitor because no longer selected for registration");
+            } catch (NotRevokableException e) {
+                logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
             }
         }
     }
@@ -469,7 +482,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException {
-        RaceLog raceLog = getRaceLog(fleet);
+        final RaceLog raceLog = getRaceLog(fleet);
         List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
         for (RaceLogEvent event : events) {
             raceLog.lockForRead();

@@ -29,31 +29,31 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitorsAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
-import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
+import com.sap.sse.gwt.client.celltable.SortableColumn;
+import com.sap.sse.gwt.client.celltable.SortedCellTableWithStylableHeaders;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeProvider;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
@@ -64,9 +64,9 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTableSettings>
         implements CompetitorSelectionChangeListener, TimeListener {
@@ -94,14 +94,13 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             final RaceCompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
             final Timer timer, final ManeuverTableSettings initialSettings,
             final TimeRangeWithZoomModel timeRangeWithZoomProvider, final LeaderBoardStyle style,
-            final UserService userService) {
+            final UserService userService, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context);
         final UserStatusEventHandler userStatusChangeHandler = new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                hasCanReplayDuringLiveRacesPermission = user != null
-                        && user.hasPermission(Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(),
-                                SailingPermissionsForRoleProvider.INSTANCE);
+                hasCanReplayDuringLiveRacesPermission = userService.hasPermission(raceDTO,
+                        TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES);
             }
         };
         userService.addUserStatusEventHandler(userStatusChangeHandler);

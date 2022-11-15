@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Varčevanje baterije"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"Izberite interval pošiljanja GPS-posodobitev"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Izberite najvišjo možno vrednost, da ohranite avtonomijo baterije, ob kateri bo spremljanje v živo še vedno zadovoljivo (odvisno od načina uporabe)."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"GPS-posodobitve bodo poslane v strežnik%1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"vsakih"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"takoj"</item>
+    	<item>"5 sekund"</item>
+    	<item>"10 sekund"</item>
+    	<item>"20 sekund"</item>
+    	<item>"60 sekund"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Vklopljeno"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Izklopljeno"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Prikaži: magnetni"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Prikaži: pravi"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Smer"</string>
+</resources>

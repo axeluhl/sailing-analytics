@@ -3,10 +3,9 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 
 /**
  * A true north indicator that can be added as a control to the map. Clicking / tapping the control toggles
@@ -21,7 +20,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     private final StringMessages stringMessages;
     
     private final RaceMapImageManager raceMapResources;
-    private final Label textLabel;
+    private final RaceMap map;
 
     private Canvas canvas;
     
@@ -34,6 +33,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
+        this.map = map;
         addStyleName(raceMapStyle.raceMapIndicatorPanel());
         addStyleName(raceMapStyle.trueNorthIndicatorPanel());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
@@ -43,24 +43,30 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         canvas.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RaceMapSettings oldRaceMapSettings = map.getSettings();
-                boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
-                
-                final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
-                        oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
-                        oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
-                        oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
-                        oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
-                        oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
-                        oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
-                        oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
-                        oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization());
-                map.updateSettings(newRaceMapSettings);
+                toggle();
             }
         });
-        textLabel = new Label("");
-        textLabel.addStyleName(this.raceMapStyle.raceMapIndicatorPanelTextLabel());
-        add(textLabel);
+    }
+
+    public void toggle() {
+        RaceMapSettings oldRaceMapSettings = map.getSettings();
+        boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
+        final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
+                oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(),
+                oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
+                oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
+                oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
+                oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
+                oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
+                oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
+                oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
+                oldRaceMapSettings.isShowSatelliteLayer(), oldRaceMapSettings.isShowWindLadder());
+                if (map.getComponentContext() != null
+                        && map.getComponentContext().isStorageSupported(map)) {
+                    map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,
+                            new DummyOnSettingsStoredCallback());
+                }
+        map.updateSettings(newRaceMapSettings);
     }
 
     protected void redraw() {
@@ -69,8 +75,6 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         String title = stringMessages.rotatedFromTrueNorth(Math.round(mappedTrueNorthDeg)) + '\n' +
                 stringMessages.clickToToggleWindUp();
         canvas.setTitle(title);
-        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : numberFormat.format(mappedTrueNorthDeg));
         if (!isVisible()) {
             setVisible(true);
         }

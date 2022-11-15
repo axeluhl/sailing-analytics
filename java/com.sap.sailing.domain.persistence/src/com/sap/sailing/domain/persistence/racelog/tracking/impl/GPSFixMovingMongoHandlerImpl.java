@@ -11,6 +11,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadPosition;
 import com.sap.sse.common.TimePoint;
 
 public class GPSFixMovingMongoHandlerImpl implements FixMongoHandler<GPSFixMoving> {
@@ -34,7 +35,7 @@ public class GPSFixMovingMongoHandlerImpl implements FixMongoHandler<GPSFixMovin
     @Override
     public GPSFixMoving transformBack(Document dbObject) {
         TimePoint timePoint = dof.loadTimePoint(dbObject);
-        Position position = dof.loadPosition(dbObject);
+        Position position = loadPosition(dbObject);
         SpeedWithBearing speed = dof.loadSpeedWithBearing(dbObject);
         return new GPSFixMovingImpl(position, timePoint, speed);
     }

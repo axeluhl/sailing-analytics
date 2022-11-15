@@ -3,15 +3,25 @@ package com.sap.sailing.gwt.home.communication.race;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
-public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadataDTO> {
+public class SimpleRaceMetadataDTO implements DTO, SecuredDTO, Comparable<SimpleRaceMetadataDTO> {
+    private static final long serialVersionUID = 4572985165272271996L;
+
     public enum RaceViewState {
         PLANNED {       // no start time set
             @Override
@@ -67,11 +77,13 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     
     private String leaderboardName;
     private String leaderboardGroupName;
+    private UUID leaderboardGroupId;
     private RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     private String raceName;
     private Date start;
     private RaceViewState state;
     private RaceTrackingState trackingState;
+    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     
     private HashSet<SimpleCompetitorDTO> competitors = new HashSet<>();
     
@@ -102,6 +114,14 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     
     public void setLeaderboardGroupName(String leaderboardGroupName) {
         this.leaderboardGroupName = leaderboardGroupName;
+    }
+    
+    public UUID getLeaderboardGroupId() {
+        return leaderboardGroupId;
+    }
+    
+    public void setLeaderboardGroupId(UUID leaderboardGroupId) {
+        this.leaderboardGroupId = leaderboardGroupId;
     }
     
     public Date getStart() {
@@ -180,6 +200,41 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
      */
     public boolean isScheduled() {
         return getViewState() == RaceViewState.SCHEDULED;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return regattaAndRaceIdentifier.getIdentifier();
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
+
+    @Override
+    public String getName() {
+        return raceName;
+    }
+
+    @Override
+    public final AccessControlListDTO getAccessControlList() {
+        return securityInformation.getAccessControlList();
+    }
+
+    @Override
+    public final OwnershipDTO getOwnership() {
+        return securityInformation.getOwnership();
+    }
+
+    @Override
+    public final void setAccessControlList(final AccessControlListDTO accessControlList) {
+        this.securityInformation.setAccessControlList(accessControlList);
+    }
+
+    @Override
+    public final void setOwnership(final OwnershipDTO ownership) {
+        this.securityInformation.setOwnership(ownership);
     }
     
 }

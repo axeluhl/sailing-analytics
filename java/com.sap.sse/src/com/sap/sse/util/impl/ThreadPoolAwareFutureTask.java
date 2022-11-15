@@ -24,29 +24,40 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     private static final Logger logger = Logger.getLogger(ThreadPoolAwareFutureTask.class.getName());
     private final KnowsExecutorAndTracingGet<V> getHelper = new KnowsExecutorAndTracingGetImpl<V>();
     private final Object callableOrRunnableIfLoggingFine;
+    private final Object delegate; // either a Callable or a Runnable whose type may or may not conform to the KnowsExecutor interface
     
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Callable<V> callable) {
-        super(callable);
+        super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(callable));
+        delegate = callable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = callable;
         } else {
             callableOrRunnableIfLoggingFine = null;
         }
-        getHelper.setExecutorThisTaskIsScheduledFor(executor);
+        setExecutorThisTaskIsScheduledFor(executor);
     }
 
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Runnable runnable, V result) {
-        super(runnable, result);
+        super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(runnable), result);
+        delegate = runnable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = runnable;
         } else {
             callableOrRunnableIfLoggingFine = null;
         }
-        getHelper.setExecutorThisTaskIsScheduledFor(executor);
+        setExecutorThisTaskIsScheduledFor(executor);
+    }
+    
+    @Override
+    public void run() {
+        super.run();
     }
     
     @Override
     public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {
+        if (delegate instanceof KnowsExecutor) {
+            ((KnowsExecutor) delegate).setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
+        }
         this.getHelper.setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
     }
 

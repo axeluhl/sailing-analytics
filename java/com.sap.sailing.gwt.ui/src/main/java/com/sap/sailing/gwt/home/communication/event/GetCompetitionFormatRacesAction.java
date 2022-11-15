@@ -49,8 +49,12 @@ public class GetCompetitionFormatRacesAction implements
     @Override
     @GwtIncompatible
     public ResultWithTTL<ListResult<RaceCompetitionFormatSeriesDTO>> execute(SailingDispatchContext context) throws DispatchException {
+        context.getSecurityService()
+                .checkCurrentUserReadPermission(context.getRacingEventService().getLeaderboardByName(regattaId));
+        context.getSecurityService()
+                .checkCurrentUserReadPermission(context.getRacingEventService().getRegattaByName(regattaId));
         RaceCompetitionFormatDataCalculator competitionFormatDataCalculator = new RaceCompetitionFormatDataCalculator();
-        EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, competitionFormatDataCalculator);
+        EventActionUtil.forRacesOfRegattaWithReadPermissions(context, eventId, regattaId, competitionFormatDataCalculator);
         Duration timeToLive = EventActionUtil.getEventStateDependentTTL(context, eventId, Duration.ONE_MINUTE);
         return new ResultWithTTL<>(timeToLive, new ListResult<>(competitionFormatDataCalculator.getResult()));
     }

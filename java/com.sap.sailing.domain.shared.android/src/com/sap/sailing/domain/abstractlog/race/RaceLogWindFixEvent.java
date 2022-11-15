@@ -3,8 +3,10 @@ package com.sap.sailing.domain.abstractlog.race;
 import com.sap.sailing.domain.common.Wind;
 
 /**
- * Contains a wind fix that the race officers documented in the Race Committee App ashore
- *
+ * Contains a wind fix that the race officers documented in the Race Committee App ashore.
+ * <p>
+ * No need to implement {@link InvalidatesLeaderboardCache} as changing wind data is already notified through the race
+ * change listener, if the wind fix reaches a race attached to the leaderboard.
  */
 public interface RaceLogWindFixEvent extends RaceLogEvent {
 

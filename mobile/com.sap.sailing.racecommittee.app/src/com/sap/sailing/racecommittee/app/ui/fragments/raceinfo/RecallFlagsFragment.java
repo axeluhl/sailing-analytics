@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,19 +35,15 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.flag_list, container, false);
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
-            header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
-            header.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                }
-            });
+            if (getArguments() != null) {
+                header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
+            }
+            header.setHeaderOnClickListener(v -> sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT));
         }
 
         return layout;
@@ -78,19 +75,5 @@ public class RecallFlagsFragment extends RaceFragment implements RecallFlagItemC
             // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
             getRaceState().setAdvancePass(now);
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 }

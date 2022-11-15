@@ -31,12 +31,17 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving> {
     private static final Logger logger = Logger.getLogger(DynamicGPSFixMovingTrackImpl.class.getName());
     
     private static final long serialVersionUID = 9111448573301259784L;
     private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
+    private static final Bearing MAX_COURSE_DIFFERENCE_BETWEEN_MEASURED_AND_COMPUTED_IN_DEGREES = new DegreeBearingImpl(90);
+
+    private long numberOfOutliersDueToCOGDiff;
+    private long numberOfFixesCheckedForOutlier;
 
     /**
      * Uses lossy compaction of fixes. See {@link CompactPositionHelper}. Use {@link #DynamicGPSFixMovingTrackImpl(Object, long, boolean)}
@@ -86,10 +91,12 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
     /**
      * This redefinition packs the <code>gpsFix</code> into a more compact representation that conserves
      * memory compared to the original, "naive" implementation. It gets along with a single object.
+     * 
+     * @return {@code true} if and only if the fix was actually added to the competitor's track
      */
     @Override
-    public void addGPSFix(GPSFixMoving gpsFix) {
-        add(gpsFix, /* replace */ true);
+    public boolean addGPSFix(GPSFixMoving gpsFix) {
+        return add(gpsFix, /* replace */ true);
     }
     
     @Override
@@ -192,6 +199,17 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         }
     }
     
+    private double getSmoothenedSpeedRatio(Speed s1, Speed s2) {
+        final double speedToPreviousFactor;
+        final double offsetForSmallSpeedsInKnots = 0.5;
+        if (s1.compareTo(s2) >= 0) {
+            speedToPreviousFactor = (s1.getKnots() + offsetForSmallSpeedsInKnots) / (s2.getKnots() + offsetForSmallSpeedsInKnots);
+        } else {
+            speedToPreviousFactor = (s2.getKnots() + offsetForSmallSpeedsInKnots) / (s1.getKnots() + offsetForSmallSpeedsInKnots);
+        }
+        return speedToPreviousFactor;
+    }
+    
     /**
      * In addition to the base class implementation, we may have the speed and bearing as measured by the device (the
      * special speed/bearing combination 0.0/0.0 is simply ignored, as are fix-provided speed values that exceed
@@ -210,22 +228,11 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         } else {
             boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 || e.getSpeed().getBearing().getDegrees() != 0.0) &&
                     (maxSpeedForSmoothing == null || e.getSpeed().compareTo(maxSpeedForSmoothing) <= 0);
-
             GPSFixMoving previous = rawFixes.lower(e);
             final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
-            Speed speedToPrevious = null;
             boolean foundValidPreviousFixInRange = false;
             while (previous != null && !foundValidPreviousFixInRange && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
-                speedToPrevious = previous.getPosition().getDistance(e.getPosition())
-                        .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
-                final double speedToPreviousFactor;
-                if (speedToPrevious.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
-                    speedToPreviousFactor = speedToPrevious.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
-                } else {
-                    speedToPreviousFactor = e.getSpeed().getMetersPerSecond() / speedToPrevious.getMetersPerSecond();
-                }
-                foundValidPreviousFixInRange = (maxSpeedForSmoothing == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0)
-                        && (!fixHasValidSogAndCog || speedToPreviousFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
+                foundValidPreviousFixInRange = isValid(previous, e, e, fixHasValidSogAndCog);
                 previous = rawFixes.lower(previous);
             }
             boolean foundValidNextFixInRange = false;
@@ -234,18 +241,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
             if (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) {
                 GPSFixMoving next = rawFixes.higher(e);
                 atLeastOneNextFixInRange = next != null && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
-                Speed speedToNext = null;
                 while (next != null && !foundValidNextFixInRange && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
-                    speedToNext = e.getPosition().getDistance(next.getPosition())
-                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-                    final double speedToNextFactor;
-                    if (speedToNext.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
-                        speedToNextFactor = speedToNext.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
-                    } else {
-                        speedToNextFactor = e.getSpeed().getMetersPerSecond() / speedToNext.getMetersPerSecond();
-                    }
-                    foundValidNextFixInRange = (maxSpeedForSmoothing == null || speedToNext.compareTo(maxSpeedForSmoothing) <= 0)
-                            && (!fixHasValidSogAndCog || speedToNextFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
+                    foundValidNextFixInRange = isValid(e, next, e, fixHasValidSogAndCog);
                     next = rawFixes.higher(next);
                 }
             }
@@ -255,6 +252,25 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         return isValid;
     }
 
+    private boolean isValid(GPSFixMoving from, GPSFixMoving to, GPSFixMoving takeCogAndSogFrom, boolean fixHasValidSogAndCog) {
+        boolean foundValidPreviousFixInRange;
+        final SpeedWithBearing speedToNeighbor = from.getSpeedAndBearingRequiredToReach(to);
+        boolean failedDueToCOGDiff = false;
+        foundValidPreviousFixInRange = (maxSpeedForSmoothing == null || speedToNeighbor.compareTo(maxSpeedForSmoothing) <= 0)
+                && (!fixHasValidSogAndCog ||
+                        (getSmoothenedSpeedRatio(speedToNeighbor, takeCogAndSogFrom.getSpeed()) <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
+                        // if speed factor is in acceptable range, also check for a significant difference in COG reported and measured:
+                        && !(failedDueToCOGDiff = speedToNeighbor.getBearing().getDifferenceTo(takeCogAndSogFrom.getSpeed().getBearing()).abs().compareTo(MAX_COURSE_DIFFERENCE_BETWEEN_MEASURED_AND_COMPUTED_IN_DEGREES) > 0)));
+        if (failedDueToCOGDiff) {
+            numberOfOutliersDueToCOGDiff++;
+            logger.finer(()->""+DynamicGPSFixMovingTrackImpl.this+": computed COG "+speedToNeighbor.getBearing()+" differs significantly (by "+
+                    speedToNeighbor.getBearing().getDifferenceTo(takeCogAndSogFrom.getSpeed().getBearing()).abs()+
+                    ") from reported COG "+takeCogAndSogFrom.getSpeed().getBearing());
+        }
+        numberOfFixesCheckedForOutlier++;
+        return foundValidPreviousFixInRange;
+    }
+    
     @Override
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);

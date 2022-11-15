@@ -104,7 +104,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         regattaDetails.deleteSeries("Default");
         // Start the tracking for the races and wait until they are ready to use
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);

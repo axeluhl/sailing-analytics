@@ -13,7 +13,7 @@ import org.apache.commons.math.linear.RealMatrixPreservingVisitor;
 import org.apache.commons.math.linear.RealVector;
 import org.apache.commons.math.linear.SingularMatrixException;
 
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -141,7 +141,6 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
 
     @Override
     public PolynomialFunction getOrCreatePolynomialFunction() throws NotEnoughDataHasBeenAddedException {
-
         PolynomialFunction resultFunction;
         if (!functionNeedsUpdate.get()) {
             LockUtil.lockForRead(cacheLock);
@@ -199,7 +198,6 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             if (nanChecker.hasNaNEntry()) {
                 throw new NotEnoughDataHasBeenAddedException("Matrix singular, all x input equal?");
             }
-
         }
         RealVector coeffs = inversedMatrix.operate(vectorOfXYMultSumsCopy);
         if (!hasIntercept) {

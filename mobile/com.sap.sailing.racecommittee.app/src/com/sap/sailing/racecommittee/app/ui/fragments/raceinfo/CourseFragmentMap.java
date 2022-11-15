@@ -1,11 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import com.sap.sailing.racecommittee.app.R;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.sap.sailing.racecommittee.app.R;
 
 public class CourseFragmentMap extends CourseFragment {
 
@@ -16,7 +16,7 @@ public class CourseFragmentMap extends CourseFragment {
         fragment.setArguments(args);
         return fragment;
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_map, container, false);

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+    
+    <string name="app_name">"SAP Sail InSight"</string>
+    <string name="options_menu_settings">"Indstillinger"</string>
+    <string name="options_menu_checkout">"Checkout"</string>
+    <string name="options_add_team_photo">"Tilføj teamfoto"</string>
+    <string name="options_replace_team_photo">"Erstat teamfoto"</string>
+    <string name="settings_category_other">"Andre indstillinger"</string>
+    <string name="device_identifier">"Enheds-id"</string>
+    <string name="tracker_started">"Sporing blev startet"</string>
+    <string name="tracker_stopped">"Sporing blev stoppet"</string>
+    <string name="title_activity_regatta">"Regatta"</string>
+    <string name="title_activity_leaderboard">"Rangliste"</string>
+    <string name="title_activity_start">"Sæt GPS Tracker op"</string>
+    <string name="title_activity_tracking">"Sporing"</string>
+    <string name="please_confirm">"Bekræft"</string>
+    <string name="do_you_really_want_to_stop_tracking">"Er du sikker på, at du vil stoppe sporing?"</string>
+    <string name="add_team_photo">"Tilføj teamfoto"</string>
+    <string name="upload_in_progress">"Uploader..."</string>
+    <string name="upload_retry">"Fejl under upload.\nTryk for at prøve igen."</string>
+    <string name="upload_io_error">"Fejl ved upload af billede:"</string>
+    <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">"Vil du bruge et eksisterende billede eller tage et nyt?"</string>
+    <string name="existing_image">"Eksisterende"</string>
+    <string name="take_photo">"Tag foto"</string>
+    <string name="add_photo_select">"Foto"</string>
+    <string name="checking_in">"Indcheckning..."</string>
+    <string name="checking_out">"Udcheckning..."</string>
+    <string name="getting_event">"Henter oplysninger om begivenhed..."</string>
+    <string name="getting_leaderboard">"Henter oplysninger om rangliste..."</string>
+    <string name="getting_competitor">"Henter oplysninger om deltager..."</string>
+    <string name="error">"Fejl"</string>
+    <string name="error_could_not_complete_operation_on_server_try_again">"Kunne ikke fuldføre operation på server. Prøv igen."</string>
+    <string name="error_sending_team_image_to_server">"Fejl: Kunne ikke sende teambillede til server."</string>
+    <string name="regatta_starts_in">"Regatta start om:"</string>
+    <string name="hours">"Timer:"</string>
+    <string name="minutes">"Minutter:"</string>
+    <string name="days">"Dage:"</string>
+    <string name="please_listen_to_announcements">"Lyt til annonceringer"</string>
+    <string name="close">"Luk"</string>
+    <string name="thank_you_you_successfully_participated">"Tak! Du har deltaget i regattaen.\n\nDit SAP Sailing-team"</string>
+    <string name="tracking_colon">"Sporing:"</string>
+    <string name="regatta_in_progress">"Regattaen er i gang:"</string>
+    <string name="heading">"Pejling"</string>
+    <string name="course_over_ground">"Kurs over grunden"</string>
+    <string name="speed_over_ground">"Fart over grunden"</string>
+    <string name="none">"Ingen"</string>
+    <string name="show_leaderboard">"Rangliste"</string>
+    <string name="show_event">"Begivenhed"</string>
+    <string name="error_while_receiving_server_data">"Fejl ved modtagelse af serverdata"</string>
+    <string name="info_already_checked_in_this_qr_code">"Allerede checket ind på denne regatta"</string>
+    <string name="warning">"Advarsel"</string>
+    <string name="enable_gps">"GPS er slået fra, men sporing kræver GPS-positioner. Vil du slå GPS til i positionsindstillingerne?"</string>
+    <string name="gps_turned_off">"GPS er slået fra. Slå lokalitetstjenester (GPS) til i dine Android-indstillinger for at starte sporing."</string>
+    <string name="knots">"%sKn"</string>
+    <string name="preferences">"Præferencer"</string>
+    
+    
+    
+    
+    
+    <string name="tracking_notification_text">"Sporer aktuelt %s"</string>
+    <string name="waiting_for_gps">"Venter på GPS"</string>
+    
+</resources>

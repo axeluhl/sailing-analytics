@@ -2,9 +2,11 @@ package com.sap.sailing.domain.base;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
@@ -70,4 +72,11 @@ public interface Event extends EventBase {
      * logo / link on the event's UI representation.
      */
     void setWindFinderReviewedSpotsCollection(Iterable<String> reviewedSpotsCollectionIds);
+    
+    /**
+     * From indicators such as the tracking data inside {@link TrackedRace}s connected to this event and/or the
+     * geo-coded {@link #getVenue() venue} name tries to obtain a position of this event. It is possible
+     * that no such position can be obtained in which case this method returns {@code null}.
+     */
+    Position getLocation();
 }

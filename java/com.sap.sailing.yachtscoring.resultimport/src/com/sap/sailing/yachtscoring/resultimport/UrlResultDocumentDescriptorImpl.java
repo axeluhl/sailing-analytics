@@ -8,6 +8,7 @@ import java.net.URLConnection;
 import com.sap.sailing.domain.common.CompetitorGenderType;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class UrlResultDocumentDescriptorImpl implements ResultDocumentDescriptor {
     private URL documentURL;  
@@ -71,7 +72,7 @@ public class UrlResultDocumentDescriptorImpl implements ResultDocumentDescriptor
     @Override
     public InputStream getInputStream() {
         try {
-            URLConnection eventResultConn = documentURL.openConnection();
+            URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(documentURL);
             InputStream inputStream = (InputStream) eventResultConn.getContent();
             return inputStream;
         } catch (IOException e) {

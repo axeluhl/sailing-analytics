@@ -1,5 +1,6 @@
 package com.sap.sailing.velum.resultimport.impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import com.sap.sailing.velum.resultimport.CsvParser;
 import com.sap.sailing.velum.resultimport.CsvParserFactory;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final long serialVersionUID = 4767200739966995306L;
@@ -45,10 +47,8 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
             try {
                 parser.parseResults();
                 String boatClass = parser.getBoatClass();
-                
                 result.put(/* use document name as "event" name */ parser.getFilename(),
                         Collections.singleton(new Util.Pair<String, TimePoint>(boatClass, parser.getLastModified())));
-
             } catch (Exception e) {
                 logger.info("Parse error during CSV import. Ignoring document " + parser.toString());
                 logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getHasResultsForBoatClassFromDateByEventName", e);
@@ -62,7 +62,7 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
             TimePoint timePointPublished) throws Exception {
         for (CsvParser parser : getAllRegattaResults()) {
             try {
-                if(parser.getFilename().equals(eventName)) {
+                if (parser.getFilename().equals(eventName)) {
                     RegattaResults regattaResult = parser.parseResults();
                     return new RegattaScoreCorrectionsImpl(this, regattaResult);
                 }
@@ -74,10 +74,16 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
         return null;
     }
 
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        final CsvParser parser = parserFactory.createParser(inputStream, inputStream.toString(), MillisecondsTimePoint.now());
+        return new RegattaScoreCorrectionsImpl(this, parser.parseResults());
+    }
+
     private Iterable<CsvParser> getAllRegattaResults() throws Exception {
-        List<CsvParser> result = new ArrayList<>();
+        final List<CsvParser> result = new ArrayList<>();
         for (ResultDocumentDescriptor resultDocDescr : getResultDocumentProvider().getResultDocumentDescriptors()) {
-            CsvParser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getDocumentName(), resultDocDescr.getLastModified());
+            final CsvParser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getDocumentName(), resultDocDescr.getLastModified());
             result.add(parser);
         }
         return result;

@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 /**
  * An implementation of a ClientFactory providing security services
@@ -21,10 +22,9 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
     protected SecureClientFactoryImpl(TLV root, EventBus eventBus) {
         this(root, eventBus, new PlaceController(eventBus));
     }
-    
+
     protected SecureClientFactoryImpl(TLV root, EventBus eventBus, PlaceController placeController) {
         super(root, eventBus, placeController);
-        
         securityProvider = new DefaultWithSecurityImpl();
     }
 
@@ -32,9 +32,20 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
     public UserManagementServiceAsync getUserManagementService() {
         return securityProvider.getUserManagementService();
     }
-    
+
+    @Override
+    public UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return securityProvider.getUserManagementWriteService();
+    }
+
     @Override
     public UserService getUserService() {
         return securityProvider.getUserService();
     }
+    
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return securityProvider.getSubscriptionServiceFactory();
+    }
+    
 }

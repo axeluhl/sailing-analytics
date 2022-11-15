@@ -13,13 +13,15 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFac
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewClientFactory;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
 
 public interface DesktopClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
         EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory,
-        SearchResultClientFactory, WhatsNewClientFactory, SeriesClientFactory, UserProfileClientFactory,
-        ErrorClientFactory, ConfirmationClientFactory, PasswordResetClientFactory, QRCodeClientFactory {
+        SubscriptionClientFactory, SearchResultClientFactory, WhatsNewClientFactory, SeriesClientFactory,
+        UserProfileClientFactory, ErrorClientFactory, ConfirmationClientFactory, PasswordResetClientFactory,
+        QRCodeClientFactory {
 
     DesktopPlacesNavigator getHomePlacesNavigator();
 

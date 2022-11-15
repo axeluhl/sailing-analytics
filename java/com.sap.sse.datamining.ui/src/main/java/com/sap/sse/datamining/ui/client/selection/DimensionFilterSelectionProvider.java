@@ -119,7 +119,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         
         availableData = new HashSet<>();
         filteredData = new ListDataProvider<Serializable>(this::elementAsString);
-        filterPanel = new AbstractFilterablePanel<Serializable>(null, filteredData) {
+        filterPanel = new AbstractFilterablePanel<Serializable>(null, filteredData, getDataMiningStringMessages()) {
             @Override
             public Iterable<String> getSearchableStrings(Serializable element) {
                 return Collections.singleton(elementAsString(element));

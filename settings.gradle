@@ -1,15 +1,24 @@
 // web and common stuff
-include ":java:com.sap.sailing.domain.common"
-include ":java:com.sap.sailing.domain.shared.android"
-include ":java:com.sap.sailing.server.gateway.serialization.shared.android"
-include ":java:com.sap.sse.common"
-include ":java:com.sap.sse.security.common"
-include ":java:com.sap.sse.datamining.annotations"
-include ":java:com.sap.sse.shared.android"
-include ":java:org.json.simple"
+include(':com.sap.sailing.domain.common')
+project(':com.sap.sailing.domain.common').projectDir = new File('./java/com.sap.sailing.domain.common')
+include(':com.sap.sailing.domain.shared.android')
+project(':com.sap.sailing.domain.shared.android').projectDir = new File('./java/com.sap.sailing.domain.shared.android')
+include(':com.sap.sailing.server.gateway.serialization.shared.android')
+project(':com.sap.sailing.server.gateway.serialization.shared.android').projectDir = new File('./java/com.sap.sailing.server.gateway.serialization.shared.android')
+include(':com.sap.sse.common')
+project(':com.sap.sse.common').projectDir = new File('./java/com.sap.sse.common')
+include(':com.sap.sse.security.common')
+project(':com.sap.sse.security.common').projectDir = new File('./java/com.sap.sse.security.common')
+include(':com.sap.sse.datamining.annotations')
+project(':com.sap.sse.datamining.annotations').projectDir = new File('./java/com.sap.sse.datamining.annotations')
+include(':com.sap.sse.shared.android')
+project(':com.sap.sse.shared.android').projectDir = new File('./java/com.sap.sse.shared.android')
+include(':org.json.simple')
+project(':org.json.simple').projectDir = new File('./java/org.json.simple')
+
 
 // android projects
-include ":mobile:com.sap.sailing.android.shared"
-include ":mobile:com.sap.sailing.android.tracking.app"
-include ":mobile:com.sap.sailing.racecommittee.app"
-include ":mobile:com.sap.sailing.buoy.positioning"
+include(':mobile:com.sap.sailing.android.shared')
+include(':mobile:com.sap.sailing.android.tracking.app')
+include(':mobile:com.sap.sailing.android.buoy.positioning.app')
+include(':mobile:com.sap.sailing.racecommittee.app')

@@ -1,9 +1,25 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
+import android.util.SparseBooleanArray;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -27,27 +43,10 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.util.SparseBooleanArray;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.TimePicker;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
@@ -93,15 +92,15 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 Calendar finishedCalendar = Calendar.getInstance();
                 finishedCalendar.setTime(finishedTime.asDate());
                 Calendar now = Calendar.getInstance();
-                return finishedCalendar.get(Calendar.YEAR) == now.get(Calendar.YEAR) && finishedCalendar.get(Calendar.DAY_OF_YEAR) == now
-                    .get(Calendar.DAY_OF_YEAR);
+                return finishedCalendar.get(Calendar.YEAR) == now.get(Calendar.YEAR)
+                        && finishedCalendar.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR);
             }
         }
         return false;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = super.onCreateView(inflater, container, savedInstanceState);
         if (customView == null) {
             layout = inflater.inflate(R.layout.protest_time_fragment, container, false);
@@ -131,12 +130,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
             mHome = ViewHelper.get(layout, R.id.header_text);
             if (mHome != null) {
-                mHome.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
-                        BroadcastManager.getInstance(getActivity()).addIntent(intent);
-                    }
+                mHome.setOnClickListener(v -> {
+                    Intent intent = new Intent(AppConstants.ACTION_REMOVE_PROTEST);
+                    BroadcastManager.getInstance(getActivity()).addIntent(intent);
                 });
             }
 
@@ -152,12 +148,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
             mChoose = ViewHelper.get(layout, R.id.choose);
             if (mChoose != null) {
-                mChoose.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        setAndAnnounceProtestTime();
-                    }
-                });
+                mChoose.setOnClickListener(v -> setAndAnnounceProtestTime());
             }
 
             mProtestDuration = ViewHelper.get(layout, R.id.protest_duration);
@@ -192,20 +183,15 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
     @Override
     protected DialogListenerHost getListenerHost() {
-        return new DialogListenerHost() {
+        return () -> new DialogListenerHost.DialogResultListener() {
             @Override
-            public DialogResultListener getListener() {
-                return new DialogResultListener() {
-                    @Override
-                    public void onDialogNegativeButton(AttachedDialogFragment dialog) {
-                        // no operation
-                    }
+            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
+                // no operation
+            }
 
-                    @Override
-                    public void onDialogPositiveButton(AttachedDialogFragment dialog) {
-                        setAndAnnounceProtestTime();
-                    }
-                };
+            @Override
+            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
+                setAndAnnounceProtestTime();
             }
         };
     }
@@ -213,12 +199,12 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     private View setupView() {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.protest_time_dialog, null);
-        mRacesList = (ListView) view.findViewById(R.id.protest_time_races_list);
+        mRacesList = view.findViewById(R.id.protest_time_races_list);
         setupRacesList(mRacesList);
-        mTimePicker = (TimePicker) view.findViewById(R.id.protest_time_time_picker);
+        mTimePicker = view.findViewById(R.id.protest_time_time_picker);
         setupTimePicker(mTimePicker);
-        mProtestDuration = (TextView) view.findViewById(R.id.protest_duration);
-        mProtestEndTime = (TextView) view.findViewById(R.id.protest_end);
+        mProtestDuration = view.findViewById(R.id.protest_duration);
+        mProtestEndTime = view.findViewById(R.id.protest_end);
         View changeDuration = view.findViewById(R.id.change_duration);
         if (changeDuration != null) {
             changeDuration.setOnClickListener(new DurationChangeListener());
@@ -261,7 +247,8 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint recentFinishedTime = null;
         for (ManagedRace race : races) {
             TimePoint currentFinishedTime = race.getState().getFinishedTime();
-            if (currentFinishedTime != null && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
+            if (currentFinishedTime != null
+                    && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
                 recentFinishedTime = currentFinishedTime;
             }
         }
@@ -278,15 +265,10 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         timePicker.setCurrentHour(hours);
         timePicker.setCurrentMinute(minutes);
 
-        timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-            @Override
-            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                updateProtestRange();
-            }
-        });
+        timePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateProtestRange());
 
-        ThemeHelper.setPickerColor(getActivity(), timePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-            .getColor(getActivity(), R.attr.sap_yellow_1));
+        ThemeHelper.setPickerColor(getActivity(), timePicker, ThemeHelper.getColor(requireContext(), R.attr.white),
+                ThemeHelper.getColor(requireContext(), R.attr.sap_yellow_1));
     }
 
     private void getRacesFromArguments() {
@@ -319,16 +301,12 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint startTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
-            Duration duration = Duration.ONE_MINUTE.times(AppPreferences.on(getActivity()).getProtestTimeDurationInMinutes());
+            Duration duration = Duration.ONE_MINUTE.times(mDuration);
             TimeRange protestTime = new TimeRangeImpl(startTime, startTime.plus(duration));
             race.getState().setProtestTime(now, protestTime);
         }
         if (mHome != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                mHome.callOnClick();
-            } else {
-                mHome.performClick();
-            }
+            mHome.callOnClick();
         }
     }
 
@@ -377,13 +355,13 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
         // tint all dots gray
         for (ImageView mDot : mDots) {
-            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+            int tint = ThemeHelper.getColor(requireContext(), R.attr.sap_light_gray);
             Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
             mDot.setImageDrawable(drawable);
         }
 
         // tint current dot black
-        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
+        int tint = ThemeHelper.getColor(requireContext(), R.attr.black);
         Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
         mDots.get(mActivePage).setImageDrawable(drawable);
 
@@ -403,12 +381,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     private void updateProtestRange() {
         if (mDuration == null) {
             mDuration = mPreferences.getProtestTimeDurationInMinutes();
-            if (mPreferences.isDefaultProtestTimeCustomEditable()) {
-                int custom = mPreferences.getProtestTimeDurationInMinutesCustom();
-                if (custom >= 0) {
-                    mDuration = custom;
-                }
-            }
         }
         if (mProtestDuration != null) {
             mProtestDuration.setText(getString(R.string.protest_duration, mDuration));
@@ -446,6 +418,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             this.group = new RaceGroupSeriesFleet(race);
         }
 
+        @NonNull
         @Override
         public String toString() {
             return String.format("%s - %s", group.getDisplayName(true), race.getRaceColumnName());
@@ -456,22 +429,20 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
         @Override
         public void onClick(View v) {
-            FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration, null);
-            final EditText duration = (EditText) layout.findViewById(R.id.protest_duration);
+            FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration,
+                    null);
+            final EditText duration = layout.findViewById(R.id.protest_duration);
             duration.setText(String.valueOf(mDuration));
             duration.setSelection(duration.length());
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextWrapper(v.getContext()), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(v.getContext().getString(R.string.protest_duration_dialog_title));
             builder.setView(layout);
-            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                try {
                     mDuration = Integer.parseInt(duration.getText().toString());
-                    if (mPreferences.isDefaultProtestTimeCustomEditable()) {
-                        mPreferences.setDefaultProtestTimeDurationInMinutesCustom(mDuration);
-                    }
-                    updateProtestRange();
+                } catch (NumberFormatException ignored) {
                 }
+                updateProtestRange();
             });
             builder.setNegativeButton(android.R.string.cancel, null);
             builder.show();

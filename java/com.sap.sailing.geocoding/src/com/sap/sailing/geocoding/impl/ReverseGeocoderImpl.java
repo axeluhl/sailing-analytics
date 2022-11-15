@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +14,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,11 +28,15 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class ReverseGeocoderImpl implements ReverseGeocoder {
 
-    private final String NEARBY_PLACE_SERVICE = "http://api.geonames.org/findNearbyPlaceNameJSON?";
+    private static final String BASE_URL = "http://api.geonames.org";
+    private static final String NEARBY_PLACE_SERVICE = BASE_URL+"/findNearbyPlaceNameJSON?";
+    private static final String SEARCH_BY_NAME_SERVICE = BASE_URL+"/searchJSON?";
     /**
      * Maximal distance in degree for the cache.<br />
      * The first number is the distance in kilometers and the second number is a needed calculation factor and mustn't
@@ -39,23 +46,23 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private final int XKM_RADIUS = 5;
     private final int ROWS_PER_XKM_RADIUS = 15;
     
-    private final int MAX_ROW_NUMBER = 1000;
+    private final int MAX_ROW_NUMBER = 500;
     private final int MAX_RADIUS = 300;
 
     private QuadTree<Util.Triple<Position, Double, List<Placemark>>> cache = new QuadTree<Util.Triple<Position,Double,List<Placemark>>>();;
+    
+    private static final Logger logger = Logger.getLogger(ReverseGeocoderImpl.class.getName());
 
     @Override
     public Placemark getPlacemarkNearest(Position position) throws IOException, ParseException {
         Placemark p = null;
         Util.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
-
         if (cachedPlacemarks != null && cachedPlacemarks.getC() != null && !cachedPlacemarks.getC().isEmpty()) {
             p = cachedPlacemarks.getC().get(0);
         } else {
             JSONArray geonames = callNearestService(position);
             if (geonames != null && !geonames.isEmpty()) {
-                p = JSONToPlacemark((JSONObject) geonames.get(0));
-
+                p = jsonToPlacemark((JSONObject) geonames.get(0));
                 if (p != null) {
                     List<Placemark> placemarks = new ArrayList<Placemark>();
                     placemarks.add(p);
@@ -63,22 +70,18 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
                 }
             }
         }
-
         return p;
     }
 
     @Override
     public List<Placemark> getPlacemarksNear(Position position, double radius) throws IOException, ParseException {
-        List<Placemark> placemarks = null;
-        Util.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
-        
-        //Calculating the search radius and the maximum number of returning Placemarks
+        final List<Placemark> placemarks;
+        final Util.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
+        // Calculating the search radius and the maximum number of returning Placemarks
         double limitedRadius = Math.min(radius, MAX_RADIUS);
-        int radiusInt = (int) limitedRadius;
-        int xKmRadius = radiusInt / XKM_RADIUS;
-        int maxRows = (int) (ROWS_PER_XKM_RADIUS * Math.pow(2, xKmRadius));
-        maxRows = Math.min(maxRows, MAX_ROW_NUMBER);
-
+        final int radiusInt = (int) limitedRadius;
+        final int xKmRadius = radiusInt / XKM_RADIUS;
+        final int maxRows = (int) Math.min(ROWS_PER_XKM_RADIUS * Math.pow(2, xKmRadius), MAX_ROW_NUMBER);
         if (cachedPlacemarks != null && cachedPlacemarks.getB() >= limitedRadius) {
             if (cachedPlacemarks.getC().size() > maxRows) {
                 placemarks = cachedPlacemarks.getC().subList(0, maxRows);
@@ -86,7 +89,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
                 placemarks = new ArrayList<Placemark>(cachedPlacemarks.getC());
             }
         } else {
-            //Recalculating the radius and resetting the search position to keep the cache correct
+            // Recalculating the radius and resetting the search position to keep the cache correct
             Position searchPosition = null;
             if (cachedPlacemarks != null) {
                 searchPosition = cachedPlacemarks.getA();
@@ -95,27 +98,31 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
             } else {
                 searchPosition = position;
             }
-            
-            JSONArray geonames = callNearbyService(searchPosition, limitedRadius, maxRows);
+            final JSONArray geonames = callNearbyService(searchPosition, limitedRadius, maxRows);
             if (geonames != null) {
                 Iterator<Object> iterator = geonames.iterator();
-                placemarks = iterator.hasNext() ? new ArrayList<Placemark>() : null;
-                while (iterator.hasNext()) {
-                    JSONObject object = (JSONObject) iterator.next();
-                    Placemark place = JSONToPlacemark(object);
-                    if (place != null) {
-                        placemarks.add(JSONToPlacemark(object));
+                if (iterator.hasNext()) {
+                    placemarks = new ArrayList<Placemark>();
+                    while (iterator.hasNext()) {
+                        JSONObject object = (JSONObject) iterator.next();
+                        Placemark place = jsonToPlacemark(object);
+                        if (place != null) {
+                            placemarks.add(jsonToPlacemark(object));
+                        }
                     }
+                    // If there are no cached placemarks for the requested Position just cache them, otherwise update the cache
+                    if (cachedPlacemarks == null) {
+                        cachePlacemarks(searchPosition, limitedRadius, placemarks);
+                    } else {
+                        updateCachedPlacemarks(searchPosition, limitedRadius, placemarks);
+                    }
+                } else {
+                    placemarks = null;
                 }
-            }
-            // If there are no cached placemarks for the requested Position just cache them, otherwise update the cache
-            if (cachedPlacemarks == null && placemarks != null) {
-                cachePlacemarks(searchPosition, limitedRadius, placemarks);
-            } else if (placemarks != null) {
-                updateCachedPlacemarks(searchPosition, limitedRadius, placemarks);
+            } else {
+                placemarks = null;
             }
         }
-
         return placemarks;
     }
 
@@ -131,6 +138,14 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
             throws IOException, ParseException {
         List<Placemark> placemarks = getPlacemarksNearSorted(position, radius, comp);
         return placemarks == null ? null : placemarks.get(0);
+    }
+    
+    @Override
+    public Placemark getPlacemark(String name, Comparator<Placemark> comp) throws IOException, ParseException {
+        StringBuilder url = new StringBuilder(SEARCH_BY_NAME_SERVICE);
+        url.append("name=" + URLEncoder.encode(name, "UTF-8"));
+        final JSONArray geonames = submitGeonamesRequestForJSONArrayResult(url);
+        return geonames.stream().map(o->jsonToPlacemark((JSONObject) o)).sorted(comp).findFirst().orElse(null);
     }
 
     private List<Placemark> getPlacemarksNearSorted(Position position, double radius, Comparator<Placemark> comp)
@@ -150,10 +165,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      * @return A {@link Placemark} or <code>null</code>, if the object doesn't contain a name, a postion or the
      *         if the population is 0
      */
-    private Placemark JSONToPlacemark(JSONObject json) {
+    private Placemark jsonToPlacemark(JSONObject json) {
         String name = (String) json.get("toponymName");
         String countryCode = (String) json.get("countryCode");
-
         // Tries are necessary, because some latitude or longitude values delivered by Geonames have no decimal places
         // and are interpreted as Long
         // Casting a Long to a Double raises a ClassCastException
@@ -233,36 +247,47 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     }
 
     private JSONArray callNearestService(Position position) throws MalformedURLException, IOException, ParseException {
-        StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
-        url.append("&lat=" + Double.toString(position.getLatDeg()));
-        url.append("&lng=" + Double.toString(position.getLngDeg()));
-        url.append("&username=" + getGeonamesUser());
-
-        URL request = new URL(url.toString());
-        URLConnection connection = request.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(in);
-        JSONArray geonames = (JSONArray) obj.get("geonames");
+        StringBuilder url = generateRequestUrlNearbyPlaceService(position);
+        JSONArray geonames = submitGeonamesRequestForJSONArrayResult(url);
         return geonames;
+    }
+
+    private URLConnection addUsernameParameterAndConnect(StringBuilder url) throws MalformedURLException, IOException {
+        url.append("&username=");
+        url.append(getGeonamesUser());
+        return HttpUrlConnectionHelper.redirectConnection(new URL(url.toString()), Duration.ONE_MINUTE, c->c.setRequestProperty("User-Agent", ""));
     }
 
     private JSONArray callNearbyService(Position position, double radius, int maxRows) throws MalformedURLException,
             IOException, ParseException {
+        StringBuilder url = generateRequestUrlNearbyPlaceService(position, radius, maxRows);
+        JSONArray geonames = submitGeonamesRequestForJSONArrayResult(url);
+        return geonames;
+    }
+    
+    private StringBuilder generateRequestUrlNearbyPlaceService(Position position) {
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
-        url.append("&lat=" + Double.toString(position.getLatDeg()));
+        url.append("lat=" + Double.toString(position.getLatDeg()));
         url.append("&lng=" + Double.toString(position.getLngDeg()));
+        return url;
+    }
+    
+    private StringBuilder generateRequestUrlNearbyPlaceService(Position position, double radius, int maxRows) {
+        StringBuilder url = generateRequestUrlNearbyPlaceService(position);
         url.append("&radius=" + Double.toString(radius));
         url.append("&maxRows=" + Integer.toString(maxRows));
-        url.append("&username=" + getGeonamesUser());
-
-        URL request = new URL(url.toString());
-        URLConnection connection = request.openConnection();
-        connection.setRequestProperty("User-Agent", "");
+        return url;
+    }
+    
+    private JSONArray submitGeonamesRequestForJSONArrayResult(StringBuilder url) throws MalformedURLException, IOException, ParseException {
+        URLConnection connection = addUsernameParameterAndConnect(url);
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(in);
         JSONArray geonames = (JSONArray) obj.get("geonames");
+        if (geonames == null) {
+            logger.log(Level.WARNING, "Returning null value for geonames object: " + obj.toJSONString());
+        }
         return geonames;
     }
 
@@ -270,5 +295,4 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private String getGeonamesUser() {
         return GEONAMES_USER+new Random().nextInt(10);
     }
-
 }

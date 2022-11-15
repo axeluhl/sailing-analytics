@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 
 /**
  * This class manages the lifecycle of the {@link FixLoaderAndTracker} by listening to
- * {@link RaceLogDenoteForTrackingEvent}, race log attached and stop tracking race changes.
+ * {@link RaceLogDenoteForTrackingEvent}, race log attached and stop tracking race changes.<p>
  * 
  * Once the race is stopped, it notifies its own {@link Owner} so that all reference to this instance can be cleanly
  * removed to prevent memory leaks.
@@ -32,6 +32,8 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private final DynamicTrackedRace trackedRace;
 
     private final SensorFixStore sensorFixStore;
+    
+    private final boolean removeOutliersFromCompetitorTracks;
 
     private final SensorFixMapperFactory sensorFixMapperFactory;
     
@@ -68,19 +70,17 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     };
 
     public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
-            SensorFixMapperFactory sensorFixMapperFactory) {
+            SensorFixMapperFactory sensorFixMapperFactory, boolean removeOutliersFromCompetitorTracks) {
+        this.removeOutliersFromCompetitorTracks = removeOutliersFromCompetitorTracks;
         this.trackedRace = trackedRace;
         this.sensorFixStore = sensorFixStore;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
-
         trackedRace.addListener(raceChangeListener);
-        
         synchronized (knownRaceLogs) {
             for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
                 addRaceLogUnlocked(raceLog);
             }
         }
-        
         updateDenotationState();
     }
 
@@ -131,7 +131,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private synchronized void startTrackerIfNotAlreadyStarted() {
         if (tracker == null) {
             logger.fine("Starting fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
-            tracker = new FixLoaderAndTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
+            tracker = new FixLoaderAndTracker(trackedRace, sensorFixStore, sensorFixMapperFactory, removeOutliersFromCompetitorTracks);
         }
     }
 

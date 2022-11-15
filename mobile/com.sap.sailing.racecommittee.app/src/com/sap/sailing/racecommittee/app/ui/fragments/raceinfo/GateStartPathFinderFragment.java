@@ -13,7 +13,6 @@ import android.widget.EditText;
 import com.sap.sailing.android.shared.util.ActivityHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -51,7 +50,8 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_pathfinder, container, false);
+        final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_pathfinder,
+                container, false);
 
         mNat = ViewHelper.get(layout, R.id.pathfinder_nat);
         mNum = ViewHelper.get(layout, R.id.pathfinder_num);
@@ -60,7 +60,7 @@ public class GateStartPathFinderFragment extends BaseFragment {
         if (getArguments() != null) {
             if (mNat != null) {
                 mNat.setText(getArguments().getString(NAT));
-                mNat.setFilters(new InputFilter[] { new InputFilter.AllCaps() });
+                mNat.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
                 mNat.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -82,7 +82,7 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
             if (mNum != null) {
                 mNum.setText(getArguments().getString(NUM));
-                mNum.setFilters(new InputFilter[] { new InputFilter.LengthFilter(6) });
+                mNum.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
                 mNum.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -105,29 +105,10 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
-            header.setHeaderOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    goHome();
-                }
-            });
+            header.setHeaderOnClickListener(v -> goHome());
         }
 
         return layout;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override
@@ -149,24 +130,20 @@ public class GateStartPathFinderFragment extends BaseFragment {
         }
 
         if (mButton != null) {
-            mButton.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    ActivityHelper.with(getActivity()).hideKeyboard();
-                    String nation = "";
-                    if (mNat != null) {
-                        nation = mNat.getText().toString();
-                    }
-                    String number = "";
-                    if (mNum != null) {
-                        number = mNum.getText().toString();
-                    }
-                    if (procedure != null) {
-                        procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
-                    }
-                    goHome();
+            mButton.setOnClickListener(v -> {
+                ActivityHelper.with(getActivity()).hideKeyboard();
+                String nation = "";
+                if (mNat != null) {
+                    nation = mNat.getText().toString();
                 }
+                String number = "";
+                if (mNum != null) {
+                    number = mNum.getText().toString();
+                }
+                if (procedure != null) {
+                    procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
+                }
+                goHome();
             });
 
             if (!TextUtils.isEmpty(mNat.getText()) && !TextUtils.isEmpty(mNum.getText())) {

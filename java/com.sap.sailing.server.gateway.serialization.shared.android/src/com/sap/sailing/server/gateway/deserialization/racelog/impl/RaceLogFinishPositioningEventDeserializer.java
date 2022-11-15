@@ -16,13 +16,13 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRaceLogEventDeserializer {
     
@@ -49,7 +49,10 @@ public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRace
             JSONObject jsonPositionedCompetitor = Helpers.toJSONObjectSafe(object);
             Serializable competitorId = (Serializable) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_ID);
             competitorId = UUIDHelper.tryUuidConversion(competitorId);
-            final String competitorDisplayName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_NAME);
+            final String competitorName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_NAME);
+            final String competitorShortName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_SHORT_NAME);
+            final String competitorBoatName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_BOAT_NAME);
+            final String competitorBoatSailId = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_BOAT_SAIL_ID);
             final String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);
             final MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName);
             final Number rank = (Number) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_RANK);
@@ -65,7 +68,9 @@ public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRace
                 mergeState = MergeState.valueOf(mergeStateAsString);
             }
             CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
-                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank.intValue(), maxPointsReason, score, finishingTime, comment, mergeState);
+                    competitorId, competitorName, competitorShortName, competitorBoatName, competitorBoatSailId,
+                    rank == null ? rankCounter : rank.intValue(), maxPointsReason, score, finishingTime, comment,
+                    mergeState);
             rankCounter++;
             positionedCompetitors.add(positionedCompetitor);
         }

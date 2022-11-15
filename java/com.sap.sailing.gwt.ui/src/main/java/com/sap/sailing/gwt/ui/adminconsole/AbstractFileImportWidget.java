@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.SensorDataImportResponse;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.SensorDataImportResultsDialog;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -50,11 +50,11 @@ public abstract class AbstractFileImportWidget extends Composite {
     FormPanel formPanelUi;
 
     private final TrackFileImportDeviceIdentifierTableWrapper table;
-    protected final SailingServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingService;
     private final ErrorReporter errorReporter;
 
     protected AbstractFileImportWidget(String formActionUrl, StringMessages stringMessages,
-            TrackFileImportDeviceIdentifierTableWrapper table, SailingServiceAsync sailingService,
+            TrackFileImportDeviceIdentifierTableWrapper table, SailingServiceWriteAsync sailingService,
             final ErrorReporter errorReporter) {
         this.table = table;
         this.sailingService = sailingService;

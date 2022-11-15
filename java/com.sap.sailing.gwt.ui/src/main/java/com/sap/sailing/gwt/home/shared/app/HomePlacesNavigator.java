@@ -1,12 +1,9 @@
 package com.sap.sailing.gwt.home.shared.app;
 
-import java.util.UUID;
-
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -20,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInfo
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
@@ -28,6 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPla
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserProfileSubscriptionsPlace;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -51,6 +50,10 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
         return createLocalPlaceNavigation(new SolutionsPlace(navigationTab));
     }
+    
+    public PlaceNavigation<SubscriptionPlace> getSubscriptionsNavigation() {
+        return createLocalPlaceNavigation(new SubscriptionPlace());
+    }
 
     public PlaceNavigation<WhatsNewPlace> getWhatsNewNavigation(WhatsNewNavigationTabs navigationTab) {
         return createLocalPlaceNavigation(new WhatsNewPlace(navigationTab));
@@ -64,13 +67,8 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
 
-    public PlaceNavigation<QRCodePlace> getQRCodeNavigation(UUID eventId, UUID competitorId, String leaderboardName,
-            String checkInUrl) {
-        return createGlobalPlaceNavigation(new QRCodePlace(eventId, competitorId, leaderboardName, checkInUrl));
-    }
-
     public PlaceNavigation<ImprintPlace> getImprintNavigation() {
-        return createGlobalPlaceNavigation(new ImprintPlace());
+        return createGlobalPlaceNavigation(new ImprintPlace((String) null /* empty place token */));
     }
 
     public PlaceNavigation<EventDefaultPlace> getEventNavigation(String eventUuidAsString, String baseUrl,
@@ -127,6 +125,10 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<? extends AbstractUserProfilePlace> getSailorProfilesNavigation() {
         return createLocalPlaceNavigation(new SailorProfilePlace());
+    }
+
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSubscriptionsNavigation() {
+        return createLocalPlaceNavigation(new UserProfileSubscriptionsPlace());
     }
 
 }

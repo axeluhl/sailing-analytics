@@ -19,22 +19,30 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
+import java.util.List;
+
 public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseRacingProcedure implements ConfigurableStartModeFlagRacingProcedure {
-    
-    protected Flags cachedStartmodeFlag;
-    private boolean startmodeFlagHasBeenSet;
+
+    Flags cachedStartmodeFlag;
+    boolean startmodeFlagHasBeenSet;
     private StartModeFlagFinder startModeFlagAnalyzer;
 
-    public ConfigurableStartModeFlagRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
-            ConfigurableStartModeFlagRacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
+    ConfigurableStartModeFlagRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
+                                                 ConfigurableStartModeFlagRacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver);
         RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
-        if (configuration.getStartModeFlags() != null) {
-            this.startModeFlagAnalyzer = new StartModeFlagFinder(procedureAnalyzer, raceLog, configuration.getStartModeFlags());
-        } else {
+        List<Flags> startModeFlags = getConfiguration().getStartModeFlags();
+        if (startModeFlags == null) {
             this.startModeFlagAnalyzer = new StartModeFlagFinder(procedureAnalyzer, raceLog, getDefaultStartModeFlags());
+        } else {
+            Flags defaultStartMode = getDefaultStartMode();
+            if (startModeFlags.isEmpty() || startModeFlags.contains(defaultStartMode)) {
+                this.cachedStartmodeFlag = defaultStartMode;
+            } else {
+                this.cachedStartmodeFlag = startModeFlags.get(0);
+            }
+            this.startModeFlagAnalyzer = new StartModeFlagFinder(procedureAnalyzer, raceLog, startModeFlags);
         }
-        this.cachedStartmodeFlag = getDefaultStartMode();
         this.startmodeFlagHasBeenSet = false;
         update();
     }
@@ -48,15 +56,11 @@ public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseR
 
     @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
-            FulfillmentFunction function) {
-        if (startTime.minus(getStartPhaseStartModeUpInterval()).before(now) && !startmodeFlagHasBeenSet()) {
+                                                                  FulfillmentFunction function) {
+        if (startTime.minus(getStartPhaseStartModeUpInterval()).before(now) && !startmodeFlagHasBeenSet) {
             return new StartModePrerequisite(function, this, now, startTime);
         }
         return new NoMorePrerequisite(function);
-    }
-
-    public boolean startmodeFlagHasBeenSet() {
-        return startmodeFlagHasBeenSet;
     }
 
     @Override
@@ -71,10 +75,10 @@ public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseR
 
     @Override
     protected void update() {
-        Flags startmodeFlag = startModeFlagAnalyzer.analyze();
-        if (startmodeFlag != null && (!startmodeFlag.equals(cachedStartmodeFlag) || !startmodeFlagHasBeenSet)) {
-            cachedStartmodeFlag = startmodeFlag;
+        Flags startModeFlag = startModeFlagAnalyzer.analyze();
+        if (startModeFlag != null && (!startModeFlag.equals(cachedStartmodeFlag) || !startmodeFlagHasBeenSet)) {
             startmodeFlagHasBeenSet = true;
+            cachedStartmodeFlag = startModeFlag;
             getChangedListeners().onStartModeChanged(this);
         }
         super.update();
@@ -84,7 +88,7 @@ public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseR
     protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
         return new LineStartChangedListeners();
     }
-    
+
     @Override
     protected LineStartChangedListeners getChangedListeners() {
         return (LineStartChangedListeners) super.getChangedListeners();
@@ -94,7 +98,7 @@ public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseR
     public void addChangedListener(LineStartChangedListener listener) {
         getChangedListeners().add(listener);
     }
-    
+
     @Override
     public ConfigurableStartModeFlagRacingProcedureConfiguration getConfiguration() {
         return (ConfigurableStartModeFlagRacingProcedureConfiguration) super.getConfiguration();

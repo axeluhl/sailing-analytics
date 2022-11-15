@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.sap.sailing.android.tracking.app"
-          android:versionCode="13"
-          android:versionName="1.11">
+    package="com.sap.sailing.android.tracking.app">
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="22"/>
+    <uses-sdk />
 
     <permission
         android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"
         android:protectionLevel="signature"/>
 
     <!--<uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />-->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-    <uses-permission android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
     <uses-feature
         android:name="android.hardware.location.gps"
+        android:required="true" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
 
     <application
@@ -32,13 +31,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
-
         <activity
             android:name=".ui.activities.StartActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
             android:theme="@style/launchScreenTheme"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -47,22 +43,30 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
+
+            <intent-filter>
+                <data android:scheme="comsapsailingtracker" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                    android:host="*"
-                    android:scheme="http"
-                    android:pathPattern="/tracking/checkin.*"/>
-
-                <data
-                    android:host="*"
-                    android:scheme="https"
-                    android:pathPattern="/tracking/checkin.*"/>
+                <data android:host="*" android:pathPattern="/tracking/checkin.*" android:scheme="http"/>
+                <data android:host="*" android:pathPattern="/tracking/checkin.*" android:scheme="https"/>
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="sailinsight-app.sapsailing.com" />
+                <data android:scheme="https" android:host="sapsailinsight-alternate.app.link" />
+            </intent-filter>
+
         </activity>
         <activity
             android:name=".ui.activities.LeaderboardWebViewActivity"
@@ -123,11 +127,6 @@
         </service>
         <!--<service android:name=".service.GcmIntentService" />-->
 
-        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-        </receiver>
         <receiver android:name=".receiver.PowerConnectionReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
@@ -139,6 +138,18 @@
             android:name="com.sap.sailing.android.tracking.app.provider.AnalyticsProvider"
             android:authorities="com.sap.sailing.android.tracking.app.provider.db"
             android:exported="false"/>
+        <provider
+                android:name="android.support.v4.content.FileProvider"
+                android:authorities="${applicationId}.fileprovider"
+                android:grantUriPermissions="true"
+                android:exported="false">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/filepaths" />
+        </provider>
+
+        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_ges90RzIjjgM0vg8wbTtYcdmtCeYJMAZ" />
+
     </application>
 
 </manifest>

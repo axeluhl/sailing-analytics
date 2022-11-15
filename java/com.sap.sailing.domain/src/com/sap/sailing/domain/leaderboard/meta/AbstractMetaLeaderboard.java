@@ -28,6 +28,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -187,11 +188,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
         final int result;
         if (leaderboard.hasScores(competitor, timePoint)) {
-            final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
+            final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
             Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
             result = competitorsFromBestToWorst.indexOf(competitor)+1;
         } else {
@@ -209,7 +210,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         return result;
     }
 
-    protected RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
+    protected MetaLeaderboardColumn getColumnForLeaderboard(Leaderboard leaderboard) {
         MetaLeaderboardColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);
@@ -274,5 +275,22 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     @Override
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        if (!(raceColumn instanceof MetaLeaderboardColumn)) {
+            throw new IllegalArgumentException("Expected a MetaLeaderboardColumn in a MetaLeaderboard but got "+raceColumn.getClass());
+        }
+        final MetaLeaderboardColumn metaRaceColumn = (MetaLeaderboardColumn) raceColumn;
+        final Leaderboard leaderboard = metaRaceColumn.getLeaderboard();
+        for (final RaceColumn raceColumnLeaderboardRaceColumn : leaderboard.getRaceColumns()) {
+            for (final Fleet raceColumnLeaderboardFleet : raceColumnLeaderboardRaceColumn.getFleets()) {
+                if (!leaderboard.isResultsAreOfficial(raceColumnLeaderboardRaceColumn, raceColumnLeaderboardFleet)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

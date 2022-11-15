@@ -39,8 +39,8 @@ public class RaceTimesInfoProvider {
     /**
      * If set to true, {@link com.sap.sailing.domain.common.dto.TagDTO tags} will also be requested from server by this
      * {@link RaceTimesInfoProvider}. This is only a temporarily workaround to save a new repeating request which is
-     * only used for tags. This attribute will be set by {@link com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel
-     * TaggingPanel} by calling methods {@link #enableTagRequests()} and {@link #disableTagRequests()} and should not
+     * only used for tags. This attribute will be set by {@link com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent
+     * TaggingComponent} by calling methods {@link #enableTagRequests()} and {@link #disableTagRequests()} and should not
      * affect any data of the other attributes of {@link RaceTimesInfoDTO}.
      */
     // TODO: remove this workaround as soon as bug 4736 is resolved
@@ -140,7 +140,6 @@ public class RaceTimesInfoProvider {
             } else {                
                 getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers);
             }
-
             asyncActionsExecutor.execute(getRaceTimesInfoAction, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {

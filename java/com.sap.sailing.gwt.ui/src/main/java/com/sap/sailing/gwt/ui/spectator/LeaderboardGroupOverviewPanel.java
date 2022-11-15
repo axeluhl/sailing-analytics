@@ -233,9 +233,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
-                String link = new LinkWithSettingsGenerator<SpectatorSettings>(new SpectatorContextDefinition(group.getName()))
-                        .createUrl(new SpectatorSettings(showRaceDetails));
-                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), group.getName());
+                String link = new LinkWithSettingsGenerator<SpectatorSettings>(
+                        new SpectatorContextDefinition(group.getId().toString()))
+                                .createUrl(new SpectatorSettings(showRaceDetails));
+                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), group.getName().toString());
             }
         };
         groupsNameColumn.setSortable(true);
@@ -249,7 +250,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                     if (!first) {
                         sb.append(", ");
                     }
-                    sb.append(leaderboard.name);
+                    sb.append(leaderboard.getName());
                     first = false;
                 }
                 return sb.toString();
@@ -360,11 +361,11 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
-                        + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + "&leaderboardGroupName=" + selectedGroup.getName() + "&root=overview"
+                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.getName()
+                        + (showRaceDetails ? "&showRaceDetails=true" : "") + "&root=overview" + "&leaderboardGroupId="
+                        + selectedGroup.getId().toString()
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), leaderboard.name);
+                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), leaderboard.getName());
             }
         };
         
@@ -454,8 +455,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
                         String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
-                                + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
-                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.getName()
+                                + selectedLeaderboard.getName() + "&raceName=" + raceId.getRaceName() + "&regattaName="
+                                + raceId.getRegattaName() + "&leaderboardGroupId=" + selectedGroup.getId().toString()
                                 + "&root=overview"
                                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                         name = ANCHORTEMPLATE.anchor(UriUtils.fromString(link), raceDisplayName);
@@ -548,7 +549,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
     
     private void fillGroupDetails(LeaderboardGroupDTO group) {
-        groupDescriptionHTML.setHTML(new SafeHtmlBuilder().appendEscapedLines(group.description).toSafeHtml());
+        groupDescriptionHTML.setHTML(new SafeHtmlBuilder().appendEscapedLines(group.getDescription()).toSafeHtml());
         leaderboardsDataProvider.getList().clear();
         leaderboardsDataProvider.getList().addAll(group.leaderboards);
     }

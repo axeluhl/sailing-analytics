@@ -16,6 +16,7 @@ public interface SocialFooterResources extends ClientBundle {
         String socialfooter_item();
         String socialfooter_item_contentwrapper();
         String socialfooter_itemleft();
+        String socialfooter_itemcenter();
         String socialfooter_itemright();
         String socialfooter_item_icon();
         String socialfooter_item_text();

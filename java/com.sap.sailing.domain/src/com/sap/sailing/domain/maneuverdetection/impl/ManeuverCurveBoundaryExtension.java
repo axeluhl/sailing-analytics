@@ -16,14 +16,16 @@ public class ManeuverCurveBoundaryExtension {
     private final SpeedWithBearing speedWithBearingAtExtensionTimePoint;
     private final double courseChangeInDegreesWithinExtensionArea;
     private final Speed lowestSpeedWithinExtensionArea;
+    private final Speed highestSpeedWithinExtensionArea;
 
     public ManeuverCurveBoundaryExtension(TimePoint extensionTimePoint,
             SpeedWithBearing speedWithBearingAtExtensionTimePoint, double totalCourseChangeInDegreesExtension,
-            Speed lowestSpeedWithinExtensionArea) {
+            Speed lowestSpeedWithinExtensionArea, Speed highestSpeedWithinExtensionArea) {
         this.extensionTimePoint = extensionTimePoint;
         this.speedWithBearingAtExtensionTimePoint = speedWithBearingAtExtensionTimePoint;
         this.courseChangeInDegreesWithinExtensionArea = totalCourseChangeInDegreesExtension;
         this.lowestSpeedWithinExtensionArea = lowestSpeedWithinExtensionArea;
+        this.highestSpeedWithinExtensionArea = highestSpeedWithinExtensionArea;
     }
 
     /**
@@ -56,9 +58,16 @@ public class ManeuverCurveBoundaryExtension {
     }
 
     /**
-     * Gets lowest speed within extension area.
+     * Gets the lowest speed within extension area.
      */
     public Speed getLowestSpeedWithinExtensionArea() {
         return lowestSpeedWithinExtensionArea;
+    }
+
+    /**
+     * Gets the highest speed within extension area.
+     */
+    public Speed getHighestSpeedWithinExtensionArea() {
+        return highestSpeedWithinExtensionArea;
     }
 }

@@ -20,13 +20,14 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.adminconsole.PairingListPreviewDialog;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
-public class PairingListEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class PairingListEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
 
     private PairingListContextDefinition pairingListContextDefinition;
 
@@ -63,7 +64,8 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint implements 
         mainPanel.setHeight("100%");
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(
                 pairingListContextDefinition.getLeaderboardName());
-        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
         mainPanel.addNorth(header, 75);
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -129,7 +131,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint implements 
         pairingListPanel.getElement().getStyle().setProperty("marginTop", "15px");
         return pairingListPanel;
     }
-    
+
     private native void printPairingListGrid(String pageHTMLContent) /*-{
 		var frameID = '__gwt_historyFrame';
 		var frame = $doc.getElementById(frameID);

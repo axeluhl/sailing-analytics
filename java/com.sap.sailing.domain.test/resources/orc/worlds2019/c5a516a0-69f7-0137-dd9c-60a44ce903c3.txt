@@ -1,0 +1,591 @@
+stored-uri:datafiles/c5a516a0-69f7-0137-dd9c-60a44ce903c3.mtb
+StartReplay:1
+
+//live-uri:tcp://event.tractrac.com:44003
+//stored-uri:tcp://event.tractrac.com:44013
+dataservers:{"stored":["tcp:\/\/event.tractrac.com:44011","tcp:\/\/event.tractrac.com:44012","tcp:\/\/event.tractrac.com:44013","tcp:\/\/event.tractrac.com:44014"],"live":["tcp:\/\/event.tractrac.com:44001","tcp:\/\/event.tractrac.com:44002","tcp:\/\/event.tractrac.com:44003","tcp:\/\/event.tractrac.com:44004"],"ws":["ws:\/\/event.tractrac.com:8891","ws:\/\/event.tractrac.com:8892","ws:\/\/event.tractrac.com:8893","ws:\/\/event.tractrac.com:8894"]}
+ResultColumn4Defaultorder:0
+EnableLadderLines:
+LadderLineDistance:100
+DefaultPanel:
+ws-uri:ws://event.tractrac.com:8888
+PerformanceTableLayout:[{"key":"Pos","header":"Pos","tooltip":"Position"},{"key":"Name","header":"Name","tooltip":"Name"},{"key":"Short","header":"Short","tooltip":"Short name"},{"key":"Country","header":"Country","tooltip":"Country"},{"key":"After","header":"After","tooltip":"After"},{"key":"Leg pos","header":"Leg pos","tooltip":"Leg position"},{"key":"Leg time","header":"Leg time","tooltip":"Leg time"},{"key":"SOG","header":"SOG","tooltip":"SOG"},{"key":"VMG","header":"VMG","tooltip":"VMG"},{"key":"Top speed","header":"Top Speed","tooltip":"Top Speed"},{"key":"Distance","header":"Distance","tooltip":"Distance"}]
+ResultsLayout:[{"key":"Order","header":"#","description":"Position","printable":true,"align":"right","collapsible":false},{"key":"Name","header":"Name","description":"Competitor's name","printable":true,"align":"left","collapsible":false},{"key":"ShortName","header":"Short Name","description":"Competitor's short name","printable":true,"align":"left","collapsible":true},{"key":"LegTime","header":"Leg","description":"Leg time","printable":false,"align":"right","collapsible":true},{"key":"LegPosition","header":"#","description":"Leg position","printable":false,"align":"right","collapsible":true},{"key":"Time","header":"Total","description":"Total time","printable":true,"align":"right","collapsible":false},{"key":"After","header":"Total \u0026Delta;","description":"Total \u0026Delta;","printable":true,"align":"right","collapsible":false}]
+ReCalcDirAndSpeed:
+smsProvider:0
+map_satellite:
+CompMarkerDeadTimeout:60
+LaggingThreshold:5
+LowBatteryThreshold:5
+BatteryLevelWarn:20
+BatteryLevelDanger:13
+Marker4Length:5
+Marker4MinPixelSize:5
+Marker4Radius:5
+ExcludeRankInfo:
+CompetitorPopUp:1
+TailWidth:4
+DisableMarkTicker:
+LeaderboardMaxSize:
+ShowLeadersNumber:1
+TileZoomDiferentiater:-1
+cpFontSizeTv:0
+cpLabelDisplacement:11
+tailWidthTV:8
+resultHeaderColorTV:000000
+ProfileAxisFontColorTv:FFFFFF
+BackgroundColorTv:000000
+ProfilechartBackgroundTv:000000
+ProfileAndResultTvBackgroundImage:
+RaceStatusImage:
+RaceStatusIsVisible:1
+RaceStatusMainTextSize:8
+RaceStatusTailTextSize:6
+RaceStatusCompetitorTextSize:8
+RaceStatusBackGroundColor:000000
+RaceStatusUseAllSpace:0
+pageSize (TV):5
+UseNameOnMap:0
+downToning:0
+EnableMarquee:0
+MaxLegtimeDifference:45
+MaxLegtimePercentageDifference:100
+MinCompetitorsRequiredToEvalRecord:15
+MarqueeRefreshFrequency:3
+MarqueeMaxEventsShown:5
+RaceDurationMin:
+TrackHistoryLoadSec:-1
+TrackHistoryLoadSecDesktop:-1
+WeatherLon1:0
+WeatherLon2:0
+WeatherLat1:0
+WeatherLat2:0
+forceLocalTimeMode:
+dimmingLevel:1
+dimmingSeconds:60
+enableDiplomas:
+boldorDiploma:
+enableLeaderboardExport:
+colorForeground:
+colorBackground:
+colorAccent1:
+colorAccent2:
+colorAccent3:
+showNonCourseMarks:
+CompMarkerUUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+CodanIsSponsor:0
+DefaultTailLength:70
+smsParams:0,tracanonym,4525720572,3,12,15
+APzoomChangeTime:2500
+disableAutoProduce:
+autoProduce:
+APstartLineShowOfLeg:0.25
+APsideOfStartLine:0.30
+APstartSwitch:0.8
+APwholeLegBehindMarks:0.15
+APmarkSwitch:0.13
+APmarkZoomBehindMarks:0.10
+APmarkZoomInFrontOfMarks:0.20
+PopupMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+ResultColumn1Visible:1
+ResultColumn1DefaultOrder:1
+ResultColumn1Tooltip:
+ResultColumn1Name:#
+ResultColumn1Size:20
+ResultColumn1Type:RowNumber
+ResultColumn2Type:Nationality
+ResultColumn2Name:Nat
+ResultColumn2Size:30
+ResultColumn2Visible:1
+ResultColumn2DefaultOrder:0
+ResultColumn3Visible:1
+ResultColumn3DefaultOrder:0
+ResultColumn3Tooltip:
+ResultColumn3Name:Boat
+ResultColumn3Size:45
+ResultColumn3Type:Ini
+ResultColumn4Visible:1
+ResultColumn4Default:0
+ResultColumn4Tooltip:
+ResultColumn4Name:Name
+ResultColumn4Size:110
+ResultColumn4Type:Name
+ResultColumn5Visible:1
+ResultColumn5DefaultOrder:0
+ResultColumn5Tooltip:
+ResultColumn5Name:after
+ResultColumn5Size:45
+ResultColumn5Type:BoatAfter
+ResultColumn5OffsetIn:m
+ResultColumn6Visible:1
+ResultColumn6DefaultOrder:0
+ResultColumn6Tooltip:
+ResultColumn6SpeedIn:Knots
+ResultColumn6Name:kts
+ResultColumn6Size:40
+ResultColumn6Type:BoatSpeed
+ManualUrl:http://www.tractrac.com/files/userguide_sailing.pdf
+Marker1UUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+Marker1Type:RGBMarkerFactory
+Marker1Directional:1
+Marker1Image:markers/boat_FF0000_big.png
+Marker1Length:5
+Marker1MinPixelSize:36
+Startlocation:15.8253162597656,43.70580449210603
+MaxDiffTime:1200
+MaxMetersPerSecond:20
+PrecisionMeters:20
+ShortAvgTime:180
+LongAvgTime:900
+TimeZone:2
+CompMarkerTimeout:0
+FramesPerSecond:15
+replayspeedup:5
+MatchRaceClock:
+MatchRaceClockNo:3
+MatchRaceClockSpacing:300
+Minimap:1
+MinimapUseLayers:
+Minimapgeorect:15.45283515624999,43.895081733242186,16.147119140625023,43.519922636405006
+MinimapMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4UUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4Type:RGBmarkerFactory
+Marker4Directional:1
+Marker4Image:markers/boat_FF0000_small.png
+MetersPerPixel:40
+MetersPerPixelMax:50
+MetersPerPixelMin:0.2
+isMatchRace:
+DefaultDistanceUnits:meters
+weatherEnabled:
+DefaultSpeedUnits:Knots
+showRaceClock:1
+BackGroundImage:graphics/background.jpg
+DisableRotation:
+ControlPointMarkerRadius:13
+disableselection:0
+disableleaderline:
+StartTimeType:Race
+delayIntervals:3,12,15
+DisableChangeRace:
+DisableLatestRoundings:0
+cis:2
+DatabaseVersion:01.00.20
+PopUpRow1Name:
+PopUpRow1Type:Name
+PopUpRow2Name:Knots
+PopUpRow2Type:BoatSpeed
+PopUpRow3Name:Ranking
+PopUpRow3Type:RowNumber
+PopUpRow4Name:Sail
+PopUpRow4Type:Ini
+PopUpRow5Name:After
+PopUpRow5Type:BoatAfter
+xrr_url_source:
+xrr_version:1.x
+WindEstimator:
+MapUrl:http://tile.tractrac.com/osm
+DisableLeaderboard:
+DisableAnalysis:0
+TableFontSize:11
+compInitialsFontSize:11
+AutoRotate:0
+MassStart:
+SegmentFile:segments.php
+RaceHandicapSystem:NONE
+TeamCompetitionType:NONE
+LiveDelaySecs: 70
+LiveDelaySecsRace: 
+LiveDelaySecsEvent: 70
+
+
+EventID:1a9551c0-3913-0137-6637-60a44ce903c3
+EventName:D-Marin ORC World Championship
+EventAnalyticsName:D-Marin ORC World Championship - event_20190529_DMarinORCW
+EventDB:event_20190529_DMarinORCW
+EventStartTime:2019-06-01 22:00:00
+EventEndTime:2019-06-08 21:00:00
+EventType:a1b74ca0-fdd8-11dc-8811-005056c00008
+DBReplicaEnabled:0
+HighLoadEnabled:1
+
+RaceID:c5a516a0-69f7-0137-dd9c-60a44ce903c3
+RaceName:ORC A - Race 4
+RaceStartTime:2019-06-06 11:10:00
+RaceEndTime:
+RaceTrackingStartTime:2019-06-06 08:55:37
+RaceTrackingEndTime:2019-06-06 13:04:28
+Initialized:1
+RaceDefaultRouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+RaceHandicapSystem:NONE
+RaceStatus:OFFICIAL
+RaceCourseArea:Standard
+
+Image1UUID:552f27f0-679a-0137-b182-60a44ce903c3
+Image1Type:Logo
+Image1Description:http://traclive.dk/events/event_20100806_SailforGol/images/ESP.gif
+Image1Image:http://traclive.dk/events/event_20100806_SailforGol/images/ESP.gif
+
+Image2UUID:58091f00-679a-0137-b1bc-60a44ce903c3
+Image2Type:Logo
+Image2Description:http://traclive.dk/events/event_20100806_SailforGol/images/LTU.gif
+Image2Image:http://traclive.dk/events/event_20100806_SailforGol/images/LTU.gif
+
+Image3UUID:58356430-679a-0137-b1c0-60a44ce903c3
+Image3Type:Logo
+Image3Description:http://traclive.dk/events/event_20100806_SailforGol/images/NED.gif
+Image3Image:http://traclive.dk/events/event_20100806_SailforGol/images/NED.gif
+
+Image4UUID:9faf1e30-6798-0137-b084-60a44ce903c3
+Image4Type:Logo
+Image4Description:http://traclive.dk/events/event_20100806_SailforGol/images/ITA.gif
+Image4Image:http://traclive.dk/events/event_20100806_SailforGol/images/ITA.gif
+
+Image5UUID:9fc4a1c0-6798-0137-b085-60a44ce903c3
+Image5Type:Logo
+Image5Description:http://traclive.dk/events/event_20100806_SailforGol/images/UKR.gif
+Image5Image:http://traclive.dk/events/event_20100806_SailforGol/images/UKR.gif
+
+Image6UUID:9fca8640-6798-0137-b086-60a44ce903c3
+Image6Type:Logo
+Image6Description:http://traclive.dk/events/event_20100806_SailforGol/images/GER.gif
+Image6Image:http://traclive.dk/events/event_20100806_SailforGol/images/GER.gif
+
+Image7UUID:9fd54ee0-6798-0137-b087-60a44ce903c3
+Image7Type:Logo
+Image7Description:http://traclive.dk/events/event_20100806_SailforGol/images/CRO.gif
+Image7Image:http://traclive.dk/events/event_20100806_SailforGol/images/CRO.gif
+
+Image8UUID:9fe41140-6798-0137-b088-60a44ce903c3
+Image8Type:Logo
+Image8Description:http://traclive.dk/events/event_20100806_SailforGol/images/SLO.gif
+Image8Image:http://traclive.dk/events/event_20100806_SailforGol/images/SLO.gif
+
+Image9UUID:9fe8b360-6798-0137-b089-60a44ce903c3
+Image9Type:Logo
+Image9Description:http://traclive.dk/events/event_20100806_SailforGol/images/CYP.gif
+Image9Image:http://traclive.dk/events/event_20100806_SailforGol/images/CYP.gif
+
+Image10UUID:9ff2b760-6798-0137-b08a-60a44ce903c3
+Image10Type:Logo
+Image10Description:http://traclive.dk/events/event_20100806_SailforGol/images/GRE.gif
+Image10Image:http://traclive.dk/events/event_20100806_SailforGol/images/GRE.gif
+
+Image11UUID:9ffab220-6798-0137-b08b-60a44ce903c3
+Image11Type:Logo
+Image11Description:http://traclive.dk/events/event_20100806_SailforGol/images/MON.gif
+Image11Image:http://traclive.dk/events/event_20100806_SailforGol/images/MON.gif
+
+Image12UUID:b6801cb0-6799-0137-b0b7-60a44ce903c3
+Image12Type:Logo
+Image12Description:http://traclive.dk/events/event_20100806_SailforGol/images/ROU.gif
+Image12Image:http://traclive.dk/events/event_20100806_SailforGol/images/ROU.gif
+
+Image13UUID:b748dc10-6799-0137-b0c7-60a44ce903c3
+Image13Type:Logo
+Image13Description:http://traclive.dk/events/event_20100806_SailforGol/images/AUT.gif
+Image13Image:http://traclive.dk/events/event_20100806_SailforGol/images/AUT.gif
+
+Image14UUID:b7e0ffb0-6799-0137-b0d4-60a44ce903c3
+Image14Type:Logo
+Image14Description:http://traclive.dk/events/event_20100806_SailforGol/images/RUS.gif
+Image14Image:http://traclive.dk/events/event_20100806_SailforGol/images/RUS.gif
+
+Image15UUID:ba3adbb0-6799-0137-b105-60a44ce903c3
+Image15Type:Logo
+Image15Description:http://traclive.dk/events/event_20100806_SailforGol/images/CZE.gif
+Image15Image:http://traclive.dk/events/event_20100806_SailforGol/images/CZE.gif
+
+Image16UUID:bb2e0f10-6799-0137-b118-60a44ce903c3
+Image16Type:Logo
+Image16Description:http://traclive.dk/events/event_20100806_SailforGol/images/EST.gif
+Image16Image:http://traclive.dk/events/event_20100806_SailforGol/images/EST.gif
+
+Class1UUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Class1Name:ORC A
+
+Team1UUID:1b8309e0-69f8-0137-ddcd-60a44ce903c3
+Team1Name:TP52
+Team1Comp1UUID:1b867220-69f8-0137-ddce-60a44ce903c3
+
+Team2UUID:375885e0-6930-0137-d269-60a44ce903c3
+Team2Name:ITA 18170
+Team2Comp1UUID:375bd930-6930-0137-d26a-60a44ce903c3
+
+Team3UUID:37d46180-6930-0137-d26d-60a44ce903c3
+Team3Name:GIB 3300
+Team3Comp1UUID:37d57380-6930-0137-d26e-60a44ce903c3
+
+Team4UUID:3a402a70-6930-0137-d271-60a44ce903c3
+Team4Name:ITA 16300
+Team4Comp1UUID:3a4321f0-6930-0137-d272-60a44ce903c3
+
+Team5UUID:3ade5b00-6930-0137-d275-60a44ce903c3
+Team5Name:GER 1807
+Team5Comp1UUID:3ae13470-6930-0137-d276-60a44ce903c3
+
+Team6UUID:3b1ffa50-6930-0137-d279-60a44ce903c3
+Team6Name:CRO 1933
+Team6Comp1UUID:3b27f120-6930-0137-d27a-60a44ce903c3
+
+Team7UUID:3b7b2980-6930-0137-d27d-60a44ce903c3
+Team7Name:SLO 878
+Team7Comp1UUID:3b7c3780-6930-0137-d27e-60a44ce903c3
+
+Team8UUID:3bba6bf0-6930-0137-d281-60a44ce903c3
+Team8Name:ITA 23520
+Team8Comp1UUID:3bc13dc0-6930-0137-d282-60a44ce903c3
+
+Team9UUID:3c22a3a0-6930-0137-d285-60a44ce903c3
+Team9Name:CYP 46
+Team9Comp1UUID:3c2377d0-6930-0137-d286-60a44ce903c3
+
+Team10UUID:3cc8eca0-6930-0137-d289-60a44ce903c3
+Team10Name:ITA 4486
+Team10Comp1UUID:3ccaa530-6930-0137-d28a-60a44ce903c3
+
+Team11UUID:3d46f610-6930-0137-d28d-60a44ce903c3
+Team11Name:ITA 1000
+Team11Comp1UUID:3d482820-6930-0137-d28e-60a44ce903c3
+
+Team12UUID:3e1b3c60-6930-0137-d295-60a44ce903c3
+Team12Name:GRE 45
+Team12Comp1UUID:3e2c25c0-6930-0137-d296-60a44ce903c3
+
+Team13UUID:3e8d8ac0-6930-0137-d299-60a44ce903c3
+Team13Name:MON 13
+Team13Comp1UUID:3e8e6510-6930-0137-d29a-60a44ce903c3
+
+Comp1UUID:375bd930-6930-0137-d26a-60a44ce903c3
+Comp1Name:Giovanni Sylos Labini
+Comp1NameShort:Luduan reloaded
+Comp1Nationality:ITA
+Comp1Description:Grand Soleil 46 R - GPH 555,4
+Comp1Handicap:1.0000000000
+Comp1HandicapDistance:0.00000
+Comp1StartTime:2019-06-06 11:10:00
+Comp1ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp1Status:DNF
+Comp1RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp1Color:795548
+
+Comp2UUID:37d57380-6930-0137-d26e-60a44ce903c3
+Comp2Name:Maestro Yachting Ltd
+Comp2NameShort:Maestro
+Comp2Nationality:UKR
+Comp2Description:XP-44 - GPH 545,5
+Comp2Handicap:1.0000000000
+Comp2HandicapDistance:0.00000
+Comp2StartTime:2019-06-06 11:10:00
+Comp2ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp2Status:FIN
+Comp2StatusTime:2019-06-06 12:41:02
+Comp2RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp2Color:7C4DFF
+
+Comp3UUID:3a4321f0-6930-0137-d272-60a44ce903c3
+Comp3Name:Sandro Paniccia
+Comp3NameShort:Altair 3
+Comp3Nationality:ITA
+Comp3Description:Scuderia 50 - GPH 488,9
+Comp3Handicap:1.0000000000
+Comp3HandicapDistance:0.00000
+Comp3StartTime:2019-06-06 11:10:00
+Comp3ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp3Status:FIN
+Comp3StatusTime:2019-06-06 12:27:16
+Comp3RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp3Color:FF6E40
+
+Comp4UUID:3ae13470-6930-0137-d276-60a44ce903c3
+Comp4Name:Roman Puchtev
+Comp4NameShort:Alemaro
+Comp4Nationality:GER
+Comp4Description:Neo 400  - GPH 525
+Comp4Handicap:1.0000000000
+Comp4HandicapDistance:0.00000
+Comp4StartTime:2019-06-06 11:10:00
+Comp4ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp4Status:FIN
+Comp4StatusTime:2019-06-06 12:51:30
+Comp4RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp4Color:FFAB40
+
+Comp5UUID:3b27f120-6930-0137-d27a-60a44ce903c3
+Comp5Name:JK Orsan
+Comp5NameShort:Dubrovnik
+Comp5Nationality:CRO
+Comp5Description:Enavigo 38 MOD - GPH 512,2
+Comp5Handicap:1.0000000000
+Comp5HandicapDistance:0.00000
+Comp5StartTime:2019-06-06 11:10:00
+Comp5ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp5Status:FIN
+Comp5StatusTime:2019-06-06 12:40:32
+Comp5RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp5Color:B2FF59
+
+Comp6UUID:3b7c3780-6930-0137-d27e-60a44ce903c3
+Comp6Name:JD Maribor?anka
+Comp6NameShort:Generali (Assilina I
+Comp6Nationality:SLO
+Comp6Description:TP 52 - GPH 459,7
+Comp6Handicap:1.0000000000
+Comp6HandicapDistance:0.00000
+Comp6StartTime:2019-06-06 11:10:00
+Comp6ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp6Status:DONT_RACE
+Comp6RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp6Color:8bff82
+
+Comp7UUID:3bc13dc0-6930-0137-d282-60a44ce903c3
+Comp7Name:Hurakan LTD
+Comp7NameShort:XIO
+Comp7Nationality:ITA
+Comp7Description:TP 52 - GPH 442,2
+Comp7Handicap:1.0000000000
+Comp7HandicapDistance:0.00000
+Comp7StartTime:2019-06-06 11:10:00
+Comp7ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp7Status:FIN
+Comp7StatusTime:2019-06-06 12:16:57
+Comp7RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp7Color:FF4081
+
+Comp8UUID:3c2377d0-6930-0137-d286-60a44ce903c3
+Comp8Name:Markos Kashiouris / IRONFX Racing LTD
+Comp8NameShort:IRONFX
+Comp8Nationality:CYP
+Comp8Description:Corel 45 - GPH 510,3
+Comp8Handicap:1.0000000000
+Comp8HandicapDistance:0.00000
+Comp8StartTime:2019-06-06 11:10:00
+Comp8ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp8Status:FIN
+Comp8StatusTime:2019-06-06 12:39:31
+Comp8RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp8Color:536DFE
+
+Comp9UUID:3ccaa530-6930-0137-d28a-60a44ce903c3
+Comp9Name:Gianclaudio Bassetti
+Comp9NameShort:WB Seven
+Comp9Nationality:ITA
+Comp9Description:XP 44 - GPH 548,5
+Comp9Handicap:1.0000000000
+Comp9HandicapDistance:0.00000
+Comp9StartTime:2019-06-06 11:10:00
+Comp9ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp9Status:FIN
+Comp9StatusTime:2019-06-06 12:42:18
+Comp9RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp9Color:ffd240
+
+Comp10UUID:3d482820-6930-0137-d28e-60a44ce903c3
+Comp10Name:Francesco Pison
+Comp10NameShort:Brava
+Comp10Nationality:ITA
+Comp10Description:Farr IMS 49 - GPH 501,4
+Comp10Handicap:1.0000000000
+Comp10HandicapDistance:0.00000
+Comp10StartTime:2019-06-06 11:10:00
+Comp10ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp10Status:DNF
+Comp10RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp10Color:64FFDA
+
+Comp11UUID:3e2c25c0-6930-0137-d296-60a44ce903c3
+Comp11Name:SoLeVi Ltd / G. Petrochilos
+Comp11NameShort:Ex Officio
+Comp11Nationality:GRE
+Comp11Description:Swan 45 - GPH 539,4
+Comp11Handicap:1.0000000000
+Comp11HandicapDistance:0.00000
+Comp11StartTime:2019-06-06 11:10:00
+Comp11ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp11Status:FIN
+Comp11StatusTime:2019-06-06 12:35:22
+Comp11RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp11Color:78909C
+
+Comp12UUID:3e8e6510-6930-0137-d29a-60a44ce903c3
+Comp12Name:Valentin Zavadnikov
+Comp12NameShort:Synergy
+Comp12Nationality:MON
+Comp12Description:Melges 40 - GPH 466
+Comp12Handicap:1.0000000000
+Comp12HandicapDistance:0.00000
+Comp12StartTime:2019-06-06 11:10:00
+Comp12ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp12Status:DONT_RACE
+Comp12RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp12Color:4E342E
+
+Comp13UUID:1b867220-69f8-0137-ddce-60a44ce903c3
+Comp13Name:Roberto Monti
+Comp13NameShort:Air is blue
+Comp13Nationality:ITA
+Comp13Description:TP 52 - GPH 460
+Comp13Handicap:1.0000000000
+Comp13HandicapDistance:0.00000
+Comp13StartTime:2019-06-06 11:10:00
+Comp13ClassUUID:9edb88e0-6798-0137-b083-60a44ce903c3
+Comp13Status:FIN
+Comp13StatusTime:2019-06-06 12:19:05
+Comp13RouteUUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Comp13Color:795548
+
+ControlPoint1UUID:0afde760-6798-0137-b073-60a44ce903c3
+ControlPoint1Name:AC Finish
+ControlPoint1HasTwoPoints:1
+ControlPoint1ShortName:F
+ControlPoint1CourseArea:Standard
+ControlPoint1Mark1Lon:15.788256
+ControlPoint1Mark1Lat:43.652692
+ControlPoint1Mark1Static:0
+ControlPoint1Mark2Lon:15.788280
+ControlPoint1Mark2Lat:43.652705
+ControlPoint1Mark2Static:0
+
+ControlPoint2UUID:d73931e0-6797-0137-b063-60a44ce903c3
+ControlPoint2Name:AC 1
+ControlPoint2HasTwoPoints:0
+ControlPoint2ShortName:1
+ControlPoint2CourseArea:Standard
+ControlPoint2Mark1Lon:15.788339
+ControlPoint2Mark1Lat:43.652794
+ControlPoint2Mark1Static:0
+
+ControlPoint3UUID:de61c1f0-6797-0137-b066-60a44ce903c3
+ControlPoint3Name:AC 1a
+ControlPoint3HasTwoPoints:0
+ControlPoint3ShortName:1a
+ControlPoint3CourseArea:Standard
+ControlPoint3Mark1Lon:15.788332
+ControlPoint3Mark1Lat:43.652783
+ControlPoint3Mark1Static:0
+
+ControlPoint4UUID:fe419020-6797-0137-b06f-60a44ce903c3
+ControlPoint4Name:AC Gate
+ControlPoint4HasTwoPoints:1
+ControlPoint4ShortName:G
+ControlPoint4CourseArea:Standard
+ControlPoint4Mark1Lon:15.788240
+ControlPoint4Mark1Lat:43.652662
+ControlPoint4Mark1Static:0
+ControlPoint4Mark2Lon:15.788270
+ControlPoint4Mark2Lat:43.652706
+ControlPoint4Mark2Static:0
+
+SegmentFile:segments.php
+Route1UUID:8e293690-69f7-0137-dd9b-60a44ce903c3
+Route1Description:ORC A - Race 4
+Route1Length:0
+Route1ControlPoint1UUID:0afde760-6798-0137-b073-60a44ce903c3
+Route1ControlPoint2UUID:d73931e0-6797-0137-b063-60a44ce903c3
+Route1ControlPoint3UUID:de61c1f0-6797-0137-b066-60a44ce903c3
+Route1ControlPoint4UUID:fe419020-6797-0137-b06f-60a44ce903c3
+Route1ControlPoint5UUID:d73931e0-6797-0137-b063-60a44ce903c3
+Route1ControlPoint6UUID:de61c1f0-6797-0137-b066-60a44ce903c3
+Route1ControlPoint7UUID:fe419020-6797-0137-b06f-60a44ce903c3
+Route1ControlPoint8UUID:0afde760-6798-0137-b073-60a44ce903c3
+

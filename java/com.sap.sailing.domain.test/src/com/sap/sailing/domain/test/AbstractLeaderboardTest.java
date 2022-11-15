@@ -33,11 +33,15 @@ public abstract class AbstractLeaderboardTest {
 
     public static DynamicCompetitorWithBoat createCompetitorWithBoat(String competitorName) {
         DynamicBoat b = (DynamicBoat) createBoat(competitorName);
+        return createCompetitorWithBoat(competitorName, b);
+    }
+
+    public static DynamicCompetitorWithBoat createCompetitorWithBoat(String competitorName, DynamicBoat boat) {
         return new CompetitorWithBoatImpl(competitorName, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")),
-                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, /* searchTag */ null, b);
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, /* searchTag */ null, boat);
     }
 }

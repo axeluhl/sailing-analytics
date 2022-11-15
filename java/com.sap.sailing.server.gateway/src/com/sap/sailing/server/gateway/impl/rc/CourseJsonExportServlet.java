@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Course;
@@ -21,6 +22,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class CourseJsonExportServlet extends AbstractJsonHttpServlet {
 
@@ -52,6 +54,9 @@ public class CourseJsonExportServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such leaderboard found.");
             return;
         }
+        SecurityUtils.getSubject()
+                .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.READ));
+
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such race column found.");
@@ -65,6 +70,8 @@ public class CourseJsonExportServlet extends AbstractJsonHttpServlet {
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
         JSONObject result;
         if (trackedRace != null) {
+            SecurityUtils.getSubject()
+                    .checkPermission(trackedRace.getIdentifier().getStringPermission(DefaultActions.READ));
             Course course = raceColumn.getRaceDefinition(fleet).getCourse();
             CourseBaseJsonSerializer serializer = new CourseBaseJsonSerializer(
                     new WaypointJsonSerializer(

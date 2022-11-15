@@ -1,11 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -25,7 +25,7 @@ public class PasswordActivity extends BaseActivity {
 
         setContentView(R.layout.password_activity);
 
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content_layout, LoginBackdrop.newInstance());
         transaction.commit();
 
@@ -36,10 +36,10 @@ public class PasswordActivity extends BaseActivity {
     public void onResume() {
         super.onResume();
 
-        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
+        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
+        filter.addAction(AppConstants.ACTION_VALID_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
     }
 
@@ -56,10 +56,10 @@ public class PasswordActivity extends BaseActivity {
         public void onReceive(Context context, Intent intent) {
             DataStore dataStore = DataManager.create(PasswordActivity.this).getDataStore();
             Intent start;
-            if (dataStore.getCourseUUID() != null) {
+            if (dataStore.getCourseAreaId() != null) {
                 start = new Intent(PasswordActivity.this, RacingActivity.class);
-                start.putExtra(AppConstants.COURSE_AREA_UUID_KEY, dataStore.getCourseUUID());
-                start.putExtra(AppConstants.EventIdTag, dataStore.getEventUUID());
+                start.putExtra(AppConstants.EXTRA_COURSE_UUID, dataStore.getCourseAreaId());
+                start.putExtra(AppConstants.EXTRA_EVENT_ID, dataStore.getEventUUID());
             } else {
                 start = new Intent(PasswordActivity.this, LoginActivity.class);
             }

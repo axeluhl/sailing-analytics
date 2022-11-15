@@ -12,12 +12,12 @@
 
   <properties>
     <parameters.jetty>
-      -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8085
+      -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8085 -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory
     </parameters.jetty>
     <!-- NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the local 
       settings.xml, because of the differences between the CI-Build and the local setup. -->
     <tycho.tests.argLine>
-      ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx1536m
+      ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx4096m
     </tycho.tests.argLine>
   </properties>
 
@@ -97,120 +97,130 @@
                 <exclude>**/core/**</exclude>
               </excludes>
 
-              <argLine>${tycho.tests.argLine}</argLine>
+              <argLine>${argLine} ${tycho.tests.argLine}</argLine>
               <appArgLine>-consoleLog -console -clean</appArgLine>
 
               <product>raceanalysis.product</product>
               <application>raceanalysis.application</application>
 
               <bundleStartLevel>
+                 <bundle>
+                   <id>com.sap.sailing.server.gateway.test.support</id>
+                   <level>4</level>
+                   <autoStart>true</autoStart>
+                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.server.gateway.test.support</id>
+                  <id>com.sap.sailing.news</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sse.filestorage</id>
-                  <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sse.security</id>
-                  <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sse.security.ui</id>
+                  <id>com.sap.sailing.domain.tractracadapter</id>
                   <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sse.security.userstore</id>
-                  <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sse.security.userstore.mongodb</id>
-                  <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.ess40.resultimport</id>
-                  <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.freg.resultimport</id>
-                  <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sse.gwt</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.gwt.home</id>
-                  <level>5</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.gwt.ui</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.kiworesultimport</id>
-                  <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.server.interface</id>
+                  <id>com.sap.sailing.domain.windfinderadapter</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
                   <id>com.sap.sailing.server</id>
-                  <level>4</level>
+                  <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
                   <id>com.sap.sailing.server.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.swisstimingadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.swisstimingadapter.persistence</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sse.replication.interfaces</id>
+                  <id>com.sap.sailing.domain.swisstimingreplayadapter</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sse.replication</id>
+                  <id>com.sap.sailing.domain.tractracadapter.persistence</id>
                   <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.gwt.ui</id>
+                  <level>6</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
                   <id>com.sap.sailing.www</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.resultimport</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.datamining.shared</id>
+                  <id>com.sap.sailing.kiworesultimport</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.datamining</id>
+                  <id>com.sap.sailing.ess40.resultimport</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.polars</id>
+                  <id>com.sap.sailing.freg.resultimport</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.domain.deckmanadapter</id>
+                  <id>com.sap.sailing.barbados.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.sailwave.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.manage2sail.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.sailti.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.yachtscoring.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.velum.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.monitoring</id>
+                  <level>7</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.xrr.resultimport</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
@@ -220,8 +230,138 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.xmlexport</id>
+                  <id>com.sap.sailing.domain.racelogtrackingadapter</id>
                   <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.deckmanadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.oceanraceadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.yellowbrickadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.yellowbrickadapter.persistence</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.dashboards.gwt</id>
+                  <level>6</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.dashboards.gwt</id>
+                  <level>6</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.datamining</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.polars</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.windestimation</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.polars.datamining</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.expeditionadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.expeditionconnector.persistence</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.bravoadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.igtimiadapter.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.shared.server</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.shared.server.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.landscape.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.hanaexport</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.security.ui</id>
+                  <level>6</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.security.userstore.mongodb</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.replication</id>
+                  <level>6</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.filestorage</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.mail</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.landscape.aws</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>org.eclipse.jetty.osgi.boot</id>
+                  <level>3</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>org.eclipse.jetty.http</id>
+                  <level>3</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
@@ -235,72 +375,17 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>org.eclipse.jetty.continuation</id>
+                  <id>org.eclipse.jetty.apache-jsp</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>org.eclipse.jetty.deploy</id>
-                  <level>4</level>
+                  <id>org.apache.aries.spifly.dynamic.bundle</id>
+                  <level>3</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>org.eclipse.jetty.http</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.io</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.jmx</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.nested</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.osgi.boot</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.security</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.server</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.servlet</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.util</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.webapp</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.xml</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.mortbay.jetty.util</id>
+                  <id>org.eclipse.jetty.annotations</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>

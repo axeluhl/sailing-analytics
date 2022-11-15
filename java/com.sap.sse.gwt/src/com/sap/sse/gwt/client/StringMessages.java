@@ -38,7 +38,13 @@ public interface StringMessages extends Messages {
     String resetToDefaultInProgress();
     String settingsRemoved();
     String settingsRemovedError();
-    
+    String settingsGetError();
+    String getAvailableDetailTypesForLeaderboardError();
+    String getLeaderboardNamesError();
+    String getLeaderboardError();
+    String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String yes();
+    String no();
     String details();
     String filterBy();
     String noDataFound();
@@ -57,7 +63,6 @@ public interface StringMessages extends Messages {
     String minutes();
     String seconds();
     String milliseconds();
-    
     String run();
     String copyToClipboard();
     String code();
@@ -96,5 +101,8 @@ public interface StringMessages extends Messages {
     String whatsNewDialogTitle();
     String whatsNewDialogMessage();
     String showChangelog();
-
+    String hideElementsWithoutUpdateRights();
+    String temporarilyUnavailable();
+    String sapAnalytics();
+    String sapAnalyticsURL();
 }

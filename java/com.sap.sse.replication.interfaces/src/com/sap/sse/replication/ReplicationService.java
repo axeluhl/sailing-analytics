@@ -42,14 +42,13 @@ public interface ReplicationService {
      * bundle that starts after this bundle because then that {@link Replicable} will not yet be registered and won't
      * become part of replication.
      */
-    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
-            ClassNotFoundException, InterruptedException;
+    void startToReplicateFrom(ReplicationMasterDescriptor master) throws Exception;
 
     /**
      * Registers a replica with this master instance. The <code>replica</code> will be considered in the result of
      * {@link #getReplicaInfo()} when this call has succeeded.
      */
-    void registerReplica(ReplicaDescriptor replica) throws IOException;
+    void registerReplica(ReplicaDescriptor replica) throws IOException, Exception;
 
     /**
      * When this service runs on a master instance, the <code>replica</code> will no longer be considered part of this
@@ -88,7 +87,7 @@ public interface ReplicationService {
      */
     UUID getServerIdentifier();
 
-    Channel createMasterChannel() throws IOException, ConnectException;
+    Channel createMasterChannel() throws IOException, ConnectException, Exception;
 
     long getNumberOfMessagesSent(ReplicaDescriptor replica);
 
@@ -98,5 +97,51 @@ public interface ReplicationService {
 
     Iterable<Replicable<?, ?>> getAllReplicables();
 
-    ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname, String exchangeName, int servletPort, int jmsPort, String jmsQueueName, Iterable<Replicable<?, ?>> replicables);
+    ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname,
+            String exchangeName, int servletPort, int jmsPort, String jmsQueueName, String bearerToken,
+            Iterable<Replicable<?, ?>> replicables);
+
+    /**
+     * @return a replication receiver that is responsible for receiving replicated operations from a message queue and
+     *         for dispatching those operations to their respective {@link Replicable}s; or {@code null} in case
+     *         currently no replication is active. Note, though, that this service may already be aware that it will
+     *         start replicating any time soon but hasn't actually done so. This can be seen from
+     *         {@link #isReplicationStarting()}. Therefore, a reasonable availability / health check shall check the
+     *         result of this method, the result of {@link #isReplicationStarting()} as well as the
+     *         {@link Replicable#isCurrentlyFillingFromInitialLoad()} results.
+     */
+    ReplicationReceiver getReplicator();
+
+    /**
+     * An update to this attribute can be observed by registering a {@link ReplicationStartingListener} using
+     * the {@link #addReplicationStartingListener} method.
+     */
+    void setReplicationStarting(boolean b);
+    
+    @FunctionalInterface
+    public static interface ReplicationStartingListener {
+        void onReplicationStartingChanged(boolean newReplicationStartingValue);
+    }
+    
+    void addReplicationStartingListener(ReplicationStartingListener listener);
+    
+    void removeReplicationStartingListener(ReplicationStartingListener listener);
+
+    /**
+     * When this service has been registered in the OSGi service registry and auto-replication has been configured,
+     * this method will return {@code true} already as soon as the service can be discovered in the registry.
+     * 
+     * @return {@code true} if replication is starting; during this phase it is clear that the replicables managed by
+     *         this service instance are about to be {@link Replicable#clearReplicaState() cleared} and to be initialized
+     *         with an {@link Replicable#initiallyFillFrom(java.io.InputStream) initial load} obtained from the master
+     *         instance. However, this initial load process may not yet have started and hence the {@link #getReplicator} method
+     *         may return nothing.
+     */
+    boolean isReplicationStarting();
+    
+    /**
+     * Provides a compound overview of this service and the {@link Replicable}s it manages.
+     * This can be used in compound server availability checks, for example.
+     */
+    ReplicationStatus getStatus();
 }

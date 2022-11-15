@@ -1,9 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -20,6 +16,10 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements SWCRacingProcedure {
 
     private final static Duration CLASS_AND_STARTMODE_UP_INTERVAL = Duration.ONE_MINUTE.times(6); // 6 minutes before start
@@ -30,8 +30,8 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     private final static Duration TWO_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(2); // 2 minutes before start
     private final static Duration ONE_MINUTE_FLAG_UP_INTERVAL = Duration.ONE_MINUTE; // 1 minutes before start
 
-    public SWCRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-             SWCStartConfiguration configuration, RaceLogResolver raceLogResolver) {
+    public SWCRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
+                                  SWCStartConfiguration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver);
     }
 
@@ -44,24 +44,24 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     public RacingProcedureType getType() {
         return RacingProcedureType.SWC;
     }
-    
+
     @Override
     public boolean hasIndividualRecall() {
         boolean hasRecall = super.hasIndividualRecall();
-        if (!hasRecall) {
-            return false;
-        } else if (startmodeFlagHasBeenSet()) {
-            return cachedStartmodeFlag != Flags.BLACK && cachedStartmodeFlag != Flags.UNIFORM;
-        } else {
-            return hasRecall;
+        if (hasRecall) {
+            return true;
         }
+        if (startmodeFlagHasBeenSet) {
+            return cachedStartmodeFlag != Flags.BLACK && cachedStartmodeFlag != Flags.UNIFORM;
+        }
+        return false;
     }
-    
+
     @Override
     protected boolean hasIndividualRecallByDefault() {
         return true;
     }
-    
+
     @Override
     protected Boolean isResultEntryEnabledByDefault() {
         return false;
@@ -69,7 +69,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
 
     @Override
     public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
-        return Arrays.<RaceStateEvent> asList(
+        return Arrays.<RaceStateEvent>asList(
                 new RaceStateEventImpl(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_CLASS_AND_STARTMODE_UP),
                 new RaceStateEventImpl(startTime.minus(FIVE_MINUTES_FLAG_UP_INTERVAL), RaceStateEvents.SWC_FIVE_UP),
                 new RaceStateEventImpl(startTime.minus(FOUR_MINUTES_FLAG_UP_INTERVAL), RaceStateEvents.SWC_FOUR_UP),
@@ -84,21 +84,21 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     @Override
     public boolean processStateEvent(RaceStateEvent event) {
         switch (event.getEventName()) {
-        case SWC_CLASS_AND_STARTMODE_UP:
-            if (!startmodeFlagHasBeenSet()) {
-                setStartModeFlag(event.getTimePoint(), cachedStartmodeFlag);
-            }
-        case SWC_CLASS_AND_STARTMODE_DOWN:
-        case SWC_FIVE_UP:
-        case SWC_FOUR_UP:
-        case SWC_THREE_UP:
-        case SWC_TWO_UP:
-        case SWC_ONE_UP:
-        case SWC_GREEN_UP:
-            getChangedListeners().onActiveFlagsChanged(this);
-            return true;
-        default:
-            return super.processStateEvent(event);
+            case SWC_CLASS_AND_STARTMODE_UP:
+                if (!startmodeFlagHasBeenSet) {
+                    setStartModeFlag(event.getTimePoint(), cachedStartmodeFlag);
+                }
+            case SWC_CLASS_AND_STARTMODE_DOWN:
+            case SWC_FIVE_UP:
+            case SWC_FOUR_UP:
+            case SWC_THREE_UP:
+            case SWC_TWO_UP:
+            case SWC_ONE_UP:
+            case SWC_GREEN_UP:
+                getChangedListeners().onActiveFlagsChanged(this);
+                return true;
+            default:
+                return super.processStateEvent(event);
         }
     }
 
@@ -106,67 +106,67 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
         if (now.before(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, false)),
+                    Collections.singletonList(new FlagPole(cachedStartmodeFlag, false)),
                     null,
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true)), 
+                    Collections.singletonList(new FlagPole(cachedStartmodeFlag, true)),
                     startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL));
         } else if (now.before(startTime.minus(FIVE_MINUTES_FLAG_UP_INTERVAL))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_FIVE, false)),
                     startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL),
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_FIVE, true)), 
+                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_FIVE, true)),
                     startTime.minus(FIVE_MINUTES_FLAG_UP_INTERVAL));
         } else if (now.before(startTime.minus(FOUR_MINUTES_FLAG_UP_INTERVAL))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_FIVE, true), new FlagPole(Flags.SWC_FOUR, false)),
                     startTime.minus(FIVE_MINUTES_FLAG_UP_INTERVAL),
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_FOUR, true), new FlagPole(Flags.SWC_THREE, false)), 
+                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_FOUR, true), new FlagPole(Flags.SWC_THREE, false)),
                     startTime.minus(FOUR_MINUTES_FLAG_UP_INTERVAL));
         } else if (now.before(startTime.minus(THREE_MINUTES_FLAG_UP_INTERVAL))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_FOUR, true), new FlagPole(Flags.SWC_THREE, false)),
                     startTime.minus(FOUR_MINUTES_FLAG_UP_INTERVAL),
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_THREE, true), new FlagPole(Flags.SWC_TWO, false)), 
+                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_THREE, true), new FlagPole(Flags.SWC_TWO, false)),
                     startTime.minus(THREE_MINUTES_FLAG_UP_INTERVAL));
         } else if (now.before(startTime.minus(TWO_MINUTES_FLAG_UP_INTERVAL))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_THREE, true), new FlagPole(Flags.SWC_TWO, false)),
                     startTime.minus(THREE_MINUTES_FLAG_UP_INTERVAL),
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_TWO, true), new FlagPole(Flags.SWC_ONE, false)), 
+                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_TWO, true), new FlagPole(Flags.SWC_ONE, false)),
                     startTime.minus(TWO_MINUTES_FLAG_UP_INTERVAL));
         } else if (now.before(startTime.minus(ONE_MINUTE_FLAG_UP_INTERVAL))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_TWO, true), new FlagPole(Flags.SWC_ONE, false)),
                     startTime.minus(TWO_MINUTES_FLAG_UP_INTERVAL),
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_ONE, true), new FlagPole(Flags.SWC_ZERO, false)), 
+                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_ONE, true), new FlagPole(Flags.SWC_ZERO, false)),
                     startTime.minus(ONE_MINUTE_FLAG_UP_INTERVAL));
         } else if (now.before(startTime)) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_ONE, true), new FlagPole(Flags.SWC_ZERO, false)),
                     startTime.minus(ONE_MINUTE_FLAG_UP_INTERVAL),
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_ZERO, true)), 
+                    Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_ZERO, true)),
                     startTime);
         } else if (now.before(startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_ZERO, true)),
                     startTime,
-                    Arrays.asList(new FlagPole(cachedStartmodeFlag, false), new FlagPole(Flags.SWC_ZERO, false)), 
+                    Arrays.asList(new FlagPole(cachedStartmodeFlag, false), new FlagPole(Flags.SWC_ZERO, false)),
                     startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL));
         } else {
             if (isIndividualRecallDisplayed(now)) {
                 return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.XRAY, true)),
+                        Collections.singletonList(new FlagPole(Flags.XRAY, true)),
                         getIndividualRecallDisplayedTime(),
-                        Arrays.asList(new FlagPole(Flags.XRAY, false)),
+                        Collections.singletonList(new FlagPole(Flags.XRAY, false)),
                         getIndividualRecallRemovalTime());
             } else if (isFinished(now)) {
                 return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
+                        Collections.singletonList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
             } else if (isInFinishingPhase(now)) {
                 return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.BLUE, true)),
+                        Collections.singletonList(new FlagPole(Flags.BLUE, true)),
                         getFinishingTime(),
-                        Arrays.asList(new FlagPole(Flags.BLUE, false)),
+                        Collections.singletonList(new FlagPole(Flags.BLUE, false)),
                         null);
             } else {
                 TimePoint recallRemoved = getIndividualRecallRemovalTime();

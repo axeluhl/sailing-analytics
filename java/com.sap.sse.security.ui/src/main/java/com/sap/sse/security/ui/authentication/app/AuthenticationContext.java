@@ -1,6 +1,10 @@
 package com.sap.sse.security.ui.authentication.app;
 
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * Interface for authentication context representations providing access to the current {@link UserDTO user} object and
@@ -37,4 +41,12 @@ public interface AuthenticationContext {
      * @return the user information subtitle text
      */
     String getUserSubtitle();
+    
+    boolean hasPermission(SecuredDTO securedDTO, Action action);
+
+    boolean hasServerPermission(Action action);
+
+    ServerInfoDTO getServerInfo();
+    
+    PaywallResolver getPaywallResolver();
 }

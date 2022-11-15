@@ -86,7 +86,7 @@ table {
 }
 
 .TopLeftControlsWrapperPanelParentDiv {
-	padding-top: 34px;
+	padding-top: 27px;
 	padding-left: 10px;
 }
 
@@ -97,10 +97,11 @@ table {
 	padding-left: 45px;
 }
 
-.MapSimulationLegendParentDiv {
-	padding-bottom: 10px;
-	padding-right: 10px;
+.MapMetricLegend {
 	pointer-events: none;
+}
+.MapMetricLegendParentDiv {
+	padding-top: 65px;
 }
 
 .MapSimulationLegend {
@@ -109,7 +110,7 @@ table {
 
 .MapSimulationLegendParentDiv {
 	padding-bottom: 10px;
-	padding-right: 10px;
+	padding-right: 50px;
 	pointer-events: none;
 }
 
@@ -472,10 +473,6 @@ img.openColumn {
 }
 
 .raceBoard-Logo {
-	position: absolute;
-	top: 6px;
-	left: 10px;
-	z-index: 10;
 	cursor: pointer;
 }
 
@@ -671,8 +668,13 @@ img.openColumn {
 .RegattaRaceInformation-Header {
 	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	position: relative;
-	left: 140px;
-	top: 11px;
+}
+
+.raceBoard-Logo, .RegattaRaceInformation-Header {
+	display: inline-block;
+	vertical-align: text-bottom;
+	margin-left: 10px;
+	margin-top: 5px;
 }
 
 .RegattaRaceInformation-Header .RaceName-Label {
@@ -696,6 +698,15 @@ img.openColumn {
 	color: white;
 }
 
+.RegattaAndRaceTime-Header_with_databy {
+    top: 3px;
+}
+
+.compactHeader .RegattaAndRaceTime-Header.RegattaAndRaceTime-Header_with_databy {
+    top: 0;
+    font-size: 90%;
+}
+
 .RegattaAndRaceTime-Header .RegattaName-Anchor {
 	font-size: 15px;
 	color: white;
@@ -716,9 +727,14 @@ img.openColumn {
 	margin-top: 5px;
 }
 
-.compactHeader .RegattaRaceInformation-Header {
-    left: 110px;
+.compactHeader .RegattaAndRaceTime-Header>* {
+    margin-top: 3px;
 }
+
+.RegattaAndRaceTime-Header_with_databy .RegattaName-Anchor, .RegattaAndRaceTime-Header_with_databy .RaceTime-Label {
+    font-size: 13px;
+}
+
 .compactHeader .RegattaRaceInformation-Header .RaceName-Label {
     display: block;
     font-size: 16px;
@@ -726,7 +742,6 @@ img.openColumn {
 }
 .compactHeader .RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
     display: block;
-    margin-top: 5px;
     white-space: nowrap;
 }
 .compactHeader .RegattaAndRaceTime-Header {

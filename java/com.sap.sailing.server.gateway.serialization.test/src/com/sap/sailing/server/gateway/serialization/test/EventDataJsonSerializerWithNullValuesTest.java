@@ -20,18 +20,20 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -67,9 +69,12 @@ public class EventDataJsonSerializerWithNullValuesTest {
         when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         // ... and the serializer itself.		
-        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
-        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
-        
+        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
+        deserializer = new EventBaseJsonDeserializer(
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
+
         when(expectedLeaderbaordGroup.getId()).thenReturn(UUID.randomUUID());
         when(expectedLeaderbaordGroup.getName()).thenReturn("LG");
         when(expectedLeaderbaordGroup.getDescription()).thenReturn("LG Description");

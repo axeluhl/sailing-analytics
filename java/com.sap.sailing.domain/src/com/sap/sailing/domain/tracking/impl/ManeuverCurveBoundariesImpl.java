@@ -16,16 +16,18 @@ public class ManeuverCurveBoundariesImpl implements ManeuverCurveBoundaries {
     private final SpeedWithBearing speedWithBearingAfter;
     private final double directionChangeInDegrees;
     private final Speed lowestSpeed;
+    private final Speed highestSpeed;
 
     public ManeuverCurveBoundariesImpl(TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, Speed lowestSpeed) {
+            double directionChangeInDegrees, Speed lowestSpeed, Speed highestSpeed) {
         this.timePointBefore = timePointBefore;
         this.timePointAfter = timePointAfter;
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
         this.lowestSpeed = lowestSpeed;
+        this.highestSpeed = highestSpeed;
     }
 
     @Override
@@ -56,6 +58,11 @@ public class ManeuverCurveBoundariesImpl implements ManeuverCurveBoundaries {
     @Override
     public Speed getLowestSpeed() {
         return lowestSpeed;
+    }
+
+    @Override
+    public Speed getHighestSpeed() {
+        return highestSpeed;
     }
 
     @Override

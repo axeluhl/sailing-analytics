@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.junit.Before;
@@ -16,9 +20,12 @@ import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.User;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserImpl;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -32,6 +39,7 @@ public class PreferenceObjectBasedNotificationSetTest {
 
     private UserStoreImpl store;
     
+    private static final String serverName = "dummyServer";
     private static final String user1 = "me";
     private static final String user2 = "somebody_else";
     private static final String mail = "anonymous@sapsailing.com";
@@ -44,20 +52,20 @@ public class PreferenceObjectBasedNotificationSetTest {
     private static final HashSet<String> allValues = values(A, B, C);
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException {
+    public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException, UserManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         MongoDatabase db = service.getDB();
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        store = new UserStoreImpl();
+        store = new UserStoreImpl("TestDefaultTenant");
     }
     
     @Test
     public void noPreferenceAvailableTest() {
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
-        Assert.assertTrue(Util.isEmpty(notificationSet.getUsersnamesToNotifyFor(prefKey)));
+        Assert.assertTrue(Util.isEmpty(notificationSet.getUserNamesToNotifyFor(prefKey)));
     }
 
     @Test
@@ -65,9 +73,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values()));
     }
     
     @Test
@@ -75,9 +83,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.registerPreferenceConverter(prefKey, prefConverter);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         store.setPreferenceObject(user1, prefKey, values1);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values()));
     }
     
     @Test
@@ -86,9 +94,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.setPreferenceObject(user1, prefKey, values1);
         store.setPreferenceObject(user2, prefKey, values2);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1, user2)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values(user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values(user1, user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values(user2)));
     }
     
     @Test
@@ -97,9 +105,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         store.setPreferenceObject(user1, prefKey, values2);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values(user1)));
     }
     
     @Test
@@ -109,9 +117,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.setPreferenceObject(user2, prefKey, allValues);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         store.setPreferenceObject(user1, prefKey, values2);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values(user2)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1, user2)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values(user1, user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values(user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values(user1, user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values(user1, user2)));
     }
     
     @Test
@@ -121,9 +129,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.setPreferenceObject(user2, prefKey, values2);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         store.unsetPreference(user1, prefKey);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user2)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values(user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values(user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values(user2)));
     }
     
     @Test
@@ -132,9 +140,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         store.setPreferenceObject(user1, prefKey, values1);
         store.unsetPreference(user1, prefKey);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values()));
     }
     
     @Test
@@ -142,7 +150,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor("x"), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor("x"), values()));
     }
     
     @Test
@@ -152,9 +160,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         store.setPreferenceObject(user1, prefKey, values1);
         store.setPreferenceObject(user1, otherPrefKey, values2);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1)));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values(user1)));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values()));
     }
     
     @Test
@@ -169,7 +177,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingTest() throws UserManagementException {
+    public void userMappingTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -182,7 +190,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException {
+    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -195,7 +203,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithTwoUsersTest() throws UserManagementException {
+    public void userMappingWithTwoUsersTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         createUserWithVerifiedEmail(user2, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
@@ -213,7 +221,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException {
+    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -229,40 +237,44 @@ public class PreferenceObjectBasedNotificationSetTest {
      * There was a bug that caused the preferences not to be removed when a user was deleted.
      */
     @Test
-    public void deleteUserWithMappingTest() throws UserManagementException {
+    public void deleteUserWithMappingTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         store.deleteUser(user1);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values()));
     }
     
     @Test
-    public void removePreferenceConverterTest() throws UserManagementException {
+    public void removePreferenceConverterTest() throws UserManagementException, UserGroupManagementException {
         store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         store.removePreferenceConverter(prefKey);
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values()));
-        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(B), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUserNamesToNotifyFor(C), values()));
     }
     
     private static HashSet<String> values(String... values) {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private static HashSet<User> users(User... values) {
+    private static Set<User> users(User... values) {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
+    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException, UserGroupManagementException {
+        UserGroup defaultTenantForSingleServer = store.createUserGroup(UUID.randomUUID(), username + "-tenant");
+        Map<String, UserGroup> defaultTenantForServer = new ConcurrentHashMap<>();
+        defaultTenantForServer.put(serverName, defaultTenantForSingleServer);
         store.createUser(username, email);
-        store.updateUser(new User(username, email, null, null, null, true, null, null, Collections.emptySet()));
+        store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenantForServer,
+                Collections.emptySet(), /* userGroupProvider */ null));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {

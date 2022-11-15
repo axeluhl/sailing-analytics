@@ -71,7 +71,7 @@ public class RaceIdentifierToLeaderboardRaceColumnAndFleetMapper {
             if (fleet == null) {
                 result = null;
             } else {
-                result = new LeaderboardNameRaceColumnNameAndFleetName(leaderboard.name, raceColumn.getName(), fleet.getName());
+                result = new LeaderboardNameRaceColumnNameAndFleetName(leaderboard.getName(), raceColumn.getName(), fleet.getName());
             }
         }
         return result;

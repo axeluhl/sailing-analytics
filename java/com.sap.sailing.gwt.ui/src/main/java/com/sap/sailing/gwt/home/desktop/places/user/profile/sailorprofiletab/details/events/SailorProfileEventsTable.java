@@ -25,8 +25,8 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.det
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 
 /** This element displays the events a sailor has participated in in the {@link ShowAndEditSailorProfile} view. */
 public class SailorProfileEventsTable extends Composite {

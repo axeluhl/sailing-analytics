@@ -1,16 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<web-app version="2.5"
-        xmlns="http://java.sun.com/xml/ns/javaee"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    version="3.1">
 
-    <servlet>
-        <servlet-name>ClearSateServlet</servlet-name>
-        <servlet-class>com.sap.sailing.server.gateway.test.support.ClearStateServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ClearSateServlet</servlet-name>
-        <url-pattern>/clearState</url-pattern>
-	</servlet-mapping>
- </web-app>
+  <!-- Apache Shiro -->
+  <context-param>
+    <param-name>shiroEnvironmentClass</param-name>
+    <param-value>org.apache.shiro.web.env.IniWebEnvironment</param-value>
+  </context-param>
+  <listener>
+    <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+  </listener>
+  <filter>
+    <filter-name>ShiroFilter</filter-name>
+    <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+  </filter>
+  <!-- Make sure any request you want accessible to Shiro is filtered. "/*" catches all requests. Usually this filter mapping 
+    is defined first (before all others) to ensure that Shiro works in subsequent filters in the filter chain: -->
+  <filter-mapping>
+    <filter-name>ShiroFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>INCLUDE</dispatcher>
+    <dispatcher>ERROR</dispatcher>
+  </filter-mapping>
+
+  <servlet>
+    <servlet-name>ClearSateServlet</servlet-name>
+    <servlet-class>com.sap.sailing.server.gateway.test.support.ClearStateServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ClearSateServlet</servlet-name>
+    <url-pattern>/clearState</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>CreateSessionServlet</servlet-name>
+    <servlet-class>com.sap.sailing.server.gateway.test.support.CreateSessionServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CreateSessionServlet</servlet-name>
+    <url-pattern>/createSession</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>WhitelabelSwitchServlet</servlet-name>
+    <servlet-class>com.sap.sailing.server.gateway.test.support.WhitelabelSwitchServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>WhitelabelSwitchServlet</servlet-name>
+    <url-pattern>/switch/whitelabel/*</url-pattern>
+  </servlet-mapping>
+</web-app>

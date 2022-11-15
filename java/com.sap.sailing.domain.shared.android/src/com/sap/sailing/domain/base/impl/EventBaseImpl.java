@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -20,6 +21,9 @@ import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.concurrent.CopyOnWriteHashMap;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -52,6 +56,9 @@ public abstract class EventBaseImpl implements EventBase {
      */
     protected EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue, boolean isPublic, UUID id) {
         assert venue != null;
+        if (startDate != null && endDate != null && startDate.after(endDate)) {
+            throw new IllegalArgumentException("Event "+name+" cannot start after it ends. Start: "+startDate+", end: "+endDate);
+        }
         this.id = id;
         this.name = name;
         this.startDate = startDate;
@@ -127,7 +134,19 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     @Override
+    public void setStartAndEndDate(TimePoint startDate, TimePoint endDate) {
+        if (startDate != null && endDate != null && endDate.before(startDate)) {
+            throw new IllegalArgumentException("Event start date ("+startDate+") for event "+this+" must not be after end date "+endDate);
+        }
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    @Override
     public void setStartDate(TimePoint startDate) {
+        if (startDate != null && getEndDate() != null && getEndDate().before(startDate)) {
+            throw new IllegalArgumentException("Event start date ("+startDate+") for event "+this+" must not be after end date "+getEndDate());
+        }
         this.startDate = startDate;
     }
 
@@ -138,6 +157,9 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public void setEndDate(TimePoint endDate) {
+        if (endDate != null && getStartDate() != null && getStartDate().after(endDate)) {
+            throw new IllegalArgumentException("Event end date ("+endDate+") for event "+this+" must not be before start date "+getStartDate());
+        }
         this.endDate = endDate;
     }
 
@@ -367,5 +389,23 @@ public abstract class EventBaseImpl implements EventBase {
             }
         }
         return false;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.EVENT;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getId());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
     }
 }

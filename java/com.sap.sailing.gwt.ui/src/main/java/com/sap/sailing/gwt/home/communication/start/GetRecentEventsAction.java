@@ -41,7 +41,8 @@ public class GetRecentEventsAction implements SailingAction<ListResult<EventQuic
     @GwtIncompatible
     public ListResult<EventQuickfinderDTO> execute(final SailingDispatchContext context) throws DispatchException {
         final SortedSet<EventQuickfinderDTO> events = new TreeSet<>();
-        HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(), new EventVisitor() {
+        HomeServiceUtil.forAllPublicEventsWithReadPermission(context.getRacingEventService(), context.getRequest(),
+                context.getSecurityService(), new EventVisitor() {
             @Override
             public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
                 EventQuickfinderDTO dto = new EventQuickfinderDTO();

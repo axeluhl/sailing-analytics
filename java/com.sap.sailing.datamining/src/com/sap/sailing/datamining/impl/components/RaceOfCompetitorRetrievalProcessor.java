@@ -23,14 +23,15 @@ public class RaceOfCompetitorRetrievalProcessor extends AbstractRetrievalProcess
     @Override
     protected Iterable<HasRaceOfCompetitorContext> retrieveData(HasTrackedRaceContext element) {
         Collection<HasRaceOfCompetitorContext> raceOfCompetitorsWithContext = new ArrayList<>();
-        for (Competitor competitor : element.getTrackedRace().getRace().getCompetitors()) {
-            if (isAborted()) {
-                break;
+        if (element.getTrackedRace() != null) {
+            for (Competitor competitor : element.getTrackedRace().getRace().getCompetitors()) {
+                if (isAborted()) {
+                    break;
+                }
+                HasRaceOfCompetitorContext raceOfCompetitorWithContext = new RaceOfCompetitorWithContext(element, competitor);
+                raceOfCompetitorsWithContext.add(raceOfCompetitorWithContext);
             }
-            HasRaceOfCompetitorContext raceOfCompetitorWithContext = new RaceOfCompetitorWithContext(element, competitor);
-            raceOfCompetitorsWithContext.add(raceOfCompetitorWithContext);
         }
         return raceOfCompetitorsWithContext;
     }
-
 }

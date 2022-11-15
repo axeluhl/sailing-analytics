@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.home.communication.event.GetFinishedRacesAction;
@@ -57,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
     
@@ -105,11 +105,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @Override
     public void setPresenter(Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
-    }
-    
-    @Override
-    public TabView.State getState() {
-        return TabView.State.VISIBLE;
     }
     
     @Override
@@ -283,12 +278,18 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     private class DesktopRegattaCompetitionPresenter extends RegattaCompetitionPresenter {
         public DesktopRegattaCompetitionPresenter() {
-            super(compFormatContainerUi);
+            super(compFormatContainerUi, new PaywallResolver(currentPresenter.getUserService(), 
+                    currentPresenter.getSubscriptionServiceFactory()));
         }
         
         @Override
         protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
             return currentPresenter.getRaceViewerURL(raceMetadata, mode);
+        }
+        
+        @Override
+        protected String getMapAndWindChartUrl(String leaderboardName, String raceName, String fleetName) {
+            return currentPresenter.getMapAndWindChartUrl(leaderboardName, raceName, fleetName);
         }
     }
 

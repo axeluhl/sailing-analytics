@@ -5,9 +5,9 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.place.shared.Prefix;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
+import com.sap.sailing.gwt.common.client.navigation.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVersion {
     private final String name;
@@ -19,6 +19,7 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
     }
 
     public PasswordResetPlace(String name, String email, String resetSecret) {
+        super((String) null); // TODO bug5288: can the generic token parsing that AbstractBasePlace offers be used here to tokenize the place params?
         this.name = name;
         this.email = email;
         this.resetSecret = resetSecret;
@@ -74,7 +75,7 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
 
         @Override
         public String getToken(PasswordResetPlace place) {
-            return "";
+            return ""; // TODO bug5288: why not the tokenized parameters as they were parsed by getPlace(token)?
         }
     }
 }

@@ -15,7 +15,8 @@ public class MarkImageDescriptor {
     private final MarkType type;
     private final Context context;
 
-    public MarkImageDescriptor(Context context, int drawableId, MarkType type, Color color, String shape, String pattern) {
+    public MarkImageDescriptor(Context context, int drawableId, MarkType type, Color color, String shape,
+            String pattern) {
         this.drawableId = drawableId;
         this.type = type;
         this.color = color;
@@ -24,16 +25,15 @@ public class MarkImageDescriptor {
         this.context = context;
     }
 
-    public
-    @DrawableRes
-    int getDrawableId() {
+    public @DrawableRes int getDrawableId() {
         return drawableId;
     }
 
     /**
-     * @param instanceColor when this descriptor has {@code null{} as its {@link #color} then
-     * {@code instanceColor} can be used to provide a specific color; if {@code instanceColor}
-     * is {@code null}, whatever the value of {@link #color} is will be used.
+     * @param instanceColor
+     *            when this descriptor has {@code null{} as its {@link #color} then {@code instanceColor} can be used to
+     *            provide a specific color; if {@code instanceColor} is {@code null}, whatever the value of {@link
+     *            #color} is will be used.
      */
     public LayerDrawable getDrawable(Color instanceColor) {
         return BuoyHelper.getBuoy(context, type, instanceColor == null ? color : instanceColor, shape, pattern);
@@ -52,10 +52,11 @@ public class MarkImageDescriptor {
     }
 
     /**
-     * An utility method to check if the mark icon has compatible display properties.
-     * In case of null values at least the mark type and the color must exist and fit.
+     * An utility method to check if the mark icon has compatible display properties. In case of null values at least
+     * the mark type and the color must exist and fit.
      */
-    public int getCompatibilityLevel(MarkType typeToCheck, Color colorToCheck, String shapeToCheck, String patternToCheck) {
+    public int getCompatibilityLevel(MarkType typeToCheck, Color colorToCheck, String shapeToCheck,
+            String patternToCheck) {
         boolean isSameType = false;
         boolean isSameColor = false;
         boolean isSameShape = false;

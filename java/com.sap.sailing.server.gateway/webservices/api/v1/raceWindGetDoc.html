@@ -14,6 +14,8 @@
 <b>Description:</b>
 <p>Gets all GPS positions and data values for the wind of a race.<br/>
 All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).</p>
+The request must be authenticated with a user who has the <tt>TRACKED_RACE:EXPORT</tt> permission for the race for
+which the data is requested.
 <br/>
 <table>
 	<tr>
@@ -38,6 +40,14 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 			<div>windsourceid (Id of a wind source. For example Igtimi wind sources will have the type=EXPEDITION but each of them has unique ids. If you want to filter by these then you can use this parameter)</div>
 		</td>
 	</tr>
+    <tr>
+        <td>Optional HTTP request header fields:</td>
+        <td>
+            <div>secondaryuserbearertoken: if provided, used to authenticate a subject for which then the <tt>TRACKED_RACE:EXPORT</tt>
+                 permission is checked for the race requested. This will skil the same test for the "primary" user that authenticated
+                 the request.</div>
+        </td>
+    </tr>
 	<tr>
 		<td>Request method:</td>
 		<td>GET</td>

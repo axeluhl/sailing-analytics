@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.sap.sailing.domain.common.PathType;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class PathDTO extends NamedDTO {
     private static final long serialVersionUID = 4926185583314563898L;
@@ -12,8 +12,8 @@ public class PathDTO extends NamedDTO {
     private boolean mixedLeg;
     private PathType pathType;
 
-    protected PathDTO() {
-    }
+    @Deprecated
+    PathDTO() {} // for GWT RPC serialization only
     
     public PathDTO(PathType pathType) {
         super(pathType.getTxtId());
@@ -41,8 +41,7 @@ public class PathDTO extends NamedDTO {
         if (points == null || points.size() == 0) {
             return 0;
         }
-
-        return points.get(points.size() - 1).timepoint - points.get(0).timepoint;
+        return points.get(0).timepoint.until(points.get(points.size() - 1).timepoint).asMillis();
     }
     
     public boolean getAlgorithmTimedOut() {
@@ -60,5 +59,4 @@ public class PathDTO extends NamedDTO {
     public void setMixedLeg(boolean mixedLeg) {
         this.mixedLeg = mixedLeg;
     }
-
 }

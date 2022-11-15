@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeComposite;
 import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
 
 public abstract class BaseQRIdentifierWidget implements IsWidget {
-    
     protected final TextBox serverBox;
     protected final Grid inputGrid;
     private final QRCodeComposite qrCodeComposite;
@@ -36,7 +35,6 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages, int errorCorrectionLevel) {
         this.stringMessages = stringMessages;
-        
         serverBox = new TextBox();
         serverBox.setVisibleLength(40);
         serverBox.setValue(Window.Location.getProtocol() + "//" + Window.Location.getHost());
@@ -52,25 +50,19 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
                 generateQRCode();
             }
         });
-        
         inputGrid = new Grid(1, 2);
         inputGrid.setWidget(0, 0, new Label(stringMessages.serverUrl()+":"));
         inputGrid.setWidget(0, 1, serverBox);
-        
         qrCodeComposite = new QRCodeComposite(qrCodeSize, errorCorrectionLevel);
-        
         error = new Label();
         error.setStyleName("errorLabel");
-        
         url = new Label();
-        
         VerticalPanel panel = new VerticalPanel();
         panel.add(inputGrid);
         panel.add(qrCodeComposite);
         panel.setCellHorizontalAlignment(qrCodeComposite, HasHorizontalAlignment.ALIGN_CENTER);
         panel.add(error);
         panel.add(url);
-        
         baseWidget = panel;
     }
     
@@ -93,11 +85,14 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     }
     
     protected String getServerUrlWithoutFinalSlash() {
-        String serverUrl = serverBox.getValue();
+        final String result;
+        final String serverUrl = serverBox.getValue();
         if (serverUrl.endsWith("/")) {
-            return serverUrl.substring(0, serverUrl.length() - 1);
+            result = serverUrl.substring(0, serverUrl.length() - 1);
+        } else {
+            result = serverUrl;
         }
-        return serverUrl;
+        return result;
     }
     
     

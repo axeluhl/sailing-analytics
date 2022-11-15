@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse,
+ com.sap.sse.classloading,
  com.sap.sse.gateway,
  com.sap.sse.i18n,
  com.sap.sse.i18n.impl,
@@ -13,6 +14,7 @@ Export-Package: com.sap.sse,
  com.sap.sse.pairinglist,
  com.sap.sse.pairinglist.impl,
  com.sap.sse.qrcode,
+ com.sap.sse.rest,
  com.sap.sse.util,
  com.sap.sse.util.graph,
  com.sap.sse.util.impl,
@@ -24,9 +26,12 @@ Require-Bundle: com.sap.sse.common,
  org.apache.servicemix.bundles.zxing;bundle-version="3.1.0",
  org.json.simple;bundle-version="1.1.0",
  org.apache.httpcomponents.httpclient,
- org.apache.httpcomponents.httpcore;bundle-version="4.2.5"
+ org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
+ com.sun.jersey,
+ org.apache.shiro.core
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
+ javax.ws.rs.core;version="1.1.1",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Automatic-Module-Name: com.sap.sse

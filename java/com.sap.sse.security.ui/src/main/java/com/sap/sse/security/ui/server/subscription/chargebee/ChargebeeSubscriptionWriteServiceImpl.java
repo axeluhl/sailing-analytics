@@ -1,0 +1,215 @@
+package com.sap.sse.security.ui.server.subscription.chargebee;
+
+import java.sql.Timestamp;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.chargebee.Result;
+import com.chargebee.models.HostedPage;
+import com.chargebee.models.HostedPage.Content;
+import com.chargebee.models.Invoice;
+import com.chargebee.models.Subscription.SubscriptionItem;
+import com.chargebee.models.Subscription.SubscriptionItem.ItemType;
+import com.chargebee.models.Transaction;
+import com.sap.sse.ServerStartupConstants;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.subscription.SubscriptionApiService;
+import com.sap.sse.security.subscription.SubscriptionCancelResult;
+import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
+import com.sap.sse.security.ui.client.subscription.chargebee.ChargebeeSubscriptionWriteService;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
+import com.sap.sse.security.ui.shared.subscription.chargebee.ChargebeeConfigurationDTO;
+import com.sap.sse.security.ui.shared.subscription.chargebee.FinishCheckoutDTO;
+import com.sap.sse.security.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
+
+public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscriptionServiceImpl
+        implements ChargebeeSubscriptionWriteService {
+
+    private static final long serialVersionUID = 3058555834123504387L;
+
+    private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionWriteServiceImpl.class.getName());
+
+    @Override
+    public SubscriptionListDTO finishCheckout(FinishCheckoutDTO data) {
+        logger.info("finishCheckout hostedPageId: " + data.getHostedPageId());
+        SubscriptionListDTO subscriptionDto;
+        try {
+            final User user = getCurrentUser();
+            final Result result = HostedPage.acknowledge(data.getHostedPageId()).request();
+            final Content content = result.hostedPage().content();
+            final String customerId = content.customer().id();
+            if (customerId != null && !customerId.equals(user.getName())) {
+                throw new UserManagementException("User does not match!");
+            }
+            final String transactionType;
+            final String transactionStatus;
+            final Transaction transaction = content.transaction();
+            if (transaction != null) {
+                transactionType = transaction.type().name().toLowerCase();
+                transactionStatus = transaction.status().name().toLowerCase();
+            } else {
+                transactionType = null;
+                transactionStatus = null;
+            }
+            final Invoice invoice = content.invoice();
+            final String invoiceId;
+            final String invoiceStatus;
+            if (invoice != null) {
+                invoiceId = invoice.id();
+                invoiceStatus = invoice.status().name().toLowerCase();
+            } else {
+                invoiceId = null;
+                invoiceStatus = null;
+            }
+            com.chargebee.models.Subscription contentSubscription = content.subscription();
+            final Timestamp trialStart = contentSubscription.trialStart();
+            final Timestamp trialEnd = contentSubscription.trialEnd();
+            //TODO: bug5510 this ignores potential Addons or Charges contained in the Subscription
+            SubscriptionPlan plan = null;
+            for (SubscriptionItem item : contentSubscription.subscriptionItems()) {
+                if(item.itemType().equals(ItemType.PLAN)) {
+                    final String itemPriceId = item.itemPriceId();
+                    plan = getSecurityService().getSubscriptionPlanByItemPriceId(itemPriceId);
+                    break;
+                }
+            }
+            if (plan == null) {
+                throw new IllegalArgumentException("No such Subscriptionplan");
+            }
+            final String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus, invoiceStatus);
+            final Subscription subscription = new ChargebeeSubscription(contentSubscription.id(), plan.getId(),
+                    customerId, trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
+                    trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialEnd),
+                    contentSubscription.status().name().toLowerCase(), paymentStatus, transactionType, transactionStatus,
+                    invoiceId, invoiceStatus, contentSubscription.mrr(), contentSubscription.currencyCode(), getTime(contentSubscription.createdAt()),
+                    getTime(contentSubscription.updatedAt()), getTime(contentSubscription.activatedAt()),
+                    getTime(contentSubscription.nextBillingAt()), getTime(contentSubscription.currentTermEnd()),
+                    getTime(contentSubscription.cancelledAt()), Subscription.emptyTime(), Subscription.emptyTime());
+            updateUserSubscription(user, subscription);
+            subscriptionDto = getSubscriptions(true);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in saving subscription", e);
+            subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
+        }
+        return subscriptionDto;
+    }
+    private TimePoint getTime(Timestamp timeStamp) {
+        return timeStamp == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
+                : TimePoint.of(timeStamp);
+    }
+    
+    @Override
+    public boolean isMailVerificationRequired() {
+        return !ServerStartupConstants.SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED;
+    }
+    
+    @Override
+    public ChargebeeConfigurationDTO getConfiguration() {
+        final ChargebeeConfiguration configuration = ChargebeeConfiguration.getInstance();
+        final ChargebeeConfigurationDTO result;
+        if (configuration != null) {
+            result = new ChargebeeConfigurationDTO(configuration.getSite());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public PrepareCheckoutDTO prepareCheckout(final String priceId) {
+        final PrepareCheckoutDTO response = new PrepareCheckoutDTO();
+        try {
+            final User user = getCurrentUser();
+            if(!ServerStartupConstants.SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED && !user.isEmailValidated()) {
+                throw new IllegalArgumentException("User mail must be validated");
+            }
+            final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
+            if(planForPrice == null) {
+                throw new IllegalArgumentException("No matching subscription plan found for given price id");
+            }else if(planForPrice.getIsOneTimePlan() && user.hasAnySubscription(planForPrice.getId())) {
+                throw new IllegalArgumentException("Plan can only be subscribed once");
+            }else if(isSubscribedToMutuallyExclusivePlan(user, planForPrice)) {
+                throw new IllegalArgumentException("User has already subscribed to mutually exclusive plan");
+            }else {
+                final Pair<String, String> usernames = getUserFirstAndLastName(user);
+                final String locale = user.getLocaleOrDefault().getLanguage();
+                final Result result = HostedPage.checkoutNewForItems()
+                        .subscriptionItemItemPriceId(0, priceId)
+                        .subscriptionItemQuantity(0,1)
+                        .customerId(user.getName()).customerEmail(user.getEmail())
+                        .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
+                        .customerLocale(locale).billingAddressFirstName(usernames.getA())
+                        .billingAddressLastName(usernames.getB()).request();
+                response.setHostedPageJSONString(result.hostedPage().toJson());
+            }
+        } catch (final Exception e) {
+            logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
+            response.setError("Error in generating Chargebee hosted page");
+        }
+        return response;
+    }
+
+    @Override
+    public boolean cancelSubscription(String planId) {
+        boolean result;
+        try {
+            User user = getCurrentUser();
+            Subscription subscription = user.getSubscriptionByPlan(planId);
+            if (isValidSubscription(subscription)) {
+                logger.info(() -> "Cancel user subscription, user " + user.getName() + ", plan " + planId);
+                SubscriptionApiService apiService = getApiService();
+                if (apiService != null) {
+                    SubscriptionCancelResult cancelResult = requestCancelSubscription(apiService,
+                            subscription.getSubscriptionId()).get();
+                    if (cancelResult.isSuccess()) {
+                        logger.info(() -> "Cancel subscription successful");
+                        result = true;
+                        if (cancelResult.getSubscription() != null) {
+                            updateUserSubscription(user, cancelResult.getSubscription());
+                        }
+                    } else {
+                        result = false;
+                        if (cancelResult.isDeleted()) {
+                            logger.info(() -> "Subscription for plan was deleted");
+                            Subscription emptySubscription = ChargebeeSubscription.createEmptySubscription(planId,
+                                    subscription.getLatestEventTime(), TimePoint.now());
+                            updateUserSubscription(user, emptySubscription);
+                        } else {
+                            logger.info(() -> "Cancel subscription failed");
+                        }
+                    }
+                } else {
+                    logger.info(() -> "No active api service found");
+                    result = false;
+                }
+            } else {
+                logger.info(() -> "Invalid subscription");
+                result = false;
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in cancel subscription ", e);
+            result = false;
+        }
+        return result;
+    }
+
+    private Future<SubscriptionCancelResult> requestCancelSubscription(SubscriptionApiService apiService,
+            String subscriptionId) {
+        CompletableFuture<SubscriptionCancelResult> result = new CompletableFuture<SubscriptionCancelResult>();
+        apiService.cancelSubscription(subscriptionId, new SubscriptionApiService.OnCancelSubscriptionResultListener() {
+            @Override
+            public void onCancelResult(SubscriptionCancelResult cancelResult) {
+                result.complete(cancelResult);
+            }
+        });
+        return result;
+    }
+}

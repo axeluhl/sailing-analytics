@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import android.content.Context;
-
 import com.sap.sailing.android.shared.data.LoginData;
+
+import android.content.Context;
 
 public class LoginGetRequest extends HttpRequest {
 

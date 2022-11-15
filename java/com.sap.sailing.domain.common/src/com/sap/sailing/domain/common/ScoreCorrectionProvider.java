@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +23,7 @@ public interface ScoreCorrectionProvider extends Named {
      * score corrections taken at different times. Later score corrections are expected to be cumulative, meaning they
      * also contain all previous corrections.
      */
-    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception;
+    Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception;
 
     /**
      * @param eventName
@@ -35,5 +36,10 @@ public interface ScoreCorrectionProvider extends Named {
      *            a time point as returned in the {@link Pair#getB()} component of the values in the map returned by
      *            {@link #getHasResultsForBoatClassFromDateByEventName()}.
      */
-    public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint timePoint) throws Exception;
+    RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint timePoint) throws Exception;
+    
+    /**
+     * Produces a single {@link RegattaScoreCorrections} object from a single {@link InputStream}.
+     */
+    RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception;
 }

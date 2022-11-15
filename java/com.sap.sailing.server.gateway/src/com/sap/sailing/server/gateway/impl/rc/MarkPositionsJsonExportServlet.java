@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.Fleet;
@@ -24,6 +25,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
 
@@ -31,7 +33,6 @@ public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         String leaderboardName = request.getParameter(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME);
         if (leaderboardName == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -60,6 +61,8 @@ public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such leaderboard found.");
             return;
         }
+        SecurityUtils.getSubject()
+                .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.READ));
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
@@ -78,6 +81,9 @@ public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
         JSONArray result = new JSONArray();
         
         if (trackedRace != null) {
+            SecurityUtils.getSubject()
+                    .checkPermission(trackedRace.getIdentifier().getStringPermission(DefaultActions.READ));
+
             MarkJsonSerializer markSerializer = new MarkJsonSerializer();
             PositionJsonSerializer positionSerializer = new PositionJsonSerializer();
             PositionedMarkJsonSerializer positionedMarkSerializer = new PositionedMarkJsonSerializer(markSerializer, positionSerializer);

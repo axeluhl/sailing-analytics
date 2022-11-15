@@ -3,9 +3,9 @@ package com.sap.sse.security.ui.authentication;
 import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Interface which provides common methods used for authentication management.
@@ -24,13 +24,15 @@ public interface AuthenticationManager {
      *            the desired password
      * @param fullName
      *            the user's full name (optional)
+     * @param locale
+     *            the locale of user which is being registered
      * @param company
      *            the company the user belongs to (optional)
      * @param callback
      *            callback which is invoked, if account creating was successful (must not be <code>null</code>)
      */
-    void createAccount(String name, String email, String password, String fullName, 
-             String company, SuccessCallback<UserDTO> callback);
+    void createAccount(String name, String email, String password, String fullName, String locale, String company,
+            SuccessCallback<UserDTO> callback);
     
     /**
      * Requests a password reset for the given username or email address.
@@ -61,7 +63,8 @@ public interface AuthenticationManager {
      */
     void logout();
     
-    void updateUserProperties(String fullName, String company, String localeName, AsyncCallback<Void> callback);
+    void updateUserProperties(String fullName, String company, String localeName, String defaultTenantIdAsString,
+            AsyncCallback<UserDTO> callback);
     
     /**
      * Provide the {@link AuthenticationContext} for the current user 

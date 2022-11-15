@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -10,6 +8,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -17,16 +16,16 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Distance;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWithSeriesAndFleetsDialog<RegattaDTO> {
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
     protected CheckBox canBoatsOfCompetitorsChangePerRaceCheckBox;
-
-    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
-            String title, String okButton, StringMessages stringMessages,
-            Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
-        super(regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
+    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, Iterable<EventDTO> existingEvents, EventDTO defaultEvent,
+            String title, String okButton, final SailingServiceAsync sailingService, UserService userService,
+            StringMessages stringMessages, Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
+        super(sailingService, userService, regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
@@ -51,8 +50,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
 
     @Override
     protected RegattaDTO getResult() {
-        RegattaDTO result = getRegattaDTO();
-        result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
+        RegattaDTO result = getRegattaDTO(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
         result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL, Distance.NULL);
         result.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceCheckBox.getValue();
         return result;

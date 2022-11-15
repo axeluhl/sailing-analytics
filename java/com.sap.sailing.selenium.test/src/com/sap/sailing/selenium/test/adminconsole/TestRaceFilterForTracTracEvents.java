@@ -5,6 +5,8 @@ import org.junit.Test;
 import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
 
+import org.junit.Before;
+
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -19,6 +21,13 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     private static final String BMW_CUP_JSON_URL =
             "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     
+    @Override
+    @Before
+    public void setUp() {
+        clearState(getContextRoot());
+        super.setUp();
+    }
+    
     /**
      * <p>Test with no filter at all, which means we expect all TracTrac races are displayed for a given event.</p>
      */
@@ -26,7 +35,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testNoFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         assertThat(tracTracEvents.getTrackableRaces().size(), is(12));
     }
     
@@ -37,7 +46,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testPartialFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 1"); //$NON-NLS-1$
         assertThat(tracTracEvents.getTrackableRaces().size(), is(5));
     }
@@ -49,7 +58,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testExactFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 12"); //$NON-NLS-1$
         assertThat(tracTracEvents.getTrackableRaces().size(), is(1));
     }
@@ -61,7 +70,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testNoneMatchingFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 18"); //$NON-NLS-1$
         assertThat(tracTracEvents.getTrackableRaces().size(), is(0));
     }

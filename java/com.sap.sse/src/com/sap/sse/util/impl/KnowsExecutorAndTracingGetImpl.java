@@ -3,6 +3,9 @@ package com.sap.sse.util.impl;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -17,6 +20,13 @@ import com.sap.sse.util.ThreadPoolUtil;
  */
 public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> implements KnowsExecutorAndTracingGet<V> {
     private ThreadPoolExecutor executorThisTaskIsScheduledFor;
+    
+    /**
+     * Captures any Shiro {@link Subject} through the use of {@link SecurityUtils#getSubject()}. If an
+     * {@link IllegalStateException} is raised, the {@link #subject} is set to {@code null}.
+     */
+    public KnowsExecutorAndTracingGetImpl() {
+    }
 
     @Override
     public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {

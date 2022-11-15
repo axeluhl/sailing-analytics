@@ -17,6 +17,7 @@ public class RestApiApplication extends Application {
         classes.add(RegattasResource.class);
         classes.add(BoatsResource.class);
         classes.add(BoatClassesResource.class);
+        classes.add(CountryCodesResource.class);
         classes.add(LeaderboardsResource.class);
         classes.add(LeaderboardsResourceV2.class);
         classes.add(PolarResource.class);
@@ -29,9 +30,14 @@ public class RestApiApplication extends Application {
         classes.add(TrackedRaceListResource.class);
         classes.add(StatisticsResource.class);
         classes.add(WindResource.class);
-        classes.add(MarkRessource.class);
-        classes.add(PreferencesResource.class);
+        classes.add(MarkResource.class);
         classes.add(TagsResource.class);
+        classes.add(TrackedEventsResource.class);
+        classes.add(TrackingDevicesResource.class);
+        classes.add(CourseConfigurationResource.class);
+        classes.add(MasterDataImportResource.class);
+        classes.add(RemoteServerReferenceResource.class);
+        classes.add(CompareServersResource.class);
         
         // Exception Mappers
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);

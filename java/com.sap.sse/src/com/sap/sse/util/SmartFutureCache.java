@@ -20,6 +20,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shiro.subject.Subject;
+
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -88,7 +90,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      */
     private final ConcurrentMap<K, FutureTaskWithCancelBlocking> ongoingRecalculations;
     
-    private final Map<K, V> cache;
+    private final ConcurrentMap<K, V> cache;
     
     /**
      * Note that this needs to have more than one thread because there may be calculations used for cache updates that
@@ -100,7 +102,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
     private final CacheUpdater<K, V, U> cacheUpdateComputer;
     
-    private final Map<K, NamedReentrantReadWriteLock> locksForKeys;
+    private final ConcurrentMap<K, NamedReentrantReadWriteLock> locksForKeys;
     
     private final String nameForLocks;
     
@@ -201,12 +203,15 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     }
     
     /**
-     * Once a client has fetched such a Future from {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations} while
-     * holding the object monitor of {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client knows that
+     * Once a client has fetched such a Future from {@link SmartFutureCache#ongoingRecalculations} while
+     * holding the object monitor of {@link SmartFutureCache#ongoingRecalculations}, the client knows that
      * the Future hasn't been cancelled yet. To avoid that the Future is cancelled after the client has fetched it from
-     * {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client can call {@link #dontCancel()} on this
+     * {@link SmartFutureCache#ongoingRecalculations}, the client can call {@link #dontCancel()} on this
      * future. After that, calls to {@link #cancel(boolean)} will return <code>false</code> immediately and the Future
-     * will be executed as originally scheduled.
+     * will be executed as originally scheduled.<p>
+     * 
+     * A task of this sort will always {@link Subject#associateWith(Runnable) associate} any current {@link Subject}
+     * to the task when it is executed.
      * 
      * @author Axel Uhl (D043530)
      * 
@@ -239,7 +244,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         
         public FutureTaskWithCancelBlocking(SettableCallable<V> callable, final K key, final U updateInterval,
                 final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
-            super(callable);
+            super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(callable));
             tracingGetHelper = new KnowsExecutorAndTracingGetImpl<>();
             callable.setCallable(this);
             this.gettingThreads = new HashSet<>();
@@ -610,7 +615,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         synchronized (ongoingRecalculations) {
             if (ongoingRecalculations.containsKey(key)) {
                 FutureTaskWithCancelBlocking scheduledOrRunning = ongoingRecalculations.get(key);
-                // a future is already scheduled for the key; try to 
+                // a future is already scheduled for the key; try to adjust the update interval
                 boolean reuseExistingFuture = scheduledOrRunning.tryToUpdateUpdateInterval(updateInterval);
                 if (reuseExistingFuture) {
                     result = scheduledOrRunning;
@@ -655,6 +660,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         // is too expensive here.
         // logger.finest("creating future task on cache "+nameForLocks+" for key "+key);
         ongoingRecalculations.put(key, future);
+        // the FutureTaskWithCancelBlocking associates any current Subject with the task while it is executed
         recalculator.execute(future);
         return future;
     }
@@ -663,7 +669,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * Fetches a value for <code>key</code> from the cache. If no {@link #triggerUpdate(Object, UpdateInterval)} for the <code>key</code>
      * has ever happened, <code>null</code> will be returned. Otherwise, depending on <code>waitForLatest</code> the result is taken
      * from the cache straight away (<code>waitForLatest==false</code>) or, if a re-calculation for the <code>key</code> is still
-     * ongoing, the result of that ongoing re-calculation is returned.
+     * ongoing, the result of that ongoing re-calculation is returned. When {@link #remove(Object)} has been called for the {@code key} and
+     * no update has finished computing since then, this method will also return {@code null} in case {@code waitForLatest} is {@code false}.
      */
     public V get(final K key, boolean waitForLatest) {
         final V value;
@@ -729,6 +736,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
     /**
      * Removes the key from the cache. If any updates are still running, they may again insert the key into the cache.
+     * Until new updates for the {@code key} are computed, {@link #get(Object, boolean)} will return {@code null} for
+     * the {@code key}.
      */
     public void remove(K key) {
         cache(key, null);

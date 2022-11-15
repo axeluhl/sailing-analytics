@@ -1,6 +1,8 @@
 package com.sap.sailing.datamining.data;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -11,8 +13,14 @@ public interface HasRaceResultOfCompetitorContext {
     @Connector(scanForStatistics=false)
     public HasLeaderboardContext getLeaderboardContext();
 
+    @Connector(scanForStatistics=false)
+    public HasTrackedRaceContext getTrackedRaceContext();
+
     @Connector(messageKey="Competitor", ordinal=2)
     public Competitor getCompetitor();
+    
+    @Connector(messageKey="Boat")
+    public Boat getBoat();
 
     @Dimension(messageKey="Regatta", ordinal=4)
     String getRegattaName();
@@ -31,6 +39,9 @@ public interface HasRaceResultOfCompetitorContext {
     
     @Statistic(messageKey="AbsoluteRank", ordinal=2, resultDecimals=2)
     public Double getAbsoluteRank();
+    
+    @Dimension(messageKey="IRM")
+    public MaxPointsReason getMaxPointsReason();
     
     @Statistic(messageKey="NumberOfPodiumFinish", ordinal=3)
     public Boolean isPodiumFinish();

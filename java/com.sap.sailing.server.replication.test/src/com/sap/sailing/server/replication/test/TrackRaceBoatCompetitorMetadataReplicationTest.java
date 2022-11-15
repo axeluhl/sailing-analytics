@@ -18,7 +18,9 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -31,6 +33,7 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
@@ -84,7 +87,8 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
-                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        /* useOfficialEventsToUpdateRaceLog */ false);
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -95,19 +99,26 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     }
 
     private void startTrackingOnMaster() throws Exception {
+        final CourseArea courseArea = master.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Course Area");
+        // in production, a course area creation based on an event's venue creation would be
+        // replicated; in test set-ups, the course area needs to be "replicated" manually:
+        replica.getBaseDomainFactory().getOrCreateCourseArea(courseArea.getId(), courseArea.getName());
         final Regatta regatta = master.createRegatta("Test regatta", "J/70",
                 /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
+                CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
                 /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 /* start with no series */ Collections.emptySet(),
-                /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
+                /* persistent */ true, new LowPoint(),
+                /* defaultCourseAreaId */ courseArea.getId(),
                 /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* rankingMetricConstructor */ OneDesignRankingMetric::new);
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
         final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
         master.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
                 /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
-                Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
-        racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000);
+                /* oneAlwaysStaysOne */ false, Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
+        racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000,
+                new DefaultRaceTrackingHandler());
     }
 
     private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {
@@ -124,28 +135,22 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         final String boat1CompetitorName = "CYC"; 
         final String boat1Name = "Boot 1";
         final String boat1Color = "#141414";
-
         final String boat2CompetitorName = "SVI"; 
         final String boat2Name = "Boot 2";
         final String boat2Color = "#606060";
-
         final String boat3CompetitorName = "BYCÜ"; 
         final String boat3Name = "Boot 3";
         final String boat3Color = "#0169EF";
-        
         startTracking();
         Thread.sleep(5000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicaTrackedRace);
-        
         Iterable<Competitor> masterCompetitors = masterTrackedRace.getRace().getCompetitors();
         Iterable<Competitor> replicaCompetitors = replicaTrackedRace.getRace().getCompetitors();
-        
         assertNotSame(masterTrackedRace, replicaTrackedRace);
         assertNotSame(masterTrackedRace.getRace(), replicaTrackedRace.getRace());
         assertEquals(Util.size(masterCompetitors), 6);
         assertEquals(Util.size(masterCompetitors), Util.size(replicaCompetitors));
-        
         for (Competitor competitor : masterCompetitors) {
             Competitor replicaCompetitor = findCompetitor(replicaCompetitors, competitor);
             Boat competitorBoat = masterTrackedRace.getBoatOfCompetitor(competitor);

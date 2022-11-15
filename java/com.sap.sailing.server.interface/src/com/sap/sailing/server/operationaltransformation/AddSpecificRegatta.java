@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -22,39 +23,59 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private static final long serialVersionUID = -8018855620167669352L;
     private final RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds;
     private final boolean persistent;
     private final ScoringScheme scoringScheme;
-    private final Serializable defaultCourseAreaId;
+    private final List<Serializable> courseAreaIds;
     private final Double buoyZoneRadiusInHullLengths;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
+    private final boolean autoRestartTrackingUponCompetitorSetChange;
     private final boolean canBoatsOfCompetitorsChangePerRace;
+    private final CompetitorRegistrationType competitorRegistrationType;
     private final RankingMetrics rankingMetricType;
+    private final String registrationLinkSecret;
     
-    public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id,
+    /**
+     * @param courseAreaIds
+     *            may be {@code null}, meaning an empty set of course areas; no worries about serializability; a local
+     *            serializable collection will be used, and the elements of this parameter, if not {@code null}, will be
+     *            copied into it
+     */
+    public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
+            boolean persistent, ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
+        this.competitorRegistrationType = competitorRegistrationType;
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.defaultCourseAreaId = defaultCourseAreaId;
+        this.courseAreaIds = new ArrayList<>();
+        if (courseAreaIds != null) {
+            Util.addAll(courseAreaIds, this.courseAreaIds);
+        }
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
+        this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
         this.rankingMetricType = rankingMetricType;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
+        this.registrationLinkSecret = registrationLinkSecret;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), canBoatsOfCompetitorsChangePerRace, getStartDate(), getEndDate(), getId(), createSeries(toState),
-                persistent, scoringScheme, defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
+        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(),
+                canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret, getStartDate(),
+                getEndDate(), getId(), createSeries(toState), persistent, scoringScheme, courseAreaIds,
+                buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
+                autoRestartTrackingUponCompetitorSetChange, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }
 
@@ -71,6 +92,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
             s.setSplitFleetContiguousScoring(e.getValue().hasSplitFleetContiguousScoring());
             s.setFirstColumnIsNonDiscardableCarryForward(e.getValue().isFirstColumnIsNonDiscardableCarryForward());
             s.setMaximumNumberOfDiscards(e.getValue().getMaximumNumberOfDiscards());
+            s.setOneAlwaysStaysOne(e.getValue().isOneAlwaysStaysOne());
             result.add(s);
         }
         return result;

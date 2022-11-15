@@ -21,8 +21,10 @@ public interface DynamicGPSFixTrack<ItemType, FixType extends GPSFix> extends GP
      * 
      * Implementations will usually implement this as a <code>synchronized</code> operation that is mutual exclusive
      * to iterating over the fixes of the track or any subset thereof.
+     * 
+     * @return {@code true} if and only if the fix was actually added to the competitor's track
      */
-    void addGPSFix(FixType gpsFix);
+    boolean addGPSFix(FixType gpsFix);
 
     void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage);
 

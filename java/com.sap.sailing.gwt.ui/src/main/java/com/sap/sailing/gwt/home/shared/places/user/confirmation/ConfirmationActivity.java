@@ -28,7 +28,7 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
             break;
         case MAIL_VERIFIED:
             panel.setWidget(clientFactory.createBusyView());
-            clientFactory.getUserManagementService().validateEmail(place.getName(), place.getValidationSecret(),
+            clientFactory.getUserManagementWriteService().validateEmail(place.getName(), place.getValidationSecret(),
                     new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -42,6 +42,7 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
                             final String message = result ? i18n_sec.emailValidatedSuccessfully(place.getName())
                                     : i18n_sec.emailValidationUnsuccessful(place.getName());
                             view.setMessage(message);
+                            clientFactory.getUserService().fireUserUpdateEvent();
                         }
                     }));
             break;

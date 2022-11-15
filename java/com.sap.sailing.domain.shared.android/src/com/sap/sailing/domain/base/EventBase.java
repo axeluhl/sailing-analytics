@@ -3,18 +3,21 @@ package com.sap.sailing.domain.base;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.shared.media.WithMedia;
 
 /**
  * Base interface for an Event consisting of all static information, which might be shared
  * by the server and an Android application.
  */
-public interface EventBase extends NamedWithID, WithDescription, Renamable, WithMedia {
+public interface EventBase extends NamedWithID, WithDescription, Renamable, WithMedia, WithQualifiedObjectIdentifier {
 
     void setDescription(String description);
     
@@ -27,6 +30,12 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
      *  @return the start date of the event 
      */
     TimePoint getStartDate();
+    
+    /**
+     * "Atomically" adjusts start and end date. Constraint checks for the end date not being before the start date
+     * are made for the two parameters, regardless of the current event's state.
+     */
+    void setStartAndEndDate(TimePoint startDate, TimePoint endDate);
 
     void setStartDate(TimePoint startDate);
 
@@ -104,4 +113,13 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
      * Sets and converts all event images and videos from the old URL based format to the new richer format 
      * */ 
     boolean setMediaURLs(Iterable<URL> imageURLs, Iterable<URL> sponsorImageURLs, Iterable<URL> videoURLs, URL logoImageURL, Map<URL, ImageSize> imageSizes);
+    
+    /**
+     * Gets all TrackingConnectorInfos containing information over what TrackingConnectors are involved in tracking this
+     * event
+     * 
+     * @return a Set of {@link TrackingConnectorInfo}; the set returned is never {@code null} and never contains
+     *         {@code null} values, but it may be empty
+     */
+    Set<TrackingConnectorInfo> getTrackingConnectorInfos();
 }

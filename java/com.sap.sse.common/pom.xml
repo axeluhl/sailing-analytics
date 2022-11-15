@@ -10,18 +10,8 @@
     </parent>
     <artifactId>com.sap.sse.common</artifactId>
     <packaging>eclipse-plugin</packaging>
-
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-compiler-plugin</artifactId>
-                <version>${tycho-version}</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-source-plugin</artifactId>

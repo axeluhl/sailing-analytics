@@ -21,28 +21,24 @@ public abstract class DeclinationImportTest<I extends DeclinationImporter> exten
     @Test
     public void importSimpleDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
         Declination record = importer.importRecord(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("2016-05-27").getTime()));
-        assertEquals(0.26307, record.getBearing().getDegrees(), 0.001);
-        assertEquals(0.14795, record.getAnnualChange().getDegrees(), 0.001);
+                new MillisecondsTimePoint(simpleDateFormat.parse("2020-04-17").getTime()));
+        assertEquals(1.03748, record.getBearing().getDegrees(), 0.05);
+        assertEquals(0.14795, record.getAnnualChange().getDegrees(), 0.06);
     }
 
     @Test
     public void importSouthernHemisphereDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
-        long start = System.currentTimeMillis();
         Declination record = importer.importRecord(new DegreePosition(-10, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("2017-05-27").getTime()));
-        System.out.println("took "+(System.currentTimeMillis()-start)+"ms");
-        assertEquals(-8.44581, record.getBearing().getDegrees(), 0.001);
-        assertEquals(0.17712, record.getAnnualChange().getDegrees(), 0.001);
+                new MillisecondsTimePoint(simpleDateFormat.parse("2019-12-14").getTime()));
+        assertEquals(-7.8071, record.getBearing().getDegrees(), 0.05);
+        assertEquals(0.17712, record.getAnnualChange().getDegrees(), 0.05);
     }
     
     @Test
     public void readOnlineOrFromFile() throws IOException, ClassNotFoundException, ParseException {
         Declination declination = importer.getDeclination(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(simpleDateFormat.parse("2018-05-27").getTime()), 
+                new MillisecondsTimePoint(simpleDateFormat.parse("2019-12-12").getTime()), 
                 /* timeoutForOnlineFetchInMilliseconds */ 10000);
         assertNotNull(declination);
-        System.out.println(declination);
     }
-    
 }

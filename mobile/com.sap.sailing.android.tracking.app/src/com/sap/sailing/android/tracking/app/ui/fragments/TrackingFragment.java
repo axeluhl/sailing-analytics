@@ -1,5 +1,14 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.util.LocationHelper;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,15 +23,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
-import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
-import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
-import com.sap.sailing.android.shared.util.LocationHelper;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.TrackingService;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class TrackingFragment extends BaseFragment {
 
@@ -54,7 +54,7 @@ public class TrackingFragment extends BaseFragment {
             accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
             unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
         } else {
-            //initially set quality to "No GPS" on start tracking
+            // initially set quality to "No GPS" on start tracking
             updateTrackingStatus(GPSQuality.noSignal);
         }
 
@@ -66,10 +66,10 @@ public class TrackingFragment extends BaseFragment {
         super.onResume();
         // so it initally updates to "battery-saving" etc.
         setAPIConnectivityStatus(APIConnectivity.noAttempt);
-        
-        //setup receiver to get message from tracking service if GPS is disabled while tracking
+
+        // setup receiver to get message from tracking service if GPS is disabled while tracking
         IntentFilter filter = new IntentFilter();
-        filter.addAction(TrackingService.GPS_DISABLED_MESSAGE); 
+        filter.addAction(TrackingService.GPS_DISABLED_MESSAGE);
 
         gpsDisabledReceiver = new BroadcastReceiver() {
             @Override
@@ -77,12 +77,12 @@ public class TrackingFragment extends BaseFragment {
                 LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
             }
         };
-        getActivity().registerReceiver(gpsDisabledReceiver,filter);
+        getActivity().registerReceiver(gpsDisabledReceiver, filter);
         if (!isLocationEnabled(getActivity())) {
             LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
         }
     }
-    
+
     @Override
     public void onStop() {
         super.onStop();
@@ -126,24 +126,24 @@ public class TrackingFragment extends BaseFragment {
                 @Override
                 public void run() {
                     switch (apiConnectivity) {
-                        case transmissionSuccess:
-                            modeText.setText(getString(R.string.tracking_mode_live));
-                            modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
-                            break;
+                    case transmissionSuccess:
+                        modeText.setText(getString(R.string.tracking_mode_live));
+                        modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
+                        break;
 
-                        case noAttempt:
-                            modeText.setText(getString(R.string.tracking_mode_no_attempt));
-                            modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
-                            break;
+                    case noAttempt:
+                        modeText.setText(getString(R.string.tracking_mode_no_attempt));
+                        modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
+                        break;
 
-                        case transmissionError:
-                            modeText.setText(getString(R.string.tracking_mode_api_error));
-                            modeText.setTextColor(getResources().getColor(R.color.sap_red));
-                            break;
+                    case transmissionError:
+                        modeText.setText(getString(R.string.tracking_mode_api_error));
+                        modeText.setTextColor(getResources().getColor(R.color.sap_red));
+                        break;
 
-                        default:
-                            modeText.setText(getString(R.string.tracking_mode_caching));
-                            modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
+                    default:
+                        modeText.setText(getString(R.string.tracking_mode_caching));
+                        modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
 
                     }
                 }
@@ -192,7 +192,8 @@ public class TrackingFragment extends BaseFragment {
         if (isAdded()) {
             View layout = getView();
             if (layout != null) {
-                SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) layout.findViewById(R.id.gps_quality_indicator);
+                SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) layout
+                        .findViewById(R.id.gps_quality_indicator);
                 indicatorView.setSignalQuality(quality);
                 updateTrackingStatus(quality);
                 if (quality != GPSQuality.noSignal) {

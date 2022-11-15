@@ -73,10 +73,10 @@ public class WindLogParser {
         }
     }
 
-    private static final String COL_NAME_TRUE_WIND_SPEED = "Tws";
-    private static final String COL_NAME_TRUE_WIND_SPEED2 = "TW_speed";
-    private static final String COL_NAME_TRUE_WIND_DIRECTION = "Twd";
-    private static final String COL_NAME_TRUE_WIND_DIRECTION2 = "TW_Dirn";
+    private static final String COL_NAME_TRUE_WIND_SPEED = "tws";
+    private static final String COL_NAME_TRUE_WIND_SPEED2 = "tw_speed";
+    private static final String COL_NAME_TRUE_WIND_DIRECTION = "twd";
+    private static final String COL_NAME_TRUE_WIND_DIRECTION2 = "tw_dirn";
     private static final String COL_NAME_LAT = ExpeditionExtendedDataImporterImpl.COL_NAME_LAT;
     private static final String COL_NAME_LON = ExpeditionExtendedDataImporterImpl.COL_NAME_LON;
     

@@ -1,10 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.Consumer;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -17,18 +14,21 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
 
 
 public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractLeaderboardDialog<LeaderboardDescriptorWithEliminations> {
     protected final ListBox regattaLeaderboardsListBox;
     protected final Collection<RegattaDTO> existingRegattas;
     protected final FlowPanel competitorEliminationPanelHolder;
-    protected final SailingServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingServiceWrite;
+    protected final UserService userService;
     private final Collection<StrippedLeaderboardDTO> existingLeaderboards;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
@@ -56,7 +56,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
             String errorMessage;
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if (dao.name.equals(leaderboardToValidate.getName())) {
+                if (dao.getName().equals(leaderboardToValidate.getName())) {
                     unique = false;
                 }
             }
@@ -78,20 +78,18 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         }
     }
 
-    public RegattaLeaderboardWithEliminationsDialog(SailingServiceAsync sailingService, String title,
+    public RegattaLeaderboardWithEliminationsDialog(SailingServiceWriteAsync sailingServiceWrite, UserService userService, String title,
             LeaderboardDescriptorWithEliminations leaderboardDTO, Collection<RegattaDTO> existingRegattas,
             final Collection<StrippedLeaderboardDTO> existingLeaderboards, final StringMessages stringMessages,
             final ErrorReporter errorReporter, LeaderboardParameterValidator validator,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
+        this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.existingRegattas = existingRegattas;
         this.existingLeaderboards = existingLeaderboards;
-        nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("NameTextBox");
-        nameTextBox.setVisibleLength(50);
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);
@@ -122,12 +120,15 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         competitorEliminationPanelHolder.clear();
         StrippedLeaderboardDTO selectedRegattaLeaderboard = getSelectedLeaderboard();
         final CompetitorRegistrationsPanel[] competitorEliminationPanel = new CompetitorRegistrationsPanel[1];
-        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingService, stringMessages,
-                errorReporter, /* editable */ true, regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
+        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingServiceWrite, userService,
+                /* competitorsRefresher not required; competitor set is limited to those in leaderboard */ null,
+                /* boatsRefresher not needed */ null, stringMessages, errorReporter, /* editable */ true,
+                regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
                 selectedRegattaLeaderboard.canBoatsOfCompetitorsChangePerRace, selectedRegattaLeaderboard.boatClassName,
-                /* "validator" updates eliminatedCompetitors */ ()->eliminatedCompetitors = competitorEliminationPanel[0].getResult(),
-                getEliminatedCompetitorsRetriever(),
-                /* restrictPoolToLeaderboard */ true, /* additionalWidgetsBeforeTables */ new Label(stringMessages.selectCompetitorsToEliminate()));
+                /* "validator" updates eliminatedCompetitors */ () -> eliminatedCompetitors = competitorEliminationPanel[0]
+                        .getResult(),
+                getEliminatedCompetitorsRetriever(), /* restrictPoolToLeaderboard */ true,
+                /* additionalWidgetsBeforeTables */ new Label(stringMessages.selectCompetitorsToEliminate()));
         competitorEliminationPanelHolder.add(competitorEliminationPanel[0]);
     }
 
@@ -139,7 +140,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
      * this hasn't happened before, and the result is cached locally. In the {@link #getResult()} implementation the
      * eliminations are then taken from the local state.
      */
-    protected abstract Consumer<AsyncCallback<Collection<CompetitorDTO>>> getEliminatedCompetitorsRetriever();
+    protected abstract Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getEliminatedCompetitorsRetriever();
 
     /**
      * Based on the contents of {@link #regattaLeaderboardsListBox} obtains the leaderboard from
@@ -148,35 +149,13 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
     protected StrippedLeaderboardDTO getSelectedLeaderboard() {
         final String selectedRegattaLeaderboardName = regattaLeaderboardsListBox.getSelectedValue();
         for (final StrippedLeaderboardDTO l : existingLeaderboards) {
-            if (l.name.equals(selectedRegattaLeaderboardName)) {
+            if (l.getName().equals(selectedRegattaLeaderboardName)) {
                 return l;
             }
         }
         return null;
     }
 
-    protected ListBox createSortedRegattaLeaderboardsListBox(Collection<StrippedLeaderboardDTO> existingLeaderboards, String preSelectedRegattaName) {
-        ListBox result = createListBox(false);
-        // sort the regatta names
-        List<StrippedLeaderboardDTO> sortedRegattaLeaderboards = new ArrayList<>();
-        for (StrippedLeaderboardDTO leaderboard : existingLeaderboards) {
-            sortedRegattaLeaderboards.add(leaderboard);
-        }
-        Collections.sort(sortedRegattaLeaderboards, (rl1, rl2) -> rl1.name.compareTo(rl2.name));
-        result.addItem(stringMessages.pleaseSelectARegatta());
-        int i=1;
-        for (StrippedLeaderboardDTO leaderboard : sortedRegattaLeaderboards) {
-            if (leaderboard.type.isRegattaLeaderboard()) {
-                result.addItem(leaderboard.name, leaderboard.name);
-                if (preSelectedRegattaName != null && leaderboard.name.equals(preSelectedRegattaName)) {
-                    result.setSelectedIndex(i);
-                }
-                i++;
-            }
-        }
-        return result;
-    }
-    
     @Override
     protected LeaderboardDescriptorWithEliminations getResult() {
         LeaderboardDescriptor leaderboard = super.getResult();

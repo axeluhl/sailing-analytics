@@ -2,14 +2,15 @@ package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.ui.authentication.AuthenticationManager;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.component.NewAccountValidator;
-import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.authentication.AuthenticationManager;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
+import com.sap.sse.security.ui.client.component.NewAccountValidator;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
  * Default Presenter implementation for {@link UserDetailsView}.
@@ -22,19 +23,17 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     
     private final AuthenticationManager authenticationManager;
 
-    private final UserManagementServiceAsync userManagementService;
+    private final UserManagementWriteServiceAsync userManagementService;
     private final String mailVerifiedConfirmationUrlToken;
     private final UserDetailsView view;
 
-    public UserDetailsPresenter(UserDetailsView view, AuthenticationManager authenticationManager, UserManagementServiceAsync userManagementService, String mailVerifiedConfirmationUrlToken) {
+    public UserDetailsPresenter(UserDetailsView view, AuthenticationManager authenticationManager, UserManagementWriteServiceAsync userManagementService, String mailVerifiedConfirmationUrlToken) {
         this.view = view;
         this.authenticationManager = authenticationManager;
         this.userManagementService = userManagementService;
         this.mailVerifiedConfirmationUrlToken = mailVerifiedConfirmationUrlToken;
-        
         view.setPresenter(this);
-        
-        if(authenticationManager.getAuthenticationContext().isLoggedIn()) {
+        if (authenticationManager.getAuthenticationContext().isLoggedIn()) {
             view.setUser(authenticationManager.getAuthenticationContext().getCurrentUser());
         }
     }
@@ -44,11 +43,11 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     }
 
     @Override
-    public void handleSaveChangesRequest(String fullName, String company, String locale) {
-        authenticationManager.updateUserProperties(fullName, company, locale,
-                new AsyncCallback<Void>() {
+    public void handleSaveChangesRequest(String fullName, String company, String locale, String defaultTenantIdAsString) {
+        authenticationManager.updateUserProperties(fullName, company, locale, defaultTenantIdAsString,
+                new AsyncCallback<UserDTO>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(UserDTO result) {
                 Notification.notify(i18n_sec.successfullyUpdatedUserProperties(
                         authenticationManager.getAuthenticationContext().getCurrentUser().getName()),
                         NotificationType.INFO);
@@ -83,7 +82,8 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     @Override
     public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
         final String username = authenticationManager.getAuthenticationContext().getCurrentUser().getName();
-        String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
+        String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation,
+                /* reallyUseLeadingOrTrailingSpacesInUsername */ true);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Notification.notify(errorMessage, NotificationType.ERROR);
             return;
@@ -113,5 +113,4 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
                     }
                 });
     }
-
 }

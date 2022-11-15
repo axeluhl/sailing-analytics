@@ -1,22 +1,31 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -25,13 +34,21 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
-import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -59,12 +76,11 @@ public class WindEstimationLockingUnderLoadTest {
     
     private TrackBasedEstimationWindTrackImpl estimationTrack;
     
-    private WindTrackImpl measuredTrack;
+    private WindTrack measuredTrack;
     
     @Before
     public void setUp() {
         realWindSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, "1");
-        measuredTrack = new WindTrackImpl(WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* useSpeed */ true, /* nameForReadWriteLock */ "Test wind track in "+getClass().getName());
         mockedTrackedRace = mockTrackedRace();
         estimationTrack = new TrackBasedEstimationWindTrackImpl(mockedTrackedRace, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 0.5);
     }
@@ -77,18 +93,33 @@ public class WindEstimationLockingUnderLoadTest {
     }
 
     private TrackedRace mockTrackedRace() {
-        TrackedRace result = mock(TrackedRace.class);
-        RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
-        when(result.getRace()).thenReturn(mockedRaceDefinition);
-        when(mockedRaceDefinition.getName()).thenReturn("Test Race");
-        when(result.getEstimatedWindDirectionWithConfidence((TimePoint) any())).thenAnswer(new Answer<WindWithConfidence<TimePoint>>() {
-                 public WindWithConfidence<TimePoint> answer(InvocationOnMock invocation) {
-                     return randomWindOrNull();
-                 }
-        });
-        when(result.getOrCreateWindTrack(realWindSource)).thenReturn(measuredTrack);
-        when(result.getStatus()).thenReturn(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, /* loadingProgress */ 1.0));
-        when(result.getMillisecondsOverWhichToAverageWind()).thenReturn(30000l);
+        final BoatClass boatClass = new BoatClassImpl("Some Handicap Boat Class", /* typicallyStartsUpwind */ true);
+        final Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
+                RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* courseArea */ null,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
+        final TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
+        final List<Waypoint> waypoints = Collections.emptyList();
+        Course course = new CourseImpl("Test Course", waypoints);
+        RaceDefinition mockedRaceDefinition = new RaceDefinitionImpl("Test Race", course, boatClass, Collections.emptyMap());
+        DynamicTrackedRace result = new DynamicTrackedRaceImpl(trackedRegatta, mockedRaceDefinition,
+                /* sidelines */ Collections.emptySet(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 10000,
+                /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 15000,
+                /* useInternalMarkPassingAlgorithm */ false, regatta.getRankingMetricConstructor(), /* raceLogResolver */ null,
+                /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null) {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
+                        return randomWindOrNull();
+                    }
+        };
+        result.setStartTimeReceived(TimePoint.now().minus(Duration.ONE_MINUTE.times(5)));
+        result.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, /* loadingProgress */ 1.0));
+        measuredTrack = result.getOrCreateWindTrack(realWindSource);
+        assertEquals(30000l, result.getMillisecondsOverWhichToAverageWind());
         return result;
     }
     

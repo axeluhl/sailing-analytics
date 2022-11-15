@@ -1,5 +1,8 @@
 package com.sap.sse.datamining.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,12 +15,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sse.common.Base64Utils;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.Query.QueryType;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -49,9 +54,11 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
-import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.shared.classloading.JoinedClassLoader;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
+    private static final Logger logger = Logger.getLogger(DataMiningServerImpl.class.getName());
     
     private static final long MEMORY_CHECK_PERIOD = 5;
     private static final TimeUnit MEMORY_CHECK_PERIOD_UNIT = TimeUnit.SECONDS;
@@ -90,7 +97,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.dataSourceProviderRegistry = dataSourceProviderRegistry;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
-        
         this.queryDefinitionRegistry = queryDefinitionRegistry;
     }
     
@@ -100,12 +106,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
             @Override
             public void performAction() {
                 memoryMonitor.logWarning("Yellow Alert free memory is below " + (100*getThreshold()) + "%!");
-                int numberOfRunningStatisticQueries = dataMiningQueryManager.getNumberOfRunningQueriesOfType(QueryType.STATISTIC);
-                if (numberOfRunningStatisticQueries > 0) {
-                    memoryMonitor.logWarning("Aborting random statistic query.");
-                    dataMiningQueryManager.abortRandomQueryOfType(QueryType.STATISTIC);
+                final int numberOfRunningQueries = dataMiningQueryManager.getNumberOfRunningQueries();
+                if (numberOfRunningQueries > 0) {
+                    memoryMonitor.logWarning("Aborting random query.");
+                    dataMiningQueryManager.abortRandomQuery();
                 } else {
-                    memoryMonitor.logWarning("Can't abort random statistic query, because none are running.");
+                    memoryMonitor.logWarning("Can't abort random query, because none are running.");
                 }
             }
         });
@@ -138,17 +144,50 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         return executorService;
     }
     
-    private JoinedClassLoader getJoinedClassLoader() {
+    @Override
+    public JoinedClassLoader getJoinedClassLoader() {
         return new JoinedClassLoader(dataMiningClassLoaders);
     }
     
+    /**
+     * @return the {@link StatisticQueryDefinitionDTO} from a base 64 string deserialized with java serialization,
+     *         considering the {@link #getJoinedClassLoader() joined class loader} that offers all classes of all
+     *         bundles that currently provide data mining components to this server
+     */
+    @Override
+    public StatisticQueryDefinitionDTO fromBase64String(final String string) {
+        byte[] bytes;
+        try {
+            bytes = Base64Utils.fromBase64(string);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+        final ClassLoader oldThreadContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getJoinedClassLoader());
+        try (final ObjectInputStream in = new ObjectInputStreamResolvingAgainstCache<Object>(
+                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null, /* classLoaderCache */ new HashMap<>()) {}) {
+            Object o = in.readObject();
+            if (o instanceof StatisticQueryDefinitionDTO) {
+                return (StatisticQueryDefinitionDTO) o;
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "Could not load query", e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldThreadContextClassLoader);
+        }
+        return null;
+    }
+
+    
     @Override
     public void addDataMiningBundleClassLoader(ClassLoader classLoader) {
+        logger.info("Adding data mining bundle class loader "+classLoader);
         dataMiningClassLoaders.add(classLoader);
     }
     
     @Override
     public void removeDataMiningBundleClassLoader(ClassLoader classLoader) {
+        logger.info("Removing data mining bundle class loader "+classLoader);
         dataMiningClassLoaders.remove(classLoader);
     }
     

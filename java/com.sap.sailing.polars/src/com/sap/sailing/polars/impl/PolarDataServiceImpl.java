@@ -4,13 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -30,12 +27,13 @@ import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.PolarDataOperation;
 import com.sap.sailing.polars.ReplicablePolarService;
 import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
@@ -49,10 +47,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.util.ClearStateTestSupport;
 
 /**
@@ -64,24 +59,11 @@ import com.sap.sse.util.ClearStateTestSupport;
  * @author Axel Uhl
  * 
  */
-public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateTestSupport {
+public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStream<PolarDataService, PolarDataOperation<?>> implements ReplicablePolarService, ClearStateTestSupport {
 
     private static final Logger logger = Logger.getLogger(PolarDataServiceImpl.class.getSimpleName());
 
     private PolarDataMiner polarDataMiner;
-
-    private final ConcurrentMap<OperationExecutionListener<PolarDataService>, OperationExecutionListener<PolarDataService>> operationExecutionListeners;
-
-    /**
-     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not
-     * currently replicated from any master.
-     */
-    private ReplicationMasterDescriptor replicatingFromMaster;
-
-    private final Set<OperationWithResult<PolarDataService, ?>> operationsSentToMasterForReplication;
-
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
-            .withInitial(() -> false);
 
     private DomainFactory domainFactory;
 
@@ -90,8 +72,6 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
      */
     public PolarDataServiceImpl() {
         resetState();
-        this.operationsSentToMasterForReplication = new HashSet<>();
-        this.operationExecutionListeners = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -101,6 +81,10 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
         SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
         this.polarDataMiner = new PolarDataMiner(settings, cubicRegressionPerCourseProcessor, speedRegressionPerAngleClusterProcessor, angleClusterGroup);
+    }
+    
+    public boolean isCurrentlyActiveAndOrHasQueue() {
+        return polarDataMiner.isCurrentlyActiveAndOrHasQueue();
     }
 
     private ClusterGroup<Bearing> createAngleClusterGroup() {
@@ -115,6 +99,16 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                     "Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
         }
         return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle);
+    }
+    
+    @Override
+    public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        if (polarDataMiner == null) {
+            throw new NotEnoughDataHasBeenAddedException(
+                    "Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
+        }
+        return polarDataMiner.estimateWindSpeeds(boatClass, boatSpeed, trueWindAngle);
     }
 
     @Override
@@ -170,10 +164,9 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         if (closestTwsTwa == null) {
             result = new Pair<>(0.0, null);
         } else {
-            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
-                    closestTwsTwa.getObject().getBearing().getDegrees(), maneuverType);
-            double minDiffDeg = Math.abs(Math.abs(targetManeuverAngle)
-                    - Math.abs(courseChangeDeg));
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(maneuverType,
+                    closestTwsTwa.getObject().getBearing());
+            double minDiffDeg = Math.abs(Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
             result = new Pair<>(1. / (1. + (minDiffDeg / 10.) * (minDiffDeg / 10.)), closestTwsTwa);
         }
         return result;
@@ -189,8 +182,8 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                 boatClass, speedAtManeuverStart, type == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND,
                 type == ManeuverType.TACK ? courseChangeDeg >= 0 ? Tack.PORT : Tack.STARBOARD
                         : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
-            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
-                    trueWindSpeedAndAngle.getObject().getBearing().getDegrees(), type);
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(type,
+                    trueWindSpeedAndAngle.getObject().getBearing());
             double diff = Math.abs(Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
             if (diff < minDiff) {
                 minDiff = diff;
@@ -198,6 +191,18 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
             }
         }
         return closestTwsTwa;
+    }
+
+    @Override
+    public double getManeuverAngleInDegreesFromTwa(ManeuverType type, Bearing twa) {
+        assert type == ManeuverType.TACK || type == ManeuverType.JIBE;
+        double maneuverAngle;
+        if (type == ManeuverType.TACK) {
+            maneuverAngle = Math.abs(twa.getDegrees() * 2);
+        } else {
+            maneuverAngle = (180 - Math.abs(twa.getDegrees())) * 2.0;
+        }
+        return maneuverAngle;
     }
 
     @Override
@@ -239,26 +244,17 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         }
         SpeedWithBearingWithConfidence<Void> speed = polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass,
                 windSpeed, legType);
-        Bearing bearing = new DegreeBearingImpl(getManeuverAngleInDegreesFromTwa(speed.getObject().getBearing().getDegrees(), maneuverType));
+        Bearing bearing = new DegreeBearingImpl(
+                getManeuverAngleInDegreesFromTwa(maneuverType, speed.getObject().getBearing()));
         BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing,
                 speed.getConfidence(), null);
         return bearingWithConfidence;
-    }
-    
-    public double getManeuverAngleInDegreesFromTwa(double twa, ManeuverType maneuverType) {
-        if (maneuverType == ManeuverType.TACK) {
-            return Math.abs(twa) * 2;
-        }
-        if (maneuverType == ManeuverType.JIBE) {
-            return (180 - Math.abs(twa)) * 2;
-        }
-        throw new IllegalArgumentException("ManeuverType needs to be tack or jibe.");
     }
 
     @Override
     public void insertExistingFixes(TrackedRace trackedRace) {
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+            final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
             track.lockForRead();
             try {
                 for (GPSFixMoving fix : track.getFixes()) {
@@ -281,41 +277,15 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
     }
 
     @Override
-    public void addOperationExecutionListener(OperationExecutionListener<PolarDataService> listener) {
-        operationExecutionListeners.put(listener, listener);
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<PolarDataService> listener) {
-        operationExecutionListeners.remove(listener);
-    }
-
-    @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         polarDataMiner = null;
     }
 
     @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
-    }
-
-    @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b) {
-        currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(b);
-
-    }
-
-    @Override
-    public Serializable getId() {
-        return getClass().getName();
-    }
-
-    @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
         ObjectInputStream ois;
         if (domainFactory != null) {
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is);
+            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is, null, classLoaderCache);
         } else {
             // TODO ensure that domainfactory is set here. Otherwise there can be issues with duplicate domain objects
             logger.warning("PolarDataService didn't have a domain factory attached. Replication to this service could fail.");
@@ -340,37 +310,6 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         // objectOutputStream.writeObject(polarDataMiner.getMovingAverageProcessor());
         objectOutputStream.writeObject(polarDataMiner.getCubicRegressionPerCourseProcessor());
         objectOutputStream.writeObject(polarDataMiner.getSpeedRegressionPerAngleClusterProcessor());
-    }
-
-    @Override
-    public Iterable<OperationExecutionListener<PolarDataService>> getOperationExecutionListeners() {
-        return operationExecutionListeners.keySet();
-    }
-
-    @Override
-    public ReplicationMasterDescriptor getMasterDescriptor() {
-        return replicatingFromMaster;
-    }
-
-    @Override
-    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = master;
-    }
-
-    @Override
-    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = null;
-    }
-
-    @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<PolarDataService, ?> operation) {
-        return this.operationsSentToMasterForReplication.contains(operation);
-    }
-
-    @Override
-    public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<PolarDataService, ?> operation) {
-        this.operationsSentToMasterForReplication.add(operation);
     }
 
     @Override

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class SeriesDTO extends NamedDTO {
     private static final long serialVersionUID = -3813445377426310687L;
@@ -18,12 +18,15 @@ public class SeriesDTO extends NamedDTO {
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
     private Integer maximumNumberOfDiscards;
-    
-    public SeriesDTO() {}
+    private boolean oneAlwaysStaysOne;
+
+    public SeriesDTO() {
+        super("");
+    }
     
     public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
-            boolean hasSplitFleetContiguousScoring, Integer maximumNumberOfDiscards) {
+            boolean hasSplitFleetContiguousScoring, Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
@@ -34,6 +37,7 @@ public class SeriesDTO extends NamedDTO {
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
     
     /**
@@ -46,7 +50,7 @@ public class SeriesDTO extends NamedDTO {
                 otherSeries.getRaceColumns() == null ? null : new ArrayList<RaceColumnDTO>(otherSeries.getRaceColumns()),
                 otherSeries.isMedal(), otherSeries.isFleetsCanRunInParallel(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
                 otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring(),
-                otherSeries.getMaximumNumberOfDiscards());
+                otherSeries.getMaximumNumberOfDiscards(), otherSeries.isOneAlwaysStaysOne());
     }
 
     public boolean hasSplitFleetContiguousScoring() {
@@ -128,5 +132,13 @@ public class SeriesDTO extends NamedDTO {
 
     public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+    }
+
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
+    }
+    
+    public void setOneAlwaysStaysOne(boolean oneAlwaysStaysOne) {
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 }

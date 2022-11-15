@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
@@ -94,33 +94,33 @@ public class AngleAndSpeedRegression implements Serializable {
      */
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        double[] coefficiants = speedRegression.getOrCreatePolynomialFunction().getCoefficients();
-        CubicEquation equation = new CubicEquation(coefficiants[2], coefficiants[1], coefficiants[0],
-                -speedOverGround.getKnots());
-
-        double[] windSpeedCandidates = equation.solve();
         Set<SpeedWithBearingWithConfidence<Void>> result = new HashSet<>();
-        for (int i = 0; i < windSpeedCandidates.length; i++) {
-            double windSpeedCandidateInKnots = windSpeedCandidates[i];
-            if (windSpeedCandidateInKnots >= 0 && windSpeedCandidateInKnots <= maxWindSpeedInKnots) {
-                double angle = 0;
-                boolean angleFound;
-                try {
-                    angle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedCandidateInKnots);
-                    if (tack == Tack.PORT) {
-                        angle = -angle;
+        final double[] coefficients = speedRegression.getOrCreatePolynomialFunction().getCoefficients();
+        if (coefficients.length > 2) { // we've seen cases where this array only held two elements; see bug5762
+            CubicEquation equation = new CubicEquation(coefficients[2], coefficients[1], coefficients[0],
+                    -speedOverGround.getKnots());
+            double[] windSpeedCandidates = equation.solve();
+            for (int i = 0; i < windSpeedCandidates.length; i++) {
+                double windSpeedCandidateInKnots = windSpeedCandidates[i];
+                if (windSpeedCandidateInKnots >= 0 && windSpeedCandidateInKnots <= maxWindSpeedInKnots) {
+                    double angle = 0;
+                    boolean angleFound;
+                    try {
+                        angle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedCandidateInKnots);
+                        if (tack == Tack.PORT) {
+                            angle = -angle;
+                        }
+                        angleFound = true;
+                    } catch (NotEnoughDataHasBeenAddedException e) {
+                        angleFound = false;
                     }
-                    angleFound = true;
-                } catch (NotEnoughDataHasBeenAddedException e) {
-                    angleFound = false;
-                }
-                if (angleFound) {
-                    result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
-                            windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.5 /* FIXME */, null));
+                    if (angleFound) {
+                        result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
+                                windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.5 /* FIXME */, null));
+                    }
                 }
             }
         }
-
         return result;
     }
 

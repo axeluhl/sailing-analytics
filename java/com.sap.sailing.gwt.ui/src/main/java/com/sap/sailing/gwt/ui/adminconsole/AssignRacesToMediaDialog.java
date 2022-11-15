@@ -13,15 +13,13 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> implements RegattasDisplayer {
+public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> {
 
     protected StringMessages stringMessages;
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -30,16 +28,28 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
     public boolean started = false;
     private final VerticalPanel panel;
     private Button btnRefresh;
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
+        
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
 
-    public AssignRacesToMediaDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
-            Validator<Set<RegattaAndRaceIdentifier>> validator, DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
+    public AssignRacesToMediaDialog(final Presenter presenter, final MediaTrack mediaTrack,
+            final StringMessages stringMessages,
+            final Validator<Set<RegattaAndRaceIdentifier>> validator,
+            final DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
         super(stringMessages.linkedRaces(), stringMessages.selectFromRacesWithOverlappingTimeRange(),
                 stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
-                regattaRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, presenter,
                 stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
             @Override
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
@@ -60,7 +70,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
             }
         };
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
-        regattaRefresher.fillRegattas();
+        presenter.getRegattasRefresher().reloadAndCallFillAll();
         panel = new VerticalPanel();
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
@@ -83,7 +93,6 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         return getAssignedRaces();
     }
 
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> result) {
         hasRaceCandidates = false;
         this.trackedRacesListComposite.fillRegattas(result);

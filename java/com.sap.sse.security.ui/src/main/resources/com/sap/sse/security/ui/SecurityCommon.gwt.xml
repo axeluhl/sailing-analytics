@@ -8,6 +8,9 @@
   <inherits name="com.sap.sse.gwt.SSESharedGWT" />
   <inherits name="com.sap.sse.SSECommon" />
   
+  <set-configuration-property name="CssResource.enableGss" value="true" />
+  <set-configuration-property name="CssResource.conversionMode" value="strict" />
+  
   <source path='client'/>
   <source path='shared'/>
 </module>

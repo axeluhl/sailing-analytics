@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.desktop.partials.eventsrecent.RecentEventTeaser;
@@ -37,11 +36,6 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
         return SeriesEventsPlace.class;
     }
     
-    @Override
-    public TabView.State getState() {
-        return TabView.State.VISIBLE;
-    }
-
     @Override
     public void start(SeriesEventsPlace myPlace, AcceptsOneWidget contentArea) {
         initWidget(ourUiBinder.createAndBindUi(this));

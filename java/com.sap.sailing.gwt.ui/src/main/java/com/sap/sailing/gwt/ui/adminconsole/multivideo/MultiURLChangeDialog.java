@@ -29,7 +29,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -58,7 +59,8 @@ public class MultiURLChangeDialog extends DialogBox {
     private TextBox replacePartIn;
     private TextBox replacePartOut;
 
-    public MultiURLChangeDialog(MediaServiceAsync mediaService, StringMessages stringMessages, Set<MediaTrack> selected,
+    public MultiURLChangeDialog(MediaServiceWriteAsync mediaServiceWrite, StringMessages stringMessages,
+            Set<MediaTrackWithSecurityDTO> selected,
             ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
         setGlassEnabled(true);
@@ -127,7 +129,7 @@ public class MultiURLChangeDialog extends DialogBox {
                 for (MediaTrack track : mediaTrackRenameMap) {
                     String newUrl = getPatchedUrl(track);
                     track.url = newUrl;
-                    mediaService.updateUrl(track, new AsyncCallback<Void>() {
+                    mediaServiceWrite.updateUrl(track, new AsyncCallback<Void>() {
 
                         @Override
                         public void onSuccess(Void result) {

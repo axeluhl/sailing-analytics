@@ -3,25 +3,31 @@ package com.sap.sailing.selenium.pages.raceboard;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.PageObject;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsDialogPO;
+import com.sap.sailing.selenium.pages.timeslider.TimeSliderPO;
 
 /**
  * {@link PageObject} representing the SAP Sailing home page.
  */
 public class RaceBoardPage extends HostPageWithAuthentication {
     
+    @FindBy(how = BySeleniumId.class, using = "moreOptionsButton")
+    private WebElement moreOptionsButton;
+    
     @FindBy(how = BySeleniumId.class, using = "raceMapSettingsButton")
     private WebElement raceMapSettingsButton;
+    
+    @FindBy(how=BySeleniumId.class, using = "dataByContainer")
+    private WebElement dataByContainer;
+    
     private boolean doneInit;
     
     /**
@@ -59,34 +65,13 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     protected void initElements() {
         super.initElements();
         doneInit = true;
-
-        // wait untill initial rendering of racemap & compilation ect, as default ajax based wait won't work here
-        WebDriverWait webDriverWait = new WebDriverWait(driver, 300);
-        webDriverWait.until(new Function<WebDriver, Boolean>() {
-            @Override
-            public Boolean apply(WebDriver t) {
-                try {
-                    return raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100;
-                } catch (Exception e) {
-                    // RaceMap cause multiple reflows and the element may temporarily not be in the viewport
-                    return false;
-                }
-            }
-        });
+        waitUntil(() -> moreOptionsButton.isDisplayed());
     }
 
     public MapSettingsPO openMapSettings() {
-        waitUntil(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                try {
-                    return raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100;
-                } catch (Exception e) {
-                    // RaceMap cause multiple reflows and the element may temporarily not be in the viewport
-                    return false;
-                }
-            }
-        });
+        waitUntil(() -> moreOptionsButton.isDisplayed());
+        moreOptionsButton.click();
+        waitUntil(() -> raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100);
         raceMapSettingsButton.click();
         waitUntil(new BooleanSupplier() {
             @Override
@@ -106,6 +91,8 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     }
     
     public LeaderboardSettingsDialogPO openLeaderboardSettingsDialog() {
+        waitUntil(() -> moreOptionsButton.isDisplayed());
+        moreOptionsButton.click();
         WebElement leaderboardSettingsButton = null;
         try {
             leaderboardSettingsButton = findElementBySeleniumId("leaderboardSettingsButton");
@@ -137,14 +124,22 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         return new LeaderboardSettingsDialogPO(driver, findElementBySeleniumId("LeaderboardSettingsDialog"));
     }
     
+    public boolean isRaceBoardLogoExisting() {
+        return !driver.findElements(new BySeleniumId("raceBoardSapLogo")).isEmpty();
+    }
+    
+    public WebElement getDataByContainer() {
+        return dataByContainer;
+    }
+    
     public static RaceBoardPage goToRaceboardUrl(WebDriver webDriver,String context, String leaderboardName, String regattaName,
-            String raceName) throws UnsupportedEncodingException {
-        return goToRaceboardUrl(webDriver, context, leaderboardName, regattaName, raceName, null);
+            String raceName, boolean whitelabel) throws UnsupportedEncodingException {
+        return goToRaceboardUrl(webDriver, context, leaderboardName, regattaName, raceName, null, whitelabel);
     }
 
     public static RaceBoardPage goToRaceboardUrl(WebDriver webDriver,String context, String leaderboardName, String regattaName,
-            String raceName, String raceMode) throws UnsupportedEncodingException {
-//        private static final String EVENT_LINK = "gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true";
+            String raceName, String raceMode, boolean whitelabel) throws UnsupportedEncodingException {
+        // structure of an event link: "gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true"
         String escapedLeaderBoardName = URLEncoder.encode(leaderboardName,"UTF-8");
         String escapedRegattaName = URLEncoder.encode(regattaName, "UTF-8");
         String escapedRaceName = URLEncoder.encode(raceName, "UTF-8");
@@ -153,7 +148,14 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         if(raceMode != null) {
             url += "&mode=" + URLEncoder.encode(raceMode, "UTF-8");
         }
+        if (whitelabel) {
+            url += "&whitelabel";
+        }
         return goToRaceboardUrl(webDriver, url);
     }
     
+    public TimeSliderPO getTimeSlider() {
+        WebElement timeSliderElement = findElementBySeleniumId(this.driver, "timeSlider");
+        return new TimeSliderPO(this.driver, timeSliderElement);
+    }
 }

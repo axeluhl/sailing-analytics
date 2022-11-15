@@ -7,10 +7,10 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class GPSFixMovingJsonDeserializer extends TypeBasedJsonDeserializer<GPSFixMoving> {
     public static final String TYPE = "GPSFixMoving";
@@ -24,7 +24,7 @@ public class GPSFixMovingJsonDeserializer extends TypeBasedJsonDeserializer<GPSF
         double speedKnots = (Double) object.get(FIELD_SPEED_KNOTS);
         JSONObject clone = (JSONObject) object.clone();
         clone.put(TypeBasedJsonDeserializer.FIELD_TYPE, GPSFixJsonDeserializer.TYPE);
-        GPSFix baseFix = new GPSFixJsonDeserializer().deserialize(object);
+        GPSFix baseFix = new GPSFixJsonDeserializer().deserialize(clone);
         Bearing bearing = new DegreeBearingImpl(bearingDeg);
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(
                 speedKnots, bearing);

@@ -2,20 +2,20 @@ package com.sap.sailing.gwt.ui.client.media.shared;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 
 public abstract class AbstractMediaPlayer implements MediaPlayer {
 
     private static final int TOLERATED_LAG_IN_MILLISECONDS = 4000;   
-    private final MediaTrack mediaTrack;
+    private final MediaTrackWithSecurityDTO mediaTrack;
     private long raceTimeInMillis;
 
-    protected AbstractMediaPlayer(MediaTrack mediaTrack) {
+    protected AbstractMediaPlayer(MediaTrackWithSecurityDTO mediaTrack) {
         this.mediaTrack = mediaTrack;
     }
 
-	public MediaTrack getMediaTrack() {
+    public MediaTrackWithSecurityDTO getMediaTrack() {
         return mediaTrack;
     }
     

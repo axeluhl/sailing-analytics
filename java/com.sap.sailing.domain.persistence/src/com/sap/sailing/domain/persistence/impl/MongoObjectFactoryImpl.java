@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getPassingInstructions;
+import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
+
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,6 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,18 +24,30 @@ import org.json.simple.JSONObject;
 import com.mongodb.BasicDBList;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
+import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
+import com.sap.sailing.domain.abstractlog.orc.RegattaLogORCCertificateAssignmentEvent;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaSpecification;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -40,6 +57,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
@@ -47,6 +65,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
@@ -72,6 +91,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
@@ -86,44 +106,48 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.orc.ORCCertificate;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatRefJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ImpliedWindSourceSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -131,20 +155,23 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonSerializer;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase database;
-    private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create();
-    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
-    private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
+    private final CompetitorWithBoatRefJsonSerializer competitorWithBoatRefSerializer = CompetitorWithBoatRefJsonSerializer.create(/* serializeNonPublicCompetitorFields */ true);
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create(
+            /* serialize boat */ true, /* serializeNonPublicCompetitorFields */ true, /* verboseBoatClassSerializer */ false);
+    private final BoatJsonSerializer boatSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer(/* verbose */ false));
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
 
@@ -174,6 +201,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return database;
     }
 
+    @Override
     public Document storeWind(Wind wind) {
         Document result = new Document();
         storePositioned(wind, result);
@@ -236,21 +264,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public MongoCollection<Document> getWindTrackCollection() {
         MongoCollection<Document> result = database.getCollection(CollectionNames.WIND_TRACKS.name());
-        result.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1));
+        DomainObjectFactoryImpl.ensureIndicesOnWindTracks(result);
         return result;
     }
 
-    public MongoCollection<Document> getGPSFixCollection() {
+    public MongoCollection<Document> getGPSFixCollection(ClientSession clientSession) {
         MongoCollection<Document> gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
-        
         // Removes old indexes not needed anymore
         dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
         dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
-        
+        dropIndexSafe(gpsFixCollection, "fixbytimeanddev");
         Document index = new Document();
-        index.put(FieldNames.DEVICE_ID.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_STRING_REPRESENTATION.name(), "hashed");
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
-        gpsFixCollection.createIndex(index);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        final IndexOptions indexOptions = new IndexOptions().name("fixbydevandtime").background(false);
+        if (clientSession == null) {
+            gpsFixCollection.createIndex(index, indexOptions);
+        } else {
+            gpsFixCollection.createIndex(clientSession, index, indexOptions);
+        }
         return gpsFixCollection;
     }
     
@@ -313,7 +347,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeLeaderboard(Leaderboard leaderboard) {
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withWriteConcern(WriteConcern.MAJORITY);
         try {
             leaderboardCollection.createIndex(new Document(FieldNames.LEADERBOARD_NAME.name(), 1));
         } catch (NullPointerException npe) {
@@ -347,15 +381,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 // at least store the scoring scheme
                 dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
             }
-            if (leaderboard.getDefaultCourseArea() != null) {
-                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
-            } else {
-                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
-            }
+            final BasicDBList courseAreaIdsAsStrings = new BasicDBList();
+            Util.addAll(Util.map(leaderboard.getCourseAreas(), ca->ca.getId().toString()), courseAreaIdsAsStrings);
+            dbLeaderboard.put(FieldNames.COURSE_AREA_IDS.name(), courseAreaIdsAsStrings);
             storeColumnFactors(leaderboard, dbLeaderboard);
             storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         }
-        leaderboardCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLeaderboard, new UpdateOptions().upsert(true));
+        leaderboardCollection.replaceOne(query, dbLeaderboard, new ReplaceOptions().upsert(true));
     }
 
     private void storeColumnFactors(Leaderboard leaderboard, Document dbLeaderboard) {
@@ -371,6 +403,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private void storeRegattaLeaderboard(RegattaLeaderboard leaderboard, Document dbLeaderboard) {
         dbLeaderboard.put(FieldNames.REGATTA_NAME.name(), leaderboard.getRegatta().getName());
+        if (leaderboard instanceof RegattaLeaderboardWithOtherTieBreakingLeaderboard) {
+            dbLeaderboard.put(FieldNames.OTHER_TIEBREAKING_LEADERBOARD_NAME.name(),
+                    ((RegattaLeaderboardWithOtherTieBreakingLeaderboard) leaderboard).getOtherTieBreakingLeaderboard().getName());
+        }
     }
 
     private void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard, Document dbLeaderboard) {
@@ -486,18 +522,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void renameLeaderboard(String oldName, String newName) {
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        Document query = new Document(FieldNames.LEADERBOARD_NAME.name(), oldName);
-        Document renameUpdate = new Document("$set", new Document(FieldNames.LEADERBOARD_NAME.name(), newName));
-        leaderboardCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, renameUpdate);
-    }
-
-    @Override
     public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-
+        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withReadConcern(ReadConcern.MAJORITY);
         try {
             leaderboardGroupCollection.createIndex(new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), 1));
         } catch (NullPointerException npe) {
@@ -517,7 +544,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Document dbOverallLeaderboard = leaderboardCollection.find(overallLeaderboardQuery).first();
             if (dbOverallLeaderboard == null) {
                 storeLeaderboard(overallLeaderboard);
-                dbOverallLeaderboard = leaderboardCollection.find(overallLeaderboardQuery).first();
+                dbOverallLeaderboard = leaderboardCollection.withReadPreference(ReadPreference.primary()).find(overallLeaderboardQuery).first();
             }
             ObjectId dbOverallLeaderboardId = (ObjectId) dbOverallLeaderboard.get("_id");
             dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), dbOverallLeaderboardId);
@@ -527,6 +554,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Document leaderboardQuery = new Document(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
             Document dbLeaderboard = leaderboardCollection.find(leaderboardQuery).first();
             if (dbLeaderboard == null) {
+                // TODO use readConcern / writeConcern "majority"
                 storeLeaderboard(leaderboard);
                 dbLeaderboard = leaderboardCollection.find(leaderboardQuery).first();
             }
@@ -534,22 +562,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbLeaderboardIds.add(dbLeaderboardId);
         }
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
-        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLeaderboardGroup, new UpdateOptions().upsert(true));
+        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLeaderboardGroup, new ReplaceOptions().upsert(true));
     }
 
     @Override
-    public void removeLeaderboardGroup(String groupName) {
+    public void removeLeaderboardGroup(UUID leaderboardGroupId) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        Document query = new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), groupName);
+        Document query = new Document(FieldNames.LEADERBOARD_GROUP_UUID.name(), leaderboardGroupId);
         leaderboardGroupCollection.deleteOne(query);
     }
 
     @Override
-    public void renameLeaderboardGroup(String oldName, String newName) {
+    public void renameLeaderboardGroup(UUID leaderboardGroupId, String newName) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        Document query = new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), oldName);
+        Document query = new Document(FieldNames.LEADERBOARD_GROUP_UUID.name(), leaderboardGroupId);
         Document update = new Document("$set", new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
-        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new UpdateOptions().upsert(true));
+        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, update, new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -560,7 +588,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document currentServerConfig = serverCollection.find().first();
         if (currentServerConfig != null) {
             serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(
-                    currentServerConfig, newServerConfig, new UpdateOptions().upsert(true));
+                    currentServerConfig, newServerConfig, new ReplaceOptions().upsert(true));
         } else {
             serverCollection.insertOne(newServerConfig);
         }
@@ -575,7 +603,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document serverDBObject = new Document();
         serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
         serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
-        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new UpdateOptions().upsert(true));
+        serverDBObject.put(FieldNames.INCLUDE.name(), server.isInclude());
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), server.getSelectedEventIds());
+        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new ReplaceOptions().upsert(true));
+    }
+    
+    @Override
+    public void updateSailingServer(final String serverName, final boolean include,
+            final Set<UUID> selectedEventIds) {
+        MongoCollection<Document> serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        Document query = new Document();
+        query.put(FieldNames.SERVER_NAME.name(), serverName);
+        Document serverDBObject = new Document();
+        serverDBObject.put(FieldNames.INCLUDE.name(), include);
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), selectedEventIds);
+        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject,
+                new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -628,7 +671,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             sailorsInfoWebsiteURLs.add(sailorsInfoWebsiteObject);
         }
         eventDBObject.put(FieldNames.EVENT_SAILORS_INFO_WEBSITES.name(), sailorsInfoWebsiteURLs);
-        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, eventDBObject, new UpdateOptions().upsert(true));
+        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, eventDBObject, new ReplaceOptions().upsert(true));
         // now store the links to the leaderboard groups
         MongoCollection<Document> linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
         linksCollection.createIndex(new Document(FieldNames.EVENT_ID.name(), 1));
@@ -639,7 +682,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document dbLinks = new Document();
         dbLinks.put(FieldNames.EVENT_ID.name(), event.getId());
         dbLinks.put(FieldNames.LEADERBOARD_GROUP_UUID.name(), lgUUIDs);
-        linksCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLinks, new UpdateOptions().upsert(true));
+        linksCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLinks, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -647,7 +690,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> eventCollection = database.getCollection(CollectionNames.EVENTS.name());
         Document query = new Document(FieldNames.EVENT_ID.name(), id);
         Document renameUpdate = new Document("$set", new Document(FieldNames.EVENT_NAME.name(), newName));
-        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, renameUpdate, new UpdateOptions().upsert(true));
+        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, renameUpdate, new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -676,18 +719,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
         Document regattaByNameIndexKey = new Document(FieldNames.REGATTA_NAME.name(), 1);
         try {
-            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true).background(false));
         } catch (MongoCommandException e) {
             // the index probably existed as non-unique; remove and create again
             regattasCollection.dropIndex(regattaByNameIndexKey);
-            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByNameIndexKey, new IndexOptions().unique(true).background(false));
         }
         Document regattaByIdIndexKey = new Document(FieldNames.REGATTA_ID.name(), 1);
         try {
-            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true).background(false));
         } catch (MongoCommandException e) {
             regattasCollection.dropIndex(regattaByIdIndexKey);
-            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true));
+            regattasCollection.createIndex(regattaByIdIndexKey, new IndexOptions().unique(true).background(false));
         }
         Document dbRegatta = new Document();
         Document query = new Document(FieldNames.REGATTA_NAME.name(), regatta.getName());
@@ -701,12 +744,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRegatta.put(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name(), regatta.getBoatClass().typicallyStartsUpwind());
         }
         dbRegatta.put(FieldNames.REGATTA_SERIES.name(), storeSeries(regatta.getSeries()));
-
-        if (regatta.getDefaultCourseArea() != null) {
-            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), regatta.getDefaultCourseArea().getId().toString());
-        } else {
-            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
-        }
+        final BasicDBList courseAreaIdsAsStrings = new BasicDBList();
+        Util.addAll(Util.map(regatta.getCourseAreas(), ca->ca.getId().toString()), courseAreaIdsAsStrings);
+        dbRegatta.put(FieldNames.COURSE_AREA_IDS.name(), courseAreaIdsAsStrings);
         if (regatta.getRegattaConfiguration() != null) {
             JsonSerializer<RegattaConfiguration> serializer = RegattaConfigurationJsonSerializer.create();
             JSONObject json = serializer.serialize(regatta.getRegattaConfiguration());
@@ -716,13 +756,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbRegatta.put(FieldNames.REGATTA_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS.name(), regatta.getBuoyZoneRadiusInHullLengths());
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
+        dbRegatta.put(FieldNames.REGATTA_AUTO_RESTART_TRACKING_UPON_COMPETITOR_SET_CHANGE.name(), regatta.isAutoRestartTrackingUponCompetitorSetChange());
         dbRegatta.put(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name(), regatta.canBoatsOfCompetitorsChangePerRace());
+        dbRegatta.put(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name(), regatta.getCompetitorRegistrationType().name());
+        dbRegatta.put(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name(), regatta.getRegistrationLinkSecret());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
         boolean success = false;
         final int MAX_TRIES = 3;
         for (int i=0; i<MAX_TRIES && !success; i++) {
             try {
-                regattasCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbRegatta, new UpdateOptions().upsert(true));
+                regattasCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbRegatta, new ReplaceOptions().upsert(true));
                 success = true;
             } catch (DuplicateKeyException e) {
                 if (i+1==MAX_TRIES) {
@@ -763,6 +806,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSeries.put(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name(), s.hasSplitFleetContiguousScoring());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name(), s.isStartsWithZeroScore());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnIsNonDiscardableCarryForward());
+        dbSeries.put(FieldNames.SERIES_ONE_ALWAYS_STAYS_ONE.name(), s.isOneAlwaysStaysOne());
         BasicDBList dbFleets = new BasicDBList();
         for (Fleet fleet : s.getFleets()) {
             dbFleets.add(storeFleet(fleet));
@@ -801,7 +845,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         Document entry = new Document(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-        regattaForRaceIDCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        regattaForRaceIDCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -823,6 +867,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbObject.put(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name(), author.getPriority());
         }
     }
+    
+    private void storeRegattaLogEventAuthor(Document dbObject, AbstractLogEventAuthor author) {
+        if (author != null) {
+            dbObject.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name(), author.getName());
+            dbObject.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name(), author.getPriority());
+        }
+    }
 
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFlagEvent flagEvent) {
         Document result = new Document();
@@ -831,7 +882,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private void storeRaceLogIdentifier(RaceLogIdentifier raceLogIdentifier, Document result) {
+    private void storeRaceLogIdentifier(SimpleRaceLogIdentifier raceLogIdentifier, Document result) {
         result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
     }
 
@@ -911,6 +962,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogWindFix(event));
         return result;
     }
+    
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogResultsAreOfficialEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogResultsAreOfficialEvent(event));
+        return result;
+    }
+
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogExcludeWindSourcesEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogExcludeWindSourceEvent(event));
+        return result;
+    }
 
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDenoteForTrackingEvent event) {
         Document result = new Document();
@@ -983,6 +1048,76 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCLegDataEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCLegDataEvent(event));
+        return result;
+    }
+
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCCertificateAssignmentEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCCertificateAssignmentEvent(event));
+        return result;
+    }
+
+    private Document storeORCCertificateAssignmentEvent(RaceLogORCCertificateAssignmentEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCCertificateAssignmentEvent.class.getSimpleName());
+        result.append(FieldNames.RACE_LOG_BOAT_ID.name(), event.getBoatId());
+        result.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
+        return result;
+    }
+    
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCScratchBoatEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCScratchBoatEvent(event));
+        return result;
+    }
+
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogORCImpliedWindSourceEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeORCImpliedWindSourceEvent(event));
+        return result;
+    }
+    
+    private Document storeORCImpliedWindSourceEvent(RaceLogORCImpliedWindSourceEvent event) {
+        final Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCImpliedWindSourceEvent.class.getSimpleName());
+        final Document impliedWindSourceDocument;
+        if (event.getImpliedWindSource() == null) {
+            impliedWindSourceDocument = null;
+        } else {
+            final JSONObject jsonSerializedImpliedWindSource = new ImpliedWindSourceSerializer().serialize(event.getImpliedWindSource());
+            impliedWindSourceDocument = Document.parse(jsonSerializedImpliedWindSource.toString());
+        }
+        result.put(FieldNames.ORC_IMPLIED_WIND_SOURCE.name(), impliedWindSourceDocument);
+        return result;
+    }
+
+    private Document storeORCScratchBoatEvent(RaceLogORCScratchBoatEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCScratchBoatEvent.class.getSimpleName());
+        return result;
+    }
+    
+    private Document storeORCLegDataEvent(RaceLogORCLegDataEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogORCLegDataEvent.class.getSimpleName());
+        result.put(FieldNames.ORC_LEG_NR.name(), event.getOneBasedLegNumber());
+        result.put(FieldNames.ORC_LEG_LENGTH_IN_NAUTICAL_MILES.name(), event.getLength()==null?null:event.getLength().getNauticalMiles());
+        result.put(FieldNames.ORC_LEG_TWA_IN_DEG.name(), event.getTwa()==null?null:event.getTwa().getDegrees());
+        result.put(FieldNames.ORC_LEG_TYPE.name(), event.getType().name());
+        return result;
+    }
+    
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
@@ -1044,13 +1179,38 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             storeTimePoint(event.getToInclusive(), result, toField);
         }
     }
+    
+    private Object storeRaceLogResultsAreOfficialEvent(RaceLogResultsAreOfficialEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogResultsAreOfficialEvent.class.getSimpleName());
+        // currently there are no further properties; the event speaks for itself
+        return result;
+    }
+
+    private Object storeRaceLogExcludeWindSourceEvent(RaceLogExcludeWindSourcesEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogExcludeWindSourcesEvent.class.getSimpleName());
+        final BasicDBList dbWindSourcesToExclude = new BasicDBList();
+        for (final WindSource windSourceToExclude : event.getWindSourcesToExclude()) {
+            final Document dbWindSourceToExclude = new Document();
+            dbWindSourceToExclude.put(FieldNames.WIND_SOURCE_NAME.name(), windSourceToExclude.name());
+            if (windSourceToExclude.getId() != null) {
+                dbWindSourceToExclude.put(FieldNames.WIND_SOURCE_ID.name(), windSourceToExclude.getId());
+            }
+            dbWindSourcesToExclude.add(dbWindSourceToExclude);
+        }
+        result.put(FieldNames.WIND_SOURCES_TO_EXCLUDE.name(), dbWindSourcesToExclude);
+        return result;
+    }
 
     private Object storeRaceLogDenoteForTrackingEvent(RaceLogDenoteForTrackingEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDenoteForTrackingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_NAME.name(), event.getRaceName());
-        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass().getName());
+        result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass()==null?null:event.getBoatClass().getName());
         result.put(FieldNames.RACE_ID.name(), event.getRaceId());
         return result;
     }
@@ -1135,8 +1295,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = new Document();
         storeRaceLogEventProperties(flagEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFlagEvent.class.getSimpleName());
-        result.put(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name(), flagEvent.getUpperFlag().name());
-        result.put(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name(), flagEvent.getLowerFlag().name());
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name(), flagEvent.getUpperFlag()==null?Flags.NONE.name():flagEvent.getUpperFlag().name());
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name(), flagEvent.getLowerFlag()==null?Flags.NONE.name():flagEvent.getLowerFlag().name());
         result.put(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name(), String.valueOf(flagEvent.isDisplayed()));
         return result;
     }
@@ -1146,8 +1306,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(startTimeEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartTimeEvent.class.getSimpleName());
         storeTimePoint(startTimeEvent.getStartTime(), result, FieldNames.RACE_LOG_EVENT_START_TIME);
+        storeCourseAreaToStartTimeEvent(startTimeEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), startTimeEvent.getNextStatus().name());
         return result;
+    }
+
+    private void storeCourseAreaToStartTimeEvent(RaceLogCourseAreaSpecification startTimeEvent, Document result) {
+        result.put(FieldNames.RACE_LOG_EVENT_COURSE_AREA_ID_AS_STRING.name(),
+                startTimeEvent.getCourseAreaId()==null?null:startTimeEvent.getCourseAreaId().toString());
     }
     
     private void storeRaceLogEventProperties(RaceLogEvent event, Document result) {
@@ -1156,12 +1322,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
-        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedCompetitors()));
+        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedCompetitorsForRaceLogEvent(event.getInvolvedCompetitors()));
         storeRaceLogEventAuthor(result, event.getAuthor());
     }
 
 
-    private BasicDBList storeInvolvedBoatsForRaceLogEvent(List<Competitor> competitors) {
+    private BasicDBList storeInvolvedCompetitorsForRaceLogEvent(List<Competitor> competitors) {
         BasicDBList dbInvolvedCompetitorIds = new BasicDBList();
         for (Competitor competitor : competitors) {
             dbInvolvedCompetitorIds.add(competitor.getId());
@@ -1184,6 +1350,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_RACECOLUMN.name(), dependentStartTimeEvent.getDependentOnRaceIdentifier().getRaceColumnName());
         result.put(FieldNames.RACE_LOG_DEPDENDENT_ON_FLEET.name(), dependentStartTimeEvent.getDependentOnRaceIdentifier().getFleetName());
         storeDuration(dependentStartTimeEvent.getStartTimeDifference(), result, FieldNames.RACE_LOG_START_TIME_DIFFERENCE_IN_MS);
+        storeCourseAreaToStartTimeEvent(dependentStartTimeEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), dependentStartTimeEvent.getNextStatus().name());
         return result;
     }
@@ -1207,9 +1374,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(courseDesignChangedEvent, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseDesignChangedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name(), courseDesignChangedEvent.getCourseDesign().getName());
+        result.put(FieldNames.RACE_LOG_COURSE_ORIGINATING_TEMPLATE_ID.name(),
+                courseDesignChangedEvent.getCourseDesign().getOriginatingCourseTemplateIdOrNull());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name(),
                 courseDesignChangedEvent.getCourseDesignerMode() == null ? null : courseDesignChangedEvent.getCourseDesignerMode().name());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), storeCourseBase(courseDesignChangedEvent.getCourseDesign()));
+
+        final BasicDBList roleMap = new BasicDBList();
+        courseDesignChangedEvent.getCourseDesign().getAssociatedRoles().forEach((mark, role) -> {
+            final Document mapping = new Document();
+            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_MARK_ID.name(), mark.getId().toString());
+            mapping.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES_ROLE_ID.name(), role.toString());
+            roleMap.add(mapping);
+        });
+
+        if (!roleMap.isEmpty()) {
+            result.put(FieldNames.RACE_LOG_COURSE_ASSOCIATED_ROLES.name(), roleMap);
+        }
         return result;
     }
     
@@ -1253,7 +1434,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Document storePositionedCompetitor(CompetitorResult competitorResult) {
         Document result = new Document();
         result.put(FieldNames.COMPETITOR_ID.name(), competitorResult.getCompetitorId());
-        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorResult.getCompetitorDisplayName());
+        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorResult.getName());
+        result.put(FieldNames.COMPETITOR_SHORT_NAME.name(), competitorResult.getShortName());
+        result.put(FieldNames.COMPETITOR_BOAT_NAME.name(), competitorResult.getBoatName());
+        result.put(FieldNames.COMPETITOR_BOAT_SAIL_ID.name(), competitorResult.getBoatSailId());
         result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(), competitorResult.getMaxPointsReason() == null ? null : competitorResult.getMaxPointsReason().name());
         result.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(), competitorResult.getScore());
         result.put(FieldNames.RACE_LOG_FINISHING_TIME_AS_MILLIS.name(), competitorResult.getFinishingTime() == null ? null : competitorResult.getFinishingTime().asMillis());
@@ -1295,6 +1479,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = new Document();
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name(), cpwtm.getId());
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name(), cpwtm.getName());
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_SHORT_NAME.name(), cpwtm.getShortName());
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name(), storeMark(cpwtm.getLeft()));
         result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name(), storeMark(cpwtm.getRight()));
         return result;
@@ -1305,20 +1490,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_ID.name(), mark.getId());
         result.put(FieldNames.MARK_COLOR.name(), mark.getColor()==null?null:mark.getColor().getAsHtml());
         result.put(FieldNames.MARK_NAME.name(), mark.getName());
+        result.put(FieldNames.MARK_SHORT_NAME.name(), mark.getShortName());
         result.put(FieldNames.MARK_PATTERN.name(), mark.getPattern());
         result.put(FieldNames.MARK_SHAPE.name(), mark.getShape());
         result.put(FieldNames.MARK_TYPE.name(), mark.getType() == null ? null : mark.getType().name());
+        result.put(FieldNames.MARK_ORIGINATING_MARK_TEMPLATE_ID.name(), mark.getOriginatingMarkTemplateIdOrNull());
+        result.put(FieldNames.MARK_ORIGINATING_MARK_PROPERTIES_ID.name(), mark.getOriginatingMarkPropertiesIdOrNull());
         return result;
-    }
-    
-    private String getPassingInstructions(PassingInstruction passingInstructions) {
-        final String passing;
-        if (passingInstructions != null) {
-            passing = passingInstructions.name();
-        } else {
-            passing = null;
-        }
-        return passing;
     }
     
     @Override
@@ -1334,9 +1512,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private void storeCompetitorWithoutBoat(Competitor competitor) {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
         JSONObject json = competitorSerializer.serialize(competitor);
-        Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
-        Document entry = Document.parse(json.toString());
-        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toJSONString());
+        Document entry = Document.parse(json.toJSONString());
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     private void storeCompetitorWithBoat(CompetitorWithBoat competitor) {
@@ -1344,7 +1522,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         JSONObject json = competitorWithBoatRefSerializer.serialize(competitor);
         Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         Document entry = Document.parse(json.toString());
-        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -1411,7 +1589,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         JSONObject json = boatSerializer.serialize(boat);
         Document query = Document.parse(BoatJsonSerializer.getBoatIdQuery(boat).toString());
         Document entry = Document.parse(json.toString());
-        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -1443,29 +1621,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(query);
     }
 
+    /**
+     * Lets the {@link DeviceConfigurationJsonSerializer} create a JSON-serialized copy of the {@code configuration} and
+     * adds as a key field the stringified configuration's UUID as a field named
+     * {@link FieldNames#CONFIGURATION_ID_AS_STRING}. This field will be redundant to the serializer's copy of the ID field.
+     */
     @Override
-    public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+    public void storeDeviceConfiguration(DeviceConfiguration configuration) {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
-        
+        final Document configDocument = createDeviceConfigurationObject(configuration);
+        configDocument.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
         Document query = new Document();
-        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
-        
-        Document entryObject = new Document();
-        entryObject.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
-        entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), createDeviceConfigurationMatcherObject(matcher));
-        entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), createDeviceConfigurationObject(configuration));
-        
-        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entryObject, new UpdateOptions().upsert(true));
-    }
-
-    private Document createDeviceConfigurationMatcherObject(DeviceConfigurationMatcher matcher) {
-        Document matcherObject = new Document();
-        if (matcher instanceof DeviceConfigurationMatcherSingle) {
-            BasicDBList client = new BasicDBList();
-            client.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
-            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), client);
-        }
-        return matcherObject;
+        query.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
+        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, configDocument, new ReplaceOptions().upsert(true));
     }
 
     private Document createDeviceConfigurationObject(DeviceConfiguration configuration) {
@@ -1476,25 +1644,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+    public void removeDeviceConfiguration(UUID id) {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
-        Document query = new Document();
-        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        Document query = new Document(FieldNames.CONFIGURATION_ID_AS_STRING.name(), id.toString());
         configurationsCollections.deleteOne(query);
-    }
-
-    public static Document storeDeviceId(
-    		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
-    				throws TransformationException, NoCorrespondingServiceRegisteredException {
-        String type = device.getIdentifierType();
-        DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-        com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
-        type = pair.getA();
-    	Object deviceTypeSpecificId = pair.getB();
-    	return new Document()
-    			.append(FieldNames.DEVICE_TYPE.name(), type)
-    			.append(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
-    			.append(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation());
     }
     
     void storeRaceLogEventEvent(Document eventEntry) {
@@ -1505,7 +1658,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void removeRaceLog(RaceLogIdentifier identifier) {
         Document query = new Document();
         storeRaceLogIdentifier(identifier, query);
-        getRaceLogCollection().deleteOne(query);
+        getRaceLogCollection().deleteMany(query);
     }
     
     @Override
@@ -1531,7 +1684,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
         Document entry = new Document(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
         entry.put(FieldNames.RESULT_URL.name(), url.toString());
-        resultUrlsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        resultUrlsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -1546,17 +1699,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> result = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         Document index = new Document(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), 1);
         index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), 1);
-        result.createIndex(index);
+        result.createIndex(index, new IndexOptions().name("regattaLogById").background(false));
         return result;
     }
     
     private Document createBasicRegattaLogEventDBObject(RegattaLogEvent event) {
         Document result = new Document();
-        storeTimed(event, result);
+        storeTimePoint(event.getLogicalTimePoint(), result, FieldNames.TIME_AS_MILLIS);
         storeTimePoint(event.getCreatedAt(), result, FieldNames.REGATTA_LOG_EVENT_CREATED_AT);
+        storeRegattaLogEventAuthor(result, event.getAuthor());
         result.put(FieldNames.REGATTA_LOG_EVENT_ID.name(), event.getId());
-        result.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_NAME.name(), event.getAuthor().getName());
-        result.put(FieldNames.REGATTA_LOG_EVENT_AUTHOR_PRIORITY.name(), event.getAuthor().getPriority());
         return result;
     }
     
@@ -1565,91 +1717,93 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         toObject.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), regattaLikeId.getName());
     }
 
-    private void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, Document innerObject) {
+    private Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, Document innerObject) {
         Document result = new Document(FieldNames.REGATTA_LOG_EVENT.name(), innerObject);
         addRegattaLikeIdentifier(regattaLikeId, result);
         getRegattaLogCollection().insertOne(result);
+        return result;
     }
     
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceCompetitorMappingEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceCompetitorMappingEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName());
         storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
     
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceBoatMappingEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceBoatMappingEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceBoatMappingEvent.class.getSimpleName());
         storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.RACE_LOG_BOAT_ID.name(), event.getMappedTo().getId());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId,
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId,
             RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), event.getClass().getSimpleName());
         storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
     
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId,
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId,
             RegattaLogDeviceBoatSensorDataMappingEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), event.getClass().getSimpleName());
         storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.RACE_LOG_BOAT_ID.name(), event.getMappedTo().getId());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceMarkMappingEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceMarkMappingEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceMarkMappingEvent.class.getSimpleName());
         storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.MARK.name(), storeMark(event.getMappedTo()));
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRevokeEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRevokeEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRevokeEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_REVOKED_EVENT_ID.name(), event.getRevokedEventId());
         result.put(FieldNames.REGATTA_LOG_REVOKED_EVENT_TYPE.name(), event.getRevokedEventType());
         result.put(FieldNames.REGATTA_LOG_REVOKED_EVENT_SHORT_INFO.name(), event.getRevokedEventShortInfo());
         result.put(FieldNames.REGATTA_LOG_REVOKED_REASON.name(), event.getReason());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterBoatEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterBoatEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterBoatEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_BOAT_ID.name(), event.getBoat().getId());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterCompetitorEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterCompetitorEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterCompetitorEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogCloseOpenEndedDeviceMappingEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogCloseOpenEndedDeviceMappingEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
         storeTimePoint(event.getClosingTimePointInclusive(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnTimeFactorEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnTimeFactorEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
-        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogSetCompetitorTimeOnTimeFactorEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
         result.put(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name(), event.getTimeOnTimeFactor());
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
     
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDependentStartTimeEvent event) {
@@ -1659,19 +1813,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
-        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
         result.put(FieldNames.REGATTA_LOG_TIME_ON_DISTANCE_SECONDS_ALLOWANCE_PER_NAUTICAL_MILE.name(), event.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
-        storeRegattaLogEvent(regattaLikeId, result);
+        return storeRegattaLogEvent(regattaLikeId, result);
     }
     
-    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, RegattaLogDefineMarkEvent event) {
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, RegattaLogDefineMarkEvent event) {
         Document result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDefineMarkEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_MARK.name(), storeMark(event.getMark()));
-        storeRegattaLogEvent(regattaLikeIdentifier, result);
+        return storeRegattaLogEvent(regattaLikeIdentifier, result);
     }
     
     private Document createImageObject(ImageDescriptor image) {
@@ -1727,7 +1881,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 final MongoCollection<Document> collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
                 Document key = new Document();
                 key.putAll(paramsPersistenceService.getKey(params));
-                collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(key);
+                final DeleteResult deleteResult = collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(key);
+                if (deleteResult.getDeletedCount() != 1) {
+                    logger.warning("Tried to delete connectivity params "+params+" from restore list but delete count was "+
+                            deleteResult.getDeletedCount());
+                }
             } else {
                 logger.warning("Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier);
             }
@@ -1750,7 +1908,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 key.putAll(paramsPersistenceService.getKey(params));
                 Document dbObject = new Document();
                 dbObject.putAll(paramsPersistenceService.mapFrom(params));
-                collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, dbObject, new UpdateOptions().upsert(true));
+                collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, dbObject, new ReplaceOptions().upsert(true));
             } catch (NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
                         ". Couldn't store race "+params.getTrackerID()+" for restoring.", e);
@@ -1789,10 +1947,66 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 final URL remoteUrl = raceInfo.getRemoteUrl();
                 newValue.append(FieldNames.REMOTE_URL.name(), remoteUrl == null ? null : remoteUrl.toExternalForm());
                 newValue.append(FieldNames.ANNIVERSARY_TYPE.name(), anniversary.getValue().getB().toString());
-                anniversarysStored.replaceOne(currentProxy, newValue, new UpdateOptions().upsert(true));
+                anniversarysStored.replaceOne(currentProxy, newValue, new ReplaceOptions().upsert(true));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    private Document createORCCertificateObject(ORCCertificate certificate) {
+        final ORCCertificateJsonSerializer serializer = new ORCCertificateJsonSerializer();
+        final Document result = Document.parse(serializer.serialize(certificate).toString());
+        return result;
+    }
+
+    public Document storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeIdentifier, RegattaLogORCCertificateAssignmentEvent event) {
+        Document document = createBasicRegattaLogEventDBObject(event);
+        document.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogORCCertificateAssignmentEvent.class.getSimpleName());
+        document.append(FieldNames.RACE_LOG_BOAT_ID.name(), event.getBoatId());
+        document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
+        return storeRegattaLogEvent(regattaLikeIdentifier, document);
+    }
+    
+    private List<Document> storeMarkPassings(Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course) {
+        final List<Document> result = new ArrayList<>();
+        for (final Entry<Competitor, Map<Waypoint, MarkPassing>> e : markPassings.entrySet()) {
+            final Document competitorMarkPassings = new Document();
+            competitorMarkPassings.put(FieldNames.COMPETITOR_ID.name(), e.getKey().getId());
+            final List<Document> markPassingsList = new ArrayList<>();
+            for (final Entry<Waypoint, MarkPassing> f : e.getValue().entrySet()) {
+                final Document markPassingDoc = new Document();
+                markPassingDoc.put(FieldNames.INDEX_OF_PASSED_WAYPOINT.name(), course.getIndexOfWaypoint(f.getKey()));
+                markPassingDoc.put(FieldNames.TIME_AS_MILLIS.name(), f.getValue().getTimePoint().asMillis());
+                markPassingsList.add(markPassingDoc);
+            }
+            competitorMarkPassings.put(FieldNames.MARK_PASSINGS.name(), markPassingsList);
+            result.add(competitorMarkPassings);
+        }
+        return result;
+    }
+
+    @Override
+    public void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint,
+            Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course) {
+        MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
+        JSONObject fingerprintjson = fingerprint.toJson();
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
+        final Document result = new Document();
+        final Document fingerprintDoc = Document.parse(fingerprintjson.toString());
+        result.put(FieldNames.MARK_PASSINGS_FINGERPRINT.name(), fingerprintDoc);
+        storeRaceIdentifier(result, raceIdentifier);
+        final List<Document> markPassingsDoc = storeMarkPassings(markPassings, course);
+        result.put(FieldNames.MARK_PASSINGS.name(), markPassingsDoc);
+        markPassingCollection.replaceOne(query, result, new ReplaceOptions().upsert(true));
+    }
+    
+    @Override
+    public void removeMarkPassings(RaceIdentifier raceIdentifier) {
+        MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
+        markPassingCollection.deleteOne(query);
     }
 }

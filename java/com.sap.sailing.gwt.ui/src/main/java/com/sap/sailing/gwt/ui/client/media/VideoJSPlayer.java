@@ -108,6 +108,10 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             type = "video/vimeo";
         } else if (mimeType.mediaSubType == MediaSubType.mp4) {
             type = "video/mp4";
+        } else if (mimeType == MimeType.qt) {
+            // TODO: this is a workaround because browsers are not supporting media type video/quicktime. For most cases this should work.
+            //  Else video upload from apple devices will not be possible.
+            type = "video/mp4";
         } else if (mimeType == MimeType.mp3) {
             type = "audio/mp3";
         }
@@ -138,9 +142,18 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         var that = this;
 
         var player = $wnd.videojs(elementId, {
+            techOrder: ['vimeo', 'youtube', 'html5'],
             "playsInline" : true,
-            "customControlsOnMobile" : true
-        }).ready(function() {
+            "customControlsOnMobile" : true,
+            youtube: {
+                enablePrivacyEnhancedMode: true,
+                customVars: { rel: 0, modestbranding: 1 }
+                },
+            vimeo: {
+                "dnt": 1,
+            }
+        });
+        player.ready(function() {
             this.on('play', function() {
                 that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
             });

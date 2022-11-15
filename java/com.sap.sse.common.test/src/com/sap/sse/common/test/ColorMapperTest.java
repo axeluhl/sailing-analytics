@@ -23,7 +23,7 @@ public class ColorMapperTest {
 
     @Before
     public void setUp() {
-        valueRange = new ValueRangeFlexibleBoundaries(-5.0, 5.0, 0.0);
+        valueRange = new ValueRangeFlexibleBoundaries(-5.0, 5.0, 0.0, 0.0);
         colorMapper = new ColorMapper(valueRange, false);
         listener = mock(ColorMapperChangedListener.class);
         colorMapper.addListener(listener);
@@ -48,9 +48,25 @@ public class ColorMapperTest {
     }
     
     @Test
+    public void testBasicOperation() {
+        // MinLeft = -5 && MaxRight = 5
+        colorMapper.setGrey(false);
+        // Below lower bound
+        assertTrue(colorMapper.getColor(-6).equals("hsl(240, 100%, 50%)"));
+        // At lower bound
+        assertTrue(colorMapper.getColor(-5).equals("hsl(240, 100%, 50%)"));
+        // Mid range
+        assertTrue(colorMapper.getColor(0).equals("hsl(120, 100%, 50%)"));
+        // At upper bound
+        assertTrue(colorMapper.getColor(5).equals("hsl(0, 100%, 50%)"));
+        // Above upper bound
+        assertTrue(colorMapper.getColor(6).equals("hsl(0, 100%, 50%)"));
+    }
+    
+    @Test
     public void testForValueOutOfBoundaries() {
-        assertTrue(colorMapper.getColor(valueRange.getMinLeft() - EPSILON) == "hsl(0, 100%, 50%)");
-        assertTrue(colorMapper.getColor(valueRange.getMaxRight() + EPSILON) == "hsl(240, 100%, 50%)");
+        assertTrue(colorMapper.getColor(valueRange.getMinLeft() - EPSILON) == "hsl(240, 100%, 50%)");
+        assertTrue(colorMapper.getColor(valueRange.getMaxRight() + EPSILON) == "hsl(0, 100%, 50%)");
     }
 
     @Test

@@ -51,7 +51,8 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
         });
 
         TimeToLiveCalculator timeToLiveCalculator = new TimeToLiveCalculator();
-        HomeServiceUtil.forAllPublicEvents(service, context.getRequest(), timeToLiveCalculator);
+        HomeServiceUtil.forAllPublicEventsWithReadPermission(service, context.getRequest(), context.getSecurityService(),
+                timeToLiveCalculator);
         return new ResultWithTTL<AnniversariesDTO>(timeToLiveCalculator.getTimeToLive(), anniversaries);
     }
 

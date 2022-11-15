@@ -13,10 +13,15 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sse.common,
  com.sap.sailing.domain.persistence,
  com.sap.sse,
- org.eclipse.orbit.mongodb;bundle-version="3.2.2"
+ org.mongodb.bson;bundle-version="4.3.1",
+ org.mongodb.driver-core;bundle-version="4.3.1",
+ org.mongodb.driver-sync;bundle-version="4.3.1",
+ com.sap.sse.security.common,
+ com.sap.sse.replication.interfaces
 Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test,com.sap.sailing.mongodb.test"
-Import-Package: org.osgi.framework,
+Import-Package: com.sap.sse.security,
+ org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sailing.domain.swisstimingadapter.persistence.impl.Activator
 Automatic-Module-Name: com.sap.sailing.domain.swisstimingadapter.persistence

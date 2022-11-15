@@ -76,6 +76,16 @@ fieldset legend {
 	clear: both;
 }
 
+.systemInformationPanel {
+    float: left;
+    display: inline-flex;
+    padding: 0px 0px 0px 50px;
+}
+
+.releaseNotesAnchor {
+    float: right;
+}
+
 .errorLabel {
 	color: #FF0000;
 }

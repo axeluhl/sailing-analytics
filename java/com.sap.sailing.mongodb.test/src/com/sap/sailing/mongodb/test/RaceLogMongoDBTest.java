@@ -103,7 +103,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         course.addWaypoint(0,
                 new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(),
                         "Black", MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green",
-                        MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"), "Upper gate")));
+                                MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"),
+                        "Upper gate", "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"),
                 "conical", "bold"), PassingInstruction.Port));
 
