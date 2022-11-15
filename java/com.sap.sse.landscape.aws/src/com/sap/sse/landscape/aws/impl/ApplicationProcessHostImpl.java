@@ -133,7 +133,7 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,/*  */ false);
+        return getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,/* function should still work like the old implementation */ false);
     }
 
     private JSONArray getServerDirectoriesAndPorts(final SshCommandChannel sshChannel)
