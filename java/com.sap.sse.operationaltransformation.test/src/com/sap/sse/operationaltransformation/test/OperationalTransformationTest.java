@@ -77,6 +77,12 @@ public class OperationalTransformationTest {
 	final private String state;
 	final private UUID id;
 
+	public StringState(String state) {
+	    super();
+	    id = UUID.randomUUID();
+	    this.state = state;
+	}
+	
 	public String getState() {
 	    return state;
 	}
@@ -91,12 +97,6 @@ public class OperationalTransformationTest {
 	    return getState().hashCode() ^ id.hashCode();
 	}
 
-	public StringState(String state) {
-	    super();
-	    id = UUID.randomUUID();
-	    this.state = state;
-	}
-	
 	public StringState apply(StringInsertOperation operation) {
 	    final String s = this.getState().substring(0, operation.getPos()) +
 	    			operation.getS()+this.getState().substring(operation.getPos());
@@ -180,31 +180,9 @@ public class OperationalTransformationTest {
 	final int COUNT = 100;
 	final Random r = new Random();
 	final AtomicInteger totalLength = new AtomicInteger(0);
-	final Thread client1FillingThread = new Thread(()->{
-            for (int i = 0; i < COUNT; i++) {
-                for (int j = r.nextInt(10); j > 0; j--) {
-                    byte[] b = new byte[r.nextInt(10)];
-                    r.nextBytes(b);
-                    String s = Base64.encode(b);
-                    client1.apply(new StringInsertOperation(
-                            r.nextInt(client1.getCurrentState().getState().length()+1), s));
-                    totalLength.addAndGet(s.length());
-                }
-            }
-	});
+	final Thread client1FillingThread = new Thread(()->addStringsToClient(COUNT, client1, totalLength, r));
 	client1FillingThread.start();
-	final Thread client2FillingThread = new Thread(()->{
-            for (int i = 0; i < COUNT; i++) {
-                for (int j = r.nextInt(10); j > 0; j--) {
-                    byte[] b = new byte[r.nextInt(10)];
-                    r.nextBytes(b);
-                    String s = Base64.encode(b);
-                    client2.apply(new StringInsertOperation(
-                            r.nextInt(client2.getCurrentState().getState().length()+1), s));
-                    totalLength.addAndGet(s.length());
-                }
-            }
-	});
+	final Thread client2FillingThread = new Thread(()->addStringsToClient(COUNT, client2, totalLength, r));
 	client2FillingThread.start();
 	client1FillingThread.join();
 	client2FillingThread.join();
@@ -214,6 +192,21 @@ public class OperationalTransformationTest {
 	assertEquals(server.getCurrentState().getState(), client1.getCurrentState().getState());
 	assertEquals(server.getCurrentState().getState(), client2.getCurrentState().getState());
 	assertEquals(totalLength.get(), server.getCurrentState().getState().length());
+    }
+
+    private void addStringsToClient(int count, Peer<StringInsertOperation, StringState> client, AtomicInteger totalLength, Random r) {
+        for (int i = 0; i < count; i++) {
+            for (int j = r.nextInt(10); j > 0; j--) {
+                byte[] b = new byte[r.nextInt(10)];
+                r.nextBytes(b);
+                String s = Base64.encode(b);
+                synchronized (client) {
+                    client.apply(new StringInsertOperation(
+                            r.nextInt(client.getCurrentState().getState().length()+1), s));
+                }
+                totalLength.addAndGet(s.length());
+            }
+        }
     }
 
     @Test
@@ -234,5 +227,4 @@ public class OperationalTransformationTest {
 	assertEquals(server.getCurrentState().getState(), server2.getCurrentState().getState());
 	assertEquals(6*COUNT, server2.getCurrentState().getState().length());
     }
-
 }
