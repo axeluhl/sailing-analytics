@@ -220,7 +220,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
             final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost()
                     .getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,
                             /*
-                             * Should throw an exception if there was an error for preventing a false positives (process
+                             * Should throw an exception if there was an error for preventing false positives (process
                              * is running, but there was an error) -> Bug5786
                              */ true);
             if (Util.isEmpty(applicationProcesses)) {
