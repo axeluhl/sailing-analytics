@@ -217,7 +217,8 @@ implements SailingAnalyticsProcess<ShardingKey> {
             logger.info("Removing server directory "+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT)+" of "+this);
             getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
                 .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT)+"\"", "Removing server directory "+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT), Level.INFO);
-            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,
+                    /* Should throw an exception if there was an error for preventing a false positives (process is running but there was an error) -> Bug5786 */ true);
             if (Util.isEmpty(applicationProcesses)) {
                 logger.info("No more application processes running on "+getHost()+"; terminating");
                 getHost().terminate();

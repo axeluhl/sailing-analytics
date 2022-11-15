@@ -83,9 +83,12 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
      *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * @param rethrowExceptions
+     *            whether an occurring exception should be rethrown. Necessary if it is necessary to know whether any 
+     *            processes are running or not. Exception means that they were just not properly detected.
      */
     @Override
-    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, Boolean rethrowExceptions ) throws Exception {
         final Set<ProcessT> result = new HashSet<>();
         final SshCommandChannel sshChannel = createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         if (sshChannel != null) { // could, e.g., have timed out
@@ -110,16 +113,27 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
                             result.add(process);
                         } catch (Exception e) {
                             logger.log(Level.WARNING, "Problem creating application process from directory "+serverDirectory+" on host "+this+"; skipping", e);
+                            if(rethrowExceptions) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 }
-            } finally {
+            } catch (RuntimeException e) {
+                throw e;
+            } 
+            finally {
                 if (sshChannel != null) {
                     sshChannel.disconnect();
                 }
             }
         }
         return result;
+    }
+    
+    @Override
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,/*  */ false);
     }
 
     private JSONArray getServerDirectoriesAndPorts(final SshCommandChannel sshChannel)
