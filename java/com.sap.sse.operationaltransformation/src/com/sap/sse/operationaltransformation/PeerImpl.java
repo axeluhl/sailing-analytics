@@ -40,7 +40,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     /**
      * Tells if this peer is currently actively running, with a certain number of pending / running requests
      */
-    private int scheduledOrRunning = 0;
+    private volatile int scheduledOrRunning = 0;
 
     /**
      * Queues operations sent out to a peer in {@link #updatePeers(Operation, Peer)} and whose
@@ -151,8 +151,8 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
                 throw new RuntimeException("Peer " + source + " not registered with peer " + this);
             }
             // Starting from base up to current, compute transformed operation sequence to send
-            // to client; this will create a sequence of states for the client which eventually
-            // leads up to a state that equals the server's current state.
+            // to peer; this will create a sequence of states for the peer which eventually
+            // leads up to a state that equals this peer's current state.
             O transformedOp = operation;
             UnmergedOperationsQueue<O, S> unmergedOperationsForSource = unmergedOperationsForPeer.get(source);
             int localOpNumber = numberOfOperationsSourceHasMergedFromThis;
