@@ -739,4 +739,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     void updateImageInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami);
 
     void updateInstanceTypeInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType);
+
+    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
+    
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
+    void createAutoscalinggroupFromExisting(AwsAutoScalingGroup autoscalingParent,
+            String shardname, TargetGroup<ShardingKey> targetgroup,Optional<Tags> tags);
 }

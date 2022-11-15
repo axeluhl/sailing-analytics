@@ -1496,4 +1496,28 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         return result;
     }
+    
+    public SailingServer getSailServer(String url, String username, String password) throws MalformedURLException {
+        final SailingServerFactory fac = sailingServerFactoryTracker.getService();
+        return fac.getSailingServer(new URL("https://" + url), username, password);
+    }
+
+    
+    public String getShardingKey(SailingServer server, String leaderboardName,String password) throws Exception{
+        return server.getLeaderboardShardingKey(leaderboardName);
+        
+    }
+
+    @Override
+    public ArrayList<String> getLeaderboardNames(SailingServer server) throws Exception {
+        try {
+            ArrayList<String> list= new ArrayList<String>();
+            server.getLeaderboardNames().forEach(t -> list.add(t));
+            return list;
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            throw e;
+        }
+    };
 }

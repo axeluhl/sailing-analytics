@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -187,4 +188,9 @@ public interface LandscapeManagementWriteServiceAsync {
     void changeAutoScalingReplicasInstanceType(SailingApplicationReplicaSetDTO<String> replicaSet,
             String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+    
+    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String username,String password, AsyncCallback<ArrayList<String>> names);
+    
+    void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
+            String username,String password, String region, byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 }

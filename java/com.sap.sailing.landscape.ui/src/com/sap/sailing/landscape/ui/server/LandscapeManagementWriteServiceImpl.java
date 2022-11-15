@@ -59,6 +59,7 @@ import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
+import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -72,9 +73,11 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
@@ -109,6 +112,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private static final Logger logger = Logger.getLogger(LandscapeManagementWriteServiceImpl.class.getName());
     
     private static final Optional<Duration> IMAGE_UPGRADE_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
+    
+    private static final String SHARD_SAILING_TARGET_PREFIX = "SH-";
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
@@ -827,4 +832,40 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 getLandscapeService().changeAutoScalingReplicasInstanceType(replicaSet, InstanceType.valueOf(instanceTypeName)),
                 Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
     }
+
+    @Override
+    public ArrayList<String> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String username,String password) throws Exception{
+        SailingServer server = getLandscapeService().getSailServer(replicaset.getHostname(), username, password);
+        Iterable<String> list = server.getLeaderboardNames();   
+        ArrayList<String> retList = new ArrayList<String>();
+        list.forEach(t -> retList.add(t));
+        return retList;
+    }
+    
+    public void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
+            String username,String password, String region, byte[] passphraseForPrivateKeyDecryption) throws Exception{
+        
+        final ArrayList<String> shardingKeys = new ArrayList<String>();
+        final AwsRegion awsregion = new AwsRegion(region, getLandscape());
+        SailingServer server = getLandscapeService().getSailServer(replicaset.getHostname(), username, password);
+        
+        AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet  = convertFromApplicationReplicaSetDTO(awsregion, replicaset);
+        logger.info("Creating Targer group for Shard "+shardName + ". Inheriting from Replicaset: " + replicaset.getName());
+        TargetGroup<String> targetgroup  = getLandscape().createTargetGroupWithoutLoadbalancer(awsregion,SHARD_SAILING_TARGET_PREFIX + shardName, replicaset.getMaster().getPort());
+        AwsAutoScalingGroup autoscalinggroup = awsReplicaSet.getAutoScalingGroup();
+        // Irgendwie kommt die falsche autosclang group raus
+        
+        logger.info("Creating Autoscalinggroup for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoscalinggroup.getName());
+        getLandscape().createAutoscalinggroupFromExisting(autoscalinggroup, shardName, targetgroup, null);
+        // createLaunchConfigurationAndAutoScalingGroup @ AwsLandScapeImpl for autosclaing builder
+        logger.info("targetgroup id: " + targetgroup.getId());
+        selectedLeaderBoards.forEach(t -> {
+            try {
+                final String shardingkey  = server.getLeaderboardShardingKey(t);
+                shardingKeys.add(shardingkey);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    };
 }

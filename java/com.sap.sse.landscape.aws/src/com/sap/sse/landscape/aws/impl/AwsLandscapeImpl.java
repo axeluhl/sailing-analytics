@@ -1935,4 +1935,52 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(launchConfigurationName));
             });
     }
+
+    @Override
+    public TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(com.sap.sse.landscape.Region region, String targetGroupName, int port) {
+        return createTargetGroup(region, targetGroupName, port, "/gwt/status", port, null);
+    }
+    
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
+    void createAutoscalinggroupFromExisting(AwsAutoScalingGroup autoscalingParent,
+            String shardname, TargetGroup<ShardingKey> targetgroup,Optional<Tags> tags) {
+        
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoscalingParent.getRegion()));
+        //final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
+        final String launchConfigurationName = autoscalingParent.getAutoScalingGroup().launchConfigurationName();
+        final String autoScalingGroupName = getAutoScalingGroupName(shardname);
+        final List<String> availabilityZones = autoscalingParent.getAutoScalingGroup().availabilityZones();
+        final int instanceWarmupTimeInSeconds = autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup();
+        //final int maxrequestsPerTarget = autoscalingParent.getAutoScalingGroup();        
+        logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardname + ". Inheriting from Autoscalinggroup: " + autoscalingParent.getName());
+        return;
+        /*autoScalingClient.createAutoScalingGroup(b->{
+            b
+                .minSize(autoscalingParent.getAutoScalingGroup().minSize())
+                .maxSize(autoscalingParent.getAutoScalingGroup().maxSize())
+                .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
+                .autoScalingGroupName(autoScalingGroupName)
+                .availabilityZones(availabilityZones)
+                .targetGroupARNs(targetgroup.getTargetGroupArn())
+                .launchConfigurationName(launchConfigurationName);
+            tags.ifPresent(t->{
+                final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
+                for (final Entry<String, String> tag : t) {
+                    awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
+                }
+                b.tags(awsTags);
+            });
+        });
+        autoScalingClient.putScalingPolicy(b->b
+                .autoScalingGroupName(autoScalingGroupName)
+                .estimatedInstanceWarmup(instanceWarmupTimeInSeconds)
+                .policyType("TargetTrackingScaling")
+                .policyName("KeepRequestsPerTargetAt"+maxrequestsPerTarget)
+                .targetTrackingConfiguration(t->t
+                        .predefinedMetricSpecification(p->p
+                                .resourceLabel("app/"+publicTargetGroup.getLoadBalancer().getName()+"/"+publicTargetGroup.getLoadBalancer().getId()+
+                                        "/targetgroup/"+publicTargetGroup.getName()+"/"+publicTargetGroup.getId())
+                                .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
+                        .targetValue((double) maxRequestsPerTarget)));*/
+    }
 }

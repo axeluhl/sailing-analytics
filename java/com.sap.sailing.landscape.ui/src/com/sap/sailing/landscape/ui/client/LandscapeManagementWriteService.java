@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -139,4 +140,9 @@ public interface LandscapeManagementWriteService extends RemoteService {
     SailingApplicationReplicaSetDTO<String> changeAutoScalingReplicasInstanceType(
             SailingApplicationReplicaSetDTO<String> replicaSet, String instanceTypeName,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    ArrayList<String> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String username,String password) throws Exception;
+    
+    void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
+            String username,String password, String region, byte[] passphraseForPrivateKeyDecryption) throws Exception;
 }

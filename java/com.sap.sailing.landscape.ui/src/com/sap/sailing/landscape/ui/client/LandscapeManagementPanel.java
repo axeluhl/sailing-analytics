@@ -115,6 +115,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final SimpleBusyIndicator applicationReplicaSetsBusy;
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
+    private final ShardManagementPanel shardManagementPanel;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
     
@@ -469,6 +470,25 @@ public class LandscapeManagementPanel extends SimplePanel {
             refreshAllThatNeedsAwsCredentials();
             storeRegionSelection(userService, selectedRegion);
         });
+        
+        final CaptionPanel shardpanel  = new CaptionPanel("Shard");
+        shardManagementPanel  =new ShardManagementPanel(landscapeManagementService, errorReporter,stringMessages);
+        shardpanel.add(shardManagementPanel);
+        mainPanel.add(shardpanel);
+        shardpanel.setVisible(false);
+        //Listen to selected replicasets.
+        applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(event -> {
+            if(applicationReplicaSetsTable.getSelectionModel().getSelectedSet().size() == 1) {
+                shardManagementPanel.setReplicaSet(applicationReplicaSetsTable.getSelectionModel().getSelectedSet().iterator().next());
+                shardManagementPanel.setRegion(regionsTable.getSelectionModel().getSelectedObject());
+                shardManagementPanel.setPassphrase(sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption());
+                shardpanel.setVisible(true);
+            } else {
+                shardpanel.setVisible(false);
+                shardManagementPanel.setReplicaSet(null);
+            }
+         });
+        
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region

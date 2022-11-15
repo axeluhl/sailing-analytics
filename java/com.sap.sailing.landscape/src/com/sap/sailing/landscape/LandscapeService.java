@@ -2,6 +2,7 @@ package com.sap.sailing.landscape;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -14,15 +15,22 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
+import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.Tags;
+import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.security.SecurityService;
 
@@ -395,4 +403,11 @@ public interface LandscapeService {
 
     <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> waitForProcessTimeout,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    String getShardingKey(SailingServer server, String leaderboardName,String password) throws Exception;
+
+    ArrayList<String> getLeaderboardNames(SailingServer server) throws Exception;
+    
+    SailingServer getSailServer(String url, String username, String password) throws MalformedURLException;
+    
 }
