@@ -27,7 +27,7 @@ allprojects {
         }
     } else {
         repositories {
-            jcenter()
+            mavenCentral()
             google()
         }
     }
@@ -71,8 +71,11 @@ ext {
     destinationFolder = project.rootDir.absolutePath + "/java/com.sap.sailing.www/apps/"
 }
 
+plugins {
+    id 'org.ajoberstar.grgit' version '2.3.0'
+}
+
 if (project.hasProperty("xmake")) {
-    apply plugin: "org.ajoberstar.grgit"
     wrapper {
         distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
     }
