@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.model.regressor;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sailing.windestimation.model.ModelContext;

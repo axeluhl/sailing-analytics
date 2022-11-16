@@ -215,6 +215,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -258,6 +259,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
@@ -265,7 +267,6 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
@@ -326,6 +327,7 @@ import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
@@ -1572,6 +1574,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
+    public BearingWithConfidenceDTO getManeuverAngle(BoatClassDTO boatClassDto, ManeuverType maneuverType, Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException, UnauthorizedException {
+        // TODO SecurityService
+        BearingWithConfidenceDTO result = null;
+        if (boatClassDto != null && maneuverType != null && (maneuverType == ManeuverType.TACK
+                || maneuverType == ManeuverType.JIBE) && windSpeed != null) {
+            BoatClass boatClass = baseDomainFactory.getBoatClass(boatClassDto.getName());
+            final PolarDataService polarDataService = getService().getPolarDataService();
+            result = new BearingWithConfidenceDTO(polarDataService.getManeuverAngle(boatClass, maneuverType,
+                    windSpeed));
+        }
+        return result;
+    }
+
+    @Override
     public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
         DynamicTrackedRace trackedRace = getService().getTrackedRace(legIdentifier.getRaceIdentifier());
         if (trackedRace == null) {
@@ -2589,6 +2606,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(
                 mongoObjectFactory, domainObjectFactory);
     }
+    
+    protected MarkPassingRaceFingerprintRegistry getMarkPassingRaceFingerprintRegistry() {
+        return getService();
+    }
 
     protected SwissTimingReplayService getSwissTimingReplayService() {
         return swissTimingReplayService;
@@ -2628,7 +2649,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
                 getSwissTimingReplayService().loadRaceData(regattaIdentifier, replayRaceDTO.link,
                         replayRaceDTO.swissTimingUrl, replayRaceDTO.getName(), replayRaceDTO.race_id, boatClassName, getService(),
-                        getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore());
+                        getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore(), getMarkPassingRaceFingerprintRegistry());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
