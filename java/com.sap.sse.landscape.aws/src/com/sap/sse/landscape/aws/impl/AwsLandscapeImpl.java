@@ -196,6 +196,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
+    private static final int DEFAULT_MAX_REQUESTS_PER_TARGET_SHARD = 15000;
     private final String accessKeyId;
     private final String secretAccessKey;
     private final Optional<String> sessionToken;
@@ -1950,13 +1951,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String launchConfigurationName = autoscalingParent.getAutoScalingGroup().launchConfigurationName();
         final String autoScalingGroupName = getAutoScalingGroupName(shardname);
         final List<String> availabilityZones = autoscalingParent.getAutoScalingGroup().availabilityZones();
-        final int instanceWarmupTimeInSeconds = autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup();
-        //final int maxrequestsPerTarget = autoscalingParent.getAutoScalingGroup();        
+        final int instanceWarmupTimeInSeconds = autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
         logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardname + ". Inheriting from Autoscalinggroup: " + autoscalingParent.getName());
-        return;
-        /*autoScalingClient.createAutoScalingGroup(b->{
+        autoScalingClient.createAutoScalingGroup(b->{
             b
-                .minSize(autoscalingParent.getAutoScalingGroup().minSize())
+                //.minSize(autoscalingParent.getAutoScalingGroup().minSize() > 1 ? autoscalingParent.getAutoScalingGroup().minSize() : 2)
+                .minSize(1)
                 .maxSize(autoscalingParent.getAutoScalingGroup().maxSize())
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
@@ -1971,7 +1971,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 b.tags(awsTags);
             });
         });
-        autoScalingClient.putScalingPolicy(b->b
+        /*autoScalingClient.putScalingPolicy(b->b
                 .autoScalingGroupName(autoScalingGroupName)
                 .estimatedInstanceWarmup(instanceWarmupTimeInSeconds)
                 .policyType("TargetTrackingScaling")
@@ -1979,8 +1979,30 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .targetTrackingConfiguration(t->t
                         .predefinedMetricSpecification(p->p
                                 .resourceLabel("app/"+publicTargetGroup.getLoadBalancer().getName()+"/"+publicTargetGroup.getLoadBalancer().getId()+
-                                        "/targetgroup/"+publicTargetGroup.getName()+"/"+publicTargetGroup.getId())
+                                        "/targetgroup/"+publicTargetGroup.getName()+"/"+publicTargetGxwroup.getId())
                                 .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
-                        .targetValue((double) maxRequestsPerTarget)));*/
+                        .targetValue((double) maxrequestsPerTarget))); */
     }
+
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
+    void putScalingPolicy(AwsAutoScalingGroup autoscalingParent,
+            String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<String> alb) {
+        
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoscalingParent.getRegion()));
+        final String autoScalingGroupName = getAutoScalingGroupName(shardname);
+        final int instanceWarmupTimeInSeconds = autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
+        autoScalingClient.putScalingPolicy(b->b
+                .autoScalingGroupName(autoScalingGroupName)
+                .estimatedInstanceWarmup(instanceWarmupTimeInSeconds)
+                .policyType("TargetTrackingScaling")
+                .policyName("KeepRequestsPerTargetAt"+DEFAULT_MAX_REQUESTS_PER_TARGET_SHARD)
+                .targetTrackingConfiguration(t->t
+                        .predefinedMetricSpecification(p->p
+                                .resourceLabel("app/"+alb.getName()+"/"+alb.getId()+
+                                        "/targetgroup/"+targetgroup.getName()+"/"+targetgroup.getId())
+                                .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
+                        .targetValue((double) DEFAULT_MAX_REQUESTS_PER_TARGET_SHARD))); 
+   } 
+    
+    
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,12 +24,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
+
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.google.gwt.thirdparty.guava.common.collect.Iterables;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -62,6 +66,7 @@ import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -101,12 +106,28 @@ import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
+import software.amazon.awssdk.services.autoscaling.model.Instance;
+import software.amazon.awssdk.services.autoscaling.model.LifecycleState;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ForwardActionConfig;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.HttpHeaderConditionConfig;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.HttpRequestMethodConditionConfig;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.PathPatternConditionConfig;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.QueryStringConditionConfig;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.QueryStringKeyValuePair;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
@@ -873,11 +894,75 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         logger.info("Creating Targer group for Shard "+shardName + ". Inheriting from Replicaset: " + replicaset.getName());
         TargetGroup<String> targetgroup  = getLandscape().createTargetGroupWithoutLoadbalancer(awsregion,SHARD_SAILING_TARGET_PREFIX + shardName, replicaset.getMaster().getPort());
         AwsAutoScalingGroup autoscalinggroup = awsReplicaSet.getAutoScalingGroup();
-        // Irgendwie kommt die falsche autosclang group raus
-        
         logger.info("Creating Autoscalinggroup for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoscalinggroup.getName());
-        getLandscape().createAutoscalinggroupFromExisting(autoscalinggroup, shardName, targetgroup, null);
-        // createLaunchConfigurationAndAutoScalingGroup @ AwsLandScapeImpl for autosclaing builder
+        getLandscape().createAutoscalinggroupFromExisting(autoscalinggroup, shardName, targetgroup, Optional.empty());
+        ApplicationLoadBalancer<String> loadbalancer = awsReplicaSet.getLoadBalancer();
+        Iterable<Rule> rules = loadbalancer.getRules();
+        //create one rules to random path for linking ALB to Targetgroup.
+        if (Iterables.size(rules) < /* Max rule count */ 30 - selectedLeaderBoards.size() - /* 2 are necessary*/2) { // add rules to loadbalancer
+            int rulePrio = getHighestAvailableIndex(rules);
+            if (rulePrio > 0) {
+                logger.info("Creating testing rule with prio: " +  rulePrio);
+                
+                Rule newRule = Rule.builder().priority("" + rulePrio).conditions(
+                        RuleCondition.builder().field("http-header")
+                                .httpHeaderConfig(
+                                        hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                                                .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+                                .build(),
+                        RuleCondition.builder().field("path-pattern").pathPatternConfig(ppc -> ppc.values(/* just any path */"/temp/"))
+                                .build())
+                        .actions(Action.builder()
+                                .forwardConfig(ForwardActionConfig.builder()
+                                        .targetGroups(TargetGroupTuple.builder()
+                                                .targetGroupArn(targetgroup.getTargetGroupArn()).build())
+                                        .build())
+                                .type(ActionTypeEnum.FORWARD).build())
+                        .build();
+                Iterable<Rule> newRuleSet = loadbalancer.addRules(newRule);
+                
+                // put the scaling policy
+                getLandscape().putScalingPolicy(autoscalinggroup, shardName, targetgroup, loadbalancer);
+                
+                //wait until instances are running
+                Wait.wait(new Callable<Boolean>() {
+                    public Boolean call() {
+                        boolean ret = true;
+                        Map<AwsInstance<String>, TargetHealth> healths = getLandscape().getTargetHealthDescriptions(targetgroup);
+                        final Logger _logger = Logger.getLogger(LandscapeManagementWriteServiceImpl.class.getName());
+                        _logger.info("Healths size: "  + healths.size());
+                        if(healths.isEmpty()) {
+                            ret = false; // if there is no Aws in target
+                        }else {
+                        for(Map.Entry<AwsInstance<String>, TargetHealth> instance : healths.entrySet()) {
+                            _logger.info("Health status: "  + instance.getValue().state());
+                           if(instance.getValue().state() != TargetHealthStateEnum.HEALTHY) {
+                               ret = false; // if this instance is unhealthy
+                               break;
+                           }
+                        }
+                        }
+                        return  ret ;
+                        
+                        
+                    }
+                },Optional.of(Duration.ONE_MINUTE.times(10)), Duration.ONE_SECOND.times(5), Level.INFO, "Has no instances");
+                
+                //remove dummy-rule
+                for(Rule r : newRuleSet) {
+                    loadbalancer.deleteRules(r);
+                }
+                
+                
+                //change ALB rules to new ones
+                
+                
+            } else {
+                throw new Exception("No prio left?");
+            }
+        }else {
+            throw new Exception("Writing rules to new ALB not yet implemented ");
+        }
         logger.info("targetgroup id: " + targetgroup.getId());
         selectedLeaderBoards.forEach(t -> {
             try {
@@ -888,4 +973,23 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             }
         });
     };
+
+    // iterates through all numbers from 999 ( highest index ) to 1 (lowest index) and checks if any priority is not in
+    // the ruleset.
+    // returns the first available priority. If no rules is available, it returns -1;
+    private int getHighestAvailableIndex(Iterable<Rule> rules) {
+        for (int i = 999; i > 1; i--) {
+            String y = "" + i;
+            if (StreamSupport.stream(rules.spliterator(), false).anyMatch(t -> {
+                return (t.priority().contains(y));
+            })) {
+                
+            } else {
+                return i; // return prio if there was no rule with the same
+            }
+        }
+        return -1; // if no free prio was found
+    }
+    
+
 }
