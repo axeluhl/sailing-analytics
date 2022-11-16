@@ -18,6 +18,11 @@ buildscript {
         classpath "org.ajoberstar:grgit:2.3.0"
     }
 }
+
+plugins {
+    id 'org.ajoberstar.grgit' version '2.3.0'
+}
+
 allprojects {
     if (project.hasProperty("xmake")) {
         repositories {
@@ -69,10 +74,6 @@ ext {
     isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
 
     destinationFolder = project.rootDir.absolutePath + "/java/com.sap.sailing.www/apps/"
-}
-
-plugins {
-    id 'org.ajoberstar.grgit' version '2.3.0'
 }
 
 if (project.hasProperty("xmake")) {
