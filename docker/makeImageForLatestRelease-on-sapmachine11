@@ -22,6 +22,6 @@ done
 docker tag sapsailing_on_sapmachine11:$release docker.sapsailing.com/sapsailing_on_sapmachine11:$release
 docker push docker.sapsailing.com/sapsailing_on_sapmachine11:$release
 if [ "$SET_LATEST" = "1" ]; then
-  docker tag sapsailing:$release docker.sapsailing.com/sapsailing_on_sapmachine11:latest
+  docker tag sapsailing_on_sapmachine11:$release docker.sapsailing.com/sapsailing_on_sapmachine11:latest
   docker push docker.sapsailing.com/sapsailing_on_sapmachine11:latest
 fi
