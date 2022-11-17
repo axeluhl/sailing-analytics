@@ -13,6 +13,7 @@ Import-Package: com.sap.sailing.server,
  com.sap.sailing.server.operationaltransformation,
  com.sap.sailing.xrr.schema,
  com.sun.istack;version="3.0.7",
+ javax.activation,
  javax.xml.bind,
  org.json.simple,
  org.json.simple.parser,
@@ -23,5 +24,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.common,
  com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0",
  com.sap.sailing.domain.shared.android,
- com.sap.sse
+ com.sap.sse,
+ com.sun.activation.javax.activation;bundle-version="1.2.0"
 Bundle-Activator: com.sap.sailing.xrr.resultimport.impl.Activator

@@ -284,7 +284,7 @@
            for Tycho that have been removed from JavaSE-11 if not building for Android -->
       <id>with-java11-non-android-relevant</id>
       <activation>
-        <jdk>[11.0,14.0)</jdk>
+        <jdk>[11.0,18.0)</jdk>
 	<property>
 	  <name>with.not.android.relevant</name>
 	  <value>true</value>
