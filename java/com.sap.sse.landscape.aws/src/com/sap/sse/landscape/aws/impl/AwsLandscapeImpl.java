@@ -439,7 +439,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             result.add(getLoadBalancingClient(getRegion(region)).createRule(b -> b
                     .listenerArn(loadBalancerListenerToAddRuleTo.listenerArn())
                     .conditions(rule.conditions())
-                    .priority(Integer.valueOf(rule.priority()))
+                    .priority(Integer.parseInt(rule.priority()))
                     .actions(rule.actions())).rules().iterator().next());
         }
         return result;
