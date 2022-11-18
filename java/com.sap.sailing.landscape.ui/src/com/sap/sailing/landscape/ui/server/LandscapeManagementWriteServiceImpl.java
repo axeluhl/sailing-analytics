@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -893,7 +894,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet  = convertFromApplicationReplicaSetDTO(awsregion, replicaset);
         logger.info("Creating Targer group for Shard "+shardName + ". Inheriting from Replicaset: " + replicaset.getName());
         TargetGroup<String> targetgroup  = getLandscape().createTargetGroupWithoutLoadbalancer(awsregion,SHARD_SAILING_TARGET_PREFIX + shardName, replicaset.getMaster().getPort());
-        AwsAutoScalingGroup autoscalinggroup = awsReplicaSet.getAutoScalingGroup();
+        AwsAutoScalingGroup autoscalinggroup = awsReplicaSet.getAutoScalingGroup();      
         logger.info("Creating Autoscalinggroup for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoscalinggroup.getName());
         getLandscape().createAutoscalinggroupFromExisting(autoscalinggroup, shardName, targetgroup, Optional.empty());
         ApplicationLoadBalancer<String> loadbalancer = awsReplicaSet.getLoadBalancer();
@@ -947,32 +948,61 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         
                     }
                 },Optional.of(Duration.ONE_MINUTE.times(10)), Duration.ONE_SECOND.times(5), Level.INFO, "Has no instances");
-                
-                //remove dummy-rule
-                for(Rule r : newRuleSet) {
+
+                // remove dummy-rule
+                for (Rule r : newRuleSet) {
                     loadbalancer.deleteRules(r);
                 }
-                
-                
-                //change ALB rules to new ones
-                
-                
+
+                // change ALB rules to new ones
+                int ruleIdx = 3;
+                while (!selectedLeaderBoards.isEmpty()) {// first make space at prio 1 <- highest prio
+                    loadbalancer.shiftRulesToMakeSpaceAt(ruleIdx, logger);
+                    Collection<RuleCondition> conditions = getShardConditions(selectedLeaderBoards, server);
+                    
+                    conditions.add(RuleCondition.builder()
+                                    .field("http-header")
+                                    .httpHeaderConfig(hhcb -> hhcb
+                                            .httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                                    .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+                            .build());
+                    loadbalancer.addRules(Rule.builder()
+                            .priority("" +ruleIdx)
+                            .conditions(conditions)
+                            .actions(Action.builder()
+                                    .forwardConfig(ForwardActionConfig.builder()
+                                            .targetGroups(TargetGroupTuple.builder()
+                                                    .targetGroupArn(targetgroup.getTargetGroupArn()).build())
+                                            .build())
+                                    .type(ActionTypeEnum.FORWARD).build()).build());
+                }
+
             } else {
                 throw new Exception("No prio left?");
             }
         }else {
             throw new Exception("Writing rules to new ALB not yet implemented ");
         }
-        logger.info("targetgroup id: " + targetgroup.getId());
-        selectedLeaderBoards.forEach(t -> {
+    };
+    
+    Collection<RuleCondition> getShardConditions(Set<String> selectedLeaderboards, SailingServer server){
+        Collection<RuleCondition> res = new ArrayList<RuleCondition>();
+        Collection<String> remove = new ArrayList<String>();
+        Iterator<String> iter = selectedLeaderboards.iterator();
+        int idx = 0;
+        while (idx < 3 && iter.hasNext()) {
             try {
-                final String shardingkey  = server.getLeaderboardShardingKey(t);
-                shardingKeys.add(shardingkey);
+                String selectedLeaderboard = iter.next();
+                remove.add(selectedLeaderboard);
+                final String shardingkey = server.getLeaderboardShardingKey(selectedLeaderboard);
+                res.add(RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(shardingkey)).build());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
-    };
+        }
+        selectedLeaderboards.removeAll(remove);
+        return res;
+    }
 
     // iterates through all numbers from 999 ( highest index ) to 1 (lowest index) and checks if any priority is not in
     // the ruleset.
