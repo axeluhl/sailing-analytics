@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
@@ -88,6 +89,17 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      *         to {@link #addRules(Rule...)}.
      */
     Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules);
+    
+    /**
+     * For inserting e.g. Shard at a specific priority, we must ensure that the priority is unique in the ruleset.
+     * This function shifts every priority starting at the highest priority one higher for making the priority at {@code index}
+     * free. 
+     * @param index
+     *          index supposed to be free
+     * @throws Exception
+     *          gets thrown if shifting exceeds the limit of priorities
+     */
+    Iterable<Rule> shiftRulesToMakeSpaceAt(int index,Logger logger) throws Exception;
     
     Iterable<TargetGroup<ShardingKey>> getTargetGroups();
 

@@ -1,13 +1,17 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -89,6 +93,63 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public Iterable<Rule> addRules(Rule... rulesToAdd) {
         return landscape.createLoadBalancerListenerRules(region, getListener(ProtocolEnum.HTTPS), rulesToAdd);
+    }
+    
+    @Override
+    public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio,Logger logger) throws Exception {
+        final Iterable<Rule> rules = getRules();
+        final TreeMap<Integer,Rule> rulesSorted = new TreeMap<Integer, Rule>();
+        final Iterator<Rule> iter = rules.iterator();
+        // create Map with every priority
+        while (iter.hasNext()) {
+            Rule r = iter.next();
+            try {
+                rulesSorted.put(Integer.parseInt(r.priority()), r);
+            } catch (Exception e) {
+                // Case where prio is not a number, e.g. 'Default' gets ignored.
+            }
+        }
+        int idxSpace = rulesSorted.lastKey() + 1; // Index for next space -> shift only until reaches this.
+                                                  // StandardValue is index after the highest.
+        //get last index for shifting. It's not the last if there was space somewhere.
+        int lastIdx = targetPrio;
+        if (rulesSorted.get(targetPrio) != null) {// if there is a rule on prio
+            for (Entry<Integer, Rule> r : rulesSorted.entrySet()) {
+                if (r.getKey() < targetPrio) {
+                    // If rules's prio is lower than the targetPrio
+                    if (r.getKey() == rulesSorted.lastKey()) {
+                        idxSpace = r.getKey() + 1;
+                        break;
+                    }
+                    continue;// Ignore priorities lower than index
+                } else if (r.getKey() == rulesSorted.lastKey()) {
+                    // if there was no gap before the last key
+                    idxSpace = r.getKey() + 1;
+                    break;
+                } else {
+                    if (r.getKey() - lastIdx > 1) {
+                        // If gap is larger than 1, shift only until here
+                        idxSpace = lastIdx + 1;
+                        break;
+                    } else {
+                        //Continue through rules
+                        lastIdx = r.getKey();
+                    }
+                }
+            }
+            final Collection<RulePriorityPair> result = new ArrayList<>(idxSpace - targetPrio);
+            for (int i = idxSpace - 1; i >= targetPrio; i--) {
+                Rule r = rulesSorted.get(i);
+                if (r != null) {
+                    //Increment Rule's prio
+                    result.add(RulePriorityPair.builder().ruleArn(r.ruleArn())
+                            .priority((Integer.parseInt(r.priority()) + 1)).build());
+                }
+            }
+            landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
+        }
+        Iterable<Rule> newRules = getRules();
+        return newRules;
     }
 
     @Override
