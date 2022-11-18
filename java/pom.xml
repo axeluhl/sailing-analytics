@@ -308,6 +308,7 @@
                   <id>com.sap.sailing.routeconverterjava11extension</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
+                <!-- For some reason there is a cyclic dependency created by the following:
                 <requirement>
                   <type>eclipse-plugin</type>
                   <id>com.sap.sse.jersey.jaxbdependencyfragment</id>
@@ -318,6 +319,7 @@
                   <id>com.sap.sse.apacheservicemixfragment</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
+                -->
               </extraRequirements>
             </dependency-resolution>
           </configuration>
