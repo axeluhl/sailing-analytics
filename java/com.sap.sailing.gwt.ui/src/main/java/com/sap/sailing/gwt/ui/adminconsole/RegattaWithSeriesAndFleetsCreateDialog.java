@@ -155,7 +155,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             if (series.getName().equals(Series.DEFAULT_NAME)) {
                 List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
                 for (int i = 1; i <= 3; i++) {
-                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO("R"+i, series.getName(), dto.getName());
+                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO("R"+i, series.getName(), dto.getName(), series.isOneAlwaysStaysOne());
                     races.add(raceColumnDTO);
                 }
                 series.setRaceColumns(races);

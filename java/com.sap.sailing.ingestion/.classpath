@@ -1,31 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+    <classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" output="target/classes" path="src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
 		<attributes>
+			<attribute name="test" value="true"/>
 			<attribute name="optional" value="true"/>
-			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="test" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="test" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
-		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
@@ -34,5 +20,12 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sailing.domain.common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sse.common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sailing.domain.shared.android"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sse.shared.android"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sailing.server.gateway.serialization"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.json.simple"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sailing.server.gateway.serialization.shared.android"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

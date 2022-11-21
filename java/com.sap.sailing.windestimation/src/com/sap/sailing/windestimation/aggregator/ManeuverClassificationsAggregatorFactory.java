@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClassificationForClusteringImpl;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClusteringBasedWindEstimationTrackImpl;

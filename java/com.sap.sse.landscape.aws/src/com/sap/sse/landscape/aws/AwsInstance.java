@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Optional;
+
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -58,4 +60,6 @@ public interface AwsInstance<ShardingKey> extends Host {
     default AwsRegion getRegion() {
         return (AwsRegion) Host.super.getRegion();
     }
+    
+    boolean verifySshKey(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase); 
 }
