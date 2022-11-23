@@ -1,6 +1,8 @@
 package com.sap.sse.landscape.aws.impl;
 
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
@@ -60,6 +63,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(AwsApplicationReplicaSetImpl.class.getName());
     private static final String ARCHIVE_SERVER_NAME = "ARCHIVE";
     private static final long serialVersionUID = 6895927683667795173L;
+    private final Map<Integer, TargetGroup<ShardingKey>> shards;
     private final CompletableFuture<AwsAutoScalingGroup> autoScalingGroup;
     private final CompletableFuture<Rule> defaultRedirectRule;
     private final CompletableFuture<String> hostedZoneId;
@@ -68,7 +72,6 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private final CompletableFuture<TargetGroup<ShardingKey>> masterTargetGroup;
     private final CompletableFuture<TargetGroup<ShardingKey>> publicTargetGroup;
     private final CompletableFuture<ResourceRecordSet> resourceRecordSet;
-
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master,
             Optional<Iterable<ProcessT>> replicas,
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
@@ -85,6 +88,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         masterTargetGroup = new CompletableFuture<>();
         publicTargetGroup = new CompletableFuture<>();
         resourceRecordSet = new CompletableFuture<>();
+        shards = new HashMap<Integer, TargetGroup<ShardingKey>>();
         allLoadBalancersInRegion.thenCompose(loadBalancers->
             allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
                 allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
@@ -97,6 +101,10 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 }
                 return null;
             });
+    }
+    
+    public Map<Integer, TargetGroup<ShardingKey>> getShards(){
+        return shards;
     }
 
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master,
@@ -179,6 +187,23 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups, launchConfigurations);
                 }
             }
+        }
+            for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions
+                    .entrySet()) {
+                if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
+                        && e.getKey().getLoadBalancerArn() != null
+                        && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
+                    // an HTTP(S) target group that is currently active in a load balancer and forwards to this replica
+                    // set master's port
+                    if (hasListenerRuleWithPathAnToReplica(listenersAndTheirRules, e.getKey())
+                            && isShardName(e.getKey().getName()))//(masterTargetGroup.get().getName())) 
+                            {
+                        // Is shard
+                        final int shardIndex  =Integer.parseInt(e.getKey().getName().substring(e.getKey().getName().lastIndexOf('-')));
+                        shards.put(shardIndex, e.getKey());
+                    }
+
+                }
         }
         if (!autoScalingGroup.isDone()) { // no auto-scaling group was found after having looked at all target groups
             autoScalingGroup.complete(null);
@@ -274,6 +299,35 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return null;
     }
     
+    /**
+     * 
+     * @param requestedName
+     *          name which should be tested for being a valid shardname. 
+     *          Naming-pattern: $getName()$-$shardCounter$>
+     * @return
+     *          if requestedName is a valid shardName
+     */
+    private boolean isShardName(String requestedName) {
+        
+            return requestedName.contains(getName())
+                    && isInt(requestedName.substring(requestedName.lastIndexOf('-')));
+    }
+    
+    public String getShardName() {
+        return this.getName() + "-" + getNextShardIndex();
+    }
+    
+    private int getNextShardIndex() {
+        int ret  = -1;
+        for(int i = 0; i< 100 ; i++) {
+            if(!shards.keySet().contains(i)) {
+                ret = i;
+                break;
+            }
+        }
+        return ret;
+      }
+    
     @Override
     public boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
@@ -334,6 +388,52 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             }
         }
         return false;
+    }
+    
+    private boolean hasListenerRuleWithPathAnToReplica(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> shardTargetGroupCandidate) {
+        final String publicTargetGroupCandidateArn = shardTargetGroupCandidate.getTargetGroupArn();
+        for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
+            if (Util.equalsWithNull(e.getKey().loadBalancerArn(), shardTargetGroupCandidate.getLoadBalancerArn())) {
+                for (final Rule rule : e.getValue()) {
+                    for (final Action action : rule.actions()) {
+                        if (action.type() == ActionTypeEnum.FORWARD) {
+                            for (final TargetGroupTuple targetGroupTuple : action.forwardConfig().targetGroups()) {
+                                if (Util.equalsWithNull(targetGroupTuple.targetGroupArn(),
+                                        publicTargetGroupCandidateArn)) {
+                                    for (final RuleCondition condition : rule.conditions()) {
+                                        if (Util.equalsWithNull(condition.field(), "path-pattern")) {
+                                            for (final RuleCondition condition2 : rule.conditions()) {
+                                                if (Util.equalsWithNull(condition2.field(), "http-header")
+                                                        && Util.equalsWithNull(
+                                                                condition2.httpHeaderConfig().httpHeaderName(),
+                                                                HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                                                        && condition2.httpHeaderConfig().values().contains(
+                                                                HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA
+                                                                        .getB())) {
+                                                    return true;
+                                                    //return true is conditions contains a path and header forward to replica
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    private boolean isInt(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean hasMasterRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> masterTargetGroupCandidate) {
