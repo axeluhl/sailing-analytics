@@ -96,7 +96,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
     
     @Override
-    public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio,Logger logger) throws Exception {
+    public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio) throws Exception {
         final Iterable<Rule> rules = getRules();
         final TreeMap<Integer,Rule> rulesSorted = new TreeMap<Integer, Rule>();
         final Iterator<Rule> iter = rules.iterator();
