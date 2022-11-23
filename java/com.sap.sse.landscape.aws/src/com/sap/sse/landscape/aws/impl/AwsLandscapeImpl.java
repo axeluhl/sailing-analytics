@@ -1986,7 +1986,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(AwsAutoScalingGroup autoscalingParent,
-            String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<String> alb) {
+            String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<ShardingKey> alb) {
         
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoscalingParent.getRegion()));
         final String autoScalingGroupName = getAutoScalingGroupName(shardname);
