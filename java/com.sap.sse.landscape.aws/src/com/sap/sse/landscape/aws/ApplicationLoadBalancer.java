@@ -99,7 +99,7 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      * @throws Exception
      *          gets thrown if shifting exceeds the limit of priorities
      */
-    Iterable<Rule> shiftRulesToMakeSpaceAt(int index,Logger logger) throws Exception;
+    Iterable<Rule> shiftRulesToMakeSpaceAt(int index) throws Exception;
     
     Iterable<TargetGroup<ShardingKey>> getTargetGroups();
 
