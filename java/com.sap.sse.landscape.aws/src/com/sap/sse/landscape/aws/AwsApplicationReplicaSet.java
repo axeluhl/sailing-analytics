@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -128,4 +129,8 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * {@link ServerInfo}.
      */
     boolean isLocalReplicaSet();
+    
+    public String getShardName();
+    
+    public Map<Integer, TargetGroup<ShardingKey>> getShards();
 }
