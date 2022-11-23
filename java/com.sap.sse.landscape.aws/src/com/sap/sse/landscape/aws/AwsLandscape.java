@@ -748,5 +748,5 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(AwsAutoScalingGroup autoscalingParent,
-            String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<String> alb);
+            String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<ShardingKey> alb);
 }
