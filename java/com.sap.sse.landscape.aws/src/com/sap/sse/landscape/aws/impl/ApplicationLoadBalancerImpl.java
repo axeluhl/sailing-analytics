@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -95,6 +94,14 @@ implements ApplicationLoadBalancer<ShardingKey> {
         return landscape.createLoadBalancerListenerRules(region, getListener(ProtocolEnum.HTTPS), rulesToAdd);
     }
     
+    static int getNewPriority(int index) throws Exception {
+        if(index < MAX_PRIORITY) {
+            return index;
+        } else {
+            throw new Exception("Priority was greater than 50000!");
+        }
+    }
+    
     @Override
     public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio) throws Exception {
         final Iterable<Rule> rules = getRules();
@@ -143,7 +150,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
                 if (r != null) {
                     //Increment Rule's prio
                     result.add(RulePriorityPair.builder().ruleArn(r.ruleArn())
-                            .priority((Integer.parseInt(r.priority()) + 1)).build());
+                            .priority(getNewPriority(Integer.parseInt(r.priority()) + 1)).build());
                 }
             }
             landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
