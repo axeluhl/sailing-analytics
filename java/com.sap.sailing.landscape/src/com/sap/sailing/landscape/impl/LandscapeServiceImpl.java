@@ -1520,5 +1520,11 @@ public class LandscapeServiceImpl implements LandscapeService {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @Override
+    public SailingServer getSailServer(String url, String bearertoken) throws MalformedURLException {
+        final SailingServerFactory fac = sailingServerFactoryTracker.getService();
+        return fac.getSailingServer(new URL("https://" + url), bearertoken);
     };
 }

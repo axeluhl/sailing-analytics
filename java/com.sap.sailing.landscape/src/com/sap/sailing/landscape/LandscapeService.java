@@ -394,4 +394,6 @@ public interface LandscapeService {
     
     SailingServer getSailServer(String url, String username, String password) throws MalformedURLException;
     
+    SailingServer getSailServer(String url, String bearertoken) throws MalformedURLException;
+    
 }
