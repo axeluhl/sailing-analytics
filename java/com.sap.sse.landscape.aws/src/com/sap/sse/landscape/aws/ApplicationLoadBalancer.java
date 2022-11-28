@@ -1,7 +1,6 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
