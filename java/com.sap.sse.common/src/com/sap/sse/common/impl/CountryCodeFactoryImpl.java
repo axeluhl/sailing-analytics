@@ -238,6 +238,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("SOMALIA", "SO", "SOM", "so", "SO", "SOM", "706", "252"));
         add(new CountryCodeImpl("SOUTH AFRICA (Zuid Afrika)", "ZA", "ZAF", "za", "ZA", "RSA", "710", "27"));
         add(new CountryCodeImpl("SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS", "GS", "SGS", "gs", null, null, "239", null));
+        add(new CountryCodeImpl("SOUTH SUDAN", "SS", "SSD", "ss", "SSD", "SSD", "728", "211"));
         add(new CountryCodeImpl("SOVIET UNION (Internet code still used)", null, null, "su", null, null, null, null));
         add(new CountryCodeImpl("SPAIN (España)", "ES", "ESP", "es", "E", "ESP", "724", "34"));
         add(new CountryCodeImpl("SRI LANKA (formerly Ceylon)", "LK", "LKA", "lk", "CL", "SRI", "144", "94"));
