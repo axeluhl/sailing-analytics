@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -8,6 +9,7 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
+import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
@@ -105,7 +107,7 @@ public interface LandscapeManagementWriteServiceAsync {
             Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
-    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
+    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,AwsShardDTO shardDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
             AsyncCallback<SerializationDummyDTO> callback);
 
@@ -195,8 +197,11 @@ public interface LandscapeManagementWriteServiceAsync {
             String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
     
-    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String username,String password, AsyncCallback<ArrayList<String>> names);
+    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset,String bearertoken, AsyncCallback<ArrayList<String>> names);
     
     void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
-            String username,String password, String region, byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+            String bearertoken, String region, byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, AsyncCallback<Map<Integer, AwsShardDTO>> callback);
+    
+    void getShardDTO(String name, AsyncCallback<AwsShardDTO> callback);
 }

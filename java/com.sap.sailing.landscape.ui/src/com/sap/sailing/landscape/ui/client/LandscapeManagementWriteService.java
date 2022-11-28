@@ -1,12 +1,14 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
+import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
@@ -71,7 +73,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<SailingApplicationReplicaSetDTO<String>> getApplicationReplicaSets(String regionId,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
+    SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,AwsShardDTO shardDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
 
     SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
@@ -143,8 +145,12 @@ public interface LandscapeManagementWriteService extends RemoteService {
             SailingApplicationReplicaSetDTO<String> replicaSet, String instanceTypeName,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    ArrayList<String> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String username,String password) throws Exception;
+    ArrayList<String> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken) throws Exception;
     
     void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
-            String username,String password, String region, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+            String bearertoken, String region, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    
+    public Map<Integer, AwsShardDTO> getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region) throws Exception;
+    
+    AwsShardDTO getShardDTO(String name);
 }
