@@ -132,5 +132,5 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     
     public String getShardName();
     
-    public Map<Integer, TargetGroup<ShardingKey>> getShards();
+    public Map<Integer, AwsShard<ShardingKey>> getShards();
 }

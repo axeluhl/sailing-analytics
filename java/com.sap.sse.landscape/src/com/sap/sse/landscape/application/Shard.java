@@ -22,6 +22,10 @@ import com.sap.sse.common.Named;
 public interface Shard<ShardingKey> extends Named {
     /**
      * @return the keys handled by this shard
+     * 
      */
     Iterable<ShardingKey> getKeys();
+    
+    
+    
 }
