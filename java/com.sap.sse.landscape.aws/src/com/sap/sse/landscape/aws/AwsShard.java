@@ -26,4 +26,6 @@ public interface AwsShard<ShardingKey> extends Shard<ShardingKey> {
     
     AwsAutoScalingGroup getAutoScalingGroup();
     
+    String getShardname();
+    
 }

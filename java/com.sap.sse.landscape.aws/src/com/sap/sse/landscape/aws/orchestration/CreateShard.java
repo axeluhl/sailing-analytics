@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import com.google.gwt.thirdparty.guava.common.collect.Iterables;
 import com.sap.sse.common.Duration;
@@ -35,6 +36,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
 public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends AbstractAwsProcedureImpl<ShardingKey> {
+    private static final Logger logger = Logger.getLogger(CreateShard.class.getName());
     static final String SHARD_SUFFIX  ="-S";
     final String shardName;
     final Set<String> shardingkeys;
@@ -77,7 +79,6 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         
         @Override
         public CreateShard<ShardingKey, MetricsT, ProcessT> build() throws Exception {
-            assert shardName != null;
             assert shardingkeys != null;
             assert replicaset != null;
             assert region != null;
@@ -151,12 +152,17 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        //logger.info("Creating Targer group for Shard "+shardName + ". Inheriting from Replicaset: " + replicaset.getName());
         
-        String name = replicaset.getShardName();
+        final String name;
+        if(shardName == null) {
+            name  =replicaset.getNextShardName();
+        } else {
+            name = replicaset.getNextShardName(shardName);
+        }
+        logger.info("Creating Targer group for Shard "+ name + ". Inheriting from Replicaset: " + replicaset.getName());
         TargetGroup<ShardingKey> targetgroup  = getLandscape().createTargetGroupWithoutLoadbalancer(region, name, replicaset.getMaster().getPort());
         AwsAutoScalingGroup autoscalinggroup = replicaset.getAutoScalingGroup();      
-        //logger.info("Creating Autoscalinggroup for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoscalinggroup.getName());
+        logger.info("Creating Autoscalinggroup for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoscalinggroup.getName());
         getLandscape().createAutoscalinggroupFromExisting(autoscalinggroup, shardName, targetgroup, Optional.empty());
         ApplicationLoadBalancer<ShardingKey> loadbalancer = replicaset.getLoadBalancer();
         Iterable<Rule> rules = loadbalancer.getRules();

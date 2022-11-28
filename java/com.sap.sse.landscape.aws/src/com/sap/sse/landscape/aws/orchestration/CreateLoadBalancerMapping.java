@@ -65,7 +65,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
  * <p>
  * 
  * The default health check settings for the target groups created are:
- * <ul>
+ * <ul>Procedure<ShardingKey>
  * <li>healthy threshold: 2</li>
  * <li>unhealthy threshold: 2</li>
  * <li>timeout: 4s</li>

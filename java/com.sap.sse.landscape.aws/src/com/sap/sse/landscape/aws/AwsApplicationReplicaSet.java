@@ -130,7 +130,9 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     boolean isLocalReplicaSet();
     
-    public String getShardName();
+    public String getNextShardName();
+    
+    public String getNextShardName(String name) throws Exception;
     
     public Map<Integer, AwsShard<ShardingKey>> getShards();
 }

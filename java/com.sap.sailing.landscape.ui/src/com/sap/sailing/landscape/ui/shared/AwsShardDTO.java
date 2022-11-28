@@ -11,11 +11,14 @@ public class AwsShardDTO implements  IsSerializable {
     String autosclaingGroupArn;
     String autobalancerArn;
     String name;
+    String replicaname;
     
+    
+
     public AwsShardDTO(){};
     
     public AwsShardDTO(Iterable<String> keys, String targetgroupArn,
-            String targetgroupName, String autoscalinggroupArn, String autobalancerArn, String name){
+            String targetgroupName, String autoscalinggroupArn, String autobalancerArn, String name, String replicaname){
         this.keys = new ArrayList<String>();
         for(String s : keys) {
             this.keys.add(s);
@@ -25,10 +28,18 @@ public class AwsShardDTO implements  IsSerializable {
         this.autobalancerArn = autobalancerArn;
         this.autosclaingGroupArn = autoscalinggroupArn;
         this.name = name;
+        this.replicaname  =replicaname;
         
     }
 
+    public String getReplicaname() {
+        return replicaname;
+    }
 
+    public void setReplicaname(String replicaname) {
+        this.replicaname = replicaname;
+    }
+    
     
     public ArrayList<String> getKeys() {
         return keys;

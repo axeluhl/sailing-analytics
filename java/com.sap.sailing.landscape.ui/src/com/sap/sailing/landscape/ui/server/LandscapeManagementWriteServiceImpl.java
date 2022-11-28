@@ -906,7 +906,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             shardsDTO.put(entry.getKey(), new AwsShardDTO(entry.getValue().getKeys(),
                     entry.getValue().getTargetGroup().getTargetGroupArn(), entry.getValue().getTargetGroup().getName(),
                     entry.getValue().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
-                    entry.getValue().getTargetGroup().getLoadBalancerArn(),awsReplicaSet.getName()));
+                    entry.getValue().getTargetGroup().getLoadBalancerArn(),entry.getValue().getName() == null ?  "" : entry.getValue().getName(),awsReplicaSet.getName()));
         }
         return shardsDTO;
     }

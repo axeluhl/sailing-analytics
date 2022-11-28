@@ -65,6 +65,8 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(AwsApplicationReplicaSetImpl.class.getName());
     private static final String ARCHIVE_SERVER_NAME = "ARCHIVE";
     private static final long serialVersionUID = 6895927683667795173L;
+    private static final int MAX_TARGETGROUPNAME_LENGTH = 32; // source: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-targetgroup.html
+    private static final int SHARD_INDEX_CHAR_LENGTH  = 2;
     private final Map<Integer, AwsShard<ShardingKey>> shards;
     private final CompletableFuture<AwsAutoScalingGroup> autoScalingGroup;
     private final CompletableFuture<Rule> defaultRedirectRule;
@@ -324,10 +326,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                             }
                         }
                     }
+                    //Shard index is stored as the last digits in the name. 0-99.
                     final int shardIndex = Integer
                             .parseInt(e.getKey().getName().substring(e.getKey().getName().lastIndexOf('-')+1));
                     
-                    AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(e.getKey().getName(),
+                    AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(
+                            getShardName(e.getKey().getName())
+                            ,getName(),
                             keys, e.getKey());
                     
                     shardp.put(shardIndex, shard);
@@ -346,7 +351,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * 
      * @param requestedName
      *          name which should be tested for being a valid shardname. 
-     *          Naming-pattern: $getName()$-$shardCounter$>
+     *          Naming-pattern: $getName()$-{$shardname$}-$shardCounter$>
      * @return
      *          if requestedName is a valid shardName
      */
@@ -356,7 +361,14 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     && isInt(requestedName.substring(requestedName.lastIndexOf('-')+1));
     }
     
-    public String getShardName() {
+    public String getNextShardName(String name) throws Exception{
+        if(name.length() + getName().length() + /* '-' + digit length */SHARD_INDEX_CHAR_LENGTH + 2 > MAX_TARGETGROUPNAME_LENGTH) {
+            throw new Exception("Shardname is to long. Replicasetname + Shardname must be shorter than "+ (MAX_TARGETGROUPNAME_LENGTH - SHARD_INDEX_CHAR_LENGTH - 2) +" chars");
+        }
+        return this.getName()+ "-" + name + "-" + getNextShardIndex();
+    }
+    
+    public String getNextShardName(){
         return this.getName() + "-" + getNextShardIndex();
     }
     
@@ -370,6 +382,28 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         }
         return ret;
       }
+    /**
+     * @param name
+     *          string where the shardname should be extracted
+     *          Naming-pattern: {prefix-}{getName()}-{$shardname$}-$shardCounter$>
+     * @return
+     *          shardname
+     */
+    public String getShardName(String name) {
+       final int firstHyphen, secondHyphen;
+       final String ret;
+       secondHyphen  =name.lastIndexOf('-');
+       firstHyphen  =name.lastIndexOf('-', secondHyphen-1);
+       if(firstHyphen < 3) {
+           //If there was no second '-' or if '-' was in the first 3 indize because this could be a prefix -> there was no shardname given 
+           ret = null;
+       }else {
+           ret = name.substring(firstHyphen+1, secondHyphen);
+       }
+       return ret;
+       
+       
+    }
     
     @Override
     public boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,

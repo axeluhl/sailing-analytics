@@ -9,12 +9,14 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
     private static final long serialVersionUID = 1L;
     final private Iterable<ShardingKey> keys;
     final private TargetGroup<ShardingKey> targetgroup;
+    final private String shardname;
     final private String name;
     private AwsAutoScalingGroup autoscalinggroup;
-    public AwsShardImpl(String name,Iterable<ShardingKey> keys, TargetGroup<ShardingKey> targetgroup){
+    public AwsShardImpl(String name,String shardname,Iterable<ShardingKey> keys, TargetGroup<ShardingKey> targetgroup){
         this.keys = keys;
         this.targetgroup  =targetgroup;
         this.name = name;
+        this.shardname  =shardname;
     }
     
     public void setAutoscalingGroup(AwsAutoScalingGroup asg) {
@@ -32,6 +34,12 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
     public String getName() {
         return name;
     }
+    
+    @Override
+    public String getShardname() {
+        return shardname;
+    }
+    
 
     @Override
     public TargetGroup<ShardingKey> getTargetGroup() {
