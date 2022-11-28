@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws.impl;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -63,7 +65,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(AwsApplicationReplicaSetImpl.class.getName());
     private static final String ARCHIVE_SERVER_NAME = "ARCHIVE";
     private static final long serialVersionUID = 6895927683667795173L;
-    private final Map<Integer, TargetGroup<ShardingKey>> shards;
+    private final Map<Integer, AwsShard<ShardingKey>> shards;
     private final CompletableFuture<AwsAutoScalingGroup> autoScalingGroup;
     private final CompletableFuture<Rule> defaultRedirectRule;
     private final CompletableFuture<String> hostedZoneId;
@@ -88,7 +90,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         masterTargetGroup = new CompletableFuture<>();
         publicTargetGroup = new CompletableFuture<>();
         resourceRecordSet = new CompletableFuture<>();
-        shards = new HashMap<Integer, TargetGroup<ShardingKey>>();
+        shards = new HashMap<Integer, AwsShard<ShardingKey>>();
         allLoadBalancersInRegion.thenCompose(loadBalancers->
             allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
                 allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
@@ -103,7 +105,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             });
     }
     
-    public Map<Integer, TargetGroup<ShardingKey>> getShards(){
+    public Map<Integer, AwsShard<ShardingKey>> getShards(){
         return shards;
     }
 
@@ -186,25 +188,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     publicTargetGroup.complete(e.getKey());
                     tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups, launchConfigurations);
                 }
-            }
+            }   
         }
-            for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions
-                    .entrySet()) {
-                if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
-                        && e.getKey().getLoadBalancerArn() != null
-                        && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
-                    // an HTTP(S) target group that is currently active in a load balancer and forwards to this replica
-                    // set master's port
-                    if (hasListenerRuleWithPathAnToReplica(listenersAndTheirRules, e.getKey())
-                            && isShardName(e.getKey().getName()))//(masterTargetGroup.get().getName())) 
-                            {
-                        // Is shard
-                        final int shardIndex  =Integer.parseInt(e.getKey().getName().substring(e.getKey().getName().lastIndexOf('-')));
-                        shards.put(shardIndex, e.getKey());
-                    }
-
-                }
-        }
+        shards.putAll(establishShards(targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules,autoScalingGroups,launchConfigurations));
         if (!autoScalingGroup.isDone()) { // no auto-scaling group was found after having looked at all target groups
             autoScalingGroup.complete(null);
         }
@@ -298,7 +284,64 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         }
         return null;
     }
+    AwsAutoScalingGroup  getShardAutoscalinggroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups, Iterable<LaunchConfiguration> launchConfigurations) {
+        
+               AwsAutoScalingGroup asg_ =  Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
+                    findFirst().map(asg->
+                        new AwsAutoScalingGroupImpl(asg,
+                                Util.filter(launchConfigurations, lc->Util.equalsWithNull(lc.launchConfigurationName(), asg.launchConfigurationName())).iterator().next(),
+                                targetGroup.getRegion())).orElse(null);
+               return asg_;
+        }
     
+    @SuppressWarnings("unchecked")
+    HashMap<Integer, AwsShard<ShardingKey>> establishShards(Map<TargetGroup<ShardingKey>, 
+            Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
+            Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoscalinggroups,
+            Iterable<LaunchConfiguration> launchConfigurations
+            ){
+        HashMap<Integer, AwsShard<ShardingKey>> shardp = new HashMap<Integer, AwsShard<ShardingKey>>();
+        for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions
+                .entrySet()) {
+            if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
+                    && e.getKey().getLoadBalancerArn() != null
+                    && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
+                // an HTTP(S) target group that is currently active in a load balancer and forwards to this replica
+                // set master's port
+                Set<Rule> pathRules = getListenerRuleWithPathAnToReplica(listenersAndTheirRules, e.getKey());
+                if (!pathRules.isEmpty() && isShardName(e.getKey().getName())) {
+                    // Is shard
+                    ArrayList<ShardingKey> keys = new ArrayList<ShardingKey>();
+                    //Set<String> keys = new HashSet<String>();
+                    // get every shardingkey from the rules
+                    for (Rule r : pathRules) {
+                        for (RuleCondition condition : r.conditions()) {
+
+                            if (condition.pathPatternConfig() != null) {
+                                for (String s : condition.pathPatternConfig().values()) {
+                                    keys.add((ShardingKey) s);
+                                }
+                            }
+                        }
+                    }
+                    final int shardIndex = Integer
+                            .parseInt(e.getKey().getName().substring(e.getKey().getName().lastIndexOf('-')+1));
+                    
+                    AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(e.getKey().getName(),
+                            keys, e.getKey());
+                    
+                    shardp.put(shardIndex, shard);
+
+                    shard.setAutoscalingGroup(getShardAutoscalinggroup(e.getKey(), autoscalinggroups, launchConfigurations));
+                    
+                }
+
+            }
+        }
+        return shardp;
+
+    };
+
     /**
      * 
      * @param requestedName
@@ -310,7 +353,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private boolean isShardName(String requestedName) {
         
             return requestedName.contains(getName())
-                    && isInt(requestedName.substring(requestedName.lastIndexOf('-')));
+                    && isInt(requestedName.substring(requestedName.lastIndexOf('-')+1));
     }
     
     public String getShardName() {
@@ -390,8 +433,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return false;
     }
     
-    private boolean hasListenerRuleWithPathAnToReplica(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> shardTargetGroupCandidate) {
+    private Set<Rule> getListenerRuleWithPathAnToReplica(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> shardTargetGroupCandidate) {
         final String publicTargetGroupCandidateArn = shardTargetGroupCandidate.getTargetGroupArn();
+        Set<Rule> res =new HashSet<Rule>();
         for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
             if (Util.equalsWithNull(e.getKey().loadBalancerArn(), shardTargetGroupCandidate.getLoadBalancerArn())) {
                 for (final Rule rule : e.getValue()) {
@@ -410,7 +454,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                                                         && condition2.httpHeaderConfig().values().contains(
                                                                 HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA
                                                                         .getB())) {
-                                                    return true;
+                                                    res.add(rule);
                                                     //return true is conditions contains a path and header forward to replica
                                                 }
                                             }
@@ -424,7 +468,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 }
             }
         }
-        return false;
+        return res;
     }
     
     private boolean isInt(String s) {
