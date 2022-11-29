@@ -9,7 +9,6 @@ import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.data.RaceResultOfCompetitorWithContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
@@ -27,19 +26,14 @@ public class CompetitorOfRaceInLeaderboardRetrievalProcessor
     protected Iterable<HasRaceResultOfCompetitorContext> retrieveData(HasTrackedRaceContext element) {
         Collection<HasRaceResultOfCompetitorContext> raceResultsOfCompetitor = new ArrayList<>();
         HasLeaderboardContext leaderboardContext = element.getLeaderboardContext();
-        for (RaceColumn raceColumn : leaderboardContext.getLeaderboard().getRaceColumns()) {
+        for (Competitor competitor : element.getRace().getCompetitors()) {
             if (isAborted()) {
                 break;
             }
-            for (Competitor competitor : leaderboardContext.getLeaderboard().getCompetitors()) {
-                if (isAborted()) {
-                    break;
-                }
-                HasRaceResultOfCompetitorContext raceResultOfCompetitorContext = new RaceResultOfCompetitorWithContext(
-                        leaderboardContext, raceColumn, competitor,
-                        leaderboardContext.getLeaderboardGroupContext().getPolarDataService(), element);
-                raceResultsOfCompetitor.add(raceResultOfCompetitorContext);
-            }
+            HasRaceResultOfCompetitorContext raceResultOfCompetitorContext = new RaceResultOfCompetitorWithContext(
+                    leaderboardContext, element.getRaceColumn(), competitor,
+                    leaderboardContext.getLeaderboardGroupContext().getPolarDataService(), element);
+            raceResultsOfCompetitor.add(raceResultOfCompetitorContext);
         }
         return raceResultsOfCompetitor;
     }
