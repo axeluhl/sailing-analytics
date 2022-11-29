@@ -219,7 +219,8 @@ public interface ScoringScheme extends Serializable {
     
     /**
      * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, {@code false} is returned 
+     * If the competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top
+     * for that column, considering any score corrections and penalties, too.
      */
     default boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
