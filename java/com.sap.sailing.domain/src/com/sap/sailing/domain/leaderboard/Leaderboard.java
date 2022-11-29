@@ -409,7 +409,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
      */
     Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
@@ -718,23 +718,17 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     boolean hasScores(Competitor competitor, TimePoint timePoint);
 
     /**
-     * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, {@code false} is returned 
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint. If the
+     * competitor is not scored for this race, {@code false} is returned. See
+     * {@link ScoringScheme#isWin(Leaderboard, Competitor, RaceColumn, TimePoint)}.
      */
     default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        final Double points = getTotalPoints(competitor, raceColumn, timePoint);
-        final boolean result;
-        final double tolerance = 0.05;
-        if (points == null) {
-            result = false;
-        } else if (getScoringScheme().isHigherBetter()) {
-            // FIXME this is broken for the high point variants where the winner gets more points than the number of competitors in the race because then even 2nd and 3rd rank may be considered a "win"
-            double competitorCount = Util.size(getCompetitors());
-            result = points >= (competitorCount - tolerance);
-        } else {
-            result = points <= 1.0 + tolerance;
-        }
-        return result;
+        return isWin(competitor, raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getScoringScheme().isWin(this, competitor, raceColumn, timePoint, cache);
     }
 
     @Override

@@ -84,7 +84,7 @@ public class HighPointByWinsTiesLastlyBrokenByOtherLeaderboard extends HighPoint
             final Double o2LastRaceScore = o2ScoresIncludingDiscarded.get(o2ScoresIncludingDiscarded.size() - 1).getB();
             result = doubleComparatorNullsLast.compare(o1LastRaceScore, o2LastRaceScore);
             // the scores would differ only if one competitor won its last race and the other didn't
-            if (result == 0 && o1LastRaceScore != null && o1LastRaceScore != 1.0) {
+            if (result == 0 && o1LastRaceScore != null && o1LastRaceScore != 1.0) { // FIXME use isWin which has to move from Leaderboard to ScoringScheme
                 final TrackedRace tr1 = o1ScoresIncludingDiscarded.get(o1ScoresIncludingDiscarded.size()-1).getA().getTrackedRace(o1);
                 final int rank1;
                 final Integer finishingRank1 = tr1 == null ? null : (rank1=tr1.getRank(o1, timePoint, cache))==0?null:rank1;

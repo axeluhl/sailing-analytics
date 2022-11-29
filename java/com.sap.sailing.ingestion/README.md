@@ -80,10 +80,12 @@ mvn clean -Dmaven.test.skip=true install -Pwith-aws-lambda,-sailing.analytics,-w
 ```
 
 In this example, the profiles ``sailing.analytics``, ``with-not-android-relevant`` and ``non-leandi`` will be disabled. This command will also create the ``bin`` folder in the project directory ``java/com.sap.sailing.ingestion`` and install the resulting JAR files to your local maven repository. When the dependencies of the project are changed please also make sure to update the java pom.xml respectively. After the initial install of the dependencies it is also possible to use the following command to build the package which can be deployed to AWS:
+
 ```
 cd java/com.sap.sailing.ingestion
 mvn clean -Dmaven.test.skip=true package
 ```
+
 This will produce a JAR file in the project's ``bin`` folder. To deploy it, you need to have a valid AWS session token in your environment. See the `configuration/aws-automation/awsmfalogon.sh` script that you need to invoke with the ARN of your MFA device and the MFA token that you read from your MFA app, for example, in your GIT root:
 
 ```

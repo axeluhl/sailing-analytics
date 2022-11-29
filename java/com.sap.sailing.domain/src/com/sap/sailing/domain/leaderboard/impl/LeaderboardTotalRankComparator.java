@@ -207,8 +207,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     // (tracked or manual) is sufficient
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                     if (scoringScheme.isMedalWinAmountCriteria()) {
-                        numberOfMedalRacesWonO1 += leaderboard.isWin(o1, raceColumn, timePoint) ? 1 : 0;
-                        numberOfMedalRacesWonO2 += leaderboard.isWin(o2, raceColumn, timePoint) ? 1 : 0;
+                        numberOfMedalRacesWonO1 += leaderboard.isWin(o1, raceColumn, timePoint, cache) ? 1 : 0;
+                        numberOfMedalRacesWonO2 += leaderboard.isWin(o2, raceColumn, timePoint, cache) ? 1 : 0;
                     }
                 }
                 if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {

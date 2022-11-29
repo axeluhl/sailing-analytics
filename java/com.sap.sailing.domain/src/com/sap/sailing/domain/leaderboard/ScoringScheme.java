@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -214,5 +215,24 @@ public interface ScoringScheme extends Serializable {
      */
     default double getOriginalScoreFromScoreScaledByFactor(RaceColumn raceColumn, double scaledScore) {
         return ScoringSchemeType.getUnscaledScore(getScoreFactor(raceColumn), scaledScore, raceColumn.isOneAlwaysStaysOne());
+    }
+    
+    /**
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint.
+     * If the competitor is not scored for this race, {@code false} is returned 
+     */
+    default boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+        final Iterable<Competitor> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint, cache);
+        for (final Competitor betterCompetitor : competitorsFromBestToWorstInColumn) {
+            if (betterCompetitor != competitor && raceColumn.getFleetOfCompetitor(betterCompetitor) == fleetOfCompetitor) {
+                // found a better competitor in same fleet; competitor obviously did not score a win
+                return false;
+            } else if (betterCompetitor == competitor) {
+                return true;
+            }
+        }
+        return false; // it is a bit strange that we're asked for a competitor that we didn't find in the column, but that's certainly not a win
     }
 }
