@@ -1,7 +1,7 @@
 package com.sap.sailing.polars.regression.test;
 
 import static org.hamcrest.Matchers.closeTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.BufferedReader;
 import java.io.File;
