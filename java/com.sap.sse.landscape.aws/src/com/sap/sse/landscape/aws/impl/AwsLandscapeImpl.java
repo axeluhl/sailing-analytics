@@ -188,7 +188,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String AUTO_SCALING_GROUP_NAME_SUFFIX = "-auto-replicas";
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
-    private static final long DEFAULT_DNS_TTL_MILLIS = 60l;
+    private static final long DEFAULT_DNS_TTL_SECONDS = 60l;
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
@@ -623,7 +623,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .changeResourceRecordSets(
                         ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
                                 .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.UPSERT)
-                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname.toLowerCase()).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
+                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname.toLowerCase()).type(type).ttl(DEFAULT_DNS_TTL_SECONDS)
                                                 .resourceRecords(ResourceRecord.builder().value(value).build()).build())
                                         .build()).build())
                                 .build());
@@ -640,7 +640,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return getRoute53Client().changeResourceRecordSets(ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
                 .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.DELETE)
                         // TODO using the DEFAULT_DNS_TTL_MILLIS is a bit unclean here; if the record has been modified manually or the default has changed, removal will fail
-                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
+                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_SECONDS)
                                 .resourceRecords(ResourceRecord.builder().value(value).build()).build()).build()).build()).build()).
                 changeInfo();
     }
@@ -2002,7 +2002,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                         "/targetgroup/"+targetgroup.getName()+"/"+targetgroup.getId())
                                 .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
                         .targetValue((double) DEFAULT_MAX_REQUESTS_PER_TARGET_SHARD))); 
-   } 
+   }
+
+    @Override
+    public TargetGroup<ShardingKey> copyTargetGroup(TargetGroup<ShardingKey> parent, String suffix) {
+        TargetGroup<ShardingKey> child =  createTargetGroupWithoutLoadbalancer(parent.getRegion(), parent.getName()+ suffix, parent.getPort());
+        child.addTargets(parent.getRegisteredTargets().keySet());
+        return child;
+    } 
     
     
 }
