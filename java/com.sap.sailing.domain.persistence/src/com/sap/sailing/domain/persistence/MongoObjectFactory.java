@@ -244,4 +244,6 @@ public interface MongoObjectFactory {
      *            a composite fingerprint of the race in the state at which the mark passings were captured
      */
     void storeMarkPassings(RaceIdentifier raceIdentifier, MarkPassingRaceFingerprint fingerprint, Map<Competitor, Map<Waypoint, MarkPassing>> markPassings, Course course);
+    
+    void removeMarkPassings(RaceIdentifier raceIdentifier);
 }

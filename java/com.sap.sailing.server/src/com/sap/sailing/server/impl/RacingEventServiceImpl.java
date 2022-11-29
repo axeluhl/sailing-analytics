@@ -955,6 +955,12 @@ Replicator {
     public MarkPassingRaceFingerprint getMarkPassingRaceFingerprint(RaceIdentifier raceIdentifier) {
         return markPassingRaceFingerprints.get(raceIdentifier);
     }
+    
+    @Override
+    public void removeStoredMarkPassings(RaceIdentifier raceIdentifier) {
+        markPassingRaceFingerprints.remove(raceIdentifier);
+        mongoObjectFactory.removeMarkPassings(raceIdentifier);
+    }
 
     @Override
     public Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course) {
@@ -3031,6 +3037,7 @@ Replicator {
         stopTrackingWind(regatta, race);
         TrackedRace trackedRace = getExistingTrackedRace(regatta, race);
         if (trackedRace != null) {
+            removeStoredMarkPassings(trackedRace.getRaceIdentifier());
             TrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             final boolean isTrackedRacesBecameEmpty;
             if (trackedRegatta != null) {
@@ -5158,7 +5165,7 @@ Replicator {
         }
         final User user = getSecurityService().getCurrentUser();
         logger.info("Importing master data from "+urlAsString+" for leaderboard groups "+Arrays.toString(leaderboardGroupIds)+
-                " for user "+user.getName());
+                " for user "+user.getName()+" with import operation ID "+importOperationId);
         final String token = getSecurityService().getOrCreateTargetServerBearerToken(urlAsString, targetServerUsername, targetServerPassword, targetServerBearerToken);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();

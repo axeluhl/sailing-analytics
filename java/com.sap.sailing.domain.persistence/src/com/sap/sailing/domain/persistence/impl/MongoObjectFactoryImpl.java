@@ -2001,4 +2001,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_PASSINGS.name(), markPassingsDoc);
         markPassingCollection.replaceOne(query, result, new ReplaceOptions().upsert(true));
     }
+    
+    @Override
+    public void removeMarkPassings(RaceIdentifier raceIdentifier) {
+        MongoCollection<Document> markPassingCollection = database.getCollection(CollectionNames.MARKPASSINGS.name());
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
+        markPassingCollection.deleteOne(query);
+    }
 }

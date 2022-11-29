@@ -1,7 +1,9 @@
 package com.sap.sse.landscape;
 
 import java.util.Map;
+import java.util.Optional;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
@@ -16,6 +18,14 @@ public interface Landscape<ShardingKey> {
      * constant ("image-type"). The tag value then must match what the subclass wants.
      */
     String IMAGE_TYPE_TAG_NAME = "image-type";
+    /**
+     * The timeout for a host to come up
+     */
+    Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(30));
+    /**
+     * The timeout for a running process to respond
+     */
+    Optional<Duration> WAIT_FOR_PROCESS_TIMEOUT = Optional.of(Duration.ONE_MINUTE);
 
     /**
      * Tells which scope currently lives where

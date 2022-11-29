@@ -72,20 +72,10 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private static final String TELNET_PORT_JSON_PROPERTY = "telnetport";
     private static final String SERVER_NAME_JSON_PROPERTY = "servername";
 
-    /**
-     * The implementation scans the {@link ApplicationProcessHost#DEFAULT_SERVERS_PATH application server deployment
-     * folder} for sub-folders. In those sub-folders, the configuration file is analyzed for the port number to
-     * instantiate an {@link ApplicationProcess} object for each one.
-     * 
-     * @param optionalKeyName
-     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
-     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
-     *            pair that was originally used when the instance was launched will be used.
-     * @param privateKeyEncryptionPassphrase
-     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
-     */
     @Override
-    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, boolean rethrowExceptions)
+            throws Exception {
         final Set<ProcessT> result = new HashSet<>();
         final SshCommandChannel sshChannel = createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         if (sshChannel != null) { // could, e.g., have timed out
@@ -94,7 +84,7 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
                         optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Parsing JSON response describing application processes on host "+this);
                 for (final Object serverDirectoryAndPort : serverDirectoriesAndPorts) {
                     final JSONObject serverDirectoryAndPortObject = (JSONObject) serverDirectoryAndPort;
-                    ProcessT process;
+                    final ProcessT process;
                     final String relativeServerDirectory = (String) serverDirectoryAndPortObject.get(SERVER_DIRECTORY_JSON_PROPERTY);
                     if (relativeServerDirectory != null) { // null means we got the empty "terminator" record
                         final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+relativeServerDirectory;
@@ -110,16 +100,29 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
                             result.add(process);
                         } catch (Exception e) {
                             logger.log(Level.WARNING, "Problem creating application process from directory "+serverDirectory+" on host "+this+"; skipping", e);
+                            if (rethrowExceptions) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 }
-            } finally {
+            } catch (RuntimeException e) {
+                throw e;
+            } 
+            finally {
                 if (sshChannel != null) {
                     sshChannel.disconnect();
                 }
             }
         }
         return result;
+    }
+    
+    @Override
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,
+                /* log and ignore exceptions and only report those processes successfully discovered */ false);
     }
 
     private JSONArray getServerDirectoriesAndPorts(final SshCommandChannel sshChannel)
