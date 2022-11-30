@@ -141,6 +141,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         int defaultFleetBasedComparisonResult = 0; // relevant if no authoritative fleet-based comparison result was determined; based on extreme fleet vs. no fleet comparison
         int numberOfMedalRacesWonO1 = 0;
         int numberOfMedalRacesWonO2 = 0;
+        int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = -1;
+        int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = -1;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
@@ -191,9 +193,15 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     if (!raceColumn.isCarryForward()) {
                         if (o1Score != null) {
                             o1MedalRaceScore += o1Score;
+                            if (raceColumn instanceof RaceColumnInSeries) {
+                                zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
+                            }
                         }
                         if (o2Score != null) {
                             o2MedalRaceScore += o2Score;
+                            if (raceColumn instanceof RaceColumnInSeries) {
+                                zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
+                            }
                         }
                         if (o1Score != null || o2Score != null) {
                             o1LastMedalScore = o1Score;
@@ -205,8 +213,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
-                    // FIXME bug5715: when there are multiple medal race series, participation in a later medal race series supersedes participation in an earlier one; and semi-finalists may participate in different numbers of medal races within the same series
-                    preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                     if (scoringScheme.isMedalWinAmountCriteria()) {
                         numberOfMedalRacesWonO1 += leaderboard.isWin(o1, raceColumn, timePoint, cache) ? 1 : 0;
                         numberOfMedalRacesWonO2 += leaderboard.isWin(o2, raceColumn, timePoint, cache) ? 1 : 0;
@@ -221,10 +227,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         defaultFleetBasedComparisonResult = compareByFleetResult.getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment();
                     }
                 }
-                if (preemptiveColumnResult != 0) {
-                    return preemptiveColumnResult;
-                }
             }
+        }
+        final int preemptiveColumnResult = compareByMedalRaceParticipation(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
+        if (preemptiveColumnResult != 0) {
+            return preemptiveColumnResult;
         }
         if (defaultFleetBasedComparisonResult != 0) {
             return defaultFleetBasedComparisonResult;
@@ -276,6 +283,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             }
         }
         return result;
+    }
+    
+    private int getZeroBasedIndexOfSeries(final RaceColumnInSeries raceColumnInSeries) {
+        final Series medalSeries = raceColumnInSeries.getSeries();
+        return Util.indexOf(medalSeries.getRegatta().getSeries(), medalSeries);
     }
 
     /**
@@ -470,20 +482,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return result;
     }
 
-    private int compareByMedalRaceParticipation(Double o1Score, Double o2Score) {
-        // if only one scored in medal race, this decides the order and returns immediately
-        if (o1Score == null) {
-            if (o2Score != null) {
-                return 1;
-            }
-        } else {
-            if (o2Score == null) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-        return 0;
+    /**
+     * Having scored in a later medal series than the other is considered better. -1 means no medal series score at all.
+     * With a lesser result encoding "better" the direction of default integer comparison between the two parameters is
+     * reversed.
+     */
+    private int compareByMedalRaceParticipation(int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored) {
+        return -Integer.compare(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
     }
 
     /**
