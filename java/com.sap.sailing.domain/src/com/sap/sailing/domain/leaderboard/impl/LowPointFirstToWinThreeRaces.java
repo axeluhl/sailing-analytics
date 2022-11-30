@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -54,6 +55,11 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         return ScoringSchemeType.LOW_POINT_FIRST_TO_WIN_THREE_RACES;
     }
 
+    @Override
+    public boolean isMedalWinAmountCriteria() {
+        return true;
+    }
+    
     /**
      * Still returns {@code null} if {@link Leaderboard#getNetPoints(Competitor, RaceColumn, TimePoint, Set)} returns {@code null}.
      * Otherwise, if the {@code raceColumn} is a medal race column and not the medal series' carry-forward column, 1.0 is returned
@@ -73,11 +79,6 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         return result;
     }
 
-    @Override
-    public boolean isCarryForwardInMedalsCriteria() {
-        return false;
-    }
-    
     @Override
     public int getTargetAmountOfMedalRaceWins() {
         return 3;
@@ -101,4 +102,31 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         }
         return factor;
     }
+
+    /**
+     * A carry-forward column in a medal series for this scoring scheme means that the points in the column represent a
+     * number of wins carried forward into this series. Other than that, the regular logic applies: one point for a
+     * {@link #isWin(Leaderboard, Competitor, RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
+     * win}, zero for non-win, adding to {@code numberOfMedalRacesWonSoFar} or starting with zero if
+     * {@link RaceColumn#isStartsWithZeroScore()}.
+     */
+    @Override
+    public int getNewNumberOfMedalRacesWon(int numberOfMedalRacesWonSoFar, Leaderboard leaderboard, Competitor o1, RaceColumn raceColumn,
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final int winCount;
+        if (raceColumn.isCarryForward()) {
+            final Double totalPoints = leaderboard.getTotalPoints(o1, raceColumn, timePoint);
+            winCount = totalPoints == null ? 0 : totalPoints.intValue();
+        } else {
+            winCount = isWin(leaderboard, o1, raceColumn, timePoint, cache) ? 1 : 0;
+        }
+        final int result;
+        if (raceColumn.isStartsWithZeroScore()) {
+            result = winCount;
+        } else {
+            result = numberOfMedalRacesWonSoFar + winCount;
+        }
+        return result;
+    }
+
 }

@@ -290,4 +290,16 @@ public interface ScoringScheme extends Serializable {
             RaceColumn raceColumn, TimePoint timePoint, final Set<RaceColumn> discardedRaceColumns) {
         return leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
     }
+    
+    default int getNewNumberOfMedalRacesWon(int numberOfMedalRacesWonSoFar, Leaderboard leaderboard, Competitor o1, RaceColumn raceColumn,
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final int winCount = isWin(leaderboard, o1, raceColumn, timePoint, cache) ? 1 : 0;
+        final int result;
+        if (raceColumn.isStartsWithZeroScore()) {
+            result = winCount;
+        } else {
+            result = numberOfMedalRacesWonSoFar + winCount;
+        }
+        return result;
+    }
 }

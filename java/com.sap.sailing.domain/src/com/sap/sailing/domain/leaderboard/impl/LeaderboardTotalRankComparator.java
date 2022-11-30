@@ -214,8 +214,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
                     if (scoringScheme.isMedalWinAmountCriteria()) {
-                        numberOfMedalRacesWonO1 += leaderboard.isWin(o1, raceColumn, timePoint, cache) ? 1 : 0;
-                        numberOfMedalRacesWonO2 += leaderboard.isWin(o2, raceColumn, timePoint, cache) ? 1 : 0;
+                        numberOfMedalRacesWonO1 = leaderboard.getScoringScheme().getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO1, leaderboard, o1, raceColumn, timePoint, cache);
+                        numberOfMedalRacesWonO2 = leaderboard.getScoringScheme().getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO2, leaderboard, o2, raceColumn, timePoint, cache);
                     }
                 }
                 if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
