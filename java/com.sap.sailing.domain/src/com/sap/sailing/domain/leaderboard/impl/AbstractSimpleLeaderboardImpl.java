@@ -507,30 +507,8 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Double getNetPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
-            TimePoint timePoint) {
-        // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race
-        // from there on
-        boolean needToResetScoreUponNextNonEmptyEntry = false;
-        double result = getCarriedPoints(competitor);
-        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
-                raceColumnsToConsider, timePoint, getScoringScheme());
-        for (RaceColumn raceColumn : raceColumnsToConsider) {
-            if (raceColumn.isStartsWithZeroScore()) {
-                needToResetScoreUponNextNonEmptyEntry = true;
-            }
-            if (getScoringScheme().isValidInNetScore(this, raceColumn, competitor, timePoint)) {
-                final Double netPoints = getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
-                if (netPoints != null) {
-                    if (needToResetScoreUponNextNonEmptyEntry) {
-                        result = 0;
-                        needToResetScoreUponNextNonEmptyEntry = false;
-                    }
-                    result += netPoints;
-                }
-            }
-        }
-        return result;
+    public Double getNetPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        return getScoringScheme().getNetPoints(this, competitor, raceColumnsToConsider, timePoint);
     }
 
     /**

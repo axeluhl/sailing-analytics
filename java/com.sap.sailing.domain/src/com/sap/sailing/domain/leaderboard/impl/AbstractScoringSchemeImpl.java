@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -99,56 +98,6 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         return new ScoreComparator(nullScoresAreBetter);
     }
     
-    /**
-     * This default implementation handles the somewhat tricky case where a score is considered valid for the total score only
-     * if for multiple unordered fleets in the race all fleets have raced or are currently racing. There have been controversial
-     * discussions whether this is desired. Usually, subclasses will override such that a result is generally valid for the
-     * total scores, and the {@link #compareByNumberOfRacesScored(int, int)} method has to just rank those better who ran
-     * more races.
-     */
-    @Override
-    public boolean isValidInNetScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
-        boolean result;
-        Iterable<? extends Fleet> fleets = raceColumn.getFleets();
-        if (Util.size(fleets) <= 1 || allFleetsOrdered(fleets)) {
-            result = true;
-        } else {
-            // multiple unordered fleets; ensure that the leaderboard has results for all of them
-            result = leaderboardHasResultsForAllFleets(leaderboard, raceColumn, at);
-        }
-        return result;
-    }
-
-    private boolean leaderboardHasResultsForAllFleets(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
-        Set<Fleet> fleetsForWhichNoScoreWasFound = new HashSet<Fleet>();
-        for (Fleet fleet : raceColumn.getFleets()) {
-            final TrackedRace trackedRaceForFleet = raceColumn.getTrackedRace(fleet);
-            if (trackedRaceForFleet == null || !trackedRaceForFleet.hasStarted(at)) {
-                fleetsForWhichNoScoreWasFound.add(fleet);
-            }
-        }
-        for (Competitor competitor : leaderboard.getCompetitors()) {
-            Fleet fleet = raceColumn.getFleetOfCompetitor(competitor);
-            if (fleetsForWhichNoScoreWasFound.contains(fleet)) {
-                if (leaderboard.getTotalPoints(competitor, raceColumn, at) != null) {
-                    fleetsForWhichNoScoreWasFound.remove(fleet);
-                }
-            }
-        }
-        return fleetsForWhichNoScoreWasFound.isEmpty();
-    }
-
-    private boolean allFleetsOrdered(Iterable<? extends Fleet> fleets) {
-        boolean allOrdered = true;
-        for (Fleet fleet : fleets) {
-            if (fleet.getOrdering() == 0) {
-                allOrdered = false;
-                break;
-            }
-        }
-        return allOrdered;
-    }
-
     /**
      * Assuming both competitors scored in the same number of races, compares the sorted scores based on World Sailing's
      * Racing Rules of Sailing (RRS) addendum A8.1:<p>

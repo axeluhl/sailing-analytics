@@ -143,7 +143,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     }
 
     /**
-     * In this test the preseries winner will win the first race, and should get a score of 2, all other finalists
+     * In this test the opening series winner will win the first race, and should get a score of 2, all other finalists
      * should be scored with Low_Points restarting at 0 for the medal series. The non finalists score should not change
      * during the medalseries.
      */
@@ -168,8 +168,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
-        List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
-                leaderboard);
+        List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later, leaderboard);
 
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst, FINAL_CARRY_COLUMN_NAME);
 

@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
@@ -235,5 +236,58 @@ public interface ScoringScheme extends Serializable {
             }
         }
         return false; // it is a bit strange that we're asked for a competitor that we didn't find in the column, but that's certainly not a win
+    }
+
+    /**
+     * Computes the score sum to be displayed in the "sum" column in the leaderboard when considering only the
+     * {@code raceColumnsToConsider}.
+     * <p>
+     * 
+     * This default implementation starts with the {@link Leaderboard#getCarriedPoints(Competitor) carried points} for
+     * the {@code leaderboard}, then enumerates the {@code raceColumnsToConsider}, and for each of them computes the net
+     * points the {@code competitor} has been awarded in that column, unless the leaderboard's
+     * {@link Leaderboard#getResultDiscardingRule() discarding rule} has decided to exclude that column's score. The
+     * scores are added up, unless a race column is found that has {@link RaceColumn#isStartsWithZeroScore()} set and
+     * the competitor scores in that or any of the following columns in which case the score sum so far is reset to
+     * zero.
+     * 
+     * @param raceColumnsToConsider
+     *            a sequence of {@link RaceColumn}s, expected to be a prefix of or the same as
+     *            {@code leaderboard.}{@link Leaderboard#getRaceColumns() getRaceColumns()}.
+     */
+    default double getNetPoints(AbstractSimpleLeaderboardImpl leaderboard, Competitor competitor,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race
+        // from there on
+        boolean needToResetScoreUponNextNonEmptyEntry = false;
+        double result = leaderboard.getCarriedPoints(competitor);
+        final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard,
+                raceColumnsToConsider, timePoint, this);
+        for (RaceColumn raceColumn : raceColumnsToConsider) {
+            if (raceColumn.isStartsWithZeroScore()) {
+                needToResetScoreUponNextNonEmptyEntry = true;
+            }
+            if (isValidInNetScore(leaderboard, raceColumn, competitor, timePoint)) {
+                final Double netPoints = getNetPointsForScoreSum(leaderboard, competitor, raceColumn, timePoint, discardedRaceColumns);
+                if (netPoints != null) {
+                    if (needToResetScoreUponNextNonEmptyEntry) {
+                        result = 0;
+                        needToResetScoreUponNextNonEmptyEntry = false;
+                    }
+                    result += netPoints;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * By default, the scores to use for the net points sum are what
+     * {@link Leaderboard#getNetPoints(Competitor, RaceColumn, TimePoint, Set)} delivers. Specialized scoring
+     * schemes may change this, e.g., to counting wins in the medal series.
+     */
+    default Double getNetPointsForScoreSum(AbstractSimpleLeaderboardImpl leaderboard, Competitor competitor,
+            RaceColumn raceColumn, TimePoint timePoint, final Set<RaceColumn> discardedRaceColumns) {
+        return leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
     }
 }

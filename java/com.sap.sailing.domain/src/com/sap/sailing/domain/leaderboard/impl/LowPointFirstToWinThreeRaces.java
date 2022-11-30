@@ -1,7 +1,14 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.Set;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Similar to {@link LowPointFirstToWinTwoRaces}, but three races are needed to win. If the regatta has one or more
@@ -47,6 +54,25 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         return ScoringSchemeType.LOW_POINT_FIRST_TO_WIN_THREE_RACES;
     }
 
+    /**
+     * Still returns {@code null} if {@link Leaderboard#getNetPoints(Competitor, RaceColumn, TimePoint, Set)} returns {@code null}.
+     * Otherwise, if the {@code raceColumn} is a medal race column and not the medal series' carry-forward column, 1.0 is returned
+     * for a win, 0.0 for non-wins. The carry-column's contents in a medal series are returned as defined by the leaderboard.
+     */
+    @Override
+    public Double getNetPointsForScoreSum(AbstractSimpleLeaderboardImpl leaderboard, Competitor competitor,
+            RaceColumn raceColumn, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) {
+        final Double result;
+        final Double netPoints = super.getNetPointsForScoreSum(leaderboard, competitor, raceColumn, timePoint, discardedRaceColumns);
+        if (netPoints != null && raceColumn.isMedalRace() && !raceColumn.isCarryForward()) {
+            result = isWin(leaderboard, competitor, raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint)) ? // TODO bug 5778: consider passing through a cache object
+                    1.0 : 0.0;
+        } else {
+            result = netPoints; // includes the null case
+        }
+        return result;
+    }
+
     @Override
     public boolean isCarryForwardInMedalsCriteria() {
         return false;
@@ -65,5 +91,14 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
     @Override
     public int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored) {
         return 0;
+    }
+    
+    @Override
+    public double getScoreFactor(RaceColumn raceColumn) {
+        Double factor = raceColumn.getExplicitFactor();
+        if (factor == null) {
+            factor = 1.0;
+        }
+        return factor;
     }
 }
