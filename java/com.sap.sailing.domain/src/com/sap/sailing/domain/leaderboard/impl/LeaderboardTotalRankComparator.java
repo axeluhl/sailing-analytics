@@ -205,6 +205,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
+                    // FIXME bug5715: when there are multiple medal race series, participation in a later medal race series supersedes participation in an earlier one; and semi-finalists may participate in different numbers of medal races within the same series
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                     if (scoringScheme.isMedalWinAmountCriteria()) {
                         numberOfMedalRacesWonO1 += leaderboard.isWin(o1, raceColumn, timePoint, cache) ? 1 : 0;

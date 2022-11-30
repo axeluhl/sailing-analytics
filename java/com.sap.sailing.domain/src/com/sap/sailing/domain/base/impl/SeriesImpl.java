@@ -425,7 +425,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
-    public boolean isFirstColumnIsNonDiscardableCarryForward() {
+    public boolean isFirstColumnNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
 
