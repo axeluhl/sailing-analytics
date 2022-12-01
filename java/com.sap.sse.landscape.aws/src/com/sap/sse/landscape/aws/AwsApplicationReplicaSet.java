@@ -135,4 +135,6 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     public String getNextShardName(String name) throws Exception;
     
     public Map<Integer, AwsShard<ShardingKey>> getShards();
+    
+    public void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception;
 }

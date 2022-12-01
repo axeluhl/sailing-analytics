@@ -2,6 +2,7 @@ package com.sap.sse.landscape.aws.impl;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -181,9 +182,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     }
                 }
                 if (!publicTargetGroup.isDone()
-                 && (!Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))
-                  || !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId()))))
-                 && hasPublicRuleForward(listenersAndTheirRules, e.getKey())) {
+                        && (!Util.isEmpty(Util.filter(e.getValue(),
+                                target -> Util.contains(Util.map(getReplicas(), replica -> replica.getHost().getId()),
+                                        target.target().id())))
+                                || !Util.isEmpty(Util.filter(e.getValue(),
+                                        target -> target.target().id().equals(getMaster().getHost().getId()))))
+                        && hasPublicRuleForward(listenersAndTheirRules, e.getKey())
+                        && !hasPathCondition(listenersAndTheirRules, e.getKey())) {
                     // this replica set's master or at least one of the replicas of this replica set is registered with
                     // the target group, and there is a rule that forwards
                     // requests with explicit replica-markup to this target group:
@@ -440,6 +445,32 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private boolean hasPublicRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> publicTargetGroupCandidate) {
         return hasListenerRuleWithHostHeaderForward(listenersAndTheirRules, publicTargetGroupCandidate, HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB());
     }
+    
+    private boolean hasPathCondition(Map<Listener, Iterable<Rule>> listenersAndTheirRules,
+            TargetGroup<ShardingKey> publicTargetGroupCandidate) {
+        final String publicTargetGroupCandidateArn = publicTargetGroupCandidate.getTargetGroupArn();
+        for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
+            if (Util.equalsWithNull(e.getKey().loadBalancerArn(), publicTargetGroupCandidate.getLoadBalancerArn())) {
+                for (final Rule rule : e.getValue()) {
+                    for (final Action action : rule.actions()) {
+                        if (action.type() == ActionTypeEnum.FORWARD) {
+                            for (final TargetGroupTuple targetGroupTuple : action.forwardConfig().targetGroups()) {
+                                if (Util.equalsWithNull(targetGroupTuple.targetGroupArn(),
+                                        publicTargetGroupCandidateArn)) {
+                                    for (final RuleCondition condition : rule.conditions()) {
+                                        if (Util.equalsWithNull(condition.field(), "path-pattern")) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     private boolean hasListenerRuleWithHostHeaderForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> publicTargetGroupCandidate, String hostHeaderForwardTo) {
         final String publicTargetGroupCandidateArn = publicTargetGroupCandidate.getTargetGroupArn();
@@ -587,5 +618,18 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     @Override
     public boolean isLocalReplicaSet() {
         return getName().equals(ServerInfo.getName());
+    }
+    
+    @Override
+    public void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception {
+        Collection<TargetGroup<ShardingKey>> targetGroups = new ArrayList<>();
+        targetGroups.add(shard.getTargetGroup());
+        // remove rules for targetgrouo
+        landscape.deleteLoadBalancerListenerRules(shard.getTargetGroup().getRegion(),
+                getLoadBalancer().getRulesForTargetGroups(targetGroups).toArray(new Rule[1]));
+        // remove autoscaling group
+        landscape.removeAutoScalingGroup(shard.getAutoScalingGroup());
+        // remove targetgroup
+        landscape.deleteTargetGroup(shard.getTargetGroup());
     }
 }
