@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import com.jcraft.jsch.JSchException;
