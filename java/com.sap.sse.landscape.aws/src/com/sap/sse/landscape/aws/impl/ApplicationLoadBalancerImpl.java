@@ -158,6 +158,48 @@ implements ApplicationLoadBalancer<ShardingKey> {
         Iterable<Rule> newRules = getRules();
         return newRules;
     }
+    
+    @Override
+    public
+    int getFirstPriorityOfHostname(String hostname) throws Exception {
+        final Iterable<Rule> rules = getRules();
+        final TreeMap<Integer,Rule> rulesSorted = new TreeMap<Integer, Rule>();
+        final Iterator<Rule> iter = rules.iterator();
+        // create Map with every priority
+        while (iter.hasNext()) {
+            Rule r = iter.next();
+            try {
+                rulesSorted.put(Integer.parseInt(r.priority()), r);
+            } catch (Exception e) {
+                // Case where prio is not a number, e.g. 'Default' gets ignored.
+            }
+        }
+        final Iterator<Entry<Integer, Rule>> iterSorted  = rulesSorted.entrySet().iterator();
+        while(iterSorted.hasNext()) {
+            Rule r = iterSorted.next().getValue();
+                for(RuleCondition con : r.conditions()) {
+                    if(con.hostHeaderConfig() != null && con.hostHeaderConfig().values().contains(hostname)) {
+                        for(Action a : r.actions()) {
+                            if (a.forwardConfig() != null) {
+                                return Integer.parseInt(r.priority());
+                            } else if(a.redirectConfig() != null) {
+                                return Integer.parseInt(r.priority())+1;
+                            } else {
+                                continue;
+                            }
+                        }
+                    }
+                
+            }
+            if(!iterSorted.hasNext()) {
+                return Integer.parseInt(r.priority())+1;
+            }
+        }
+        throw new Exception("Unexprected error, code should not be reached");
+        
+        
+    }
+
 
     @Override
     public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules) {
@@ -339,4 +381,25 @@ implements ApplicationLoadBalancer<ShardingKey> {
                                                && condition.pathPatternConfig().values().size() == 1
                                                && condition.pathPatternConfig().values().contains("/")).findAny().isPresent();
     }
+    
+    @Override
+    public Collection<Rule> getRulesForTargetGroups(Iterable<TargetGroup<ShardingKey>> targetGroups) {
+        ArrayList<Rule> ret = new ArrayList<Rule>();
+        for(Rule rule : getRules()) {
+            for(Action action : rule.actions()) {
+                if(action.type() == ActionTypeEnum.FORWARD) {
+                for(String arn : Util.map(action.forwardConfig().targetGroups(),s -> s.targetGroupArn())) {
+                    for(String targetArn : Util.map(targetGroups, s -> s.getTargetGroupArn())) {
+                        if(arn.equals(targetArn)) {
+                            ret.add(rule);
+                        }
+                    }
+                    
+                }}
+            }
+        }
+        return ret;
+    }
 }
+
+    

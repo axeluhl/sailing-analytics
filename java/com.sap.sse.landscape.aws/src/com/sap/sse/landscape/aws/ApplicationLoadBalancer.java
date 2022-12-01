@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
@@ -35,6 +36,11 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleConditio
  *
  */
 public interface ApplicationLoadBalancer<ShardingKey> extends Named {
+    
+    static final int MAX_RULES_PER_LOADBALANCER  =100; // https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-limits.html
+    static final String DNS_MAPPED_ALB_NAME_PREFIX = "DNSMapped-";
+    static final Pattern ALB_NAME_PATTERN = Pattern.compile(DNS_MAPPED_ALB_NAME_PREFIX+"(.*)$");
+    static final int MAX_ALBS_PER_REGION = 20;
     /**
      * The DNS name of this load balancer; can be used, e.g., to set a CNAME DNS record pointing
      * to this load balancer.
@@ -100,6 +106,17 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      */
     Iterable<Rule> shiftRulesToMakeSpaceAt(int index) throws Exception;
     
+    /**
+     * 
+     * @param hostname
+     *          to look for in rules.
+     * @return priority of a rule with hostname as Host +1, if the rule it was found in is a redirect or the index of the Rule if it is an Forward.
+     *          if there is no Rule with this hostname, just return the index after the last rule.
+     * @throws Exception
+     */
+    
+    int getFirstPriorityOfHostname(String hostname) throws Exception;
+    
     Iterable<TargetGroup<ShardingKey>> getTargetGroups();
 
     /**
@@ -128,4 +145,6 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Rule getDefaultRedirectRule(String hostName, PlainRedirectDTO plainRedirectDTO);
 
     RuleCondition createHostHeaderRuleCondition(String hostname);
+    
+    java.util.Collection<Rule> getRulesForTargetGroups(Iterable<TargetGroup<ShardingKey>> targetGroups);
 }
