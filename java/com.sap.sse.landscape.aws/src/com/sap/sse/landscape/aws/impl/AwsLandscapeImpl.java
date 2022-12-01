@@ -95,6 +95,7 @@ import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
+import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -1929,12 +1930,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup) {
         final String launchConfigurationName = autoScalingGroup.getAutoScalingGroup().launchConfigurationName();
         final AutoScalingAsyncClient autoScalingAsyncClient = getAutoScalingAsyncClient(getRegion(autoScalingGroup.getRegion()));
-        logger.info("Removing auto-scaling group "+autoScalingGroup.getAutoScalingGroup().autoScalingGroupName());
-        return autoScalingAsyncClient.deleteAutoScalingGroup(b->b.forceDelete(true).autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName()))
+        return removeAutoScalingGroup(autoScalingGroup)
             .thenAccept(response->{
                 logger.info("Removing launch configuration "+launchConfigurationName);
                 autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(launchConfigurationName));
             });
+    }
+    
+    @Override
+    public CompletableFuture<DeleteAutoScalingGroupResponse> removeAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup) {
+        final AutoScalingAsyncClient autoScalingAsyncClient = getAutoScalingAsyncClient(getRegion(autoScalingGroup.getRegion()));
+        logger.info("Removing auto-scaling group "+autoScalingGroup.getAutoScalingGroup().autoScalingGroupName());
+        return autoScalingAsyncClient.deleteAutoScalingGroup(b->b.forceDelete(true).autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName()));
     }
 
     @Override
@@ -1971,17 +1978,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 b.tags(awsTags);
             });
         });
-        /*autoScalingClient.putScalingPolicy(b->b
-                .autoScalingGroupName(autoScalingGroupName)
-                .estimatedInstanceWarmup(instanceWarmupTimeInSeconds)
-                .policyType("TargetTrackingScaling")
-                .policyName("KeepRequestsPerTargetAt"+maxrequestsPerTarget)
-                .targetTrackingConfiguration(t->t
-                        .predefinedMetricSpecification(p->p
-                                .resourceLabel("app/"+publicTargetGroup.getLoadBalancer().getName()+"/"+publicTargetGroup.getLoadBalancer().getId()+
-                                        "/targetgroup/"+publicTargetGroup.getName()+"/"+publicTargetGxwroup.getId())
-                                .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
-                        .targetValue((double) maxrequestsPerTarget))); */
     }
 
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
@@ -2009,6 +2005,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         TargetGroup<ShardingKey> child =  createTargetGroupWithoutLoadbalancer(parent.getRegion(), parent.getName()+ suffix, parent.getPort());
         child.addTargets(parent.getRegisteredTargets().keySet());
         return child;
+    }
+
+    @Override
+    public long getDNSTTLInSeconds() {
+       return DEFAULT_DNS_TTL_SECONDS;
     } 
     
     

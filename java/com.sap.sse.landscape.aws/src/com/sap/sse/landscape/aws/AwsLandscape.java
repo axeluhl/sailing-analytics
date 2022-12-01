@@ -37,6 +37,7 @@ import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -484,6 +485,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn);
+    
+    TargetGroup<ShardingKey> copyTargetGroup(TargetGroup<ShardingKey> parent, String suffix);
 
     default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn,
             String loadBalancerArn, ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol,
@@ -728,7 +731,9 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
             ProcessT master, Iterable<ProcessT> replicas);
 
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
-
+    
+    CompletableFuture<DeleteAutoScalingGroupResponse> removeAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup);
+    
     /**
      * updates minimum and desired size to {@code minSize}
      */
@@ -749,4 +754,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(AwsAutoScalingGroup autoscalingParent,
             String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<ShardingKey> alb);
+    
+    long getDNSTTLInSeconds();
 }
