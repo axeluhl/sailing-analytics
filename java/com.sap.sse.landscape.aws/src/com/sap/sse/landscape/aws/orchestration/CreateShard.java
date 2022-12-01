@@ -274,7 +274,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     }
     
     private ApplicationLoadBalancer<ShardingKey> getFreeLoadbalancer() throws Exception {
-        final int requiredRules = getLenRequiredRules(Iterables.size(shardingkeys));
+        final int requiredRules = getLenRequiredRules(Iterables.size(shardingkeys) +replicaset.getShards().size());
         final ApplicationLoadBalancer<ShardingKey> res;
         if(ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER - Iterables.size(replicaset.getLoadBalancer().getRules()) > requiredRules ) {
             // if the replicaset's loadbalancer has enough free rules left
