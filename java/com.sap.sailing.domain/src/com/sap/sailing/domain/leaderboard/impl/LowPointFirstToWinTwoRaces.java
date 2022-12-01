@@ -57,4 +57,24 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
         }
         return factor;
     }
+
+    /**
+     * If one of the competitors reached the target of races
+     * won (defined by {@link ScoringScheme#getTargetAmountOfMedalRaceWins()} it is ranked better than the other. If
+     * none of the competitors reached the target, they are ranked equally even if one has more wins. This is because
+     * only reaching the exact number of wins counts for this criteria but not the general comparison by the number of
+     * wins. If both competitors exactly reached the target, they are also ranked equally (this can e.g. occur while
+     * entering score corrections).
+     */
+    @Override
+    public int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        final int result;
+        final int targetAmount = getTargetAmountOfMedalRaceWins();
+        if (numberOfMedalRacesWonO1 >= targetAmount || numberOfMedalRacesWonO2 >= targetAmount) {
+            result = Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
+        } else {
+            result = 0;
+        }
+        return result;
+    }
 }

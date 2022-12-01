@@ -140,6 +140,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         final Map<Series, Map<Competitor, Fleet>> fleetWithCorrectOrderingForCompetitorBySeries = new HashMap<>();
         int defaultFleetBasedComparisonResult = 0; // relevant if no authoritative fleet-based comparison result was determined; based on extreme fleet vs. no fleet comparison
         int numberOfMedalRacesWonO1 = 0;
+        boolean clearNumberOfMedalRacesWonByO1UponNextValidMedalRaceScore = false;
+        boolean clearNumberOfMedalRacesWonByO2UponNextValidMedalRaceScore = false;
         int numberOfMedalRacesWonO2 = 0;
         int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = -1;
         int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = -1;
@@ -214,8 +216,12 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
                     if (scoringScheme.isMedalWinAmountCriteria()) {
-                        numberOfMedalRacesWonO1 = leaderboard.getScoringScheme().getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO1, leaderboard, o1, raceColumn, timePoint, cache);
-                        numberOfMedalRacesWonO2 = leaderboard.getScoringScheme().getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO2, leaderboard, o2, raceColumn, timePoint, cache);
+                        final Pair<Integer, Boolean> o1Result = leaderboard.getScoringScheme().getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO1, clearNumberOfMedalRacesWonByO1UponNextValidMedalRaceScore, leaderboard, o1, raceColumn, timePoint, cache);
+                        final Pair<Integer, Boolean> o2Result = leaderboard.getScoringScheme().getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO2, clearNumberOfMedalRacesWonByO2UponNextValidMedalRaceScore, leaderboard, o2, raceColumn, timePoint, cache);
+                        numberOfMedalRacesWonO1 = o1Result.getA();
+                        clearNumberOfMedalRacesWonByO1UponNextValidMedalRaceScore = o1Result.getB();
+                        numberOfMedalRacesWonO2 = o2Result.getA();
+                        clearNumberOfMedalRacesWonByO2UponNextValidMedalRaceScore = o2Result.getB();
                     }
                 }
                 if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
@@ -244,7 +250,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             if (scoringScheme.isMedalWinAmountCriteria()) {
                 // if one reaches the target amount of races won then this has priority, else proceed with normal
                 // points-based scoring (e.g., not enough races yet)
-                result = compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
+                result = scoringScheme.compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
             }
             if (result == 0) {
                 result = compareByScoreSum(o1ScoreSum, o2ScoreSum);
@@ -290,25 +296,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return Util.indexOf(medalSeries.getRegatta().getSeries(), medalSeries);
     }
 
-    /**
-     * Compares by the number of races won in the medal series. If one of the competitors reached the target of races
-     * won (defined by {@link ScoringScheme#getTargetAmountOfMedalRaceWins()} it is ranked better than the other. If
-     * none of the competitors reached the target, they are ranked equally even if one has more wins. This is because
-     * only reaching the exact number of wins counts for this criteria but not the general comparison by the number of
-     * wins. If both competitors exactly reached the target, they are also ranked equally (this can e.g. occur while
-     * entering score corrections).
-     */
-    private int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
-        final int result;
-        final int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
-        if (numberOfMedalRacesWonO1 >= targetAmount || numberOfMedalRacesWonO2 >= targetAmount) {
-            result = Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
-        } else {
-            result = 0;
-        }
-        return result;
-    }
-    
     /**
      * Compares by the scores of a single race column. If only one of the competitors has a result this competitor is
      * ranked better than the other one.

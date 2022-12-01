@@ -20,6 +20,7 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A leaderboard has a scoring scheme that decides how race ranks map to scores, how penalties are to be scored,
@@ -291,15 +292,49 @@ public interface ScoringScheme extends Serializable {
         return leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
     }
     
-    default int getNewNumberOfMedalRacesWon(int numberOfMedalRacesWonSoFar, Leaderboard leaderboard, Competitor o1, RaceColumn raceColumn,
+    default Pair<Integer, Boolean> getNewNumberOfMedalRacesWon(int numberOfMedalRacesWonSoFar,
+            boolean clearNumberOfMedalRacesWonUponNextValidMedalRaceScore,
+            Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
             TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final int winCount = isWin(leaderboard, o1, raceColumn, timePoint, cache) ? 1 : 0;
-        final int result;
+        final Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache);
+        final int winCount = getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, cache);
+        final int newNumberOfMedalRacesWonSoFar;
+        final boolean newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore;
         if (raceColumn.isStartsWithZeroScore()) {
-            result = winCount;
+            if (totalPoints != null) {
+                newNumberOfMedalRacesWonSoFar = winCount;
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = false;
+            } else {
+                newNumberOfMedalRacesWonSoFar = numberOfMedalRacesWonSoFar;
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = true;
+            }
         } else {
-            result = numberOfMedalRacesWonSoFar + winCount;
+            if (totalPoints != null) {
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = false;
+                if (clearNumberOfMedalRacesWonUponNextValidMedalRaceScore) {
+                    newNumberOfMedalRacesWonSoFar = winCount;
+                } else {
+                    newNumberOfMedalRacesWonSoFar = numberOfMedalRacesWonSoFar + winCount;
+                }
+            } else {
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = clearNumberOfMedalRacesWonUponNextValidMedalRaceScore;
+                newNumberOfMedalRacesWonSoFar = numberOfMedalRacesWonSoFar;
+            }
         }
-        return result;
+        return new Pair<>(newNumberOfMedalRacesWonSoFar, newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore);
     }
+
+    default int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
+            final Double totalPoints, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return totalPoints == null ? 0 : isWin(leaderboard, competitor, raceColumn, timePoint, cache) ? 1 : 0;
+    }
+    
+    /**
+     * Compares by the number of races won in the medal series. This default implementation simply compares the two numbers, and
+     * the competitor with the greater number is scored better ("less").
+     */
+    default int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        return Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
+    }
+
 }

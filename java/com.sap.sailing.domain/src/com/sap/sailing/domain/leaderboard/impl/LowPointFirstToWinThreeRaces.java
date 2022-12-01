@@ -111,22 +111,14 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * {@link RaceColumn#isStartsWithZeroScore()}.
      */
     @Override
-    public int getNewNumberOfMedalRacesWon(int numberOfMedalRacesWonSoFar, Leaderboard leaderboard, Competitor o1, RaceColumn raceColumn,
-            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final int winCount;
+    public int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
+            final Double totalPoints, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Integer winCount;
         if (raceColumn.isCarryForward()) {
-            final Double totalPoints = leaderboard.getTotalPoints(o1, raceColumn, timePoint);
             winCount = totalPoints == null ? 0 : totalPoints.intValue();
         } else {
-            winCount = isWin(leaderboard, o1, raceColumn, timePoint, cache) ? 1 : 0;
+            winCount = super.getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, cache);
         }
-        final int result;
-        if (raceColumn.isStartsWithZeroScore()) {
-            result = winCount;
-        } else {
-            result = numberOfMedalRacesWonSoFar + winCount;
-        }
-        return result;
+        return winCount;
     }
-
 }
