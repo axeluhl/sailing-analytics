@@ -900,7 +900,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet  = convertFromApplicationReplicaSetDTO(awsregion, replicaset);
         Thread.sleep(1000);// wait. Ich hab keine ahnung warum
         Map<Integer, AwsShardDTO> shardsDTO = new HashMap<Integer,AwsShardDTO>();
-        logger.info("Len shards: " + awsReplicaSet.getShards().size());
         for(Entry<Integer, AwsShard<String>> entry : awsReplicaSet.getShards().entrySet()) {
 
             shardsDTO.put(entry.getKey(), new AwsShardDTO(entry.getValue().getKeys(),
@@ -910,9 +909,68 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
         return shardsDTO;
     }
+    
+    @Override
+    public Map<Integer, AwsShardDTO> getShards(SailingApplicationReplicaSetDTO<String> replicaset,
+            String region, byte[] passphrase) throws Exception {
+        final AwsRegion awsregion = new AwsRegion(region, getLandscape());
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
+        final Map<Integer, AwsShardDTO> shardsDTO = new HashMap<Integer, AwsShardDTO>();
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet;
+        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
+            getLandscape().getApplicationReplicaSetsByTag(awsregion, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
+                    hostSupplier, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.empty(), passphrase)) {
+                if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
+                    awsReplicaSet = applicationServerReplicaSet;
+                    Thread.sleep(1000);// wait. Ich hab keine ahnung warum
+                    for (Entry<Integer, AwsShard<String>> entry : awsReplicaSet.getShards().entrySet()) {
+
+                        shardsDTO.put(entry.getKey(),
+                                new AwsShardDTO(entry.getValue().getKeys(),
+                                        entry.getValue().getTargetGroup().getTargetGroupArn(),
+                                        entry.getValue().getTargetGroup().getName(),
+                                        entry.getValue().getAutoScalingGroup().getAutoScalingGroup()
+                                                .autoScalingGroupARN(),
+                                        entry.getValue().getTargetGroup().getLoadBalancerArn(),
+                                        entry.getValue().getName() == null ? "" : entry.getValue().getName(),
+                                        awsReplicaSet.getName()));
+                    }
+                    break;
+                }   
+        }
+        return shardsDTO;
+    }
+    
+    @Override
+    public void removeShard(int index, AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase)
+            throws Exception {
+        final AwsRegion awsregion = new AwsRegion(region, getLandscape());
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet;
+        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
+            getLandscape().getApplicationReplicaSetsByTag(awsregion, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
+                    hostSupplier, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.empty(), passphrase)) {
+                if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
+                    awsReplicaSet = applicationServerReplicaSet;
+                    Thread.sleep(1000);// wait. Ich hab keine ahnung warum
+                    for (Entry<Integer, AwsShard<String>> entry : awsReplicaSet.getShards().entrySet()) {
+                        if(shard.getTargetgroupArn().equals(entry.getValue().getTargetGroup().getTargetGroupArn())) {
+                           awsReplicaSet.removeShard(entry.getValue(), getLandscape());
+                           return;
+                        }
+                        
+                    }
+                    throw new Exception("Shard was not found");
+                }   
+        }
+    }
+        
+    
 
     @Override
     public AwsShardDTO getShardDTO(String name) {
         return null;
-    };
+    }
+
+    
 }

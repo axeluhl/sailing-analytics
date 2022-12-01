@@ -152,5 +152,9 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     public Map<Integer, AwsShardDTO> getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region) throws Exception;
     
+    public Map<Integer, AwsShardDTO> getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase) throws Exception;
+    
+    public void removeShard(int index, AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase)throws Exception;
+    
     AwsShardDTO getShardDTO(String name);
 }
