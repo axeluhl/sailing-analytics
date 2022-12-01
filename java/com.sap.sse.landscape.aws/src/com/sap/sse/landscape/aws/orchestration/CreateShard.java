@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
-import com.google.gwt.thirdparty.guava.common.collect.Iterables;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
@@ -182,7 +181,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         if (loadbalancer != null) {
             // TODO fix calculation of number of required rules
             Iterable<Rule> rules = loadbalancer.getRules();
-            if (Iterables.size(rules) < /* Max rule count */ 30 - getLenRequiredRules(Iterables.size(shardingkeys))) { 
+            if (Util.size(rules) < /* Max rule count */ 30 - getLenRequiredRules(Util.size(shardingkeys))) { 
                 int rulePrio = getHighestAvailableIndex(rules);
                 if (rulePrio > 0) {
                     // logger.info("Creating testing rule with prio: " + rulePrio);
@@ -272,9 +271,9 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     }
     
     private ApplicationLoadBalancer<ShardingKey> getFreeLoadbalancer() throws Exception {
-        final int requiredRules = getLenRequiredRules(Iterables.size(shardingkeys) +replicaset.getShards().size());
+        final int requiredRules = getLenRequiredRules(Util.size(shardingkeys) +replicaset.getShards().size());
         final ApplicationLoadBalancer<ShardingKey> res;
-        if(ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER - Iterables.size(replicaset.getLoadBalancer().getRules()) > requiredRules ) {
+        if(ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER - Util.size(replicaset.getLoadBalancer().getRules()) > requiredRules ) {
             // if the replicaset's loadbalancer has enough free rules left
             res = replicaset.getLoadBalancer();
         } else {
@@ -402,7 +401,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                 t -> t.getName().startsWith("DNSMapped"));
         ApplicationLoadBalancer<ShardingKey> res = null;
         for (ApplicationLoadBalancer<ShardingKey> loadbalancer : loadbalancersFIltered) {
-            if (Iterables.size(loadbalancer.getRules()) < 100 - rules) {
+            if (Util.size(loadbalancer.getRules()) < 100 - rules) {
                 res = loadbalancer;
                 break;
             }
