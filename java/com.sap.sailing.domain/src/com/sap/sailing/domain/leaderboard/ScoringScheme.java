@@ -101,10 +101,11 @@ public interface ScoringScheme extends Serializable {
      *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(...)}. This accelerates things considerable because we do not have to make this expensive calculation
      *            for each competitor again.
+     * @param cache TODO
      */
     int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2,
             List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
-            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor);
+            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -341,4 +342,18 @@ public interface ScoringScheme extends Serializable {
         return getScoreComparator(nullScoresAreBetter).compare(o1ScoreSum, o2ScoreSum);
     }
 
+    /**
+     * Precondition: either both scored in medal race or both didn't. If both scored, the better score wins.
+     * This is to be applied only if the net score of both competitors are equal to each other.
+     */
+    default int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore, boolean nullScoresAreBetter) {
+        assert o1MedalRaceScore != null || o2MedalRaceScore == null;
+        final int result;
+        if (o1MedalRaceScore != null) {
+            result = getScoreComparator(nullScoresAreBetter).compare(o1MedalRaceScore, o2MedalRaceScore);
+        } else {
+            result = 0;
+        }
+        return result;
+    }
 }

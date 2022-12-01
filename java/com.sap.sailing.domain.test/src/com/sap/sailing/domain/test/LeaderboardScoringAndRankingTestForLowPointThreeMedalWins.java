@@ -46,7 +46,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     private static final double EPSILON = 0.000001;
 
     private void executePreSeries(List<Competitor> yellow, List<Competitor> blue, TimePoint now) {
-        RaceColumn qColumn = series.get(0).getRaceColumnByName("Q");
+        RaceColumn qColumn = series.get(0).getRaceColumnByName("R1");
         TrackedRace qYellow = new MockedTrackedRaceWithStartTimeAndRanks(now, yellow);
         qColumn.setTrackedRace(qColumn.getFleetByName("Yellow"), qYellow);
         TrackedRace qBlue = new MockedTrackedRaceWithStartTimeAndRanks(now, blue);

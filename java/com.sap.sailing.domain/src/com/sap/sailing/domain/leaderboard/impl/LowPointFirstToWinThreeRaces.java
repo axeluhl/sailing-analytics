@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -10,6 +12,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Similar to {@link LowPointFirstToWinTwoRaces}, but three races are needed to win. If the regatta has one or more
@@ -136,5 +140,59 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
     public int compareByScoreSum(double o1ScoreSum, double o2ScoreSum, boolean nullScoresAreBetter,
             boolean haveValidMedalRaceScores) {
         return haveValidMedalRaceScores ? 0 : super.compareByScoreSum(o1ScoreSum, o2ScoreSum, nullScoresAreBetter, haveValidMedalRaceScores);
+    }
+
+    /**
+     * The sum of medal race scores is not of interest to ranking when using this scoring scheme. See
+     * {@link #compareByMedalRacesWon(int, int)} instead.
+     */
+    @Override
+    public int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore, boolean nullScoresAreBetter) {
+        return 0;
+    }
+
+    /**
+     * The default implementation will do an RRS A8.1 comparison (sort results, compare one by one "from the top" and
+     * decide upon the first difference), across <em>all</em> scores throughout the leaderboard. Here, however, we need
+     * to distinguish between competitors who only sailed in the opening series (anything preceding the first medal
+     * series), and those who did score in at least one medal race, because the medal series are evaluated only by wins
+     * and as a secondary tie breaker then by the last medal race score and after that the rank at the end of the opening
+     * series.<p>
+     * 
+     * It is safe to assume that if {@code o1} has valid medal series scores then so will {@code o2}, and vice versa,
+     * because otherwise ranking by medal series participation would already have decided who ranks better. If none has
+     * score in a medal race then we default to the {@code super} implementation with a default RRS A8.1 decision.<p>
+     * 
+     * Otherwise (both have scored in at least one medal race) we have to assume that both sailed in the same medal series,
+     * scored the same number of wins (including wins carried forward) and were also tied on the scores in their respective
+     * last medal race. Then, the decision is to be made based on the opening series rank, which in itself includes the
+     * entire tie-breaking rule set with {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
+     * etc., only up to the end of the opening series.
+     */
+    @Override
+    public int compareByBetterScore(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
+            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final int result;
+        if (!hasMedalScores(o1Scores)) {
+            result = super.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
+                    discardedRaceColumnsPerCompetitor, cache);
+        } else {
+            final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
+            result = new LeaderboardTotalRankComparator(leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns, cache).compare(o1, o2);
+        }
+        return result;
+    }
+
+    /**
+     * Merge non-medal series columns, preserving order across {@code raceColumnsO1} and {@code raceColumnsO2}.
+     */
+    private Iterable<RaceColumn> getOpeningSeriesRaceColumns(Leaderboard leaderboard) {
+        return Util.filter(leaderboard.getRaceColumns(), rc->!rc.isMedalRace());
+    }
+
+    private boolean hasMedalScores(List<Pair<RaceColumn, Double>> o1Scores) {
+        return o1Scores.stream().anyMatch(p->p.getA().isMedalRace() && p.getB() != null);
     }
 }
