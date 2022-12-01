@@ -177,7 +177,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         Competitor preThird = medalCompetitorsBestToWorst.get(2);
         Competitor preFourth = medalCompetitorsBestToWorst.get(3);
 
-        RaceColumn m1 = leaderboard.getRaceColumnByName("M1");
+        RaceColumn m1 = leaderboard.getRaceColumnByName("SF1");
 
         ArrayList<Competitor> m1Results = new ArrayList<>();
         m1Results.add(preFirst);
@@ -232,7 +232,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         Competitor preThird = medalCompetitorsBestToWorst.get(2);
         Competitor preFourth = medalCompetitorsBestToWorst.get(3);
 
-        RaceColumn m1 = leaderboard.getRaceColumnByName("M1");
+        RaceColumn m1 = leaderboard.getRaceColumnByName("SF1");
 
         ArrayList<Competitor> m1Results = new ArrayList<>();
         m1Results.add(preSecond);
@@ -255,7 +255,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         Assert.assertEquals(res.get(0), preFirst);
         Assert.assertEquals(res.get(1), preSecond);
         
-        RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
+        RaceColumn m2 = leaderboard.getRaceColumnByName("F1");
 
         ArrayList<Competitor> m2Results = new ArrayList<>();
         m2Results.add(preSecond);
@@ -319,7 +319,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         Competitor preThird = medalCompetitorsBestToWorst.get(2);
         Competitor preFourth = medalCompetitorsBestToWorst.get(3);
 
-        RaceColumn m1 = leaderboard.getRaceColumnByName("M1");
+        RaceColumn m1 = leaderboard.getRaceColumnByName("SF1");
 
         ArrayList<Competitor> m1Results = new ArrayList<>();
         m1Results.add(preSecond);
@@ -405,7 +405,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         Competitor preThird = medalCompetitorsBestToWorst.get(2);
         Competitor preFourth = medalCompetitorsBestToWorst.get(3);
 
-        RaceColumn m1 = leaderboard.getRaceColumnByName("M1");
+        RaceColumn m1 = leaderboard.getRaceColumnByName("SF1");
 
         ArrayList<Competitor> m1Results = new ArrayList<>();
         m1Results.add(preFourth);
@@ -492,7 +492,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         Competitor preThird = medalCompetitorsBestToWorst.get(2);
         Competitor preFourth = medalCompetitorsBestToWorst.get(3);
 
-        RaceColumn m1 = leaderboard.getRaceColumnByName("M1");
+        RaceColumn m1 = leaderboard.getRaceColumnByName("SF1");
 
         ArrayList<Competitor> m1Results = new ArrayList<>();
         m1Results.add(preFourth);
