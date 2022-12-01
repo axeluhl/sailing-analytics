@@ -337,4 +337,8 @@ public interface ScoringScheme extends Serializable {
         return Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
     }
 
+    default int compareByScoreSum(double o1ScoreSum, double o2ScoreSum, boolean nullScoresAreBetter, boolean haveValidMedalRaceScores) {
+        return getScoreComparator(nullScoresAreBetter).compare(o1ScoreSum, o2ScoreSum);
+    }
+
 }

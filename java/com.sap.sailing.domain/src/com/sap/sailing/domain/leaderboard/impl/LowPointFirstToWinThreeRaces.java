@@ -60,6 +60,11 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         return true;
     }
     
+    @Override
+    public boolean isLastMedalRaceCriteria() {
+        return true;
+    }
+    
     /**
      * Still returns {@code null} if {@link Leaderboard#getNetPoints(Competitor, RaceColumn, TimePoint, Set)} returns {@code null}.
      * Otherwise, if the {@code raceColumn} is a medal race column and not the medal series' carry-forward column, 1.0 is returned
@@ -120,5 +125,16 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
             winCount = super.getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, cache);
         }
         return winCount;
+    }
+
+    /**
+     * When the competitors have valid medal race scores, this scoring scheme ignores the score sums altogether and
+     * assumes that a {@link #compareByMedalRacesWon(int, int) comparison by the number of medal races won} is being
+     * performed because {@link #isMedalWinAmountCriteria()} returns {@code true} for this scoring scheme.
+     */
+    @Override
+    public int compareByScoreSum(double o1ScoreSum, double o2ScoreSum, boolean nullScoresAreBetter,
+            boolean haveValidMedalRaceScores) {
+        return haveValidMedalRaceScores ? 0 : super.compareByScoreSum(o1ScoreSum, o2ScoreSum, nullScoresAreBetter, haveValidMedalRaceScores);
     }
 }

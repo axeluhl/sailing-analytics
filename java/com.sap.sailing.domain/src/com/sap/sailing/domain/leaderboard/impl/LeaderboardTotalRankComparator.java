@@ -146,8 +146,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = -1;
         int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = -1;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
-            needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
-            needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
+            needToResetO1ScoreUponNextValidResult = needToResetO1ScoreUponNextValidResult || raceColumn.isStartsWithZeroScore();
+            needToResetO2ScoreUponNextValidResult = needToResetO2ScoreUponNextValidResult || raceColumn.isStartsWithZeroScore();
             final boolean o1ValidInNetScore = getLeaderboard().getScoringScheme().isValidInNetScore(getLeaderboard(), raceColumn, o1, timePoint);
             final boolean o2ValidInNetScore = getLeaderboard().getScoringScheme().isValidInNetScore(getLeaderboard(), raceColumn, o2, timePoint);
             final Double o1Score;
@@ -253,7 +253,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 result = scoringScheme.compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
             }
             if (result == 0) {
-                result = compareByScoreSum(o1ScoreSum, o2ScoreSum);
+                result = scoringScheme.compareByScoreSum(o1ScoreSum, o2ScoreSum, nullScoresAreBetter,
+                        zeroBasedIndexOfLastMedalSeriesInWhichO1Scored>=0 || zeroBasedIndexOfLastMedalSeriesInWhichO2Scored>=0);
                 if (result == 0) {
                     if (scoringScheme.isCarryForwardInMedalsCriteria()) {
                         result = compareBySingleRaceColumnScore(o1CarryForwardScoreInMedals, o2CarryForwardScoreInMedals);
