@@ -958,15 +958,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                            awsReplicaSet.removeShard(entry.getValue(), getLandscape());
                            return;
                         }
-                        
                     }
                     throw new Exception("Shard was not found");
                 }   
         }
     }
-        
     
-
     @Override
     public AwsShardDTO getShardDTO(String name) {
         return null;

@@ -25,7 +25,4 @@ public interface Shard<ShardingKey> extends Named {
      * 
      */
     Iterable<ShardingKey> getKeys();
-    
-    
-    
 }
