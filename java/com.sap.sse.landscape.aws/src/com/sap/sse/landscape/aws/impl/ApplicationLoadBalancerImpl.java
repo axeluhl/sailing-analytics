@@ -160,10 +160,9 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
     
     @Override
-    public
-    int getFirstPriorityOfHostname(String hostname) throws Exception {
+    public int getFirstPriorityOfHostname(String hostname) throws Exception {
         final Iterable<Rule> rules = getRules();
-        final TreeMap<Integer,Rule> rulesSorted = new TreeMap<Integer, Rule>();
+        final TreeMap<Integer, Rule> rulesSorted = new TreeMap<Integer, Rule>();
         final Iterator<Rule> iter = rules.iterator();
         // create Map with every priority
         while (iter.hasNext()) {
@@ -174,32 +173,28 @@ implements ApplicationLoadBalancer<ShardingKey> {
                 // Case where prio is not a number, e.g. 'Default' gets ignored.
             }
         }
-        final Iterator<Entry<Integer, Rule>> iterSorted  = rulesSorted.entrySet().iterator();
-        while(iterSorted.hasNext()) {
+        final Iterator<Entry<Integer, Rule>> iterSorted = rulesSorted.entrySet().iterator();
+        while (iterSorted.hasNext()) {
             Rule r = iterSorted.next().getValue();
-                for(RuleCondition con : r.conditions()) {
-                    if(con.hostHeaderConfig() != null && con.hostHeaderConfig().values().contains(hostname)) {
-                        for(Action a : r.actions()) {
-                            if (a.forwardConfig() != null) {
-                                return Integer.parseInt(r.priority());
-                            } else if(a.redirectConfig() != null) {
-                                return Integer.parseInt(r.priority())+1;
-                            } else {
-                                continue;
-                            }
+            for (RuleCondition con : r.conditions()) {
+                if (con.hostHeaderConfig() != null && con.hostHeaderConfig().values().contains(hostname)) {
+                    for (Action a : r.actions()) {
+                        if (a.forwardConfig() != null) {
+                            return Integer.parseInt(r.priority());
+                        } else if (a.redirectConfig() != null) {
+                            return Integer.parseInt(r.priority()) + 1;
+                        } else {
+                            continue;
                         }
                     }
-                
+                }
             }
-            if(!iterSorted.hasNext()) {
-                return Integer.parseInt(r.priority())+1;
+            if (!iterSorted.hasNext()) {
+                return Integer.parseInt(r.priority()) + 1;
             }
         }
         throw new Exception("Unexprected error, code should not be reached");
-        
-        
     }
-
 
     @Override
     public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules) {
