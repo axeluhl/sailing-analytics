@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.impl.data;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Comparator;
 import java.util.Locale;

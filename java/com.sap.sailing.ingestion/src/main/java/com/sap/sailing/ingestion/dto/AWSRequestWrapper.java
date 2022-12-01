@@ -3,8 +3,6 @@ package com.sap.sailing.ingestion.dto;
 import java.io.Serializable;
 import java.util.Base64;
 
-import com.google.gson.Gson;
-
 /**
  * In most cases requests coming to a lambda will be serialized into JSON. That means that all fields a HTTP request
  * normally has can be found inside the JSON. This implementation just provides the body and the method.
@@ -48,8 +46,11 @@ public class AWSRequestWrapper implements Serializable {
     private String body;
     private Boolean isBase64Encoded;
 
-    public <T> T getBodyAsType(Class<T> type) {
-        return (T) new Gson().fromJson(getBody(), type);
+    public AWSRequestWrapper(String httpMethod, String body, Boolean isBase64Encoded) {
+        super();
+        this.httpMethod = httpMethod;
+        this.body = body;
+        this.isBase64Encoded = isBase64Encoded;
     }
 
     public String getBody() {

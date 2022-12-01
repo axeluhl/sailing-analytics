@@ -6,16 +6,15 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.redisson.api.RMap;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.google.gson.Gson;
-import com.sap.sailing.ingestion.dto.AWSRequestWrapper;
-import com.sap.sailing.ingestion.dto.AWSResponseWrapper;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
-
-import software.amazon.awssdk.utils.IoUtils;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 /**
  * <p>
@@ -48,44 +47,54 @@ import software.amazon.awssdk.utils.IoUtils;
  *
  */
 public class EndpointRegistrationLambda implements RequestStreamHandler {
+    private final AWSInOutHandler awsInOut = new AWSInOutHandler();
+    private final JsonDeserializer<EndpointDTO> endpointDeserializer = new EndpointJsonDeserializer();
+
     @SuppressWarnings("unchecked")
     @Override
-    public void handleRequest(InputStream inputAsStream, OutputStream outputAsStream, Context context) {
+    public void handleRequest(final InputStream inputAsStream, final OutputStream outputAsStream, final Context context) {
         try {
-            final byte[] streamAsBytes = IoUtils.toByteArray(inputAsStream);
-            final AWSRequestWrapper requestWrapped = new Gson().fromJson(new String(streamAsBytes),
-                    AWSRequestWrapper.class);
-            final EndpointDTO input = new Gson().fromJson(requestWrapped.getBody(), EndpointDTO.class);
-            context.getLogger().log("Input: "+input);
-            context.getLogger().log("Input body: "+requestWrapped.getBody());
+            final JSONObject requestObject = awsInOut.parseInputToJson(inputAsStream);
+            context.getLogger().log("Input body: " + requestObject.toJSONString());
+            final EndpointDTO input = endpointDeserializer.deserialize(requestObject);
             if (input != null && input.getDevicesUuid() != null && input.getDevicesUuid().size() > 0) {
                 final RMap<String, List<EndpointDTO>> cacheMap = RedisUtils.getCacheMap();
                 for (final String deviceUuid : input.getDevicesUuid()) {
                     final Object memObject = cacheMap.get(deviceUuid);
-                    final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>()
-                            : (List<EndpointDTO>) memObject;
+                    final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>() : (List<EndpointDTO>) memObject;
                     if (input.isRegisterAction()) {
                         if (!endpoints.contains(input)) {
                             endpoints.add(input);
                             context.getLogger().log("Added endpoint for device UUID " + deviceUuid + " with url "
-                                    + input.getEndpointCallbackUrl()+" and ID "+input.getEndpointUuid());
+                                    + input.getEndpointCallbackUrl() + " and ID " + input.getEndpointUuid());
                         }
                     } else if (input.isUnRegisterAction()) {
                         endpoints.remove(input);
-                        context.getLogger().log("Removed endpoint for device UUID "+deviceUuid+" with url "+
-                                input.getEndpointCallbackUrl()+" and ID "+input.getEndpointUuid()+
-                                ". Remaining subscriptions for device UUID: "+endpoints);
+                        context.getLogger().log("Removed endpoint for device UUID " + deviceUuid + " with url "
+                                        + input.getEndpointCallbackUrl() + " and ID " + input.getEndpointUuid()
+                                        + ". Remaining subscriptions for device UUID: " + endpoints);
                     }
                     cacheMap.put(deviceUuid, endpoints);
                 }
             }
-            String successResponse = new Gson()
-                    .toJson(AWSResponseWrapper.successResponseAsJson("\"" + input.getEndpointUuid() + "\""));
+            final String successResponse = awsInOut.createJsonResponse("\"" + input.getEndpointUuid() + "\"").toJSONString();
             context.getLogger().log(successResponse);
             outputAsStream.write(successResponse.getBytes());
-            outputAsStream.close();
+        } catch (ParseException | JsonDeserializationException e) {
+            context.getLogger().log("Exception trying to deserialize JSON input: " + e.getMessage());
         } catch (IOException ex) {
             context.getLogger().log(ex.getMessage());
+        } finally {
+            try {
+                inputAsStream.close();
+            } catch (IOException e) {
+                context.getLogger().log("Exception trying to close input: " + e.getMessage());
+            }
+            try {
+                outputAsStream.close();
+            } catch (IOException e) {
+                context.getLogger().log("Exception trying to close output: " + e.getMessage());
+            }
         }
     }
 }

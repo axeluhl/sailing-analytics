@@ -248,6 +248,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                 result.add(Integer.toString(t.getMaster().getPort()));
                 result.add(t.getMaster().getServerName());
                 result.add(t.getMaster().getHost().getInstanceId());
+                if (t.getAutoScalingGroupAmiId() != null) {
+                    result.add(t.getAutoScalingGroupAmiId());
+                }
                 for (final SailingAnalyticsProcessDTO replica : t.getReplicas()) {
                     result.add(replica.getHostname());
                     result.add(replica.getServerName());
@@ -344,7 +347,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return builder.toSafeHtml();
             }
         };
-        applicationReplicaSetsTable.addColumn(autoScalingGroupAmiIdColumn, stringMessages.machineImageId());
+        applicationReplicaSetsTable.addColumn(autoScalingGroupAmiIdColumn, stringMessages.machineImageId(), (rs1, rs2)->new NaturalComparator().compare(rs1.getAutoScalingGroupAmiId(), rs2.getAutoScalingGroupAmiId()));
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
                 new ApplicationReplicaSetsImagesBarCell(userService, stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_ARCHIVE,
