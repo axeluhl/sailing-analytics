@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
@@ -37,6 +38,8 @@ public class ShardManagementPanel extends SimplePanel {
     private final BusyIndicator leaderboardsBusy;
     private String region;
     private String passphrase;
+    private final DialogBox messageBox;
+    private final TextArea message;
     public ShardManagementPanel(LandscapeManagementWriteServiceAsync pLandscapeManagementService,ErrorReporter errorReporter, StringMessages stringMessages) {
         final VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
@@ -53,6 +56,9 @@ public class ShardManagementPanel extends SimplePanel {
         addShard.addClickHandler(event -> {
             addShardButtonPress();
         });
+        final Button removeButton  =new Button("Remove");
+        actionPanel.add(removeButton);
+        removeButton.addClickHandler(event -> removeButtonPress());
         mainPanel.add(actionPanel);
         final HorizontalPanel usercredentials = new HorizontalPanel();
         brearertokenText = new TextBox();
@@ -78,6 +84,10 @@ public class ShardManagementPanel extends SimplePanel {
         shardTable.addColumn(t -> t.getKey().toString(),"index");
         shardTable.addColumn(t -> t.getValue().getName(),"Name");
         shardTable.addColumn(t-> t.getValue().getKeysString() , "Sharding Keys");
+        shardTable.getSelectionModel().addSelectionChangeHandler(event -> {
+            removeButton.setEnabled(!shardTable.getSelectionModel().getSelectedSet().isEmpty());
+        });
+        removeButton.setEnabled(!shardTable.getSelectionModel().getSelectedSet().isEmpty());
         regattasTable = new TableWrapperWithMultiSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, false, java.util.Optional.empty(), GWT.create(AdminConsoleTableResources.class),
                 java.util.Optional.empty(), java.util.Optional.empty(), null) {
@@ -90,7 +100,7 @@ public class ShardManagementPanel extends SimplePanel {
                 }
                 return result;
             }
-        };
+        };  
         regattasTable.addColumn(t -> t, "Leaderboards");
         final HorizontalPanel tableRow  = new HorizontalPanel();
         leaderboardsBusy  =new SimpleBusyIndicator();
@@ -100,8 +110,29 @@ public class ShardManagementPanel extends SimplePanel {
         tableRow.add(shardTable);
         tableRow.add(shardBusy);
         
+        messageBox = new DialogBox(false);
+        final VerticalPanel dialogMainPanel = new VerticalPanel();
+        dialogMainPanel.setSpacing(5);
+        dialogMainPanel.setWidth("100%");
+        messageBox.add(dialogMainPanel);
+        message = new TextArea();
+        message.setPixelSize(200, 300);
+        dialogMainPanel.add(message);
+        Button closeButton = new Button("Close");
+        closeButton.addClickHandler(event -> messageBox.hide());
+        dialogMainPanel.add(closeButton);
+        messageBox.center();
+        messageBox.show();
+        appendMessage("Started");
+        appendMessage("Test");
+        
         
         mainPanel.add(tableRow);   
+    }
+    
+    private void appendMessage(String msg) {
+        message.setText(message.getText() + '\n' + msg);
+        messageBox.show();
     }
     
     private void refresh() {
@@ -125,7 +156,7 @@ public class ShardManagementPanel extends SimplePanel {
             
             @Override
             public void onSuccess(ArrayList<String> result) {
-                result.forEach(t -> regattasTable.add(t));
+                regattasTable.refresh(result);
                 setLeaderboardBusy(false);
             }
 
@@ -186,10 +217,31 @@ public class ShardManagementPanel extends SimplePanel {
             nameRequest.show();
         }
     }
+
+    private void removeButtonPress() {
+        setShardtableBusy(true);
+        for (Entry<Integer, AwsShardDTO> selection : shardTable.getSelectionModel().getSelectedSet()) {
+            landscapeManagementService.removeShard(selection.getKey(), selection.getValue(), replicaSet, region,
+                    passphrase.getBytes(), new AsyncCallback<Void>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                            setShardtableBusy(false);
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            appendMessage("Deleted Shard: " + selection.getValue().getName());
+                        }
+                    });
+        }
+        refresh();
+    }
     
     private void displayShards() {
         setShardtableBusy(true);
-            landscapeManagementService.getShards(replicaSet, region, new AsyncCallback<Map<Integer,AwsShardDTO>>() {
+            landscapeManagementService.getShards(replicaSet, region,passphrase.getBytes(), new AsyncCallback<Map<Integer,AwsShardDTO>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -199,9 +251,7 @@ public class ShardManagementPanel extends SimplePanel {
 
                 @Override
                 public void onSuccess(Map<Integer, AwsShardDTO> result) {
-                    for(Entry<Integer,AwsShardDTO> entry : result.entrySet()) {
-                        shardTable.add(entry);
-                    }
+                    shardTable.refresh(result.entrySet());
                     setShardtableBusy(false);
                 }
             });
