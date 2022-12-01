@@ -189,7 +189,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 o2Score = null;
             }
             if (o1ValidInNetScore && o2ValidInNetScore) {
-                int preemptiveColumnResult = 0;
                 if (raceColumn.isMedalRace()) {
                     // only count the score for the medal race score if it wasn't a carry-forward column
                     if (!raceColumn.isCarryForward()) {
@@ -232,61 +231,67 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         clearNumberOfMedalRacesWonByO2UponNextValidMedalRaceScore = o2Result.getB();
                     }
                 }
-                if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
+                if (raceColumn.isTotalOrderDefinedByFleet()) {
+                    final int preemptiveColumnResult;
                     final FleetComparisonResult compareByFleetResult = compareByFleet(raceColumn, o1, o2, fleetWithCorrectOrderingForCompetitorBySeries);
                     if (compareByFleetResult.getAuthoritativeFleetComparisonResult() != null) {
                         preemptiveColumnResult = compareByFleetResult.getAuthoritativeFleetComparisonResult();
                         defaultFleetBasedComparisonResult = 0;
-                    } else if (defaultFleetBasedComparisonResult == 0) {
-                        defaultFleetBasedComparisonResult = compareByFleetResult.getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment();
+                    } else {
+                        if (defaultFleetBasedComparisonResult == 0) {
+                            defaultFleetBasedComparisonResult = compareByFleetResult.getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment();
+                        }
+                        preemptiveColumnResult = 0;
+                    }
+                    if (preemptiveColumnResult != 0) {
+                        return preemptiveColumnResult;
                     }
                 }
             }
         }
-        final int preemptiveColumnResult = compareByMedalRaceParticipation(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
-        if (preemptiveColumnResult != 0) {
-            return preemptiveColumnResult;
-        }
-        if (defaultFleetBasedComparisonResult != 0) {
-            return defaultFleetBasedComparisonResult;
-        }
-        // now count the races in which they scored; if they scored in a different number of races, prefer the
-        // competitor who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
-        // break tie by sorting scores and looking for the first score difference.
-        int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
+        int result = compareByMedalRaceParticipation(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
         if (result == 0) {
-            if (scoringScheme.isMedalWinAmountCriteria()) {
-                // if one reaches the target amount of races won then this has priority, else proceed with normal
-                // points-based scoring (e.g., not enough races yet)
-                result = scoringScheme.compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
-            }
+            result = defaultFleetBasedComparisonResult;
             if (result == 0) {
-                result = scoringScheme.compareByScoreSum(o1ScoreSum, o2ScoreSum, nullScoresAreBetter,
-                        zeroBasedIndexOfLastMedalSeriesInWhichO1Scored>=0 || zeroBasedIndexOfLastMedalSeriesInWhichO2Scored>=0);
+                // now count the races in which they scored; if they scored in a different number of races, prefer the
+                // competitor who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
+                // break tie by sorting scores and looking for the first score difference.
+                result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
                 if (result == 0) {
-                    if (scoringScheme.isCarryForwardInMedalsCriteria()) {
-                        result = compareBySingleRaceColumnScore(o1CarryForwardScoreInMedals, o2CarryForwardScoreInMedals);
+                    if (scoringScheme.isMedalWinAmountCriteria()) {
+                        // if one reaches the target amount of races won then this has priority, else proceed with normal
+                        // points-based scoring (e.g., not enough races yet)
+                        result = scoringScheme.compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
                     }
                     if (result == 0) {
-                        if (scoringScheme.isLastMedalRaceCriteria()) {
-                            result = compareBySingleRaceColumnScore(o1LastMedalScore, o2LastMedalScore);
-                        }
+                        result = scoringScheme.compareByScoreSum(o1ScoreSum, o2ScoreSum, nullScoresAreBetter,
+                                zeroBasedIndexOfLastMedalSeriesInWhichO1Scored>=0 || zeroBasedIndexOfLastMedalSeriesInWhichO2Scored>=0);
                         if (result == 0) {
-                            result = scoringScheme.compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore, nullScoresAreBetter);
+                            if (scoringScheme.isCarryForwardInMedalsCriteria()) {
+                                result = compareBySingleRaceColumnScore(o1CarryForwardScoreInMedals, o2CarryForwardScoreInMedals);
+                            }
                             if (result == 0) {
-                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints), o2, Collections.unmodifiableList(o2TotalPoints), timePoint);
+                                if (scoringScheme.isLastMedalRaceCriteria()) {
+                                    result = compareBySingleRaceColumnScore(o1LastMedalScore, o2LastMedalScore);
+                                }
                                 if (result == 0) {
-                                    // compare by last race:
-                                    result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2, timePoint, cache);
+                                    result = scoringScheme.compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore, nullScoresAreBetter);
                                     if (result == 0) {
-                                        result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                                        result = compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints), o2, Collections.unmodifiableList(o2TotalPoints), timePoint);
                                         if (result == 0) {
-                                            if (getLeaderboard() instanceof RegattaLeaderboardWithOtherTieBreakingLeaderboard) {
-                                                result = scoringScheme.compareByOtherTieBreakingLeaderboard(
-                                                        (RegattaLeaderboardWithOtherTieBreakingLeaderboard) getLeaderboard(), o1, o2, timePoint);
-                                            }
+                                            // compare by last race:
+                                            result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2, timePoint, cache);
                                             if (result == 0) {
-                                                result = compareByArbitraryButStableCriteria(o1, o2);
+                                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                                                if (result == 0) {
+                                                    if (getLeaderboard() instanceof RegattaLeaderboardWithOtherTieBreakingLeaderboard) {
+                                                        result = scoringScheme.compareByOtherTieBreakingLeaderboard(
+                                                                (RegattaLeaderboardWithOtherTieBreakingLeaderboard) getLeaderboard(), o1, o2, timePoint);
+                                                    }
+                                                    if (result == 0) {
+                                                        result = compareByArbitraryButStableCriteria(o1, o2);
+                                                    }
+                                                }
                                             }
                                         }
                                     }
