@@ -237,11 +237,56 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         createCompetitorsAndRunAndAssertOpeningSeries(now, later, /* numberOfCompetitors */ 100);
         final List<Competitor> openingSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         final Util.Pair<List<Competitor>, List<Competitor>> semiFinalists = assignCarryForwardWinsToSemiFinalistsAndGrandFinalists(later);
-        
-        // TODO 
-        
+        // let top-seeded competitor from A with two carried wins win the first race immediately:
+        // scores for the A semi-finalists in the order of their seeding:
+        //   Carried Wins  SF1        Wins
+        //        2         1          3
+        //        1         2          1
+        //                  3          0
+        //                  4          0
+        final TrackedRace sf1ARace = new MockedTrackedRaceWithStartTimeAndRanks(now, semiFinalists.getA());
+        final RaceColumn sf1Column = leaderboard.getRaceColumnByName("SF1");
+        sf1Column.setTrackedRace(sf1Column.getFleetByName(SEMIFINAL_FLEET_A_NAME), sf1ARace);
+        // scores for the B semi-finalists in the order of their seeding:
+        //   Carried Wins  SF1  SF2   Wins
+        //        2         4    1     3
+        //        1         3    2     1
+        //                  2    3     0
+        //                  1    4     1
+        final TrackedRace sf1BRace = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(
+                semiFinalists.getB().get(3),
+                semiFinalists.getB().get(2),
+                semiFinalists.getB().get(1),
+                semiFinalists.getB().get(0)));
+        sf1Column.setTrackedRace(sf1Column.getFleetByName(SEMIFINAL_FLEET_B_NAME), sf1BRace);
+        final TrackedRace sf2BRace = new MockedTrackedRaceWithStartTimeAndRanks(now, semiFinalists.getB());
+        final RaceColumn sf2Column = leaderboard.getRaceColumnByName("SF2");
+        sf2Column.setTrackedRace(sf2Column.getFleetByName(SEMIFINAL_FLEET_B_NAME), sf2BRace);
         final List<Competitor> rankResultsAfterSemifinals = leaderboard.getCompetitorsFromBestToWorst(later);
-        
+        // So we should see ties on one win each for zero index-based A(1), B(1), and B(3).
+        // Their last race's scores are, respectively,                 2  ,  2  ,      4
+        // So A(1) and B(1) need to break their tie based on the opening series, and B(3) ranks worse.
+        // Overall ranks 1 and 2 are taken by the finalists; 3 and 4 by the semi-final winners. Start looking at rank 5 (zero-based 4):
+        if (openingSeriesRankResult.indexOf(semiFinalists.getA().get(1)) < openingSeriesRankResult.indexOf(semiFinalists.getB().get(1))) {
+            assertSame(rankResultsAfterSemifinals.get(4), semiFinalists.getA().get(1));
+            assertSame(rankResultsAfterSemifinals.get(5), semiFinalists.getB().get(1));
+        } else {
+            assertSame(rankResultsAfterSemifinals.get(5), semiFinalists.getA().get(1));
+            assertSame(rankResultsAfterSemifinals.get(4), semiFinalists.getB().get(1));
+        }
+        assertSame(rankResultsAfterSemifinals.get(6), semiFinalists.getB().get(3));
+        // And we should see ties on zero wins each for zero index-based A(2), A(3), and B(2)
+        // Their last race's scores are, respectively,                    3  ,  4  ,      3
+        // So A(2) and B(2) are tied on the last race too, and the opening series rank decides,
+        // and A(3) follows
+        if (openingSeriesRankResult.indexOf(semiFinalists.getA().get(2)) < openingSeriesRankResult.indexOf(semiFinalists.getB().get(2))) {
+            assertSame(rankResultsAfterSemifinals.get(7), semiFinalists.getA().get(2));
+            assertSame(rankResultsAfterSemifinals.get(8), semiFinalists.getB().get(2));
+        } else {
+            assertSame(rankResultsAfterSemifinals.get(8), semiFinalists.getA().get(2));
+            assertSame(rankResultsAfterSemifinals.get(7), semiFinalists.getB().get(2));
+        }
+        assertSame(rankResultsAfterSemifinals.get(9), semiFinalists.getA().get(3));
     }
     
     /**
