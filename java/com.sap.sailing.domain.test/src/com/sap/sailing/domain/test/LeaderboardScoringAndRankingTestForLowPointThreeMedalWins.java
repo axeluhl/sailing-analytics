@@ -31,12 +31,14 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinThreeRaces;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -49,12 +51,16 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * who did not advance to the semi-final stage.
  */
 public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends LeaderboardScoringAndRankingTestBase {
-    private static final String GRANDFINAL_SERIES_NAME = "Grand Final";
     private static final String SEMIFINAL_SERIES_NAME = "Semifinal";
-    private static final String FINAL_CARRY_COLUMN_NAME = "Carry F";
+    private static final String SEMIFINAL_FLEET_A_NAME = "A";
+    private static final String SEMIFINAL_FLEET_B_NAME = "B";
     private static final String SEMIFINAL_CARRY_COLUMN_NAME = "Carry SF";
+    private static final String GRANDFINAL_SERIES_NAME = "Grand Final";
+    private static final String GRANDFINAL_DEFAULT_FLEET_NAME = "Default";
+    private static final String FINAL_CARRY_COLUMN_NAME = "Carry F";
     private static final double EPSILON = 0.000001;
     private Regatta regatta;
+    private RegattaLeaderboard leaderboard;
 
     /**
      * The competitor orders provided in the lists define the points scored in the respective race, one-based
@@ -83,7 +89,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     }
 
     private void setupMedalSeriesWithCarryOverAndSixRaceColumnsEach() {
-        Iterable<? extends Fleet> semiFinalFleets = Arrays.asList(new Fleet[] { new FleetImpl("A", 0), new FleetImpl("B", 0)});
+        Iterable<? extends Fleet> semiFinalFleets = Arrays.asList(new Fleet[] { new FleetImpl(SEMIFINAL_FLEET_A_NAME, 0), new FleetImpl(SEMIFINAL_FLEET_B_NAME, 0)});
         List<String> semiFinalRaceColumnNames = new ArrayList<String>();
         semiFinalRaceColumnNames.add(SEMIFINAL_CARRY_COLUMN_NAME);
         semiFinalRaceColumnNames.add("SF1");
@@ -97,7 +103,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         semiFinalSeries.setFirstColumnIsNonDiscardableCarryForward(true);
         semiFinalSeries.setStartsWithZeroScore(true);
         series.add(semiFinalSeries);
-        Set<? extends Fleet> grandFinalFleets = Collections.singleton(new FleetImpl("Default"));
+        Set<? extends Fleet> grandFinalFleets = Collections.singleton(new FleetImpl(GRANDFINAL_DEFAULT_FLEET_NAME));
         List<String> grandFinalRaceColumnNames = new ArrayList<String>();
         grandFinalRaceColumnNames.add(FINAL_CARRY_COLUMN_NAME);
         grandFinalRaceColumnNames.add("F1");
@@ -143,6 +149,33 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         setupOpeningSeriesWithOneRaceColumnPerSeries();
         setupMedalSeriesWithCarryOverAndSixRaceColumnsEach();
         regatta = setupRegatta();
+        // leaderboard set-up
+        leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+    }
+    
+    @Test
+    public void testWithRandomRaceOutcomes20() throws NoWindException {
+        testWithRandomRaceOutcomes(/* numberOfCompetitors */ 20);
+    }
+
+    @Test
+    public void testWithRandomRaceOutcomes40() throws NoWindException {
+        testWithRandomRaceOutcomes(/* numberOfCompetitors */ 40);
+    }
+
+    @Test
+    public void testWithRandomRaceOutcomes60() throws NoWindException {
+        testWithRandomRaceOutcomes(/* numberOfCompetitors */ 60);
+    }
+
+    @Test
+    public void testWithRandomRaceOutcomes80() throws NoWindException {
+        testWithRandomRaceOutcomes(/* numberOfCompetitors */ 80);
+    }
+
+    @Test
+    public void testWithRandomRaceOutcomes100() throws NoWindException {
+        testWithRandomRaceOutcomes(/* numberOfCompetitors */ 100);
     }
 
     /**
@@ -150,9 +183,44 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
      * should be scored with Low_Points restarting at 0 for the medal series. The non finalists score should not change
      * during the medalseries.
      */
-    @Test
-    public void testWithRandomRaceOutcomes() throws NoWindException {
-        final int NUMBER_OF_COMPETITORS_PER_RACE = 600;
+    private void testWithRandomRaceOutcomes(final int numberOfCompetitors) {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
+        createCompetitorsAndRunAndAssertOpeningSeries(now, later, numberOfCompetitors);
+        final List<Competitor> openingSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        final Util.Pair<List<Competitor>, List<Competitor>> semiFinalists = assignCarryForwardWinsToSemiFinalistsAndGrandFinalists(later);
+        // lottery for semi-final races until we have three wins:
+        runRacesInFinalUntilThreeWins(semiFinalists.getA(), regatta.getSeriesByName(SEMIFINAL_SERIES_NAME), SEMIFINAL_FLEET_A_NAME, now);
+        runRacesInFinalUntilThreeWins(semiFinalists.getB(), regatta.getSeriesByName(SEMIFINAL_SERIES_NAME), SEMIFINAL_FLEET_B_NAME, now);
+        // check that the semi-final winners took three wins (including carried wins) each:
+        final List<Competitor> rankResultsAfterSemifinals = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(3.0, leaderboard.getNetPoints(rankResultsAfterSemifinals.get(2), later), EPSILON);
+        assertEquals(3.0, leaderboard.getNetPoints(rankResultsAfterSemifinals.get(3), later), EPSILON);
+        // assemble final fleet:
+        final List<Competitor> finalists = new ArrayList<>();
+        finalists.add(openingSeriesRankResult.get(0));
+        finalists.add(openingSeriesRankResult.get(1));
+        finalists.add(rankResultsAfterSemifinals.get(2));
+        finalists.add(rankResultsAfterSemifinals.get(3));
+        runRacesInFinalUntilThreeWins(finalists, regatta.getSeriesByName(GRANDFINAL_SERIES_NAME), GRANDFINAL_DEFAULT_FLEET_NAME, now);
+        // check total results:
+        final List<Competitor> rankResultsAfterGrandFinal = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(3.0, leaderboard.getNetPoints(rankResultsAfterGrandFinal.get(0), later), EPSILON);
+        assertFinalistRanks(leaderboard, regatta.getSeriesByName(GRANDFINAL_SERIES_NAME), finalists, rankResultsAfterGrandFinal, openingSeriesRankResult, later);
+        // assert that non-medalists remain in the order computed at the end of the opening series
+        for (int i=10; i<openingSeriesRankResult.size(); i++) {
+            assertSame(openingSeriesRankResult.get(i), rankResultsAfterGrandFinal.get(i));
+        }
+    }
+
+    /**
+     * @param numberOfCompetitors
+     *            must be evenly divisible by four, so we can have two opening series fleets and promote the better half
+     *            of each of the qualification series races to gold and half to silver, each.
+     */
+    private void createCompetitorsAndRunAndAssertOpeningSeries(TimePoint now, TimePoint later, int numberOfCompetitors) {
+        assertEquals("Number of competitors must be evenly divisible by four, but "+numberOfCompetitors+" isn't.", 0, numberOfCompetitors % 4);
+        final int NUMBER_OF_COMPETITORS_PER_RACE = numberOfCompetitors / 2;
         // Competitor set-up
         final List<Competitor> competitors = createCompetitors(2*NUMBER_OF_COMPETITORS_PER_RACE);
         final List<Competitor> yellow = new ArrayList<>(competitors.subList(0, NUMBER_OF_COMPETITORS_PER_RACE));
@@ -168,30 +236,32 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         silver.addAll(yellow.subList(NUMBER_OF_COMPETITORS_PER_RACE/2, NUMBER_OF_COMPETITORS_PER_RACE));
         silver.addAll(blue.subList(NUMBER_OF_COMPETITORS_PER_RACE/2, NUMBER_OF_COMPETITORS_PER_RACE));
         Collections.shuffle(silver);
-        // leaderboard set-up
-        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         // assign points by creating races with competitors in the order defined above and check opening series scoring
         executePreSeries(yellow, blue, gold, silver, now);
         assertOpeningSeriesTiesBrokenProperly(leaderboard, later);
+    }
+    
+    /**
+     * Returns the semi-finalists for A and B fleets
+     */
+    private Pair<List<Competitor>, List<Competitor>> assignCarryForwardWinsToSemiFinalistsAndGrandFinalists(TimePoint timePoint) {
         // now compute and enter the wins carried forward:
         // - opening series winner carries two, second carries one win straight to the grand final
         // - third/fourth carry two wins to semi-final, fifth/sixth carry one win to semi-final
         // - ranks three to ten compete in the semi-final
         // - semi-final fleet A: 3, 6, 7, 10; semi-final fleet B: 4, 5, 8, 9
-        final List<Competitor> openingSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        final List<Competitor> openingSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(timePoint);
         leaderboard.getScoreCorrection().correctScore(openingSeriesRankResult.get(0), leaderboard.getRaceColumnByName(FINAL_CARRY_COLUMN_NAME), 2.0);
         leaderboard.getScoreCorrection().correctScore(openingSeriesRankResult.get(1), leaderboard.getRaceColumnByName(FINAL_CARRY_COLUMN_NAME), 1.0);
         final Map<String, List<Competitor>> semiFinalCompetitorsByFleetName = new HashMap<>();
         final List<Competitor> sfACompetitors = new ArrayList<>();
-        semiFinalCompetitorsByFleetName.put("A", sfACompetitors);
+        semiFinalCompetitorsByFleetName.put(SEMIFINAL_FLEET_A_NAME, sfACompetitors);
         sfACompetitors.add(openingSeriesRankResult.get(2));
         sfACompetitors.add(openingSeriesRankResult.get(5));
         sfACompetitors.add(openingSeriesRankResult.get(6));
         sfACompetitors.add(openingSeriesRankResult.get(9));
         final List<Competitor> sfBCompetitors = new ArrayList<>();
-        semiFinalCompetitorsByFleetName.put("B", sfBCompetitors);
+        semiFinalCompetitorsByFleetName.put(SEMIFINAL_FLEET_B_NAME, sfBCompetitors);
         sfBCompetitors.add(openingSeriesRankResult.get(3));
         sfBCompetitors.add(openingSeriesRankResult.get(4));
         sfBCompetitors.add(openingSeriesRankResult.get(7));
@@ -201,7 +271,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         leaderboard.getScoreCorrection().correctScore(sfBCompetitors.get(0), leaderboard.getRaceColumnByName(SEMIFINAL_CARRY_COLUMN_NAME), 2.0);
         leaderboard.getScoreCorrection().correctScore(sfBCompetitors.get(1), leaderboard.getRaceColumnByName(SEMIFINAL_CARRY_COLUMN_NAME), 1.0);
         // assert that the finalists already rank at the top:
-        final List<Competitor> rankResultsAfterApplyingCarriedWins = leaderboard.getCompetitorsFromBestToWorst(later);
+        final List<Competitor> rankResultsAfterApplyingCarriedWins = leaderboard.getCompetitorsFromBestToWorst(timePoint);
         assertSame(openingSeriesRankResult.get(0), rankResultsAfterApplyingCarriedWins.get(0));
         assertSame(openingSeriesRankResult.get(1), rankResultsAfterApplyingCarriedWins.get(1));
         // assert that semi-finalists are still ordered by their opening series rank because when tied on wins
@@ -209,30 +279,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         for (int i=2; i<10; i++) {
             assertSame(openingSeriesRankResult.get(i), rankResultsAfterApplyingCarriedWins.get(i));
         }
-        // lottery for semi-final races until we have three wins:
-        for (final String semiFinalFleet : new String[] { "A", "B" }) {
-            runRacesInFinalUntilThreeWins(semiFinalCompetitorsByFleetName.get(semiFinalFleet),
-                    regatta.getSeriesByName(SEMIFINAL_SERIES_NAME), semiFinalFleet, now);
-        }
-        // check that the semi-final winners took three wins (including carried wins) each:
-        final List<Competitor> rankResultsAfterSemifinals = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(3.0, leaderboard.getNetPoints(rankResultsAfterSemifinals.get(2), later), EPSILON);
-        assertEquals(3.0, leaderboard.getNetPoints(rankResultsAfterSemifinals.get(3), later), EPSILON);
-        // assemble final fleet:
-        final List<Competitor> finalists = new ArrayList<>();
-        finalists.add(openingSeriesRankResult.get(0));
-        finalists.add(openingSeriesRankResult.get(1));
-        finalists.add(rankResultsAfterSemifinals.get(2));
-        finalists.add(rankResultsAfterSemifinals.get(3));
-        runRacesInFinalUntilThreeWins(finalists, regatta.getSeriesByName(GRANDFINAL_SERIES_NAME), "Default", now);
-        // check total results:
-        final List<Competitor> rankResultsAfterGrandFinal = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(3.0, leaderboard.getNetPoints(rankResultsAfterGrandFinal.get(0), later), EPSILON);
-        assertFinalistRanks(leaderboard, regatta.getSeriesByName(GRANDFINAL_SERIES_NAME), finalists, rankResultsAfterGrandFinal, openingSeriesRankResult, later);
-        // assert that non-medalists remain in the order computed at the end of the opening series
-        for (int i=10; i<openingSeriesRankResult.size(); i++) {
-            assertSame(openingSeriesRankResult.get(i), rankResultsAfterGrandFinal.get(i));
-        }
+        return new Util.Pair<>(sfACompetitors, sfBCompetitors);
     }
 
     /**
