@@ -44,8 +44,11 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
         return true;
     }
     
-    @Override
-    public int getTargetAmountOfMedalRaceWins() {
+    /**
+     * If {@link #isMedalWinAmountCriteria()} returns {@code true}, this will be the amount of races that must be won,
+     * in order to win the medal series instantly
+     */
+    private int getTargetAmountOfMedalRaceWins() {
         return 2;
     }
     

@@ -176,14 +176,6 @@ public interface ScoringScheme extends Serializable {
     }
 
     /**
-     * If {@link #isMedalWinAmountCriteria()} returns {@code true}, this will be the amount of races that must be won,
-     * in order to win the medal series instantly
-     */
-    default int getTargetAmountOfMedalRaceWins() {
-        throw new IllegalStateException("This call is not valid for this scoringSheme");
-    }
-
-    /**
      * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
      * medal race column it usually counts double. Under certain circumstances, columns may also count with factors
      * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee

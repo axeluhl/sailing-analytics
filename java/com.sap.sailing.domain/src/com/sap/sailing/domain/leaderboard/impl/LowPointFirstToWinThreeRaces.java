@@ -88,11 +88,6 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         return result;
     }
 
-    @Override
-    public int getTargetAmountOfMedalRaceWins() {
-        return 3;
-    }
-
     /**
      * In equal-weighted semifinal fleets A/B a different number of races may be sailed until any one competitor
      * in that fleet has reached {@link #getTargetAmountOfMedalRaceWins()} wins. Therefore, the number of races
