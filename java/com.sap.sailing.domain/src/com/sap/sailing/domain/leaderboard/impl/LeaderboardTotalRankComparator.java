@@ -194,25 +194,21 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     if (!raceColumn.isCarryForward()) {
                         if (o1Score != null) {
                             o1MedalRaceScore += o1Score;
-                            if (raceColumn instanceof RaceColumnInSeries) {
-                                zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
-                            }
-                        }
-                        if (o2Score != null) {
-                            o2MedalRaceScore += o2Score;
-                            if (raceColumn instanceof RaceColumnInSeries) {
-                                zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
-                            }
-                        }
-                        if (o1Score != null) {
                             o1LastMedalScore = o1Score;
                         }
                         if (o2Score != null) {
+                            o2MedalRaceScore += o2Score;
                             o2LastMedalScore = o2Score;
                         }
                     } else {
                         o1CarryForwardScoreInMedals = o1Score;
                         o2CarryForwardScoreInMedals = o2Score;
+                    }
+                    if (o1Score != null && raceColumn instanceof RaceColumnInSeries) {
+                        zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
+                    }
+                    if (o2Score != null && raceColumn instanceof RaceColumnInSeries) {
+                        zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
                     }
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
