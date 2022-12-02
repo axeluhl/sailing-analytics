@@ -20,10 +20,6 @@ public class ImageCreateDialog extends ImageDialog {
         subtitleTextBox.setVisibleLength(40);
         copyrightTextBox = createTextBox(null);
         copyrightTextBox.setVisibleLength(40);
-        widthInPxBox = createIntegerBox(null, 10);
-        widthInPxBox.setEnabled(false);
-        heightInPxBox = createIntegerBox(null, 10);
-        heightInPxBox.setEnabled(false);
         List<String> tags = new ArrayList<>();
         if (initialTag != null && !initialTag.isEmpty()) {
             tags.add(initialTag);

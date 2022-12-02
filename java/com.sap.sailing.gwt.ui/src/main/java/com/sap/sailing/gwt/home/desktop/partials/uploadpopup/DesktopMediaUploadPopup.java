@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.uploadpopup;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources;
@@ -9,8 +10,8 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class DesktopMediaUploadPopup extends AbstractMediaUploadPopup {
 
-    public DesktopMediaUploadPopup(Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
-        super(updateVideo, updateImage);
+    public DesktopMediaUploadPopup(Consumer<List<VideoDTO>> updateVideos, Consumer<List<ImageDTO>> updateImages) {
+        super(updateVideos, updateImages);
         MediaPageResources.INSTANCE.css().ensureInjected();
         addStyleName(MediaPageResources.INSTANCE.css().popup());
     }

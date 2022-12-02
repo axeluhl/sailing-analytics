@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -31,7 +32,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
-import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.listedit.ExpandedUiWithCheckboxes;
@@ -51,8 +51,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
     protected TextBox titleTextBox;
     protected TextBox subtitleTextBox;
     protected TextBox copyrightTextBox;
-    protected IntegerBox widthInPxBox;
-    protected IntegerBox heightInPxBox;
+    protected final VerticalPanel fileInfoVPanel;
     protected final StringListInlineEditorComposite tagsListEditor;
     protected Image image;
     private final ExpandedUiWithCheckboxes<String> expandedUi;
@@ -100,8 +99,10 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                 final Integer imageHeight = imageToValidate.getHeightInPx();
                 if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                     errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
-            } else if (imageToValidate.getSourceRef().startsWith("http:")) {
-                errorMessage = stringMessages.pleaseUseHttpsForImageUrls();
+                } else if (imageToValidate.getSourceRef().startsWith("http:")
+                        && !imageToValidate.getSourceRef().contains("localhost")
+                        && !imageToValidate.getSourceRef().contains("127.0.0.1")) {
+                    errorMessage = stringMessages.pleaseUseHttpsForImageUrls();
                 } else if (imageWidth == null || imageHeight == null) {
                     errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
                 } else {
@@ -123,7 +124,8 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                                     && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight())) {
                                 // Image has tag but is not compatible
                                 if (!resizingTask.getResizingTask().contains(mediaTag)) { // Image has tag but resizeTask does not
-                                    errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
+                                    String fileName = ImageDialog.extractFileName(imageToValidate.getSourceRef());
+                                    errorMessage += getSizeErrorMessage(fileName, mediaTag, stringMessages) + "\r\n";
                                     checkBoxStyleMap.put(checkBox, CheckBoxStyle.Error);
                                     if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
                                         checkBox.setEnabled(false);
@@ -227,8 +229,8 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             return errorMessage;
         }
         
-        private String getSizeErrorMessage(MediaTagConstants mediaTag, StringMessages stringMessages) {
-            String errorMessage = stringMessages.imageSizeError(mediaTag.getName(), mediaTag.getMinWidth(),
+        private String getSizeErrorMessage(String fileName, MediaTagConstants mediaTag, StringMessages stringMessages) {
+            String errorMessage = stringMessages.imageSizeError(fileName + "(" + mediaTag.getName() + ")", mediaTag.getMinWidth(),
                     mediaTag.getMaxWidth(), mediaTag.getMinHeight(), mediaTag.getMaxHeight());
             return errorMessage;
         }
@@ -254,6 +256,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.creationDate = creationDate;
+        fileInfoVPanel = new VerticalPanel();
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, true, "image/*");
@@ -262,8 +265,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             public void onValueChange(ValueChangeEvent<List<String>> event) {
                 List<String> imageUrls = event.getValue();
                 if (imageUrls == null || imageUrls.isEmpty()) {
-                    widthInPxBox.setText("");
-                    heightInPxBox.setText("");
+                    fileInfoVPanel.clear();
                 } else {
                     busyIndicator.setBusy(true);
                     busyCounter = 0;
@@ -274,6 +276,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                                     new AsyncCallback<Pair<Integer, Integer>>() {
                                         @Override
                                         public void onSuccess(Pair<Integer, Integer> imageSize) {
+                                            GWT.log("resolve image dimensions - SUCCESS " + imageSize);
                                             imageDimensionsMap.put(imageUrl, imageSize);
                                             busyCounter -= 1;
                                             if (busyCounter <= 0) {
@@ -284,6 +287,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
 
                                         @Override
                                         public void onFailure(Throwable caught) {
+                                            GWT.log("resolve image dimensions - FAILURE", caught);
                                             busyCounter -= 1;
                                             if (busyCounter <= 0) {
                                                 busyIndicator.setBusy(false);
@@ -333,6 +337,13 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         for (String tag : tagsListEditor.getValue()) {
             tags.add(tag);
         }
+        final List<MediaTagConstants> notCheckedMediaTags = new ArrayList<MediaTagConstants>();
+        for (int i = 0; i < tags.size(); i++) {
+            if (Arrays.asList(MediaTagConstants.values()).contains(MediaTagConstants.fromName(tags.get(i)))
+                    && !expandedUi.getCheckBoxes().get(i).getValue()) {
+                notCheckedMediaTags.add(MediaTagConstants.fromName(tags.get(i)));
+            }
+        }
         final List<MediaTagConstants> mediaTags = new ArrayList<MediaTagConstants>();
         for (int i = 0; i < tags.size(); i++) {
             if (Arrays.asList(MediaTagConstants.values()).contains(MediaTagConstants.fromName(tags.get(i)))
@@ -342,35 +353,50 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         }
         ArrayList<ImageResizingTaskDTO> results = new ArrayList<>(imageURLAndUploadComposite.getUris().size());
         List<String> uris = imageURLAndUploadComposite.getUris();
+        fileInfoVPanel.clear();
         for (int i = 0; i < uris.size(); i++) {
             final String imageURL = uris.get(i);
+            final String fileName = ImageDialog.extractFileName(imageURL);
             final ImageDTO image = new ImageDTO(imageURL, creationDate);
             image.setTitle(titleTextBox.getValue());
             image.setSubtitle(subtitleTextBox.getValue());
             image.setCopyright(copyrightTextBox.getValue());
             final Pair<Integer, Integer> dims = imageDimensionsMap.get(imageURL);
+            final Label fileInfoText;
             if (dims != null) {
                 image.setSizeInPx(dims.getA(), dims.getB());
-                if (i == 0) {
-                    widthInPxBox.setValue(dims.getA());
-                    heightInPxBox.setValue(dims.getB());
-                }
+                fileInfoText = new Label(fileName + " (" + dims.getA() + "x" + dims.getB() + ")");
+                
+            } else {
+                fileInfoText = new Label(fileName);
             }
             image.setTags(tags);
             final List<MediaTagConstants> resizeTags = new ArrayList<>();
             for (final MediaTagConstants mediaTag : mediaTags) {
                 if (imageNeedsResizeForTag(image, mediaTag)) {
                     resizeTags.add(mediaTag);
+                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize());
                 }
             }
+            for (final MediaTagConstants mediaTag : notCheckedMediaTags) {
+                if (imageNeedsResizeForTag(image, mediaTag)) {
+                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize());
+                    fileInfoText.setStyleName("errorLabel");
+                }
+            }
+            fileInfoVPanel.add(fileInfoText);
             results.add(new ImageResizingTaskDTO(image, resizeTags));
         }
         return results;
     }
+    
+    private static String extractFileName(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
 
     private static boolean imageNeedsResizeForTag(ImageDTO image, MediaTagConstants mediaTag) {
-        final boolean widthExceeded = image.getWidthInPx() > mediaTag.getMaxWidth();
-        final boolean heightExceeded = image.getHeightInPx() > mediaTag.getMaxHeight();
+        final boolean widthExceeded = image != null && image.getWidthInPx() != null && image.getWidthInPx() > mediaTag.getMaxWidth();
+        final boolean heightExceeded = image != null && image.getWidthInPx() != null && image.getHeightInPx() > mediaTag.getMaxHeight();
         return widthExceeded || heightExceeded;
     }
 
@@ -383,7 +409,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             panel.add(additionalWidget);
         }
 
-        Grid grid = new Grid(11, 2);
+        Grid grid = new Grid(10, 2);
 
         grid.setWidget(0, 0, new Label(stringMessages.createdAt() + ":"));
         grid.setWidget(0, 1, createdAtLabel);
@@ -391,22 +417,20 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         grid.setWidget(1, 1, busyIndicator);
         grid.setWidget(2,  0, new Label(stringMessages.imageURL() + ":"));
         grid.setWidget(2, 1, imageURLAndUploadComposite);
-        grid.setWidget(3, 0, new HTML("&nbsp;"));
+        grid.setWidget(3, 0, new Label(stringMessages.fileUpload() + ":"));
+        grid.setWidget(3, 1, fileInfoVPanel);
+        grid.setWidget(4, 0, new HTML("&nbsp;"));
 
-        grid.setWidget(4,  0, new Label(stringMessages.title() + ":"));
-        grid.setWidget(4, 1, titleTextBox);
-        grid.setWidget(5,  0, new Label(stringMessages.subtitle() + ":"));
-        grid.setWidget(5, 1, subtitleTextBox);
-        grid.setWidget(6, 0, new Label(stringMessages.copyright() + ":"));
-        grid.setWidget(6, 1, copyrightTextBox);
-        grid.setWidget(7, 0, new Label(stringMessages.widthInPx() + ":"));
-        grid.setWidget(7, 1, widthInPxBox);
-        grid.setWidget(8, 0, new Label(stringMessages.heightInPx() + ":"));
-        grid.setWidget(8, 1, heightInPxBox);
+        grid.setWidget(5,  0, new Label(stringMessages.title() + ":"));
+        grid.setWidget(5, 1, titleTextBox);
+        grid.setWidget(6,  0, new Label(stringMessages.subtitle() + ":"));
+        grid.setWidget(6, 1, subtitleTextBox);
+        grid.setWidget(7, 0, new Label(stringMessages.copyright() + ":"));
+        grid.setWidget(7, 1, copyrightTextBox);
 
-        grid.setWidget(9, 0, new HTML("&nbsp;"));
-        grid.setWidget(10, 0, new Label(stringMessages.tags() + ":"));
-        grid.setWidget(10, 1, tagsListEditor);
+        grid.setWidget(8, 0, new HTML("&nbsp;"));
+        grid.setWidget(9, 0, new Label(stringMessages.tags() + ":"));
+        grid.setWidget(9, 1, tagsListEditor);
 
         panel.add(grid);
 

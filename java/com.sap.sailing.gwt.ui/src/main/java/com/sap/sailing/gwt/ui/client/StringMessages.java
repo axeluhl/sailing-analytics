@@ -2069,6 +2069,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String swissTimingUpdateUsername();
     String swissTimingUpdatePassword();
     String allowResizing();
+    String resize();
     String resizeSuccessfull();
     String resizeUnsuccessful(String cause);
     String automaticResizeNeedsStorageService();
@@ -2391,6 +2392,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String confirmDeleteImage();
     String confirmDeleteVideo();
     String fileUpload();
+    String uploadedFiles();
     String or();
     String noMediaSelected();
     String fileTypeNotSupported();

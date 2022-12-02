@@ -107,6 +107,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String refresh();
     String preferredLanguage();
     String cannotResetInvalidURL();
+    String cannotUploadVideosAndImagesTogether();
     String showMoreInfoLogin();
     String moreInfo();
     String dismiss();

@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -60,14 +63,15 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
 
-    private final Consumer<VideoDTO> updateVideo;
-    private final Consumer<ImageDTO> updateImage;
+    private final Consumer<List<VideoDTO>> updateVideos;
+    private final Consumer<List<ImageDTO>> updateImages;
 
     protected final FileUpload upload;
     protected final Button uploadButton;
     protected final FlowPanel content;
     protected final TextBox fileNameInput;
     protected final TextBox urlInput;
+    protected final FlowPanel files; 
     protected final TextBox titleTextBox;
     protected final TextBox subtitleTextBox;
     protected final TextBox copyrightTextBox;
@@ -75,11 +79,11 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final FlowPanel fileExistingPanel;
     private final Button saveButton;
     private FlowPanel progressOverlay;
-    private String uri;
+    private final List<String> uriList = new ArrayList<>();
 
-    public AbstractMediaUploadPopup(Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
-        this.updateVideo = updateVideo;
-        this.updateImage = updateImage;
+    public AbstractMediaUploadPopup(Consumer<List<VideoDTO>> updateVideos, Consumer<List<ImageDTO>> updateImages) {
+        this.updateVideos = updateVideos;
+        this.updateImages = updateImages;
         sharedHomeResources.sharedHomeCss().ensureInjected();
         addStyleName(sharedHomeResources.sharedHomeCss().popup());
         setTitle(i18n.upload());
@@ -88,6 +92,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         setAnimationEnabled(true);
         upload = new FileUpload();
         upload.getElement().setAttribute("accept", "image/*;capture=camera");
+        upload.getElement().setAttribute("multiple", "multiple");
         upload.setVisible(false);
         upload.setName("file");
         this.setModal(false);
@@ -149,6 +154,11 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             }
         });
         metaDataPanel.add(urlInput);
+        final Label uploadedFiles = new Label(i18n.uploadedFiles());
+        uploadedFiles.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        metaDataPanel.add(uploadedFiles);
+        files = new FlowPanel();
+        metaDataPanel.add(files);
         fileExistingPanel = new FlowPanel();
         fileExistingPanel.add(new Label("-- " + i18n.noMediaSelected() + " --"));
         metaDataPanel.add(fileExistingPanel);
@@ -334,21 +344,23 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             JSONValue resultJsonValue = parseAfterReplacingSurroundingPreElement(result);
             JSONArray resultJson = resultJsonValue.isArray();
             if (resultJson != null) {
-                if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
-                    cleanFormElements();
-                    String uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString()
-                            .stringValue();
-                    String fileName = resultJson.get(0).isObject().get(FileUploadConstants.FILE_NAME).isString()
-                            .stringValue();
-                    updateUri(uri, fileName);
-                    fileNameInput.setValue(i18n.uploadSuccessful());
-                } else {
-                    String status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString()
-                            .stringValue();
-                    String message = resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString()
-                            .stringValue();
-                    Notification.notify(i18n.fileUploadResult(status, message), NotificationType.ERROR);
-                    logger.log(Level.SEVERE, "Submit file failed. Status: " + status + ", message: " + message);
+                for (int i=0; i<resultJson.size(); i++) {
+                    if (resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI) != null) {
+                        cleanFormElements();
+                        String uri = resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI).isString()
+                                .stringValue();
+                        String fileName = resultJson.get(i).isObject().get(FileUploadConstants.FILE_NAME).isString()
+                                .stringValue();
+                        addUri(uri, fileName);
+                        fileNameInput.setValue(i18n.uploadSuccessful());
+                    } else {
+                        String status = resultJson.get(i).isObject().get(FileUploadConstants.STATUS).isString()
+                                .stringValue();
+                        String message = resultJson.get(i).isObject().get(FileUploadConstants.MESSAGE).isString()
+                                .stringValue();
+                        Notification.notify(i18n.fileUploadResult(status, message), NotificationType.ERROR);
+                        logger.log(Level.SEVERE, "Submit file failed. Status: " + status + ", message: " + message);
+                    }
                 }
             }
         }
@@ -362,7 +374,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     @Override
     public void show() {
         // reset all fields
-        updateUri(null, null);
+        resetInput();
         cleanFormElements();
         super.show();
     }
@@ -381,52 +393,56 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
      * Finally add a new MediaTrack.
      */
     private void addMedia() {
-
-        final String uploadUrl;
-        if (uri == null) {
-            uploadUrl = "";
-        } else if (!UriUtils.isSafeUri(uri.trim())) {
-            logger.warning("Upload url is not valid: " + uri + ". Ignore upload url.");
-            uploadUrl = "";
-        } else {
-            uploadUrl = uri.trim();
-        }
-        final String inputUrl;
-        if (urlInput.getValue() == null) {
-            inputUrl = "";
-        } else if (!UriUtils.isSafeUri(urlInput.getValue())) {
-            logger.warning("Upload url is not valid: " + uri + ". Ignore upload url.");
-            inputUrl = "";
-        } else {
-            inputUrl = urlInput.getValue();
-        }
-        final String url;
-        if (uploadUrl.isEmpty()) {
-            url = inputUrl;
-        } else {
-            url = uploadUrl;
-        }
-
-        if (!url.isEmpty()) {
-            final String mimeTypeName = mimeTypeListBox.getSelectedValue();
-            final MimeType mimeType;
-            if (mimeTypeName != null) {
-                mimeType = MimeType.byName(mimeTypeListBox.getSelectedValue());
+        List<ImageDTO> imageList = new ArrayList<>();
+        List<VideoDTO> videoList = new ArrayList<>();
+        for (String uri: uriList) {
+            final String uploadUrl;
+            if (uri == null) {
+                uploadUrl = "";
+            } else if (!UriUtils.isSafeUri(uri.trim())) {
+                logger.warning("Upload url is not valid: " + uri + ". Ignore upload url.");
+                uploadUrl = "";
             } else {
-                mimeType = MimeType.unknown;
+                uploadUrl = uri.trim();
             }
-            hide();
-            if (mimeType.mediaType == MediaType.image) {
-                updateImage.accept(createImage(url));
-            } else if (mimeType.mediaType == MediaType.video || mimeType.mediaType == MediaType.audio) {
-                updateVideo.accept(createVideo(url, null, mimeType));
+            final String inputUrl;
+            if (urlInput.getValue() == null) {
+                inputUrl = "";
+            } else if (!UriUtils.isSafeUri(urlInput.getValue())) {
+                logger.warning("Upload url is not valid: " + uri + ". Ignore upload url.");
+                inputUrl = "";
             } else {
-                logger.warning("No image nor video detected. Nothing will be saved.");
-                Notification.notify(i18n.noImageOrVideoDetected(), NotificationType.WARNING);
+                inputUrl = urlInput.getValue();
             }
-
-        } else {
-            Notification.notify(i18n.invalidURL(), NotificationType.ERROR);
+            final String url;
+            if (uploadUrl.isEmpty()) {
+                url = inputUrl;
+            } else {
+                url = uploadUrl;
+            }
+            if (!url.isEmpty()) {
+                final MimeType mimeType = detectMimeTypeFromUrl(url);
+                hide();
+                if (mimeType.mediaType == MediaType.image) {
+                    GWT.log("add image " + url);
+                    imageList.add(createImage(url));
+                } else if (mimeType.mediaType == MediaType.video || mimeType.mediaType == MediaType.audio) {
+                    GWT.log("add video " + url);
+                    videoList.add(createVideo(url, null, mimeType));
+                } else {
+                    logger.warning("No image nor video detected. Nothing will be saved.");
+                    Notification.notify(i18n.noImageOrVideoDetected(), NotificationType.WARNING);
+                }
+            } else {
+                Notification.notify(i18n.invalidURL(), NotificationType.ERROR);
+            }
+        }
+        if (!imageList.isEmpty() && !videoList.isEmpty()) {
+            Notification.notify(i18n.cannotUploadVideosAndImagesTogether(), NotificationType.ERROR);
+        } else if (!imageList.isEmpty()) {
+            updateImages.accept(imageList);
+        } else if (!videoList.isEmpty()) {
+            updateVideos.accept(videoList);
         }
     }
 
@@ -452,56 +468,58 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
 
     private void cleanupTempFileUpload() {
-        if (uri != null) {
-            String url = DELETE_URL + uri;
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.DELETE, url);
-            requestBuilder.setCallback(new RequestCallback() {
-
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    String status = STATUS_NOT_OK;
-                    String message = EMPTY_MESSAGE;
-                    JSONValue jsonValue = parseAfterReplacingSurroundingPreElement(response.getText());
-                    JSONArray resultJson = jsonValue.isArray();
-                    if (resultJson != null) {
-                        if (resultJson.get(0).isObject().get(FileUploadConstants.STATUS) != null) {
-                            status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString()
-                                    .stringValue();
-                            if (!STATUS_OK.equals(status)) {
-                                message = resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString()
+        for (String uri: uriList) {
+            if (uri != null) {
+                String url = DELETE_URL + uri;
+                RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.DELETE, url);
+                requestBuilder.setCallback(new RequestCallback() {
+    
+                    @Override
+                    public void onResponseReceived(Request request, Response response) {
+                        String status = STATUS_NOT_OK;
+                        String message = EMPTY_MESSAGE;
+                        JSONValue jsonValue = parseAfterReplacingSurroundingPreElement(response.getText());
+                        JSONArray resultJson = jsonValue.isArray();
+                        if (resultJson != null) {
+                            if (resultJson.get(0).isObject().get(FileUploadConstants.STATUS) != null) {
+                                status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString()
                                         .stringValue();
+                                if (!STATUS_OK.equals(status)) {
+                                    message = resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString()
+                                            .stringValue();
+                                }
                             }
+                        } else {
+                            status = jsonValue.isObject().get(FileUploadConstants.STATUS).isString().stringValue();
                         }
-                    } else {
-                        status = jsonValue.isObject().get(FileUploadConstants.STATUS).isString().stringValue();
+                        if (STATUS_OK.equals(status)) {
+                            logger.log(Level.INFO, "Cleanup file successful. URL: " + uri);
+                        } else if (EMPTY_MESSAGE.equals(message)) {
+                            // No further message from service. Probably the file is not existing any more.
+                            Notification.notify(i18n.error(), NotificationType.ERROR);
+                            logger.log(Level.SEVERE,
+                                    "Cleanup file failed. " + status + ": File with URI could not be removed. URI: " + uri);
+                        } else {
+                            Notification.notify(i18n.fileUploadResult(status, message), NotificationType.ERROR);
+                            logger.log(Level.SEVERE, "Cleanup file failed. Status: " + status + ", message: " + message);
+                        }
                     }
-                    if (STATUS_OK.equals(status)) {
-                        logger.log(Level.INFO, "Cleanup file successful. URL: " + uri);
-                    } else if (EMPTY_MESSAGE.equals(message)) {
-                        // No further message from service. Probably the file is not existing any more.
+    
+                    @Override
+                    public void onError(Request request, Throwable exception) {
                         Notification.notify(i18n.error(), NotificationType.ERROR);
                         logger.log(Level.SEVERE,
-                                "Cleanup file failed. " + status + ": File with URI could not be removed. URI: " + uri);
-                    } else {
-                        Notification.notify(i18n.fileUploadResult(status, message), NotificationType.ERROR);
-                        logger.log(Level.SEVERE, "Cleanup file failed. Status: " + status + ", message: " + message);
+                                "Cleanup file failed. Callback returned with error: " + exception.getMessage(), exception);
                     }
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
+                });
+                try {
+                    resetInput();
+                    cleanFormElements();
+                    requestBuilder.send();
+                } catch (RequestException e) {
                     Notification.notify(i18n.error(), NotificationType.ERROR);
-                    logger.log(Level.SEVERE,
-                            "Cleanup file failed. Callback returned with error: " + exception.getMessage(), exception);
+                    logger.log(Level.SEVERE, "Cleanup file failed. Sending caused an error: " + e.getMessage(), e);
                 }
-            });
-            try {
-                updateUri(null, "");
-                cleanFormElements();
-                requestBuilder.send();
-            } catch (RequestException e) {
-                Notification.notify(i18n.error(), NotificationType.ERROR);
-                logger.log(Level.SEVERE, "Cleanup file failed. Sending caused an error: " + e.getMessage(), e);
             }
         }
     }
@@ -515,21 +533,23 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
         return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
     }
+    
+    private void resetInput() {
+        fileExistingPanel.setVisible(true);
+        files.clear();
+        saveButton.setEnabled(false);
+        // fileNameInput.setEnabled(false);
+        urlInput.setEnabled(true);
+    }
 
-    private void updateUri(String uri, String fileName) {
-        this.uri = uri;
-        if (uri == null) {
-            fileExistingPanel.setVisible(true);
-            saveButton.setEnabled(false);
-            // fileNameInput.setEnabled(false);
-            urlInput.setEnabled(true);
-        } else {
-            fileExistingPanel.setVisible(false);
-            saveButton.setEnabled(true);
-            // fileNameInput.setEnabled(true);
-            urlInput.setEnabled(false);
-            selectMimeTypeInBox(getMimeType(uri));
-        }
+    private void addUri(String uri, String fileName) {
+        this.uriList.add(uri);
+        files.add(new Label(fileName));
+        fileExistingPanel.setVisible(false);
+        saveButton.setEnabled(true);
+        // fileNameInput.setEnabled(true);
+        urlInput.setEnabled(false);
+        selectMimeTypeInBox(getMimeType(uri));
         updateFileName(fileName);
         checkSaveButton();
     }
@@ -538,7 +558,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
 
     private void checkSaveButton() {
         boolean urlInputNotEmpty = urlInput.getValue() != null && !urlInput.getValue().trim().isEmpty();
-        boolean uriNotEmpty = uri != null && !uri.trim().isEmpty();
+        boolean uriNotEmpty = !uriList.isEmpty();
         saveButton.setEnabled(urlInputNotEmpty || uriNotEmpty);
     }
 

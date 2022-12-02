@@ -59,10 +59,10 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
         MediaPageResources.INSTANCE.css().ensureInjected();
-        mobileMediaUploadPopup = new MobileMediaUploadPopup(video -> {
-            manageMediaModel.addVideo(video, eventDto -> updateMedia());
+        mobileMediaUploadPopup = new MobileMediaUploadPopup(videos -> {
+            manageMediaModel.addVideos(videos, eventDto -> updateMedia());
         }, image -> {
-            manageMediaModel.addImage(image, eventDto -> updateMedia());
+            manageMediaModel.addImages(image, eventDto -> updateMedia());
         });
         addMediaButtonUi.addClickHandler(new ClickHandler() {
             @Override

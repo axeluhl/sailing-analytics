@@ -21,10 +21,6 @@ public class ImageEditDialog extends ImageDialog {
         subtitleTextBox.setVisibleLength(40);
         copyrightTextBox = createTextBox(imageDTO.getCopyright());
         copyrightTextBox.setVisibleLength(40);
-        widthInPxBox = createIntegerBox(imageDTO.getWidthInPx(), 10);
-        widthInPxBox.setEnabled(false);
-        heightInPxBox = createIntegerBox(imageDTO.getHeightInPx(), 10);
-        heightInPxBox.setEnabled(false);
         List<String> tags = new ArrayList<String>();
         tags.addAll(imageDTO.getTags());
         tagsListEditor.setValue(tags);
