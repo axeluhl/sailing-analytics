@@ -6,8 +6,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -31,7 +34,7 @@ public class ShardManagementPanel extends SimplePanel {
     private final Button addShard;
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithMultiSelectionAndFilter<String, StringMessages, AdminConsoleTableResources> regattasTable;
-    private final TableWrapperWithMultiSelectionAndFilter<Entry<Integer, AwsShardDTO>, StringMessages, AdminConsoleTableResources> shardTable;
+    private final TableWrapperWithMultiSelectionAndFilter< Entry<AwsShardDTO, Iterable<String>>, StringMessages, AdminConsoleTableResources> shardTable;
     private final TextBox brearertokenText;
     private SailingApplicationReplicaSetDTO<String> replicaSet;
     private final BusyIndicator shardBusy;
@@ -71,19 +74,31 @@ public class ShardManagementPanel extends SimplePanel {
  
         mainPanel.add(usercredentials);  
         
-        shardTable =  new TableWrapperWithMultiSelectionAndFilter<Entry<Integer,AwsShardDTO>, StringMessages, AdminConsoleTableResources>(stringMessages, errorReporter, false, java.util.Optional.empty(), GWT.create(AdminConsoleTableResources.class), java.util.Optional.empty(), java.util.Optional.empty(), null) {
+        shardTable = new TableWrapperWithMultiSelectionAndFilter<Entry<AwsShardDTO, Iterable<String>>, StringMessages, AdminConsoleTableResources>(
+                stringMessages, errorReporter, false, java.util.Optional.empty(),
+                GWT.create(AdminConsoleTableResources.class), java.util.Optional.empty(), java.util.Optional.empty(),
+                null) {
 
             @Override
-            protected Iterable<String> getSearchableStrings(Entry<Integer, AwsShardDTO> t) {
+            protected Iterable<String> getSearchableStrings(Entry<AwsShardDTO, Iterable<String>> t) {
                 Set<String> res = new HashSet<String>();
-                
-                res.add(t.getValue().getName());
+
+                res.add(t.getKey().getName());
                 return res;
             }
         };
-        shardTable.addColumn(t -> t.getKey().toString(),"index");
-        shardTable.addColumn(t -> t.getValue().getName(),"Name");
-        shardTable.addColumn(t-> t.getValue().getKeysString() , "Sharding Keys");
+        //shardTable.addColumn(t -> t.getKey().toString(),"index");
+        shardTable.addColumn(t -> t.getKey().getName(),"Name");
+        shardTable.addColumn(t-> t.getKey().getKeysString() , "Sharding Keys");
+        final SafeHtmlCell targetgroupCell = new SafeHtmlCell();
+        final Column<Entry<AwsShardDTO, Iterable<String>>, SafeHtml> targetgroupColumn = new Column<Entry<AwsShardDTO, Iterable<String>>, SafeHtml>(targetgroupCell) {
+            @Override
+            public SafeHtml getValue(Entry<AwsShardDTO, Iterable<String>> shardentry) {
+                return new LinkBuilder().setTargetgroupName(shardentry.getKey().getTargetgroupName()).setRegion(region).setPathMode(LinkBuilder.pathModes.TargetgroupSearch).build();
+            }
+        };
+        shardTable.addColumn(targetgroupColumn , "Targetgroup");
+        shardTable.addColumn(t-> t.getKey().getAutoscalingGroupName() , "Autoscalinggroup");
         shardTable.getSelectionModel().addSelectionChangeHandler(event -> {
             removeButton.setEnabled(!shardTable.getSelectionModel().getSelectedSet().isEmpty());
         });
@@ -188,7 +203,7 @@ public class ShardManagementPanel extends SimplePanel {
             Button submitButton = new Button("Submit");
             mainPanel.add(submitButton);
             submitButton.addClickHandler(event -> {
-               if(nameText.getValue() == null || nameText.getValue() == "" || region == null || passphrase == null) {
+               if(nameText.getValue() == null || nameText.getValue() == "") {
                    nameRequest.setVisible(false);
                    errorReporter.reportError("Name not valid");
                }else if(region == null || passphrase == null) {
@@ -220,8 +235,8 @@ public class ShardManagementPanel extends SimplePanel {
 
     private void removeButtonPress() {
         setShardtableBusy(true);
-        for (Entry<Integer, AwsShardDTO> selection : shardTable.getSelectionModel().getSelectedSet()) {
-            landscapeManagementService.removeShard(selection.getKey(), selection.getValue(), replicaSet, region,
+        for (Entry<AwsShardDTO, Iterable<String>> selection : shardTable.getSelectionModel().getSelectedSet()) {
+            landscapeManagementService.removeShard( selection.getKey(), replicaSet, region,
                     passphrase.getBytes(), new AsyncCallback<Void>() {
 
                         @Override
@@ -232,7 +247,7 @@ public class ShardManagementPanel extends SimplePanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            appendMessage("Deleted Shard: " + selection.getValue().getName());
+                            appendMessage("Deleted Shard: " + selection.getKey().getName());
                         }
                     });
         }
@@ -241,7 +256,7 @@ public class ShardManagementPanel extends SimplePanel {
     
     private void displayShards() {
         setShardtableBusy(true);
-            landscapeManagementService.getShards(replicaSet, region,passphrase.getBytes(), new AsyncCallback<Map<Integer,AwsShardDTO>>() {
+            landscapeManagementService.getShards(replicaSet, region,passphrase.getBytes(), new AsyncCallback< Map<AwsShardDTO, Iterable<String>>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -250,7 +265,7 @@ public class ShardManagementPanel extends SimplePanel {
                 }
 
                 @Override
-                public void onSuccess(Map<Integer, AwsShardDTO> result) {
+                public void onSuccess( Map<AwsShardDTO, Iterable<String>> result) {
                     shardTable.refresh(result.entrySet());
                     setShardtableBusy(false);
                 }
