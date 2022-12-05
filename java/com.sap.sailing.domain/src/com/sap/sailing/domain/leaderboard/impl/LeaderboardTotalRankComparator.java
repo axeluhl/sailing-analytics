@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -85,6 +86,23 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, ScoringScheme scoringScheme,
             boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        this(leaderboard, timePoint, scoringScheme, nullScoresAreBetter, raceColumnsToConsider,
+                (competitor, raceColumn)->leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache),
+                cache);
+    }
+
+    /**
+     * Like
+     * {@link #LeaderboardTotalRankComparator(Leaderboard, TimePoint, ScoringScheme, boolean, Iterable, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)},
+     * but additionally allows the caller to supply the
+     * {@link Leaderboard#getTotalPoints(Competitor, RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
+     * total points} function which may take its results from a pre-calculated cache such as the one otherwise
+     * constructed here.
+     */
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, ScoringScheme scoringScheme,
+            boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         super();
         this.leaderboard = leaderboard;
         this.timePoint = timePoint;
@@ -100,7 +118,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             this.discardedRaceColumnsPerCompetitor.put(competitor, discardedRaceColumns);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
-                final Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache);
+                final Double totalPoints = totalPointsSupplier.apply(competitor,  raceColumn);
                 netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
                         /* total points provider */ ()->totalPoints));
                 totalPointsCache.put(key, totalPoints);
@@ -216,11 +234,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         final Pair<Integer, Boolean> o1Result = leaderboard.getScoringScheme()
                                 .getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO1,
                                         clearNumberOfMedalRacesWonByO1UponNextValidMedalRaceScore, leaderboard, o1,
-                                        raceColumn, timePoint, cache);
+                                        raceColumn, timePoint, competitor->totalPointsCache.get(new Pair<>(competitor, raceColumn)), cache);
                         final Pair<Integer, Boolean> o2Result = leaderboard.getScoringScheme()
                                 .getNewNumberOfMedalRacesWon(numberOfMedalRacesWonO2,
                                         clearNumberOfMedalRacesWonByO2UponNextValidMedalRaceScore, leaderboard, o2,
-                                        raceColumn, timePoint, cache);
+                                        raceColumn, timePoint, competitor->totalPointsCache.get(new Pair<>(competitor, raceColumn)), cache);
                         numberOfMedalRacesWonO1 = o1Result.getA();
                         clearNumberOfMedalRacesWonByO1UponNextValidMedalRaceScore = o1Result.getB();
                         numberOfMedalRacesWonO2 = o2Result.getA();
@@ -477,7 +495,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * Assuming both competitors scored in the same number of races, and assuming they scored the same net score, break
      * the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
      * 
-     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
+     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
      * 
      * @param o1Scores
      *            the scores of each race for competitor {@code o1}, including the scores of races that may be
@@ -489,7 +507,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     protected int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Util.Pair<RaceColumn, Double>> o2Scores, TimePoint timePoint) {
         return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
-                Collections.unmodifiableMap(discardedRaceColumnsPerCompetitor), cache);
+                Collections.unmodifiableMap(discardedRaceColumnsPerCompetitor),
+                (competitor, raceColumn)->totalPointsCache.get(new Pair<>(competitor, raceColumn)),
+                cache);
     }
     
     /**

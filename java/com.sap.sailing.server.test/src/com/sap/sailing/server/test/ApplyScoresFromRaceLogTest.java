@@ -197,7 +197,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
                 new RacingProcedureFactoryImpl(author, new EmptyRegattaConfiguration()));
         f1RaceState.setFinishPositioningListChanged(now, results);
-        final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        final Iterable<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now, results);
         final Function<Competitor, Double> expectedPoints =
@@ -208,7 +208,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         }
         final List<Competitor> expectedNewOrder = new ArrayList<>(competitors);
         expectedNewOrder.sort((c1, c2)->new Double(expectedPoints.apply(c1)).compareTo(new Double(expectedPoints.apply(c1))));
-        final List<Competitor> rankedCompetitorsAfterApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        final Iterable<Competitor> rankedCompetitorsAfterApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         double lastScore = 0;
         for (final Competitor c : rankedCompetitorsAfterApplying) {
             assertEquals(expectedPoints.apply(c), leaderboard.getTotalPoints(c, f1Column, later));
@@ -244,7 +244,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
                 new RacingProcedureFactoryImpl(author, new EmptyRegattaConfiguration()));
         f1RaceState.setFinishPositioningListChanged(now, results);
-        final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        final Iterable<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now, results);
         
@@ -286,7 +286,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
                 new RacingProcedureFactoryImpl(author, new EmptyRegattaConfiguration()));
         f1RaceState.setFinishPositioningListChanged(now, results);
-        final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        final Iterable<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now, results);
         // validate that it arrived in leaderboard

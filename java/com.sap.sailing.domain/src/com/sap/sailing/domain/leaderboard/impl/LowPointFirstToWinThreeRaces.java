@@ -3,6 +3,8 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -31,7 +33,7 @@ import com.sap.sse.common.Util.Pair;
  * <p>
  * 
  * Those carried wins are added to the
- * {@link #isWin(com.sap.sailing.domain.leaderboard.Leaderboard, com.sap.sailing.domain.base.Competitor, com.sap.sailing.domain.base.RaceColumn, com.sap.sse.common.TimePoint, com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
+ * {@link #isWin(com.sap.sailing.domain.leaderboard.Leaderboard, com.sap.sailing.domain.base.Competitor, com.sap.sailing.domain.base.RaceColumn, com.sap.sse.common.TimePoint, com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache, Function<Competitor, Double>)
  * wins} achieved in the medal series. More wins rank better. Equal numbers of races won make the score in the last race
  * in that series the first tie-breaker. Note that "last race" can be different races in case of multiple fleets in that
  * medal series, such as in a semi-final medal series split into fleets A and B. Should the tie not be resolved this
@@ -80,8 +82,10 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         final Double result;
         final Double netPoints = super.getNetPointsForScoreSum(leaderboard, competitor, raceColumn, timePoint, discardedRaceColumns);
         if (netPoints != null && raceColumn.isMedalRace() && !raceColumn.isCarryForward()) {
-            result = isWin(leaderboard, competitor, raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint)) ? // TODO bug 5778: consider passing through a cache object
-                    1.0 : 0.0;
+            // TODO bug 5778: consider passing through a cache object
+            final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+            result = isWin(leaderboard, competitor, raceColumn, timePoint, c->leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache),
+                    cache) ? 1.0 : 0.0;
         } else {
             result = netPoints; // includes the null case
         }
@@ -110,18 +114,18 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
     /**
      * A carry-forward column in a medal series for this scoring scheme means that the points in the column represent a
      * number of wins carried forward into this series. Other than that, the regular logic applies: one point for a
-     * {@link #isWin(Leaderboard, Competitor, RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
+     * {@link #isWin(Leaderboard, Competitor, RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, Function<Competitor, Double>)
      * win}, zero for non-win, adding to {@code numberOfMedalRacesWonSoFar} or starting with zero if
      * {@link RaceColumn#isStartsWithZeroScore()}.
      */
     @Override
     public int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
-            final Double totalPoints, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Integer winCount;
         if (raceColumn.isCarryForward()) {
             winCount = totalPoints == null ? 0 : totalPoints.intValue();
         } else {
-            winCount = super.getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, cache);
+            winCount = super.getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, totalPointsSupplier, cache);
         }
         return winCount;
     }
@@ -161,21 +165,24 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * Otherwise (both have scored in at least one medal race) we have to assume that both sailed in the same medal series,
      * scored the same number of wins (including wins carried forward) and were also tied on the scores in their respective
      * last medal race. Then, the decision is to be made based on the opening series rank, which in itself includes the
-     * entire tie-breaking rule set with {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
+     * entire tie-breaking rule set with {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
      * etc., only up to the end of the opening series.
      */
     @Override
     public int compareByBetterScore(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
             Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final int result;
         if (!hasMedalScores(o1Scores)) {
             result = super.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
-                    discardedRaceColumnsPerCompetitor, cache);
+                    discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
         } else {
             final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
-            result = new LeaderboardTotalRankComparator(leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns, cache).compare(o1, o2);
+            // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
+            // to speed up / save the total points (re-)calculation
+            result = new LeaderboardTotalRankComparator(leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns, totalPointsSupplier, cache)
+                    .compare(o1, o2);
         }
         return result;
     }

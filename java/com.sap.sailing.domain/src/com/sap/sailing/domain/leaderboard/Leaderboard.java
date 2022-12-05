@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Boat;
@@ -411,13 +412,16 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
+    Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
      * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections. A new list is
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException 
      */
-    default List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    default Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
@@ -427,7 +431,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException 
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     /**
      * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
@@ -723,12 +727,13 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link ScoringScheme#isWin(Leaderboard, Competitor, RaceColumn, TimePoint)}.
      */
     default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return isWin(competitor, raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+        final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+        return isWin(competitor, raceColumn, timePoint, cache);
     }
 
     default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getScoringScheme().isWin(this, competitor, raceColumn, timePoint, cache);
+        return getScoringScheme().isWin(this, competitor, raceColumn, timePoint, c->getTotalPoints(c, raceColumn, timePoint, cache), cache);
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -508,13 +509,26 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     /**
+     * Like {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)},
+     * but here callers can provide the total points as a {@link Function} that maps {@link Competitor}s to their
+     * total points at {@code timePoint} for {@code raceColumn}. The default for computing this would be
+     * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
+     */
+    @Override
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint,
+                competitor->getTotalPoints(competitor, raceColumn, timePoint, cache), cache);
+    }
+
+    /**
      * All competitors with non-<code>null</code> total points are added to the result which is then sorted by total
      * points in ascending order. The fleet, if ordered, is the primary ordering criterion, followed by the total
      * points.
      */
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> totalPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
             Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, cache);

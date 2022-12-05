@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -101,11 +103,11 @@ public interface ScoringScheme extends Serializable {
      *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(...)}. This accelerates things considerable because we do not have to make this expensive calculation
      *            for each competitor again.
-     * @param cache TODO
+     * @param totalPointsSupplier TODO
      */
     int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2,
             List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
-            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -216,11 +218,12 @@ public interface ScoringScheme extends Serializable {
      * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint.
      * If the competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top
      * for that column, considering any score corrections and penalties, too.
+     * @param totalPointsSupplier provides the 
      */
     default boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-        final Iterable<Competitor> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint, cache);
+        final Iterable<Competitor> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint, totalPointsSupplier, cache);
         for (final Competitor betterCompetitor : competitorsFromBestToWorstInColumn) {
             if (betterCompetitor != competitor && raceColumn.getFleetOfCompetitor(betterCompetitor) == fleetOfCompetitor) {
                 // found a better competitor in same fleet; competitor obviously did not score a win
@@ -288,9 +291,9 @@ public interface ScoringScheme extends Serializable {
     default Pair<Integer, Boolean> getNewNumberOfMedalRacesWon(int numberOfMedalRacesWonSoFar,
             boolean clearNumberOfMedalRacesWonUponNextValidMedalRaceScore,
             Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
-            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache);
-        final int winCount = getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, cache);
+            TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Double totalPoints = totalPointsSupplier.apply(competitor);
+        final int winCount = getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, totalPointsSupplier, cache);
         final int newNumberOfMedalRacesWonSoFar;
         final boolean newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore;
         if (raceColumn.isStartsWithZeroScore()) {
@@ -318,8 +321,9 @@ public interface ScoringScheme extends Serializable {
     }
 
     default int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
-            final Double totalPoints, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return totalPoints == null ? 0 : isWin(leaderboard, competitor, raceColumn, timePoint, cache) ? 1 : 0;
+            final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return totalPoints == null ? 0 : isWin(leaderboard, competitor, raceColumn, timePoint, totalPointsSupplier, cache) ? 1 : 0;
     }
     
     /**

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -110,7 +111,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores,
             Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter,
             TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Comparator<Pair<RaceColumn, Double>> ruleA8_1ScoreComparator = getRuleA8_1ScoreComparator(nullScoresAreBetter);
         final boolean includeDiscardedResults = isConsiderDiscardedScoresDuringBetterScoreTieBreak();
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
@@ -149,7 +150,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * Usually, RRS A8.1-based rules will eliminate discarded results before starting to compare the remaining scores.
      * Some specializations then consider final series scores before they consider qualification series scores (see
      * {@link #getRuleA8_1ScoreComparator(boolean)} for details). This method tells whether or not to consider
-     * discarded results in {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
+     * discarded results in {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
      * This implementation returns {@code false}, thus implementing the default RRS A8.1 rule.
      */
     protected boolean isConsiderDiscardedScoresDuringBetterScoreTieBreak() {
