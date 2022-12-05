@@ -144,7 +144,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public Iterable<? extends RaceColumnInSeries> getRaceColumns() {
-        return raceColumns;
+        return new ArrayList<>(raceColumns);
     }
 
     /**
