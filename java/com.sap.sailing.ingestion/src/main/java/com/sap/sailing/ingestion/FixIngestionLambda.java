@@ -15,23 +15,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.redisson.api.RMap;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.google.gson.Gson;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-import com.sap.sailing.ingestion.dto.AWSRequestWrapper;
-import com.sap.sailing.ingestion.dto.AWSResponseWrapper;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
-import com.sap.sailing.ingestion.dto.FixHeaderDTO;
-import com.sap.sailing.ingestion.dto.GpsFixPayloadDTO;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingJsonSerializer;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.shared.json.JsonDeserializationException;
@@ -41,43 +34,38 @@ import com.sap.sse.shared.json.JsonSerializer;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.utils.IoUtils;
 
 /**
- * This λ accepts fixes of any kind that adhere to {@link FixHeaderDTO} structure wrapped inside an
- * {@link AWSRequestWrapper}. In most cases clients will want to submit GPS fixes thus adhering to the
- * {@link GpsFixPayloadDTO} structure. This structure will be recognized by most sailing servers.
+ * This λ accepts fixes that adhere to the structure {@link Pair<UUID, List<GPSFixMoving>>} which are provided in the
+ * body of an AWS request which is parsed with the {@link AWSInOutHandler}. In most cases clients will want to submit
+ * GPS fixes thus adhering to the {@link GPSFixMoving} structure. This structure will be recognized by most sailing
+ * servers.
  */
 
-//TODO remove Gson dependency
 public class FixIngestionLambda implements RequestStreamHandler {
-    final S3Client s3Client = S3Client.builder().region(Configuration.S3_REGION).build();
-    final RMap<String, List<EndpointDTO>> cacheMap = RedisUtils.getCacheMap();
-    private final JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> deserializer =
-            new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
-    private final JsonSerializer<GPSFixMoving> serializer = new GPSFixMovingJsonSerializer();
+    private final AWSInOutHandler awsInOut = new AWSInOutHandler();
+    private final JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> gpsFixDeserializer = new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
+    private final JsonSerializer<GPSFixMoving> gpsFixSerializer = new GPSFixMovingJsonSerializer();
     private final S3FixStorageStructure s3FixStorageStructure = new S3FixStorageStructure();
+    private final S3Client s3Client = S3Client.builder().region(Configuration.S3_REGION).build();
+    private final RMap<String, List<EndpointDTO>> cacheMap = RedisUtils.getCacheMap();
     private static final Logger logger = Logger.getLogger(FixIngestionLambda.class.getName());
-    
+
     @Override
-    public void handleRequest(final InputStream input, final OutputStream output, final Context context) {
+    public void handleRequest(final InputStream inputAsStream, final OutputStream outputAsStream, final Context context) {
         try {
-            logger.info("Starting Lambda");
-            final byte[] streamAsBytes = IoUtils.toByteArray(input);
-            logger.info("Input: " + new String(streamAsBytes));
-            final AWSRequestWrapper dtoWrapped = new Gson().fromJson(new String(streamAsBytes), AWSRequestWrapper.class);
-            Object requestBody = JSONValue.parseWithException(dtoWrapped.getBody());
-            JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-            Pair<UUID, List<GPSFixMoving>> data = deserializer.deserialize(requestObject);
-            DeviceIdentifier deviceIdentifier = new SmartphoneUUIDIdentifierImpl(data.getA());
-            List<GPSFixMoving> newFixes = data.getB();
-            final byte[] bodyAsBytes = dtoWrapped.getBody().getBytes();
+            final JSONObject requestObject = awsInOut.parseInputToJson(inputAsStream);
+            logger.info("Input: " + requestObject.toJSONString());
+            final Pair<UUID, List<GPSFixMoving>> data = gpsFixDeserializer.deserialize(requestObject);
+            final DeviceIdentifier deviceIdentifier = new SmartphoneUUIDIdentifierImpl(data.getA());
+            final List<GPSFixMoving> newFixes = data.getB();
+            final byte[] bodyAsBytes = requestObject.toJSONString().getBytes();
             final ForkJoinPool dispatchToSubscribersTask = ForkJoinPool.commonPool();
             dispatchToSubscribersTask.submit(() -> {
                 try {
                     storeFixFileToS3(deviceIdentifier, newFixes);
                 } catch (IOException e) {
-                    logger.log(Level.SEVERE, "Exception trying to store fixes to S3: "+e.getMessage());
+                    logger.log(Level.SEVERE, "Exception trying to store fixes to S3: " + e.getMessage());
                 }
             });
             final List<EndpointDTO> listOfEndpointsToTrigger = cacheMap.get(deviceIdentifier.getStringRepresentation());
@@ -95,19 +83,21 @@ public class FixIngestionLambda implements RequestStreamHandler {
             } else {
                 logger.info("No endpoint has been configured for Identifier " + deviceIdentifier.getStringRepresentation());
             }
-            output.write(new Gson().toJson(AWSResponseWrapper.successResponseAsJson(deviceIdentifier.getStringRepresentation())).getBytes());
+            String successResponse = awsInOut.createJsonResponse(deviceIdentifier.getStringRepresentation()).toJSONString();
+            logger.info(successResponse);
+            outputAsStream.write(successResponse.getBytes());
         } catch (ParseException | JsonDeserializationException e) {
             logger.log(Level.SEVERE, "Exception trying to deserialize JSON input: " + e.getMessage());
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             try {
-                input.close();
+                inputAsStream.close();
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Exception trying to close input: " + e.getMessage());
             }
             try {
-                output.close();
+                outputAsStream.close();
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Exception trying to close output: " + e.getMessage());
             }
@@ -115,7 +105,7 @@ public class FixIngestionLambda implements RequestStreamHandler {
     }
 
     private void dispatchToSubscribers(final EndpointDTO endpoint, final byte[] jsonAsBytes) {
-        logger.info("Connecting to endpoint " + endpoint.getEndpointCallbackUrl()+" with ID "+endpoint.getEndpointUuid());
+        logger.info("Connecting to endpoint " + endpoint.getEndpointCallbackUrl() + " with ID " + endpoint.getEndpointUuid());
         URL endpointUrl;
         try {
             endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
@@ -132,26 +122,26 @@ public class FixIngestionLambda implements RequestStreamHandler {
                     os.write(jsonAsBytes);
                     os.flush();
                     final int responseCode = connectionToEndpoint.getResponseCode(); // reading is important to actually issue the request
-                    logger.info("Sent data "+new String(jsonAsBytes)+" to " + endpoint.getEndpointCallbackUrl()+" with response code "+responseCode);
-                } 
+                    logger.info("Sent data " + new String(jsonAsBytes) + " to " + endpoint.getEndpointCallbackUrl() + " with response code " + responseCode);
+                }
             } catch (Exception ex) {
-                logger.log(Level.SEVERE, "Exception trying to send data to "+endpointUrl+": "+ex.getMessage());
+                logger.log(Level.SEVERE, "Exception trying to send data to " + endpointUrl + ": " + ex.getMessage());
             }
         } catch (MalformedURLException e) {
-            logger.log(Level.SEVERE, "Malformed URL for end point "+endpoint.getEndpointCallbackUrl());
+            logger.log(Level.SEVERE, "Malformed URL for end point " + endpoint.getEndpointCallbackUrl());
         }
     }
 
     private void storeFixFileToS3(final DeviceIdentifier deviceIdentifier, final List<GPSFixMoving> newFixes)
             throws IOException {
         final String dataAsString = newFixes.toString();
-        logger.info("Data to write: "+dataAsString);
-        for (GPSFixMoving fix: newFixes) {
+        logger.info("Data to write: " + dataAsString);
+        for (GPSFixMoving fix : newFixes) {
             final String destinationKey = s3FixStorageStructure.generateKeyForSingleFix(deviceIdentifier, fix.getTimePoint());
-            logger.info("Location: "+destinationKey);
+            logger.info("Location: " + destinationKey);
             final PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(Configuration.S3_BUCKET_NAME)
                     .key(destinationKey).contentType("application/json").build();
-            final JSONObject serializedFix = serializer.serialize(fix);
+            final JSONObject serializedFix = gpsFixSerializer.serialize(fix);
             s3Client.putObject(putObjectRequest, RequestBody.fromString(serializedFix.toJSONString()));
         }
         logger.info("Finished putting object into S3");

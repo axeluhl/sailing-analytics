@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.Duration;
 
 public class RaceMapDataDTO implements IsSerializable {
-    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
+    public Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositions;
     public CoursePositionsDTO coursePositions;
     public List<SidelineDTO> courseSidelines;
     public LinkedHashMap<String, QuickRankDTO> quickRanks;
