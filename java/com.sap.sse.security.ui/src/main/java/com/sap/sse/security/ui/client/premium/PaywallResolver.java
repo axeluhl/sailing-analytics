@@ -36,11 +36,6 @@ public class PaywallResolver {
     private final SubscriptionServiceFactory subscriptionServiceFactory;
 
     /**
-     * See bug5696.
-     */
-    private boolean isDisabled;
-
-    /**
      * The registered provider from subscription service factory will be initialized.
      * 
      * @param userService
@@ -86,9 +81,7 @@ public class PaywallResolver {
      * @return the permission check result
      */
     public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
-        if (isDisabled) {
-            return true;
-        } else if (action != null) {
+        if (action != null) {
             return userService.hasPermission(dtoContext, action);
         } else {
             return userService.hasPermission(dtoContext, DefaultActions.READ);
@@ -156,14 +149,5 @@ public class PaywallResolver {
     public HandlerRegistration registerUserStatusEventHandler(final UserStatusEventHandler handler) {
         userService.addUserStatusEventHandler(handler);
         return () -> userService.removeUserStatusEventHandler(handler);
-    }
-
-    /**
-     * TODO bug5696: When bug is resolved, this workaround is no longer necessary.
-     * 
-     * @param isDisabled
-     */
-    public void setDisabled(boolean isDisabled) {
-        this.isDisabled = isDisabled;
     }
 }
