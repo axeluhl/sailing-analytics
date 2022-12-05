@@ -52,6 +52,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.Route53Client;
@@ -756,4 +757,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
             String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<ShardingKey> alb);
     
     long getDNSTTLInSeconds();
+    
+    public Iterable<TagDescription> getTargetGroupTags(String arn, String tagName, com.sap.sse.landscape.Region region);
 }

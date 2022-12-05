@@ -157,6 +157,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SetRulePrioritiesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SubnetMapping;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
@@ -1293,6 +1294,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return tagResponse.tags().stream().map(t->t.value()).findAny();
     }
 
+    public Iterable<TagDescription> getTargetGroupTags(String arn, String tagName, com.sap.sse.landscape.Region region) {
+        final software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsResponse tagResponse = getLoadBalancingClient(
+                getRegion(region)).describeTags(t -> t.resourceArns(arn));
+        return tagResponse.tagDescriptions();
+    }
+
     @Override
     public Tags getTagForMongoProcess(Tags tagsToAddTo, String replicaSetName, int port) {
         return tagsToAddTo.and(MONGO_REPLICA_SETS_TAG_NAME,
@@ -2010,7 +2017,5 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public long getDNSTTLInSeconds() {
        return DEFAULT_DNS_TTL_SECONDS;
-    } 
-    
-    
+    }
 }
