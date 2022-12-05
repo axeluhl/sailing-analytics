@@ -200,7 +200,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     public void testWithTiesInFinal() {
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        final List<Competitor> openingSeriesRankResult = raceAndAssertOpeningSeriesAndRandomSemiFinals(now, later, /* numberOfCompetitors */ 100);
+        final List<Competitor> openingSeriesRankResult = raceAndAssertOpeningSeriesAndRandomSemiFinals(now, later, /* numberOfCompetitors */ 1000);
         final List<Competitor> rankResultsAfterSemifinals = leaderboard.getCompetitorsFromBestToWorst(later);
         // assemble final fleet:
         final List<Competitor> finalists = new ArrayList<>();
@@ -234,7 +234,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     public void testWithTiesInSemiFinalWithDifferentNumbersOfSemifinalRaces() {
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        createCompetitorsAndRunAndAssertOpeningSeries(now, later, /* numberOfCompetitors */ 100);
+        createCompetitorsAndRunAndAssertOpeningSeries(now, later, /* numberOfCompetitors */ 1000);
         final List<Competitor> openingSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         final Util.Pair<List<Competitor>, List<Competitor>> semiFinalists = assignCarryForwardWinsToSemiFinalistsAndGrandFinalists(later);
         // let top-seeded competitor from A with two carried wins win the first race immediately:

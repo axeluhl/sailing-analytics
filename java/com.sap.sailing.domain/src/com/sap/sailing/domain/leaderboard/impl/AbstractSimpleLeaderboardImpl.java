@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
@@ -49,8 +50,6 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
@@ -85,11 +84,9 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     private final Map<Competitor, Double> carriedPoints;
 
     /**
-     * A set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}. Access is
-     * controlled by the {@link #suppressedCompetitorsLock} lock.
+     * A set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
      */
-    private final Set<Competitor> suppressedCompetitors;
-    private final NamedReentrantReadWriteLock suppressedCompetitorsLock;
+    private final ConcurrentHashMap<Competitor, Competitor> suppressedCompetitors;
 
     private final RaceColumnListeners raceColumnListeners;
 
@@ -223,8 +220,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         this.scoreCorrection = createScoreCorrection();
         this.displayNames = new HashMap<Competitor, String>();
         this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
-        this.suppressedCompetitors = new HashSet<Competitor>();
-        this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
+        this.suppressedCompetitors = new ConcurrentHashMap<>();
     }
 
     protected RaceColumnListeners getRaceColumnListeners() {
@@ -870,22 +866,12 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Iterable<Competitor> getSuppressedCompetitors() {
-        LockUtil.lockForRead(suppressedCompetitorsLock);
-        try {
-            return new HashSet<Competitor>(suppressedCompetitors);
-        } finally {
-            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
-        }
+        return new HashSet<>(suppressedCompetitors.keySet());
     }
 
     @Override
     public boolean isSuppressed(Competitor competitor) {
-        LockUtil.lockForRead(suppressedCompetitorsLock);
-        try {
-            return suppressedCompetitors.contains(competitor);
-        } finally {
-            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
-        }
+        return suppressedCompetitors.containsKey(competitor);
     }
 
     @Override
@@ -893,15 +879,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         if (competitor == null) {
             throw new IllegalArgumentException("Cannot change suppression for a null competitor");
         }
-        LockUtil.lockForWrite(suppressedCompetitorsLock);
-        try {
-            if (suppressed) {
-                suppressedCompetitors.add(competitor);
-            } else {
-                suppressedCompetitors.remove(competitor);
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(suppressedCompetitorsLock);
+        if (suppressed) {
+            suppressedCompetitors.put(competitor, competitor);
+        } else {
+            suppressedCompetitors.remove(competitor);
         }
         getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
     }
