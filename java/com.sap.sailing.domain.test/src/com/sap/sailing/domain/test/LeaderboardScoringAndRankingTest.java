@@ -98,7 +98,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
         f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
         Iterable<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(competitors, rankedCompetitors);
+        assertEquals(competitors, Util.asList(rankedCompetitors));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         // incomplete fleets are ordered now also by scores 
         assertEquals(Arrays.asList(new Competitor[] { competitors.get(0), competitors.get(1), competitors.get(2),
                 competitors.get(5), competitors.get(8), competitors.get(3), competitors.get(9), competitors.get(6),
-                competitors.get(4), competitors.get(7) }), rankedCompetitorsWithOneRaceMissingInQ2);
+                competitors.get(4), competitors.get(7) }), Util.asList(rankedCompetitorsWithOneRaceMissingInQ2));
         double[] points = new double[] { 1, 2, 3, 5, 7, 4, 6, 8, 4, 5 };
         for (int i=0; i<9; i++) {
             assertEquals(points[i], leaderboard.getNetPoints(competitors.get(i), later), 0.000000001);
@@ -308,7 +308,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         // incomplete fleets are ordered now also by scores 
         assertEquals(Arrays.asList(new Competitor[] { competitors.get(0), competitors.get(1), competitors.get(2),
                 competitors.get(5), competitors.get(8), competitors.get(3), competitors.get(9), competitors.get(6),
-                competitors.get(4), competitors.get(7) }), rankedCompetitorsWithOneRaceMissingInQ2);
+                competitors.get(4), competitors.get(7) }), Util.asList(rankedCompetitorsWithOneRaceMissingInQ2));
         double[] points = new double[] { 1, 2, 3, 5, 7, 4, 6, 8, 4, 5 };
         for (int i=0; i<9; i++) {
             assertEquals(points[i], leaderboard.getNetPoints(competitors.get(i), later), 0.000000001);
@@ -446,7 +446,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
 
         Iterable<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(Arrays.asList(competitors.get(4), competitors.get(2), competitors.get(0), competitors.get(1), competitors.get(3), competitors.get(5)),
-                rankedCompetitors);
+                Util.asList(rankedCompetitors));
     }
     
     @Test
@@ -548,7 +548,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         // point sums for competitors 0..5: 1, 1, 1, 1, 1, 1
         // cyclic direct comparison; expect competitors to be ordered by their names
         Iterable<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(competitors, rankedCompetitors);
+        assertEquals(competitors, Util.asList(rankedCompetitors));
     }
 
     /**
@@ -676,7 +676,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         // So the expected order is: (4), (3), (5), (0), (1), (2) (where the last three elements' order is resolved by their name)
         Iterable<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(Arrays.asList(competitors.get(4), competitors.get(3), competitors.get(5), competitors.get(0), competitors.get(1), competitors.get(2)),
-                rankedCompetitors);
+                Util.asList(rankedCompetitors));
     }
 
     /**
@@ -993,7 +993,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             assertEquals(leaderboard.getNetPoints(firstCompetitor, later), leaderboard.getNetPoints(competitor, later));
         }
         // assert that the ordering of competitors equals that of the last race
-        assertEquals(reversedCompetitors, leaderboard.getCompetitorsFromBestToWorst(later));
+        assertEquals(reversedCompetitors, Util.asList(leaderboard.getCompetitorsFromBestToWorst(later)));
     }
 
     @Test
@@ -1123,7 +1123,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3);
         Iterable<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[1], later), 0.000000001);
-        assertEquals(Arrays.asList(new Competitor[] { c[0], c[1], c[2] }), rankedCompetitors);
+        assertEquals(Arrays.asList(new Competitor[] { c[0], c[1], c[2] }), Util.asList(rankedCompetitors));
     }
 
     @Test
