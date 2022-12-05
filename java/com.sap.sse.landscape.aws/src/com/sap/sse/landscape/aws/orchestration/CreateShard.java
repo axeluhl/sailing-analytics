@@ -27,6 +27,7 @@ import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
+import com.sap.sse.landscape.aws.ShardNameDTO;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.shared.util.Wait;
@@ -162,16 +163,16 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     @Override
     public void run() throws Exception {
         
-        final String name;
+        final ShardNameDTO name;
         if(shardName == null) {
-            name  =replicaset.getNextShardName();
+            throw new Exception("Shardname is null, please enter a name");
         } else {
             name = replicaset.getNextShardName(shardName);
         }
         ApplicationLoadBalancer<ShardingKey> loadbalancer = getFreeLoadbalancer();
         logger.info(
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaset.getName());
-        TargetGroup<ShardingKey> targetgroup = getLandscape().createTargetGroupWithoutLoadbalancer(region, name,
+        TargetGroup<ShardingKey> targetgroup = getLandscape().createTargetGroupWithoutLoadbalancer(region, name.getTargetgroupName(),
                 replicaset.getMaster().getPort());
         AwsAutoScalingGroup autoscalinggroup = replicaset.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
@@ -318,16 +319,16 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         final Collection<Rule> tempRules = new ArrayList<Rule>();
         alb.addRulesAssigningUnusedPriorities(true,  createRules(alb, targetgroupMasterTemp,targetgroupPublicTemp, true)).forEach(t -> tempRules.add(t));;
         //For each shard in replicaset -> move
-        for(Entry<Integer,AwsShard<ShardingKey>> shard : replicaSet.getShards().entrySet()) {
-            final TargetGroup<ShardingKey> tempShardTargetGroup = getLandscape().copyTargetGroup(shard.getValue().getTargetGroup(), TEMP_TARGETGROUP_SUFFIX);                
+        for(Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSet.getShards().entrySet()) {
+            final TargetGroup<ShardingKey> tempShardTargetGroup = getLandscape().copyTargetGroup(shard.getKey().getTargetGroup(), TEMP_TARGETGROUP_SUFFIX);                
             final Set<String> s = new HashSet<>();
-            for(ShardingKey key : shard.getValue().getKeys()) {
+            for(ShardingKey key : shard.getValue()) {
                 s.add(key.toString());
             }
-            keysAssignment.put(shard.getValue().getTargetGroup(), s);
+            keysAssignment.put(shard.getKey().getTargetGroup(), s);
             temptargetgroups.add(tempShardTargetGroup);
             addShardingRules(alb,s,tempShardTargetGroup).forEach(t -> tempRules.add(t));
-            originaltargetgroups.add(shard.getValue().getTargetGroup());
+            originaltargetgroups.add(shard.getKey().getTargetGroup());
         }
         //set new dns record -> overwrites old entry
         getLandscape().setDNSRecordToApplicationLoadBalancer(replicaSet.getHostedZoneId(), replicaSet.getHostname(), alb,/* force */ true);

@@ -130,11 +130,9 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     boolean isLocalReplicaSet();
     
-    public String getNextShardName();
+    public ShardNameDTO getNextShardName(String name) throws Exception;
     
-    public String getNextShardName(String name) throws Exception;
-    
-    public Map<Integer, AwsShard<ShardingKey>> getShards();
+    public Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards();
     
     public void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception;
 }

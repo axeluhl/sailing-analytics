@@ -30,6 +30,7 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
+import com.sap.sse.landscape.aws.ShardNameDTO;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -41,6 +42,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.Route53AsyncClient;
@@ -68,7 +71,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final long serialVersionUID = 6895927683667795173L;
     private static final int MAX_TARGETGROUPNAME_LENGTH = 32; // source: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-targetgroup.html
     private static final int SHARD_INDEX_CHAR_LENGTH  = 2;
-    private final Map<Integer, AwsShard<ShardingKey>> shards;
+    private final Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> shards;
     private final CompletableFuture<AwsAutoScalingGroup> autoScalingGroup;
     private final CompletableFuture<Rule> defaultRedirectRule;
     private final CompletableFuture<String> hostedZoneId;
@@ -83,7 +86,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) {
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache, AwsLandscape<ShardingKey> landscape) {
         super(replicaSetAndServerName, hostname, master, replicas);
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
@@ -93,13 +96,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         masterTargetGroup = new CompletableFuture<>();
         publicTargetGroup = new CompletableFuture<>();
         resourceRecordSet = new CompletableFuture<>();
-        shards = new HashMap<Integer, AwsShard<ShardingKey>>();
+        shards = new HashMap<>();
         allLoadBalancersInRegion.thenCompose(loadBalancers->
             allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
                 allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
                     allAutoScalingGroups.thenCompose(autoScalingGroups->
                         allLaunchConfigurations.handle((launchConfigurations, e)->establishState(
-                                loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, launchConfigurations, dnsCache))))))
+                                loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, launchConfigurations, dnsCache, landscape))))))
             .handle((v, e)->{
                 if (e != null) {
                     logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
@@ -108,7 +111,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             });
     }
     
-    public Map<Integer, AwsShard<ShardingKey>> getShards(){
+    public Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards(){
         return shards;
     }
 
@@ -121,7 +124,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
                 allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations,
-                dnsCache);
+                dnsCache, landscape);
     }
     
     /**
@@ -162,7 +165,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private Void establishState(Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers,
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
             Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups,
-            Iterable<LaunchConfiguration> launchConfigurations, DNSCache dnsCache) {
+            Iterable<LaunchConfiguration> launchConfigurations, DNSCache dnsCache, AwsLandscape<ShardingKey> landscape) {
         TargetGroup<ShardingKey> myMasterTargetGroup = null;
         TargetGroup<ShardingKey> singleTargetGroupCandidate = null;
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
@@ -197,7 +200,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 }
             }   
         }
-        shards.putAll(establishShards(targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules,autoScalingGroups,launchConfigurations));
+        shards.putAll(establishShards(targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules,autoScalingGroups,launchConfigurations, landscape));
         if (!autoScalingGroup.isDone()) { // no auto-scaling group was found after having looked at all target groups
             autoScalingGroup.complete(null);
         }
@@ -302,12 +305,12 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         }
     
     @SuppressWarnings("unchecked")
-    HashMap<Integer, AwsShard<ShardingKey>> establishShards(Map<TargetGroup<ShardingKey>, 
+    HashMap<AwsShard<ShardingKey>, Iterable<ShardingKey>> establishShards(Map<TargetGroup<ShardingKey>, 
             Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
             Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoscalinggroups,
-            Iterable<LaunchConfiguration> launchConfigurations
+            Iterable<LaunchConfiguration> launchConfigurations, AwsLandscape<ShardingKey> landscape
             ){
-        HashMap<Integer, AwsShard<ShardingKey>> shardp = new HashMap<Integer, AwsShard<ShardingKey>>();
+        HashMap<AwsShard<ShardingKey>, Iterable<ShardingKey>> shardp = new HashMap<>();
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions
                 .entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
@@ -331,16 +334,33 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                             }
                         }
                     }
-                    //Shard index is stored as the last digits in the name. 0-99.
-                    final int shardIndex = Integer
-                            .parseInt(e.getKey().getName().substring(e.getKey().getName().lastIndexOf('-')+1));
+                    String tagname = null;
+                    Iterable<TagDescription> tagsDesc = landscape.getTargetGroupTags(e.getKey().getTargetGroupArn(), ShardNameDTO.TAG_KEY, e.getKey().getRegion());
+                    for(TagDescription des : tagsDesc) {
+                        Iterable<Tag> tag = Util.filter(des.tags(), t->t.key().equals(ShardNameDTO.TAG_KEY));
+                        if(!Util.isEmpty(tag)) {
+                            tagname = tag.iterator().next().value();
+                            break;
+                        }  
+                    }
+                    ShardNameDTO shardname;
+                    try {
+                        shardname = ShardNameDTO.parse(e.getKey().getName(),tagname);
+                    } catch (Exception e1) {
+                        logger.info(e1.getMessage());
+                        //This entry is no valid shard
+                        continue;
+                    }
+                    
                     
                     AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(
-                            getShardName(e.getKey().getName())
-                            ,getName(),
-                            keys, e.getKey());
+                            
+                            getName(),
+                            keys, 
+                            e.getKey(),
+                            shardname);
                     
-                    shardp.put(shardIndex, shard);
+                    shardp.put(shard, shard.getKeys());
 
                     shard.setAutoscalingGroup(getShardAutoscalinggroup(e.getKey(), autoscalinggroups, launchConfigurations));
                     
@@ -351,42 +371,16 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return shardp;
 
     };
-
-    /**
-     * 
-     * @param requestedName
-     *          name which should be tested for being a valid shardname. 
-     *          Naming-pattern: $getName()$-{$shardname$}-$shardCounter$>
-     * @return
-     *          if requestedName is a valid shardName
-     */
+    
     private boolean isShardName(String requestedName) {
         
-            return requestedName.contains(getName())
-                    && isInt(requestedName.substring(requestedName.lastIndexOf('-')+1));
+            return ShardNameDTO.isValidTargetGroupName(requestedName);
     }
     
-    public String getNextShardName(String name) throws Exception{
-        if(name.length() + getName().length() + /* '-' + digit length */SHARD_INDEX_CHAR_LENGTH + 2 > MAX_TARGETGROUPNAME_LENGTH) {
-            throw new Exception("Shardname is to long. Replicasetname + Shardname must be shorter than "+ (MAX_TARGETGROUPNAME_LENGTH - SHARD_INDEX_CHAR_LENGTH - 2) +" chars");
-        }
-        return this.getName()+ "-" + name + "-" + getNextShardIndex();
+    public ShardNameDTO getNextShardName(String name) throws Exception{
+        return ShardNameDTO.create(getName(), name);
     }
     
-    public String getNextShardName(){
-        return this.getName() + "-" + getNextShardIndex();
-    }
-    
-    private int getNextShardIndex() {
-        int ret  = -1;
-        for(int i = 0; i< 100 ; i++) {
-            if(!shards.keySet().contains(i)) {
-                ret = i;
-                break;
-            }
-        }
-        return ret;
-      }
     /**
      * @param name
      *          string where the shardname should be extracted

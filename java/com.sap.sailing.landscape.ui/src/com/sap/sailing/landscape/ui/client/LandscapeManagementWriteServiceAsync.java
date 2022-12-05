@@ -202,11 +202,11 @@ public interface LandscapeManagementWriteServiceAsync {
     void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
             String bearertoken, String region, byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
     
-    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, AsyncCallback<Map<Integer, AwsShardDTO>> callback);
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, AsyncCallback< Map<AwsShardDTO, Iterable<String>>> callback);
     
-    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region,byte[] passphrase, AsyncCallback<Map<Integer, AwsShardDTO>> callback);
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region,byte[] passphrase, AsyncCallback< Map<AwsShardDTO, Iterable<String>>> callback);
     
-    public void removeShard(int index, AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset,String region, byte[] passphrase, AsyncCallback<Void> callback);
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset,String region, byte[] passphrase, AsyncCallback<Void> callback);
     
     void getShardDTO(String name, AsyncCallback<AwsShardDTO> callback);
 }

@@ -82,6 +82,7 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
@@ -702,7 +703,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
             .setHostname(masterHostname)
-            .setTargetGroupNamePrefix(LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setTargetGroupNamePrefix(TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX)
             .setLandscape(getLandscape())
             .build();
         createLoadBalancerMapping.run();
@@ -894,28 +895,31 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public Map<Integer, AwsShardDTO> getShards(SailingApplicationReplicaSetDTO<String> replicaset,
+    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaset,
             String region) throws Exception {
         final AwsRegion awsregion = new AwsRegion(region, getLandscape());
         AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet  = convertFromApplicationReplicaSetDTO(awsregion, replicaset);
         Thread.sleep(1000);// wait. Ich hab keine ahnung warum
-        Map<Integer, AwsShardDTO> shardsDTO = new HashMap<Integer,AwsShardDTO>();
-        for(Entry<Integer, AwsShard<String>> entry : awsReplicaSet.getShards().entrySet()) {
+        Map<AwsShardDTO, Iterable<String>> shardsDTO = new HashMap<>();
+        for(Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
 
-            shardsDTO.put(entry.getKey(), new AwsShardDTO(entry.getValue().getKeys(),
-                    entry.getValue().getTargetGroup().getTargetGroupArn(), entry.getValue().getTargetGroup().getName(),
-                    entry.getValue().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
-                    entry.getValue().getTargetGroup().getLoadBalancerArn(),entry.getValue().getName() == null ?  "" : entry.getValue().getName(),awsReplicaSet.getName()));
+            shardsDTO.put(new AwsShardDTO(entry.getValue(),
+                    entry.getKey().getTargetGroup().getTargetGroupArn(), entry.getKey().getTargetGroup().getName(),
+                    entry.getKey().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
+                    entry.getKey().getAutoScalingGroup().getName(),
+                    entry.getKey().getTargetGroup().getLoadBalancerArn(),
+                    entry.getKey().getName() == null ?  "" : entry.getKey().getName(),
+                            awsReplicaSet.getName()), entry.getValue());
         }
         return shardsDTO;
     }
     
     @Override
-    public Map<Integer, AwsShardDTO> getShards(SailingApplicationReplicaSetDTO<String> replicaset,
+    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaset,
             String region, byte[] passphrase) throws Exception {
         final AwsRegion awsregion = new AwsRegion(region, getLandscape());
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
-        final Map<Integer, AwsShardDTO> shardsDTO = new HashMap<Integer, AwsShardDTO>();
+        final Map<AwsShardDTO, Iterable<String>> shardsDTO = new HashMap<>();
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet;
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(awsregion, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
@@ -923,17 +927,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
                     awsReplicaSet = applicationServerReplicaSet;
                     Thread.sleep(1000);// wait. Ich hab keine ahnung warum
-                    for (Entry<Integer, AwsShard<String>> entry : awsReplicaSet.getShards().entrySet()) {
+                    for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
 
-                        shardsDTO.put(entry.getKey(),
-                                new AwsShardDTO(entry.getValue().getKeys(),
-                                        entry.getValue().getTargetGroup().getTargetGroupArn(),
-                                        entry.getValue().getTargetGroup().getName(),
-                                        entry.getValue().getAutoScalingGroup().getAutoScalingGroup()
+                        shardsDTO.put(
+                                new AwsShardDTO(entry.getValue(), entry.getKey().getTargetGroup().getTargetGroupArn(),
+                                        entry.getKey().getTargetGroup().getName(),
+                                        entry.getKey().getAutoScalingGroup().getAutoScalingGroup()
                                                 .autoScalingGroupARN(),
-                                        entry.getValue().getTargetGroup().getLoadBalancerArn(),
-                                        entry.getValue().getName() == null ? "" : entry.getValue().getName(),
-                                        awsReplicaSet.getName()));
+                                        entry.getKey().getTargetGroup().getLoadBalancerArn(),
+                                        entry.getKey().getAutoScalingGroup().getName(),
+                                        entry.getKey().getName() == null ? "" : entry.getKey().getName(),
+                                        awsReplicaSet.getName()),
+                                entry.getValue());
                     }
                     break;
                 }   
@@ -942,7 +947,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void removeShard(int index, AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase)
+    public void removeShard( AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase)
             throws Exception {
         final AwsRegion awsregion = new AwsRegion(region, getLandscape());
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
@@ -953,9 +958,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
                     awsReplicaSet = applicationServerReplicaSet;
                     Thread.sleep(1000);// wait. Ich hab keine ahnung warum
-                    for (Entry<Integer, AwsShard<String>> entry : awsReplicaSet.getShards().entrySet()) {
-                        if(shard.getTargetgroupArn().equals(entry.getValue().getTargetGroup().getTargetGroupArn())) {
-                           awsReplicaSet.removeShard(entry.getValue(), getLandscape());
+                    for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
+                        if(shard.getTargetgroupArn().equals(entry.getKey().getTargetGroup().getTargetGroupArn())) {
+                           awsReplicaSet.removeShard(entry.getKey(), getLandscape());
                            return;
                         }
                     }
