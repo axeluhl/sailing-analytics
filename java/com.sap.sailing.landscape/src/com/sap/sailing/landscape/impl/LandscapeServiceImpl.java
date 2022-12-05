@@ -794,7 +794,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
             .setHostname(masterHostname)
-            .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setTargetGroupNamePrefix(TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX)
             .setLandscape(landscape)
             .build();
         createLoadBalancerMapping.run();
@@ -835,7 +835,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
-                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
+                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache, getLandscape());
         return applicationReplicaSet;
     }
 

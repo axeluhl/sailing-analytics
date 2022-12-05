@@ -16,6 +16,10 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  *
  */
 public interface TargetGroup<ShardingKey> extends Named {
+    
+    final public static int MAX_TARGETGROUP_NAME_LENGTH = 32;
+    final public static String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
+    
     Region getRegion();
     
     Map<AwsInstance<ShardingKey>, TargetHealth> getRegisteredTargets();
