@@ -15,7 +15,6 @@ import java.util.function.Function;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Timer;
@@ -456,15 +455,16 @@ public class LandscapeManagementPanel extends SimplePanel {
             storeRegionSelection(userService, selectedRegion);
         });
         
-        final CaptionPanel shardpanel  = new CaptionPanel("Shard");
-        shardManagementPanel  =new ShardManagementPanel(landscapeManagementService, errorReporter,stringMessages);
+        final CaptionPanel shardpanel = new CaptionPanel(stringMessages.shard());
+        shardManagementPanel = new ShardManagementPanel(landscapeManagementService, errorReporter, stringMessages);
         shardpanel.add(shardManagementPanel);
         mainPanel.add(shardpanel);
         shardpanel.setVisible(false);
-        //Listen to selected replicasets.
+        // Listen to selected replicasets.
         applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(event -> {
-            if(applicationReplicaSetsTable.getSelectionModel().getSelectedSet().size() == 1) {
-                shardManagementPanel.setReplicaSet(applicationReplicaSetsTable.getSelectionModel().getSelectedSet().iterator().next());
+            if (applicationReplicaSetsTable.getSelectionModel().getSelectedSet().size() == 1) {
+                shardManagementPanel.setReplicaSet(
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet().iterator().next());
                 shardManagementPanel.setRegion(regionsTable.getSelectionModel().getSelectedObject());
                 shardManagementPanel.setPassphrase(sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption());
                 shardpanel.setVisible(true);
@@ -472,7 +472,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 shardpanel.setVisible(false);
                 shardManagementPanel.setReplicaSet(null);
             }
-         });
+        });
         
         AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
                 @Override

@@ -1506,7 +1506,6 @@ public class LandscapeServiceImpl implements LandscapeService {
     
     public String getShardingKey(SailingServer server, String leaderboardName,String password) throws Exception{
         return server.getLeaderboardShardingKey(leaderboardName);
-        
     }
 
     @Override
@@ -1516,7 +1515,6 @@ public class LandscapeServiceImpl implements LandscapeService {
             server.getLeaderboardNames().forEach(t -> list.add(t));
             return list;
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             throw e;
         }

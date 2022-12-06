@@ -13,9 +13,6 @@ public class AwsShardDTO implements  IsSerializable {
     String autobalancerArn;
     String name;
     String replicaname;
-    
-    
-
     public AwsShardDTO(){};
     
     public AwsShardDTO(Iterable<String> keys, String targetgroupArn,
@@ -31,7 +28,6 @@ public class AwsShardDTO implements  IsSerializable {
         this.autosclaingGroupArn = autoscalinggroupArn;
         this.name = name;
         this.replicaname  =replicaname;
-        
     }
 
     public String getReplicaname() {

@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
@@ -865,55 +864,54 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return retList;
     }
     
-    private <BuilderT extends CreateShard.Builder<BuilderT,CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> 
-    Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> 
-    createShardBuilder(){
-        return CreateShard.<SailingAnalyticsMetrics,SailingAnalyticsProcess<String>,BuilderT,String>builder();
+    private <BuilderT extends CreateShard.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createShardBuilder() {
+        return CreateShard.<SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, BuilderT, String> builder();
     }
-    
-    
-    public void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
-            String bearertoken, String region, byte[] passphraseForPrivateKeyDecryption) throws Exception{
+
+    public void addShard(String shardName, Set<String> selectedLeaderBoards,
+            SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, String region,
+            byte[] passphraseForPrivateKeyDecryption) throws Exception {
         final AwsRegion awsregion = new AwsRegion(region, getLandscape());
-        AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet  = convertFromApplicationReplicaSetDTO(awsregion, replicaset);
-        SailingServer server = getLandscapeService().getSailServer(replicaset.getHostname(), bearertoken);
-        
-        Set<String> shardingkeys = new HashSet<String>();
-        for(String s : selectedLeaderBoards) {
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet = convertFromApplicationReplicaSetDTO(
+                awsregion, replicaset);
+        final SailingServer server = getLandscapeService().getSailServer(replicaset.getHostname(), bearertoken);
+
+        final Set<String> shardingkeys = new HashSet<String>();
+        for (String s : selectedLeaderBoards) {
             shardingkeys.add(server.getLeaderboardShardingKey(s));
         }
-        
-        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet = getLandscape().getApplicationReplicaSet(awsregion, awsReplicaSet.getServerName(), awsReplicaSet.getMaster(), awsReplicaSet.getReplicas());
-        
-        createShardBuilder()
-        .setLandscape(getLandscape())
-        .setShardingkeys(shardingkeys)
-        .setReplicaset(applicationReplicaSet)
-        .setRegion(awsregion)
-        .setShardName(shardName)
-        .setPassphrase(passphraseForPrivateKeyDecryption).build().run();
+
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet = getLandscape()
+                .getApplicationReplicaSet(awsregion, awsReplicaSet.getServerName(), awsReplicaSet.getMaster(),
+                        awsReplicaSet.getReplicas());
+
+        createShardBuilder().setLandscape(getLandscape()).setShardingkeys(shardingkeys)
+                .setReplicaset(applicationReplicaSet).setRegion(awsregion).setShardName(shardName)
+                .setPassphrase(passphraseForPrivateKeyDecryption).build().run();
     }
 
     @Override
     public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaset,
             String region) throws Exception {
         final AwsRegion awsregion = new AwsRegion(region, getLandscape());
-        AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet  = convertFromApplicationReplicaSetDTO(awsregion, replicaset);
-        Thread.sleep(1000);// wait. Ich hab keine ahnung warum
-        Map<AwsShardDTO, Iterable<String>> shardsDTO = new HashMap<>();
-        for(Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet = convertFromApplicationReplicaSetDTO(
+                awsregion, replicaset);
+        Thread.sleep(1000);
+        final Map<AwsShardDTO, Iterable<String>> shardsDTO = new HashMap<>();
+        for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
 
-            shardsDTO.put(new AwsShardDTO(entry.getValue(),
-                    entry.getKey().getTargetGroup().getTargetGroupArn(), entry.getKey().getTargetGroup().getName(),
-                    entry.getKey().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
-                    entry.getKey().getAutoScalingGroup().getName(),
-                    entry.getKey().getTargetGroup().getLoadBalancerArn(),
-                    entry.getKey().getName() == null ?  "" : entry.getKey().getName(),
-                            awsReplicaSet.getName()), entry.getValue());
+            shardsDTO.put(
+                    new AwsShardDTO(entry.getValue(), entry.getKey().getTargetGroup().getTargetGroupArn(),
+                            entry.getKey().getTargetGroup().getName(),
+                            entry.getKey().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
+                            entry.getKey().getAutoScalingGroup().getName(),
+                            entry.getKey().getTargetGroup().getLoadBalancerArn(),
+                            entry.getKey().getName() == null ? "" : entry.getKey().getName(), awsReplicaSet.getName()),
+                    entry.getValue());
         }
         return shardsDTO;
     }
-    
+
     @Override
     public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaset,
             String region, byte[] passphrase) throws Exception {
@@ -921,54 +919,53 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
         final Map<AwsShardDTO, Iterable<String>> shardsDTO = new HashMap<>();
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet;
-        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
-            getLandscape().getApplicationReplicaSetsByTag(awsregion, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
-                    hostSupplier, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.empty(), passphrase)) {
-                if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
-                    awsReplicaSet = applicationServerReplicaSet;
-                    Thread.sleep(1000);// wait. Ich hab keine ahnung warum
-                    for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
+        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet : getLandscape()
+                .getApplicationReplicaSetsByTag(awsregion,
+                        SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, hostSupplier,
+                        Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.empty(), passphrase)) {
+            if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
+                awsReplicaSet = applicationServerReplicaSet;
+                Thread.sleep(1000);// wait. Ich hab keine ahnung warum
+                for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
 
-                        shardsDTO.put(
-                                new AwsShardDTO(entry.getValue(), entry.getKey().getTargetGroup().getTargetGroupArn(),
-                                        entry.getKey().getTargetGroup().getName(),
-                                        entry.getKey().getAutoScalingGroup().getAutoScalingGroup()
-                                                .autoScalingGroupARN(),
-                                        entry.getKey().getTargetGroup().getLoadBalancerArn(),
-                                        entry.getKey().getAutoScalingGroup().getName(),
-                                        entry.getKey().getName() == null ? "" : entry.getKey().getName(),
-                                        awsReplicaSet.getName()),
-                                entry.getValue());
-                    }
-                    break;
-                }   
+                    shardsDTO.put(new AwsShardDTO(entry.getValue(), entry.getKey().getTargetGroup().getTargetGroupArn(),
+                            entry.getKey().getTargetGroup().getName(),
+                            entry.getKey().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
+                            entry.getKey().getTargetGroup().getLoadBalancerArn(),
+                            entry.getKey().getAutoScalingGroup().getName(),
+                            entry.getKey().getName() == null ? "" : entry.getKey().getName(), awsReplicaSet.getName()),
+                            entry.getValue());
+                }
+                break;
+            }
         }
         return shardsDTO;
     }
-    
+
     @Override
-    public void removeShard( AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase)
-            throws Exception {
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region,
+            byte[] passphrase) throws Exception {
         final AwsRegion awsregion = new AwsRegion(region, getLandscape());
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet;
-        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
-            getLandscape().getApplicationReplicaSetsByTag(awsregion, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
-                    hostSupplier, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.empty(), passphrase)) {
-                if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
-                    awsReplicaSet = applicationServerReplicaSet;
-                    Thread.sleep(1000);// wait. Ich hab keine ahnung warum
-                    for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
-                        if(shard.getTargetgroupArn().equals(entry.getKey().getTargetGroup().getTargetGroupArn())) {
-                           awsReplicaSet.removeShard(entry.getKey(), getLandscape());
-                           return;
-                        }
+        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet : getLandscape()
+                .getApplicationReplicaSetsByTag(awsregion,
+                        SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, hostSupplier,
+                        Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.empty(), passphrase)) {
+            if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
+                awsReplicaSet = applicationServerReplicaSet;
+                Thread.sleep(1000);
+                for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
+                    if (shard.getTargetgroupArn().equals(entry.getKey().getTargetGroup().getTargetGroupArn())) {
+                        awsReplicaSet.removeShard(entry.getKey(), getLandscape());
+                        return;
                     }
-                    throw new Exception("Shard was not found");
-                }   
+                }
+                throw new Exception("Shard was not found");
+            }
         }
     }
-    
+
     @Override
     public AwsShardDTO getShardDTO(String name) {
         return null;
@@ -981,8 +978,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion awsregion = new AwsRegion(region, getLandscape());
         AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet = convertFromApplicationReplicaSetDTO(
                 awsregion, replicaset);
-        SailingServer server = getLandscapeService().getSailServer(replicaset.getHostname(), bearertoken);
-        Set<String> shardingkeys = new HashSet<String>();
+        final SailingServer server = getLandscapeService().getSailServer(replicaset.getHostname(), bearertoken);
+        final Set<String> shardingkeys = new HashSet<String>();
         for (String s : selectedLeaderBoards) {
             shardingkeys.add(server.getLeaderboardShardingKey(s));
         }
@@ -1007,7 +1004,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.empty(), passphraseForPrivateKeyDecryption)) {
             if (applicationServerReplicaSet.getName().equals(replicaset.getName())) {
                 awsReplicaSet = applicationServerReplicaSet;
-                Thread.sleep(1000);// wait. Ich hab keine ahnung warum
+                Thread.sleep(1000);
                 createShardBuilder().setLandscape(getLandscape()).setShardingkeys(Util.asSet(selectedLeaderBoards))
                         .setReplicaset(awsReplicaSet).setRegion(awsregion).setShardName(shardName)
                         .setPassphrase(passphraseForPrivateKeyDecryption).setMode(CreateShard.Mode.REMOVE_SHARDINGKEY)

@@ -1982,9 +1982,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void createAutoscalinggroupFromExisting(AwsAutoScalingGroup autoscalingParent,
             String shardname, TargetGroup<ShardingKey> targetgroup,Optional<Tags> tags) {
-        
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoscalingParent.getRegion()));
-        //final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
         final String launchConfigurationName = autoscalingParent.getAutoScalingGroup().launchConfigurationName();
         final String autoScalingGroupName = getAutoScalingGroupName(shardname);
         final List<String> availabilityZones = autoscalingParent.getAutoScalingGroup().availabilityZones();
@@ -1992,7 +1990,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardname + ". Inheriting from Autoscalinggroup: " + autoscalingParent.getName());
         autoScalingClient.createAutoScalingGroup(b->{
             b
-                //.minSize(autoscalingParent.getAutoScalingGroup().minSize() > 1 ? autoscalingParent.getAutoScalingGroup().minSize() : 2)
+                .minSize(autoscalingParent.getAutoScalingGroup().minSize() > 1 ? autoscalingParent.getAutoScalingGroup().minSize() : 2)
                 .minSize(1)
                 .maxSize(autoscalingParent.getAutoScalingGroup().maxSize())
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)

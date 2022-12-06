@@ -36,19 +36,17 @@ import com.sap.sse.shared.util.Wait;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ForwardActionConfig;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.PathPatternConditionConfig;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
 
-public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends AbstractAwsProcedureImpl<ShardingKey> {
+public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+        extends AbstractAwsProcedureImpl<ShardingKey> {
     private static final Logger logger = Logger.getLogger(CreateShard.class.getName());
-    static final String SHARD_SUFFIX  ="-S";
-    static final String TEMP_TARGETGROUP_SUFFIX  ="-TP";
+    static final String SHARD_SUFFIX = "-S";
+    static final String TEMP_TARGETGROUP_SUFFIX = "-TP";
     final static int NUMBER_OF_RULES_PER_REPLICA_SET = 5;
     final static int MAX_RULES_PER_LOADBALANCER = 100;
     final String shardName;
@@ -56,136 +54,143 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset;
     final Region region;
     final byte[] passphraseForPrivateKeyDecryption;
-    final Mode selectedMode; 
-    protected CreateShard(BuilderImpl<?,  ShardingKey,MetricsT, ProcessT> builder) throws Exception {
+    final Mode selectedMode;
+
+    protected CreateShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
         this.shardName = builder.getShardName();
-        this.passphraseForPrivateKeyDecryption  =builder.getPassphrase();
-        this.replicaset  =builder.getReplicaSet();
+        this.passphraseForPrivateKeyDecryption = builder.getPassphrase();
+        this.replicaset = builder.getReplicaSet();
         this.shardingkeys = builder.getShardingKeys();
-        this.region  =builder.getRegion();
-        this.selectedMode = builder.getSelectedMode() == null ? Mode.CREATE : builder.getSelectedMode(); // defaults to create
-        
+        this.region = builder.getRegion();
+        this.selectedMode = builder.getSelectedMode() == null ? Mode.CREATE : builder.getSelectedMode(); // defaults to
+                                                                                                         // create
+
     }
-    
-    public static interface Builder<BuilderT extends Builder<BuilderT,T, ShardingKey, MetricsT, ProcessT>,
-    T extends CreateShard<ShardingKey, MetricsT, ProcessT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    extends AbstractAwsProcedureImpl.Builder<BuilderT,T, ShardingKey> {
+
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>, T extends CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+            extends AbstractAwsProcedureImpl.Builder<BuilderT, T, ShardingKey> {
         BuilderT setShardName(String name);
+
         BuilderT setLandscape(AwsLandscape<String> landscape);
+
         BuilderT setShardingkeys(Set<String> shardingkeys);
+
         BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
+
         BuilderT setRegion(Region region);
+
         BuilderT setPassphrase(byte[] passphrase);
+
         BuilderT setMode(Mode mode);
     }
-    
-    static class BuilderImpl<BuilderT extends Builder<BuilderT,CreateShard<ShardingKey, MetricsT, ProcessT>,ShardingKey, MetricsT, ProcessT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    extends AbstractAwsProcedureImpl.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey>
-    implements Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey,MetricsT, ProcessT> {
+
+    static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+            extends
+            AbstractAwsProcedureImpl.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey>
+            implements
+            Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
         private String shardName;
         private Set<String> shardingkeys;
         private AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset;
         private Region region;
         private byte[] passphraseForPrivateKeyDecryption;
-        private Mode selectedMode; 
-        
+        private Mode selectedMode;
+
         @Override
         public CreateShard<ShardingKey, MetricsT, ProcessT> build() throws Exception {
             assert shardingkeys != null;
             assert replicaset != null;
             assert region != null;
             assert passphraseForPrivateKeyDecryption != null;
-            
+
             return new CreateShard<ShardingKey, MetricsT, ProcessT>(this);
-            
+
         }
+
         @Override
         public BuilderT setShardName(String name) {
             this.shardName = name;
             return self();
         }
+
         @Override
         public BuilderT setShardingkeys(Set<String> shardingkeys) {
-           this.shardingkeys  =shardingkeys;
-           return self();
+            this.shardingkeys = shardingkeys;
+            return self();
         }
+
         @Override
-        public BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset ) {
+        public BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset) {
             this.replicaset = replicaset;
             return self();
         }
 
         @Override
         public BuilderT setRegion(Region region) {
-            this.region  =region;
+            this.region = region;
             return self();
         }
+
         @Override
         public BuilderT setPassphrase(byte[] passphrase) {
             this.passphraseForPrivateKeyDecryption = passphrase;
             return self();
         }
-        
+
         @SuppressWarnings("unchecked")
         @Override
         public BuilderT setLandscape(AwsLandscape<String> landscape) {
             super.setLandscape((AwsLandscape<ShardingKey>) landscape);
             return self();
         }
-        
+
         protected AwsLandscape<ShardingKey> getLandscape() {
             return (AwsLandscape<ShardingKey>) super.getLandscape();
         }
-        
+
         public byte[] getPassphrase() {
             return passphraseForPrivateKeyDecryption;
         }
-        
+
         public Region region() {
             return region;
         }
-        
-        public AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>  getReplicaSet() {
+
+        public AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getReplicaSet() {
             return replicaset;
         }
-        
-        public Set<String> getShardingKeys(){
+
+        public Set<String> getShardingKeys() {
             return shardingkeys;
         }
-        
+
         public String getShardName() {
             return shardName;
         }
-        
+
         public Region getRegion() {
             return region;
         }
+
         @Override
         public BuilderT setMode(Mode mode) {
             this.selectedMode = mode;
             return self();
-        }   
-        
-        
+        }
+
         public Mode getSelectedMode() {
             return selectedMode;
         }
     }
-    
+
     public static enum Mode {
-        CREATE,
-        APPEND_SHARDINGKEY,
-        REMOVE_SHARDINGKEY
+        CREATE, APPEND_SHARDINGKEY, REMOVE_SHARDINGKEY
     }
 
     @Override
     public void run() throws Exception {
-        switch(selectedMode) {
+        switch (selectedMode) {
         case APPEND_SHARDINGKEY:
             APPEND_SHARDINGKEY();
             break;
@@ -198,23 +203,24 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             break;
         }
     }
-    
-    private void CREATE() throws Exception{
-        
+
+    private void CREATE() throws Exception {
+
         final ShardNameDTO name;
-        if(shardName == null) {
+        if (shardName == null) {
             throw new Exception("Shardname is null, please enter a name");
         } else {
             name = replicaset.getNextShardName(shardName);
         }
-        if(!isTargetgroupNameUnique(name.getTargetgroupName())) {
-            throw new Exception("targetgroup name with this shardname is not unique. You may change the last or first two chars");
+        if (!isTargetgroupNameUnique(name.getTargetgroupName())) {
+            throw new Exception(
+                    "targetgroup name with this shardname is not unique. You may change the last or first two chars");
         }
         ApplicationLoadBalancer<ShardingKey> loadbalancer = getFreeLoadbalancer();
         logger.info(
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaset.getName());
-        TargetGroup<ShardingKey> targetgroup = getLandscape().createTargetGroupWithoutLoadbalancer(region, name.getTargetgroupName(),
-                replicaset.getMaster().getPort());
+        TargetGroup<ShardingKey> targetgroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
+                name.getTargetgroupName(), replicaset.getMaster().getPort());
         getLandscape().addTargetGroupTag(targetgroup.getTargetGroupArn(), ShardNameDTO.TAG_KEY, name.getName(), region);
         AwsAutoScalingGroup autoscalinggroup = replicaset.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
@@ -223,7 +229,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         // create one rules to random path for linking ALB to Targetgroup.
         if (loadbalancer != null) {
             Iterable<Rule> rules = loadbalancer.getRules();
-            if (Util.size(rules) < MAX_RULES_PER_LOADBALANCER - getLenRequiredRules(Util.size(shardingkeys))) { 
+            if (Util.size(rules) < MAX_RULES_PER_LOADBALANCER - getLenRequiredRules(Util.size(shardingkeys))) {
                 int rulePrio = getHighestAvailableIndex(rules);
                 if (rulePrio > 0) {
                     Rule newRule = Rule.builder().priority("" + rulePrio)
@@ -280,8 +286,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             }
         }
     }
-    
-    private void APPEND_SHARDINGKEY() throws Exception{
+
+    private void APPEND_SHARDINGKEY() throws Exception {
         // get shard, targetgroup and loadbalancer
         AwsShard<ShardingKey> shard = null;
         for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> entry : replicaset.getShards().entrySet()) {
@@ -309,7 +315,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                     keys.addAll(con.values());
                 }
             }
-            while (keys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - /* two conditions are required for host and forward to replica  */2
+            while (keys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE
+                    - /* two conditions are required for host and forward to replica */2
                     && !manipulatableShardingKeys.isEmpty()) {
                 keys.add(manipulatableShardingKeys.get(0));
                 manipulatableShardingKeys.remove(0);
@@ -329,12 +336,12 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         }
         if (!manipulatableShardingKeys.isEmpty()) {
             // check number of rules
-            if (Util.size(loadbalancer.getRules()) + getLenRequiredRules(Util.size(shardingkeys)) < MAX_RULES_PER_LOADBALANCER) {
+            if (Util.size(loadbalancer.getRules())
+                    + getLenRequiredRules(Util.size(shardingkeys)) < MAX_RULES_PER_LOADBALANCER) {
                 // enough rules
-                Set<String> keysCopy  =new HashSet<>();
+                Set<String> keysCopy = new HashSet<>();
                 keysCopy.addAll(shardingkeys);
                 addShardingRules(loadbalancer, keysCopy, targetgroup);
-
             } else {
                 // not enough rules
                 // move to new loadbalancer if necessary
@@ -343,9 +350,9 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             }
         }
     }
-    
+
     private void REMOVE_SHARDINGKEY() throws Exception {
-     // get shard, targetgroup and loadbalancer
+        // get shard, targetgroup and loadbalancer
         AwsShard<ShardingKey> shard = null;
         for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> entry : replicaset.getShards().entrySet()) {
             if (entry.getKey().getName().equals(shardName)) {
@@ -363,83 +370,85 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                 if (condition.pathPatternConfig() != null) {
                     shardingKeys.addAll(condition.values());
                 }
-            };
-                  }
-        getLandscape()
-        .deleteLoadBalancerListenerRules(region,Util.toArray(shard.getRules(), new Rule[0]));
-        
+            }
+            ;
+        }
+        getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(shard.getRules(), new Rule[0]));
+
         shardingKeys = Util.asSet(Util.filter(shardingKeys, t -> {
-            for(String s  : shardingkeys) {
-                if(s.equals(t)) {
+            for (String s : shardingkeys) {
+                if (s.equals(t)) {
                     return false;
                 }
-                
+
             }
             return true;
         }));
-     // change ALB rules to new ones
-        addShardingRules(shard.getLoadbalancer(),Util.asSet(shardingKeys), shard.getTargetGroup());
+        // change ALB rules to new ones
+        addShardingRules(shard.getLoadbalancer(), Util.asSet(shardingKeys), shard.getTargetGroup());
     }
-    
+
     private boolean isTargetgroupNameUnique(String name) {
         Iterable<TargetGroup<ShardingKey>> targetgroups = getLandscape().getTargetGroups(region);
-        for(TargetGroup<ShardingKey> t :  targetgroups) {
-            if(name.equals(t.getName())) {
+        for (TargetGroup<ShardingKey> t : targetgroups) {
+            if (name.equals(t.getName())) {
                 return false;
             }
         }
         return true;
     }
-    
-    private   Collection<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Set<String> shardingkeys, TargetGroup<ShardingKey> targetgroup) throws Exception {
-     // change ALB rules to new ones
-        Collection<Rule> rules = new ArrayList<Rule>();
-        Set<String> shardingKeysForConsumption = new HashSet<>();
+
+    private Collection<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Set<String> shardingkeys,
+            TargetGroup<ShardingKey> targetgroup) throws Exception {
+        // change ALB rules to new ones
+        final Collection<Rule> rules = new ArrayList<Rule>();
+        final Set<String> shardingKeysForConsumption = new HashSet<>();
         shardingKeysForConsumption.addAll(shardingkeys);
-        int ruleIdx = alb.getFirstPriorityOfHostname(replicaset.getHostname());
+        final int ruleIdx = alb.getFirstPriorityOfHostname(replicaset.getHostname());
         while (!shardingKeysForConsumption.isEmpty()) {// first make space at prio 1 <- highest prio
             alb.shiftRulesToMakeSpaceAt(ruleIdx);
             Collection<RuleCondition> conditions = convertShardingKeysToConditions(shardingKeysForConsumption);
-
-            conditions
-                    .add(RuleCondition.builder().field("http-header")
-                            .httpHeaderConfig(hhcb -> hhcb
-                                    .httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
-                                    .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
-                            .build());
-            alb
-                    .addRules(Rule.builder().priority("" + ruleIdx).conditions(conditions)
-                            .actions(Action.builder().forwardConfig(ForwardActionConfig.builder()
+            conditions.add(RuleCondition.builder().field("http-header")
+                    .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                            .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+                    .build());
+            alb.addRules(Rule.builder().priority("" + ruleIdx).conditions(conditions)
+                    .actions(Action.builder()
+                            .forwardConfig(ForwardActionConfig.builder()
                                     .targetGroups(TargetGroupTuple.builder()
                                             .targetGroupArn(targetgroup.getTargetGroupArn()).build())
-                                    .build()).type(ActionTypeEnum.FORWARD).build())
-                            .build()).forEach(t -> rules.add(t));;
+                                    .build())
+                            .type(ActionTypeEnum.FORWARD).build())
+                    .build()).forEach(t -> rules.add(t));
+            ;
         }
         return rules;
     }
-    
+
     private ApplicationLoadBalancer<ShardingKey> getFreeLoadbalancer() throws Exception {
-        final int requiredRules = getLenRequiredRules(Util.size(shardingkeys) +replicaset.getShards().size());
+        final int requiredRules = getLenRequiredRules(Util.size(shardingkeys) + replicaset.getShards().size());
         final ApplicationLoadBalancer<ShardingKey> res;
-        if(ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER - Util.size(replicaset.getLoadBalancer().getRules()) > requiredRules ) {
+        if (ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER
+                - Util.size(replicaset.getLoadBalancer().getRules()) > requiredRules) {
             // if the replicaset's loadbalancer has enough free rules left
             res = replicaset.getLoadBalancer();
         } else {
-            //Another loadbalancer 
-            Iterable<ApplicationLoadBalancer<ShardingKey>> loadbalancers = getLandscape().getLoadBalancers(region);
-            ApplicationLoadBalancer<ShardingKey>  alb = getLoadbalancerWithRulesLeft(loadbalancers, requiredRules + /* 5 default rules for the replicaset */NUMBER_OF_RULES_PER_REPLICA_SET);
-            if(alb != null) {
+            // Another loadbalancer
+            final Iterable<ApplicationLoadBalancer<ShardingKey>> loadbalancers = getLandscape().getLoadBalancers(region);
+            ApplicationLoadBalancer<ShardingKey> alb = getLoadbalancerWithRulesLeft(loadbalancers,
+                    requiredRules + /* 5 default rules for the replicaset */NUMBER_OF_RULES_PER_REPLICA_SET);
+            if (alb != null) {
                 // There is an alb left with enough rules
                 res = alb;
             } else {
-                Set<String> loadbalancerNames  =new HashSet<>();
-             
-                for(ApplicationLoadBalancer<ShardingKey> lb  :loadbalancers) {
+                Set<String> loadbalancerNames = new HashSet<>();
+
+                for (ApplicationLoadBalancer<ShardingKey> lb : loadbalancers) {
                     loadbalancerNames.add(lb.getName());
                 }
                 String name = getAvailableDNSMappedAlbName(loadbalancerNames);
                 // Create a new alb
-                
+
                 alb = getLandscape().createLoadBalancer(name, region);
                 res = alb;
             }
@@ -447,48 +456,63 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         }
         return res;
     }
-    
-    private void moveReplicaSeToLoadbalancer(ApplicationLoadBalancer<ShardingKey> alb, AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet) throws Exception {
-      //Move replicaset to this alb with all shards
-        //create temporary targetgroups
+
+    private void moveReplicaSeToLoadbalancer(ApplicationLoadBalancer<ShardingKey> alb,
+            AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet) throws Exception {
+        // Move replicaset to this alb with all shards
+        // create temporary targetgroups
         final TargetGroup<ShardingKey> targetMaster = replicaSet.getMasterTargetGroup();
         final TargetGroup<ShardingKey> targetPublic = replicaSet.getPublicTargetGroup();
-        final TargetGroup<ShardingKey> targetgroupMasterTemp = getLandscape().copyTargetGroup(replicaSet.getMasterTargetGroup(), TEMP_TARGETGROUP_SUFFIX);
-        final TargetGroup<ShardingKey> targetgroupPublicTemp = getLandscape().copyTargetGroup(replicaSet.getPublicTargetGroup(), TEMP_TARGETGROUP_SUFFIX);
+        final TargetGroup<ShardingKey> targetgroupMasterTemp = getLandscape()
+                .copyTargetGroup(replicaSet.getMasterTargetGroup(), TEMP_TARGETGROUP_SUFFIX);
+        final TargetGroup<ShardingKey> targetgroupPublicTemp = getLandscape()
+                .copyTargetGroup(replicaSet.getPublicTargetGroup(), TEMP_TARGETGROUP_SUFFIX);
         final Collection<TargetGroup<ShardingKey>> temptargetgroups = new ArrayList<>();
         final Collection<TargetGroup<ShardingKey>> originaltargetgroups = new ArrayList<>();
-        final Map<TargetGroup<ShardingKey>,Set<String>> keysAssignment = new HashMap<>();
+        final Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment = new HashMap<>();
         temptargetgroups.add(targetgroupMasterTemp);
         temptargetgroups.add(targetgroupPublicTemp);
         originaltargetgroups.add(targetMaster);
         originaltargetgroups.add(targetPublic);
         // add rules from replicaset
         final Collection<Rule> tempRules = new ArrayList<Rule>();
-        alb.addRulesAssigningUnusedPriorities(true,  createRules(alb, targetgroupMasterTemp,targetgroupPublicTemp, true)).forEach(t -> tempRules.add(t));;
-        //For each shard in replicaset -> move
-        for(Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSet.getShards().entrySet()) {
-            final TargetGroup<ShardingKey> tempShardTargetGroup = getLandscape().copyTargetGroup(shard.getKey().getTargetGroup(), TEMP_TARGETGROUP_SUFFIX);                
+        alb.addRulesAssigningUnusedPriorities(true,
+                createRules(alb, targetgroupMasterTemp, targetgroupPublicTemp, true)).forEach(t -> tempRules.add(t));
+        ;
+        // For each shard in replicaset -> move
+        for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSet.getShards().entrySet()) {
+            final TargetGroup<ShardingKey> tempShardTargetGroup = getLandscape()
+                    .copyTargetGroup(shard.getKey().getTargetGroup(), TEMP_TARGETGROUP_SUFFIX);
             final Set<String> s = new HashSet<>();
-            for(ShardingKey key : shard.getValue()) {
+            for (ShardingKey key : shard.getValue()) {
                 s.add(key.toString());
             }
             keysAssignment.put(shard.getKey().getTargetGroup(), s);
             temptargetgroups.add(tempShardTargetGroup);
-            addShardingRules(alb,s,tempShardTargetGroup).forEach(t -> tempRules.add(t));
+            addShardingRules(alb, s, tempShardTargetGroup).forEach(t -> tempRules.add(t));
             originaltargetgroups.add(shard.getKey().getTargetGroup());
         }
-        //set new dns record -> overwrites old entry
-        getLandscape().setDNSRecordToApplicationLoadBalancer(replicaSet.getHostedZoneId(), replicaSet.getHostname(), alb,/* force */ true);
-        //wait until new dns record is alive
-        Thread.sleep(getLandscape().getDNSTTLInSeconds() */* 10 times*/ 10 * /* conversion seconds to ms */ 1000);
+        // set new dns record -> overwrites old entry
+        getLandscape().setDNSRecordToApplicationLoadBalancer(replicaSet.getHostedZoneId(), replicaSet.getHostname(),
+                alb, /* force */ true);
+        // wait until new dns record is alive
+        Thread.sleep(getLandscape().getDNSTTLInSeconds() * /* 10 times */ 10 * /* conversion seconds to ms */ 1000);
         // ThreadPoolUtil.INSTANCE.
-        Collection<Rule> rulesToRemove  = replicaSet.getLoadBalancer().getRulesForTargetGroups(originaltargetgroups); //remove all old rules pointing to original targetgroups
-        getLandscape().deleteLoadBalancerListenerRules(region, rulesToRemove.toArray(new Rule[0])); //remove rules in old alb
-        //write rules to old targetgroups in new alb
-        Collection<Rule> tempRulesToRemove  = alb.getRulesForTargetGroups(temptargetgroups);
+        Collection<Rule> rulesToRemove = replicaSet.getLoadBalancer().getRulesForTargetGroups(originaltargetgroups); // remove
+                                                                                                                     // all
+                                                                                                                     // old
+                                                                                                                     // rules
+                                                                                                                     // pointing
+                                                                                                                     // to
+                                                                                                                     // original
+                                                                                                                     // targetgroups
+        getLandscape().deleteLoadBalancerListenerRules(region, rulesToRemove.toArray(new Rule[0])); // remove rules in
+                                                                                                    // old alb
+        // write rules to old targetgroups in new alb
+        Collection<Rule> tempRulesToRemove = alb.getRulesForTargetGroups(temptargetgroups);
         tempRulesToRemove.add(replicaSet.getDefaultRedirectRule());
-        alb.addRulesAssigningUnusedPriorities(true, createRules(alb, targetMaster,targetPublic, true));
-        for(Entry<TargetGroup<ShardingKey>,Set<String>> entry : keysAssignment.entrySet()) {
+        alb.addRulesAssigningUnusedPriorities(true, createRules(alb, targetMaster, targetPublic, true));
+        for (Entry<TargetGroup<ShardingKey>, Set<String>> entry : keysAssignment.entrySet()) {
             addShardingRules(alb, entry.getValue(), entry.getKey());
         }
         // Remove temp rules
@@ -499,54 +523,58 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             getLandscape().deleteTargetGroup(t);
         }
     }
-    
+
     private int getLenRequiredRules(int lenLeaderboards) {
-        return (int) (lenLeaderboards /3) + 1;
+        return (int) (lenLeaderboards / 3) + 1;
     }
-    
-    private Rule[] createRules(ApplicationLoadBalancer<ShardingKey> alb, TargetGroup<ShardingKey> masterTarget, TargetGroup<ShardingKey> publicTarget, boolean includeDefaultRedirect) throws Exception{
-        final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET -(includeDefaultRedirect ? 0 :1)];
+
+    private Rule[] createRules(ApplicationLoadBalancer<ShardingKey> alb, TargetGroup<ShardingKey> masterTarget,
+            TargetGroup<ShardingKey> publicTarget, boolean includeDefaultRedirect) throws Exception {
+        final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET - (includeDefaultRedirect ? 0 : 1)];
         int counter = 0;
-        if(includeDefaultRedirect) {
-           rules[counter++] = alb.getDefaultRedirectRule(getHostName(), new PlainRedirectDTO());
+        if (includeDefaultRedirect) {
+            rules[counter++] = alb.getDefaultRedirectRule(getHostName(), new PlainRedirectDTO());
         }
         rules[counter++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).build(),
-                alb.createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(masterTarget)).
-                build();
+                RuleCondition.builder().field("http-header")
+                        .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                                .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB()))
+                        .build(),
+                alb.createHostHeaderRuleCondition(getHostName()))
+                .actions(createForwardToTargetGroupAction(masterTarget)).build();
         rules[counter++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())).build(),
-                alb.createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(publicTarget)).
-                build();
-        rules[counter++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-request-method").httpRequestMethodConfig(hrmcb->hrmcb.values("GET")).build(),
-                alb.createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(publicTarget)).
-                build();
-        rules[counter++] = Rule.builder().conditions(
-                alb.createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(masterTarget)).
-                build();
-        
-        assert counter == NUMBER_OF_RULES_PER_REPLICA_SET - (includeDefaultRedirect ? 0 :1);
+                RuleCondition.builder().field("http-header")
+                        .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                                .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+                        .build(),
+                alb.createHostHeaderRuleCondition(getHostName()))
+                .actions(createForwardToTargetGroupAction(publicTarget)).build();
+        rules[counter++] = Rule.builder()
+                .conditions(
+                        RuleCondition.builder().field("http-request-method")
+                                .httpRequestMethodConfig(hrmcb -> hrmcb.values("GET")).build(),
+                        alb.createHostHeaderRuleCondition(getHostName()))
+                .actions(createForwardToTargetGroupAction(publicTarget)).build();
+        rules[counter++] = Rule.builder().conditions(alb.createHostHeaderRuleCondition(getHostName()))
+                .actions(createForwardToTargetGroupAction(masterTarget)).build();
+        assert counter == NUMBER_OF_RULES_PER_REPLICA_SET - (includeDefaultRedirect ? 0 : 1);
         return rules;
     }
-    
+
     private Action createForwardToTargetGroupAction(TargetGroup<ShardingKey> targetGroup) {
-        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc.targetGroups(
-                TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())) .build();
+        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc
+                .targetGroups(TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build()))
+                .build();
     }
-    
-    private String getHostName() throws Exception{
+
+    private String getHostName() throws Exception {
         return replicaset.getHostname();
     }
-    
+
     private ApplicationLoadBalancer<ShardingKey> getLoadbalancerWithRulesLeft(
             Iterable<ApplicationLoadBalancer<ShardingKey>> loadbalancers, int rules) {
         final Iterable<ApplicationLoadBalancer<ShardingKey>> loadbalancersFIltered = Util.filter(loadbalancers,
-                t -> t.getName().startsWith("DNSMapped"));
+                t -> t.getName().startsWith(ApplicationLoadBalancer.DNS_MAPPED_ALB_NAME_PREFIX));
         ApplicationLoadBalancer<ShardingKey> res = null;
         for (ApplicationLoadBalancer<ShardingKey> loadbalancer : loadbalancersFIltered) {
             if (Util.size(loadbalancer.getRules()) < 100 - rules) {
@@ -561,7 +589,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     public AwsLandscape<ShardingKey> getLandscape() {
         return (AwsLandscape<ShardingKey>) super.getLandscape();
     }
-    
+
     private static Collection<RuleCondition> convertShardingKeysToConditions(Set<String> shardingkeys) {
         final Collection<RuleCondition> res = new ArrayList<RuleCondition>();
         final Collection<String> remove = new ArrayList<String>();
@@ -592,7 +620,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         }
         return -1; // if no free prio was found
     }
-    
+
     /**
      * Picks a new load balancer name following the pattern {@link #DNS_MAPPED_ALB_NAME_PREFIX}{@code [0-9]+} that is
      * not part of {@code loadBalancerNames} and has the least number.
@@ -610,11 +638,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                         .min().getAsInt();
     }
 
-    public static 
-    <MetricsT extends ApplicationProcessMetrics, 
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> 
-    Builder<BuilderT,CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {
+    public static <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {
         return new BuilderImpl<BuilderT, ShardingKey, MetricsT, ProcessT>();
     }
 }

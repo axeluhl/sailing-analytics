@@ -166,7 +166,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
         final Iterator<Rule> iter = rules.iterator();
         // create Map with every priority
         while (iter.hasNext()) {
-            Rule r = iter.next();
+            final Rule r = iter.next();
             try {
                 rulesSorted.put(Integer.parseInt(r.priority()), r);
             } catch (Exception e) {
@@ -175,7 +175,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
         }
         final Iterator<Entry<Integer, Rule>> iterSorted = rulesSorted.entrySet().iterator();
         while (iterSorted.hasNext()) {
-            Rule r = iterSorted.next().getValue();
+            final Rule r = iterSorted.next().getValue();
             for (RuleCondition con : r.conditions()) {
                 if (con.hostHeaderConfig() != null && con.hostHeaderConfig().values().contains(hostname)) {
                     for (Action a : r.actions()) {
