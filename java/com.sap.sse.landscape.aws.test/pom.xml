@@ -12,4 +12,19 @@
   <packaging>eclipse-test-plugin</packaging>
 -->
   <packaging>eclipse-plugin</packaging>
+  <build>
+    <plugins>
+      <plugin>
+       <groupId>org.eclipse.tycho</groupId>
+       <artifactId>tycho-surefire-plugin</artifactId>
+       <version>${tycho.version}</version>
+          <configuration>
+            <excludes>
+              <!-- We don't want to provide AWS secrets to the central build -->
+              <exclude>**/*.class</exclude>
+            </excludes>
+          </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
