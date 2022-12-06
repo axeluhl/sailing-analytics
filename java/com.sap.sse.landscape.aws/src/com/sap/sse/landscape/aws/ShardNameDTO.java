@@ -36,6 +36,10 @@ public class ShardNameDTO {
     }
     
     public static ShardNameDTO create(String replicaSetName, String shardname) throws Exception {
+        if(!shardname.matches("[a-zA-Z0-9]*")) {
+            throw new Exception("Only a-z, A-Z and 0-9 characters are allowed in shardname!");
+        }
+        
         final String name;
         // "S-" "-" "-"
         if (TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX.length() + 1 + replicaSetName.length() + 1
@@ -61,6 +65,10 @@ public class ShardNameDTO {
     
     public String getTargetgroupName() {
         return targetGroupname;
+    }
+    
+    public String getShardName() {
+        return shardName;
     }
     
     public static boolean isValidTargetGroupName(String name) {
