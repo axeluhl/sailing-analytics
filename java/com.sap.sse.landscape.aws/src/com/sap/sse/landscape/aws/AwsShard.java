@@ -2,6 +2,9 @@ package com.sap.sse.landscape.aws;
 
 import com.sap.sse.landscape.application.Shard;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+
+
 /**
  * A shard is represented by a target group that has its own auto-scaling group and which handles a number of sharding
  * keys.
@@ -26,6 +29,10 @@ public interface AwsShard<ShardingKey> extends Shard<ShardingKey> {
     
     AwsAutoScalingGroup getAutoScalingGroup();
     
+    ApplicationLoadBalancer<ShardingKey> getLoadbalancer();
+    
     String getShardname();
+    
+    Iterable<Rule> getRules();
     
 }
