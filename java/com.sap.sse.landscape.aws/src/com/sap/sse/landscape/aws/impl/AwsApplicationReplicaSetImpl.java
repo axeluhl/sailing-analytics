@@ -335,7 +335,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                         }
                     }
                     String tagname = null;
-                    Iterable<TagDescription> tagsDesc = landscape.getTargetGroupTags(e.getKey().getTargetGroupArn(), ShardNameDTO.TAG_KEY, e.getKey().getRegion());
+                    Iterable<TagDescription> tagsDesc = landscape.getTargetGroupTags(e.getKey().getTargetGroupArn(), e.getKey().getRegion());
                     for(TagDescription des : tagsDesc) {
                         Iterable<Tag> tag = Util.filter(des.tags(), t->t.key().equals(ShardNameDTO.TAG_KEY));
                         if(!Util.isEmpty(tag)) {
@@ -351,17 +351,14 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                         //This entry is no valid shard
                         continue;
                     }
-                    
-                    
                     AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(
-                            
                             getName(),
                             keys, 
                             e.getKey(),
-                            shardname);
-                    
+                            shardname,
+                            e.getKey().getLoadBalancer(),
+                            pathRules);
                     shardp.put(shard, shard.getKeys());
-
                     shard.setAutoscalingGroup(getShardAutoscalinggroup(e.getKey(), autoscalinggroups, launchConfigurations));
                     
                 }

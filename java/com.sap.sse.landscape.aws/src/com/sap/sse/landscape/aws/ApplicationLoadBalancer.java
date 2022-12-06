@@ -41,6 +41,7 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     static final String DNS_MAPPED_ALB_NAME_PREFIX = "DNSMapped-";
     static final Pattern ALB_NAME_PATTERN = Pattern.compile(DNS_MAPPED_ALB_NAME_PREFIX+"(.*)$");
     static final int MAX_ALBS_PER_REGION = 20;
+    static final int MAX_CONDITIONS_PER_RULE = 5;
     /**
      * The DNS name of this load balancer; can be used, e.g., to set a CNAME DNS record pointing
      * to this load balancer.
