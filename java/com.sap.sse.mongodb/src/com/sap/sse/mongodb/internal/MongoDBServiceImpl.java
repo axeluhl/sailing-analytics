@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,9 +31,9 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private MongoDBConfiguration configuration;
 
-    private final Map<ConnectionString, MongoClient> mongos;
+    private final ConcurrentMap<ConnectionString, MongoClient> mongos;
     
-    private final Map<ConnectionString, MongoDatabase> dbs;
+    private final ConcurrentMap<ConnectionString, MongoDatabase> dbs;
     
     private final Map<ClientSession, Boolean> sessionsToRefresh;
     
@@ -43,8 +45,8 @@ public class MongoDBServiceImpl implements MongoDBService {
     private final Map<String, String> registered;
 
     public MongoDBServiceImpl() {
-        mongos = new HashMap<>();
-        dbs = new HashMap<>();
+        mongos = new ConcurrentHashMap<>();
+        dbs = new ConcurrentHashMap<>();
         registered = new HashMap<String, String>();
         sessionsToRefresh = Collections.synchronizedMap(new WeakHashMap<>());
     }
