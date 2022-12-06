@@ -1,16 +1,29 @@
 package com.sap.sailing.ingestion;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.google.gson.Gson;
-import com.sap.sailing.ingestion.dto.AWSRequestWrapper;
-import com.sap.sailing.ingestion.dto.AWSResponseWrapper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public class PingLambda implements RequestHandler<AWSRequestWrapper, String> {
+import org.json.simple.parser.ParseException;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.sap.sse.shared.json.JsonDeserializationException;
+
+public class PingLambda implements RequestStreamHandler {
+    private final AWSInOutHandler awsInOut = new AWSInOutHandler();
+
     @Override
-    public String handleRequest(AWSRequestWrapper input, Context context) {
-        final String jsonAsString = new Gson().toJson(input);
-        context.getLogger().log(jsonAsString);
-        return new Gson().toJson(AWSResponseWrapper.successResponseAsJson(jsonAsString));
+    public void handleRequest(final InputStream inputAsStream, final OutputStream outputAsStream, final Context context) {
+        try {
+            final String jsonAsString = awsInOut.parseInputToJson(inputAsStream).toJSONString();
+            context.getLogger().log(jsonAsString);
+            String successResponse = awsInOut.createJsonResponse(jsonAsString).toJSONString();
+            outputAsStream.write(successResponse.getBytes());
+        } catch (ParseException | JsonDeserializationException e) {
+            context.getLogger().log("Exception trying to deserialize JSON input: " + e.getMessage());
+        } catch (IOException e) {
+            context.getLogger().log(e.getMessage());
+        }
     }
 }
