@@ -46,6 +46,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.ec2.model.Snapshot;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.AddTagsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
@@ -410,6 +411,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(Region region);
 
     CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> getTargetGroupsAsync(Region region);
+    
+    public Iterable<TargetGroup<ShardingKey>> getTargetGroups(com.sap.sse.landscape.Region region);
 
     CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(Region region, TargetGroup<ShardingKey> targetGroup);
 
@@ -512,6 +515,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     <SK> void deleteTargetGroup(TargetGroup<SK> targetGroup);
 
     Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
+    
+    public Iterable<Rule> modifyRuleConditions(Region region, Rule rule);
 
     /**
      * Use {@link Rule.Builder} to create {@link Rule} objects you'd like to set for the {@link Listener} passed as parameter.
@@ -758,5 +763,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     
     long getDNSTTLInSeconds();
     
-    public Iterable<TagDescription> getTargetGroupTags(String arn, String tagName, com.sap.sse.landscape.Region region);
+    public Iterable<TagDescription> getTargetGroupTags(String arn, com.sap.sse.landscape.Region region);
+    
+    public  AddTagsResponse addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
 }

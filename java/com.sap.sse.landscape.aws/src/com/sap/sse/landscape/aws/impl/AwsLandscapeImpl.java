@@ -133,6 +133,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalanci
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.AddTagsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Certificate;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerResponse;
@@ -150,6 +151,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyRuleResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
@@ -414,6 +416,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), loadBalancerArn,
                         tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
     }
+    
+    public Iterable<TargetGroup<ShardingKey>> getTargetGroups(com.sap.sse.landscape.Region region) {
+        return Util.map(
+                getLoadBalancingClient(getRegion(region)).describeTargetGroupsPaginator().targetGroups(),
+                tg-> new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().isEmpty() ? null : tg.loadBalancerArns().get(0),
+                tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
+               
+    }
 
     @Override
     public Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb) {
@@ -431,6 +441,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, com.sap.sse.landscape.Region region) {
         return getLoadBalancingClient(getRegion(region)).describeRules(b->b.listenerArn(loadBalancerListener.listenerArn())).rules();
+    }
+    
+    public Iterable<Rule> modifyRuleConditions(com.sap.sse.landscape.Region region, Rule rule) {
+        ModifyRuleResponse res = getLoadBalancingClient(getRegion(region)).modifyRule(t -> t.conditions(rule.conditions()).ruleArn(rule.ruleArn()).build());
+        return res.rules();
     }
 
     @Override
@@ -1294,11 +1309,19 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return tagResponse.tags().stream().map(t->t.value()).findAny();
     }
 
-    public Iterable<TagDescription> getTargetGroupTags(String arn, String tagName, com.sap.sse.landscape.Region region) {
+    public Iterable<TagDescription> getTargetGroupTags(String arn, com.sap.sse.landscape.Region region) {
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsResponse tagResponse = getLoadBalancingClient(
                 getRegion(region)).describeTags(t -> t.resourceArns(arn));
         return tagResponse.tagDescriptions();
     }
+    
+    public  AddTagsResponse addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region) {
+        Collection<software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag> tags = new ArrayList<>(); 
+        tags.add(software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(key).value(value).build());
+        return getLoadBalancingClient(
+                getRegion(region)).addTags(t -> t.resourceArns(arn).tags(tags));
+        
+    };
 
     @Override
     public Tags getTagForMongoProcess(Tags tagsToAddTo, String replicaSetName, int port) {

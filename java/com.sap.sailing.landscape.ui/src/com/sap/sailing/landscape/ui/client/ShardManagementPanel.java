@@ -1,9 +1,12 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.Set;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -13,6 +16,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -23,18 +27,24 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
+
 public class ShardManagementPanel extends SimplePanel {
     private final ErrorReporter errorReporter;
-    private final Button addShard;
+    
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithMultiSelectionAndFilter<String, StringMessages, AdminConsoleTableResources> regattasTable;
     private final TableWrapperWithMultiSelectionAndFilter< Entry<AwsShardDTO, Iterable<String>>, StringMessages, AdminConsoleTableResources> shardTable;
+
+    private final TableWrapperWithMultiSelectionAndFilter<String, StringMessages, AdminConsoleTableResources> selectedKeysTable;
     private final TextBox brearertokenText;
     private SailingApplicationReplicaSetDTO<String> replicaSet;
     private final BusyIndicator shardBusy;
@@ -43,6 +53,11 @@ public class ShardManagementPanel extends SimplePanel {
     private String passphrase;
     private final DialogBox messageBox;
     private final TextArea message;
+    private ArrayList<String> leaderboards;
+    private Map<AwsShardDTO, Iterable<String>> shards;
+    private final Button addShard;
+    private final CaptionPanel leaderboardCaption, shardsCaption, keysCaption; 
+    private final Button addButton, deleteButton, removeShardButton;
     public ShardManagementPanel(LandscapeManagementWriteServiceAsync pLandscapeManagementService,ErrorReporter errorReporter, StringMessages stringMessages) {
         final VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
@@ -59,9 +74,9 @@ public class ShardManagementPanel extends SimplePanel {
         addShard.addClickHandler(event -> {
             addShardButtonPress();
         });
-        final Button removeButton  =new Button("Remove");
-        actionPanel.add(removeButton);
-        removeButton.addClickHandler(event -> removeButtonPress());
+        removeShardButton  =new Button("Remove");
+        actionPanel.add(removeShardButton);
+        removeShardButton.addClickHandler(event -> removeButtonPress());
         mainPanel.add(actionPanel);
         final HorizontalPanel usercredentials = new HorizontalPanel();
         brearertokenText = new TextBox();
@@ -73,7 +88,7 @@ public class ShardManagementPanel extends SimplePanel {
         usercredentials.add(brearertokenText);
  
         mainPanel.add(usercredentials);  
-        
+        shardsCaption  =new CaptionPanel("Shards");
         shardTable = new TableWrapperWithMultiSelectionAndFilter<Entry<AwsShardDTO, Iterable<String>>, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, false, java.util.Optional.empty(),
                 GWT.create(AdminConsoleTableResources.class), java.util.Optional.empty(), java.util.Optional.empty(),
@@ -100,9 +115,13 @@ public class ShardManagementPanel extends SimplePanel {
         shardTable.addColumn(targetgroupColumn , "Targetgroup");
         shardTable.addColumn(t-> t.getKey().getAutoscalingGroupName() , "Autoscalinggroup");
         shardTable.getSelectionModel().addSelectionChangeHandler(event -> {
-            removeButton.setEnabled(!shardTable.getSelectionModel().getSelectedSet().isEmpty());
+            updateRemoveShardButton();
+            updateSelectedKeysTable();
+            updateAddDeleteButton();
         });
-        removeButton.setEnabled(!shardTable.getSelectionModel().getSelectedSet().isEmpty());
+        shardsCaption.add(shardTable);
+        updateRemoveShardButton();
+        leaderboardCaption  =new CaptionPanel("Leaderboards");
         regattasTable = new TableWrapperWithMultiSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, false, java.util.Optional.empty(), GWT.create(AdminConsoleTableResources.class),
                 java.util.Optional.empty(), java.util.Optional.empty(), null) {
@@ -117,13 +136,47 @@ public class ShardManagementPanel extends SimplePanel {
             }
         };  
         regattasTable.addColumn(t -> t, "Leaderboards");
+        regattasTable.getSelectionModel().addSelectionChangeHandler(event -> { updateAddDeleteButton();});
+        leaderboardCaption.add(regattasTable);
         final HorizontalPanel tableRow  = new HorizontalPanel();
         leaderboardsBusy  =new SimpleBusyIndicator();
         shardBusy = new SimpleBusyIndicator();
-        tableRow.add(regattasTable);
+        keysCaption = new CaptionPanel("Keys");
+        selectedKeysTable = new TableWrapperWithMultiSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
+                stringMessages, errorReporter, false, java.util.Optional.empty(), GWT.create(AdminConsoleTableResources.class),
+                java.util.Optional.empty(), java.util.Optional.empty(), null) {
+
+            @Override
+            protected Iterable<String> getSearchableStrings(String t) {
+                Set<String> result = new HashSet<>();
+                if(t != null && !t.isEmpty()) {
+                    result.add(t);
+                }
+                return result;
+            }
+        };
+        selectedKeysTable.addColumn(t -> t,"Keys");
+        selectedKeysTable.getSelectionModel().addSelectionChangeHandler(event -> {updateAddDeleteButton(); updateRemoveShardButton();});
+        keysCaption.setVisible(false);
+        keysCaption.add(selectedKeysTable);
+        
+        addButton  =new Button(">");
+        addButton.addClickHandler(event -> addLeaderboardToShard());
+        deleteButton  =new Button("<");
+        deleteButton.addClickHandler(event -> removeLeaderboardFromShard());
+        final VerticalPanel buttonPanel  = new VerticalPanel();
+        final SimplePanel spaceholder  = new SimplePanel();
+        spaceholder.setHeight("30px");
+        buttonPanel.add(spaceholder);
+        buttonPanel.add(addButton);
+        buttonPanel.add(deleteButton);
+        
+        tableRow.add(leaderboardCaption);
+        tableRow.add(buttonPanel);
         tableRow.add(leaderboardsBusy);
-        tableRow.add(shardTable);
+        tableRow.add(shardsCaption);
         tableRow.add(shardBusy);
+        tableRow.add(keysCaption);
         
         messageBox = new DialogBox(false);
         final VerticalPanel dialogMainPanel = new VerticalPanel();
@@ -137,12 +190,31 @@ public class ShardManagementPanel extends SimplePanel {
         closeButton.addClickHandler(event -> messageBox.hide());
         dialogMainPanel.add(closeButton);
         messageBox.center();
-        messageBox.show();
-        appendMessage("Started");
-        appendMessage("Test");
+        messageBox.hide();
+        updateAddDeleteButton();
         
         
         mainPanel.add(tableRow);   
+    }
+    
+    private void updateSelectedKeysTable(){
+        if(shardTable.getSelectionModel().getSelectedSet().size() == 1) {
+            keysCaption.setVisible(true);
+            selectedKeysTable.refresh(shardTable.getSelectionModel().getSelectedSet().iterator().next().getValue());
+        } else {
+            keysCaption.setVisible(false);
+        }
+    }
+    
+    private void updateRemoveShardButton() {
+        removeShardButton.setEnabled(!shardTable.getSelectionModel().getSelectedSet().isEmpty() && selectedKeysTable.getSelectionModel().getSelectedSet().size() == 0);
+    }
+    
+    private void updateAddDeleteButton() {
+        addButton.setEnabled(shardTable.getSelectionModel().getSelectedSet().size() == 1 &&
+                regattasTable.getSelectionModel().getSelectedSet().size() >0);
+        deleteButton.setEnabled(shardTable.getSelectionModel().getSelectedSet().size() == 1 &&
+                selectedKeysTable.getSelectionModel().getSelectedSet().size() > 0 );
     }
     
     private void appendMessage(String msg) {
@@ -151,28 +223,51 @@ public class ShardManagementPanel extends SimplePanel {
     }
     
     private void refresh() {
-        displayLeaderboards();
-        displayShards();
+        setLeaderboardBusy(true);
+        setShardtableBusy(true);
+        getLeaderboards();
+    }
+    
+    private void display() {
+        final ArrayList<String> takenLeaderboards = new ArrayList<>();
+        for(Entry<AwsShardDTO, Iterable<String>> s : shards.entrySet()) {
+            for(String t : s.getValue()) {
+                takenLeaderboards.add(t);
+            }
+        }
+        final Iterable<String> leaderboardsToDisplay = Util.filter(leaderboards, t->{
+            for(String key : takenLeaderboards) {
+                if(key.endsWith(t) || key.equals(t)){
+                    return false;
+                }
+                
+            }
+            return true;
+        });
+        regattasTable.refresh(leaderboardsToDisplay);
+        shardTable.refresh(shards.entrySet());
     }
     
     private void setLeaderboardBusy(boolean b) {
-        regattasTable.getTable().setVisible(!b);
+        leaderboardCaption.setVisible(!b);
        leaderboardsBusy.setBusy(b);
     }
     
     private void setShardtableBusy(boolean b) {
-        shardTable.getTable().setVisible(!b);
+        shardsCaption.setVisible(!b);
+        keysCaption.setVisible(false);
        shardBusy.setBusy(b);
     }
     
-    private void displayLeaderboards() {
+    private void getLeaderboards() {
         setLeaderboardBusy(true);
         landscapeManagementService.getLeaderboardNames(replicaSet, brearertokenText.getValue(),  new AsyncCallback<ArrayList<String>>() {
             
             @Override
             public void onSuccess(ArrayList<String> result) {
-                regattasTable.refresh(result);
+                leaderboards = result;
                 setLeaderboardBusy(false);
+                getShards();
             }
 
             @Override
@@ -181,6 +276,26 @@ public class ShardManagementPanel extends SimplePanel {
                 
             }
         });
+    }
+    
+    private void getShards() {
+        landscapeManagementService.getShards(replicaSet, region, passphrase.getBytes(),
+                new AsyncCallback<Map<AwsShardDTO, Iterable<String>>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                        setShardtableBusy(false);
+                    }
+
+                    @Override
+                    public void onSuccess(Map<AwsShardDTO, Iterable<String>> result) {
+                        shards = result;
+                        setShardtableBusy(false);
+                        display();
+
+                    }
+                });
     }
 
     
@@ -217,7 +332,8 @@ public class ShardManagementPanel extends SimplePanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            errorReporter.reportError("Success");
+                            Notification.notify("Created succesfully", NotificationType.SUCCESS);
+                            refresh();
                         }
 
                         @Override
@@ -230,6 +346,7 @@ public class ShardManagementPanel extends SimplePanel {
             });
             nameRequest.center();
             nameRequest.show();
+            refresh();
         }
     }
 
@@ -247,30 +364,58 @@ public class ShardManagementPanel extends SimplePanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            appendMessage("Deleted Shard: " + selection.getKey().getName());
+                            appendMessage("Deleted Shard: " + selection.getKey().getName())
+                            ;refresh();
                         }
                     });
         }
-        refresh();
+        
     }
     
-    private void displayShards() {
+    private void addLeaderboardToShard() {
         setShardtableBusy(true);
-            landscapeManagementService.getShards(replicaSet, region,passphrase.getBytes(), new AsyncCallback< Map<AwsShardDTO, Iterable<String>>>() {
+       if(!regattasTable.getSelectionModel().getSelectedSet().isEmpty() &&
+               shardTable.getSelectionModel().getSelectedSet().size() == 1) {
+           Iterable<String> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
+           Entry<AwsShardDTO, Iterable<String>> shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
+           landscapeManagementService.appendShardingKeysToShard(selectedLeaderboards, region, shard.getKey().getName(), replicaSet, brearertokenText.getValue(), passphrase.getBytes(), new AsyncCallback<Void>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.getMessage());
-                    setShardtableBusy(false);
-                }
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
 
-                @Override
-                public void onSuccess( Map<AwsShardDTO, Iterable<String>> result) {
-                    shardTable.refresh(result.entrySet());
-                    setShardtableBusy(false);
-                }
-            });
-        
+            @Override
+            public void onSuccess(Void result) {
+                appendMessage("Success");
+                refresh();
+            }
+        });
+       }else {
+           
+       }
+    }
+    
+    private void removeLeaderboardFromShard(){
+       setShardtableBusy(true);
+       if(!selectedKeysTable.getSelectionModel().getSelectedSet().isEmpty() &&
+               shardTable.getSelectionModel().getSelectedSet().size() == 1) {
+           Iterable<String> selectedLeaderboards = selectedKeysTable.getSelectionModel().getSelectedSet();
+           Entry<AwsShardDTO, Iterable<String>> shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
+           landscapeManagementService.removeShardingKeysToShard(selectedLeaderboards, region, shard.getKey().getName(), replicaSet, brearertokenText.getValue(), passphrase.getBytes(), new AsyncCallback<Void>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                appendMessage("Success");
+                refresh();
+            }
+        });
+       }
     }
     
     public void setReplicaSet(SailingApplicationReplicaSetDTO<String> rs) {
