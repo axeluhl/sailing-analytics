@@ -35,7 +35,7 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         List<NavigationFormat> formats = new ArrayList<NavigationFormat>();
         for (Class<? extends NavigationFormat> formatClass : supportedFormats) {
             try {
-                NavigationFormat format = formatClass.newInstance();
+                NavigationFormat format = formatClass.getDeclaredConstructor().newInstance();
                 if (restrictToWritableFormats && format.isSupportsWriting() ||
                         !restrictToWritableFormats && format.isSupportsReading())
                     formats.add(format);

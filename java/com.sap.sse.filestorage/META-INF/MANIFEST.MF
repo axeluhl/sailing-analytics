@@ -4,7 +4,7 @@ Bundle-Name: Sse File storage
 Bundle-SymbolicName: com.sap.sse.filestorage
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.sap.sse.filestorage,
  com.sap.sse.filestorage.impl,
  com.sap.sse.filestorage.testsupport
@@ -13,7 +13,7 @@ Import-Package: com.sap.sse.security.shared,
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sse.filestorage.impl.Activator
-Require-Bundle: com.amazon.aws.aws-java-api,
+Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.18.8",
  com.sap.sse.common,
  com.sap.sse.mongodb,
  com.sap.sse.replication.interfaces,

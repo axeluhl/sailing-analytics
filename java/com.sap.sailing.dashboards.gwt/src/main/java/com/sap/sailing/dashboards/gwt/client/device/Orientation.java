@@ -64,7 +64,7 @@ public class Orientation {
     }
 
     public void notifiyListenerAboutHeadingChange(double orientationHeading) {
-        Pair<OrientationType, Double> orienationPair = new Pair<OrientationType, Double>(getOrientationTypeForHeadingInSafari(orientationHeading), new Double(orientationHeading));
+        Pair<OrientationType, Double> orienationPair = new Pair<OrientationType, Double>(getOrientationTypeForHeadingInSafari(orientationHeading), Double.valueOf(orientationHeading));
         for (OrientationListener orientationListener : orientationListeners) {
             orientationListener.orientationChanged(orienationPair);
         }

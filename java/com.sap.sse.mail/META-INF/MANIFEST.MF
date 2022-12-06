@@ -4,13 +4,14 @@ Bundle-Name: Sse Email
 Bundle-SymbolicName: com.sap.sse.mail
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Activator: com.sap.sse.mail.impl.Activator
 Export-Package: com.sap.sse.mail,
  com.sap.sse.mail.impl,
  com.sap.sse.mail.queue,
  com.sap.sse.mail.queue.impl
-Import-Package: javax.mail,
+Import-Package: javax.activation,
+ javax.mail,
  javax.mail.internet,
  javax.mail.util;version="1.4.0",
  org.osgi.framework,

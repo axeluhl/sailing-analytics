@@ -3266,7 +3266,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
                         metadata, fileType);
                 sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
-                        .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
+                        .storeFile(fileStorageStream, "." + fileType, Long.valueOf(fileStorageStream.available()))
                         .toString());
             }
         } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException

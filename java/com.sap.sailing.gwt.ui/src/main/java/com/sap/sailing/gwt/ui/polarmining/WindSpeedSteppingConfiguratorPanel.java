@@ -71,7 +71,7 @@ public class WindSpeedSteppingConfiguratorPanel extends HorizontalPanel {
     public WindSpeedSteppingWithMaxDistance getStepping(double maxDistance) {
         List<Double> levelList = new ArrayList<Double>(); 
         for (TextBox box : textBoxes) {
-            levelList.add(new Double(Integer.parseInt(box.getValue())));
+            levelList.add(Double.valueOf(Integer.parseInt(box.getValue())));
         }
         Collections.sort(levelList);
         double[] levels = new double[levelList.size()];

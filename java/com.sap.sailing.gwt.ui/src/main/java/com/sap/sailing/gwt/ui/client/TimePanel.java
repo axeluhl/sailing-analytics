@@ -345,7 +345,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (timeRangeProvider.isZoomed()) {
-            timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
+            timeSlider.setCurrentValue(Double.valueOf(newTime.getTime()), false);
         } else {
             if (getFromTime() == null || getToTime() == null) {
                 initializeTimeRange(oldTime, newTime);
@@ -368,7 +368,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
                         break;
                     }
                 }
-                timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
+                timeSlider.setCurrentValue(Double.valueOf(newTime.getTime()), false);
             }
         }
         dateLabel.setText(getDateLabelText(newTime));
@@ -436,7 +436,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
         final Optional<Pair<Double, Double>> changed =
-                timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
+                timeSlider.setMinAndMaxValue(Double.valueOf(min.getTime()), Double.valueOf(max.getTime()), fireEvent);
         if (changed.isPresent()) {
             final Double changedMin = changed.get().getA();
             final Double changedMax = changed.get().getB();

@@ -22,16 +22,16 @@ public class WindwardToGoComparatorTest {
                 return 0;
             }
         });
-        ti.add(new Integer(1));
-        ti.add(new Integer(2));
+        ti.add(Integer.valueOf(1));
+        ti.add(Integer.valueOf(2));
         assertEquals(1, ti.size());
     }
 
     @Test
     public void testInsertEqualElementsIntoSortedSetWithoutComparator() {
         TreeSet<Integer> ti = new TreeSet<Integer>();
-        ti.add(new Integer(1));
-        ti.add(new Integer(2));
+        ti.add(Integer.valueOf(1));
+        ti.add(Integer.valueOf(2));
         assertEquals(2, ti.size());
     }
 }

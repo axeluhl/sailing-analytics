@@ -291,7 +291,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
             if(innerSettings instanceof SettingsMap) {
                 copiedSettings = reconstructSettingsMap((SettingsMap)innerSettings);
             } else {
-                copiedSettings = innerSettings.getClass().newInstance();
+                copiedSettings = innerSettings.getClass().getDeclaredConstructor().newInstance();
             }
             innerMap.put(entry.getKey(), copiedSettings);
         }

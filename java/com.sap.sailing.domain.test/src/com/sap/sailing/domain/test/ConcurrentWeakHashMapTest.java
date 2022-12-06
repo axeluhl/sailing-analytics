@@ -38,8 +38,8 @@ public class ConcurrentWeakHashMapTest {
     @Test
     public void testPutAndPutAgain() {
         ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
-        Integer one1 = new Integer(1);
-        Integer one2 = new Integer(1);
+        Integer one1 = Integer.valueOf(1);
+        Integer one2 = Integer.valueOf(1);
         assertNotSame(one1, one2);
         m.put(one1, "a");
         String replaced = m.put(one2, "b");
@@ -51,7 +51,7 @@ public class ConcurrentWeakHashMapTest {
     @Test
     public void testRemoveWithSame() {
         ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         m.put(one, "a");
         m.remove(one);
         assertTrue(m.isEmpty());
@@ -60,7 +60,7 @@ public class ConcurrentWeakHashMapTest {
     @Test
     public void testRemoveImpactOnKeySetAndEntrySet() {
         ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         m.put(one, "a");
         Set<Integer> keySet = m.keySet();
         Set<Entry<Integer, String>> entrySet = m.entrySet();
@@ -75,8 +75,8 @@ public class ConcurrentWeakHashMapTest {
     @Test
     public void testRemoveWithEqual() {
         ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
-        Integer one1 = new Integer(1);
-        Integer one2 = new Integer(1);
+        Integer one1 = Integer.valueOf(1);
+        Integer one2 = Integer.valueOf(1);
         assertNotSame(one1, one2);
         m.put(one1, "a");
         m.remove(one2);
@@ -86,7 +86,7 @@ public class ConcurrentWeakHashMapTest {
     @Test
     public void removeThrougKeySet() {
         ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
-        Integer one1 = new Integer(1);
+        Integer one1 = Integer.valueOf(1);
         m.put(one1, "a");
         final Set<Integer> keySet = m.keySet();
         Iterator<Integer> keySetIter = keySet.iterator();

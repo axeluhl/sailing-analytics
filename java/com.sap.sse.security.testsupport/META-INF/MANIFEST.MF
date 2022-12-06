@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sse.security.testsupport
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Automatic-Module-Name: com.sap.sse.security.testsupport
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: com.sap.sse.security,
  org.mockito.mockito-core;bundle-version="1.10.14",
  com.sap.sse.common

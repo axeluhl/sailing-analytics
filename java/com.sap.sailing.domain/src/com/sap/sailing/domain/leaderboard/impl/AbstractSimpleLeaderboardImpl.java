@@ -65,7 +65,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         implements RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
-    static final Double DOUBLE_0 = new Double(0);
+    static final Double DOUBLE_0 = Double.valueOf(0);
 
     private final SettableScoreCorrection scoreCorrection;
 

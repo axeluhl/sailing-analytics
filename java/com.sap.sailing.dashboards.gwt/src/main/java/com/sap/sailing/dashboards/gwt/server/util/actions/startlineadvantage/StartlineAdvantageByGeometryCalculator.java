@@ -35,7 +35,7 @@ public final class StartlineAdvantageByGeometryCalculator {
                     Distance rcToMark = firstMarkPosition.getDistance(startlineMarkPositions.getA());
                     Distance pinToMark = firstMarkPosition.getDistance(startlineMarkPositions.getB());
                     double startlineadvantage =  rcToMark.getMeters() - pinToMark.getMeters();
-                    result = new Double(startlineadvantage);
+                    result = Double.valueOf(startlineadvantage);
                 }
             }
         }

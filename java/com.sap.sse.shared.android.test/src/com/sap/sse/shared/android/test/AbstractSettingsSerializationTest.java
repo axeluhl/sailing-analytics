@@ -184,7 +184,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     protected abstract <T extends GenericSerializableSettings> SOT serialize(T settings) throws Exception;
 
     protected <T extends GenericSerializableSettings> T deserialize(SOT serializedObject, Class<T> settingsClass) throws Exception {
-        T deserializedInstance = settingsClass.newInstance();
+        T deserializedInstance = settingsClass.getDeclaredConstructor().newInstance();
 
         return deserialize(serializedObject, deserializedInstance);
     }

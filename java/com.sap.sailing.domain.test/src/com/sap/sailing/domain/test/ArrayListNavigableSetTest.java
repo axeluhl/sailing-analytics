@@ -36,8 +36,8 @@ public class ArrayListNavigableSetTest {
     }
 
     private void testSet(Set<Integer> hashSet) {
-        Integer i1 = new Integer(1);
-        Integer i2 = new Integer(1);
+        Integer i1 = Integer.valueOf(1);
+        Integer i2 = Integer.valueOf(1);
         assertNotSame(i1, i2);
         assertEquals(i1, i2);
         hashSet.add(i1);

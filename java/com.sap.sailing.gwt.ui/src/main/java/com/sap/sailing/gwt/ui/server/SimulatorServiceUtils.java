@@ -395,7 +395,7 @@ public class SimulatorServiceUtils {
         int noOfPathPoints = pathPoints.size();
         List<Double> diffs = new ArrayList<Double>();
         for (int index = 0; index < noOfPathPoints; index++) {
-            diffs.add(new Double(Math.abs(pathPoints.get(index).getTimePoint().asMillis() - timepointAsMillis)));
+            diffs.add(Double.valueOf(Math.abs(pathPoints.get(index).getTimePoint().asMillis() - timepointAsMillis)));
         }
         int indexOfMinDiff = diffs.indexOf(Collections.min(diffs));
         return pathPoints.get(indexOfMinDiff).getSpeed();

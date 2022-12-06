@@ -44,7 +44,7 @@ public class DurationFormatter {
                 result.append("s");
             }
         } else if (asMinutes >= 1. || asMinutes <= -1.) {
-            int minutesToSee = (int) ensureDisplay(new Double(asMinutes), nonNegativeDuration);
+            int minutesToSee = (int) ensureDisplay(Double.valueOf(asMinutes), nonNegativeDuration);
             int secondsToSee = (int) ensureDisplay(instance.minus(Duration.ONE_MINUTE.times((long) Math.abs(asMinutes))).asSeconds(), nonNegativeDuration);
             if (secondsToSee < 10 && secondsToSee > 0) {
                 // this is a hack but we can't use NumberFormat here because this
