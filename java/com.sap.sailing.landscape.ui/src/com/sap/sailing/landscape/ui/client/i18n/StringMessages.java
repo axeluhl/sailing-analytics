@@ -139,4 +139,14 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String errorDuringImport(String message);
     String errorWhileComparingServerContent();
     String differencesInServerContentFound(String serverAName, String aDiffs, String serverBName, String bDiffs);
+    String shard();
+    String shardname();
+    String addShard();
+    String removeShard();
+    String leaderboards();
+    String shardingKeys();
+    String Targetgroup();
+    String Autoscalinggroup();
+    String keys();
+    String enterShardName();
 }
