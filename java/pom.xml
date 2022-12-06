@@ -542,6 +542,7 @@
   </pluginManagement>
 
   <plugins>
+    <!-- Uncomment the following to display active profiles for each artifact:
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-help-plugin</artifactId>
@@ -556,6 +557,7 @@
         </execution>
       </executions>
     </plugin>
+    -->
     <plugin>
       <groupId>org.eclipse.tycho</groupId>
       <artifactId>tycho-maven-plugin</artifactId>
