@@ -38,8 +38,10 @@ public class ConcurrentWeakHashMapTest {
     @Test
     public void testPutAndPutAgain() {
         ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
-        Integer one1 = Integer.valueOf(1);
-        Integer one2 = Integer.valueOf(1);
+        @SuppressWarnings("deprecation") // we really want distinct instances here
+        Integer one1 = new Integer(1);
+        @SuppressWarnings("deprecation") // we really want distinct instances here
+        Integer one2 = new Integer(1);
         assertNotSame(one1, one2);
         m.put(one1, "a");
         String replaced = m.put(one2, "b");
@@ -75,8 +77,10 @@ public class ConcurrentWeakHashMapTest {
     @Test
     public void testRemoveWithEqual() {
         ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
-        Integer one1 = Integer.valueOf(1);
-        Integer one2 = Integer.valueOf(1);
+        @SuppressWarnings("deprecation") // we really want distinct instances here
+        Integer one1 = new Integer(1);
+        @SuppressWarnings("deprecation") // we really want distinct instances here
+        Integer one2 = new Integer(1);
         assertNotSame(one1, one2);
         m.put(one1, "a");
         m.remove(one2);
