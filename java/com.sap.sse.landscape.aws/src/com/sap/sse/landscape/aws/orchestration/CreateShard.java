@@ -216,7 +216,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
             throw new Exception(
                     "targetgroup name with this shardname is not unique. You may change the last or first two chars");
         }
-        ApplicationLoadBalancer<ShardingKey> loadbalancer = getFreeLoadbalancer();
+        ApplicationLoadBalancer<ShardingKey> loadbalancer = getFreeLoadbalancerAndMoveReplicaset();
         logger.info(
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaset.getName());
         TargetGroup<ShardingKey> targetgroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
@@ -315,7 +315,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     keys.addAll(con.values());
                 }
             }
-            while (keys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE
+            while (keys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE 
                     - /* two conditions are required for host and forward to replica */2
                     && !manipulatableShardingKeys.isEmpty()) {
                 keys.add(manipulatableShardingKeys.get(0));
@@ -334,7 +334,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                 getLandscape().modifyRuleConditions(region, newRule);
             }
         }
-        if (!manipulatableShardingKeys.isEmpty()) {
+        if (!manipulatableShardingKeys.isEmpty() ) {
             // check number of rules
             if (Util.size(loadbalancer.getRules())
                     + getLenRequiredRules(Util.size(shardingkeys)) < MAX_RULES_PER_LOADBALANCER) {
@@ -344,9 +344,11 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                 addShardingRules(loadbalancer, keysCopy, targetgroup);
             } else {
                 // not enough rules
-                // move to new loadbalancer if necessary
-                // add rules
-                throw new Exception("Not implemented");
+                ApplicationLoadBalancer<ShardingKey> alb  = getFreeLoadbalancerAndMoveReplicaset();
+                // set new rules
+                Set<String> keysCopy = new HashSet<>();
+                keysCopy.addAll(shardingkeys);
+                addShardingRules(alb, keysCopy, targetgroup);
             }
         }
     }
@@ -425,8 +427,9 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         return rules;
     }
 
-    private ApplicationLoadBalancer<ShardingKey> getFreeLoadbalancer() throws Exception {
-        final int requiredRules = getLenRequiredRules(Util.size(shardingkeys) + replicaset.getShards().size());
+    private ApplicationLoadBalancer<ShardingKey> getFreeLoadbalancerAndMoveReplicaset() throws Exception {
+        final int requiredRules = getLenRequiredRules(Util.size(shardingkeys) + 
+                (replicaset.getShards().size() + /* 5 std rules per replicaset */NUMBER_OF_RULES_PER_REPLICA_SET) * /* for guaranteeing availability*/2);
         final ApplicationLoadBalancer<ShardingKey> res;
         if (ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER
                 - Util.size(replicaset.getLoadBalancer().getRules()) > requiredRules) {
@@ -496,7 +499,11 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         getLandscape().setDNSRecordToApplicationLoadBalancer(replicaSet.getHostedZoneId(), replicaSet.getHostname(),
                 alb, /* force */ true);
         // wait until new dns record is alive
-        Thread.sleep(getLandscape().getDNSTTLInSeconds() * /* 10 times */ 10 * /* conversion seconds to ms */ 1000);
+        for(int i = 0; i<6;i++) {
+            Thread.sleep(getLandscape().getDNSTTLInSeconds() * /* conversion seconds to ms */ 1000);
+            logger.info("Still waiting.");
+        }
+        
         // ThreadPoolUtil.INSTANCE.
         Collection<Rule> rulesToRemove = replicaSet.getLoadBalancer().getRulesForTargetGroups(originaltargetgroups); // remove
                                                                                                                      // all
