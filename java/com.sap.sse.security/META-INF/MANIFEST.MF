@@ -20,7 +20,6 @@ Bundle-ClassPath: .
 Require-Bundle: org.eclipse.jetty.osgi-servlet-api;bundle-version="3.1.0",
  org.json.simple,
  com.sun.jersey,
- org.apache.commons.beanutils;bundle-version="1.8.0",
  org.apache.shiro.core;bundle-version="1.2.2",
  org.apache.shiro.ehcache;bundle-version="1.2.3",
  org.apache.shiro.web;bundle-version="1.2.2",
