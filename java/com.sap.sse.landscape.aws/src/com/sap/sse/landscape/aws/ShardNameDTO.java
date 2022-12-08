@@ -40,6 +40,9 @@ public class ShardNameDTO {
         if (!shardname.matches("[a-zA-Z0-9]*")) {
             throw new Exception("Only a-z, A-Z and 0-9 characters are allowed in shardname!");
         }
+        if(shardname.endsWith(TargetGroup.MASTER_SUFFIX) || shardname.endsWith(TargetGroup.TEMP_SUFFIX)){
+            throw new Exception(TargetGroup.MASTER_SUFFIX + " and " + TargetGroup.TEMP_SUFFIX + " are not allowed at the end of Shardnames");
+        }
         final String name;
         if (TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX.length() + 1 + replicaSetName.length() + 1
                 + shardname.length() < TargetGroup.MAX_TARGETGROUP_NAME_LENGTH) {
@@ -71,7 +74,7 @@ public class ShardNameDTO {
 
     public static boolean isValidTargetGroupName(String name) {
         boolean ret = true;
-        if (name.length() > 32 || !name.startsWith(TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX)) {
+        if (name.length() > 32 || !name.startsWith(TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX) || name.endsWith(TargetGroup.MASTER_SUFFIX) || name.endsWith(TargetGroup.TEMP_SUFFIX)) {
             ret = false;
         }
         if (name.contains("--")) {
