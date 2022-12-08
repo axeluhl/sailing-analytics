@@ -17,10 +17,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
 
 import com.mongodb.MongoException;
@@ -150,15 +150,11 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         return new MillisecondsTimePoint(millis);
     }
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
     @Test
     public void cantAddBeforeDenoting() throws MalformedURLException, FileNotFoundException, URISyntaxException,
             Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
-        exception.expect(NotDenotedForRaceLogTrackingException.class);
-        trackAndGetRace(column);
+        Assert.assertThrows(NotDenotedForRaceLogTrackingException.class, ()->trackAndGetRace(column));
     }
 
     private void testSize(Track<?> track, int expected) {

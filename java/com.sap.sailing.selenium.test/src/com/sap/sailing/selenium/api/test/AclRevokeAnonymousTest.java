@@ -6,8 +6,8 @@ import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,12 +54,12 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
         aclPopup.addUserGroup(""); // add empty user group -> anonymous group
         AclActionInputPO deniedInput = aclPopup.getDeniedActionsInput();
         AclActionInputPO allowedInput = aclPopup.getAllowedActionsInput();
-        Assert.assertThat(deniedInput.isEnabled(), Matchers.equalTo(false));
-        Assert.assertThat(allowedInput.isEnabled(), Matchers.equalTo(true));
+        assertThat(deniedInput.isEnabled(), Matchers.equalTo(false));
+        assertThat(allowedInput.isEnabled(), Matchers.equalTo(true));
         
         aclPopup.addUserGroup("admin-tenant");
-        Assert.assertThat(deniedInput.isEnabled(), Matchers.equalTo(true));
-        Assert.assertThat(allowedInput.isEnabled(), Matchers.equalTo(true));
+        assertThat(deniedInput.isEnabled(), Matchers.equalTo(true));
+        assertThat(allowedInput.isEnabled(), Matchers.equalTo(true));
     }
 
 }

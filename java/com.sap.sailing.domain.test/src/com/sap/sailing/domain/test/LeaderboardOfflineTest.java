@@ -236,10 +236,10 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         assertEquals(101., leaderboard.getNetPoints(competitorWithBoat, now), 0.00000001);
         assertEquals(51., leaderboard.getNetPoints(c2, now), 0.00000001);
         assertEquals(26., leaderboard.getNetPoints(c3, now), 0.00000001);
-        List<Competitor> sortedCompetitors = leaderboard.getCompetitorsFromBestToWorst(now);
-        assertSame(c3, sortedCompetitors.get(0));
-        assertSame(c2, sortedCompetitors.get(1));
-        assertSame(competitorWithBoat, sortedCompetitors.get(2));
+        Iterable<Competitor> sortedCompetitors = leaderboard.getCompetitorsFromBestToWorst(now);
+        assertSame(c3, Util.get(sortedCompetitors, 0));
+        assertSame(c2, Util.get(sortedCompetitors, 1));
+        assertSame(competitorWithBoat, Util.get(sortedCompetitors, 2));
     }
 
     @Test
