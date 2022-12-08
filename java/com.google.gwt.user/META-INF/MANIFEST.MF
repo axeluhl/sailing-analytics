@@ -186,6 +186,5 @@ Export-Package: com.google.gwt.activity.shared,
  javaemul.internal.annotations,
  jsinterop.annotations
 Require-Bundle: org.eclipse.jetty.osgi-servlet-api;bundle-version="3.1.0",
- org.junit;bundle-version="4.8.2";resolution:=optional,
- com.google.gwt.dev;bundle-version="2.10.0"
+ org.junit;bundle-version="4.8.2";resolution:=optional
 Automatic-Module-Name: com.google.gwt.user
