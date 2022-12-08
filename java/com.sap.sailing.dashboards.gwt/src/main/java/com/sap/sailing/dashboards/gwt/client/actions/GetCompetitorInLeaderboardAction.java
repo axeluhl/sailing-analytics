@@ -33,7 +33,7 @@ public class GetCompetitorInLeaderboardAction implements DashboardAction<Leaderb
     public LeaderboardCompetitorsDTO execute(DashboardDispatchContext dashboardDispatchContext) throws DispatchException {
         LeaderboardCompetitorsDTO result = new LeaderboardCompetitorsDTO();
         Leaderboard lb = dashboardDispatchContext.getRacingEventService().getLeaderboardByName(this.leaderboarName);
-        List<Competitor> competitorsFromBestToWorst = lb.getCompetitorsFromBestToWorst(MillisecondsTimePoint.now());
+        Iterable<Competitor> competitorsFromBestToWorst = lb.getCompetitorsFromBestToWorst(MillisecondsTimePoint.now());
         List<CompetitorDTO> competitorDTOs = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorDTOList(competitorsFromBestToWorst);
         result.setCompetitors(competitorDTOs);
         return result;
