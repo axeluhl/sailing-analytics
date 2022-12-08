@@ -488,7 +488,7 @@
     <string name="reset_message_1">"Chcete vyprázdnit seznam?"</string>
     <string name="reset_message_2">"Chcete resetovat na poslední stav?"</string>
     
-    <string name="onboarding_scan">"Skenovat kód QR"</string>
+    <string name="onboarding_scan">"Skenovat QR kód"</string>
     <string name="onboarding_input">"Manuální zadání"</string>
     <string name="race_group">"Skupinový závod"</string>
     <string name="wind_select_race">"Vyberte závod"</string>
