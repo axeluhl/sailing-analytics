@@ -148,4 +148,6 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     RuleCondition createHostHeaderRuleCondition(String hostname);
     
     java.util.Collection<Rule> getRulesForTargetGroups(Iterable<TargetGroup<ShardingKey>> targetGroups);
+
+    Iterable<Rule> replaceTargetGroupInForwardRules(TargetGroup<ShardingKey> oldTargetGroup, TargetGroup<ShardingKey> newTargetGroup );
 }

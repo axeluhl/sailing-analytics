@@ -2039,4 +2039,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public long getDNSTTLInSeconds() {
        return DEFAULT_DNS_TTL_SECONDS;
     }
+
+    @Override
+    public Iterable<Rule> modifyRuleActions(com.sap.sse.landscape.Region region, Rule rule) {
+        ModifyRuleResponse res = getLoadBalancingClient(getRegion(region))
+                .modifyRule(t -> t.actions(rule.actions()).ruleArn(rule.ruleArn()).build());
+        return res.rules();
+    }
 }

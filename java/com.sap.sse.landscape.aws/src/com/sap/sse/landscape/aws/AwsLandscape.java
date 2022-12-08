@@ -517,6 +517,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
     
     public Iterable<Rule> modifyRuleConditions(Region region, Rule rule);
+    
+    public Iterable<Rule> modifyRuleActions(Region region, Rule rule);
 
     /**
      * Use {@link Rule.Builder} to create {@link Rule} objects you'd like to set for the {@link Listener} passed as parameter.

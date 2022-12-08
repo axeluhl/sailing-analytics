@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActi
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 
 public class ApplicationLoadBalancerImpl<ShardingKey>
 implements ApplicationLoadBalancer<ShardingKey> {
@@ -394,6 +395,41 @@ implements ApplicationLoadBalancer<ShardingKey> {
             }
         }
         return ret;
+    }
+    
+    /**
+     * Goes through all rules in this load balancer and replaces every target group in a forward-action that has the
+     * same ARN as the {@code oldTargetgroup} with the {@code newTargetgroup}
+     */
+    @Override
+    public Iterable<Rule> replaceTargetGroupInForwardRules(TargetGroup<ShardingKey> oldTargetGroup,
+            TargetGroup<ShardingKey> newTargetGroup) {
+        Iterable<Rule> rules = getRules();
+        Collection<Rule> modifiedRules = new ArrayList<>();
+        for (Rule r : rules) {
+            int i = 0;
+            boolean modified = false;
+            Action[] newActions = new Action[r.actions().size()];
+            for (Action a : r.actions()) {
+                if (a.forwardConfig() != null && a.targetGroupArn().equals(oldTargetGroup.getTargetGroupArn())) {
+                    newActions[i++] = createForwardToTargetGroupAction(newTargetGroup);
+                    modified = true;
+                } else {
+                    newActions[i++] = a;
+                }
+            }
+            if(modified) {
+                landscape.modifyRuleActions(region, Rule.builder().actions(newActions).ruleArn(r.ruleArn()).build())
+                    .forEach(t -> modifiedRules.add(t));
+            }
+        }
+        return modifiedRules;
+    }
+    
+    private Action createForwardToTargetGroupAction(TargetGroup<ShardingKey> targetGroup) {
+        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc
+                .targetGroups(TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build()))
+                .build();
     }
 }
 
