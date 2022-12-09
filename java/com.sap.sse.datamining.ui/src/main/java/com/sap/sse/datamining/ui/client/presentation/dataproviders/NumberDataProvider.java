@@ -41,7 +41,7 @@ public class NumberDataProvider extends AbstractNumericDataProviderWithStaticMap
     public String getLocalizedNameForDataKey(QueryResultDTO<?> result, StringMessages stringMessages, String dataKey) {
         switch (dataKey) {
         case FLOAT:
-            return stringMessages.floatNumber(); // TODO extract into com.sap.sse.gwt.client.StringMessages
+            return stringMessages.floatNumber();
         case INTEGER:
             return stringMessages.integer();
         }

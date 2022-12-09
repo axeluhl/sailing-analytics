@@ -55,15 +55,7 @@ public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements I
 
     public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
             Tack tack, LegType legType, boolean extrapolated) {
-        super(timepoint, position);
-        this.timepoint = timepoint;
-        this.position = position;
-        this.speedWithBearing = speedWithBearing;
-        this.tack = tack;
-        this.legType = legType;
-        this.extrapolated = extrapolated;
-        this.degreesBoatToTheWind = degreesBoatToTheWind;
-        this.detailValue = null;
+        this(timepoint, position, speedWithBearing, degreesBoatToTheWind, tack, legType, extrapolated, /* detailValue */ null);
     }
     
     public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
