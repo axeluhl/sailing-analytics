@@ -135,11 +135,8 @@ public class MediaPage extends Composite {
     @UiHandler("mediaAddButton")
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
-        final DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(videos -> {
-            manageMediaModel.addVideos(videos, eventDto -> updateMedia());
-        }, images -> {
-            manageMediaModel.addImages(images, eventDto -> updateMedia());
-        });
+        final DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(
+                (images, videos) -> manageMediaModel.addImagesAndVideos(images, videos, eventDto -> updateMedia()));
         popupHolder.add(popup);
         popup.center();
     }

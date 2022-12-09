@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -38,6 +39,7 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sse.common.Color;
@@ -47,6 +49,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
 
 /**
  * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
@@ -65,6 +68,7 @@ public abstract class DataEntryDialog<T> {
     private final Button okButton;
     private final Button cancelButton;
     private final HTML statusLabel;
+    private final FlowPanel errorListPanel;
     private final FlowPanel panelForAdditionalWidget;
     private final DockPanel buttonPanel;
     private final FlowPanel rightButtonPanel;
@@ -139,6 +143,8 @@ public abstract class DataEntryDialog<T> {
         statusLabel = new HTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
         statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
+        errorListPanel = new FlowPanel();
+        dialogFPanel.add(errorListPanel);
         if (message != null) {
             Label messageLabel = new Label(message);
             messageLabel.addStyleName("dialogMessageLabel");
@@ -222,13 +228,25 @@ public abstract class DataEntryDialog<T> {
                  */
                 @Override
                 public void onSuccess(String errorMessage) {
+                    errorListPanel.clear();
                     boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
                     if (invalidState != dialogInInvalidState) {
                         onInvalidStateChanged(invalidState);
                     }
                     if (invalidState) {
-                        statusLabel.setHTML(SafeHtmlUtils.fromString(errorMessage));
-                        statusLabel.setStyleName("errorLabel");
+                        String[] errors = errorMessage.split("\\r?\\n|\\r");
+                        if (errors.length > 1) {
+                            for (int i=0; i< errors.length; i++) {
+                                GWT.log(i + " - " + errors[i]);
+                                HTML errorLabel = new HTML(SafeHtmlUtils.fromString(errors[i]));
+                                errorLabel.setStyleName("errorLabel");
+                                errorListPanel.add(errorLabel);
+                            }
+                            statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
+                        } else {
+                            statusLabel.setHTML(SafeHtmlUtils.fromString(errorMessage));
+                            statusLabel.setStyleName("errorLabel");
+                        }
                         getOkButton().setEnabled(false);
                     } else {
                         statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));

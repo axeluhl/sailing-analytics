@@ -233,5 +233,10 @@ When a file has "wrong line endings" (line endings are different to what is conf
 
 See [RaceCommittee App](/wiki/info/mobile/racecommittee-app) for more information regarding the mobile app.
 
+### Java on ARM based Mac troubleshooting
+
+Irritating behavior can occur on ARM-based processors, such as on a MacBook. There are some problems, especially with graphical functions. There are cases where javax.imageio.ImageIO, javax.imageio.ImageReader or java.awt.graphics2D stops responding without error message.
+In such cases it might help to set AWT to headless mode (`-Djava.awt.headless=true`, see [stackoverflow](https://stackoverflow.com/questions/13796611/imageio-read-with-mac for more information)).
+
 ### GWT Browser Plugin 
 Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work. The Plugin can be found on this page: [https://code.google.com/archive/p/google-web-toolkit/downloads](https://code.google.com/archive/p/google-web-toolkit/downloads)

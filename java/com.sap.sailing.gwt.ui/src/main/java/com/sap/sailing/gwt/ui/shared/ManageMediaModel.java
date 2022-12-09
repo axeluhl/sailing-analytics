@@ -129,7 +129,21 @@ public class ManageMediaModel {
             updateEventDto(eventDto, callback);
         });
     }
-    
+
+    public void addImagesAndVideos(List<ImageDTO> imageList, List<VideoDTO> videoList, Consumer<EventDTO> callback) {
+        loadEventData(eventDto -> {
+            for (ImageDTO image: imageList) {
+                eventDto.getImages().add(image);
+                mediaDto.addPhoto(new SailingImageDTO(null, image));
+            }
+            for (VideoDTO video: videoList) {
+                eventDto.getVideos().add(video);
+                mediaDto.addVideo(new SailingVideoDTO(null, video));
+            }
+            updateEventDto(eventDto, callback);
+        });
+    }
+
     public void reloadMedia(Consumer<EventDTO> callback) {
         loadEventData(eventDto -> {
             setVideos(eventDto.getVideos());

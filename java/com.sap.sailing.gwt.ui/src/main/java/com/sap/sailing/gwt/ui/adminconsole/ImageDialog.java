@@ -230,7 +230,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         }
         
         private String getSizeErrorMessage(String fileName, MediaTagConstants mediaTag, StringMessages stringMessages) {
-            String errorMessage = stringMessages.imageSizeError(fileName + "(" + mediaTag.getName() + ")", mediaTag.getMinWidth(),
+            String errorMessage = stringMessages.imageSizeError(fileName + " (" + mediaTag.getName() + ")", mediaTag.getMinWidth(),
                     mediaTag.getMaxWidth(), mediaTag.getMinHeight(), mediaTag.getMaxHeight());
             return errorMessage;
         }
@@ -375,12 +375,12 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             for (final MediaTagConstants mediaTag : mediaTags) {
                 if (imageNeedsResizeForTag(image, mediaTag)) {
                     resizeTags.add(mediaTag);
-                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize());
+                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize() + " (" + mediaTag.name() + ")");
                 }
             }
             for (final MediaTagConstants mediaTag : notCheckedMediaTags) {
                 if (imageNeedsResizeForTag(image, mediaTag)) {
-                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize());
+                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize() + " (" + mediaTag.name() + ")");
                     fileInfoText.setStyleName("errorLabel");
                 }
             }
@@ -408,9 +408,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-
         Grid grid = new Grid(10, 2);
-
         grid.setWidget(0, 0, new Label(stringMessages.createdAt() + ":"));
         grid.setWidget(0, 1, createdAtLabel);
         grid.setWidget(1, 0, new HTML("&nbsp;"));
@@ -420,20 +418,16 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         grid.setWidget(3, 0, new Label(stringMessages.fileUpload() + ":"));
         grid.setWidget(3, 1, fileInfoVPanel);
         grid.setWidget(4, 0, new HTML("&nbsp;"));
-
         grid.setWidget(5,  0, new Label(stringMessages.title() + ":"));
         grid.setWidget(5, 1, titleTextBox);
         grid.setWidget(6,  0, new Label(stringMessages.subtitle() + ":"));
         grid.setWidget(6, 1, subtitleTextBox);
         grid.setWidget(7, 0, new Label(stringMessages.copyright() + ":"));
         grid.setWidget(7, 1, copyrightTextBox);
-
         grid.setWidget(8, 0, new HTML("&nbsp;"));
         grid.setWidget(9, 0, new Label(stringMessages.tags() + ":"));
         grid.setWidget(9, 1, tagsListEditor);
-
         panel.add(grid);
-
         return panel;
     }
 
