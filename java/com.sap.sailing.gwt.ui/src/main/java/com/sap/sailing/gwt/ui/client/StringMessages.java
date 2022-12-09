@@ -52,7 +52,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitorWithBoat();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
-    String newDotDotDot();
     String editScores();
     String columnNamesInSelectedLeaderboard();
     String addDotDotDot();
@@ -176,7 +175,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pointsToLoad();
     String speed();
     String distance();
-    String in();
     String secondsUnit();
     String secondsPerNauticalMileUnit();
     String metersUnit();
@@ -1043,8 +1041,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pwaAnchor();
     String hasSplitFleetContiguousScoring();
     String eventOverview();
-    String addRaceLogTracker();
-    String addRaceLogTrackers();
     String denoteForRaceLogTracking();
     String startRaceLogTracking();
     String filterByLeaderboard();
