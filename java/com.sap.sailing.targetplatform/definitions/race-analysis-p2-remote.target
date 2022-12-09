@@ -52,7 +52,6 @@
 <unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
 <unit id="javax.xml.soap" version="1.2.0.v201005080501"/>
-<unit id="javax.xml.soap.source" version="1.2.0.v201005080501"/>
 <unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
@@ -176,7 +175,6 @@
 <plugin id="javax.xml.stream"/>
 <plugin id="javax.xml.ws"/>
 <plugin id="javax.xml.soap"/>
-<plugin id="javax.xml.soap.source"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="lz4-java"/>
