@@ -16,14 +16,6 @@
       <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
-<!--
-    <dependency>
-      <groupId>com.sap.sailing</groupId>
-      <artifactId>elemental2</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-      <classifier>sources</classifier>
-    </dependency>
--->
     <dependency>
       <groupId>com.google.elemental2</groupId>
       <artifactId>elemental2-core</artifactId>
@@ -41,6 +33,12 @@
       <artifactId>elemental2-promise</artifactId>
       <version>1.1.0</version>
       <classifier>sources</classifier>
+    </dependency>
+    <!-- gwt-dev is required during build-time for building and using the special manifest linker -->
+    <dependency>
+      <groupId>org.gwtproject</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <version>2.11.0</version>
     </dependency>
   </dependencies>
   <build>
