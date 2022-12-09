@@ -25,7 +25,6 @@
     <stringAttribute key="pde.version" value="3.3"/>
     <setAttribute key="selected_target_bundles">
 <setEntry value="routeconverter@default:default"/>
-<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="org.apache.commons.codec@default:default"/>
 <setEntry value="org.apache.poi@default:default"/>
 <setEntry value="org.apache.poi.ooxml@default:default"/>
@@ -189,6 +188,7 @@
 <setEntry value="com.google.gson.source@default:default"/>
 </setAttribute>
     <setAttribute key="selected_workspace_bundles">
+<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
 <setEntry value="com.sap.sailing.domain@default:default"/>

@@ -30,7 +30,6 @@
 <stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
 <setAttribute key="selected_target_bundles">
 <setEntry value="routeconverter@default:default"/>
-<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="org.apache.commons.codec@default:default"/>
 <setEntry value="org.apache.poi@default:default"/>
 <setEntry value="org.apache.poi.ooxml@default:default"/>
@@ -194,6 +193,7 @@
 <setEntry value="com.google.gson.source@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
+<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
 <setEntry value="com.sap.sailing.domain@default:default"/>
