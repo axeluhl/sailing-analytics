@@ -81,6 +81,7 @@
       </properties>
       <modules>
         <module>elemental2</module>
+	<module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
         <module>com.sap.sse.apacheservicemixfragment</module>
         <module>com.sap.sse.test</module>
