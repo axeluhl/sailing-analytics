@@ -1,4 +1,4 @@
-FROM sapmachine:11
+FROM sapmachine:11.0.17
 ARG RELEASE
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release
