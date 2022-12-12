@@ -29,10 +29,13 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter
      */
     public static Integer getIntParameter(String name) throws ParseHttpParameterException {
+        final Integer result;
         if (Window.Location.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Integer.valueOf(getRequiredIntParameter(name));
         }
-        return new Integer(getRequiredIntParameter(name));
+        return result;
     }
 
     /**
@@ -45,14 +48,17 @@ public abstract class GwtHttpRequestUtils {
      *            the default value to use as fallback
      */
     public static int getIntParameter(String name, int defaultValue) {
+        int result;
         if (Window.Location.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredIntParameter(name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredIntParameter(name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -98,11 +104,13 @@ public abstract class GwtHttpRequestUtils {
      * @return the Long value, or <code>null</code> if not present
      */
     public static Long getLongParameter(String name) throws ParseHttpParameterException {
-
+        final Long result;
         if (Window.Location.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Long.valueOf(getRequiredLongParameter(name));
         }
-        return new Long(getRequiredLongParameter(name));
+        return result;
     }
 
     /**
@@ -115,14 +123,17 @@ public abstract class GwtHttpRequestUtils {
      *            the default value to use as fallback
      */
     public static Long getLongParameter(String name, Long defaultValue) {
+        Long result;
         if (Window.Location.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredLongParameter(name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredLongParameter(name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -132,11 +143,13 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static long[] getLongParameters(String name) {
+        long[] result;
         try {
-            return getRequiredLongParameters(name);
+            result = getRequiredLongParameters(name);
         } catch (ParseHttpParameterException ex) {
-            return new long[0];
+            result = new long[0];
         }
+        return result;
     }
 
     /**
@@ -156,7 +169,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static long[] getRequiredLongParameters(String name) throws ParseHttpParameterException {
-
         return LONG_PARSER.parseLongs(name, Window.Location.getParameterMap().get(name));
     }
 
@@ -169,11 +181,13 @@ public abstract class GwtHttpRequestUtils {
      * @return the Float value, or <code>null</code> if not present
      */
     public static Float getFloatParameter(String name) throws ParseHttpParameterException {
-
+        final Float result;
         if (Window.Location.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Float.valueOf(getRequiredFloatParameter(name));
         }
-        return new Float(getRequiredFloatParameter(name));
+        return result;
     }
 
     /**
@@ -186,14 +200,17 @@ public abstract class GwtHttpRequestUtils {
      *            the default value to use as fallback
      */
     public static float getFloatParameter(String name, float defaultValue) {
+        float result;
         if (Window.Location.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredFloatParameter(name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredFloatParameter(name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -203,11 +220,13 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static float[] getFloatParameters(String name) {
+        float[] result;
         try {
-            return getRequiredFloatParameters(name);
+            result = getRequiredFloatParameters(name);
         } catch (ParseHttpParameterException ex) {
-            return new float[0];
+            result = new float[0];
         }
+        return result;
     }
 
     /**
@@ -217,7 +236,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter
      */
     public static float getRequiredFloatParameter(String name) throws ParseHttpParameterException {
-
         return FLOAT_PARSER.parseFloat(name, Window.Location.getParameter(name));
     }
 
@@ -228,7 +246,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static float[] getRequiredFloatParameters(String name) throws ParseHttpParameterException {
-
         return FLOAT_PARSER.parseFloats(name,  Window.Location.getParameterMap().get(name));
     }
 
@@ -241,11 +258,13 @@ public abstract class GwtHttpRequestUtils {
      * @return the Double value, or <code>null</code> if not present
      */
     public static Double getDoubleParameter(String name) throws ParseHttpParameterException {
-
+        final Double result;
         if (Window.Location.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Double.valueOf(getRequiredDoubleParameter(name));
         }
-        return new Double(getRequiredDoubleParameter(name));
+        return result;
     }
 
     /**
@@ -258,14 +277,17 @@ public abstract class GwtHttpRequestUtils {
      *            the default value to use as fallback
      */
     public static double getDoubleParameter(String name, double defaultValue) {
+        double result;
         if (Window.Location.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredDoubleParameter(name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredDoubleParameter(name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -275,11 +297,13 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static double[] getDoubleParameters(String name) {
+        double[] result;
         try {
-            return getRequiredDoubleParameters(name);
+            result = getRequiredDoubleParameters(name);
         } catch (ParseHttpParameterException ex) {
-            return new double[0];
+            result = new double[0];
         }
+        return result;
     }
 
     /**
@@ -289,7 +313,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter
      */
     public static double getRequiredDoubleParameter(String name) throws ParseHttpParameterException {
-
         return DOUBLE_PARSER.parseDouble(name, Window.Location.getParameter(name));
     }
 
@@ -300,7 +323,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static double[] getRequiredDoubleParameters(String name) throws ParseHttpParameterException {
-
         return DOUBLE_PARSER.parseDoubles(name, Window.Location.getParameterMap().get(name));
     }
 
@@ -316,11 +338,13 @@ public abstract class GwtHttpRequestUtils {
      * @return the Boolean value, or <code>null</code> if not present
      */
     public static Boolean getBooleanParameter(String name) throws ParseHttpParameterException {
-
+        final Boolean result;
         if (Window.Location.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = (getRequiredBooleanParameter(name) ? Boolean.TRUE : Boolean.FALSE);
         }
-        return (getRequiredBooleanParameter(name) ? Boolean.TRUE : Boolean.FALSE);
+        return result;
     }
 
     /**
@@ -336,14 +360,17 @@ public abstract class GwtHttpRequestUtils {
      *            the default value to use as fallback
      */
     public static boolean getBooleanParameter(String name, boolean defaultValue) {
+        boolean result;
         if (Window.Location.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredBooleanParameter(name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredBooleanParameter(name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -356,11 +383,13 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static boolean[] getBooleanParameters(String name) {
+        boolean[] result;
         try {
-            return getRequiredBooleanParameters(name);
+            result = getRequiredBooleanParameters(name);
         } catch (ParseHttpParameterException ex) {
-            return new boolean[0];
+            result = new boolean[0];
         }
+        return result;
     }
 
     /**
@@ -386,7 +415,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter
      */
     public static boolean[] getRequiredBooleanParameters(String name) throws ParseHttpParameterException {
-
         return BOOLEAN_PARSER.parseBooleans(name,  Window.Location.getParameterMap().get(name));
     }
 
@@ -400,11 +428,13 @@ public abstract class GwtHttpRequestUtils {
      *             a subclass of ServletException, so it doesn't need to be caught
      */
     public static String getStringParameter(String name) throws ParseHttpParameterException {
-
+        final String result;
         if (Window.Location.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = getRequiredStringParameter(name);
         }
-        return getRequiredStringParameter(name);
+        return result;
     }
 
     /**
@@ -428,11 +458,13 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static String[] getStringParameters(String name) {
+        String[] result;
         try {
-            return getRequiredStringParameters(name);
+            result = getRequiredStringParameters(name);
         } catch (ParseHttpParameterException ex) {
-            return new String[0];
+            result = new String[0];
         }
+        return result;
     }
 
     /**
@@ -442,7 +474,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter
      */
     public static String getRequiredStringParameter(String name) throws ParseHttpParameterException {
-
         return STRING_PARSER.validateRequiredString(name, Window.Location.getParameter(name));
     }
 

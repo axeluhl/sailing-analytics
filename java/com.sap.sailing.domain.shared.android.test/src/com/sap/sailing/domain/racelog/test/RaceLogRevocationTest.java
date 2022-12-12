@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.racelog.test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isIn;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
@@ -125,7 +126,7 @@ public class RaceLogRevocationTest {
         clientBRaceLog.revokeEvent(clientBAuthor, event);
         clientCRaceLog.revokeEvent(clientCAuthor, event);
         //expected, because A does not have sufficient priority
-        assertThat("event not revoked due to insufficient author priority", event, isIn(clientARaceLog.getUnrevokedEvents()));
+        assertThat("event not revoked due to insufficient author priority", event, is(in(clientARaceLog.getUnrevokedEvents())));
         
         //update clients
         sendClientAEvent(null);

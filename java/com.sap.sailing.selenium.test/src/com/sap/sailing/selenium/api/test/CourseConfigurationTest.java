@@ -230,7 +230,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
             final RepeatablePart tgrtRepeatablePart = trgtCourseConfiguration.getRepeatablePart();
             assertEquals("repeatablePart.start is different",
                     srcRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
-                    new Integer(tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartStart()));
+                    Integer.valueOf(tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartStart()));
             assertEquals("repeatablePart.end is different", srcRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd(),
                     tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd());
         }

@@ -7,8 +7,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.omg.CORBA.DoubleHolder;
-
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -31,7 +29,7 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
         return DEFINITION;
     }
 
-    private final Map<GroupKey, DoubleHolder> sumPerKey;
+    private final Map<GroupKey, double[]> sumPerKey;
     private final Map<GroupKey, Double> minPerKey;
     private final Map<GroupKey, Double> maxPerKey;
     private final Map<GroupKey, AtomicLong> elementAmountPerKey;
@@ -50,13 +48,13 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
         if (element.getDataEntry() != null) {
             incrementElementAmount(element);
             // concurrency is not an issue here; needsSynchronization() returns true
-            DoubleHolder aggregate = sumPerKey.get(element.getKey());
+            double[] aggregate = sumPerKey.get(element.getKey());
             final double doubleValue = element.getDataEntry().doubleValue();
             if (aggregate == null) {
-                aggregate = new DoubleHolder(doubleValue);
+                aggregate = new double[] { doubleValue };
                 sumPerKey.put(element.getKey(), aggregate);
             } else {
-                aggregate.value += doubleValue;
+                aggregate[0] += doubleValue;
             }
             if (!minPerKey.containsKey(element.getKey()) || doubleValue < minPerKey.get(element.getKey())) {
                 minPerKey.put(element.getKey(), doubleValue);
@@ -81,12 +79,12 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
     @Override
     protected Map<GroupKey, AverageWithStats<Number>> aggregateResult() {
         Map<GroupKey, AverageWithStats<Number>> result = new HashMap<>();
-        for (Entry<GroupKey, DoubleHolder> sumAggregationEntry : sumPerKey.entrySet()) {
+        for (Entry<GroupKey, double[]> sumAggregationEntry : sumPerKey.entrySet()) {
             if (isAborted()) {
                 break;
             }
             GroupKey key = sumAggregationEntry.getKey();
-            result.put(key, new AverageWithStatsImpl<Number>(sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get(),
+            result.put(key, new AverageWithStatsImpl<Number>(sumAggregationEntry.getValue()[0] / elementAmountPerKey.get(key).get(),
                     minPerKey.get(key), maxPerKey.get(key),
                     /* median */ null,
                     /* standardDeviation */ null,

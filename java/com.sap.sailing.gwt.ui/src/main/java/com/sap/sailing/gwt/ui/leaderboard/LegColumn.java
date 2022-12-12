@@ -50,7 +50,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private class TimeTraveledInSeconds extends AbstractLegDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LegEntryDTO entry) {
-            return new Long(entry.timeInMilliseconds / 1000).doubleValue();
+            return Long.valueOf(entry.timeInMilliseconds / 1000).doubleValue();
         }
     }
     

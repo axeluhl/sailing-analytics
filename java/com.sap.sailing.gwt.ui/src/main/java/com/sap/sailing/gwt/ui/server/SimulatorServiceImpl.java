@@ -427,7 +427,7 @@ public class SimulatorServiceImpl extends DelegatingProxiedRemoteServiceServlet 
                 series[i] = new Number[boatSpeeds.size()];
                 int j = 0;
                 for (Speed boatSpeed : boatSpeeds) {
-                    series[i][j++] = new Double(boatSpeed.getKnots());
+                    series[i][j++] = Double.valueOf(boatSpeed.getKnots());
                 }
                 i++;
             }

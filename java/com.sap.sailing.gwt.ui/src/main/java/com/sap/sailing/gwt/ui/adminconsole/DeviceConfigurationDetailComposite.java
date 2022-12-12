@@ -231,7 +231,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             priorityListBox.setSelectedIndex(0);
         } else {
             for (int i=1; i<priorityListBox.getItemCount(); i++) {
-                if (new Integer(priorityListBox.getValue(i)).equals(priority)) {
+                if (Integer.valueOf(priorityListBox.getValue(i)).equals(priority)) {
                     priorityListBox.setSelectedIndex(i);
                     break;
                 }

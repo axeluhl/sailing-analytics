@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.impl.components.aggregators;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -58,7 +59,6 @@ public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
     }
 
     private class ManeuverSpeedDetailsAggregationCreatorHelper implements ManeuverSpeedDetailsAggregationCreator {
-
         private ManeuverSpeedDetailsAggregationCreator allManeuvers = null;
         private ManeuverSpeedDetailsAggregationCreator portsideManeuvers = null;
         private ManeuverSpeedDetailsAggregationCreator starboardManeuvers = null;
@@ -70,8 +70,8 @@ public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
                     if (portsideManeuvers == null) {
                         try {
                             portsideManeuvers = (ManeuverSpeedDetailsAggregationCreator) aggregationCreatorClass
-                                    .newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
+                                    .getDeclaredConstructor().newInstance();
+                        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                         }
                     }
                     portsideManeuvers.addElement(statistic);
@@ -79,8 +79,8 @@ public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
                     if (starboardManeuvers == null) {
                         try {
                             starboardManeuvers = (ManeuverSpeedDetailsAggregationCreator) aggregationCreatorClass
-                                    .newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
+                                    .getDeclaredConstructor().newInstance();
+                        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                         }
                     }
                     starboardManeuvers.addElement(statistic);
@@ -88,8 +88,8 @@ public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
             } else {
                 if (allManeuvers == null) {
                     try {
-                        allManeuvers = (ManeuverSpeedDetailsAggregationCreator) aggregationCreatorClass.newInstance();
-                    } catch (InstantiationException | IllegalAccessException e) {
+                        allManeuvers = (ManeuverSpeedDetailsAggregationCreator) aggregationCreatorClass.getDeclaredConstructor().newInstance();
+                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                     }
                 }
                 allManeuvers.addElement(statistic);

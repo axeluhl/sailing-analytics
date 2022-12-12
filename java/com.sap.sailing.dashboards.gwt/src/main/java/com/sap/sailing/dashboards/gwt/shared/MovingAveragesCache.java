@@ -38,7 +38,7 @@ public class MovingAveragesCache {
         Double result = null;
         MovingAverage movingAverage = averagesForStringKeys.get(key);
         if(movingAverage != null) {
-            result = new Double(movingAverage.getAverage());
+            result = Double.valueOf(movingAverage.getAverage());
         }
         return result;
     }

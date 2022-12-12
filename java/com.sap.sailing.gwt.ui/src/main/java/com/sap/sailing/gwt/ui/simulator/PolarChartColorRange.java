@@ -13,9 +13,9 @@ public class PolarChartColorRange {
         n = Nr;
         k = n / 2;
         h = new float[3];
-        h[0] = new Float(4 / 12.0);
-        h[1] = new Float(2 / 12.0);
-        h[2] = new Float(0 / 12.0);
+        h[0] = Double.valueOf(4 / 12.0).floatValue();
+        h[1] = Double.valueOf(2 / 12.0).floatValue();
+        h[2] = Double.valueOf(0 / 12.0).floatValue();
         s = new double[] { 1.0, 1.0, 1.0 };
         v = new double[] { 0.5, 0.9, 0.75 };
     }
@@ -36,8 +36,8 @@ public class PolarChartColorRange {
 
         for (int i = 0; i < 2; i++) {
             float[] hs = GenerateSeq(h[i], h[i + 1], k);
-            float[] ss = GenerateSeq(new Float(s[i]), new Float(s[i + 1]), k);
-            float[] vs = GenerateSeq(new Float(v[i]), new Float(v[i + 1]), k);
+            float[] ss = GenerateSeq(Double.valueOf(s[i]).floatValue(), Double.valueOf(s[i + 1]).floatValue(), k);
+            float[] vs = GenerateSeq(Double.valueOf(v[i]).floatValue(), Double.valueOf(v[i + 1]).floatValue(), k);
             
             for (int j = 0; j < k; j++) {
             	
