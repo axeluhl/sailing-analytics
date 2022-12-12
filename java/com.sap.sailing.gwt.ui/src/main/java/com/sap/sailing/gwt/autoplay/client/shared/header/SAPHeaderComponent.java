@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComponentSettings> {
     private SAPHeaderComponentSettings settings;
@@ -21,7 +21,7 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     
     public SAPHeaderComponent(Component<?> parent, ComponentContext<?> context,
             SAPHeaderComponentLifecycle componentLifecycle,
-            UserService userService, PaywallResolver paywallResolver, SAPHeaderComponentSettings settings,
+            UserService userService, PaywallResolverImpl paywallResolver, SAPHeaderComponentSettings settings,
             StringMessages stringMessages, boolean startInAutoScreenMode) {
         super(parent, context);
         this.componentLifecycle = componentLifecycle;

@@ -9,7 +9,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 public abstract class PremiumUiElement extends Composite implements HasEnabled {
 
     protected final Action action;
-    protected final PaywallResolver paywallResolver;
+    protected final PaywallResolverImpl paywallResolver;
     private final SecuredDTO contextDTO;
 
     /**
@@ -19,7 +19,7 @@ public abstract class PremiumUiElement extends Composite implements HasEnabled {
      */
     private boolean enabled = true;
 
-    protected PremiumUiElement(final Action action, final PaywallResolver paywallResolver, final SecuredDTO contextDTO) {
+    protected PremiumUiElement(final Action action, final PaywallResolverImpl paywallResolver, final SecuredDTO contextDTO) {
         this.action = action;
         this.paywallResolver = paywallResolver;
         this.contextDTO = contextDTO;

@@ -6,18 +6,18 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class MultiRaceLeaderboardPanelLifecycle
         extends AbstractMultiRaceLeaderboardPanelLifecycle<MultiRaceLeaderboardSettings> {
 
     public MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+            Iterable<DetailType> availableDetailTypes, PaywallResolverImpl paywallResolver) {
         super(leaderboard, stringMessages, availableDetailTypes, paywallResolver);
     }
 
     protected MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, List<String> namesOfRaceColumns, boolean canBoatInfoBeShown,
-            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolverImpl paywallResolver) {
         super(leaderboard, namesOfRaceColumns, canBoatInfoBeShown, stringMessages, availableDetailTypes, paywallResolver);
     }
 

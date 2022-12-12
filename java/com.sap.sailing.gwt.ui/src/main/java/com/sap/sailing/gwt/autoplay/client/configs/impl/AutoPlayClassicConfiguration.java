@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
@@ -43,7 +43,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
                     public void onSuccess(Iterable<DetailType> result) {
                         StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(initialEventData,
                                 context.getLeaderboardName());
-                        PaywallResolver paywallResolver = new PaywallResolver(cf.getUserService(), cf.getSubscriptionServiceFactory());
+                        PaywallResolverImpl paywallResolver = new PaywallResolverImpl(cf.getUserService(), cf.getSubscriptionServiceFactory());
                         AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(
                                 leaderBoardDTO, cf.getUserService(), paywallResolver, result);
                         cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
@@ -59,7 +59,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     public void openSettingsDialog(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
             OnSettingsCallback settingsCallback, PerspectiveCompositeSettings<?> settings,
             AutoPlayContextDefinition apcd, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory,
-            PaywallResolver paywallResolver) {
+            PaywallResolverImpl paywallResolver) {
         DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
             @Override
             public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {

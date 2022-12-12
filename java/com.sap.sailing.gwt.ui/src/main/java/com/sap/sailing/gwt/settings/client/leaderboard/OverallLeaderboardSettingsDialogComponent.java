@@ -7,13 +7,13 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class OverallLeaderboardSettingsDialogComponent extends MultiRaceLeaderboardSettingsDialogComponent {
 
     public OverallLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
             List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes,
-            PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
+            PaywallResolverImpl paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
         super(initialSettings, allRaceColumnNames, stringMessages, availableDetailTypes,
                 /* canBoatInfoBeShown */ false, paywallResolver, leaderboardDTO);
     }

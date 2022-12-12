@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class RegattaStatusRace extends Composite {
     
@@ -49,7 +49,7 @@ public class RegattaStatusRace extends Composite {
     public RegattaStatusRace(LiveRaceDTO race,
             BiFunction<? super SimpleRaceMetadataDTO, String, String> raceboardUrlFactory,
             final Function<? super SimpleRaceMetadataDTO, String> mapAndWindChartUrlFactory,
-            PaywallResolver paywallResolver) {
+            PaywallResolverImpl paywallResolver) {
         this.race = race;
         this.launchPadController = new RaceviewerLaunchPadController<LiveRaceDTO>(raceboardUrlFactory,
                 mapAndWindChartUrlFactory, paywallResolver);

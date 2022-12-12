@@ -127,7 +127,7 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
 public class AdminConsoleViewImpl extends Composite implements AdminConsoleView {
@@ -151,7 +151,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private final StringMessages stringMessages = StringMessages.INSTANCE;
 
     private UserService userService;
-    private PaywallResolver paywallResolver;
+    private PaywallResolverImpl paywallResolver;
 
     private ErrorReporter errorReporter;
 
@@ -170,7 +170,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         this.userService = presenter.getUserService();
         this.errorReporter = presenter.getErrorReporter();
         this.placeController = presenter.getPlaceController();
-        this.paywallResolver = new PaywallResolver(this.userService, presenter.getSubscriptionServiceFactory());
+        this.paywallResolver = new PaywallResolverImpl(this.userService, presenter.getSubscriptionServiceFactory());
     }
 
     @Override

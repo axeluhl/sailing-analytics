@@ -46,7 +46,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AutoplayHelper {
@@ -293,7 +293,7 @@ public class AutoplayHelper {
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
                 /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false, /* showWindLadder */ false);
-        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
         userService.createEssentialSecuredDTOByIdAndType(currentLiveRace.getPermissionType(), currentLiveRace.getName(),
                 currentLiveRace.getTypeRelativeObjectIdentifier(), new AsyncCallback<SecuredDTO>() {
 

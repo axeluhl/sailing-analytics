@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.shared.EssentialSecuredDTO;
 
@@ -27,7 +27,7 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
 
     public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService,
             SubscriptionServiceFactory subscriptionServiceFactory, Iterable<DetailType> availableDetailTypes) {
-        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+        PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
                 availableDetailTypes, paywallResolver);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
@@ -38,7 +38,7 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
     }
 
     public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService,
-            PaywallResolver paywallResolver, Iterable<DetailType> availableDetailTypes) {
+            PaywallResolverImpl paywallResolver, Iterable<DetailType> availableDetailTypes) {
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
                 availableDetailTypes, paywallResolver);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,

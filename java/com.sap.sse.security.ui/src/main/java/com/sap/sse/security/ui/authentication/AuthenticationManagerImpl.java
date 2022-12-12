@@ -22,7 +22,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -40,7 +40,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private final EventBus eventBus;
     private final String emailConfirmationUrl;
     private final String passwordResetUrl;
-    private final PaywallResolver paywallResolver;
+    private final PaywallResolverImpl paywallResolver;
     
     private final StringMessages i18n = StringMessages.INSTANCE;
     private final ErrorMessageView view = new ErrorMessageViewImpl();
@@ -60,7 +60,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     public AuthenticationManagerImpl(WithSecurity clientFactory, EventBus eventBus,
             String emailConfirmationUrl, String passwordResetUrl) {
         this(clientFactory.getUserManagementWriteService(), clientFactory.getUserService(), 
-                new PaywallResolver(clientFactory.getUserService(), clientFactory.getSubscriptionServiceFactory()),
+                new PaywallResolverImpl(clientFactory.getUserService(), clientFactory.getSubscriptionServiceFactory()),
                 eventBus, emailConfirmationUrl, passwordResetUrl);
     }
     
@@ -77,13 +77,13 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      * @param passwordResetUrl
      *            URL which is send to users to reset their password
      */
-    public AuthenticationManagerImpl(UserService userService, PaywallResolver paywallResolver, 
+    public AuthenticationManagerImpl(UserService userService, PaywallResolverImpl paywallResolver, 
             EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
         this(userService.getUserManagementWriteService(), userService, paywallResolver,  eventBus, emailConfirmationUrl, passwordResetUrl);
     }
     
     private AuthenticationManagerImpl(UserManagementWriteServiceAsync userManagementWriteService, UserService userService,
-            PaywallResolver paywallResolver, final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
+            PaywallResolverImpl paywallResolver, final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
         this.userManagementWriteService = userManagementWriteService;
         this.userService = userService;
         this.eventBus = eventBus;

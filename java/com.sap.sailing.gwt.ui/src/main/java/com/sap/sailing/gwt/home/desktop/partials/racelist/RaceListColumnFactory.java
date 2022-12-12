@@ -43,7 +43,7 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class RaceListColumnFactory {
     
@@ -468,7 +468,7 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(
             final EventView.Presenter presenter, final boolean showNotTracked) {
-        final PaywallResolver paywallResolver = new PaywallResolver(presenter.getUserService(), 
+        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(presenter.getUserService(), 
                 presenter.getSubscriptionServiceFactory());
         final RaceviewerLaunchPadController<T> lpPresenter = new RaceviewerLaunchPadController<T>(
                 presenter::getRaceViewerURL, race -> {

@@ -41,7 +41,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
  * Component Viewer that uses a {@link TouchSplitLayoutPanel} to display its components.
@@ -97,7 +97,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             List<Pair<Component<?>, Action>> components, final StringMessages stringMessages, UserService userService,
             EditMarkPassingsPanel markPassingsPanel, EditMarkPositionPanel markPositionPanel,
             ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher,
-            PaywallResolver paywallResolver, SecuredDTO dtoContext) {
+            PaywallResolverImpl paywallResolver, SecuredDTO dtoContext) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;

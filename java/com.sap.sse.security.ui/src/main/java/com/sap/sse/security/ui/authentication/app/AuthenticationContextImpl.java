@@ -10,7 +10,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
  * Default implementation of {@link AuthenticationContext}.
@@ -23,7 +23,7 @@ public class AuthenticationContextImpl implements AuthenticationContext {
             new ArrayList<WildcardPermissionWithSecurityDTO>(),
             /* groups */ null);
     private final UserService userService;
-    private final PaywallResolver paywallResolver;
+    private final PaywallResolverImpl paywallResolver;
 
     /**
      * Creating an {@link AuthenticationContextImpl} containing the given {@link UserDTO} object.
@@ -31,7 +31,7 @@ public class AuthenticationContextImpl implements AuthenticationContext {
      * @param currentUser
      *            the current {@link UserDTO user} object
      */
-    public AuthenticationContextImpl(UserDTO currentUser, UserService userService, PaywallResolver paywallResolver) {
+    public AuthenticationContextImpl(UserDTO currentUser, UserService userService, PaywallResolverImpl paywallResolver) {
         this.userService = userService;
         this.paywallResolver = paywallResolver;
         if (currentUser == null) {
@@ -89,7 +89,7 @@ public class AuthenticationContextImpl implements AuthenticationContext {
     }
     
     @Override
-    public PaywallResolver getPaywallResolver() {
+    public PaywallResolverImpl getPaywallResolver() {
         return paywallResolver;
     }
 }

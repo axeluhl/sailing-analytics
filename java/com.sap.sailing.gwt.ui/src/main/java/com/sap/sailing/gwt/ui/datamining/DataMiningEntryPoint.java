@@ -56,7 +56,7 @@ import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
 
@@ -92,7 +92,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
     private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
         removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
-        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), paywallResolver,
                 header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(

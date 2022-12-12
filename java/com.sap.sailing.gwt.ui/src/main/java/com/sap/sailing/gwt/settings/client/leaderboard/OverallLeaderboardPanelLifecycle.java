@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
  * This is a special lifecycle that uses a different ID, which is required to allow a OverallLeaderboard and a normal
@@ -14,7 +14,7 @@ public class OverallLeaderboardPanelLifecycle extends MultiRaceLeaderboardPanelL
     public static final String ID = "olb";
 
     public OverallLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+            Iterable<DetailType> availableDetailTypes, PaywallResolverImpl paywallResolver) {
         super(leaderboard, stringMessages, availableDetailTypes, paywallResolver);
     }
 

@@ -132,7 +132,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -341,7 +341,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private HandlerRegistration leaderboardAsTableSelectionModelRegistration;
 
     private final FlowPanel contentPanel = new FlowPanel();
-    protected final PaywallResolver paywallResolver;
+    protected final PaywallResolverImpl paywallResolver;
 
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -478,7 +478,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         LEG_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
-        this.paywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory());
+        this.paywallResolver = new PaywallResolverImpl(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory());
         // Now register a user status event handler that notices changes in user sign-in/out or premium status change.
         // Leaderboard columns can depend on permissions, and currently (and we should change that!) the filtering
         // happens in the LeaderboardSettingsComponentDialog. Therefore, in order to filter the current settings
@@ -3663,7 +3663,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         sb.appendHtmlConstant("</div>");
     }
 
-    public PaywallResolver getPaywallResolver() {
+    public PaywallResolverImpl getPaywallResolver() {
         return this.paywallResolver;
     }
 }
