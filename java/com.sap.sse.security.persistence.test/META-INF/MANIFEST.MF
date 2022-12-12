@@ -11,5 +11,5 @@ Import-Package: org.apache.shiro.session;version="1.2.2",
  org.apache.shiro.session.mgt;version="1.2.2",
  org.apache.shiro.subject;version="1.2.2",
  org.junit
-Require-Bundle: org.hamcrest;bundle-version="1.1.0",
+Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  slf4j.api;bundle-version="1.6.4"

@@ -15,13 +15,20 @@ Require-Bundle:
  routeconverter,
  com.sap.sse.common,
  com.sap.sse,
- com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"
+ com.sun.xml.bind.jaxb-impl;bundle-version="2.3.1",
+ jaxb-api;bundle-version="2.3.1"
 Import-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.domain.abstractlog.regatta.events.impl,
  com.sap.sailing.domain.common.sensordata,
  com.sap.sailing.domain.racelogtracking,
  com.sap.sse.security.shared,
+ javax.xml.bind;version="2.3.0",
+ javax.xml.bind.annotation;version="2.3.0",
+ javax.xml.bind.annotation.adapters;version="2.3.0",
+ javax.xml.bind.attachment;version="2.3.0",
+ javax.xml.bind.helpers;version="2.3.0",
+ javax.xml.bind.util;version="2.3.0",
  org.osgi.framework;version="1.7.0"
 Bundle-Activator: com.sap.sailing.server.trackfiles.impl.Activator
 Automatic-Module-Name: com.sap.sailing.server.trackfiles

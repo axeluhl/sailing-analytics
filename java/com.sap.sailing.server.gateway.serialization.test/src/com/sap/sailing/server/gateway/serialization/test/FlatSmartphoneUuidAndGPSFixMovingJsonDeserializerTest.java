@@ -20,7 +20,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
 
-
 public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {
     @Test
     public void deserialize() throws JsonDeserializationException, ParseException {

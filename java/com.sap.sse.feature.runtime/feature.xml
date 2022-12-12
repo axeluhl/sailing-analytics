@@ -689,6 +689,13 @@
          unpack="false"/>
 
    <plugin
+         id="javax.xml.soap"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.v201005080501"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.osgi.util"
          download-size="0"
          install-size="0"

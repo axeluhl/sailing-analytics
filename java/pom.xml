@@ -31,7 +31,7 @@
          Due to ECJ/JDT bugs it may fail depending on the Eclipse version tycho is based on 
          (see Bugzilla: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3859). -->
     <!-- Most likely, serialization/replication will fail with tycho versions based on Eclipse Neon R (4.6.0). -->
-    <tycho-version>1.6.0</tycho-version>
+    <tycho-version>2.7.5</tycho-version>
     <gwt.version>2.11.0</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
     <gwt.plugin.version>2.11.0</gwt.plugin.version>
@@ -78,7 +78,9 @@
       </activation>
       <modules>
         <module>elemental2</module>
+	    <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
+        <module>com.sap.sse.apacheservicemixfragment</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.landscape.common</module>
         <module>com.sap.sse.landscape</module>
@@ -268,6 +270,54 @@
                   <id>com.google.gwt.dev</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
+              </extraRequirements>
+            </dependency-resolution>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+  <profile>
+      <!-- This profile activates the addition of those JavaEE bundles to the target platform
+           for Tycho that have been removed from JavaSE-11 if not building for Android -->
+    <id>with-java11-non-android-relevant</id>
+    <activation>
+      <jdk>[11.0,18.0)</jdk>
+      <!-- TODO find out if this dependency on a property set by yet another profile works properly
+	  <property>
+	    <name>with.not.android.relevant</name>
+	    <value>true</value>
+      </property>
+      -->
+    </activation>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <dependency-resolution>
+              <extraRequirements>
+                <!-- The bundles that provide those package dropped in JavaSE-11 will be
+                     required by the following fragments -->
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sap.sailing.routeconverterjava11extension</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+                <!-- For some reason there is a cyclic dependency created by the following:
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sap.sse.jersey.jaxbdependencyfragment</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sap.sse.apacheservicemixfragment</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+                -->
               </extraRequirements>
             </dependency-resolution>
           </configuration>
