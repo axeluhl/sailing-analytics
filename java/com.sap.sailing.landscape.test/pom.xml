@@ -26,7 +26,6 @@
         <configuration>
           <excludes>
             <exclude>**/*.java</exclude>
-            <exclude>**/*.java</exclude>
           </excludes>
         </configuration>
       </plugin>

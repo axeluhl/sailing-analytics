@@ -81,7 +81,7 @@
       </properties>
       <modules>
         <module>elemental2</module>
-	<module>org.hamcrest.core</module>
+	    <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
         <module>com.sap.sse.apacheservicemixfragment</module>
         <module>com.sap.sse.test</module>
@@ -543,22 +543,6 @@
   </pluginManagement>
 
   <plugins>
-    <!-- Uncomment the following to display active profiles for each artifact:
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-help-plugin</artifactId>
-      <version>3.3.0</version>
-      <executions>
-        <execution>
-          <id>show-profiles</id>
-          <phase>compile</phase>
-          <goals>
-            <goal>active-profiles</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-    -->
     <plugin>
       <groupId>org.eclipse.tycho</groupId>
       <artifactId>tycho-maven-plugin</artifactId>
