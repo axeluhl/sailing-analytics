@@ -12,6 +12,6 @@
   <packaging>eclipse-test-plugin</packaging>
 -->
   <properties>
-    <tycho.plugin-test.skip>false</tycho.plugin-test.skip>
+    <tycho.plugin-test.skip>true</tycho.plugin-test.skip>
   </properties>
 </project>
