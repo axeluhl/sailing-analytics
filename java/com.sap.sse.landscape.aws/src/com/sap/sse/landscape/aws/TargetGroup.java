@@ -7,6 +7,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
 /**
@@ -42,6 +43,13 @@ public interface TargetGroup<ShardingKey> extends Named {
      * @return the traffic port
      */
     Integer getPort();
+    
+    /**
+     * 
+     * @return
+     *          returns all tag descriptions for this target group
+     */
+    public Iterable<TagDescription> getTagDescriptions();
     
     /**
      * @return the traffic protocol; usually either one of {@link ProtocolEnum#HTTP} or {@link ProtocolEnum#HTTPS}

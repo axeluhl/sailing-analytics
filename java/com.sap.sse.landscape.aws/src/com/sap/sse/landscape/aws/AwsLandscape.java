@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -90,6 +89,8 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * @param <MetricsT>
  */
 public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
+    public static final long DEFAULT_DNS_TTL_SECONDS = 60l;
+    
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
@@ -489,7 +490,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn);
-    
+    /**
+     * Copies a target group from an existing target group. The name gets extended with {@code suffix}
+     * @param parent 
+     *          target group to copy from
+     * @param suffix
+     *          suffix to append to the parent's name for the name of the new created target group
+     * @return
+     *          newly created target group.
+     */
     TargetGroup<ShardingKey> copyTargetGroup(TargetGroup<ShardingKey> parent, String suffix);
 
     default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn,
@@ -515,10 +524,19 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     <SK> void deleteTargetGroup(TargetGroup<SK> targetGroup);
 
     Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
+    /**
+     * Modifies an existing rule that is identified by the passed {@code rule}'s ARN. Only the conditions are modified and nothing
+     * else gets touched.
+     * @param region
+     *          AWS Region
+     * @param rule
+     *          The Rule to modify. Only ARN and Conditions are necessary.
+     * @return
+     *          the modified Rule as an Iterable.
+     */
+    Iterable<Rule> modifyRuleConditions(Region region, Rule rule);
     
-    public Iterable<Rule> modifyRuleConditions(Region region, Rule rule);
-    
-    public Iterable<Rule> modifyRuleActions(Region region, Rule rule);
+    Iterable<Rule> modifyRuleActions(Region region, Rule rule);
 
     /**
      * Use {@link Rule.Builder} to create {@link Rule} objects you'd like to set for the {@link Listener} passed as parameter.
@@ -533,7 +551,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     void updateLoadBalancerListenerRule(Region region, Rule ruleToUpdate);
 
-    void updateLoadBalancerListenerRulePriorities(Region region, Collection<RulePriorityPair> newRulePriorities);
+    void updateLoadBalancerListenerRulePriorities(Region region, Iterable<RulePriorityPair> newRulePriorities);
 
     void deleteLoadBalancerListener(Region region, Listener listener);
 
@@ -756,16 +774,32 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
     
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoscalinggroupFromExisting(AwsAutoScalingGroup autoscalingParent,
+    void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoscalingParent,
             String shardname, TargetGroup<ShardingKey> targetgroup,Optional<Tags> tags);
     
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void putScalingPolicy(AwsAutoScalingGroup autoscalingParent,
-            String shardname, TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<ShardingKey> alb);
-    
-    long getDNSTTLInSeconds();
+    void putScalingPolicy(
+            int instanceWarmupTimeInSeconds, String shardname, TargetGroup<ShardingKey> targetgroup, int maxRequestPerTarget, com.sap.sse.landscape.Region region);
     
     public Iterable<TagDescription> getTargetGroupTags(String arn, com.sap.sse.landscape.Region region);
     
-    public  AddTagsResponse addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
+    /**
+     * 
+     *  See AWS doc for tag restrictions: 
+     *  https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-tags.html
+     *   If a resource already has a tag with the same key,
+     *   the value gets updated.
+     *  
+     * @param arn
+     *          Target group's ARN to add the tag to. 
+     * @param key
+     *          Key of the tag. See AWS logs for restrictions. 
+     * @param value
+     *          value of tag. See AWS logs for restrictions. 
+     * @param region
+     *          AWS Region of target group
+     * @return
+     *          Returns the added Tag
+     */
+    public Tags addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
 }

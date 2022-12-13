@@ -44,6 +44,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
@@ -486,7 +487,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     @Test
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
-        final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80,
+        final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, ApplicationProcess.HEALTH_CHECK_PATH, 80,
                 /* loadBalancerArn */ null);
         try {
             final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,

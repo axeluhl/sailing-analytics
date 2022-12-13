@@ -15,6 +15,10 @@ import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
  *
  */
 public interface AwsAutoScalingGroup extends Named {
+    /**
+     * Describes on how many requests per minute a new instance gets created.
+     */
+    public static int DEFAULT_MAX_REQUESTS_PER_TARGET = 15000;
     AutoScalingGroup getAutoScalingGroup();
     
     LaunchConfiguration getLaunchConfiguration();
