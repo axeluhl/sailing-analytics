@@ -8,6 +8,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsApplicationProcess;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
@@ -37,7 +38,6 @@ extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
     private static final int DEFAULT_MIN_REPLICAS = 1;
     private static final int DEFAULT_MAX_REPLICAS = 30;
-    private static final int DEFAULT_MAX_REQUESTS_PER_TARGET = 15000;
     
     /**
      * 
@@ -66,8 +66,8 @@ implements Procedure<ShardingKey> {
         BuilderT setMaxReplicas(int maxReplicas);
 
         /**
-         * Defines the scaling threshold based on the number of requests per target per minute. Defaults to 30,000 (see
-         * {@link CreateLaunchConfigurationAndAutoScalingGroup#DEFAULT_MAX_REQUESTS_PER_TARGET}).
+         * Defines the scaling threshold based on the number of requests per target per minute. Defaults to 15,000 (see
+         * {@link AwsAutoScalingGroup#DEFAULT_MAX_REQUESTS_PER_TARGET}).
          */
         BuilderT setMaxRequestsPerTarget(int maxRequestsPerTarget);
     }
@@ -85,7 +85,7 @@ implements Procedure<ShardingKey> {
         private Optional<Tags> tags;
         private int minReplicas = DEFAULT_MIN_REPLICAS;
         private int maxReplicas = DEFAULT_MAX_REPLICAS;
-        private int maxRequestsPerTarget = DEFAULT_MAX_REQUESTS_PER_TARGET;
+        private int maxRequestsPerTarget = AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET;
 
         public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, String replicaSetName,
                 TargetGroup<ShardingKey> targetGroup) {

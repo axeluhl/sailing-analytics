@@ -11,7 +11,6 @@ import com.sap.sse.landscape.aws.AwsApplicationProcess;
 
 public interface SailingAnalyticsProcess<ShardingKey> extends AwsApplicationProcess<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
     static Logger logger = Logger.getLogger(SailingAnalyticsProcess.class.getName());
-    static String HEALTH_CHECK_PATH = "/gwt/status";
 
     int getExpeditionUdpPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
