@@ -116,46 +116,30 @@ implements ApplicationLoadBalancer<ShardingKey> {
         while (iter.hasNext()) {
             Rule r = iter.next();
             try {
-                rulesSorted.put(Integer.parseInt(r.priority()), r);
+                rulesSorted.put(Integer.valueOf(r.priority()), r);
             } catch (Exception e) {
                 // Case where prio is not a number, e.g. 'Default' gets ignored.
             }
         }
-        //Index for next space ->shift only until reaches this. StandardValue is index after the highest
-        int idxSpace = rulesSorted.lastKey() + 1;
-        //get last index for shifting. It's not the last if there was space somewhere.
-        int lastIdx = targetPrio;
+        int lastPrio = targetPrio;
+        boolean skipNext = false;
+        final Collection<RulePriorityPair> result = new ArrayList<>();
         if (rulesSorted.get(targetPrio) != null) {// if there is a rule on prio
             for (Entry<Integer, Rule> r : rulesSorted.entrySet()) {
-                if (r.getKey() < targetPrio) {
-                    // If rules's prio is lower than the targetPrio
-                    if (r.getKey() == rulesSorted.lastKey()) {
-                        idxSpace = r.getKey() + 1;
-                        break;
-                    }
-                    continue;// Ignore priorities lower than index
-                } else if (r.getKey() == rulesSorted.lastKey()) {
-                    // if there was no gap before the last key
-                    idxSpace = r.getKey() + 1;
-                    break;
-                } else {
-                    if (r.getKey() - lastIdx > 1) {
-                        // If gap is larger than 1, shift only until here
-                        idxSpace = lastIdx + 1;
+                if (r.getKey() < targetPrio || skipNext) {
+                    // if prio is lower than target prio
+                    continue;
+                } else  {
+                    //if prio is higher than target prio and is not supposed to be skipped
+                    if (lastPrio - r.getKey() > 1) {
+                        result.add(RulePriorityPair.builder().ruleArn(r.getValue().ruleArn())
+                                .priority(getNewPriority(Integer.valueOf(lastPrio) + 1)).build());
                         break;
                     } else {
-                        //Continue through rules
-                        lastIdx = r.getKey();
+                        lastPrio = Integer.valueOf(r.getValue().priority()) + 1;
+                        result.add(RulePriorityPair.builder().ruleArn(r.getValue().ruleArn())
+                                .priority(getNewPriority(lastPrio)).build());
                     }
-                }
-            }
-            final Collection<RulePriorityPair> result = new ArrayList<>(idxSpace - targetPrio);
-            for (int i = idxSpace - 1; i >= targetPrio; i--) {
-                Rule r = rulesSorted.get(i);
-                if (r != null) {
-                    //Increment Rule's prio
-                    result.add(RulePriorityPair.builder().ruleArn(r.ruleArn())
-                            .priority(getNewPriority(Integer.valueOf(r.priority()) + 1)).build());
                 }
             }
             landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
