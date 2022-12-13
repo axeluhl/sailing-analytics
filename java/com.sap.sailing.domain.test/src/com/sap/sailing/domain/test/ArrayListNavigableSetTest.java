@@ -36,9 +36,7 @@ public class ArrayListNavigableSetTest {
     }
 
     private void testSet(Set<Integer> hashSet) {
-        @SuppressWarnings("deprecation") // we really want distinct instances here
         Integer i1 = new Integer(1);
-        @SuppressWarnings("deprecation") // we really want distinct instances here
         Integer i2 = new Integer(1);
         assertNotSame(i1, i2);
         assertEquals(i1, i2);
