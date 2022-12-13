@@ -113,7 +113,6 @@ public class ShardManagementPanel extends SimplePanel {
             updateSelectedKeysTable();
             updateAddDeleteButton();
         });
-        shardsCaption.add(shardTable);
         updateRemoveShardButton();
         leaderboardCaption = new CaptionPanel(StringMessages.INSTANCE.leaderboards());
         regattasTable = new TableWrapperWithMultiSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
@@ -164,22 +163,27 @@ public class ShardManagementPanel extends SimplePanel {
         addButton.addClickHandler(event -> addLeaderboardToShard());
         deleteButton = new Button("<");
         deleteButton.addClickHandler(event -> removeLeaderboardFromShard());
+        final HorizontalPanel insideShardPanel  =new HorizontalPanel();
         final VerticalPanel buttonPanel = new VerticalPanel();
         final SimplePanel spaceholder = new SimplePanel();
-        spaceholder.setHeight("30px");
+        spaceholder.setHeight("60px");
+        final SimplePanel keysSpaceholder  =new SimplePanel();
         buttonPanel.add(spaceholder);
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
         tableRow.add(leaderboardCaption);
         tableRow.add(buttonPanel);
         tableRow.add(leaderboardsBusy);
+        keysSpaceholder.add(keysCaption);
+        insideShardPanel.add(keysSpaceholder);
+        insideShardPanel.add(shardTable);
+        shardsCaption.add(insideShardPanel);
+        shardsCaption.setWidth("90%");
         tableRow.add(shardsCaption);
         tableRow.add(shardBusy);
-        tableRow.add(keysCaption);
         messageBox = new DialogBox(false);
         final VerticalPanel dialogMainPanel = new VerticalPanel();
         dialogMainPanel.setSpacing(5);
-        dialogMainPanel.setWidth("100%");
         messageBox.add(dialogMainPanel);
         message = new TextArea();
         message.setPixelSize(200, 300);
@@ -340,7 +344,6 @@ public class ShardManagementPanel extends SimplePanel {
             });
             nameRequest.center();
             nameRequest.show();
-            refresh();
         }
     }
 
