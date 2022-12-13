@@ -282,7 +282,7 @@
            for Tycho that have been removed from JavaSE-11 if not building for Android -->
     <id>with-java11-non-android-relevant</id>
     <activation>
-      <jdk>[11.0,18.0)</jdk>
+      <jdk>[9.0,21.0)</jdk>
       <!-- TODO find out if this dependency on a property set by yet another profile works properly
 	  <property>
 	    <name>with.not.android.relevant</name>
@@ -306,7 +306,6 @@
                   <id>com.sap.sailing.routeconverterjava11extension</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
-                <!-- For some reason there is a cyclic dependency created by the following:
                 <requirement>
                   <type>eclipse-plugin</type>
                   <id>com.sap.sse.jersey.jaxbdependencyfragment</id>
@@ -317,7 +316,6 @@
                   <id>com.sap.sse.apacheservicemixfragment</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
-                -->
               </extraRequirements>
             </dependency-resolution>
           </configuration>
