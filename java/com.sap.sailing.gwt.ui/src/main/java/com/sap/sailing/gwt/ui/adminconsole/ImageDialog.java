@@ -260,16 +260,16 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, true, "image/*");
-        imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
+        imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<Map<String, String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<List<String>> event) {
-                List<String> imageUrls = event.getValue();
+            public void onValueChange(ValueChangeEvent<Map<String, String>> event) {
+                Map<String, String> imageUrls = event.getValue();
                 if (imageUrls == null || imageUrls.isEmpty()) {
                     fileInfoVPanel.clear();
                 } else {
                     busyIndicator.setBusy(true);
                     busyCounter = 0;
-                    for (final String imageUrl : imageUrls) {
+                    for (final String imageUrl : imageUrls.keySet()) {
                         if (!imageDimensionsMap.containsKey(imageUrl)) {
                             busyCounter += 1;
                             ImageDialog.this.sailingService.resolveImageDimensions(imageUrl,

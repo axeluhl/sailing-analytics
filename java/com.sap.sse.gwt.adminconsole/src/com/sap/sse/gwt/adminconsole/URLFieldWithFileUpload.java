@@ -1,7 +1,10 @@
 package com.sap.sse.gwt.adminconsole;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,7 +49,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  * @author Axel Uhl (d043530)
  *
  */
-public class URLFieldWithFileUpload extends Composite implements HasValue<List<String>> {
+public class URLFieldWithFileUpload extends Composite implements HasValue<Map<String, String>> {
     private final Logger logger = Logger.getLogger(getClass().getName());
     private static final URLFieldWithFileUploadResources RESOURCES = URLFieldWithFileUploadResources.INSTANCE;
     private static final String UPLOAD_URL = "/sailingserver/fileupload";
@@ -56,7 +59,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
 
     private final FileUpload fileUploadField;
 
-    private List<String> uriList;
+    private Map<String, String> uriList;
     private String name;
 
     private boolean valueChangeHandlerInitialized = false;
@@ -73,7 +76,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
 
     public URLFieldWithFileUpload(final StringMessages stringMessages, boolean multiFileUpload, boolean initiallyEnableUpload, boolean showUrlAfterUpload, String acceptedFileTypes) {
         RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
-        this.uriList = new ArrayList<>();
+        this.uriList = new LinkedHashMap<>();
         startUploadEvent = new StartUploadEvent() {
             @Override
             public void startUpload() {
@@ -109,7 +112,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
         removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                for (String uri : uriList) {
+                for (String uri : uriList.keySet()) {
                     removePanel.setAction("/sailingserver/api/v1/file?uri=" + uri);
                     removePanel.submit();
                 }
@@ -175,7 +178,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
         uploadFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                for (String localUri : uriList) {
+                for (String localUri : uriList.keySet()) {
                     if (localUri != null && !"".equals(localUri)) {
                         GWT.log("(1) remove uploaded file " + localUri);
                         deleteFileOnServer(localUri);
@@ -186,15 +189,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
                 String result = event.getResults();
                 JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
-                    List<String> uris = new ArrayList<>(resultJson.size());
+                    Map<String, String> uris = new HashMap<>(resultJson.size());
                     List<String> titleStrings = new ArrayList<>(resultJson.size());
                     List<String> valueStrings = new ArrayList<>(resultJson.size());
                     for (int i = 0; i < resultJson.size(); i++) {
                         if (resultJson.get(i).isObject() != null) {
                             if (resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI) != null) {
                                 String uri = resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI).isString().stringValue();
-                                uris.add(uri);
-                                String fileName = resultJson.get(0).isObject().get(FileUploadConstants.FILE_NAME).isString().stringValue();
+                                String fileName = resultJson.get(i).isObject().get(FileUploadConstants.FILE_NAME).isString().stringValue();
+                                uris.put(uri, fileName);
                                 titleStrings.add(fileName);
                                 if (showUrlAfterUpload) {
                                     valueStrings.add(uri);
@@ -251,10 +254,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
     }
 
     public List<String> getUris() {
-        return uriList;
+        return new ArrayList<>(uriList.keySet());
     }
 
-    public void setUris(List<String> uris, boolean fireEvent) {
+    private void setUris(Map<String, String> uris, boolean fireEvent) {
         if (uris != null) {
             this.uriList = uris;
         } else {
@@ -264,7 +267,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
             urlTextBox.setValue("");
             urlTextBox.setTitle("");
         } else {
-            urlTextBox.setValue(String.join(URI_DELIMITER, uriList));
+            urlTextBox.setValue(String.join(URI_DELIMITER, uriList.keySet()));
         }
         removeButton.setEnabled(uriList != null);
         if (fireEvent) {
@@ -279,8 +282,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
      */
     public String getUri() {
         String result = null;
-        if (uriList != null && uriList.size() > 0 && uriList.get(0) != null) {
-            result = uriList.get(0).trim();
+        if (uriList != null && uriList.size() > 0 && uriList.keySet().iterator().next() != null) {
+            result = uriList.keySet().iterator().next().trim();
         }
         return result;
     }
@@ -295,7 +298,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
             urlTextBox.setValue("");
             urlTextBox.setTitle("");
         } else {
-            this.uriList.add(uri);
+            this.uriList.put(uri, extractFileName(uri));
             urlTextBox.setValue(uri);
         }
         removeButton.setEnabled(uri != null);
@@ -303,13 +306,17 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
             ValueChangeEvent.fire(this, uriList);
         }
     }
+    
+    private String extractFileName(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
 
     public FocusWidget getInitialFocusWidget() {
         return urlTextBox;
     }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<String>> handler) {
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Map<String, String>> handler) {
         if (!valueChangeHandlerInitialized) {
             valueChangeHandlerInitialized = true;
             addDomHandler(new ChangeHandler() {
@@ -322,17 +329,17 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
       }
 
     @Override
-    public List<String> getValue() {
+    public Map<String, String> getValue() {
         return uriList;
     }
 
     @Override
-    public void setValue(List<String> value) {
+    public void setValue(Map<String, String> value) {
         setUris(value, false);
     }
 
     @Override
-    public void setValue(List<String> value, boolean fireEvents) {
+    public void setValue(Map<String, String> value, boolean fireEvents) {
         setUris(value, fireEvents);
     }
 
@@ -368,7 +375,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
     }
 
     public void deleteCurrentFile() {
-        for (final String localUri : uriList) {
+        for (final String localUri : uriList.keySet()) {
             deleteFileOnServer(localUri);
         }
     }

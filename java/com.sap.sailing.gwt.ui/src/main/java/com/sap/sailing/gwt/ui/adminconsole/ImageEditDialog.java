@@ -24,6 +24,6 @@ public class ImageEditDialog extends ImageDialog {
         List<String> tags = new ArrayList<String>();
         tags.addAll(imageDTO.getTags());
         tagsListEditor.setValue(tags);
-        ValueChangeEvent.fire(imageURLAndUploadComposite, imageURLAndUploadComposite.getUris());
+        ValueChangeEvent.fire(imageURLAndUploadComposite, imageURLAndUploadComposite.getValue());
     }
 }

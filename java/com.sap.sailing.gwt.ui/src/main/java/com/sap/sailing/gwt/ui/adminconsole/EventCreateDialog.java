@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -17,9 +18,9 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 public class EventCreateDialog extends EventDialog {
 
     public EventCreateDialog(Collection<EventDTO> existingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, 
-            SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
+            SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, DialogCallback<EventDTO> callback, MediaServiceAsync mediaService) {
         super(new EventParameterValidator(stringMessages, existingEvents), sailingServiceWrite, stringMessages,
-                availableLeaderboardGroups, /* leaderboardGroups */ Collections.<LeaderboardGroupDTO>emptyList(), callback);
+                availableLeaderboardGroups, /* leaderboardGroups */ Collections.<LeaderboardGroupDTO>emptyList(), callback, mediaService);
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(50);
         nameEntryField.ensureDebugId("NameTextBox");

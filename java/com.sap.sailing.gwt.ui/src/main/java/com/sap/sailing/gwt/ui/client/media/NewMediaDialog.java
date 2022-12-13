@@ -3,10 +3,12 @@ package com.sap.sailing.gwt.ui.client.media;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
@@ -154,9 +156,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         this.mediaService = mediaService;
 
         urlBox = new URLFieldWithFileUpload(stringMessages, false, true, false, "audio/*,video/*");
-        urlBox.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
+        urlBox.addValueChangeHandler(new ValueChangeHandler<Map<String, String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<List<String>> event) {
+            public void onValueChange(ValueChangeEvent<Map<String, String>> event) {
                 nameBox.setValue(urlBox.getName());
                 mediaTrack.title = nameBox.getValue();
                 validateAndUpdate();
@@ -572,6 +574,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             }
             @Override
             public void onFailure(Throwable caught) {
+                GWT.log("Error in backend", caught);
                 busyIndicator.setBusy(false);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack, MimeType.mp4MimeTypes());

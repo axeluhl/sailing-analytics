@@ -499,7 +499,7 @@ public class EventListComposite extends Composite {
             public void ok(final EventDTO newEvent) {
                 createNewEvent(newEvent, existingLeaderboardGroups);
             }
-        });
+        }, presenter.getMediaServiceWrite());
         dialog.ensureDebugId("EventCreateDialog");
         dialog.show();
     }
@@ -624,7 +624,7 @@ public class EventListComposite extends Composite {
             public void ok(EventDTO updatedEvent) {
                 updateEvent(selectedEvent, updatedEvent);
             }
-        });
+        }, presenter.getMediaServiceWrite());
         dialog.show();
     }
 
