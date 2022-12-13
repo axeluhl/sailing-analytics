@@ -286,12 +286,6 @@
     <id>with-java11-non-android-relevant</id>
     <activation>
       <jdk>[9.0,21.0)</jdk>
-      <!-- TODO find out if this dependency on a property set by yet another profile works properly
-	  <property>
-	    <name>with.not.android.relevant</name>
-	    <value>true</value>
-      </property>
-      -->
     </activation>
     <build>
       <plugins>
