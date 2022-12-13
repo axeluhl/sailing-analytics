@@ -90,26 +90,103 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     protected void addChildSettings() {
         showSatelliteLayer = new BooleanSetting(PARAM_SHOW_SATELLITE_LAYER, this, false);
         showMapControls = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
-        helpLinesSettings = new RaceMapHelpLinesSettings("helpLinesSettings", this);
+        helpLinesSettings = new RaceMapHelpLinesSettings(HELP_LINES_SETTINGS, this);
         windUp = new BooleanSetting(PARAM_MAP_ORIENTATION_WIND_UP, this, false);
         buoyZoneRadius = new DistanceSetting(PARAM_BUOY_ZONE_RADIUS_IN_METERS, this, DEFAULT_BUOY_ZONE_RADIUS);
         showWindStreamletOverlay = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false);
         showWindStreamletColors = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false);
         showSimulationOverlay = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
         showWindLadder = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
-        zoomSettings = new RaceMapZoomSettings("zoomSettings", this);
-        transparentHoverlines = new BooleanSetting("transparentHoverlines", this, false);
-        hoverlineStrokeWeight = new IntegerSetting("hoverlineStrokeWeight", this, 15);
-        tailLengthInMilliseconds = new LongSetting("tailLengthInMilliseconds", this, 100000l);
-        showOnlySelectedCompetitors = new BooleanSetting("showOnlySelectedCompetitors", this, false);
-        showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
-        maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
-        showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
-        showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false); 
-        startCountDownFontSizeScaling = new DoubleSetting("startCountDownFontSizeScaling", this, 1.0);
-        showManeuverLossVisualization = new BooleanSetting("showManeuverLossVisualization", this, false);
+        zoomSettings = new RaceMapZoomSettings(ZOOM_SETTINGS, this);
+        transparentHoverlines = new BooleanSetting(TRANSPARENT_HOVERLINES, this, false);
+        hoverlineStrokeWeight = new IntegerSetting(HOVERLINE_STROKE_WEIGHT, this, 15);
+        tailLengthInMilliseconds = new LongSetting(TAIL_LENGTH_IN_MILLISECONDS, this, 100000l);
+        showOnlySelectedCompetitors = new BooleanSetting(SHOW_ONLY_SELECTED_COMPETITORS, this, false);
+        showSelectedCompetitorsInfo = new BooleanSetting(SHOW_SELECTED_COMPETITORS_INFO, this, true);
+        maneuverTypesToShow = new EnumSetSetting<>(MANEUVER_TYPES_TO_SHOW, this, getDefaultManeuvers(), ManeuverType::valueOf);
+        showDouglasPeuckerPoints = new BooleanSetting(SHOW_DOUGLAS_PEUCKER_POINTS, this, false);
+        showEstimatedDuration = new BooleanSetting(SHOW_ESTIMATED_DURATION, this, false); 
+        startCountDownFontSizeScaling = new DoubleSetting(START_COUNT_DOWN_FONT_SIZE_SCALING, this, 1.0);
+        showManeuverLossVisualization = new BooleanSetting(SHOW_MANEUVER_LOSS_VISUALIZATION, this, false);
     }
-
+    
+    @SuppressWarnings("unchecked")
+    public void setSettingIfPresent(AbstractSetting setting) {
+        try {
+            final String settingName = setting.getSettingName();
+            switch (settingName) {
+            case SHOW_MANEUVER_LOSS_VISUALIZATION:
+                this.showManeuverLossVisualization = (BooleanSetting) setting;
+                break;
+            case START_COUNT_DOWN_FONT_SIZE_SCALING:
+                this.startCountDownFontSizeScaling = (DoubleSetting) setting;
+                break;
+            case SHOW_ESTIMATED_DURATION:
+                this.showEstimatedDuration = (BooleanSetting) setting;
+                break;
+            case SHOW_DOUGLAS_PEUCKER_POINTS:
+                this.showDouglasPeuckerPoints = (BooleanSetting) setting;
+                break;
+            case MANEUVER_TYPES_TO_SHOW:
+                this.maneuverTypesToShow = (EnumSetSetting<ManeuverType>) setting;
+                break;
+            case SHOW_SELECTED_COMPETITORS_INFO:
+                this.showSelectedCompetitorsInfo = (BooleanSetting) setting;
+                break;
+            case SHOW_ONLY_SELECTED_COMPETITORS:
+                this.showOnlySelectedCompetitors = (BooleanSetting) setting;
+                break;
+            case TAIL_LENGTH_IN_MILLISECONDS:
+                this.tailLengthInMilliseconds = (LongSetting) setting;
+                break;
+            case HOVERLINE_STROKE_WEIGHT:
+                this.hoverlineStrokeWeight = (IntegerSetting) setting;
+                break;
+            case TRANSPARENT_HOVERLINES:
+                this.transparentHoverlines = (BooleanSetting) setting;
+                break;
+            case HELP_LINES_SETTINGS:
+                this.helpLinesSettings = (RaceMapHelpLinesSettings) setting;
+                break;
+            case ZOOM_SETTINGS:
+                this.zoomSettings = (RaceMapZoomSettings) setting;
+                break;
+            case PARAM_SHOW_SATELLITE_LAYER:
+                this.showSatelliteLayer = (BooleanSetting) setting;
+                break;
+            case PARAM_SHOW_MAPCONTROLS:
+                this.showMapControls = (BooleanSetting) setting;
+                break;
+            case PARAM_SHOW_COURSE_GEOMETRY:
+                BooleanSetting booleanSetting = (BooleanSetting) setting;
+                this.helpLinesSettings = new RaceMapHelpLinesSettings(
+                        createHelpLineSettings(booleanSetting.getValue()));
+                break;
+            case PARAM_MAP_ORIENTATION_WIND_UP:
+                this.windUp = (BooleanSetting) setting;
+                break;
+            case PARAM_VIEW_SHOW_STREAMLETS:
+                this.showWindStreamletOverlay = (SecuredBooleanSetting) setting;
+                break;
+            case PARAM_VIEW_SHOW_STREAMLET_COLORS:
+                this.showWindStreamletColors = (BooleanSetting) setting;
+                break;
+            case PARAM_VIEW_SHOW_SIMULATION:
+                this.showSimulationOverlay = (BooleanSetting) setting;
+                break;
+            case PARAM_BUOY_ZONE_RADIUS_IN_METERS:
+                this.buoyZoneRadius = (DistanceSetting) setting;
+                break;
+            case PARAM_SHOW_WIND_LADDER:
+                this.showWindLadder = (BooleanSetting) setting;
+                break;
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Setting " + setting.getSettingName()
+                    + " could not be set in parent Setting " + this.getSettingName());
+        }
+    }
+    
     public RaceMapSettings() {
     }
 
