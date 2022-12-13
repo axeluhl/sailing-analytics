@@ -1592,7 +1592,6 @@ public class LandscapeServiceImpl implements LandscapeService {
                 return;
             }
         }
-        throw new Exception("Shard was not found");
     }
 
     public void addShard(Iterable<String> selectedLeaderboardNames,
