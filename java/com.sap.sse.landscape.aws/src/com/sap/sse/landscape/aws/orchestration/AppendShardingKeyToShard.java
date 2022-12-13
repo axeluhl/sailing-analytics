@@ -16,7 +16,16 @@ import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
-
+/**
+ * This class is supposed to append {@code shardingKeys} to the shard, identified by {@code shardName} from {@replicaSet}.
+ * This is done by adding rule conditions to the shard's rule set and after that just appending new rules. This could lead to moving to replicaset to antoher
+ * load balancer, because it may get full with new sharding rules.
+ * @author I569653
+ *
+ * @param <ShardingKey>
+ * @param <MetricsT>
+ * @param <ProcessT>
+ */
 public class AppendShardingKeyToShard<ShardingKey, 
     MetricsT extends ApplicationProcessMetrics, 
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>

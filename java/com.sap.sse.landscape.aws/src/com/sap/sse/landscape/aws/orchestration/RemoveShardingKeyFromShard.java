@@ -10,7 +10,17 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsShard;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
-
+/**
+ * This class is supposed to remove {@code shardingKeys} from the shard, indentified by {@shardName} from {@code replicaSet}.
+ * This is done by rewriting all rules without {@code shardingKeys}'s path-conditions to the replicaSet's load balancer.
+ * In the future, there should be a algorithm to extract and resort all rules without removing them for ensuring that 100% of time the requests
+ * are reaching the shard's target group.
+ * @author I569653
+ *
+ * @param <ShardingKey>
+ * @param <MetricsT>
+ * @param <ProcessT>
+ */
 public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
     public RemoveShardingKeyFromShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {

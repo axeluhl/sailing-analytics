@@ -30,14 +30,24 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.ForwardActio
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
-
+/**
+ * This class is the base for all procedures that deal with shards. In the subclasses, all procedures are described.
+ * The parameter <ShardingKey> stands for a type that represents a sharding key. But those keys are normally strings because AWS deals with them as strings in
+ * their Rules. The function Shard.getKeys returns a list of the keys contained by the shard. Those keys are found in the shard's rules as a path-condition.
+ * This class implements most of the required functionality when dealing with shards like inserting rules or switching a replica set's load balancer. 
+ * @author I569653
+ *
+ * @param <ShardingKey>
+ * @param <MetricsT>
+ * @param <ProcessT>
+ */
 public abstract class ShardProcedure<ShardingKey,
     MetricsT extends ApplicationProcessMetrics, 
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends AbstractAwsProcedureImpl<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     static final String SHARD_SUFFIX = "-S";
-    static final String TEMP_TARGETGROUP_SUFFIX = "-TP";
+    static final String TEMP_TARGETGROUP_SUFFIX = "-TMP";
     final static int NUMBER_OF_RULES_PER_REPLICA_SET = 5;
     final static int NUMBER_OF_STANDARD_RULES_FOR_SHARDING_RULE = 2;
     protected final String shardName;
@@ -227,7 +237,15 @@ public abstract class ShardProcedure<ShardingKey,
         }
         return res;
     }
-
+    /**
+     * This functions changes the {@code replicaSetToMode}'s load balancer to another one.
+     * This function contains a 6min sleep, which is necessary for ensuring that all DNS rules point to the new one. 
+     * This function can fail is the target group names are to long because of the {@code TargetGroup.TEMP_SUFFIX} suffix for temporary target groups.
+     * @param alb
+     *          application load balancer to move to
+     * @param replicaSetToMove
+     *          replica set to move
+     */
     private void changeReplicaSetLoadBalancer(ApplicationLoadBalancer<ShardingKey> alb,
             AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSetToMove) throws Exception {
         // Move replicaset to this alb with all shards
@@ -400,12 +418,4 @@ public abstract class ShardProcedure<ShardingKey,
                 + IntStream.range(0, ApplicationLoadBalancer.MAX_ALBS_PER_REGION).filter(i -> !numbersTaken.contains(i))
                         .min().getAsInt();
     }
-
-//    public static <MetricsT extends ApplicationProcessMetrics, 
-//        ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, 
-//        BuilderT extends Builder<BuilderT, ShardProcedure<ShardingKey, MetricsT, ProcessT>, 
-//        ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, ShardProcedure<ShardingKey, MetricsT, ProcessT>, 
-//        ShardingKey, MetricsT, ProcessT> builder() {
-//        return new BuilderImpl<BuilderT, ShardingKey, MetricsT, ProcessT>();
-//    }
 }
