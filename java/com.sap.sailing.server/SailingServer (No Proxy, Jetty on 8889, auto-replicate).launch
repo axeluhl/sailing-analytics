@@ -287,7 +287,6 @@
 <setEntry value="com.sap.sse.threadmanager@default:default"/>
 <setEntry value="com.sap.sse.security.common@default:default"/>
 <setEntry value="org.json.simple@default:default"/>
-<setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:default"/>
 <setEntry value="org.moxieapps.gwt.highcharts@default:default"/>
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="org.mp4parser.isoparser@default:default"/>
@@ -302,7 +301,6 @@
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 <setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="elemental2@default:default"/>
-<setEntry value="com.sap.sse.apacheservicemixfragment@default:default"/>
 </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>

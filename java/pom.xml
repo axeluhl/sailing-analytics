@@ -83,7 +83,6 @@
         <module>elemental2</module>
 	    <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
-        <module>com.sap.sse.apacheservicemixfragment</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.landscape.common</module>
         <module>com.sap.sse.landscape</module>
@@ -300,11 +299,6 @@
                 <requirement>
                   <type>eclipse-plugin</type>
                   <id>com.sap.sailing.routeconverterjava11extension</id>
-                  <versionRange>0.0.0</versionRange>
-                </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>com.sap.sse.apacheservicemixfragment</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
               </extraRequirements>
