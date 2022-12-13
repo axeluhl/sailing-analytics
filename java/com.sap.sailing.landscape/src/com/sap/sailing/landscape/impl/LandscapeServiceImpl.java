@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -72,6 +73,7 @@ import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.ReverseProxy;
 import com.sap.sse.landscape.aws.Tags;
@@ -80,11 +82,15 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 import com.sap.sse.landscape.aws.impl.AwsApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.DNSCache;
+import com.sap.sse.landscape.aws.orchestration.AppendShardingKeyToShard;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.aws.orchestration.CopyAndCompareMongoDatabase;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateLoadBalancerMapping;
+import com.sap.sse.landscape.aws.orchestration.CreateShard;
+import com.sap.sse.landscape.aws.orchestration.RemoveShardingKeyFromShard;
+import com.sap.sse.landscape.aws.orchestration.ShardProcedure;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
@@ -835,7 +841,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
-                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache, getLandscape());
+                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
         return applicationReplicaSet;
     }
 
@@ -1498,12 +1504,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         return result;
     }
     
-    public SailingServer getSailServer(String url, String username, String password) throws MalformedURLException {
-        final SailingServerFactory fac = sailingServerFactoryTracker.getService();
-        return fac.getSailingServer(new URL("https://" + url), username, password);
-    }
-
-    
+    @Override
     public String getShardingKey(SailingServer server, String leaderboardName,String password) throws Exception{
         return server.getLeaderboardShardingKey(leaderboardName);
     }
@@ -1519,10 +1520,93 @@ public class LandscapeServiceImpl implements LandscapeService {
             throw e;
         }
     }
+    
+    @Override
+    public SailingServer getSailingServer(String hostname, String username, String password, Optional<Integer> port)
+            throws MalformedURLException {
+        final SailingServerFactory fac = sailingServerFactoryTracker.getService();
+        return fac.getSailingServer(RemoteServerUtil.getBaseServerUrl(hostname,
+                port.isPresent() ? port.get() : /* defaults to HTTPS */ 443), username, password);
+    }
 
     @Override
-    public SailingServer getSailServer(String url, String bearertoken) throws MalformedURLException {
+    public SailingServer getSailingServer(String hostname, String bearertoken, Optional<Integer> port)
+            throws MalformedURLException {
         final SailingServerFactory fac = sailingServerFactoryTracker.getService();
-        return fac.getSailingServer(new URL("https://" + url), bearertoken);
-    };
+        return fac.getSailingServer(RemoteServerUtil.getBaseServerUrl(hostname,
+                port.isPresent() ? port.get() : /* defaults to HTTPS */ 443), bearertoken);
+    }
+
+    private <BuilderT extends ShardProcedure.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.ShardProcedure.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createShardBuilder() {
+        return CreateShard.<SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, BuilderT, String> builder();
+    }
+
+    private <BuilderT extends ShardProcedure.Builder<BuilderT, AppendShardingKeyToShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.ShardProcedure.Builder<BuilderT, AppendShardingKeyToShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> appendShardingKeyToShardBuilder() {
+        return AppendShardingKeyToShard
+                .<SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, BuilderT, String> builder();
+    }
+
+    private <BuilderT extends ShardProcedure.Builder<BuilderT, RemoveShardingKeyFromShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.ShardProcedure.Builder<BuilderT, RemoveShardingKeyFromShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> removeShardingKeyFromShardBuilder() {
+        return RemoveShardingKeyFromShard
+                .<SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, BuilderT, String> builder();
+    }
+
+    @Override
+    public void removeShardingKeysToShard(Iterable<String> selectedleaderboards,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken)
+            throws Exception {
+        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearertoken,
+                /* HTTPS port */ Optional.of(443));
+
+        Set<String> shardingKeys = new HashSet<>();
+        for (String leaderboardName : selectedleaderboards) {
+            shardingKeys.add(server.getLeaderboardShardingKey(leaderboardName));
+        }
+        removeShardingKeyFromShardBuilder().setLandscape(getLandscape()).setShardingkeys(shardingKeys)
+                .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
+                .setPassphrase(passphraseForPrivateKeyDecription).build().run();
+    }
+
+    public void appendShardingKeysToShard(Iterable<String> selectedLeaderboards,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken)
+            throws Exception {
+        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearertoken,
+                /* HTTPS port */ Optional.of(443));
+        final Set<String> shardingkeys = new HashSet<String>();
+        for (String s : selectedLeaderboards) {
+            shardingkeys.add(server.getLeaderboardShardingKey(s));
+        }
+        appendShardingKeyToShardBuilder().setLandscape(getLandscape()).setShardingkeys(shardingkeys)
+                .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
+                .setPassphrase(passphraseForPrivateKeyDecription).build().run();
+    }
+
+    public void removeShard(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            String shardTargetGroupArn) throws Exception {
+        for (Entry<AwsShard<String>, Iterable<String>> entry : applicationReplicaSet.getShards().entrySet()) {
+            if (shardTargetGroupArn.equals(entry.getKey().getTargetGroup().getTargetGroupArn())) {
+                applicationReplicaSet.removeShard(entry.getKey(), getLandscape());
+                return;
+            }
+        }
+        throw new Exception("Shard was not found");
+    }
+
+    public void addShard(Iterable<String> selectedLeaderboardNames,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName)
+            throws Exception {
+        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearertoken,
+                Optional.of(443));
+        final Set<String> shardingkeys = new HashSet<String>();
+        for (final String s : selectedLeaderboardNames) {
+            shardingkeys.add(server.getLeaderboardShardingKey(s));
+        }
+        createShardBuilder().setLandscape(getLandscape()).setShardingkeys(shardingkeys)
+                .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
+                .setPassphrase(passphraseForPrivateKeyDecription).build().run();
+    }
 }

@@ -389,9 +389,25 @@ public interface LandscapeService {
     String getShardingKey(SailingServer server, String leaderboardName,String password) throws Exception;
 
     ArrayList<String> getLeaderboardNames(SailingServer server) throws Exception;
+
+    SailingServer getSailingServer(String hostname, String username, String password, Optional<Integer> port)
+            throws MalformedURLException;
+
+    SailingServer getSailingServer(String hostname, String bearertoken, Optional<Integer> port)
+            throws MalformedURLException;
     
-    SailingServer getSailServer(String url, String username, String password) throws MalformedURLException;
+    void removeShardingKeysToShard(Iterable<String> selectedleaderboards, 
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            byte[] passphraseForPrivateKeyDecription,AwsRegion region, String shardName, String bearertoken) throws Exception;
     
-    SailingServer getSailServer(String url, String bearertoken) throws MalformedURLException;
+    public void appendShardingKeysToShard(Iterable<String> selectedLeaderboards,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken) throws Exception;
     
+    void removeShard(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, String shardTargetGroupArn) throws Exception;
+    
+    void addShard(Iterable<String> selectedLeaderboardNames, 
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, 
+            AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName) throws Exception;
+
 }
