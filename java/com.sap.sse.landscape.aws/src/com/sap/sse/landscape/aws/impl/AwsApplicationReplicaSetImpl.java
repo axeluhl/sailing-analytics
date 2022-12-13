@@ -332,7 +332,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
 
                             if (condition.pathPatternConfig() != null) {
                                 for (String s : condition.pathPatternConfig().values()) {
-                                    keys.add((ShardingKey)s.toString());
+                                    keys.add((ShardingKey) s.toString());
                                 }
                             }
                         }
