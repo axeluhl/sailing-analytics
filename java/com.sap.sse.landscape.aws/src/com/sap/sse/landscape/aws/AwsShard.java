@@ -11,12 +11,13 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
  * <p>
  * 
  * Technically, the shard's name is represented as a tag value on the {@link #getTargetGroup() target group}, hence the
- * restrictions for AWS tag values apply.
+ * restrictions for AWS tag values apply. The tag's key is {@link ShardName.TAG_KEY}. 
+ *
  * <p>
  *
  * Routing to shards happens at the {@link #getTargetGroup() target group's} {@link TargetGroup#getLoadBalancer() load
  * balancer}, or more precisely, through the load balancer's HTTPS listener's rule set. Each shard requires a number of rule pairs
- * of which one rule forwardsrequests based on an HTTP header field requiring the request to be handled by a replica,
+ * of which one rule forwards requests based on an HTTP header field requiring the request to be handled by a replica,
  * and the other one based on the request using the GET request method. Another rule pair is required per three sharding keys
  * to be handled, due to the restriction on the number of conditions a rule may have.
  * 
@@ -34,5 +35,4 @@ public interface AwsShard<ShardingKey> extends Shard<ShardingKey> {
     String getShardname();
     
     Iterable<Rule> getRules();
-    
 }

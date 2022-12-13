@@ -130,9 +130,19 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     boolean isLocalReplicaSet();
     
-    public ShardNameDTO getNextShardName(String name) throws Exception;
+    /**
+     * Returns a {@code ShardName} that is created from an (user-) entered shard name ({@code shardName}.
+     * {@code ShardName} contains the target group name and the replica set name.
+     * @param shardName
+     *          (User-) entered name for the shard.
+     * @return
+     *          ShardName created from {@code shardName}.
+     * @throws Exception
+     *          throws when {@code shardName} is not valid or is not parse-able to a shardName.
+     */
+    ShardName getNewShardName(String shardName) throws Exception;
     
-    public Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards();
+    Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards() throws Exception;
     
-    public void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception;
+    void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception;
 }

@@ -3,7 +3,7 @@ package com.sap.sse.landscape.aws.impl;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsShard;
-import com.sap.sse.landscape.aws.ShardNameDTO;
+import com.sap.sse.landscape.aws.ShardName;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -16,12 +16,12 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
     final private String shardname;
     final private String name;
     private AwsAutoScalingGroup autoscalinggroup;
-    private ShardNameDTO shardNameDTO;
+    private ShardName shardNameDTO;
     private ApplicationLoadBalancer<ShardingKey> loadbalancer;
     private Iterable<Rule> rules;
 
     public AwsShardImpl(String shardname, Iterable<ShardingKey> keys, TargetGroup<ShardingKey> targetgroup,
-            ShardNameDTO shardnameDTO, ApplicationLoadBalancer<ShardingKey> loadbalancer, Iterable<Rule> rules) {
+            ShardName shardnameDTO, ApplicationLoadBalancer<ShardingKey> loadbalancer, Iterable<Rule> rules) {
         this.keys = keys;
         this.targetgroup = targetgroup;
         this.shardname = shardname;
@@ -62,11 +62,11 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
         return autoscalinggroup;
     }
 
-    public ShardNameDTO getShardNameDTO() {
+    public ShardName getShardNameDTO() {
         return shardNameDTO;
     }
 
-    public void setShardNameDTO(ShardNameDTO shardNameDTO) {
+    public void setShardNameDTO(ShardName shardNameDTO) {
         this.shardNameDTO = shardNameDTO;
     }
 

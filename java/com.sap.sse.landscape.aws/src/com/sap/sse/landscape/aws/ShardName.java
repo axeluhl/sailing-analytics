@@ -1,6 +1,6 @@
 package com.sap.sse.landscape.aws;
 
-public class ShardNameDTO {
+public class ShardName {
     final public static String TAG_KEY = "shardname";
     final static int POST_LENGTH = 2;
     final static int PRE_LENGTH = 2;
@@ -9,13 +9,13 @@ public class ShardNameDTO {
     final String replicaName;
     final String targetGroupname;
 
-    private ShardNameDTO(String shardName, String replicaName, String targetGroupname) {
+    private ShardName(String shardName, String replicaName, String targetGroupname) {
         this.shardName = shardName;
         this.replicaName = replicaName;
         this.targetGroupname = targetGroupname;
     }
 
-    public static ShardNameDTO parse(String shardTargetName, String tagString) throws Exception {
+    public static ShardName parse(String shardTargetName, String tagString) throws Exception {
         // Possible options: S-{Replicaname}-{Shardname} or S-{Replicaname}-{Shardname[0:2]}--{Shardname[-2:0]}
         int idxDoubleHyphen = shardTargetName.indexOf("--");
         final String shardname, replicaname;
@@ -33,31 +33,43 @@ public class ShardNameDTO {
             replicaname = shardTargetName.substring(idxSingleHyphen + 1, idxDoubleHyphen);
             shardname = tagString;
         }
-        return new ShardNameDTO(shardname, replicaname, shardTargetName);
+        return new ShardName(shardname, replicaname, shardTargetName);
     }
-
-    public static ShardNameDTO create(String replicaSetName, String shardname) throws Exception {
-        if (!shardname.matches("[a-zA-Z0-9]*")) {
+    
+/**
+ * Creates a ShardName from {@code replicaSetName} and {@code shardname}. {@code shardname} should only contain a-z, A-Z and numbers.
+ * This function builds from those im puts a valid shard-target group name. This can have two patterns: Firstly, S-{replica set name}-{shardname}
+ * or S-{relica set name}-{shard name [0:2]}--{shard name [-2:0]}
+ * @param replicaSetName
+        Replica set name of the shard
+ * @param shardname
+ *      (User-) entered shard name
+ * @return
+ * @throws Exception
+ *      Gets thrown if {@code shardName} is not valid or the combination is invalid. This happens if both pattern cannot be applied.
+ */
+    public static ShardName create(String replicaSetName, String shardName) throws Exception {
+        if (!shardName.matches("[a-zA-Z0-9]*")) {
             throw new Exception("Only a-z, A-Z and 0-9 characters are allowed in shardname!");
         }
-        if(shardname.endsWith(TargetGroup.MASTER_SUFFIX) || shardname.endsWith(TargetGroup.TEMP_SUFFIX)){
+        if(shardName.endsWith(TargetGroup.MASTER_SUFFIX) || shardName.endsWith(TargetGroup.TEMP_SUFFIX)){
             throw new Exception(TargetGroup.MASTER_SUFFIX + " and " + TargetGroup.TEMP_SUFFIX + " are not allowed at the end of Shardnames");
         }
         final String name;
         if (TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX.length() + 1 + replicaSetName.length() + 1
-                + shardname.length() < TargetGroup.MAX_TARGETGROUP_NAME_LENGTH) {
-            name = TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX + replicaSetName + "-" + shardname;
+                + shardName.length() < TargetGroup.MAX_TARGETGROUP_NAME_LENGTH) {
+            name = TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX + replicaSetName + "-" + shardName;
         } else {
             if (TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX.length() + 1 + replicaSetName.length() + 1
-                    + shardname.length() < TargetGroup.MAX_TARGETGROUP_NAME_LENGTH
+                    + shardName.length() < TargetGroup.MAX_TARGETGROUP_NAME_LENGTH
                             - (POST_LENGTH + PRE_LENGTH + SEPERATOR.length() + 1)) {
                 throw new Exception(
                         "TargetGoup's name, in combination with this shardname, shouldn't be longer than 25 chars");
             }
-            name = TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX + replicaSetName + "-" + shardname.substring(0, 2)
-                    + "--" + shardname.substring(shardname.length() - 3);
+            name = TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX + replicaSetName + "-" + shardName.substring(0, 2)
+                    + "--" + shardName.substring(shardName.length() - 3);
         }
-        return new ShardNameDTO(shardname, replicaSetName, name);
+        return new ShardName(shardName, replicaSetName, name);
     }
 
     public String getName() {

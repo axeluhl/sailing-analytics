@@ -4,41 +4,42 @@ import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class AwsShardDTO implements  IsSerializable {
+public class AwsShardDTO implements IsSerializable {
     ArrayList<String> keys;
-    String targetgroupArn;
-    String targetgroupName;
-    String autosclaingGroupArn;
-    String autoscalingGroupName;
-    String autobalancerArn;
+    String targetGroupArn;
+    String targetGroupName;
+    String autoScalingGroupArn;
+    String autoScalingGroupName;
+    String autoBalancerArn;
     String name;
-    String replicaname;
-    public AwsShardDTO(){};
-    
-    public AwsShardDTO(Iterable<String> keys, String targetgroupArn,
-            String targetgroupName, String autoscalinggroupArn, String autobalancerArn,String autoScalingGroupName, String name, String replicaname){
+    String replicaName;
+
+    public AwsShardDTO() {
+    };
+
+    public AwsShardDTO(Iterable<String> keys, String targetGroupArn, String targetGroupName, String autoScalinggroupArn,
+            String autoBalancerArn, String autoScalingGroupName, String name, String replicaName) {
         this.keys = new ArrayList<String>();
-        for(String s : keys) {
+        for (String s : keys) {
             this.keys.add(s);
         }
-        this.targetgroupArn  =targetgroupArn;
-        this.targetgroupName = targetgroupName;
-        this.autobalancerArn = autobalancerArn;
-        this.autoscalingGroupName = autoScalingGroupName;
-        this.autosclaingGroupArn = autoscalinggroupArn;
+        this.targetGroupArn = targetGroupArn;
+        this.targetGroupName = targetGroupName;
+        this.autoBalancerArn = autoBalancerArn;
+        this.autoScalingGroupName = autoScalingGroupName;
+        this.autoScalingGroupArn = autoScalinggroupArn;
         this.name = name;
-        this.replicaname  =replicaname;
+        this.replicaName = replicaName;
     }
 
     public String getReplicaname() {
-        return replicaname;
+        return replicaName;
     }
 
     public void setReplicaname(String replicaname) {
-        this.replicaname = replicaname;
+        this.replicaName = replicaname;
     }
-    
-    
+
     public ArrayList<String> getKeys() {
         return keys;
     }
@@ -48,55 +49,54 @@ public class AwsShardDTO implements  IsSerializable {
     }
 
     public String getTargetgroupArn() {
-        return targetgroupArn;
+        return targetGroupArn;
     }
 
     public void setTargetgroupArn(String targetgroupArn) {
-        this.targetgroupArn = targetgroupArn;
+        this.targetGroupArn = targetgroupArn;
     }
 
     public String getTargetgroupName() {
-        return targetgroupName;
+        return targetGroupName;
     }
 
     public void setTargetgroupName(String targetgroupName) {
-        this.targetgroupName = targetgroupName;
+        this.targetGroupName = targetgroupName;
     }
 
     public String getAutosclaingGroupArn() {
-        return autosclaingGroupArn;
+        return autoScalingGroupArn;
     }
 
     public void setAutosclaingGroupArn(String autosclaingGroupArn) {
-        this.autosclaingGroupArn = autosclaingGroupArn;
+        this.autoScalingGroupArn = autosclaingGroupArn;
     }
 
     public String getAutobalancerArn() {
-        return autobalancerArn;
+        return autoBalancerArn;
     }
 
     public void setAutobalancerArn(String autobalancerArn) {
-        this.autobalancerArn = autobalancerArn;
+        this.autoBalancerArn = autobalancerArn;
     }
 
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getAutoscalingGroupName() {
-        return this.autoscalingGroupName;
+        return this.autoScalingGroupName;
     }
 
     public String getName() {
         return name;
     }
-    
+
     public String getKeysString() {
-        String s  ="";
-        for(String i : getKeys()) {
-            s = s + i + ", " ;
+        String s = "";
+        for (String i : getKeys()) {
+            s = s + i + ", ";
         }
         return s;
     }
-
 }
