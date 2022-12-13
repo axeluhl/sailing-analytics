@@ -35,6 +35,8 @@ public interface Series extends SeriesBase {
      * something that has a single start time and start line; so if each fleet in a series gets their own start for
      * something called "R2", those are as many "races" as we have fleets; therefore, we use "race column" instead to
      * describe all "races" named, e.g., "R3" in a series.
+     * 
+     * @return a non-live snapshot copy of the race columns at the time point of the call
      */
     Iterable<? extends RaceColumnInSeries> getRaceColumns();
     
@@ -117,7 +119,7 @@ public interface Series extends SeriesBase {
      */
     void setStartsWithZeroScore(boolean startsWithZeroScore);
 
-    boolean isFirstColumnIsNonDiscardableCarryForward();
+    boolean isFirstColumnNonDiscardableCarryForward();
 
     void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward);
 
