@@ -20,7 +20,7 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.10.1",
  com.sap.sailing.server.interface,
  com.sap.sse.security,
  com.sap.sailing.datamining
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.polars.datamining.data,
  com.sap.sailing.polars.datamining.data.impl

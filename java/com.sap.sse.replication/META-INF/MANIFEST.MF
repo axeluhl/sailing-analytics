@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sse.replication
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sse.replication.impl.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sse.replication,
  com.sap.sse.replication.impl

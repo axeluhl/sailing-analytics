@@ -4,7 +4,7 @@ Bundle-Name: Elemental2
 Bundle-SymbolicName: elemental2
 Bundle-Version: 1.1.0.qualifier
 Automatic-Module-Name: elemental2
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/elemental2-core-1.1.0.jar,
  lib/elemental2-dom-1.1.0.jar,
  lib/elemental2-promise-1.1.0.jar,

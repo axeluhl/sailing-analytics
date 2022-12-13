@@ -6,7 +6,7 @@ Bundle-Version: 1.9.37
 Bundle-ClassPath: .,
  lib/isoparser-1.9.37.jar
 Bundle-Vendor: Sebastian Annies
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.media.mp4,
  org.mp4parser,

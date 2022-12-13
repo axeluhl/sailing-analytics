@@ -4,7 +4,7 @@ Bundle-Name: Udpconnector
 Bundle-SymbolicName: com.sap.sailing.udpconnector
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.udpconnector
 Automatic-Module-Name: com.sap.sailing.udpconnector

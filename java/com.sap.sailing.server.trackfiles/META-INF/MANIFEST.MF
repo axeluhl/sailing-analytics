@@ -4,7 +4,7 @@ Bundle-Name: Trackfiles
 Bundle-SymbolicName: com.sap.sailing.server.trackfiles
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.server.trackfiles,
  com.sap.sailing.server.trackfiles.common,
@@ -15,7 +15,7 @@ Require-Bundle:
  routeconverter,
  com.sap.sse.common,
  com.sap.sse,
- com.sun.xml.bind.jaxb-impl;bundle-version="2.3.1"
+ com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"
 Import-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.domain.abstractlog.regatta.events.impl,

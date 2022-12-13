@@ -4,7 +4,7 @@ Bundle-Name: Mongodb
 Bundle-SymbolicName: com.sap.sse.mongodb
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.common,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",

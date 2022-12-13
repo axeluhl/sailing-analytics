@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.server.gateway.interfaces
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Automatic-Module-Name: com.sap.sailing.server.gateway.interface
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sailing.server.gateway.interfaces
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sse.common,

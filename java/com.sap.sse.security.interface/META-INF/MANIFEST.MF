@@ -4,7 +4,7 @@ Bundle-Name: Persistence
 Bundle-SymbolicName: com.sap.sse.security.interface
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sse.security.interface
 Import-Package: org.apache.shiro.session;version="1.2.2",
  org.apache.shiro.session.mgt;version="1.2.2",

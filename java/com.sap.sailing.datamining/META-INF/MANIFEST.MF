@@ -4,7 +4,7 @@ Bundle-Name: Datamining
 Bundle-SymbolicName: com.sap.sailing.datamining
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.server.interfaces,
  org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sailing.datamining,

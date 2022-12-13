@@ -4,7 +4,7 @@ Bundle-Name: Swisstiming Adapter Persistence
 Bundle-SymbolicName: com.sap.sailing.domain.swisstimingadapter.persistence
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sse.mongodb,

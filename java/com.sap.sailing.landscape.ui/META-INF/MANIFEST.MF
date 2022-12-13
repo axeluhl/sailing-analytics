@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.landscape.ui
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Automatic-Module-Name: com.sap.sailing.landscape.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.gwt,
  com.google.gwt.servlet;bundle-version="2.10.0",
  com.google.gwt.user;bundle-version="2.10.0";resolution:=optional,

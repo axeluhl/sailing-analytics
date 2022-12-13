@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Fragment-Host: routeconverter;bundle-version="2.12.2"
 Automatic-Module-Name: com.sap.sailing.routeconverterjava11extension
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sun.istack,
  com.sun.istack.localization,
  com.sun.istack.logging,

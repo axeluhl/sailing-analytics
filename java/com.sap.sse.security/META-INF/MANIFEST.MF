@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sse.security
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sse.security.impl.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.mail;version="1.4.0",
  javax.mail.internet;version="1.4.0",
  javax.ws.rs;version="1.1.1",

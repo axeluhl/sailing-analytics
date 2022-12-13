@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.awssensorfixstore
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.awssensorfixstore.impl.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.awssensorfixstore
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.framework;version="1.8.0"

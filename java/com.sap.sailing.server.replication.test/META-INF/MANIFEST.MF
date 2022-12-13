@@ -4,7 +4,7 @@ Bundle-Name: Server Replication Test
 Bundle-SymbolicName: com.sap.sailing.server.replication.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sse.replication
 Import-Package: com.rabbitmq.client;version="2.8.4"
 Require-Bundle: com.sap.sailing.server,

@@ -6,7 +6,7 @@ Automatic-Module-Name: com.sap.sailing.domain.windfinderadapter.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Fragment-Host: com.sap.sailing.domain.windfinderadapter
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit,
  org.objenesis;bundle-version="2.1.0",
  org.hamcrest;bundle-version="2.2.0",

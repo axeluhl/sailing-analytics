@@ -50,7 +50,7 @@ Import-Package: javax.ws.rs;version="1.1.1",
  org.apache.http.client.methods;version="4.5.5",
  org.apache.http.impl.client;version="4.5.5"
 Web-ContextPath: /windestimation
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.windestimation
 Bundle-ClassPath: .

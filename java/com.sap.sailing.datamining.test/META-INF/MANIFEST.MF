@@ -4,7 +4,7 @@ Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sailing.datamining.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.datamining
 Import-Package: junit.framework;version="4.8.2",
  org.junit;version="4.8.2",

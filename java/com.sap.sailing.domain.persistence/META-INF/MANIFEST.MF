@@ -4,7 +4,7 @@ Bundle-Name: Persistence
 Bundle-SymbolicName: com.sap.sailing.domain.persistence
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.sap.sailing.domain.persistence.impl.Activator
 Require-Bundle: com.sap.sse.mongodb,
  com.sap.sailing.domain,

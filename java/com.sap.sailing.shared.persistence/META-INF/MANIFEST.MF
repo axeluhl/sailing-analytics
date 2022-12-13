@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.shared.persistence
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.shared.persistence.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.shared.persistence
 Import-Package: org.apache.shiro.session;version="1.2.2",
  org.apache.shiro.session.mgt;version="1.2.2",

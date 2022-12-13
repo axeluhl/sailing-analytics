@@ -4,7 +4,7 @@ Bundle-Name: PolarsTest
 Bundle-SymbolicName: com.sap.sailing.polars.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.polars
 Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  org.mockito.mockito-core;bundle-version="1.10.14",

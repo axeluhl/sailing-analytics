@@ -4,7 +4,7 @@ Bundle-Name: Tractracadapter
 Bundle-SymbolicName: com.sap.sailing.domain.tractracadapter
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain,
  com.tractrac.clientmodule;bundle-version="2.0.0",
  com.googlecode.java-diff-utils;bundle-version="1.3.0",

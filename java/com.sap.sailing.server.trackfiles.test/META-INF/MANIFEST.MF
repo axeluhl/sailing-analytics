@@ -4,7 +4,7 @@ Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sailing.server.trackfiles.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.server.trackfiles
 Require-Bundle: com.tractrac.clientmodule;bundle-version="2.0.0",
  com.sap.sailing.domain.tractracadapter,

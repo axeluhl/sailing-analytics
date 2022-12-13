@@ -4,7 +4,7 @@ Bundle-Name: Manage2sail
 Bundle-SymbolicName: com.sap.sailing.manage2sail
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.domain.common,
