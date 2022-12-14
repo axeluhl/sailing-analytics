@@ -725,7 +725,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
-            ProcessT master, Iterable<ProcessT> replicas);
+            ProcessT master, Iterable<ProcessT> replicas) throws Exception;
 
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
 

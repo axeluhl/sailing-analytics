@@ -195,7 +195,14 @@ public class LandscapeServiceImpl implements LandscapeService {
             return unmanagedReplicas.isEmpty() ? null : unmanagedReplicas.get(0);
         });
         // if an unmanaged replica process was launched, return a replica set that contains it; otherwise use the one we already have (without any replica)
-        return unmanagedReplica.map(ur->getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur))).orElse(result);
+        return unmanagedReplica.map(ur->{
+            try {
+                return getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur));
+            } catch (Exception e) {
+                // If getting application replica set failed.
+                return null;
+            }
+        }).orElse(result);
     }
     
     @Override
@@ -1231,7 +1238,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updateImageForReplicaSets(AwsRegion region,
             Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets,
-            Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException {
+            Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException, Exception {
         final Set<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> result = new HashSet<>();
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet : replicaSets) {
             if (replicaSet.getAutoScalingGroup() != null) {
