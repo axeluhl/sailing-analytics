@@ -1,5 +1,15 @@
 package com.sap.sse.landscape.aws;
 
+/**
+ * ShardName is a wrapper class for a {@code AwsShard}'s target group name, replica set name and the shard's name.
+ * {@code parse} and create {@code create} are used for decoding a shard's name by it's target group, replica set and
+ * the target groups tag with the key {@code TAG_KEY} and creating a {@code ShardName} by a replica set and the (user-)
+ * entered shardname. Those created values should be used as names in the AWS landscape.
+ * 
+ * @author I569653
+ *
+ */
+
 public class ShardName {
     final public static String TAG_KEY = "shardname";
     final static int POST_LENGTH = 2;
