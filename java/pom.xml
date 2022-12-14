@@ -279,8 +279,8 @@
     </build>
   </profile>
   <profile>
-      <!-- This profile activates the addition of those JavaEE bundles to the target platform
-           for Tycho that have been removed from JavaSE-11 if not building for Android -->
+    <!-- This profile activates the addition of those JavaEE bundles to the target platform
+         for Tycho that have been removed from JavaSE-11 if not building for Android -->
     <id>with-java11-non-android-relevant</id>
     <activation>
       <jdk>[9.0,21.0)</jdk>
