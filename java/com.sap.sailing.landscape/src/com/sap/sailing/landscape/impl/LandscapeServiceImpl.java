@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -516,6 +517,10 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
+        // Remove all shards
+        for (AwsShard<String> shard : applicationReplicaSet.getShards().keySet()) {
+            applicationReplicaSet.removeShard(shard, getLandscape());
+        }
         terminateReplicasNotManagedByAutoScalingGroup(applicationReplicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
         if (autoScalingGroup != null) {
             // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
@@ -858,10 +863,17 @@ public class LandscapeServiceImpl implements LandscapeService {
         final String effectiveReplicaReplicationBearerToken = getEffectiveBearerToken(replicaReplicationBearerToken);
         final int oldAutoScalingGroupMinSize;
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
+        final Collection<AwsAutoScalingGroup> affectedAutoscaligGroups = new ArrayList<>();
         final int autoScalingReplicaCount;
+        replicaSet.getShards().keySet().forEach(t -> affectedAutoscaligGroups.add(t.getAutoScalingGroup()));
         if (autoScalingGroup != null) {
+            affectedAutoscaligGroups.add(autoScalingGroup);
             oldAutoScalingGroupMinSize = autoScalingGroup.getAutoScalingGroup().minSize();
-            autoScalingReplicaCount = autoScalingGroup.getAutoScalingGroup().desiredCapacity();
+            int tempAutoScalingReplicaCount = 0;
+            for (AwsAutoScalingGroup asg : affectedAutoscaligGroups) {
+                tempAutoScalingReplicaCount = tempAutoScalingReplicaCount + asg.getAutoScalingGroup().desiredCapacity();
+            }
+            autoScalingReplicaCount = tempAutoScalingReplicaCount;
         } else {
             oldAutoScalingGroupMinSize = -1;
             autoScalingReplicaCount = -1;
@@ -871,7 +883,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingAnalyticsProcess<String> additionalReplicaStarted = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
                 replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         if (replicaSet.getAutoScalingGroup() != null) {
-            getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), replicaSet.getName(), release);
+            getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(),affectedAutoscaligGroups, replicaSet.getName(), release);
         }
         final SailingAnalyticsProcess<String> master = replicaSet.getMaster();
         master.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
@@ -893,14 +905,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             if (replicaSet.getAutoScalingGroup() != null) {
                 // run updating the auto-scaling group in the background; it's more time-critical now
                 // to remove the old replicas from the target group
-                ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().execute(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(()->
-                    {
-                        try {
-                            getLandscape().updateAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), oldAutoScalingGroupMinSize);
-                        } catch (InterruptedException | ExecutionException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }));
+                for (AwsAutoScalingGroup asg : affectedAutoscaligGroups) {
+                    ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor()
+                            .execute(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(() -> {
+                                getLandscape().updateAutoScalingGroupMinSize(asg, oldAutoScalingGroupMinSize);
+                            }));
+                }
             } // else, the replica was started explicitly, without an auto-scaling group; in any case, all replicas still
             // on the old release will now be stopped:
         }
