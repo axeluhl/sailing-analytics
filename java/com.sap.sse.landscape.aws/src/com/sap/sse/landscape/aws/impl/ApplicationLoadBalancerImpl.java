@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -35,6 +37,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
 
 public class ApplicationLoadBalancerImpl<ShardingKey>
 implements ApplicationLoadBalancer<ShardingKey> {
+    private static final Logger logger = Logger.getLogger(ApplicationLoadBalancerImpl.class.getName());
+    
     private static final long serialVersionUID = -5297220031399131769L;
     
     private final LoadBalancer loadBalancer;
@@ -110,15 +114,18 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio) {
         final Iterable<Rule> rules = getRules();
-        final TreeMap<Integer,Rule> rulesSorted = new TreeMap<>();
+        final TreeMap<Integer, Rule> rulesSorted = new TreeMap<>();
         final Iterator<Rule> iter = rules.iterator();
         // create Map with every priority
         while (iter.hasNext()) {
             Rule r = iter.next();
             try {
-                rulesSorted.put(Integer.valueOf(r.priority()), r);
+                if (!r.priority().equalsIgnoreCase("Default")) {
+                    rulesSorted.put(Integer.valueOf(r.priority()), r);
+                }
             } catch (Exception e) {
                 // Case where prio is not a number, e.g. 'Default' gets ignored.
+                logger.log(Level.WARNING, "Priority '" + r.priority() + "' couldn't be parsed as an Integer.");
             }
         }
         int lastPrio = targetPrio;
@@ -129,11 +136,13 @@ implements ApplicationLoadBalancer<ShardingKey> {
                 if (r.getKey() < targetPrio || skipNext) {
                     // if prio is lower than target prio
                     continue;
-                } else  {
-                    //if prio is higher than target prio and is not supposed to be skipped
+                } else {
+                    // if prio is higher than target prio and is not supposed to be skipped
                     if (lastPrio - r.getKey() > 1) {
-                        result.add(RulePriorityPair.builder().ruleArn(r.getValue().ruleArn())
-                                .priority(getNewPriority(Integer.valueOf(lastPrio) + 1)).build());
+                        // if there is a gap between current prio and the last one. -> so this one is not supposed to be
+                        // skipped
+                        // and every rule after this
+                        skipNext = true;
                         break;
                     } else {
                         lastPrio = Integer.valueOf(r.getValue().priority()) + 1;
@@ -155,11 +164,14 @@ implements ApplicationLoadBalancer<ShardingKey> {
         final Iterator<Rule> iter = rules.iterator();
         // create Map with every priority
         while (iter.hasNext()) {
-            final Rule r = iter.next();
+            Rule r = iter.next();
             try {
-                rulesSorted.put(Integer.parseInt(r.priority()), r);
+                if (!r.priority().equalsIgnoreCase("Default")) {
+                    rulesSorted.put(Integer.valueOf(r.priority()), r);
+                }
             } catch (Exception e) {
                 // Case where prio is not a number, e.g. 'Default' gets ignored.
+                logger.log(Level.WARNING, "Priority '" + r.priority() + "' couldn't be parsed as an Integer.");
             }
         }
         final Iterator<Entry<Integer, Rule>> iterSorted = rulesSorted.entrySet().iterator();
