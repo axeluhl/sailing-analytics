@@ -68,7 +68,6 @@
           <skipTests>true</skipTests>
           <skip>true</skip>
         </configuration>
-
         <executions>
           <execution>
             <phase>integration-test</phase>
@@ -81,13 +80,10 @@
               <excludes>
                 <exclude>**/core/**</exclude>
               </excludes>
-
               <argLine>${argLine} ${tycho.tests.argLine}</argLine>
               <appArgLine>-consoleLog -console -clean</appArgLine>
-
               <product>raceanalysis.product</product>
               <application>raceanalysis.application</application>
-
               <bundleStartLevel>
                  <bundle>
                    <id>com.sap.sailing.server.gateway.test.support</id>
