@@ -82,6 +82,7 @@
       <modules>
         <module>elemental2</module>
 	    <module>org.hamcrest.core</module>
+        <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.landscape.common</module>
