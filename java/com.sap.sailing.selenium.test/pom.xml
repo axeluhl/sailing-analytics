@@ -14,7 +14,7 @@
     <parameters.jetty>
       -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8085 -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory
     </parameters.jetty>
-    <!-- NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the local 
+    <!-- Note: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the local 
       settings.xml, because of the differences between the CI-Build and the local setup. -->
     <tycho.tests.argLine>
       ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx4096m
