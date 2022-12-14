@@ -76,11 +76,13 @@
           <name>!ldi.releaseBuild</name>
         </property>
       </activation>
+      <properties>
+        <with.not.android.relevant>true</with.not.android.relevant>
+      </properties>
       <modules>
         <module>elemental2</module>
         <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
-        <module>com.sap.sse.apacheservicemixfragment</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.landscape.common</module>
         <module>com.sap.sse.landscape</module>
@@ -93,7 +95,6 @@
         <module>com.sap.sailing.landscape.test</module>
         <module>com.sap.sailing.landscape.common</module>
         <module>com.sap.sailing.landscape.ui</module>
-        <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
         <module>com.sap.sse.mail</module>
         <module>com.sap.sse.mail.replication.test</module>
@@ -298,16 +299,6 @@
                 <requirement>
                   <type>eclipse-plugin</type>
                   <id>com.sap.sailing.routeconverterjava11extension</id>
-                  <versionRange>0.0.0</versionRange>
-                </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>com.sap.sse.jersey.jaxbdependencyfragment</id>
-                  <versionRange>0.0.0</versionRange>
-                </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>com.sap.sse.apacheservicemixfragment</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
               </extraRequirements>
