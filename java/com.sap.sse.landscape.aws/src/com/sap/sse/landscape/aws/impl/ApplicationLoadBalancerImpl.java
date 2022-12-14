@@ -118,7 +118,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
         final Iterator<Rule> iter = rules.iterator();
         // create Map with every priority
         while (iter.hasNext()) {
-            Rule r = iter.next();
+            final Rule r = iter.next();
             try {
                 if (!r.priority().equalsIgnoreCase("Default")) {
                     rulesSorted.put(Integer.valueOf(r.priority()), r);
@@ -164,7 +164,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
         final Iterator<Rule> iter = rules.iterator();
         // create Map with every priority
         while (iter.hasNext()) {
-            Rule r = iter.next();
+            final Rule r = iter.next();
             try {
                 if (!r.priority().equalsIgnoreCase("Default")) {
                     rulesSorted.put(Integer.valueOf(r.priority()), r);
