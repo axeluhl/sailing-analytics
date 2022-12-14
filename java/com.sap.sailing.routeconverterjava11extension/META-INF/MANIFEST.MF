@@ -18,6 +18,3 @@ Import-Package: com.sun.istack,
  javax.xml.bind.helpers,
  javax.xml.bind.util,
  javax.xml.datatype
-Require-Bundle: com.sun.istack.commons-runtime;bundle-version="3.0.7",
- com.sun.xml.bind.jaxb-impl;bundle-version="2.3.1",
- jaxb-api;bundle-version="2.3.1"
