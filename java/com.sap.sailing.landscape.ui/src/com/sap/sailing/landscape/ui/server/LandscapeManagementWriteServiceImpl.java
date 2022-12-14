@@ -874,27 +874,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaSetDTO,
-            String region) throws Exception {
-        checkLandscapeManageAwsPermission();
-        final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
-        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet = convertFromApplicationReplicaSetDTO(
-                awsRegion, replicaSetDTO);
-        final Map<AwsShardDTO, Iterable<String>> shardsDTO = new HashMap<>();
-        for (Entry<AwsShard<String>, Iterable<String>> entry : awsReplicaSet.getShards().entrySet()) {
-            shardsDTO.put(
-                    new AwsShardDTO(entry.getValue(), entry.getKey().getTargetGroup().getTargetGroupArn(),
-                            entry.getKey().getTargetGroup().getName(),
-                            entry.getKey().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
-                            entry.getKey().getAutoScalingGroup().getName(),
-                            entry.getKey().getTargetGroup().getLoadBalancerArn(),
-                            entry.getKey().getName() == null ? "" : entry.getKey().getName(), awsReplicaSet.getName()),
-                    entry.getValue());
-        }
-        return shardsDTO;
-    }
-
-    @Override
-    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaSetDTO,
             String region, byte[] passphrase) throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
@@ -902,13 +881,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet = convertFromApplicationReplicaSetDTO(
                 awsRegion, replicaSetDTO);
         for (Entry<AwsShard<String>, Iterable<String>> entry : applicationServerReplicaSet.getShards().entrySet()) {
-            shardsDTO.put(new AwsShardDTO(entry.getValue(), entry.getKey().getTargetGroup().getTargetGroupArn(),
-                    entry.getKey().getTargetGroup().getName(),
-                    entry.getKey().getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
-                    entry.getKey().getTargetGroup().getLoadBalancerArn(),
-                    entry.getKey().getAutoScalingGroup().getName(),
-                    entry.getKey().getName() == null ? "" : entry.getKey().getName(),
-                    applicationServerReplicaSet.getName()), entry.getValue());
+            shardsDTO.put(createAwsShardDTO(entry.getKey(), applicationServerReplicaSet.getName()), entry.getValue());
         }
         return shardsDTO;
     }
@@ -920,7 +893,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet = convertFromApplicationReplicaSetDTO(
                 awsRegion, replicaSetDTO);
-
         getLandscapeService().removeShard(applicationServerReplicaSet, shard.getTargetgroupArn());
 
     }
@@ -949,5 +921,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 awsRegion, replicaset);
         getLandscapeService().removeShardingKeysToShard(selectedShardingKeys, replicaSet,
                 passphraseForPrivateKeyDecryption, awsRegion, shardName, bearertoken);
+    }
+
+    public AwsShardDTO createAwsShardDTO(AwsShard<String> shard, String replicaSetName) {
+        return new AwsShardDTO(shard.getKeys(), shard.getTargetGroup().getTargetGroupArn(),
+                shard.getTargetGroup().getName(),
+                shard.getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
+                shard.getTargetGroup().getLoadBalancerArn(), shard.getAutoScalingGroup().getName(),
+                shard.getName() == null ? "" : shard.getName(), replicaSetName);
     }
 }
