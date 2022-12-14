@@ -63,13 +63,5 @@
       <artifactId>gwt-user</artifactId>
       <version>${gwt.version}</version>
     </dependency>
-    <!-- try without the gwt-dev dependency; it creates problems with Java 11 because it bundles classes from the JDK
-         such as javax.xml.parsers and org.xml.sax
-    <dependency>
-      <groupId>org.gwtproject</groupId>
-      <artifactId>gwt-dev</artifactId>
-      <version>${gwt.version}</version>
-    </dependency>
-    -->
   </dependencies>
 </project>
