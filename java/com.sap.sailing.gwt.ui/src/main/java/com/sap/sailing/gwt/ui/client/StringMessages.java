@@ -374,7 +374,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveRegatta(String name);
     String errorLoadingScoreCorrectionProviders(String message);
     String selectResultListToImportFrom();
-    String of();
     String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName, String string, String message);
     String assignRaceNumbersToRaceColumns();
     String importOfficialResults();
