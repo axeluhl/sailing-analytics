@@ -12,6 +12,7 @@ echo "Copying files from GITROOT $GITROOT into Docker workspace"
 cp "$GITROOT/java/target/env.sh" "$DOCKERDIR"
 cp "$GITROOT/java/target/start" "$DOCKERDIR"
 cp "$GITROOT/java/target/configuration/JavaSE-11.profile" "$DOCKERDIR"
+cat ${DOCKERFILE}.tpl | sed -e "s/RELEASE/${release}/g" >${DOCKERFILE}
 cd "$DOCKERDIR"
 docker build --build-arg RELEASE=${release} -t sapsailing:$release .
 echo "Cleaning up..."
