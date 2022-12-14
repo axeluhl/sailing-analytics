@@ -764,9 +764,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String hide();
     String leftWind();
     String rightWind();
-    String strategyOption1();
-    String strategyOption2();
-    String strategyOption3();
     String legLabel();
     String raceLabel();
     String competitorLabel();
