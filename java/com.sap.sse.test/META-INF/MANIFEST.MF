@@ -8,3 +8,4 @@ Fragment-Host: com.sap.sse
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="4.8.2"
 Automatic-Module-Name: com.sap.sse.test
+Import-Package: javax.xml.bind

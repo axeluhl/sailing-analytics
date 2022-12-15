@@ -12,4 +12,7 @@
   <packaging>eclipse-test-plugin</packaging>
 -->
   <packaging>eclipse-plugin</packaging>
+  <properties>
+    <tycho.plugin-test.skip>true</tycho.plugin-test.skip>
+  </properties>
 </project>

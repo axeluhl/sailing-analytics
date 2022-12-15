@@ -19,10 +19,11 @@ Require-Bundle: com.tractrac.clientmodule;bundle-version="2.0.0",
  com.sap.sse.common,
  com.sap.sse.security.common,
  com.sap.sailing.domain.shared.android
-Import-Package:  javax.xml.bind,
- com.sun.istack,
+Import-Package: com.sun.istack,
  com.sun.istack.localization,
  com.sun.istack.logging,
+ javax.activation,
+ javax.xml.bind,
  org.json.simple,
  org.json.simple.parser
 Automatic-Module-Name: com.sap.sailing.server.trackfiles.test
