@@ -199,8 +199,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             try {
                 return getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur));
             } catch (Exception e) {
-                // If getting application replica set failed.
-                return null;
+                throw new RuntimeException(e);
             }
         }).orElse(result);
     }
