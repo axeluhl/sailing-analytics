@@ -17,6 +17,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -121,7 +122,7 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
         return optionalPreferredInstanceToDeployTo.map(host->{
             logger.info("Checking preferred instance "+host+" for eligibility");
             try {
-                return landscapeService.isEligibleForDeployment(host, replicaSet.getServerName(), replicaSet.getPort(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
+                return landscapeService.isEligibleForDeployment(host, replicaSet.getServerName(), replicaSet.getPort(), Landscape.WAIT_FOR_PROCESS_TIMEOUT,
                         optionalKeyName, privateKeyEncryptionPassphrase)
                     && isAcceptableAvailabilityZone(host.getAvailabilityZone(), replicaSet) ? host : null;
             } catch (Exception e) {
@@ -200,7 +201,7 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
     
     private int getNumberOfProcesses(SailingAnalyticsHost<String> host) {
         try {
-            return Util.size(host.getApplicationProcesses(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+            return Util.size(host.getApplicationProcesses(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
         } catch (Exception e) {
             logger.log(Level.WARNING, "Exception trying to obtain number of processes on host "+host, e);
             return Integer.MAX_VALUE; // probably not a good idea to deploy to this host, so make it look full

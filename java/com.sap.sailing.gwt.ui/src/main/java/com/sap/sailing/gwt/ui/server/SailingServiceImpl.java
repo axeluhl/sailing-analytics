@@ -228,7 +228,6 @@ import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
@@ -346,6 +345,7 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -987,7 +987,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RaceColumnDTO> raceColumns = convertToRaceColumnDTOs(series.getRaceColumns());
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(), series.isFleetsCanRunInParallel(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
+                        series.isStartsWithZeroScore(), series.isFirstColumnNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
                         series.getMaximumNumberOfDiscards(), series.isOneAlwaysStaysOne());
         return result;
     }
@@ -1355,7 +1355,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     /**
      * Uses <code>wind</code> for both, the non-dampened and dampened fields of the {@link WindDTO} object returned
      */
-    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, TimePoint requestTimepoint) {
+    public WindDTO createWindDTOFromAlreadyAveraged(Wind wind, TimePoint requestTimepoint) {
         WindDTO windDTO;
         if (wind == null) {
             windDTO = null;
@@ -1786,7 +1786,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         } else {
             estimatedDuration = null;
         }
-        final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
+        final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositions = getBoatPositionsInternal(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName,
                 leaderboardGroupId);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
@@ -1854,165 +1854,37 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
-    private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
+    private Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId)
             throws NoWindException {
-        Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
-        Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
-        final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache> cachesByTimePoint = new ConcurrentHashMap<>();
+        Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> result = new HashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
-            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
                 if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
-                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                    List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
-                    result.put(competitorDTO, fixesForCompetitor);
+                    final CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
-                    TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
-                    // copy the fixes into a list while holding the monitor; then release the monitor to avoid deadlocks
-                    // during wind estimations required for tack determination
-                    List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
-                    track.lockForRead();
-                    try {
-                        Iterator<GPSFixMoving> fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
-                        while (fixIter.hasNext()) {
-                            GPSFixMoving fix = fixIter.next();
-                            if (fix.getTimePoint().before(toTimePointExcluding) ||
-                                    (extrapolate && fix.getTimePoint().equals(toTimePointExcluding))) {
-                                logger.finest(()->""+competitor.getName()+": " + fix);
-                                fixes.add(fix);
-                            } else {
-                                break;
-                            }
-                        }
-                    } finally {
-                        track.unlockAfterRead();
-                    }
-                    final Set<GPSFixMoving> extrapolatedFixes;
-                    if (fixes.isEmpty()) {
-                        // then there was no (smoothened) fix between fromTimePoint and toTimePointExcluding; estimate...
-                        TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
-                        Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
-                        SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
-                        if (estimatedPosition != null && estimatedSpeed != null) {
-                            GPSFixMoving estimatedFix = new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed);
-                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
-                                logger.finest(""+competitor.getName()+": " + estimatedFix+" (estimated)");
-                            }
-                            fixes.add(estimatedFix);
-                            extrapolatedFixes = Collections.singleton(estimatedFix);
-                        } else {
-                            extrapolatedFixes = Collections.emptySet();
-                        }
-                    } else {
-                        extrapolatedFixes = Collections.emptySet();
-                    }
-                    Iterator<GPSFixMoving> fixIter = fixes.iterator();
-                    if (fixIter.hasNext()) {
-                        GPSFixMoving fix = fixIter.next();
-                        while (fix != null && (fix.getTimePoint().before(toTimePointExcluding) ||
-                                (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            final Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
-                            final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
-                            Tack tack = wind == null? null : trackedRace.getTack(estimatedSpeed, wind, fix.getTimePoint());
-                            TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
-                                    fix.getTimePoint());
-                            LegType legType;
-                            if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getLeg() != null) {
-                                TimePoint quantifiedTimePoint = quantifyTimePointWithResolution(fix.getTimePoint(), /* resolutionInMilliseconds */60000);
-                                Pair<Leg, TimePoint> cacheKey = new Pair<Leg, TimePoint>(trackedLegOfCompetitor.getLeg(), quantifiedTimePoint);
-                                legType = legTypeCache.get(cacheKey);
-                                if (legType == null) {
-                                    try {
-                                        legType = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
-                                        legTypeCache.put(cacheKey, legType);
-                                    } catch (NoWindException nwe) {
-                                        // without wind, leave the leg type null, meaning "unknown"
-                                        legType = null;
-                                    }
-                                }
-                            } else {
-                                legType = null;
-                            }
-                            WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
-                            Double detailValue = null;
-                            if (detailType != null) {
-                                MillisecondsTimePoint time = new MillisecondsTimePoint(fix.getTimePoint().asMillis());
-                                WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = cachesByTimePoint.get(time);
-                                if (cache == null) {
-                                    cache = new LeaderboardDTOCalculationReuseCache(time);
-                                    cachesByTimePoint.put(time, cache);
-                                }
-                                try {
-                                    detailValue = getCompetitorRaceDataEntry(detailType, trackedRace, competitor,
-                                            fix.getTimePoint(), leaderboardGroupName, leaderboardGroupId, leaderboardName, cache);
-                                } catch (NoWindException nwe) {
-                                    detailValue = null;
-                                }
-                            }
-                            GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix), detailValue);
-                            fixesForCompetitor.add(fixDTO);
-                            if (fixIter.hasNext()) {
-                                fix = fixIter.next();
-                            } else {
-                                // check if fix was at date and if extrapolation is requested; 
-                                if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
-                                    Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
-                                    Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
-                                    SpeedWithBearing estimatedSpeed2 = track.getEstimatedSpeed(toTimePointExcluding);
-                                    Tack tack2 = wind2 == null ? null : trackedRace.getTack(estimatedSpeed2, wind2, toTimePointExcluding);
-                                    LegType legType2;
-                                    if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getLeg() != null) {
-                                        TimePoint quantifiedTimePoint = quantifyTimePointWithResolution(
-                                                fix.getTimePoint(), /* resolutionInMilliseconds */
-                                                60000);
-                                        Pair<Leg, TimePoint> cacheKey = new Pair<Leg, TimePoint>(
-                                                trackedLegOfCompetitor.getLeg(), quantifiedTimePoint);
-                                        legType2 = legTypeCache.get(cacheKey);
-                                        if (legType2 == null) {
-                                            try {
-                                                legType2 = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
-                                                legTypeCache.put(cacheKey, legType2);
-                                            } catch (NoWindException nwe) {
-                                                // no wind information; leave leg type null, meaning "unknown"
-                                                legType2 = null;
-                                            }
-                                        }
-                                    } else {
-                                        legType2 = null;
-                                    }
-                                    WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
-                                    GPSFixDTOWithSpeedWindTackAndLegType extrapolated = new GPSFixDTOWithSpeedWindTackAndLegType(
-                                            toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
-                                            position==null?null:position,
-                                                    estimatedSpeed2==null?null:createSpeedWithBearingDTO(estimatedSpeed2), windDTO2,
-                                                            tack2, legType2, /* extrapolated */ true);
-                                    fixesForCompetitor.add(extrapolated);
-                                }
-                                fix = null;
-                            }
-                        }
-                    }
+                    final TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
+                    final TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
+                    result.put(competitorDTO,
+                            new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(competitor, this, trackedRace, detailType,
+                                    track, fromTimePoint, toTimePointExcluding, extrapolate,
+                                    leaderboardName, leaderboardGroupName, leaderboardGroupId));
                 }
             }
         }
         return result;
     }
 
-    private TimePoint quantifyTimePointWithResolution(TimePoint timePoint, long resolutionInMilliseconds) {
-        return new MillisecondsTimePoint(timePoint.asMillis() / resolutionInMilliseconds * resolutionInMilliseconds);
-    }
-
-    private SpeedWithBearingDTO createSpeedWithBearingDTO(SpeedWithBearing speedWithBearing) {
+    public SpeedWithBearingDTO createSpeedWithBearingDTO(SpeedWithBearing speedWithBearing) {
         return new SpeedWithBearingDTO(speedWithBearing.getKnots(), speedWithBearing
                 .getBearing().getDegrees());
     }
 
-    private GPSFixDTOWithSpeedWindTackAndLegType createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
+    public GPSFixDTOWithSpeedWindTackAndLegType createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
         return new GPSFixDTOWithSpeedWindTackAndLegType(fix.getTimePoint().asDate(), fix.getPosition()==null?null:fix.getPosition(),
                 speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated, detailValue);
     }
@@ -2679,7 +2551,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      *            non-{@code null} name is provided here and if {@code leaderboardGroupId} was {@code null} then the
      *            name is used to try to resolve the leaderboard group by name.
      */
-    private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
+    public Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         Double result = null;
@@ -3217,7 +3089,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         List<Double> values = new ArrayList<Double>();
                         List<CompetitorDTO> competitorDTOs = new ArrayList<>();
                         for (Competitor competitor : e.getValue()) {
-                            values.add(new Double(rank));
+                            values.add(Double.valueOf(rank));
                             competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
                             rank++;
                         }

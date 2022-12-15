@@ -4,10 +4,12 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -134,8 +136,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                 /* executeExistingDelayedTasksAfterShutdownPolicy */ true);
         final Future<String> sourceMd5 = executor.submit(()->sourceDatabase.getMD5Hash());
         final Future<String> targetMd5 = executor.submit(()->targetDatabase.getMD5Hash());
-        executor.shutdown();
-        if (sourceMd5.get().equals(targetMd5.get())) {
+        if (sourceMd5.get(Landscape.WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS).equals(targetMd5.get(Landscape.WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS))) {
             logger.info("Databases "+sourceDatabase+" and "+targetDatabase+" have equal MD5 hash "+sourceMd5.get()+".");
             if (dropSourceAfterSuccessfulCopy) {
                 logger.info("Removing "+sourceDatabase+" and "+Util.joinStrings(", ", additionalDatabasesToDelete));
@@ -148,5 +149,6 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             throw new IllegalStateException("Import failed; hashes are different. "+sourceDatabase+" has "+sourceMd5.get()+
                     ", "+targetDatabase+" has "+targetMd5.get());
         }
+        executor.shutdown();
     }
 }

@@ -1,0 +1,39 @@
+#!/bin/bash
+SAILING_GIT_ROOT="${1}"
+if [ -n ${2} ]; then
+  OUTPUT_FOLDER_FOR_GWT_ZIP="${2}"
+fi
+GWT_VERSION=2.11.0
+GWT="`mktemp -t -d gwt.XXXXX`"
+GWT_ROOT="${GWT}/trunk"
+cd "${GWT}"
+echo "GWT directory: ${GWT}"
+# Use the following two lines for the new gwt-2.10-api-checker stuff
+git clone https://github.com/axeluhl/gwt.git -b issue-7987-compatibility trunk
+git clone https://github.com/Vertispan/tools.git -b gwt-2.10-api-checker
+# Or alternatively:
+#git clone https://github.com/axeluhl/gwt.git -b issue-7987-compatibility trunk
+#git clone https://github.com/gwtproject/tools.git
+git clone https://github.com/axeluhl/gwt-maven-plugin.git -b ${GWT_VERSION}
+cd ${GWT_ROOT}
+ant clean dist-dev -Dgwt.version=${GWT_VERSION}
+cp build/dist/gwt-${GWT_VERSION}.zip ${GWT}
+if [ -n ${OUTPUT_FOLDER_FOR_GWT_ZIP} ]; then
+  cp build/dist/gwt-${GWT_VERSION}.zip ${OUTPUT_FOLDER_FOR_GWT_ZIP}
+fi
+cd ${GWT}
+rm -rf gwt-${GWT_VERSION}
+unzip gwt-${GWT_VERSION}.zip
+cd gwt-${GWT_VERSION}
+cp gwt-dev.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.dev/lib/gwt-dev.jar
+cp gwt-user.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.user/lib/gwt-user.jar
+cp gwt-servlet.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet.jar
+cp gwt-servlet-deps.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet-deps.jar
+for i in dev user servlet; do
+  mvn --batch-mode install:install-file -Dfile=gwt-${i}.jar -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-$i-${GWT_VERSION}.pom"
+done
+mvn --batch-mode install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom"
+mvn --batch-mode install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom"
+cd ${GWT_ROOT}/../gwt-maven-plugin
+mvn --batch-mode install
+rm -rf "${GWT}"

@@ -13,7 +13,8 @@ Require-Bundle: com.sap.sailing.resultimport,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.xrr.resultimport,
  com.sap.sailing.xrr.schema
-Import-Package: org.apache.commons.io;version="2.2.0",
+Import-Package: javax.xml.bind,
+ org.apache.commons.io;version="2.2.0",
  org.osgi.framework;version="1.10.0",
  org.osgi.util.tracker
 Bundle-ActivationPolicy: lazy

@@ -48,6 +48,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions, String keyName) throws Exception;
 
+    Boolean verifyPassphrase(String regionId, SSHKeyPairDTO key, String privateKeyEncryptionPassphrase);
+    
     /**
      * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
      * credentials and stores them in the user's preference store from where they can be obtained again using

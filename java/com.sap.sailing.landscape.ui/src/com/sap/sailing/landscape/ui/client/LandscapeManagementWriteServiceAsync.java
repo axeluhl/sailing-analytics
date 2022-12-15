@@ -44,6 +44,12 @@ public interface LandscapeManagementWriteServiceAsync {
      * {@link CREATE_OBJECT} permission on the server on which this is called.
      */
     void generateSshKeyPair(String regionId, String keyName, String privateKeyEncryptionPassphrase, AsyncCallback<SSHKeyPairDTO> callback);
+    
+    /**
+     * Verifies a passphrase for an SSH private key. Returns {@code true} if the passphrase can decipher the private key
+     * and {@code false} if this does not work or the key is invalid, or the key is {@code null}.
+     */
+    void verifyPassphrase(String regionId, SSHKeyPairDTO key, String privateKeyEncryptionPassphrase, AsyncCallback<Boolean> callback);
 
     /**
      * The calling subject must have {@code CREATE} permission for the key requested as well as the

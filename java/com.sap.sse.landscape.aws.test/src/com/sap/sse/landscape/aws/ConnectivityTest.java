@@ -30,7 +30,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
-import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
@@ -42,6 +41,7 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsProcessFactory;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -124,13 +124,13 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
                 new SailingAnalyticsHostSupplier<String>());
         for (final SailingAnalyticsHost<String> host : hosts) {
             final Iterable<SailingAnalyticsProcess<String>> processes = host.getApplicationProcesses(
-                    LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.of(AXELS_KEY_NAME), AXELS_KEY_PASS.getBytes());
+                    Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.of(AXELS_KEY_NAME), AXELS_KEY_PASS.getBytes());
             for (final SailingAnalyticsProcess<String> process : processes) {
-                SailingAnalyticsProcess<String> master = process.getMaster(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
+                SailingAnalyticsProcess<String> master = process.getMaster(Landscape.WAIT_FOR_PROCESS_TIMEOUT,
                         new SailingAnalyticsHostSupplier<String>(),
                         new SailingAnalyticsProcessFactory(() -> landscape));
                 assertNotNull(master);
-                assertNotNull(master.getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT));
+                assertNotNull(master.getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT));
                 assertNotEquals(master, process);
             }
         }

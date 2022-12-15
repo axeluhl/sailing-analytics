@@ -1687,7 +1687,7 @@ Replicator {
                 } else if (o2 == null) {
                     result = -1;
                 } else {
-                    result = new Long(Math.abs(o1.getTimePoint().until(timePoint).asMillis())).compareTo(
+                    result = Long.valueOf(Math.abs(o1.getTimePoint().until(timePoint).asMillis())).compareTo(
                             Math.abs(o2.getTimePoint().until(timePoint).asMillis()));
                 }
                 return result;
@@ -2154,7 +2154,7 @@ Replicator {
             result.put(
                     s.getName(),
                     new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isFleetsCanRunInParallel(), s.isStartsWithZeroScore(), s
-                            .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
+                            .isFirstColumnNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
                             : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s
                             .hasSplitFleetContiguousScoring(), s.getMaximumNumberOfDiscards(), s.isOneAlwaysStaysOne()));
         }
@@ -5165,7 +5165,7 @@ Replicator {
         }
         final User user = getSecurityService().getCurrentUser();
         logger.info("Importing master data from "+urlAsString+" for leaderboard groups "+Arrays.toString(leaderboardGroupIds)+
-                " for user "+user.getName());
+                " for user "+user.getName()+" with import operation ID "+importOperationId);
         final String token = getSecurityService().getOrCreateTargetServerBearerToken(urlAsString, targetServerUsername, targetServerPassword, targetServerBearerToken);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();

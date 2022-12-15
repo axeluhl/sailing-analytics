@@ -29,6 +29,7 @@ import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.LandscapeService;
@@ -65,6 +66,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -230,8 +232,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     private MongoProcessDTO convertToMongoProcessDTO(MongoProcess mongoProcess, String replicaSetName) throws MalformedURLException, IOException, URISyntaxException {
-        return new MongoProcessDTO(convertToAwsInstanceDTO(mongoProcess.getHost()), mongoProcess.getPort(), mongoProcess.getHostname(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT),
-                replicaSetName, mongoProcess.getURI(/* no specific DB */ Optional.empty(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT).toString());
+        return new MongoProcessDTO(convertToAwsInstanceDTO(mongoProcess.getHost()), mongoProcess.getPort(), mongoProcess.getHostname(Landscape.WAIT_FOR_PROCESS_TIMEOUT),
+                replicaSetName, mongoProcess.getURI(/* no specific DB */ Optional.empty(), Landscape.WAIT_FOR_PROCESS_TIMEOUT).toString());
     }
 
     private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
@@ -251,13 +253,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final ScheduledExecutorService backgroundThreadPool = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Constructing SailingApplicationReplicaSetDTOs "+UUID.randomUUID());
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
-                hostSupplier, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
+                hostSupplier, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
             resultFutures.put(backgroundThreadPool.submit(()->
                 convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)), applicationServerReplicaSet);
         }
         Util.addAll(Util.filter(Util.map(resultFutures.keySet(), future->{
             try {
-                return future.get(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS);
+                return future.get(Landscape.WAIT_FOR_PROCESS_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 logger.log(Level.WARNING, "Problem waiting for a replica set "+resultFutures.get(future)+"; ignoring that replica set", e);
                 return null;
@@ -279,7 +281,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         throw new RuntimeException(e);
                     }
                 }),
-                applicationServerReplicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
+                applicationServerReplicaSet.getVersion(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
                 applicationServerReplicaSet.getHostname(), getLandscapeService().getDefaultRedirectPath(applicationServerReplicaSet.getDefaultRedirectRule()),
                 applicationServerReplicaSet.getAutoScalingGroup() == null ? null : applicationServerReplicaSet.getAutoScalingGroup().getLaunchConfiguration().imageId());
     }
@@ -288,17 +290,35 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return new SailingAnalyticsProcessDTO(convertToAwsInstanceDTO(sailingAnalyticsProcess.getHost()),
                 sailingAnalyticsProcess.getPort(), sailingAnalyticsProcess.getHostname(),
-                sailingAnalyticsProcess.getRelease(SailingReleaseRepository.INSTANCE, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
-                sailingAnalyticsProcess.getTelnetPortToOSGiConsole(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
-                sailingAnalyticsProcess.getServerName(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
-                sailingAnalyticsProcess.getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT),
-                sailingAnalyticsProcess.getExpeditionUdpPort(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
-                sailingAnalyticsProcess.getStartTimePoint(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT));
+                sailingAnalyticsProcess.getRelease(SailingReleaseRepository.INSTANCE, Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
+                sailingAnalyticsProcess.getTelnetPortToOSGiConsole(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getServerName(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT),
+                sailingAnalyticsProcess.getExpeditionUdpPort(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getStartTimePoint(Landscape.WAIT_FOR_PROCESS_TIMEOUT));
     }
 
     private AwsLandscape<String> getLandscape() {
         checkLandscapeManageAwsPermission();
         return getLandscapeService().getLandscape();
+    }
+    
+    @Override
+    public Boolean verifyPassphrase(String regionId, SSHKeyPairDTO key, String privateKeyEncryptionPassphrase) {
+        final JSch jsch = new JSch();
+        final boolean res;
+        if (key == null) {
+            res = false;
+        } else {
+            final SSHKeyPair keypair = getLandscape().getSSHKeyPair(new AwsRegion(regionId, getLandscape()),
+                    key.getName());
+            if (keypair == null) {
+                res = false;
+            } else {
+                res = keypair.checkPassphrase(jsch, privateKeyEncryptionPassphrase.getBytes());
+            }
+        }
+        return res;
     }
 
     @Override
@@ -632,7 +652,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final SailingAnalyticsProcess<String> master = getSailingAnalyticsProcessFromDTO(applicationReplicaSetDTO.getMaster());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 getLandscape().getApplicationReplicaSet(region, applicationReplicaSetDTO.getReplicaSetName(),
-                    master, master.getReplicas(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, new SailingAnalyticsHostSupplier<String>(),
+                    master, master.getReplicas(Landscape.WAIT_FOR_PROCESS_TIMEOUT, new SailingAnalyticsHostSupplier<String>(),
                             new SailingAnalyticsProcessFactory(this::getLandscape)));
         return applicationReplicaSet;
     }
@@ -724,7 +744,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     releaseOrNullForLatestMaster, optionalKeyName, privateKeyEncryptionPassphrase,
                     replicaReplicationBearerToken);
         final SailingAnalyticsProcess<String> oldMaster = replicaSet.getMaster();
-        final Release release = upgradedReplicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+        final Release release = upgradedReplicaSet.getVersion(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),
                 convertToSailingAnalyticsProcessDTO(oldMaster, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
                 Util.map(upgradedReplicaSet.getReplicas(), r->{

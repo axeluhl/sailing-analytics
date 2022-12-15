@@ -708,5 +708,4 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             throw new UnauthorizedException("Not permitted to update the ACL for a user");
         }
     }
-
 }

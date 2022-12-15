@@ -104,6 +104,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
 * [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
 * [[Chargebee Payment Integration|wiki/howto/chargebee]]
+* [[Building and Using a Forked GWT Version|wiki/howto/development/gwt-fork]]
 
 ### Development
 

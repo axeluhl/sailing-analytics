@@ -68,5 +68,6 @@ Import-Package: com.sap.sse.security,
  org.apache.http.client.entity;version="4.5.5",
  org.apache.http.client.methods;version="4.5.5",
  org.apache.http.impl.client;version="4.5.5",
- org.apache.http.message;version="4.4.9"
+ org.apache.http.message;version="4.4.9",
+ javax.xml.bind
 Automatic-Module-Name: com.sap.sailing.domain

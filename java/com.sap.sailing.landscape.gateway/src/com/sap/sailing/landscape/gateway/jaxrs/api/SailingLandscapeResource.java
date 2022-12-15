@@ -24,7 +24,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
-import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
@@ -38,6 +37,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompareServersResultJso
 import com.sap.sailing.server.gateway.serialization.impl.DataImportProgressJsonSerializer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -408,7 +408,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                         getLandscapeService().useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
                 response = Response.ok()
                         .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(
-                                result.getVersion(optionalTimeoutInMilliseconds==null?LandscapeService.WAIT_FOR_PROCESS_TIMEOUT:Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
+                                result.getVersion(optionalTimeoutInMilliseconds==null?Landscape.WAIT_FOR_PROCESS_TIMEOUT:Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
                                         Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName())
                                                 .serialize(result)))
                         .build();
@@ -453,7 +453,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                                 Optional.ofNullable(sharedInstanceTypeOrNull).map(sharedInstanceTypeName->InstanceType.valueOf(sharedInstanceTypeName)));
                 response = Response.ok()
                         .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(result.getVersion(
-                                optionalTimeoutInMilliseconds == null ? LandscapeService.WAIT_FOR_PROCESS_TIMEOUT
+                                optionalTimeoutInMilliseconds == null ? Landscape.WAIT_FOR_PROCESS_TIMEOUT
                                         : Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
                                 Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName()).serialize(result)))
                         .build();
@@ -504,7 +504,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                                 optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
                 response = Response.ok()
                         .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(result.getVersion(
-                                optionalTimeoutInMilliseconds == null ? LandscapeService.WAIT_FOR_PROCESS_TIMEOUT
+                                optionalTimeoutInMilliseconds == null ? Landscape.WAIT_FOR_PROCESS_TIMEOUT
                                         : Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
                                 Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName()).serialize(result)))
                         .build();
@@ -532,7 +532,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         try {
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
-                    .getApplicationReplicaSet(region, replicaSetName, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT.get().asMillis(), optionalKeyName,
+                    .getApplicationReplicaSet(region, replicaSetName, Landscape.WAIT_FOR_PROCESS_TIMEOUT.get().asMillis(), optionalKeyName,
                             passphraseForPrivateKeyDecryption);
             if (replicaSet == null) {
                 response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
@@ -541,7 +541,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                         .changeAutoScalingReplicasInstanceType(replicaSet, InstanceType.valueOf(instanceType));
                 response = Response.ok()
                         .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(result.getVersion(
-                                LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName()).serialize(result)))
+                                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName()).serialize(result)))
                         .build();
             }
         } catch (Exception e) {

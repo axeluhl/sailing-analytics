@@ -29,7 +29,7 @@ import com.sap.sse.common.Base64Utils;
 import com.sap.sse.common.media.MediaTagConstants;
 
 /**
- * /** An Utility Class to help resizing an image
+ * An Utility Class to help resizing an image
  * 
  * @author Robin Fleige (D067799)
  */

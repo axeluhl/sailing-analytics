@@ -21,7 +21,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.jcraft.jsch.JSchException;
-import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
@@ -31,6 +30,7 @@ import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -214,10 +214,15 @@ implements SailingAnalyticsProcess<ShardingKey> {
             byte[] privateKeyEncryptionPassphrase) {
         try {
             tryShutdown(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            logger.info("Removing server directory "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)+" of "+this);
+            logger.info("Removing server directory "+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT)+" of "+this);
             getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
-                .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)+"\"", "Removing server directory "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT), Level.INFO);
-            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+                .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT)+"\"", "Removing server directory "+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT), Level.INFO);
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost()
+                    .getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,
+                            /*
+                             * Should throw an exception if there was an error for preventing false positives (process
+                             * is running, but there was an error) -> Bug5786
+                             */ true);
             if (Util.isEmpty(applicationProcesses)) {
                 logger.info("No more application processes running on "+getHost()+"; terminating");
                 getHost().terminate();
@@ -240,9 +245,9 @@ implements SailingAnalyticsProcess<ShardingKey> {
     public void refreshToRelease(Release release, Optional<String> optionalKeyName,
             byte[] privateKeyEncryptionPassphrase) throws IOException, InterruptedException, JSchException, Exception {
         logger.info("Upgrading process "+this+" to release "+release.getName());
-        getHost().createRootSshChannel(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase)
+        getHost().createRootSshChannel(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase)
             .runCommandAndReturnStdoutAndLogStderr("su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
-                    "cd "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT).replaceAll("\"", "\\\\\"")+"; "+
+                    "cd "+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT).replaceAll("\"", "\\\\\"")+"; "+
                     "./refreshInstance.sh install-release "+release.getName()+" && ./stop && ./start"+
                     "\"", "Refreshing process to release "+release.getName(), Level.INFO);
         this.release = release;
