@@ -196,71 +196,78 @@ public interface LandscapeManagementWriteServiceAsync {
     void changeAutoScalingReplicasInstanceType(SailingApplicationReplicaSetDTO<String> replicaSet,
             String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
-    
-    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset,String bearertoken, AsyncCallback<ArrayList<String>> names);
-    
-    void addShard(String shardName,Set<String> selectedLeaderBoards, SailingApplicationReplicaSetDTO<String> replicaset,
-            String bearertoken, String region, byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
-    
-    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region,byte[] passphrase, AsyncCallback<Map<AwsShardDTO, Iterable<String>>> callback);
-    
+
+    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
+            AsyncCallback<ArrayList<String>> names);
+
+    void addShard(String shardName, Set<String> selectedLeaderBoards,
+            SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, String region,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase,
+            AsyncCallback<Map<AwsShardDTO, Iterable<String>>> callback);
+
     /**
-     * Removes {@code shard} from the replica set. This deletes the load balancer listener rules, and the auto scaling group and the target group.
+     * Removes {@code shard} from the replica set. This deletes the load balancer listener rules, and the auto scaling
+     * group and the target group.
+     * 
      * @param shard
-     *          the shard to remove
+     *            the shard to remove
      * @param replicaset
-     *          the replica set which contains the shard.
+     *            the replica set which contains the shard.
      * @param region
-     *          replica set's region
+     *            replica set's region
      * @param passphrase
-     *          passphrase for the private key decription.
+     *            passphrase for the private key decription.
      * @param callback
-     *          
+     * 
      */
-    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset,String region, byte[] passphrase, AsyncCallback<Void> callback);
-    
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region,
+            byte[] passphrase, AsyncCallback<Void> callback);
+
     /**
-     * Appends sharding keys for each leader board in {@code selectedLeaderboards} to the shard, identified by {@code shardName}, from the {@code replicaset}.
-     * This function inserts rules to the replica set's load balancer for each {@selectedLeaderboards}'s sharding key. It the replica set's load balancer does not have enough rules left,
-     * a new one gets created. For inserting the rules, first every existing rule of this shard get's checked for space left and if there is, it gets filled with a sharding key and after that new rules are created.
-     * Throws an Exception if:
-     *  - the shard is not found.
-     *  - shards cannot be retrived
-     *  - sharding rules cannot be inserted  
-     *  - the is no free load balancer or the process of moving the replica set to another load balancer failed.
+     * Appends sharding keys for each leader board in {@code selectedLeaderboards} to the shard, identified by
+     * {@code shardName}, from the {@code replicaset}. This function inserts rules to the replica set's load balancer
+     * for each {@selectedLeaderboards}'s sharding key. It the replica set's load balancer does not have enough rules
+     * left, a new one gets created. For inserting the rules, first every existing rule of this shard get's checked for
+     * space left and if there is, it gets filled with a sharding key and after that new rules are created. Throws an
+     * Exception if: - the shard is not found. - shards cannot be retrived - sharding rules cannot be inserted - the is
+     * no free load balancer or the process of moving the replica set to another load balancer failed.
+     * 
      * @param selectedLeaderBoards
-     *          list of selected leaderboards. These are the names and not sharding keys.
+     *            list of selected leaderboards. These are the names and not sharding keys.
      * @param region
-     *          landscape region
+     *            landscape region
      * @param shardName
-     *          shard's name where the keys are supposed to be appended
+     *            shard's name where the keys are supposed to be appended
      * @param replicaset
-     *          shard's replica set
+     *            shard's replica set
      * @param bearertoken
      * @param passphraseForPrivateKeyDecryption
      * @param callback
      */
-    void appendShardingKeysToShard(Iterable<String> selectedLeaderBoards, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset,String bearertoken,byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
-    
+    void appendShardingKeysToShard(Iterable<String> selectedLeaderBoards, String region, String shardName,
+            SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+
     /**
-     * Removes the shardingkeys for {@selectedLeaderBoards} from a shard, identified by {@code shardName} from {@code replicaset}.
-     * Throws Exception if:
-     *  - no shard is found
-     *  - replicaset is not found
-     *  - shards from replica set cannot be retrieved.
-     *  - sharding rules cannot be updated
-     *   
+     * Removes the shardingkeys for {@selectedLeaderBoards} from a shard, identified by {@code shardName} from
+     * {@code replicaset}. Throws Exception if: - no shard is found - replicaset is not found - shards from replica set
+     * cannot be retrieved. - sharding rules cannot be updated
+     * 
      * @param selectedLeaderBoards
-     *          Sharding keys for all selected leader boards.
+     *            Sharding keys for all selected leader boards.
      * @param region
-     *          shard's regio
+     *            shard's regio
      * @param shardName
-     *          Shard's name where  the keys should be removed from
+     *            Shard's name where the keys should be removed from
      * @param replicaset
-     *          replica set which contains the shard
+     *            replica set which contains the shard
      * @param bearertoken
      * @param passphraseForPrivateKeyDecryption
      * @param callback
      */
-    void removeShardingKeysToShard(Iterable<String> selectedLeaderBoards, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+    void removeShardingKeysToShard(Iterable<String> selectedLeaderBoards, String region, String shardName,
+            SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 }

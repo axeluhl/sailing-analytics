@@ -88,7 +88,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * @param <MetricsT>
  */
 public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
-    public static final long DEFAULT_DNS_TTL_SECONDS = 60l;
+    static final long DEFAULT_DNS_TTL_SECONDS = 60l;
     
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
@@ -412,7 +412,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> getTargetGroupsAsync(Region region);
     
-    public Iterable<TargetGroup<ShardingKey>> getTargetGroups(com.sap.sse.landscape.Region region);
+    Iterable<TargetGroup<ShardingKey>> getTargetGroups(com.sap.sse.landscape.Region region);
 
     CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(Region region, TargetGroup<ShardingKey> targetGroup);
 
@@ -529,12 +529,22 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * @param region
      *          AWS Region
      * @param rule
-     *          The Rule to modify. Only ARN and Conditions are necessary.
+     *          The Rule to modify. Only ARN and conditions are necessary.
      * @return
      *          the modified Rule as an Iterable.
      */
     Iterable<Rule> modifyRuleConditions(Region region, Rule rule);
     
+    /**
+     * Modifies an existing rule that is identified by the passed {@code rule}'s ARN. Only the actions are modified and nothing
+     * else gets touched.
+     * @param region
+     *          AWS Region
+     * @param rule
+     *          The Rule to modify. Only ARN and actions are necessary.
+     * @return
+     *          the modified Rule as an Iterable.
+     */
     Iterable<Rule> modifyRuleActions(Region region, Rule rule);
 
     /**
@@ -774,7 +784,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoscalingParent,
-            String shardname, TargetGroup<ShardingKey> targetgroup,Optional<Tags> tags);
+            String shardname, TargetGroup<ShardingKey> targetgroup, Optional<Tags> tags);
     
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(

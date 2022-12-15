@@ -391,7 +391,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
         for(Rule rule : getRules()) {
             for(Action action : rule.actions()) {
                 if(action.type() == ActionTypeEnum.FORWARD) {
-                for(String arn : Util.map(action.forwardConfig().targetGroups(),s -> s.targetGroupArn())) {
+                for(String arn : Util.map(action.forwardConfig().targetGroups(), s -> s.targetGroupArn())) {
                     for(String targetArn : Util.map(targetGroups, s -> s.getTargetGroupArn())) {
                         if(arn.equals(targetArn)) {
                             ret.add(rule);
@@ -439,5 +439,3 @@ implements ApplicationLoadBalancer<ShardingKey> {
                 .build();
     }
 }
-
-    

@@ -108,6 +108,5 @@ public class ShardName {
             }
         }
         return ret;
-
     }
 }

@@ -49,7 +49,7 @@ public interface TargetGroup<ShardingKey> extends Named {
      * @return
      *          returns all tag descriptions for this target group
      */
-    public Iterable<TagDescription> getTagDescriptions();
+    Iterable<TagDescription> getTagDescriptions();
     
     /**
      * @return the traffic protocol; usually either one of {@link ProtocolEnum#HTTP} or {@link ProtocolEnum#HTTPS}

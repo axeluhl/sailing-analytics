@@ -386,7 +386,7 @@ public interface LandscapeService {
     <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> waitForProcessTimeout,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    String getShardingKey(SailingServer server, String leaderboardName,String password) throws Exception;
+    String getShardingKey(SailingServer server, String leaderboardName) throws Exception;
 
     ArrayList<String> getLeaderboardNames(SailingServer server) throws Exception;
 

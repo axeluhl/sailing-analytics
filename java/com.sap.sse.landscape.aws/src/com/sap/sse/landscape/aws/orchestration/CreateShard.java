@@ -26,9 +26,12 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleConditio
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
+
 /**
- * This class is for creating shards out of the {@code shardingKeys}. This class creats a target group, and an autoscaling group and inserts rules into the 
- * {@code replicaSet}'s load balancer. If the load balancer does not have enough rules left in it'S HTTPS-listener, the whole replica set gets moved to another load balancer.
+ * This class is for creating shards out of the {@code shardingKeys}. This class creats a target group, and an
+ * autoscaling group and inserts rules into the {@code replicaSet}'s load balancer. If the load balancer does not have
+ * enough rules left in it'S HTTPS-listener, the whole replica set gets moved to another load balancer.
+ * 
  * @author I569653
  *
  * @param <ShardingKey>
@@ -37,7 +40,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  */
 public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
-    
+
     private static int DEFAULT_INSTANCE_STARTUP_TIME = 180;
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
 
