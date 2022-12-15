@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Typ dráhy"</string>
+    <string name="marks">"Značky"</string>
+    <string name="set_position">"Nastavit polohu"</string>
+    <string name="set_position_disabled_gps">"Umožnit GPS\nnastavit polohu"</string>
+    <string name="set_position_no_gps_yet">"Čeká se na signál GPS"</string>
+    <string name="reset_position">"Resetovat polohu"</string>
+    <string name="getting_marks">"Načítají se značky závodu..."</string>
+    <string name="set">"nastaveno"</string>
+    <string name="unknown">"n/a"</string>
+    <string name="not_set">"nenastaveno"</string>
+    <string name="mark_list_accuracy">"(Přesnost cca %1$sm)"</string>
+    <string name="accuracy_detail">"polohy podle GPS"</string>
+    <string name="distance_detail">"ke staré bóji"</string>
+    
+    
+    <string name="accuracy">"Přesnost GPS"</string>
+    <string name="distance">"Vzdálenost ke staré bóji"</string>
+    <string name="position_set">"Poloha byla nastavena"</string>
+    <string name="no_information">"Žádné informace"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Polohu značky nastavíte tak, že do blízkosti značky umístíte zařízení a stisknete „Nastavit polohu“. Pomocí indikátoru přesnosti zjistíte, zda je zobrazená poloha dostatečně kvalitní. Aktivujte GPS nebo vyčkejte, až bude nalezen GPS signál."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Nastavení"</string>
+
+    <string name="server">"Cyklické dotazování"</string>
+    <string name="server_sync_settings">"Interval cyklického dotazování (sekundy)"</string>
+
+    <string name="options_menu_checkout">"Odhlásit"</string>
+    <string name="checkout_warning_message">"Opravdu se chcete odhlásit? Abyste získali přístup ke značkám, budete se muset znovu přihlásit pomocí dodaného QR kódu!"</string>
+
+    <string name="no_marks_message">"Žádné značky"</string>
+
+</resources>

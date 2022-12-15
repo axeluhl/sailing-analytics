@@ -2154,7 +2154,7 @@ Replicator {
             result.put(
                     s.getName(),
                     new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isFleetsCanRunInParallel(), s.isStartsWithZeroScore(), s
-                            .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
+                            .isFirstColumnNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
                             : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s
                             .hasSplitFleetContiguousScoring(), s.getMaximumNumberOfDiscards(), s.isOneAlwaysStaysOne()));
         }

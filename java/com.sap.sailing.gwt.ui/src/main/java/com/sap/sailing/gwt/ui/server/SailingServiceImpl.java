@@ -987,7 +987,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RaceColumnDTO> raceColumns = convertToRaceColumnDTOs(series.getRaceColumns());
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(), series.isFleetsCanRunInParallel(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
+                        series.isStartsWithZeroScore(), series.isFirstColumnNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
                         series.getMaximumNumberOfDiscards(), series.isOneAlwaysStaysOne());
         return result;
     }

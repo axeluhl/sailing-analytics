@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="scan_qr">"Skenovat QR kód"</string>
+    <string name="scan_hint">"QR kód naleznete v potvrzení účasti."</string>
+    <string name="no_qr_code">"Nemáte QR kód?"</string>
+    <string name="start_tracking">"Zahájit trasování"</string>
+    <string name="stop_tracking">"Zastavit trasování"</string>
+    <string name="tracking_gps_accuracy">"Přesnost GPS"</string>
+    <string name="tracking_mode">"Režim"</string>
+    <string name="tracking_mode_live">"Živě"</string>
+    <string name="tracking_mode_battery_saving">"Úspora baterie"</string>
+    <string name="tracking_unsent_fixes">"Neodeslané zprávy"</string>
+    <string name="tracking_mode_caching">"Offline"</string>
+    <string name="tracking_mode_api_error">"Chyba API"</string>
+    <string name="tracking_mode_no_attempt">"Inicializovat"</string>
+    <string name="tracking_time">"Doba trasování"</string>
+    
+    <string name="tracking_status_tracking">"Trasování"</string>
+    <string name="tracking_status_no_gps_signal">"Nedošlo ke změně polohy GPS nebo není signál!"</string>
+    <string name="desc_regatta_user_image">"Uživatelský obrázek regaty"</string>
+    <string name="desc_add_photo_button">"Tlačítko pro přidání fotografie"</string>
+    <string name="tracking_status_gps_found">"Signál GPS nalezen!"</string>
+</resources>

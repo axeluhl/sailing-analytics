@@ -805,7 +805,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSeries.put(FieldNames.SERIES_MAXIMUM_NUMBER_OF_DISCARDS.name(), s.getMaximumNumberOfDiscards());
         dbSeries.put(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name(), s.hasSplitFleetContiguousScoring());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name(), s.isStartsWithZeroScore());
-        dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnIsNonDiscardableCarryForward());
+        dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnNonDiscardableCarryForward());
         dbSeries.put(FieldNames.SERIES_ONE_ALWAYS_STAYS_ONE.name(), s.isOneAlwaysStaysOne());
         BasicDBList dbFleets = new BasicDBList();
         for (Fleet fleet : s.getFleets()) {

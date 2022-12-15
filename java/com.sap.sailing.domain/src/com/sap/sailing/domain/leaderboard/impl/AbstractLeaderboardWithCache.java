@@ -1184,7 +1184,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     @Override
     public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) {
-        return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+        return Util.indexOf(getCompetitorsFromBestToWorst(timePoint), competitor) + 1;
     }
 
     protected void regattaLogEventAdded(RegattaLogEvent event) {
