@@ -9,14 +9,14 @@
     <string name="options_replace_team_photo">"Nahradit týmovou fotografii"</string>
     <string name="settings_category_other">"Další nastavení"</string>
     <string name="device_identifier">"Identifikátor zařízení"</string>
-    <string name="tracker_started">"Sledování bylo úspěšně zahájeno."</string>
-    <string name="tracker_stopped">"Sledování bylo úspěšně zastaveno."</string>
+    <string name="tracker_started">"Trasování bylo úspěšně zahájeno."</string>
+    <string name="tracker_stopped">"Trasování bylo úspěšně zastaveno."</string>
     <string name="title_activity_regatta">"Regata"</string>
     <string name="title_activity_leaderboard">"Výsledková tabule"</string>
     <string name="title_activity_start">"Nastavit GPS lokátor"</string>
-    <string name="title_activity_tracking">"Sledování"</string>
+    <string name="title_activity_tracking">"Trasování"</string>
     <string name="please_confirm">"Potvrďte"</string>
-    <string name="do_you_really_want_to_stop_tracking">"Chcete opravdu zastavit sledování?"</string>
+    <string name="do_you_really_want_to_stop_tracking">"Chcete trasování opravdu zastavit?"</string>
     <string name="add_team_photo">"Přidat týmovou fotografii"</string>
     <string name="upload_in_progress">"Uploadování..."</string>
     <string name="upload_retry">"Chyba při uploadu.\nKlepnutím pokus zopakujte."</string>
@@ -40,7 +40,7 @@
     <string name="please_listen_to_announcements">"Věnujte pozornost hlášení."</string>
     <string name="close">"Zavřít"</string>
     <string name="thank_you_you_successfully_participated">"Děkujeme vám za úspěšnou účast ve fregatě.\n\nVáš tým SAP Sailing"</string>
-    <string name="tracking_colon">"Sledování:"</string>
+    <string name="tracking_colon">"Trasování:"</string>
     <string name="regatta_in_progress">"Regata probíhá."</string>
     <string name="heading">"Kurz"</string>
     <string name="course_over_ground">"Kurz proti dnu"</string>
@@ -51,8 +51,8 @@
     <string name="error_while_receiving_server_data">"Chyba při příjmu dat ze serveru."</string>
     <string name="info_already_checked_in_this_qr_code">"Na tuto regatu jste již přihlášeni."</string>
     <string name="warning">"Upozornění"</string>
-    <string name="enable_gps">"GPS je vypnuté, ale sledování vyžaduje polohy podle GPS. Chcete v nastavení polohy GPS zapnout?"</string>
-    <string name="gps_turned_off">"GPS je vypnuté. Aby se spustilo sledování, zapněte v nastavení Android polohové služby (GPS)."</string>
+    <string name="enable_gps">"GPS je vypnuté, ale pro trasování jsou polohy podle GPS nezbytné. Chcete v nastavení polohy GPS zapnout?"</string>
+    <string name="gps_turned_off">"GPS je vypnuté. Aby se spustilo trasování, v nastavení Android zapněte polohové služby (GPS)."</string>
     <string name="knots">"%s uzlů"</string>
     <string name="preferences">"Preference"</string>
     
@@ -60,7 +60,7 @@
     
     
     
-    <string name="tracking_notification_text">"Momentálně se sleduje %s"</string>
+    <string name="tracking_notification_text">"Momentálně se trasuje %s"</string>
     <string name="waiting_for_gps">"Čeká se na GPS."</string>
     
 </resources>
