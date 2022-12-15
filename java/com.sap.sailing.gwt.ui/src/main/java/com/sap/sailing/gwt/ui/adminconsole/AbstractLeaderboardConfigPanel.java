@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -38,6 +39,8 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.Displayer;
@@ -347,7 +350,17 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
             Notification.notify(stringMessages.raceLogReloaded(), NotificationType.SUCCESS);
         });
-        vPanel.add(reloadAllRaceLogs);
+        HorizontalPanel hPanel = new HorizontalPanel();
+        hPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        hPanel.setWidth("100%");
+        hPanel.setSpacing(5);
+        hPanel.add(reloadAllRaceLogs);
+        Label helpLabel = new Label(stringMessages.helptextLinkingRaces());
+        helpLabel.setWidth("85%");
+        hPanel.add(helpLabel);
+        hPanel.add(new HelpButton(HelpButtonResources.INSTANCE,
+                stringMessages.videoGuide(), "https://vimeo.com/768053778/922b629cc4"));
+        vPanel.add(hPanel);
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
