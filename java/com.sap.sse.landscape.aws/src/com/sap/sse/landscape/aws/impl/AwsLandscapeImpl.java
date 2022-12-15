@@ -415,17 +415,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                         tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
     }
     
-    private TargetGroup<ShardingKey> createTargetGroup(AwsLandscape<ShardingKey> landscape, com.sap.sse.landscape.Region region, String targetGroupName, String targetGroupArn, String loadBalancerArn, ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol, Integer healthCheckPort, String healthCheckPath) {
+    private TargetGroup<ShardingKey> createTargetGroup(AwsLandscape<ShardingKey> landscape,
+            com.sap.sse.landscape.Region region, String targetGroupName, String targetGroupArn, String loadBalancerArn,
+            ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol, Integer healthCheckPort,
+            String healthCheckPath) {
         return new AwsTargetGroupImpl<ShardingKey>(this, region, targetGroupName, targetGroupArn, loadBalancerArn,
                 protocol, port, healthCheckProtocol, healthCheckPort, healthCheckPath);
     }
     
     @Override
     public Iterable<TargetGroup<ShardingKey>> getTargetGroups(com.sap.sse.landscape.Region region) {
-        return Util.map(
-                getLoadBalancingClient(getRegion(region)).describeTargetGroupsPaginator().targetGroups(),
-                tg-> createTargetGroup(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().isEmpty() ? null : tg.loadBalancerArns().get(0),
-                tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));       
+        return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroupsPaginator().targetGroups(),
+                tg -> createTargetGroup(this, region, tg.targetGroupName(), tg.targetGroupArn(),
+                        tg.loadBalancerArns().isEmpty() ? null : tg.loadBalancerArns().get(0), tg.protocol(), tg.port(),
+                        tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
     }
 
     @Override
@@ -448,7 +451,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public Iterable<Rule> modifyRuleConditions(com.sap.sse.landscape.Region region, Rule rule) {
-        ModifyRuleResponse res = getLoadBalancingClient(getRegion(region)).modifyRule(t -> t.conditions(rule.conditions()).ruleArn(rule.ruleArn()).build());
+        ModifyRuleResponse res = getLoadBalancingClient(getRegion(region))
+                .modifyRule(t -> t.conditions(rule.conditions()).ruleArn(rule.ruleArn()).build());
         return res.rules();
     }
 
@@ -1326,7 +1330,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         getLoadBalancingClient(getRegion(region)).addTags(t -> t.resourceArns(arn).tags(tags));
         return new TagsImpl(key,value);
         
-    };
+    }
 
     @Override
     public Tags getTagForMongoProcess(Tags tagsToAddTo, String replicaSetName, int port) {
@@ -2015,7 +2019,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoscalingParent,
-            String shardname, TargetGroup<ShardingKey> targetgroup,Optional<Tags> tags) {
+            String shardname, TargetGroup<ShardingKey> targetgroup, Optional<Tags> tags) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoscalingParent.getRegion()));
         final String launchConfigurationName = autoscalingParent.getAutoScalingGroup().launchConfigurationName();
         final String autoScalingGroupName = getAutoScalingGroupName(shardname);

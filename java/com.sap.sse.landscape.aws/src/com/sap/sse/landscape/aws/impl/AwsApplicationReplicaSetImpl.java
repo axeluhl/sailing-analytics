@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws.impl;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
@@ -407,7 +405,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             byte[] privateKeyEncryptionPassphrase) throws Exception {
         logger.info("Stopping all unmanaged replicas of replica set "+this);
         for (final ProcessT replica : getReplicas()) {
-            if (getAutoScalingGroup() == null || !replica.getHost().isManagedByAutoScalingGroup(getAutoScalingGroup())) {
+            if (getAutoScalingGroup() == null || !replica.getHost().isManagedByAutoScalingGroup(Collections.singleton(getAutoScalingGroup()))) {
                 logger.info("Found unmanaged replica "+replica+". Removing from public target group and stopping...");
                 getPublicTargetGroup().removeTarget(replica.getHost());
                 replica.stopAndTerminateIfLast(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);

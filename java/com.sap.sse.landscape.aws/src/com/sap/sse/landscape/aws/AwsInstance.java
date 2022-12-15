@@ -45,7 +45,7 @@ public interface AwsInstance<ShardingKey> extends Host {
      * implementation checks the {@link #AWS_AUTOSCALING_GROUP_NAME_TAG} tag's value and compares it to the
      * {@code autoScalingGroup}'s name.
      */
-    boolean isManagedByAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup);
+    boolean isManagedByAutoScalingGroup(Iterable<AwsAutoScalingGroup> autoScalingGroup);
     
     default String getId() {
         return getInstanceId();

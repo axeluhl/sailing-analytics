@@ -12,28 +12,28 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
 
     private static final long serialVersionUID = 1L;
     final private Iterable<ShardingKey> keys;
-    final private TargetGroup<ShardingKey> targetgroup;
-    final private String shardname;
+    final private TargetGroup<ShardingKey> targetGroup;
+    final private String shardName;
     final private String name;
-    private AwsAutoScalingGroup autoscalinggroup;
+    private AwsAutoScalingGroup autoScalingGroup;
     private ShardName shardNameDTO;
-    private ApplicationLoadBalancer<ShardingKey> loadbalancer;
+    private ApplicationLoadBalancer<ShardingKey> loadBalancer;
     private Iterable<Rule> rules;
 
     public AwsShardImpl(String shardname, Iterable<ShardingKey> keys, TargetGroup<ShardingKey> targetgroup,
             ShardName shardnameDTO, ApplicationLoadBalancer<ShardingKey> loadbalancer, Iterable<Rule> rules) {
         this.keys = keys;
-        this.targetgroup = targetgroup;
-        this.shardname = shardname;
+        this.targetGroup = targetgroup;
+        this.shardName = shardname;
         this.setShardNameDTO(shardnameDTO);
         this.name = shardnameDTO.getName();
-        this.loadbalancer = loadbalancer;
+        this.loadBalancer = loadbalancer;
         this.rules  =rules;
     }
 
     public void setAutoscalingGroup(AwsAutoScalingGroup asg) {
-        if (autoscalinggroup == null) {
-            autoscalinggroup = asg;
+        if (autoScalingGroup == null) {
+            autoScalingGroup = asg;
         }
     }
 
@@ -49,17 +49,17 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
 
     @Override
     public String getShardname() {
-        return shardname;
+        return shardName;
     }
 
     @Override
     public TargetGroup<ShardingKey> getTargetGroup() {
-        return targetgroup;
+        return targetGroup;
     }
 
     @Override
     public AwsAutoScalingGroup getAutoScalingGroup() {
-        return autoscalinggroup;
+        return autoScalingGroup;
     }
 
     public ShardName getShardNameDTO() {
@@ -72,12 +72,11 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
 
     @Override
     public ApplicationLoadBalancer<ShardingKey> getLoadbalancer() {
-        return loadbalancer;
+        return loadBalancer;
     }
 
     @Override
     public Iterable<Rule> getRules() {
         return rules;
     }
-
 }
