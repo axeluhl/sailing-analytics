@@ -496,7 +496,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
-        final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
+        final ConcurrentMap<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new ConcurrentHashMap<>();
         final ConcurrentMap<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> futuresForCompetitorAndColumnName = new ConcurrentHashMap<>();
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);

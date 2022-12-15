@@ -11,5 +11,7 @@
 <!-- Enable the following if there is a valid AWS SDK key available in the test execution environment:
   <packaging>eclipse-test-plugin</packaging>
 -->
-  <packaging>eclipse-plugin</packaging>
+  <properties>
+    <tycho.plugin-test.skip>true</tycho.plugin-test.skip>
+  </properties>
 </project>

@@ -1916,26 +1916,26 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertTrue(leaderboardHighPoint10Or8AndLastBreaksTie.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[3], later)) < 0); // c0 better than c3
         assertEquals(10, Util.size(leaderboardHighPoint10Or8AndLastBreaksTie.getCompetitorsFromBestToWorst(later)));
-        assertEquals(new Double(10), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(9), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
-        assertEquals(new Double(1), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(10), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(9), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(1), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors), dummyRegatta), "R2", /* medalRace */ false);
-        assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
-        assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(20), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(18), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(2), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         RaceLog raceLogForRace2 = leaderboardHighPoint10Or8AndLastBreaksTie.getRaceColumnByName("R2").getRaceLog(leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
         raceLogForRace2.add(new RaceLogAdditionalScoringInformationEventImpl(now, later, new LogEventAuthorImpl("Plopp", 1), "12345678", 0, AdditionalScoringInformationType.UNKNOWN));
-        assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
-        assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(20), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(18), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(2), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         raceLogForRace2.add(new RaceLogAdditionalScoringInformationEventImpl(now, later.plus(Duration.ONE_MINUTE), new LogEventAuthorImpl("Plopp", 1), "123456789873773762", 0, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
-        assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(16), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
-        assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(18), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(16), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(2), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors), dummyRegatta), "R3", /* medalRace */ false);
-        assertEquals(new Double(28), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(25), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
-        assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(28), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(25), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLogForRace2);
         RaceLogAdditionalScoringInformationEvent event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event != null;
@@ -1946,18 +1946,18 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         }
         event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event == null;
-        assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(30), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         RaceState raceStateForRace2 = RaceStateImpl.create(mock(RaceLogResolver.class), raceLogForRace2, new LogEventAuthorImpl("Simon", 1));
         assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assertTrue(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
-        assertEquals(new Double(28), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(28), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND.plus(10000)), /*enable*/false, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
-        assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(30), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(3), leaderboardHighPoint10Or8AndLastBreaksTie.getNetPoints(competitors[9], later));
         LeaderboardDTO leaderboardDTO  = null;
         try {
             leaderboardDTO = leaderboardHighPoint10Or8AndLastBreaksTie.getLeaderboardDTO(later.plus(Duration.ONE_HOUR), Collections.<String>emptyList(), false, trackedRegattaRegistry, DomainFactory.INSTANCE, false);
@@ -1993,33 +1993,33 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertTrue(leaderboardHighPoint10LastBreaksTie.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboardHighPoint10LastBreaksTie.getNetPoints(competitors[0], later), leaderboardHighPoint10LastBreaksTie.getNetPoints(competitors[3], later)) < 0); // c0 better than c3
         assertEquals(16, Util.size(leaderboardHighPoint10LastBreaksTie.getCompetitorsFromBestToWorst(later)));
-        assertEquals(new Double(10), leaderboardHighPoint10LastBreaksTie.getNetPoints(competitors[0], later));
-        assertEquals(new Double(1), leaderboardHighPoint10LastBreaksTie.getNetPoints(competitors[15], later));
+        assertEquals(Double.valueOf(10), leaderboardHighPoint10LastBreaksTie.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(1), leaderboardHighPoint10LastBreaksTie.getNetPoints(competitors[15], later));
         // Normal HighPoint leaderboard has no max so that winner gets as many points as there are competitors
         FlexibleLeaderboard leaderboardHighPoint = new FlexibleLeaderboardImpl("Test ESS Highpoint", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
                 new HighPoint(), null);
         leaderboardHighPoint.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R1", /* medalRace */
                 false);
         assertEquals(16, Util.size(leaderboardHighPoint.getCompetitorsFromBestToWorst(later)));
-        assertEquals(new Double(16), leaderboardHighPoint.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(16), leaderboardHighPoint.getNetPoints(competitors[0], later));
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("ESS", "ESS", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboardHighPoint10LastBreaksTie }));
         LeaderboardGroupMetaLeaderboard leaderboardHighPointESSOverall = new LeaderboardGroupMetaLeaderboard(
                 leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
                 new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]));
         assertEquals(16, Util.size(leaderboardHighPointESSOverall.getCompetitorsFromBestToWorst(later)));
-        assertEquals(new Double(10), leaderboardHighPointESSOverall.getNetPoints(competitors[0], later));
-        assertEquals(new Double(9), leaderboardHighPointESSOverall.getNetPoints(competitors[1], later));
-        assertEquals(new Double(8), leaderboardHighPointESSOverall.getNetPoints(competitors[2], later));
-        assertEquals(new Double(7), leaderboardHighPointESSOverall.getNetPoints(competitors[3], later));
-        assertEquals(new Double(6), leaderboardHighPointESSOverall.getNetPoints(competitors[4], later));
-        assertEquals(new Double(5), leaderboardHighPointESSOverall.getNetPoints(competitors[5], later));
-        assertEquals(new Double(4), leaderboardHighPointESSOverall.getNetPoints(competitors[6], later));
-        assertEquals(new Double(3), leaderboardHighPointESSOverall.getNetPoints(competitors[7], later));
-        assertEquals(new Double(2), leaderboardHighPointESSOverall.getNetPoints(competitors[8], later));
-        assertEquals(new Double(1), leaderboardHighPointESSOverall.getNetPoints(competitors[9], later));
-        assertEquals(new Double(1), leaderboardHighPointESSOverall.getNetPoints(competitors[14], later));
-        assertEquals(new Double(1), leaderboardHighPointESSOverall.getNetPoints(competitors[15], later));
+        assertEquals(Double.valueOf(10), leaderboardHighPointESSOverall.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(9), leaderboardHighPointESSOverall.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(8), leaderboardHighPointESSOverall.getNetPoints(competitors[2], later));
+        assertEquals(Double.valueOf(7), leaderboardHighPointESSOverall.getNetPoints(competitors[3], later));
+        assertEquals(Double.valueOf(6), leaderboardHighPointESSOverall.getNetPoints(competitors[4], later));
+        assertEquals(Double.valueOf(5), leaderboardHighPointESSOverall.getNetPoints(competitors[5], later));
+        assertEquals(Double.valueOf(4), leaderboardHighPointESSOverall.getNetPoints(competitors[6], later));
+        assertEquals(Double.valueOf(3), leaderboardHighPointESSOverall.getNetPoints(competitors[7], later));
+        assertEquals(Double.valueOf(2), leaderboardHighPointESSOverall.getNetPoints(competitors[8], later));
+        assertEquals(Double.valueOf(1), leaderboardHighPointESSOverall.getNetPoints(competitors[9], later));
+        assertEquals(Double.valueOf(1), leaderboardHighPointESSOverall.getNetPoints(competitors[14], later));
+        assertEquals(Double.valueOf(1), leaderboardHighPointESSOverall.getNetPoints(competitors[15], later));
     }
     
     @Test
@@ -2038,26 +2038,26 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
                 leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later), 
                 leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[3], later)) < 0); // c0 better than c3
         assertEquals(8, Util.size(leaderboardHighPoint12LastBreaksTie2017.getCompetitorsFromBestToWorst(later)));
-        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
-        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        assertEquals(Double.valueOf(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
         // now let's assume that the first competitor is DSQ so it gets 4 points
         leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.DSQ);
         assertEquals(8, Util.size(leaderboardHighPoint12LastBreaksTie2017.getCompetitorsFromBestToWorst(later)));
-        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
-        assertEquals(new Double(4), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
-        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        assertEquals(Double.valueOf(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(4), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
         leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.NONE);
-        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
-        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        assertEquals(Double.valueOf(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
         leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.DNS);
-        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
-        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
-        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        assertEquals(Double.valueOf(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
         // two competitors not started leading to tie
         leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[1], raceColumn, MaxPointsReason.DNS);
-        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[2], later));
-        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
-        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(Double.valueOf(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[2], later));
+        assertEquals(Double.valueOf(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(Double.valueOf(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
     }
 
     @Test
