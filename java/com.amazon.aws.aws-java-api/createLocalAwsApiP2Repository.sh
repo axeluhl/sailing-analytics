@@ -42,7 +42,7 @@ for l in ${LIBS}; do
   fi
   echo "        <classpathentry exported=\"true\" kind=\"lib\" path=\"${LIB}/${l}\"${SOURCEPATH}/>" >>${WRAPPER_BUNDLE}/${CLASSPATH_FILE}
 done
-echo "        <classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11\"/>
+echo "        <classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8\"/>
         <classpathentry kind=\"con\" path=\"org.eclipse.pde.core.requiredPlugins\"/>
         <classpathentry kind=\"output\" path=\"bin\"/>
 </classpath>" >>${WRAPPER_BUNDLE}/${CLASSPATH_FILE}
@@ -57,7 +57,7 @@ Bundle-Name: aws-java-api
 Bundle-SymbolicName: com.amazon.aws.aws-java-api
 Bundle-Version: ${VERSION}
 Bundle-Vendor: Amazon
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: " >${WRAPPER_BUNDLE}/META-INF/${MANIFEST_FILE}
 for l in ${LIBS}; do
   echo -n "lib/${l},
