@@ -1,12 +1,14 @@
 package com.sap.sailing.domain.common.impl;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 
 public class DataImportProgressImpl implements DataImportProgress {
+    private static final Logger logger = Logger.getLogger(DataImportProgressImpl.class.getName());
 
     private static final long serialVersionUID = 5538458397711003527L;
     private UUID currentImportOperationId;
@@ -17,7 +19,8 @@ public class DataImportProgressImpl implements DataImportProgress {
     private boolean failed = false;
     private String errorMessage;
 
-    DataImportProgressImpl() {
+    @Deprecated
+    DataImportProgressImpl() { // for GWT serialization
     }
 
     public DataImportProgressImpl(final UUID currentImportOperationId) {
@@ -51,6 +54,9 @@ public class DataImportProgressImpl implements DataImportProgress {
     
     @Override
     public void setCurrentSubProgress(DataImportSubProgress subProgress) {
+        if (subProgress != currentSubProgress) {
+            logger.info("Master data import with operation ID "+getOperationId()+" moving from stage "+currentSubProgressPct+" to "+subProgress);
+        }
         currentSubProgress = subProgress;
     }
 
@@ -88,5 +94,4 @@ public class DataImportProgressImpl implements DataImportProgress {
     public void setErrorMessage(String message) {
         errorMessage = message;
     }
-
 }

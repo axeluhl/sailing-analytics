@@ -41,6 +41,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -142,9 +143,10 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                     }
                                 });
                         if (leaderboardDTO.type.isMetaLeaderboard()) {
+                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
                             // overall
                             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
-                                    stringmessages, leaderboardDTO, result);
+                                    stringmessages, leaderboardDTO, result, paywallResolver);
                             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                                     rootComponentLifeCycle, getUserService(), storageDefinition);
                             context.getInitialSettings(
@@ -158,7 +160,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                                     sailingServiceFactory, new AsyncActionsExecutor(), timer, null,
                                                     leaderboardName, LeaderboardEntryPoint.this,
                                                     getStringMessages(), getActualChartDetailType(defaultSettings),
-                                                    result);
+                                                    result, LeaderboardEntryPoint.this);
                                             createUi(leaderboardViewer, defaultSettings, timer,
                                                     leaderboardContextDefinition);
                                         }
@@ -173,8 +175,9 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                         }
                                     });
                         } else {
+                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
                             LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
-                                    StringMessages.INSTANCE, leaderboardDTO, result);
+                                    StringMessages.INSTANCE, leaderboardDTO, result, paywallResolver);
                             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                                     rootComponentLifeCycle, getUserService(), storageDefinition);
                             context.getInitialSettings(
@@ -200,7 +203,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                                                     defaultSettings, sailingServiceFactory,
                                                                     new AsyncActionsExecutor(), timer, leaderboardName,
                                                                     LeaderboardEntryPoint.this, getStringMessages(),
-                                                                    getActualChartDetailType(defaultSettings), result);
+                                                                    getActualChartDetailType(defaultSettings), result, LeaderboardEntryPoint.this);
                                                             createUi(leaderboardViewer, defaultSettings, timer,
                                                                     leaderboardContextDefinition);
                                                         }
@@ -248,7 +251,8 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                 leaderboardDisplayName = leaderboardName;
             }
             SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
-            new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+            new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
             mainPanel.addNorth(header, 75);
         }
 

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -156,10 +157,25 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
      * in the first fleet of the series.
      */
     private boolean hasNoPredecessor(FilterableRace race) {
-        return race.getZeroBasedSeriesIndex() == 0 && race.getZeroBasedIndexInFleet() == 0 &&
+        return race.getZeroBasedIndexInFleet() == 0 && isInFirstNonEmptySeries(race) &&
                 (race.getSeries().isFleetsCanRunInParallel() || Util.indexOf(race.getSeries().getFleets(), race.getFleet()) == 0);
     }
 
+    private boolean isInFirstNonEmptySeries(FilterableRace race) {
+        for (int seriesIndex = race.getZeroBasedSeriesIndex() - 1; seriesIndex>=0; seriesIndex--) {
+            final SeriesWithRows seriesWithRows = Util.get(race.getRaceGroup().getSeries(), seriesIndex);
+            if (!isEmptySeries(seriesWithRows)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isEmptySeries(SeriesWithRows seriesWithRows) {
+        final Iterable<RaceRow> raceRows = seriesWithRows.getRaceRows();
+        return !raceRows.iterator().hasNext() || !raceRows.iterator().next().getCells().iterator().hasNext();
+    }
+    
     /**
      * Two cases need to be distinguished: the races in different fleets of the same series may be run
      * in parallel or not.<p>
@@ -231,17 +247,18 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
 
     private Iterable<T> getLastRacesFromImmediatelyPrecedingSeries(FilterableRace race, final RaceGroup raceGroup) {
         final Set<T> lastRacesInImmediatelyPrecedingSeries = new HashSet<>();
-        final SeriesWithRows immediatelyPrecedingSeries = Util.get(raceGroup.getSeries(), race.getZeroBasedSeriesIndex()-1);
-        if (immediatelyPrecedingSeries.isFleetsCanRunInParallel()) {
+        final List<SeriesWithRows> immediatelyPrecedingSerieses = Util.asList(raceGroup.getSeries()).subList(0, race.getZeroBasedSeriesIndex());
+        SeriesWithRows lastPrecedingNonEmptySeries = Util.last(Util.filter(immediatelyPrecedingSerieses, series->!isEmptySeries(series)));
+        if (lastPrecedingNonEmptySeries.isFleetsCanRunInParallel()) {
             // add all last races of all fleets in immediately preceding series because they may be run in parallel
-            for (final RaceRow rowInImmediatelyPrecedingSeries : immediatelyPrecedingSeries.getRaceRows()) {
-                final T lastRaceInRow = getLastRaceInRow(raceGroup, immediatelyPrecedingSeries, rowInImmediatelyPrecedingSeries);
+            for (final RaceRow rowInImmediatelyPrecedingSeries : lastPrecedingNonEmptySeries.getRaceRows()) {
+                final T lastRaceInRow = getLastRaceInRow(raceGroup, lastPrecedingNonEmptySeries, rowInImmediatelyPrecedingSeries);
                 lastRacesInImmediatelyPrecedingSeries.add(lastRaceInRow);
             }
         } else {
             // add only the last race of the last fleet in the immediately preceding series
-            final RaceRow lastRowInImmediatelyPrecedingSeries = Util.last(immediatelyPrecedingSeries.getRaceRows());
-            lastRacesInImmediatelyPrecedingSeries.add(getLastRaceInRow(raceGroup, immediatelyPrecedingSeries, lastRowInImmediatelyPrecedingSeries));
+            final RaceRow lastRowInImmediatelyPrecedingSeries = Util.last(lastPrecedingNonEmptySeries.getRaceRows());
+            lastRacesInImmediatelyPrecedingSeries.add(getLastRaceInRow(raceGroup, lastPrecedingNonEmptySeries, lastRowInImmediatelyPrecedingSeries));
         }
         return lastRacesInImmediatelyPrecedingSeries;
     }

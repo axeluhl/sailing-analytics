@@ -94,7 +94,8 @@ public class RaceLogFixTrackerManagerTest {
         raceLog2 = new RaceLogImpl("racelog2");
         regattaLog = new RegattaLogImpl("regattalog");
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
+                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
         Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
@@ -107,7 +108,7 @@ public class RaceLogFixTrackerManagerTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null);
     }
 
     /**
@@ -119,7 +120,6 @@ public class RaceLogFixTrackerManagerTest {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRaceLog(raceLog2);
-
         RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager(trackedRace,
                 EmptySensorFixStore.INSTANCE, new SensorFixMapperFactory() {
                     @Override
@@ -127,7 +127,7 @@ public class RaceLogFixTrackerManagerTest {
                             Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
                         throw new IllegalArgumentException("Unknown event type");
                     }
-                });
+                }, /* removeOutliersFromCompetitorTracks */ true);
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }
 
@@ -139,7 +139,6 @@ public class RaceLogFixTrackerManagerTest {
     public void testThatNoExceptionIsThrownWhenStoppingTrackingWhenAddingSecondRaceLogWhileAlreadyTracking_bug4001() {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.attachRaceLog(raceLog);
-
         RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager(trackedRace,
                 EmptySensorFixStore.INSTANCE, new SensorFixMapperFactory() {
                     @Override
@@ -147,7 +146,7 @@ public class RaceLogFixTrackerManagerTest {
                             Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
                         throw new IllegalArgumentException("Unknown event type");
                     }
-                });
+                }, /* removeOutliersFromCompetitorTracks */ true);
         trackedRace.attachRaceLog(raceLog2);
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }

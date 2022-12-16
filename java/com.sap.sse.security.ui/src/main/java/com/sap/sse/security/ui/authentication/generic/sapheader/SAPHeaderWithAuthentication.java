@@ -37,7 +37,8 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
         Anchor authenticationMenu = new Anchor();
         authenticationMenu.addStyleName(res.css().usermanagement_icon());
         rightWithAuthentication.add(authenticationMenu);
-        authenticationMenuView = new AuthenticationMenuViewImpl(authenticationMenu, res.css().usermanagement_loggedin(), res.css().usermanagement_open());
+        authenticationMenuView = new AuthenticationMenuViewImpl(authenticationMenu, res.css().usermanagement_loggedin(),
+                res.css().usermanagement_open(), res.css().user_menu_premium());
         rightWrapper = new SimplePanel();
         rightWrapper.addStyleName(res.css().header_right_extension());
         rightWithAuthentication.add(rightWrapper);
@@ -48,9 +49,10 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
     public void addWidgetToRightSide(Widget widget) {
         rightWrapper.add(widget);
     }
-    
+
     /**
-     * @return the {@link AuthenticationMenuView} associated with the authentication control on the right side of the header.
+     * @return the {@link AuthenticationMenuView} associated with the authentication control on the right side of the
+     *         header.
      */
     public AuthenticationMenuView getAuthenticationMenuView() {
         return authenticationMenuView;

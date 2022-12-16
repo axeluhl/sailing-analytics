@@ -192,7 +192,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
-                
                 @Override
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);

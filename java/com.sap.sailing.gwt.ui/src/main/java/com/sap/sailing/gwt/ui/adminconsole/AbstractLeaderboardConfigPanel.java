@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -38,6 +39,8 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.Displayer;
@@ -48,7 +51,6 @@ import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -70,10 +72,11 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel
-        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, TrackedRaceChangedListener,
-        FilterablePanelProvider<StrippedLeaderboardDTOWithSecurity> {
+        implements SelectedLeaderboardProvider<StrippedLeaderboardDTO>, TrackedRaceChangedListener,
+        FilterablePanelProvider<StrippedLeaderboardDTO> {
     protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -82,11 +85,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected final SailingServiceWriteAsync sailingServiceWrite;
 
-    protected final ListDataProvider<StrippedLeaderboardDTOWithSecurity> filteredLeaderboardList;
+    protected final ListDataProvider<StrippedLeaderboardDTO> filteredLeaderboardList;
 
     protected final ErrorReporter errorReporter;
 
-    protected final FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable;
+    protected final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable;
 
     protected final RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
     protected final RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
@@ -97,11 +100,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     protected final CaptionPanel trackedRacesCaptionPanel;
     protected final List<RegattaDTO> allRegattas;
 
-    protected LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity> filterLeaderboardPanel;
+    protected LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
 
-    protected List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList;
+    protected List<StrippedLeaderboardDTO> availableLeaderboardList;
 
-    protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTOWithSecurity> leaderboardSelectionModel;
+    protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTO> leaderboardSelectionModel;
 
     protected final RefreshableSelectionModel<RaceDTO> refreshableTrackedRaceSelectionModel;
     protected final SelectionChangeEvent.Handler trackedRaceListHandler;
@@ -111,16 +114,17 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     private final Button reloadAllRaceLogs;
 
     protected UserService userService;
+    protected SubscriptionServiceFactory subscriptionServiceFactory;
     
-    private final Displayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer = new Displayer<StrippedLeaderboardDTOWithSecurity>() {
+    private final Displayer<StrippedLeaderboardDTO> leaderboardsDisplayer = new Displayer<StrippedLeaderboardDTO>() {
         
         @Override
-        public void fill(Iterable<StrippedLeaderboardDTOWithSecurity> result) {
+        public void fill(Iterable<StrippedLeaderboardDTO> result) {
             fillLeaderboards(result);
         }
     };
     
-    public Displayer<StrippedLeaderboardDTOWithSecurity> getLeaderboardsDisplayer() {
+    public Displayer<StrippedLeaderboardDTO> getLeaderboardsDisplayer() {
         return leaderboardsDisplayer;
     }
     
@@ -137,11 +141,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
 
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality
-            extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTOWithSecurity> {
+            extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
         public RaceColumnDTOAndFleetDTOWithNameBasedEquality(RaceColumnDTO a, FleetDTO b,
-                StrippedLeaderboardDTOWithSecurity c) {
+                StrippedLeaderboardDTO c) {
             super(a, b, c);
         }
 
@@ -186,6 +190,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         this.stringMessages = theStringConstants;
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
+        this.subscriptionServiceFactory = presenter.getSubscriptionServiceFactory();
         filteredLeaderboardList = new ListDataProvider<>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = presenter.getErrorReporter();
@@ -211,11 +216,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         });
         createLeaderboardRefreshBtn.ensureDebugId("LeaderboardRefreshButton");
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTOWithSecurity>(/* pageSize */10000, tableRes);
-        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity>(lblFilterEvents,
+        leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
+        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
                 availableLeaderboardList, filteredLeaderboardList, stringMessages) {
             @Override
-            public List<String> getSearchableStrings(StrippedLeaderboardDTOWithSecurity t) {
+            public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.displayName);
@@ -223,7 +228,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
 
             @Override
-            public AbstractCellTable<StrippedLeaderboardDTOWithSecurity> getCellTable() {
+            public AbstractCellTable<StrippedLeaderboardDTO> getCellTable() {
                 return leaderboardTable;
             }
         };
@@ -235,7 +240,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         addColumnsToLeaderboardTableAndSetSelectionModel(userService, leaderboardTable, tableRes,
                 filterLeaderboardPanel.getAllListDataProvider());
         @SuppressWarnings("unchecked")
-        RefreshableMultiSelectionModel<StrippedLeaderboardDTOWithSecurity> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTOWithSecurity>) leaderboardTable
+        RefreshableMultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable
                 .getSelectionModel();
         leaderboardSelectionModel = multiSelectionModel;
         leaderboardTable.setWidth("100%");
@@ -284,7 +289,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
                 // if no leaderboard column is selected, ignore the race selection change
                 if (selectedRaceColumnAndFleetName != null) {
-                    final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
+                    final StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
                     if (userService.hasPermission(selectedLeaderboard, UPDATE)) {
                         RaceColumnDTO selectedRaceColumn = selectedRaceColumnAndFleetName.getA();
                         FleetDTO selectedRaceColumnFleet = selectedRaceColumnAndFleetName.getB();
@@ -337,7 +342,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         this.reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
         reloadAllRaceLogs.ensureDebugId("ReloadAllRaceLogsButton");
         reloadAllRaceLogs.addClickHandler(event -> {
-            StrippedLeaderboardDTOWithSecurity leaderboard = getSelectedLeaderboard();
+            StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
             for (RaceColumnDTO column : leaderboard.getRaceList()) {
                 for (FleetDTO fleet : column.getFleets()) {
                     refreshRaceLog(column, fleet, false);
@@ -345,7 +350,17 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
             Notification.notify(stringMessages.raceLogReloaded(), NotificationType.SUCCESS);
         });
-        vPanel.add(reloadAllRaceLogs);
+        HorizontalPanel hPanel = new HorizontalPanel();
+        hPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        hPanel.setWidth("100%");
+        hPanel.setSpacing(5);
+        hPanel.add(reloadAllRaceLogs);
+        Label helpLabel = new Label(stringMessages.helptextLinkingRaces());
+        helpLabel.setWidth("85%");
+        hPanel.add(helpLabel);
+        hPanel.add(new HelpButton(HelpButtonResources.INSTANCE,
+                stringMessages.videoGuide(), "https://vimeo.com/768053778/922b629cc4"));
+        vPanel.add(hPanel);
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
@@ -377,17 +392,17 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     protected abstract void addSelectedLeaderboardRacesControls(Panel racesPanel);
 
     protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService,
-            FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
-            AdminConsoleTableResources tableRes, ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider);
+            FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
+            AdminConsoleTableResources tableRes, ListDataProvider<StrippedLeaderboardDTO> listDataProvider);
 
     protected abstract void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable);
 
-    protected SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> createSortableSelectionCheckboxColumn(
-            final FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
+    protected SelectionCheckboxColumn<StrippedLeaderboardDTO> createSortableSelectionCheckboxColumn(
+            final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
             AdminConsoleTableResources tableResources,
-            ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler,
-            ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider) {
-        SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity>(
+            ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler,
+            ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
@@ -399,7 +414,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         return selectionCheckboxColumn;
     }
 
-    public void fillLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> result) {
+    public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> result) {
         availableLeaderboardList.clear();
         Util.addAll(result, availableLeaderboardList);
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList    
@@ -408,11 +423,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
 
     public void loadAndRefreshLeaderboard(final String leaderboardName) {
-        MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity> callback = new MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity>(
-                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+        MarkedAsyncCallback<StrippedLeaderboardDTO> callback = new MarkedAsyncCallback<StrippedLeaderboardDTO>(
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTOWithSecurity leaderboard) {
-                        for (StrippedLeaderboardDTOWithSecurity leaderboardDTO : leaderboardSelectionModel
+                    public void onSuccess(StrippedLeaderboardDTO leaderboard) {
+                        for (StrippedLeaderboardDTO leaderboardDTO : leaderboardSelectionModel
                                 .getSelectedSet()) {
                             if (leaderboardDTO.getName().equals(leaderboardName)) {
                                 leaderboardSelectionModel.setSelected(leaderboardDTO, false);
@@ -438,8 +453,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName, callback);
     }
     
-    public void loadAndRefreshLeaderboard(final StrippedLeaderboardDTOWithSecurity leaderboard) {
-        for (StrippedLeaderboardDTOWithSecurity leaderboardDTO : leaderboardSelectionModel.getSelectedSet()) {
+    public void loadAndRefreshLeaderboard(final StrippedLeaderboardDTO leaderboard) {
+        for (StrippedLeaderboardDTO leaderboardDTO : leaderboardSelectionModel.getSelectedSet()) {
             if (leaderboardDTO.getName().equals(leaderboard.getName())) {
                 leaderboardSelectionModel.setSelected(leaderboardDTO, false);
                 break;
@@ -453,8 +468,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     }
 
-    private void replaceLeaderboardInList(List<StrippedLeaderboardDTOWithSecurity> leaderboardList,
-            String leaderboardToReplace, StrippedLeaderboardDTOWithSecurity newLeaderboard) {
+    private void replaceLeaderboardInList(List<StrippedLeaderboardDTO> leaderboardList,
+            String leaderboardToReplace, StrippedLeaderboardDTO newLeaderboard) {
         int index = -1;
         for (StrippedLeaderboardDTO existingLeaderboard : leaderboardList) {
             index++;
@@ -644,12 +659,12 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity getSelectedLeaderboard() {
+    public StrippedLeaderboardDTO getSelectedLeaderboard() {
         return leaderboardSelectionModel.getSelectedSet().isEmpty() ? null
                 : leaderboardSelectionModel.getSelectedSet().iterator().next();
     }
 
-    protected Refresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher() {
+    protected Refresher<StrippedLeaderboardDTO> getLeaderboardsRefresher() {
         return presenter.getLeaderboardsRefresher();
     }
 
@@ -932,7 +947,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
     
     @Override
-    public AbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity> getFilterablePanel() {
+    public AbstractFilterablePanel<StrippedLeaderboardDTO> getFilterablePanel() {
         return filterLeaderboardPanel;
     }
 }

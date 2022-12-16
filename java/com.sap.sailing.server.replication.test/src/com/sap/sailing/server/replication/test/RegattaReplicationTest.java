@@ -277,8 +277,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         FleetDTO finalsGoldFleet = new FleetDTO("Gold", 1, Color.GRAY);
         master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(), finals.isFleetsCanRunInParallel(),
                 new int[] {},
-                finals.isStartsWithZeroScore(), finals.isFirstColumnIsNonDiscardableCarryForward(),
-                finals.hasSplitFleetContiguousScoring(), finals.getMaximumNumberOfDiscards(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
+                finals.isStartsWithZeroScore(), finals.isFirstColumnNonDiscardableCarryForward(),
+                finals.hasSplitFleetContiguousScoring(), finals.getMaximumNumberOfDiscards(), finals.isOneAlwaysStaysOne(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -320,8 +320,9 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), qualification.getName(), "Simons Quali", 
                 qualification.isMedal(), qualification.isFleetsCanRunInParallel(),
                 new int[] {},
-                qualification.isStartsWithZeroScore(), qualification.isFirstColumnIsNonDiscardableCarryForward(),
-                qualification.hasSplitFleetContiguousScoring(), qualification.getMaximumNumberOfDiscards(), Arrays.asList(new FleetDTO[] {  })));
+                qualification.isStartsWithZeroScore(), qualification.isFirstColumnNonDiscardableCarryForward(),
+                qualification.hasSplitFleetContiguousScoring(), qualification.getMaximumNumberOfDiscards(),
+                qualification.isOneAlwaysStaysOne(), Arrays.asList(new FleetDTO[] {  })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);

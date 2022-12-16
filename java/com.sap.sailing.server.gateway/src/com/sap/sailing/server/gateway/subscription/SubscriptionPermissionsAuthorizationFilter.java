@@ -28,7 +28,8 @@ public abstract class SubscriptionPermissionsAuthorizationFilter extends Permiss
                 new String[] { SecuredSecurityTypes.USER.getStringPermissionForTypeRelativeIdentifier(
                         UserActions.ADD_SUBSCRIPTION, new TypeRelativeObjectIdentifier(username)) });
         if (!isAllowed) {
-            logger.warning(() -> "Subscription webhook event is denied for user " + (username != null ? username : ""));
+            logger.warning(() -> "Subscription webhook event requested by "+getSubject(request, response).getPrincipal()+
+                    " is denied for user " + (username != null ? username : ""));
         }
         return isAllowed;
     }

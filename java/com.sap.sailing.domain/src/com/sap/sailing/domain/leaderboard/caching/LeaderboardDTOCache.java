@@ -170,7 +170,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
             leaderboardByNameCacheMissCount++;
         }
         logger.info("getLeaderboardByName cache hit vs. miss: "+leaderboardByNameCacheHitCount+"/"+leaderboardByNameCacheMissCount);
-        LeaderboardDTO result = future.get();
+        final LeaderboardDTO result = future.get();
         logger.fine("getLeaderboardByName("+leaderboard.getName()+", "+adjustedTimePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;

@@ -28,7 +28,8 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
             RegattaCompetitionPresenter presenter) {
         this.race = race;
         this.launchPadController = new RaceviewerLaunchPadController<>(presenter::getRaceViewerURL,
-                r -> presenter.getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), fleetName));
+                r -> presenter.getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), fleetName),
+                presenter.getPaywallResolver());
         this.mainElement = getMainUiElement();
         setupRaceState(race);
         getRaceNameUiElement().setInnerText(race.getRaceName());

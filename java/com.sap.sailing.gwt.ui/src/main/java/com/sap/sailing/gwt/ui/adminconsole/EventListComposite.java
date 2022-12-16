@@ -42,6 +42,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
@@ -191,6 +193,8 @@ public class EventListComposite extends Composite {
 
             }
         });
+        buttonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
+                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/CreatingYourFirstEvent.mp4"));
         panel.add(filterTextbox);
         panel.add(eventTable);
         noEventsLabel = new Label(stringMessages.noEventsYet());

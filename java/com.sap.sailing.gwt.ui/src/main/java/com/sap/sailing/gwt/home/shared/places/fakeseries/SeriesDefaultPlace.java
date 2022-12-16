@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import com.google.gwt.place.shared.Prefix;
+import com.sap.sailing.gwt.common.client.navigation.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 
 public class SeriesDefaultPlace extends AbstractSeriesPlace implements HasMobileVersion {

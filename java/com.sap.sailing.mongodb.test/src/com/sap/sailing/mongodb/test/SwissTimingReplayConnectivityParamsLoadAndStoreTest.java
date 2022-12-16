@@ -37,7 +37,8 @@ public class SwissTimingReplayConnectivityParamsLoadAndStoreTest extends Abstrac
         final SwissTimingReplayConnectivityParameters stParams = new SwissTimingReplayConnectivityParameters(
                 link, swissTimingUrl, raceName, raceID, boatClassName, useInternalMarkPassingAlgorithm,
                 swissTimingAdapter.getSwissTimingDomainFactory(),
-                new SwissTimingReplayServiceFactoryImpl().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory(), racingEventService), /* raceLogStore */ null, /* regattaLogStore */ null);
+                new SwissTimingReplayServiceFactoryImpl().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory(), racingEventService),
+                /* raceLogStore */ null, /* regattaLogStore */ null);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load

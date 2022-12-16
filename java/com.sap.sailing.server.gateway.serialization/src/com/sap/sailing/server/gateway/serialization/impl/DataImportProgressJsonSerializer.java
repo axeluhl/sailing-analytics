@@ -37,8 +37,8 @@ public class DataImportProgressJsonSerializer implements JsonSerializer<DataImpo
             counts.put(REGATTA_COUNT, object.getResult().getRegattaCount());
             counts.put(MEDIA_TRACK_COUNT, object.getResult().getMediaTrackCount());
             final JSONArray overwrittenRegattaNames = new JSONArray();
-            if (object.getResult().getOverwrittenRegattaNames() != null) {
-                for (final String overwrittenRegattaName : object.getResult().getOverwrittenRegattaNames()) {
+            if (object.getResult().getNamesOfOverwrittenRegattaNames() != null) {
+                for (final String overwrittenRegattaName : object.getResult().getNamesOfOverwrittenRegattaNames()) {
                     overwrittenRegattaNames.add(overwrittenRegattaName);
                 }
                 counts.put(OVERWRITTEN_REGATTA_NAMES, overwrittenRegattaNames);

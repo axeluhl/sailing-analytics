@@ -76,9 +76,8 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
-                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()), getClientFactory());
 
-        
         int competitorCount = getPlace().getStatistic().getCompetitors();
         Distance distance  = getPlace().getStatistic().getDistance();
         Duration duration = getPlace().getStatistic().getDuration();

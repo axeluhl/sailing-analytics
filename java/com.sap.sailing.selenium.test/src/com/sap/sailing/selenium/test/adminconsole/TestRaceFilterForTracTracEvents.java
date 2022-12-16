@@ -2,8 +2,8 @@ package com.sap.sailing.selenium.test.adminconsole;
 
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
 
 import org.junit.Before;
 

@@ -119,7 +119,7 @@ android=1
 java=1
 reporting=0
 suppress_confirmation=0
-extra=''
+export extra='--batch-mode -DtestSuffix=.noAutomaticTestingBasedOnBundleName'
 parallelexecution=0
 p2local=0
 
@@ -601,7 +601,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 		    cp $i $i.bak
 		    cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
 		    mv $i.sed $i
-		    
 		done
 	    fi
 	else
@@ -612,15 +611,16 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $p2local -eq 1 ]; then
 	    echo "INFO: Building and using local p2 repo"
 	    #build local p2 repo
-	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
             echo "JAVA_HOME used: $JAVA_HOME"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
-	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
-	    #create local target definition
+	    # Build AWS API; its local repo must exist for creating the local target definition in the next step
+	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
+	    # create local target definition
 	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
@@ -658,7 +658,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools/bin
         PATH=$PATH:$ANDROID_HOME/platform-tools
-        SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
+        SDK_MANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
         if [ \! -x "$SDK_MANAGER" ]; then
             SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
@@ -667,8 +667,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "BUILD_TOOLS_VERSION=$BUILD_TOOLS_VERSION"
         TARGET_API_VERSION=`grep "targetSdk = " build.gradle | cut -d "=" -f 2 | sed 's/ //g'`
         echo "TARGET_API_VERSION=$TARGET_API_VERSION"
-        $SDK_MANAGER --update && yes | $SDK_MANAGER --licenses
-        $SDK_MANAGER "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
+        echo "Updating Android SDK at ${ANDROID_HOME}"
+        $SDK_MANAGER --update --sdk_root=${ANDROID_HOME} && yes | $SDK_MANAGER --licenses
+        echo "Getting Android build-tools, platform-tools and platform ${TARGET_API_VERSION}"
+        $SDK_MANAGER --sdk_root=${ANDROID_HOME} "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
 
         # TODO: make distinction available for gradle builds as well
         # Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
@@ -676,6 +678,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         # Use the following line for regular builds with no staged Nexus artifacts:
         # mobile_extra="-P -with-not-android-relevant -P with-mobile"
 
+        echo "Building apps with Gradle..."
         ./gradlew build
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
@@ -743,11 +746,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         fi
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
+	echo "Building and installing forked GWT version..."
+	JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
     
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
         echo "JAVA_HOME used: $JAVA_HOME"
-	export MAVEN_OPTS="-Xmx2g"
+	export MAVEN_OPTS="-Xmx4g"
         mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         # now get the exit status from mvn, and not that of tee which is what $? contains now
         MVN_EXIT_CODE=${PIPESTATUS[0]}

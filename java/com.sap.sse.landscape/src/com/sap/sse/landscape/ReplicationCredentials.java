@@ -10,4 +10,10 @@ package com.sap.sse.landscape;
  *
  */
 public interface ReplicationCredentials extends UserDataProvider {
+    /**
+     * Resolves these replication credentials to a bearer token that can be used to authenticate
+     * HTTP requests to the host/port provided. If {@code port} is {@code null}, it defaults
+     * to 443, the standard HTTPS port.
+     */
+    <LogT extends Log, MetricsT extends Metrics> String getBearerToken(String hostname, Integer port);
 }

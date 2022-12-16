@@ -258,9 +258,9 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     private boolean isCertainlyBeforeRaceFinish(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
         final boolean result;
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-        final TimePoint endOfRace;
+        final TimePoint endOfRace = trackedRace == null ? null : trackedRace.getFinishedTime() == null ? trackedRace.getEndOfRace() : trackedRace.getFinishedTime();
         // endOfRace != null means we at least will have a fallback result even if there are no mark passings for the competitor
-        if (trackedRace != null && (endOfRace = trackedRace.getEndOfRace()) != null) {
+        if (endOfRace != null) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
             final MarkPassing lastMarkPassing;
             // count race as finished for the competitor if the finish mark passing exists or the time is after the end of race

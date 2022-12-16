@@ -1,7 +1,10 @@
 package com.sap.sse.security.subscription;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -12,6 +15,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 
 /**
  * Perform fetching and updating user subscriptions of a provider service
@@ -31,23 +35,26 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
     }
 
     public void run() {
-        for (User user : users) {
-            try {
-                apiService.getUserSubscriptions(user, this);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Fetch subscriptions failed, provider: " + apiService.getProviderName()
-                        + ", user: " + user.getName(), e);
-            }
+        try {
+            apiService.getUserSubscriptions(this);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Fetch subscriptions failed, provider: " + apiService.getProviderName(), e);
         }
     }
 
     @Override
-    public void onSubscriptionsResult(User user, Iterable<Subscription> subscriptions) {
-        try {
-            checkAndUpdateSubscriptions(user, subscriptions, apiService);
-        } catch (UserManagementException e) {
-            logger.log(Level.SEVERE, "Update user subscriptions failed, provider: " + apiService.getProviderName()
-                    + ", user: " + user.getName(), e);
+    public void onSubscriptionsResult(Map<String, List<Subscription>> subscriptions) {
+        if (subscriptions != null) {
+            for (User user : users) {
+                try {
+                    checkAndUpdateSubscriptions(user, subscriptions.get(user.getName()), apiService);
+                } catch (UserManagementException e) {
+                    logger.log(Level.SEVERE, "Update user subscriptions failed, provider: "
+                            + apiService.getProviderName() + ", user: " + user.getName(), e);
+                }
+            }
+        } else {
+            logger.log(Level.SEVERE, "Update user subscriptions failed, provider: " + apiService.getProviderName());
         }
     }
 
@@ -61,7 +68,6 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
             // No subscriptions so we need to remove all current subscriptions of user for the provider
             Subscription emptySubscription = createEmptySubscription(provider, null);
             getSecurityService().updateUserSubscription(user.getName(), emptySubscription);
-            // getSecurityService().removeProviderUserSubscriptions(user.getName(), providerName);
         } else if (userSubscriptions != null) {
             if (currentSubscriptions != null) {
                 Map<String, Boolean> existingPlans = getExistingPlans(userSubscriptions);
@@ -75,13 +81,27 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
                     }
                 }
             }
-
-            for (Subscription subscription : userSubscriptions) {
+            // Only one subscription per plan has to be processed.
+            final Set<Subscription> skimmedSubscriptions = new HashSet<>();
+            for (SubscriptionPlan subscriptionPlan : getSecurityService().getAllSubscriptionPlans().values()) {
+                Subscription planSubscription = null;
+                for(Subscription userSubscription : userSubscriptions) {
+                    final boolean isSamePlan = subscriptionPlan.getId().equals(userSubscription.getPlanId());
+                    if (isSamePlan && planSubscription == null || 
+                            isSamePlan && userSubscription.isUpdatedMoreRecently(planSubscription)) {
+                        planSubscription = userSubscription;
+                    }
+                }
+                if (planSubscription != null) {
+                    skimmedSubscriptions.add(planSubscription);
+                }
+            }
+            for (Subscription subscription : skimmedSubscriptions) {
                 getSecurityService().updateUserSubscription(user.getName(), subscription);
             }
         }
     }
-
+    
     private Subscription createEmptySubscription(SubscriptionApiService provider, String planId) {
         return provider.getDataHandler().toSubscription(
                 SubscriptionData.createEmptySubscriptionDataWithUpdateTimes(planId, TimePoint.now(), TimePoint.now()));

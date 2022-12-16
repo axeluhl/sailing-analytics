@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -58,7 +57,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                     seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                     seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
-                    seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
+                    seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards(), seriesDTO.isOneAlwaysStaysOne());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingServiceWrite.createRegatta(newRegatta.getName(),
@@ -141,7 +140,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     public void ok(RegattaName regattaIdentifier) {
                         sailingServiceWrite.createRegattaLeaderboard(regattaIdentifier,
                                 /* displayName */ null, new int[] {},
-                                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to create default regatta leaderboard for " + newRegatta.getName()
@@ -149,7 +148,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     }
 
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                    public void onSuccess(StrippedLeaderboardDTO result) {
                         if (!newRegatta.courseAreas.isEmpty()) {
                             // Show the event's leaderboard groups and allow the user to pick one to assign the regatta leaderboard to
                             final EventDTO event = getEventForCourseArea(existingEvents, newRegatta.courseAreas);

@@ -63,7 +63,7 @@ public class TwoDPoint {
 
     @Override
     public int hashCode() {
-        return 31 * (new Double(this.x).hashCode()) * (new Double(this.y).hashCode());
+        return 31 * (Double.valueOf(this.x).hashCode()) * (Double.valueOf(this.y).hashCode());
     }
 
     public TwoDPoint getProjection(TwoDSegment line) {

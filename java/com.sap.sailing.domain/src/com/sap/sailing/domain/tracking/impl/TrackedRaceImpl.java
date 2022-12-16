@@ -109,6 +109,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
@@ -123,7 +124,7 @@ import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -471,10 +472,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
-            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
+            boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo,
+            MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForWindEstimationCacheInvalidation,
-                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackingConnectorInfo);
+                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver, trackingConnectorInfo,
+                markPassingRaceFingerprintRegistry);
     }
     
     /**
@@ -483,12 +486,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            the function that creates the ranking metric, passing this tracked race as argument. Callers may use a
      *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
      *            {@link TrackedRace} argument.
+     * @param markPassingRaceFingerprintRegistry TODO
      */
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
-            RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
+            RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo,
+            MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         distancesFromStarboardSideOfStartLineProjectedOntoLineCache = new ConcurrentHashMap<>();
         distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes = new ConcurrentHashMap<>();
@@ -608,7 +613,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         if (useInternalMarkPassingAlgorithm) {
-            markPassingCalculator = createMarkPassingCalculator();
+            markPassingCalculator = createMarkPassingCalculator(markPassingRaceFingerprintRegistry);
             this.trackedRegatta.addRaceListener(new RaceListener() {
                 @Override
                 public void raceAdded(TrackedRace trackedRace) {}
@@ -1134,6 +1139,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     protected void setFinishingTime(final TimePoint newFinishingTime) {
         finishingTime = newFinishingTime;
+        updated(newFinishingTime);
     }
 
     @Override
@@ -1143,6 +1149,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     protected void setFinishedTime(final TimePoint newFinishedTime) {
         finishedTime = newFinishedTime;
+        updated(newFinishedTime);
     }
     
     private TimePoint getLastPassingOfFinishLine() {
@@ -1647,27 +1654,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (rankedCompetitors == null) {
             LockUtil.lockForWrite(readWriteLock);
             try {
-                if (rankedCompetitors == null) {
-                    rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
-                                                                           // write lock after updating the cache
-                    if (rankedCompetitors == null) {
-                        // RaceRankComparator requires course read lock
-                        getRace().getCourse().lockForRead();
-                        try {
-                            Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
-                            rankedCompetitors = new ArrayList<Competitor>();
-                            for (Competitor c : getRace().getCompetitors()) {
-                                rankedCompetitors.add(c);
-                            }
-                            Collections.sort(rankedCompetitors, comparator);
-                        } finally {
-                            getRace().getCourse().unlockAfterRead();
-                        }
-                        synchronized (competitorRankings) {
-                            competitorRankings.put(timePoint, rankedCompetitors);
-                        }
-                    }
-                }
+		rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
+								       // write lock after updating the cache
+		if (rankedCompetitors == null) {
+		    // RaceRankComparator requires course read lock
+		    getRace().getCourse().lockForRead();
+		    try {
+			Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
+			rankedCompetitors = new ArrayList<Competitor>();
+			for (Competitor c : getRace().getCompetitors()) {
+			    rankedCompetitors.add(c);
+			}
+			Collections.sort(rankedCompetitors, comparator);
+		    } finally {
+			getRace().getCourse().unlockAfterRead();
+		    }
+		    synchronized (competitorRankings) {
+			competitorRankings.put(timePoint, rankedCompetitors);
+		    }
+		}
             } finally {
                 LockUtil.unlockAfterWrite(readWriteLock);
             }
@@ -3030,10 +3035,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private void suspendAllCachesNotUpdatingWhileLoading() {
         cachesSuspended = true;
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
-            competitorTrack.suspendValidityCaching();
+            competitorTrack.suspendValidityAndMaxSpeedCaching();
         }
         for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
-            markTrack.suspendValidityCaching();
+            markTrack.suspendValidityAndMaxSpeedCaching();
         }
         if (markPassingCalculator != null) {
             markPassingCalculator.suspend();
@@ -3046,10 +3051,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         cachesSuspended = false;
         shortTimeWindCache.clearCache();
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
-            competitorTrack.resumeValidityCaching();
+            competitorTrack.resumeValidityAndMaxSpeedCaching();
         }
         for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
-            markTrack.resumeValidityCaching();
+            markTrack.resumeValidityAndMaxSpeedCaching();
         }
         if (markPassingCalculator != null) {
             markPassingCalculator.resume();
@@ -3804,7 +3809,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return competitorSpeedWhenPassingStart;
     }
     
-    protected abstract MarkPassingCalculator createMarkPassingCalculator();
+    protected abstract MarkPassingCalculator createMarkPassingCalculator(MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry);
     
     @Override
     public boolean isUsingMarkPassingCalculator() {
@@ -3969,7 +3974,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
-        if(polarDataService != null && windEstimation != null) {
+        if (polarDataService != null && windEstimation != null) {
             updateManeuversAndWindWithNewWindEstimation(windEstimation, windEstimation);
         }
     }
@@ -3989,6 +3994,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (windEstimation != null) {
             windTracks.put(windSource, windEstimation.getWindTrack());
         }
+        updateWindSourcesByType(windSource);
         this.windEstimation = windEstimation;
         // TODO Make more efficient by reusing the state of incremental maneuver detectors. The already computed
         // complete maneuver curves can be fed directly into the windEstimation.

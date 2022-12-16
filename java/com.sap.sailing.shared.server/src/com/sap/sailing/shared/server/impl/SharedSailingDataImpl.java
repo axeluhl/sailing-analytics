@@ -549,9 +549,9 @@ implements ReplicatingSharedSailingData, ClearStateTestSupport {
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
         return new ObjectInputStreamResolvingAgainstCache<MarkTemplateResolver>(is,
-                mt -> markTemplatesById.computeIfAbsent(mt.getId(), id -> mt), null) {
+                mt -> markTemplatesById.computeIfAbsent(mt.getId(), id -> mt), null, classLoaderCache) {
         };
     }
 

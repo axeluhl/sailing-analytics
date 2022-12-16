@@ -1,5 +1,6 @@
 #!/bin/bash
-#editing the filepath, so it fits for operating system #currently savely works for cygwin, gitbash and linux
+# editing the filepath, so it fits for operating system;
+# currently safely works for cygwin, gitbash and linux
 correct_file_path()
 {
     if [[ "$1" == '/' ]] || [[ "$1" == "" ]]; then

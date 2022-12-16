@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.leaderboard.impl.HighPointByWinsTiesLastlyBrokenByOtherLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall12PointsMax;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
@@ -56,6 +57,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterp
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinThreeRaces;
 import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
@@ -103,8 +105,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
 
     @Override
     public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
-            InputStream inputStream, ResolveListener resolveListener) throws IOException {
-        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this, resolveListener);
+            InputStream inputStream, ResolveListener resolveListener, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this, resolveListener, classLoaderCache);
     }
 
     @Override
@@ -152,8 +154,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
             return new LowPointWithAutomaticRDG();
         case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
             return new LowPointFirstToWinTwoRaces();
-        default:
-            break;
+        case LOW_POINT_FIRST_TO_WIN_THREE_RACES:
+            return new LowPointFirstToWinThreeRaces();
+        case HIGH_POINT_BY_WINS_TIES_LASTLY_BROKEN_BY_OTHER_LEADERBOARD:
+            return new HighPointByWinsTiesLastlyBrokenByOtherLeaderboard();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }

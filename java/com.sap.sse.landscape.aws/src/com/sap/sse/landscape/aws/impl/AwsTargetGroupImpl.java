@@ -2,6 +2,7 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.Map;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -68,12 +69,16 @@ extends NamedImpl implements TargetGroup<ShardingKey> {
 
     @Override
     public void addTargets(Iterable<AwsInstance<ShardingKey>> targets) {
-        landscape.addTargetsToTargetGroup(this, targets);
+        if (!Util.isEmpty(targets)) {
+            landscape.addTargetsToTargetGroup(this, targets);
+        }
     }
 
     @Override
     public void removeTargets(Iterable<AwsInstance<ShardingKey>> targets) {
-        landscape.removeTargetsFromTargetGroup(this, targets);
+        if (!Util.isEmpty(targets)) {
+            landscape.removeTargetsFromTargetGroup(this, targets);
+        }
     }
 
     @Override

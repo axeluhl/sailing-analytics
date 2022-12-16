@@ -57,6 +57,7 @@
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.manage2sail.resultimport" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.sailti.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.monitoring" autoStart="true" startLevel="7" />
       <plugin id="com.sap.sailing.news" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.polars" autoStart="true" startLevel="5" />

@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsLandscapeOperation;
@@ -43,7 +42,12 @@ import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
  */
 public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStream<ReplicableAwsLandscapeState, AwsLandscapeOperation<?>> implements ReplicableAwsLandscapeState {
     private final MongoObjectFactory mongoObjectFactory;
+    
+    /**
+     * The keys are pairs of the region ID and the key name.
+     */
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
+    
     private final Set<SSHKeyPairListener> sshKeyPairListeners;
     
     public AwsLandscapeStateImpl() {
@@ -54,7 +58,7 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     
     public AwsLandscapeStateImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.mongoObjectFactory = mongoObjectFactory;
-        this.sshKeyPairs = new ConcurrentHashMap<Util.Pair<String,String>, SSHKeyPair>();
+        this.sshKeyPairs = new ConcurrentHashMap<>();
         this.sshKeyPairListeners = new HashSet<>();
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             addKeyPairToMap(keyPair);
@@ -62,10 +66,15 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     }
     
     /**
-     * No persistence, no replication.
+     * No persistence, no replication. The new {@code keyPair} will overwrite any key for the same region by an equal
+     * name.
      */
     private void addKeyPairToMap(SSHKeyPair keyPair) {
-        sshKeyPairs.put(new Pair<>(keyPair.getRegionId(), keyPair.getName()), keyPair);
+        sshKeyPairs.put(getKey(keyPair), keyPair);
+    }
+
+    private Pair<String, String> getKey(SSHKeyPair keyPair) {
+        return new Pair<>(keyPair.getRegionId(), keyPair.getName());
     }
     
     
@@ -85,8 +94,7 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     }
     
     @Override
-    public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
-        final String regionId = region.getId();
+    public void deleteKeyPair(String regionId, String keyName) {
         apply(s->s.internalDeleteKeyPair(regionId, keyName));
     }
 
@@ -111,8 +119,8 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     }
 
     @Override
-    public SSHKeyPair getSSHKeyPair(com.sap.sse.landscape.Region region, String keyName) {
-        return sshKeyPairs.get(new Pair<>(region.getId(), keyName));
+    public SSHKeyPair getSSHKeyPair(String regionId, String keyName) {
+        return sshKeyPairs.get(new Pair<>(regionId, keyName));
     }
     
     @Override
@@ -133,8 +141,8 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstCache<Object>(is, /* dummy "cache" */ new Object(), /* resolve listener */ null) {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstCache<Object>(is, /* dummy "cache" */ new Object(), /* resolve listener */ null, classLoaderCache) {
         }; // use anonymous inner class in this class loader to see all that this class sees
     }
 

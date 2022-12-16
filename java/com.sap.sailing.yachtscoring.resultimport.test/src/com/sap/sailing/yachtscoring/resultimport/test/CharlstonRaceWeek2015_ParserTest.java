@@ -26,7 +26,7 @@ import com.sap.sailing.yachtscoring.resultimport.ScoreCorrectionProviderImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public abstract class CharlstonRaceWeek2015_ParserTest extends AbstractCharlstonRaceWeek2015Test {
+public class CharlstonRaceWeek2015_ParserTest extends AbstractCharlstonRaceWeek2015Test {
     @Test
     public void testSimpleParsingSomeYachtscoringDocuments() throws JAXBException, IOException {
         RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(CHARLSTONRACEWEEK2015_TESTFILE_XRR), CHARLSTONRACEWEEK2015_EVENT_NAME).parse();

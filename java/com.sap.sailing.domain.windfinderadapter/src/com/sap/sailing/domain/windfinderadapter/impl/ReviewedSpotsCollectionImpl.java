@@ -110,7 +110,8 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
         if (!backoffTracker.backOff()) {
             try (InputStreamReader in = new InputStreamReader((InputStream) HttpUrlConnectionHelper
                     .redirectConnection(
-                            new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS + "/" + getId() + SPOT_LIST_DOCUMENT_SUFFIX))
+                            new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS + "/" + getId() + SPOT_LIST_DOCUMENT_SUFFIX),
+                            /* timeout */ Duration.ONE_SECOND.times(10), /* preConnectionModifier */ null)
                     .getContent())) {
                 JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
                 result = parser.parseSpots(spotsAsJson, this);

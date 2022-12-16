@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
+import com.sap.sse.common.Util;
 
 public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColumnInSeries> {
     private static final long serialVersionUID = 8987540636040301063L;
@@ -31,7 +32,7 @@ public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColum
             if (insertIndex == -1) {
                 result = series.addRaceColumn(getColumnName(), toState);
             } else {
-                result = series.addRaceColumn(insertIndex, getColumnName(), toState);
+                result = series.addRaceColumn(insertIndex>Util.size(series.getRaceColumns()) ? Util.size(series.getRaceColumns()) : insertIndex, getColumnName(), toState);
             }
             if (result != null && series.getRegatta().isPersistent()) {
                 toState.updateStoredRegatta(series.getRegatta());

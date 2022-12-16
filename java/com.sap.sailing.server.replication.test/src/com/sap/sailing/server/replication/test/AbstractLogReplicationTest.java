@@ -98,9 +98,9 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
     protected Regatta setupRegatta(final String regattaName, String seriesName, String fleetName, String boatClassName) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
         SeriesCreationParametersDTO creationParametersForDefaultSeries = new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */
-                false, /* firstColumnIsNonDiscardableCarryForward */false, /* discardingThresholds */new int[0], /* hasSplitFleetContiguousScoring */
-                false, /* maximumNumberOfDiscards */ null);
+                Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */ false, /* fleetsCanRunInParallel */ true, /* startsWithZero */
+                false, /* firstColumnIsNonDiscardableCarryForward */ false, /* discardingThresholds */ new int[0], /* hasSplitFleetContiguousScoring */
+                false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false);
         seriesCreationParameters.put(seriesName, creationParametersForDefaultSeries);
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);

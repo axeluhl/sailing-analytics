@@ -7,7 +7,6 @@ import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 
 public class Manage2SailResultDocumentProvider extends AbstractManage2SailResultDocumentProvider implements ResultDocumentProvider {
-
     public Manage2SailResultDocumentProvider(final ResultUrlProvider resultUrlProvider) {
         super(resultUrlProvider);
     }
@@ -29,5 +28,4 @@ public class Manage2SailResultDocumentProvider extends AbstractManage2SailResult
     protected boolean acceptRegatta(RegattaResultDescriptor regattaResult) {
         return regattaResult.getIsFinal() != null && regattaResult.getPublishedAt() != null;
     }
-
 }

@@ -55,7 +55,7 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
                 cf.getUserService(), AutoplayHelper.asyncActionsExecutor,
                 new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                 cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(), cf.getErrorReporter(), stringMessages,
-                withFullscreenButton, Arrays.asList(DetailType.values()));
+                withFullscreenButton, Arrays.asList(DetailType.values()), cf);
 
         setPlaceToGo(new LeaderboardPlace(leaderboardPerspective));
         getBus().fireEvent(new AutoPlayHeaderEvent(headerSettings.getTitle(), ""));

@@ -10,6 +10,7 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,7 +25,6 @@ import java.util.stream.StreamSupport;
 import com.sap.sse.common.util.MappingIterable;
 import com.sap.sse.common.util.MappingIterator;
 import com.sap.sse.common.util.NaturalComparator;
-
 
 public class Util {
     public static class Pair<A, B> implements Serializable {
@@ -273,6 +273,36 @@ public class Util {
                 result = counter;
             } else {
                 result = -1;
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * The list returned is "live" connected to {@code ts} only if {@code ts} was instance of a class
+     * that implements {@link List}.
+     */
+    public static <T> List<T> subList(Iterable<T> ts, int from, int toExclusive) {
+        final List<T> result;
+        if (from < 0 || from > toExclusive) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (ts instanceof List<?>) {
+            result = ((List<T>) ts).subList(from, toExclusive);
+        } else {
+            result = new LinkedList<>();
+            int i=0;
+            for (final T t : ts) {
+                if (i >= from && i<toExclusive) {
+                    result.add(t);
+                }
+                i++;
+                if (i >= toExclusive) {
+                    break;
+                }
+            }
+            if (i < toExclusive) {
+                throw new IndexOutOfBoundsException("to-index "+toExclusive+" greater than collection size "+Util.size(ts));
             }
         }
         return result;

@@ -72,6 +72,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     }
 
     @Override
+    public boolean isOneAlwaysStaysOne() {
+        return getSeries().isOneAlwaysStaysOne();
+    }
+
+    @Override
     public Series getSeries() {
         return series;
     }
@@ -111,12 +116,12 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 
     @Override
     public boolean isDiscardable() {
-        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnIsNonDiscardableCarryForward());
+        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnNonDiscardableCarryForward());
     }
 
     @Override
     public boolean isCarryForward() {
-        return isFirstColumnInSeries() && getSeries().isFirstColumnIsNonDiscardableCarryForward();
+        return isFirstColumnInSeries() && getSeries().isFirstColumnNonDiscardableCarryForward();
     }
 
     /**

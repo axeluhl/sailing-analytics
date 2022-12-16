@@ -40,6 +40,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
+    private boolean oneAlwaysStaysOne;
 
     /**
      * If not {@code null}, defines an upper inclusive limit for the number of races that may be discarded from
@@ -143,7 +144,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public Iterable<? extends RaceColumnInSeries> getRaceColumns() {
-        return raceColumns;
+        return new ArrayList<>(raceColumns);
     }
 
     /**
@@ -321,6 +322,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        raceColumnListeners.notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+    }
+
+    @Override
     public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
         raceColumnListeners.notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
     }
@@ -328,6 +334,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+    }
+
+    @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
     }
 
     @Override
@@ -347,7 +358,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
+        final ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
         if (!Util.equalsWithNull(oldResultDiscardingRule, resultDiscardingRule)) {
             this.resultDiscardingRule = resultDiscardingRule;
             raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldResultDiscardingRule, resultDiscardingRule);
@@ -362,6 +373,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        final Integer oldMaximumNumberOfDiscards = maximumNumberOfDiscards;
+        if (!Util.equalsWithNull(maximumNumberOfDiscards, maximumNumberOfDiscards)) {
+            this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+            raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, maximumNumberOfDiscards);
+        }
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
 
@@ -391,7 +407,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         boolean oldStartsWithZeroScore = this.startsWithZeroScore;
         if (oldStartsWithZeroScore != startsWithZeroScore) {
             this.startsWithZeroScore = startsWithZeroScore;
-            RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
+            final RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
             if (firstRaceColumnInSeries != null) {
                 raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(firstRaceColumnInSeries, startsWithZeroScore);
             }
@@ -409,7 +425,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
-    public boolean isFirstColumnIsNonDiscardableCarryForward() {
+    public boolean isFirstColumnNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
 
@@ -418,7 +434,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         boolean oldFirstColumnIsNonDiscardableCarryForward = this.firstColumnIsNonDiscardableCarryForward;
         if (oldFirstColumnIsNonDiscardableCarryForward != firstColumnIsNonDiscardableCarryForward) {
             this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
-            RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
+            final RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
             if (firstRaceColumnInSeries != null) {
                 raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(firstRaceColumnInSeries, firstColumnIsNonDiscardableCarryForward);
             }
@@ -429,5 +445,21 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
+    }
+
+    @Override
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
+    }
+
+    @Override
+    public void setOneAlwaysStaysOne(boolean oneAlwaysStaysOne) {
+        boolean oldOneAlwaysStaysOne = this.oneAlwaysStaysOne;
+        if (oldOneAlwaysStaysOne != oneAlwaysStaysOne) {
+            this.oneAlwaysStaysOne = oneAlwaysStaysOne;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+            }
+        }
     }
 }

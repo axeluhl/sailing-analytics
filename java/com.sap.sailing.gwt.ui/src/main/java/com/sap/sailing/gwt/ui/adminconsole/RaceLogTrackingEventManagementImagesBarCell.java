@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -33,7 +33,7 @@ public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         ArrayList<ImageSpec> result = new ArrayList<ImageSpec>();
-        final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = (StrippedLeaderboardDTOWithSecurity) getContext().getKey();
+        final StrippedLeaderboardDTO selectedLeaderboard = (StrippedLeaderboardDTO) getContext().getKey();
         result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteAllRacesForRaceLogTrackingShorctut(),
                 makeImagePrototype(resources.denoteForRaceLogTracking())));
         result.add(new ImageSpec(ACTION_COMPETITOR_REGISTRATIONS, stringMessages.competitorRegistrations(),

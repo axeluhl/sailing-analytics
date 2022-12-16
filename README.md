@@ -42,16 +42,17 @@ See the server logs like this:
 ```
     tail -f logs/sailing0.log.0
 ```
+Connect to your server at ``http://localhost:8888`` and find its administration console at ``http://localhost:8888/gwt/AdminConsole.html``. The first-time default login user is ``admin`` with default password ``admin`` (please change).
 
 ## Docker
 
-To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``donaldduck70/sapsailing:...`` result from the build. To run that docker image, try something like
+To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``docker.sapsailing.com:443/sapsailing:...`` result from the build. To run that docker image, try something like
 ```
     docker run -d -e "MEMORY=4g" -e "MONGODB_URI=mongodb://my.mongohost.org?replicaSet=rs0&retryWrites=true" -P <yourimage>
 ```
 Do a "docker ps" to figure out the port exposing the web application:
 
-CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 79f6faf19b6a donaldduck70/sapsailing:latest "/home/sailing/serve…" 33 seconds ago Up 32 seconds 0.0.0.0:32782->6666/tcp, 0.0.0.0:32781->7091/tcp, 0.0.0.0:32780->8000/tcp, 0.0.0.0:32779->8888/tcp, 0.0.0.0:32778->14888/tcp modest_dhawan
+CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 79f6faf19b6a docker.sapsailing.com:443/sapsailing:latest "/home/sailing/serve…" 33 seconds ago Up 32 seconds 0.0.0.0:32782->6666/tcp, 0.0.0.0:32781->7091/tcp, 0.0.0.0:32780->8000/tcp, 0.0.0.0:32779->8888/tcp, 0.0.0.0:32778->14888/tcp modest_dhawan
 
 In this example, find your web application at http://localhost:32779 which is where the port 8888 exposed by the application is exposed at on your host. In the example with telnet port 14888 mapped to localhost:32788 do a
 ```
@@ -61,7 +62,7 @@ to connect to the server's OSGi console.
 
 ## Docker Compose
 
-If you have built or obtained the ``donaldduck70/sapsailing:latest`` image, try this:
+If you have built or obtained the ``docker.sapsailing.com:443/sapsailing:latest`` image, try this:
 ```
     cd docker
     docker-compose up

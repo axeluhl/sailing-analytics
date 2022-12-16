@@ -11,7 +11,7 @@ public class UserProfileSettingsPresenter implements UserProfileSettingsView.Pre
     private final UserProfileSettingsView view;
     private final UserProfileView.Presenter userProfilePresenter;
     private final UserSettingsView.Presenter userSettingsPresenter;
-            
+
     public UserProfileSettingsPresenter(final UserProfileSettingsView view,
             final UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
@@ -20,12 +20,12 @@ public class UserProfileSettingsPresenter implements UserProfileSettingsView.Pre
                 userProfilePresenter.getClientFactory());
         view.setPresenter(this);
     }
-    
+
     @Override
     public UserSettingsView.Presenter getUserSettingsPresenter() {
         return userSettingsPresenter;
     }
-    
+
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         view.getDecorator().setAuthenticationContext(authenticationContext);
@@ -33,7 +33,7 @@ public class UserProfileSettingsPresenter implements UserProfileSettingsView.Pre
             userSettingsPresenter.loadData();
         }
     }
-    
+
     @Override
     public void doTriggerLoginForm() {
         userProfilePresenter.doTriggerLoginForm();

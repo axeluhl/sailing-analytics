@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
 import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
@@ -55,6 +56,7 @@ import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
 
@@ -88,9 +90,10 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
     }
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
-        removeUrlParameter();;
+        removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
-        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), paywallResolver,
                 header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
@@ -141,6 +144,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     }
                 });
                 queryDefinitionProvider.addControl(orientationAnchor);
+                queryDefinitionProvider.addControl(new HelpButton(DataMiningHelpButtonResources.INSTANCE,
+                        getStringMessages().videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/360019913740-An-Introduction-to-the-SAP-Sailing-Analytics-Data-Mining-Tool"));
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the

@@ -6,14 +6,16 @@ public class SeriesParameters {
     private boolean startswithZeroScore = false;
     private int[] discardingThresholds = null;
     private Integer maximumNumberOfDiscards = null;
+    private boolean oneAlwaysStaysOne;
 
     public SeriesParameters(boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            boolean startswithZeroScore, int[] discardingThresholds, Integer maximumNumberOfDiscards) {
+            boolean startswithZeroScore, int[] discardingThresholds, Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne) {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.startswithZeroScore = startswithZeroScore;
         this.discardingThresholds = discardingThresholds;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
@@ -50,5 +52,9 @@ public class SeriesParameters {
 
     public Integer getMaximumNumberOfDiscards() {
         return maximumNumberOfDiscards;
+    }
+
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
     }
 }

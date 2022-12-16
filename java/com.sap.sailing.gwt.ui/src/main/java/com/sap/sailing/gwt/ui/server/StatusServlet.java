@@ -49,6 +49,7 @@ public class StatusServlet extends HttpServlet {
         final String waitUntilRacesLoadedString = req.getParameter(WAIT_UNTIL_RACES_LOADED);
         boolean waitUntilRacesLoaded = Boolean.valueOf(waitUntilRacesLoadedString);
         result.put("servername", ServerInfo.getName());
+        result.put("serverdirectory", ServerInfo.getServerDirectory().getAbsolutePath());
         result.put("buildversion", ServerInfo.getBuildVersion());
         try {
             final JSONObject versionAsJson = ServerInfo.getBuildVersionJson();

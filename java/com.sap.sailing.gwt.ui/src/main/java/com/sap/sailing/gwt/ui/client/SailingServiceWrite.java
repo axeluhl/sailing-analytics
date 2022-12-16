@@ -73,7 +73,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -271,7 +271,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
-            List<FleetDTO> fleets) throws UnauthorizedException;
+            boolean oneAlwaysStaysOne, List<FleetDTO> fleets) throws UnauthorizedException;
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, List<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
@@ -371,17 +371,20 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeLeaderboards(Collection<String> leaderboardNames) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
+    StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, List<UUID> newCourseAreaIds)
             throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name, String displayName,
+    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
             String regattaName) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
+    StrippedLeaderboardDTO createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName);
+    
+    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
+    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds, ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds)
             throws UnauthorizedException;
 

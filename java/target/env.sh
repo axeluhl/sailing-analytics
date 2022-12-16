@@ -7,6 +7,11 @@
 # of this file as there could be overwritten ones!
 # *******************************************************
 
+# Source secrets if available; they may be overwritten in the user data section and by an environment.
+if [ -f configuration/secrets ]; then
+  . configuration/secrets
+fi
+
 # Set the heap size here if you want to override the default which
 # will compute a MEMORY assignment from the total
 # memory installed in the machine and the number of server instances to
@@ -73,7 +78,7 @@ JAVA_BINARY="$JAVA_HOME/bin/java"
 JAVA_VERSION_OUTPUT=$("$JAVA_BINARY" -version 2>&1)
 JAVA_VERSION=$(echo "$JAVA_VERSION_OUTPUT" | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
 export JAVA_11_LOGGING_ARGS="-Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=10000000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
-export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC ${JAVA_11_LOGGING_ARGS} --illegal-access=permit"
+export JAVA_11_ARGS="-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8000,onjcmd=y,server=y -Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC ${JAVA_11_LOGGING_ARGS}"
 export JAVA_8_LOGGING_ARGS="-XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
 echo JAVA_VERSION detected: $JAVA_VERSION >&2
 JAVA_MAJOR_VERSION=$( echo "${JAVA_VERSION}" | sed -e 's/^\([0-9]*\)\..*$/\1/' )

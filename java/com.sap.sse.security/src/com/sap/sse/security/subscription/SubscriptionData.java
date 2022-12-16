@@ -25,7 +25,13 @@ public class SubscriptionData {
         SUBSCRIPTION_UPDATED_AT,
         LATEST_EVENT_TIME,
         MANUAL_UPDATED_AT,
-        PROVIDER_NAME;
+        PROVIDER_NAME,
+        NEXT_BILLING_AT,
+        CURRENT_TERM_END,
+        CANCELLED_AT,
+        SUBSCRIPTION_ACTIVATED_AT,
+        REOCURRING_PAYMENT_VALUE,
+        CURRENCY_CODE;
     }
 
     /**
@@ -115,12 +121,47 @@ public class SubscriptionData {
     public String getProviderName() {
         return getMapStringValue(DataAttribute.PROVIDER_NAME.name());
     }
+    
+    public TimePoint getNextBillingAt() {
+        return getMapTimePointValue(DataAttribute.NEXT_BILLING_AT.name());
+    }
+    
+    public TimePoint getCurrentTermEnd() {
+        return getMapTimePointValue(DataAttribute.CURRENT_TERM_END.name());
+    }
+    
+    public TimePoint getCancelledAt() {
+        return getMapTimePointValue(DataAttribute.CANCELLED_AT.name());
+    }
+    
+    public TimePoint getSubscriptionActivatedAt() {
+        return getMapTimePointValue(DataAttribute.SUBSCRIPTION_ACTIVATED_AT.name());
+    }
+    
+    public Integer getReocurringPaymentValue() {
+        return getMapIntegerValue(DataAttribute.REOCURRING_PAYMENT_VALUE.name());
+    }
+    
+    public String getCurrencyCode() {
+        return getMapStringValue(DataAttribute.CURRENCY_CODE.name());
+    }
 
     private String getMapStringValue(String key) {
         Object valObj = data.get(key);
         final String val;
         if (valObj != null) {
             val = (String) valObj;
+        } else {
+            val = null;
+        }
+        return val;
+    }
+    
+    private Integer getMapIntegerValue(String key) {
+        Object valObj = data.get(key);
+        final Integer val;
+        if (valObj != null) {
+            val = (Integer) valObj;
         } else {
             val = null;
         }

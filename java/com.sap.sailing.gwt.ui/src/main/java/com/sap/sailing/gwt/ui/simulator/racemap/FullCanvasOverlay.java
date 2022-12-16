@@ -9,6 +9,8 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
 import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
+import com.google.gwt.maps.client.events.resize.ResizeMapEvent;
+import com.google.gwt.maps.client.events.resize.ResizeMapHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
@@ -34,6 +36,11 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     
     protected Vector diffPx;
 
+    /** Cached map width. A lookup of this value takes multiple up to 5ms **/
+    protected Integer mapWidth;
+    /** Cached map height. A lookup of this value takes multiple up to 5ms **/
+    protected Integer mapHeight;
+
     public String pointColor = "Red";
     public String textColor = "Black";
     
@@ -54,9 +61,15 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
      *  Set the canvas to be the size of the map and set it to the top left corner of the map 
      */
     public void setCanvasSettings() {
-        int canvasWidth = getMap().getDiv().getClientWidth();
-        int canvasHeight = getMap().getDiv().getClientHeight();
-   
+        if (mapWidth == null) {
+            mapWidth = getMap().getDiv().getClientWidth();
+        }
+        if (mapHeight == null) {
+            mapHeight = getMap().getDiv().getClientHeight();
+        }
+        int canvasWidth = mapWidth;
+        int canvasHeight = mapHeight;
+
         canvas.setWidth(String.valueOf(canvasWidth));
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
@@ -72,12 +85,27 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
 
     @Override
     public void onResize() {
+        mapWidth = null;
+        mapHeight = null;
     	// improve browser performance by deferred scheduling of redraws
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
                 draw();
             }
         });
+    }
+
+    @Override
+    public void addToMap() {
+        if (map != null) {
+            map.addResizeHandler(new ResizeMapHandler() {
+                @Override
+                public void onEvent(ResizeMapEvent event) {
+                    onResize();
+                }
+            });
+        }
+        super.addToMap();
     }
 
     protected void drawCenterChanged() {

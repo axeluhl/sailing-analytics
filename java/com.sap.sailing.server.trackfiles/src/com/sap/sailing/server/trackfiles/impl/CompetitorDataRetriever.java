@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
@@ -32,8 +33,9 @@ public class CompetitorDataRetriever extends AbstractDataRetriever {
             public String getName(Map.Entry<Competitor, Boat> competitorAndBoat) {
                 final Competitor c = competitorAndBoat.getKey();
                 final Boat b = competitorAndBoat.getValue();
+                final Nationality nationality = c.getTeam().getNationality();
                 return c.getName() + " - " + b.getSailID() + " - "
-                        + c.getTeam().getNationality().getThreeLetterIOCAcronym();
+                        + (nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
             }
         }, retriever);
     }

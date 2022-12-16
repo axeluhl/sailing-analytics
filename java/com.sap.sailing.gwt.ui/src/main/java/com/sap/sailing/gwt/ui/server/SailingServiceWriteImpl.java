@@ -279,7 +279,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -313,6 +313,7 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboardWithEliminations;
+import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
@@ -395,6 +396,7 @@ import com.sap.sse.shared.util.impl.UUIDHelper;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ImageConverter;
 import com.sap.sse.util.ImageConverter.ImageWithMetadata;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class SailingServiceWriteImpl extends SailingServiceImpl implements SailingServiceWrite {
 
@@ -749,7 +751,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         for (String serverName : namesOfSailingServersToRemove) {
             getService().apply(new RemoveRemoteSailingServerReference(serverName));
         }
@@ -757,7 +759,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         final String expandedURL;
         if (sailingServer.getUrl().contains("//")) {
             expandedURL = sailingServer.getUrl();
@@ -775,7 +777,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
             final RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         RemoteSailingServerReference serverRef = getService()
                 .apply(new UpdateSailingServerReference(sailingServer.getName(),
                         sailingServer.isInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
@@ -789,7 +791,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(final String sailingServerName)
             throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         RemoteSailingServerReference serverRef = getService().getRemoteServerReferenceByName(sailingServerName);
         com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
                 .getCompleteRemoteServerReference(serverRef);
@@ -935,15 +937,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName,
+    public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName,
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             List<UUID> courseAreaIds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName),
-                leaderboardDisplayName, new Callable<StrippedLeaderboardDTOWithSecurity>() {
+                leaderboardDisplayName, new Callable<StrippedLeaderboardDTO>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
-                        return createStrippedLeaderboardDTOWithSecurity(
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(
                                 getService().apply(new CreateFlexibleLeaderboard(leaderboardName,
                                         leaderboardDisplayName, discardThresholds,
                                 baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaIds)), false, false);
@@ -952,28 +954,28 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
+    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaIdentifier),
-                leaderboardDisplayName, new Callable<StrippedLeaderboardDTOWithSecurity>() {
+                leaderboardDisplayName, new Callable<StrippedLeaderboardDTO>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
-                        return createStrippedLeaderboardDTOWithSecurity(getService().apply(new CreateRegattaLeaderboard(
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(
                                 regattaIdentifier, leaderboardDisplayName, discardThresholds)), false, false);
                     }
                 });
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name, String displayName,
+    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
             String fullRegattaLeaderboardName) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(name), displayName,
-                new Callable<StrippedLeaderboardDTOWithSecurity>() {
+                new Callable<StrippedLeaderboardDTO>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
-                        return createStrippedLeaderboardDTOWithSecurity(
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(
                                 getService().apply(new CreateRegattaLeaderboardWithEliminations(name, displayName,
                                         fullRegattaLeaderboardName)),
                                 false, false);
@@ -982,14 +984,30 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
+    public StrippedLeaderboardDTO createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName) {
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaIdentifier), leaderboardDisplayName,
+                new Callable<StrippedLeaderboardDTO>() {
+                    @Override
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(
+                                getService().apply(new CreateRegattaLeaderboardWithOtherTieBreakingLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds,
+                                        otherTieBreakingLeaderboardName)),
+                                false, false);
+                    }
+                });
+    }
+
+    @Override
+    public StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThresholds, List<UUID> newCourseAreaIds) {
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         Leaderboard updatedLeaderboard = getService().apply(
                 new UpdateLeaderboard(leaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaIds));
-        return createStrippedLeaderboardDTOWithSecurity(updatedLeaderboard, false, false);
+        return createStrippedLeaderboardDTO(updatedLeaderboard, false, false);
     }
 
     @Override
@@ -1619,7 +1637,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
+            Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne, List<FleetDTO> fleets) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
@@ -1627,7 +1645,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, isFleetsCanRunInParallel, resultDiscardingThresholds,
                         startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
-                        maximumNumberOfDiscards, fleets));
+                        maximumNumberOfDiscards, oneAlwaysStaysOne, fleets));
     }
 
     @Override
@@ -1636,7 +1654,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
-        for(String columnName: columnNames) {
+        for (String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
     }
@@ -1699,7 +1717,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     protected RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
         RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getName(),
-                raceColumnInSeries.getSeries().getName(), raceColumnInSeries.getRegatta().getName());
+                raceColumnInSeries.getSeries().getName(), raceColumnInSeries.getRegatta().getName(),
+                raceColumnInSeries.isOneAlwaysStaysOne());
         fillRaceColumnDTO(raceColumnInSeries, raceColumnInSeriesDTO);
         return raceColumnInSeriesDTO;
     }
@@ -1711,17 +1730,25 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final boolean exportTrackedRacesAndStartTracking) {
         final UUID importOperationId = UUID.randomUUID();
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
+        final String targetServerBearerToken;
+        if (!Util.hasLength(targetServerUsername) || !Util.hasLength(targetServerPassword)) {
+            targetServerBearerToken = getSecurityService().getOrCreateAccessToken(getSecurityService().getCurrentUser().getName());
+        } else {
+            targetServerBearerToken = null;
+        }
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
             @Override
             public void run() {
                 getService().importMasterData(urlAsString, leaderboardGroupIds, override, compress, exportWind,
-                        exportDeviceConfigurations, targetServerUsername, targetServerPassword, /* targetServerBeararToken */ null,
+                        exportDeviceConfigurations, targetServerUsername, targetServerPassword, targetServerBearerToken,
                         exportTrackedRacesAndStartTracking, importOperationId);
             }
         };
-        executor.execute(masterDataImportTask);
+        // We need to convey the current user's credentials into the masterDataImportTask for default object ownership and permissions in case no
+        // deviating username and password have been provided:
+        executor.execute(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(masterDataImportTask));
         return importOperationId;
     }
 
@@ -3196,18 +3223,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     getService().getFileStorageManagementService().getActiveFileStorageService()
                             .removeFile(new URI(alreadyStoredFileRef));
                 } catch (Exception e) {
+                    logger.warning("Exception trying to remove image file "+alreadyStoredFileRef+": "+e.getMessage());
                 }
                 // Exception occured while trying to revert changes after exception
                 // This only keeps some trash on the FileStorage
             }
             throw new Exception("Error occured while storing images on the FileStorage");
         }
-        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
-                resizedImages);
-        for (String tag : resizingTask.getImage().getTags()) {
+        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask, resizedImages);
+        final ImageDTO image = resizingTask.getImage();
+        for (String tag : new ArrayList<>(image.getTags())) {
             final MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
             if (predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
-                final ImageDTO image = resizingTask.getImage();
                 for (MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
                     image.getTags().remove(tagConstant.getName());
                 }
@@ -3239,7 +3266,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
                         metadata, fileType);
                 sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
-                        .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
+                        .storeFile(fileStorageStream, "." + fileType, Long.valueOf(fileStorageStream.available()))
                         .toString());
             }
         } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException

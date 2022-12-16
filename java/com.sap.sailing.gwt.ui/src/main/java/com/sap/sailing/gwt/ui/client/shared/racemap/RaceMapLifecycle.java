@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * This lifecycle corresponds with the RaceMap
@@ -11,17 +13,23 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     public static final String ID = "rm";
 
     private final StringMessages stringMessages;
+    private final PaywallResolver paywallResolver;
+    private final SecuredDTO raceDTO;
     
-    public RaceMapLifecycle(StringMessages stringMessages) {
+    public RaceMapLifecycle(StringMessages stringMessages, PaywallResolver paywallResolver, SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
+        this.paywallResolver = paywallResolver;
+        this.raceDTO = raceDTO;
     }
-    
+
+    public SecuredDTO getRaceDTO() {
+        return raceDTO;
+    }
+
     @Override
     public RaceMapSettingsDialogComponent getSettingsDialogComponent(RaceMapSettings settings) {
         return new RaceMapSettingsDialogComponent(settings, stringMessages,
-                /* isSimulationEnabled: enable simulation because we don't know the boat class
-                 * here yet and therefore cannot reasonably judge whether polar data is
-                 * available; if in doubt, rather enable selecting it */ true);
+                /* hasPolar */ true, paywallResolver, raceDTO);
     }
 
     @Override
@@ -55,7 +63,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints(), settings.isShowEstimatedDuration(),
                 settings.getStartCountDownFontSizeScaling(), settings.isShowManeuverLossVisualization(),
-                settings.isShowSatelliteLayer());
+                settings.isShowSatelliteLayer(), settings.isShowWindLadder());
     }
 
     @Override
@@ -69,6 +77,6 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints(), settings.isShowEstimatedDuration(),
                 settings.getStartCountDownFontSizeScaling(), settings.isShowManeuverLossVisualization(),
-                settings.isShowSatelliteLayer());
+                settings.isShowSatelliteLayer(), settings.isShowWindLadder());
     }
 }

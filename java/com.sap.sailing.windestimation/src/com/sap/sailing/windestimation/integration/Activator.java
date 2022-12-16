@@ -61,6 +61,10 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         logger.info("Registering WindEstimationFactoryService");
         registerIncorporatedMongoDbCollectionsExclusively();
+        // Initialize the factory with its model cache; this will try to load existing models from the DB on a master
+        // node. If this fails, e.g., because no model is stored in the DB yet, or it was removed from the DB, or the
+        // model serialization pattern has changed incompatibly, other methods of obtaining a wind estimation model set
+        // will be evaluated below. See also bug5716.
         service = new WindEstimationFactoryServiceImpl();
         final String windEstimationModelDataSourceURL = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME);

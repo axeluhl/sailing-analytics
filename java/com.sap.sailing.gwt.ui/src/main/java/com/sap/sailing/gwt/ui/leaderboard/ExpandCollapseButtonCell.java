@@ -33,11 +33,15 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
         super("click", "keydown");
         this.column = column;
         this.delegate = delegate;
-
         ImageResourceRenderer imgRenderer = new ImageResourceRenderer(); 
         ImageResource imgResource = column.isExpanded() ? leaderboardResources.minusIcon() : leaderboardResources.plusIcon();
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<div class=\"openColumn\">");
+        // The "isExpanded" attribute is evaluated by the LeaderboardTablePO test page object
+        // to obtain a stable criterion for deciding whether the column is currently expanded
+        // or collapsed. The previous approach (trying to compare the base64-encoded data URLs
+        // for the expand/collapse button impages) was brittle and broke during the Java 11
+        // migration.
+        sb.appendHtmlConstant("<div class=\"openColumn\" isExpanded=\""+Boolean.toString(column.isExpanded())+"\">");
         sb.append(imgRenderer.render(imgResource));
         sb.appendHtmlConstant("</div>");
         this.html = sb.toSafeHtml();
@@ -50,13 +54,12 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
         if ("click".equals(event.getType())) {
             EventTarget eventTarget = event.getEventTarget();
-            if (!Element.is(eventTarget)) {
-                return;
-            }
-            if (parent.getFirstChildElement().isOrHasChild(Element.as(eventTarget))) {
-                if (!column.isTogglingInProcess()) {
-                    // Ignore clicks that occur outside of the main element.
-                    onEnterKeyDown(context, parent, value, event, valueUpdater);
+            if (Element.is(eventTarget)) {
+                if (parent.getFirstChildElement().isOrHasChild(Element.as(eventTarget))) {
+                    if (!column.isTogglingInProcess()) {
+                        // Ignore clicks that occur outside of the main element.
+                        onEnterKeyDown(context, parent, value, event, valueUpdater);
+                    }
                 }
             }
         }

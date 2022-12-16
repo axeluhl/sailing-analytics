@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 public abstract class AbstractORCPerformanceCurveLegDialog<T> extends DataEntryDialog<T> {
     private final StringMessages stringMessages;
@@ -33,5 +34,20 @@ public abstract class AbstractORCPerformanceCurveLegDialog<T> extends DataEntryD
             i++;
         }
         return legTypeBox;
+    }
+
+    protected void updateTwaBoxFromTwdAndLegDirection(DoubleBox twdBox, DoubleBox legDirectionBox, DoubleBox twaBox) {
+        if (twdBox.getValue() != null && legDirectionBox.getValue() != null) {
+            double twa = twdBox.getValue() - legDirectionBox.getValue();
+            if (twa < -180) {
+                twa += 360;
+            } else if (twa > 180) {
+                twa -= 360;
+            }
+            twaBox.setValue(twa);
+        } else {
+            twaBox.setText("");
+        }
+        validateAndUpdate();
     }
 }

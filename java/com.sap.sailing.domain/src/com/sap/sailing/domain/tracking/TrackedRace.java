@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -41,6 +44,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -50,7 +54,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
@@ -484,6 +487,21 @@ public interface TrackedRace
      *            {@link MarkPassingCalculator }to block the thread until all calculations will be finished.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates);
+    
+    /**
+     * Fetches all mark passings for all competitors from this tracked race.
+     * 
+     * @see #getMarkPassings(Competitor, boolean)
+     */
+    default Map<Competitor, Map<Waypoint, MarkPassing>> getMarkPassings(boolean waitForLatestUpdates) {
+        final Map<Competitor, Map<Waypoint, MarkPassing>> result = new HashMap<>();
+        for (final Competitor competitor : getRace().getCompetitors()) {
+            for (final MarkPassing markPassing : getMarkPassings(competitor, waitForLatestUpdates)) {
+                result.computeIfAbsent(competitor, k->new HashMap<>()).put(markPassing.getWaypoint(), markPassing);
+            }
+        }
+        return result;
+    }
 
     /**
      * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.

@@ -68,7 +68,7 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
     }
 
     @Override
-    protected SettingsType getResult() {
+    public SettingsType getResult() {
         return settingsDialogComponent.getResult();
     }
 

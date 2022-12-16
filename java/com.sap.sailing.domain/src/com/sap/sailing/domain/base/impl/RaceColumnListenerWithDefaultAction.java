@@ -90,6 +90,11 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     }
 
     @Override
+    default void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        defaultAction(); 
+    }
+
+    @Override
     default void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
         defaultAction(); 
     }
@@ -97,6 +102,12 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     @Override
     default void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
             ResultDiscardingRule newDiscardingRule) {
+        defaultAction(); 
+    }
+
+    @Override
+    default void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards,
+            Integer newMaximumNumberOfDiscards) {
         defaultAction(); 
     }
 

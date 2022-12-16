@@ -1,0 +1,6 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target" : { "namespace": "android_app", "package_name": "com.sap.sailing.racecommittee.app",
+               "sha256_cert_fingerprints": ["D4:C2:5C:14:6B:B2:EA:63:78:E9:1B:36:B7:82:A9:69:3B:65:8D:6B:60:4C:32:8D:AB:C8:5B:54:30:05:ED:AC",
+                                            "BD:06:F0:7D:9E:57:F0:05:E1:1F:45:17:27:D6:1C:04:4D:50:A5:08:19:22:04:2F:A9:91:44:C1:02:FF:D5:07" ] }
+}]

@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section"
+             xmlns:sh="urn:import:com.sap.sailing.gwt.home.mobile.partials.sectionHeader">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ms:MobileSection>
+        <ms:header>
+            <sh:SectionHeaderContent ui:field="sectionHeaderUi"/>
+        </ms:header>
+        <ms:content>
+            <g:HTMLPanel ui:field="contentContainerUi" addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
+                <div ui:field="subscriptionInfoUi" class="{res.mediaCss.small12}"/>
+                <g:Button ui:field="cancelControlUi" text="{i18n.cancelSubscription}"
+                          addStyleNames="{res.mediaCss.small12} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonred}" />
+            </g:HTMLPanel>
+        </ms:content>
+    </ms:MobileSection>
+</ui:UiBinder> 

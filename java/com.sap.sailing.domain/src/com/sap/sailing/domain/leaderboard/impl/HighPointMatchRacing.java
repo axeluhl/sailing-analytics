@@ -32,5 +32,4 @@ public class HighPointMatchRacing extends HighPoint {
             Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         return rank == 0 ? null : rank == 1 ? 1.0 : 0.0;
     }
-
 }

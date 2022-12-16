@@ -54,7 +54,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
-import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.shared.classloading.JoinedClassLoader;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
@@ -165,7 +165,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         final ClassLoader oldThreadContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getJoinedClassLoader());
         try (final ObjectInputStream in = new ObjectInputStreamResolvingAgainstCache<Object>(
-                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null) {}) {
+                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null, /* classLoaderCache */ new HashMap<>()) {}) {
             Object o = in.readObject();
             if (o instanceof StatisticQueryDefinitionDTO) {
                 return (StatisticQueryDefinitionDTO) o;

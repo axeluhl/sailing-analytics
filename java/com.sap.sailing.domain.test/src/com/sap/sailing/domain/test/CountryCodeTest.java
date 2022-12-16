@@ -12,7 +12,6 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.MissingResourceException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +23,7 @@ import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 
 public class CountryCodeTest {
-    private static final int NUMBER_OF_COUNTRY_CODES = 260;
+    private static final int NUMBER_OF_COUNTRY_CODES = 261;
 
     @Ignore
     @Test
@@ -102,13 +101,10 @@ public class CountryCodeTest {
     
     @Test
     public void testGermanyCountryCode() {
-        for (Locale l : Locale.getAvailableLocales()) {
-            try {
-                l.getISO3Country();
-            } catch (MissingResourceException e) {
-                // The "Serbia and Montenegro" locale has no ISO3 code due to the split-up
-                assertEquals("sr_CS", l.toString());
-            }
+        for (String iso2 : Locale.getISOCountries()) {
+            final CountryCode cc = CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(iso2);
+            assertNotNull("No country code found for two-letter ISO code "+iso2, cc);
+            assertEquals(iso2, cc.getTwoLetterISOCode());
         }
         assertEquals("DEU", Locale.GERMANY.getISO3Country());
         assertEquals("DE", Locale.GERMANY.getCountry());

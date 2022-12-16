@@ -7,8 +7,8 @@
 
 # set username, password, and organization
 
-# TOKEN can be generated using docker login docker.sapsailing.com:443
-TOKEN=$( cat ~/.docker/config.json | jq -r '.auths."docker.sapsailing.com:443".auth' )
+# TOKEN can be generated using docker login docker.sapsailing.com
+TOKEN=$( cat ~/.docker/config.json | jq -r '.auths."docker.sapsailing.com".auth' )
 if [ "${TOKEN}" = "null" ]; then
   # set username, password, and organization
   read -p "Username: " UNAME
@@ -47,7 +47,7 @@ do
       if [[ $j =~ $k ]]; then
 	found=1
 	echo -n "  - ${j} ... "
-	digest=$( curl -s -X HEAD -I -i -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "${AUTH_HEADER}" https://docker.sapsailing.com/v2/${REPO}/manifests/${j} | grep "^Docker-Content-Digest: " | sed -e 's/^Docker-Content-Digest: \([^]*\)\?$/\1/' )
+	digest=$( curl -s -X HEAD -I -i -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "${AUTH_HEADER}" https://docker.sapsailing.com/v2/${REPO}/manifests/${j} | grep -i "^Docker-Content-Digest: " | sed -e 's/^[dD]ocker-[cC]ontent-[dD]igest: \([^]*\)\?$/\1/' )
 	URL="https://docker.sapsailing.com/v2/${REPO}/manifests/${digest}"
 	curl -s -X DELETE -H "${AUTH_HEADER}" "${URL}"
 	echo "DELETED ($?)"

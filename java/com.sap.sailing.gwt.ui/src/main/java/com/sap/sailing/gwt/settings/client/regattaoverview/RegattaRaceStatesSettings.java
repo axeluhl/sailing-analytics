@@ -86,7 +86,7 @@ public final class RegattaRaceStatesSettings extends AbstractGenericSerializable
     }
     
     public void setDefaultCourseAreas(Iterable<CourseAreaDTO> defaultCourseAreas) {
-        if(defaultCourseAreas == null) {
+        if (defaultCourseAreas == null) {
             defaultCourseAreas = Collections.emptySet();
         }
         Set<UUID> courseAreaIds = new HashSet<>();

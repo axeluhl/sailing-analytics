@@ -5,7 +5,7 @@ import java.io.Serializable;
 public interface WithID {
 
     /**
-     * Something that uniquely identifies this object beyond his name
+     * Something that uniquely identifies this object beyond its name
      */
     Serializable getId();
 

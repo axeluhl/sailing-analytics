@@ -84,6 +84,8 @@ implements UserDataProvider {
         
         BuilderT setInboundReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
 
+        Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration();
+        
         BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
 
         BuilderT setDatabaseConfiguration(Database databaseConfiguration);
@@ -271,6 +273,11 @@ implements UserDataProvider {
                     && inboundReplicationConfiguration.get().getInboundMasterExchangeName() != null;
         }
         
+        protected boolean isInboundMasterServletHostSet() {
+            return inboundReplicationConfiguration != null && inboundReplicationConfiguration.isPresent()
+                    && inboundReplicationConfiguration.get().getMasterHostname() != null;
+        }
+        
         protected boolean isOutboundReplicationRabbitMQEndpointSet() {
             return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundRabbitMQEndpoint() != null;
         }
@@ -297,7 +304,8 @@ implements UserDataProvider {
             return self();
         }
         
-        protected Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration() {
+        @Override
+        public Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration() {
             final InboundReplicationConfiguration.Builder resultBuilder;
             if (inboundReplicationConfiguration == null || !inboundReplicationConfiguration.isPresent()) {
                 resultBuilder = InboundReplicationConfiguration.builder();

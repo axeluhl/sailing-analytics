@@ -221,7 +221,7 @@
         },
         {
             "name": "google-web-toolkit ",
-            "version": "2.9.0",
+            "version": "2.10.0",
             "owner": "Google, Inc.",
             "homepage": "http://www.gwtproject.org/terms.html",
             "acknowledgements": [

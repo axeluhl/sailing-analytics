@@ -379,9 +379,11 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         if (numberOfStartAnalysisCards > 0) {
             rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.right());
         }
-        final StartAnalysisCard startlineAnalysisCard = new StartAnalysisCard(numberOfStartAnalysisCards
-                * SCROLL_OFFSET_STARTANALYSIS_CARDS + MARGIN_LEFT_STARTANALYSIS_CARD, numberOfStartAnalysisCards,
-                startAnalysisDTO, dashboardClientFactory.getSailingService(), errorReporter, raceMapResources);
+        final StartAnalysisCard startlineAnalysisCard = new StartAnalysisCard(
+                numberOfStartAnalysisCards * SCROLL_OFFSET_STARTANALYSIS_CARDS + MARGIN_LEFT_STARTANALYSIS_CARD,
+                numberOfStartAnalysisCards, startAnalysisDTO, dashboardClientFactory.getSailingService(), errorReporter,
+                raceMapResources, dashboardClientFactory.getSubscriptionServiceFactory(),
+                dashboardClientFactory.getUserService());
         startanalysis_card_container.add(startlineAnalysisCard);
         startlineAnalysisCard.startAnalysisComponentPageChangedToIndexAndStartAnalysis(page, startAnalysisDTO);
         registerPageChangeListener(startlineAnalysisCard);

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.searchresult;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
@@ -28,13 +30,16 @@ public class SearchResultActivity extends AbstractActivity {
         if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
             view.setSearchText(searchText);
-            searchOnServer(panel, view, new GetSearchResultsAction(searchText));
+            view.setBusy(true);
+            final AtomicInteger numberOfOutstandingRequests = new AtomicInteger(1);
+            searchOnServer(panel, view, new GetSearchResultsAction(searchText), numberOfOutstandingRequests);
             clientFactory.getDispatch().execute(new GetSearchServerNamesAction(),
                     new ActivityCallback<StringsResult>(clientFactory, panel) {
                 @Override
                 public void onSuccess(StringsResult result) {
                     for (String serverName : result.getValues()) {
-                        searchOnServer(panel, view, new GetSearchResultsAction(searchText, serverName));
+                        numberOfOutstandingRequests.incrementAndGet();
+                        searchOnServer(panel, view, new GetSearchResultsAction(searchText, serverName), numberOfOutstandingRequests);
                     }
                 }
             });
@@ -42,11 +47,24 @@ public class SearchResultActivity extends AbstractActivity {
         panel.setWidget(view);
     }
     
-    private void searchOnServer(AcceptsOneWidget panel, final SearchResultView view, GetSearchResultsAction action) {
+    private void searchOnServer(AcceptsOneWidget panel, final SearchResultView view, GetSearchResultsAction action, final AtomicInteger numberOfOutstandingRequests) {
         clientFactory.getDispatch().execute(action, new ActivityCallback<ListResult<SearchResultDTO>>(clientFactory, panel) {
             @Override
             public void onSuccess(ListResult<SearchResultDTO> result) {
                 view.updateSearchResult(searchResultPlace.getSearchText(), result.getValues());
+                manageBusyState(view, numberOfOutstandingRequests);
+            }
+
+            private void manageBusyState(final SearchResultView view, AtomicInteger numberOfOutstandingRequests) {
+                if (numberOfOutstandingRequests.decrementAndGet() <= 0) {
+                    view.setBusy(false);
+                }
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                super.onFailure(caught);
+                manageBusyState(view, numberOfOutstandingRequests);
             }
         });
     }

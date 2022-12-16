@@ -302,7 +302,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                         if (editedBoatIndex >= 0){
                             getFilterField().add(editedBoatIndex, updatedBoat);
                         } else {
-                            //in case boat was not present --> not edit, but create
+                            // in case boat was not present --> not edit, but create
                             getFilterField().add(updatedBoat);
                         }
                         getDataProvider().refresh();

@@ -83,7 +83,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
                             @Override
                             public void onSuccess(final Iterable<DetailType> result) {
                                 createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager,
-                                        currentPresenter.getUserService(), null, panel -> callback.run(), result);
+                                        currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(), null, panel -> callback.run(), result);
                             }
 
                             @Override

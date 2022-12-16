@@ -86,10 +86,15 @@ done
 echo >>${WRAPPER_BUNDLE}/${BUILD_PROPERTIES_FILE}
 echo "Building the wrapper bundle..."
 cd ..
-mvn clean install
+echo "NOT USING ${extra} arguments for Maven to avoid using local target definition already for building local repo"
+echo "In folder $(pwd) using: mvn clean install"
+mvn --batch-mode clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
-mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
+# Note: the JAR ends up in target/ because the SDK project does not use any parent pom, so
+# it doesn't inherit the output directory specification "bin/" from its parent, and
+# target/ is the default.
+mv target/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
 echo "Unpacking source bundles..."
 cd ${LIB}
 for l in *-sources.jar; do
@@ -114,13 +119,16 @@ sed -i -e 's/^\( *\)version="[0-9.]*"/\1version="'${VERSION}'"/' ${FEATURE_XML}
 echo "Patching com.sap.sse.feature.runtime's feature.xml..."
 NEW_SSE_RUNTIME_FEATURE_XML_CONTENT=$( cat "${SSE_RUNTIME_FEATURE_XML}" |  awk -v VERSION=${VERSION} '
 /id="com.amazon.aws.aws-java-api"/ { IN_PLUGIN="true"; }
-{ if (IN_PLUGIN=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN="false"; } else print $0; }
+/id="com.amazon.aws.aws-java-api.source"/ { IN_PLUGIN_SOURCE="true"; }
+{ if (IN_PLUGIN=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN="false"; } else
+if (IN_PLUGIN_SOURCE=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN_SOURCE="false"; } else print $0; }
 ' )
 echo "${NEW_SSE_RUNTIME_FEATURE_XML_CONTENT}" >"${SSE_RUNTIME_FEATURE_XML}"
 echo "Patching update site's site.xml..."
 sed -i -e 's/com.amazon.aws.aws-java-api\(\.source\)\?_\([0-9.]*\)\.jar/com.amazon.aws.aws-java-api\1_'${VERSION}'.jar/' -e '/feature url=/s/version="[0-9.]*"/version="'${VERSION}'"/' ${SITE_XML}
 echo "Building update site..."
-mvn clean install
+echo "In folder $(pwd) using: mvn ${extra} clean install"
+mvn ${extra} clean install
 echo "Patching SDK version ${VERSION} in target platform definition ${TARGET_DEFINITION}..."
 sed -i -e 's/<unit id="com.amazon.aws.aws-java-api.feature.group" version="[0-9.]*"\/>/<unit id="com.amazon.aws.aws-java-api.feature.group" version="'${VERSION}'"\/>/' ${TARGET_DEFINITION}
 echo "You may test your target platform locally by creating race-analysis-p2-local.target by running the script createLocalTargetDef.sh."

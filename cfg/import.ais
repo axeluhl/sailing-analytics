@@ -4,7 +4,7 @@ imports dslVersion:"1.3", {
         // required dependencies
         artifactFile "com.oracle.download.java:jdk:tar.gz:linux-x64:1.8.0_66-sap-01"
         
-        // see http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.releases/com/google/download/android/
+        // see https://int.repositories.cloud.sap/artifactory/build-releases/com/google/download/android/
         // for the versions available in an xmake environment
         artifactFile "com.google.download.android:tools:zip:linux:26.1.1"
         artifactFile "com.google.download.android:platform-tools:zip:linux:30.0.5"

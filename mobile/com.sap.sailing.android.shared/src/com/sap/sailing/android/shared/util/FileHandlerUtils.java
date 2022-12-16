@@ -29,6 +29,7 @@ public class FileHandlerUtils {
         try {
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
+                stringBuilder.append('\n');
             }
         } catch (IOException e) {
             ExLog.e(context, TAG,

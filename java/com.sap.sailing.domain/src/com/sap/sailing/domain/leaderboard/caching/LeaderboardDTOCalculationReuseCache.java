@@ -192,9 +192,10 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     
     @Override
     public Position getApproximatePosition(TrackedRace trackedRace, Waypoint waypoint, TimePoint timePoint) {
-        Triple<TrackedRace, Waypoint, TimePoint> cacheKey = new Triple<>(trackedRace, waypoint, timePoint);
-        // TODO bug5143: is it worth-while to pass through a MarkPositionAtTimePointCache here?
-        return approximateWaypointPositions.computeIfAbsent(cacheKey, key->key.getA().getApproximatePosition(key.getB(), key.getC()));
+        final Triple<TrackedRace, Waypoint, TimePoint> cacheKey = new Triple<>(trackedRace, waypoint, timePoint);
+        return approximateWaypointPositions.computeIfAbsent(cacheKey, 
+                        // TODO bug5143: is it worth-while to pass through a MarkPositionAtTimePointCache here?
+                        key->key.getA().getApproximatePosition(key.getB(), key.getC()));
     }
 
     /**
@@ -243,20 +244,19 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         }
         return result;
     }
-
+    
     @Override
     public Competitor getScratchBoat(TimePoint timePoint, TrackedRace raceContext, Function<TimePoint, Competitor> scratchBoatSupplier) {
-        return scratchBoat.computeIfAbsent(new Pair<>(timePoint, raceContext),
-                timePointAndRaceContext->scratchBoatSupplier.apply(timePointAndRaceContext.getA()));
+        return scratchBoat.computeIfAbsent(new Pair<>(timePoint, raceContext), timePointAndRaceContext->scratchBoatSupplier.apply(timePointAndRaceContext.getA()));
     }
 
     @Override
     public ORCPerformanceCurve getPerformanceCurveForPartialCourse(TimePoint timePoint,
             TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier) {
-        final ORCPerformanceCurve result = performanceCurvesPerCompetitor.computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
-                timePointAndTrackedRaceAndCompetitor -> {
-                    final ORCPerformanceCurve performanceCurve = performanceCurveSupplier.apply(timePointAndTrackedRaceAndCompetitor.getA(),
-                        timePointAndTrackedRaceAndCompetitor.getC());
+        final ORCPerformanceCurve result = performanceCurvesPerCompetitor.computeIfAbsent(
+                new Triple<>(timePoint, raceContext, competitor), timePointAndTrackedRaceAndCompetitor -> {
+                    final ORCPerformanceCurve performanceCurve = performanceCurveSupplier.apply(
+                            timePointAndTrackedRaceAndCompetitor.getA(), timePointAndTrackedRaceAndCompetitor.getC());
                     return performanceCurve == null ? NULL_PERFORMANCE_CURVE : performanceCurve;
                 });
         return result == NULL_PERFORMANCE_CURVE ? null : result;
@@ -264,28 +264,24 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
 
     @Override
     public Speed getImpliedWind(TimePoint timePoint, TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, Speed> impliedWindSupplier) {
-        final Speed result = impliedWindPerCompetitor
-                .computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
-                        timePointAndTrackedRaceAndCompetitor -> {
-                            final Speed impliedWind = impliedWindSupplier.apply(
-                                timePointAndTrackedRaceAndCompetitor.getA(),
-                                timePointAndTrackedRaceAndCompetitor.getC());
-                            return impliedWind == null ? NULL_IMPLIED_WIND : impliedWind;
-                        });
+        final Speed result = impliedWindPerCompetitor.computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
+                timePointAndTrackedRaceAndCompetitor -> {
+                    final Speed impliedWind = impliedWindSupplier.apply(timePointAndTrackedRaceAndCompetitor.getA(),
+                            timePointAndTrackedRaceAndCompetitor.getC());
+                    return impliedWind == null ? NULL_IMPLIED_WIND : impliedWind;
+                });
         return result == NULL_IMPLIED_WIND ? null : result;
     }
 
     @Override
     public Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
             TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier) {
-        final Duration result = relativeCorrectedTimePerCompetitor
-                .computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
-                        timePointAndTrackedRaceAndCompetitor -> {
-                            final Duration relativeCorrectedTime = relativeCorrectedTimeSupplier.apply(
-                                timePointAndTrackedRaceAndCompetitor.getC(),
-                                timePointAndTrackedRaceAndCompetitor.getA());
-                            return relativeCorrectedTime == null ? NULL_RELATIVE_CORRECTED_TIME : relativeCorrectedTime;
-                        });
+        final Duration result = relativeCorrectedTimePerCompetitor.computeIfAbsent(
+                new Triple<>(timePoint, raceContext, competitor), timePointAndTrackedRaceAndCompetitor -> {
+                    final Duration relativeCorrectedTime = relativeCorrectedTimeSupplier.apply(
+                            timePointAndTrackedRaceAndCompetitor.getC(), timePointAndTrackedRaceAndCompetitor.getA());
+                    return relativeCorrectedTime == null ? NULL_RELATIVE_CORRECTED_TIME : relativeCorrectedTime;
+                });
         return result == NULL_RELATIVE_CORRECTED_TIME ? null : result;
     }
 

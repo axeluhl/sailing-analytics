@@ -11,6 +11,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 
+/**
+ * Finds fixed mark passings and suppressed mark passings in the {@link RaceLog}. Suppressions are encoded
+ * in the result by a {@link Triple} with {@code null} as their third {@link TimePoint} component, whereas
+ * those {@link Triple}s with a non-{@code null} {@link TimePoint} in their third component represent
+ * fixed mark passings. The {@link Integer} second component encodes the zero-based waypoint index.
+ */
 public class MarkPassingDataFinder extends RaceLogAnalyzer<Set<Triple<Competitor, Integer, TimePoint>>> {
 
     public MarkPassingDataFinder(RaceLog raceLog) {

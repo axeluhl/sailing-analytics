@@ -3,8 +3,8 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
@@ -22,14 +22,14 @@ import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 public class SimpleRabbitMQTest {
     private final static String QUEUE_NAME = "hello";
     
-    private Map<Consumer, String> received;
+    private ConcurrentMap<Consumer, String> received;
     private ConnectionFactory factory;
     private Connection connection;
     private Channel channel;
     
     @Before
     public void setUp() throws IOException, TimeoutException {
-        received = new HashMap<Consumer, String>();
+        received = new ConcurrentHashMap<Consumer, String>();
         factory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         factory.setHost("localhost");
         connection = factory.newConnection();
@@ -47,6 +47,7 @@ public class SimpleRabbitMQTest {
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         final Consumer consumer = new QueueConsumer(QUEUE_NAME);
         new Thread(consumer).start();
+        Thread.sleep(100); // make sure both consumers are waiting
         String message = "Hello World!";
         channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
         consumer.waitUntilReceived(1000);
@@ -61,6 +62,7 @@ public class SimpleRabbitMQTest {
         final Consumer consumer2 = new ExchangeConsumer(EXCHANGE_NAME);
         new Thread(consumer1).start();
         new Thread(consumer2).start();
+        Thread.sleep(100); // make sure both consumers are waiting
         String message = "Hello World!";
         channel.basicPublish(EXCHANGE_NAME, /* queue name */ "", null, message.getBytes());
         Thread.sleep(1000);

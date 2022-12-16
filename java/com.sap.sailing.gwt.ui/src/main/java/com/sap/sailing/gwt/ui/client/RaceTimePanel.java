@@ -219,9 +219,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     public void onTimeZoomReset() {
         super.onTimeZoomReset();
         timeSlider.setZoomed(false);
-        timeSlider.setMinValue(new Double(timeRangeProvider.getFromTime().getTime()), false);
-        timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
-        timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
+        timeSlider.setMinValue(Double.valueOf(timeRangeProvider.getFromTime().getTime()), false);
+        timeSlider.setMaxValue(Double.valueOf(timeRangeProvider.getToTime().getTime()), false);
+        timeSlider.setCurrentValue(Double.valueOf(timer.getTime().getTime()), true);
         timeSlider.clearMarkersAndLabelsAndTicks();
         if (lastRaceTimesInfo != null) {
             redrawAllMarkers(lastRaceTimesInfo);
@@ -363,16 +363,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     break;
                 }
             }
-            if ((lastRaceTimesInfo.startOfRace == null && newRaceTimesInfo.startOfRace != null)
-                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace == null)
-                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace != null
-                    && lastRaceTimesInfo.startOfRace.getTime() != newRaceTimesInfo.startOfRace.getTime())) {
-                requiresMarkerUpdate = true;
-            }
-            if ((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null)
-                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null)
-                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null
-                    && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime())) {
+            if (!requiresMarkerUpdate &&
+                (!Util.equalsWithNull(lastRaceTimesInfo.startOfRace, newRaceTimesInfo.startOfRace) ||
+                 !Util.equalsWithNull(lastRaceTimesInfo.endOfRace, newRaceTimesInfo.endOfRace))) {
                 requiresMarkerUpdate = true;
             }
         }
@@ -391,7 +384,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         if (newRaceTimesInfo.startOfRace != null) {
             long markerTime = newRaceTimesInfo.startOfRace.getTime();
             if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
-                timeSlider.addMarker("S", new Double(markerTime));
+                timeSlider.addMarker("S", Double.valueOf(markerTime));
             }
         }
         int markPassingCounter = 1;
@@ -400,7 +393,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             if (markPassingCounter > 1 && markPassingTimesDTO.firstPassingDate != null) {
                 long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
                 if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
-                    timeSlider.addMarker(markPassingTimesDTO.getName(), new Double(markerTime));
+                    timeSlider.addMarker(markPassingTimesDTO.getName(), Double.valueOf(markerTime));
                 }
             }
             markPassingCounter++;
@@ -412,7 +405,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 markerTime = newRaceTimesInfo.getFinishedTime().getTime();
             }
             if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
-                timeSlider.addMarker("E", new Double(markerTime));
+                timeSlider.addMarker("E", Double.valueOf(markerTime));
             }
         }
         timeSlider.redraw(); 

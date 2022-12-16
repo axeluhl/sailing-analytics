@@ -8,8 +8,8 @@ public class RaceColumnInSeriesDTO extends RaceColumnDTO {
     @Deprecated
     RaceColumnInSeriesDTO() {} // for GWT serialization
     
-    public RaceColumnInSeriesDTO(String name, String seriesName, String regattaName) {
-        super(name);
+    public RaceColumnInSeriesDTO(String name, String seriesName, String regattaName, boolean oneAlwaysStaysOne) {
+        super(name, oneAlwaysStaysOne);
         this.seriesName = seriesName;
         this.regattaName = regattaName;
     }

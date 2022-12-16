@@ -12,8 +12,8 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
@@ -119,7 +119,7 @@ public class StartlineAdvantageCalculationDataRetriever {
         Double result = null;
         LineDetails startline = trackedRace.getStartLine(MillisecondsTimePoint.now());
         if (startline != null && startline.getAdvantage() != null) {
-            result = new Double(startline.getAdvantage().getMeters());
+            result = Double.valueOf(startline.getAdvantage().getMeters());
         }
         return result;
     }
@@ -127,7 +127,7 @@ public class StartlineAdvantageCalculationDataRetriever {
     private Double retrieveStartlineLenght(TrackedRace trackedRace) {
         Double result = null;
         LineDetails startline = trackedRace.getStartLine(MillisecondsTimePoint.now());
-        result = new Double(startline.getLength().getMeters());
+        result = Double.valueOf(startline.getLength().getMeters());
         return result;
     }
     
@@ -142,7 +142,7 @@ public class StartlineAdvantageCalculationDataRetriever {
         try {
             if (boatClass != null && maneuverType != null && windSpeed != null) {
                 BearingWithConfidence<Void> bearingWithConfidence =  polarDataService.getManeuverAngle(boatClass, maneuverType, windSpeed);
-                result = new Double(bearingWithConfidence.getObject().getDegrees());
+                result = Double.valueOf(bearingWithConfidence.getObject().getDegrees());
             }
         } catch (NotEnoughDataHasBeenAddedException | NullPointerException e) {
             e.printStackTrace();

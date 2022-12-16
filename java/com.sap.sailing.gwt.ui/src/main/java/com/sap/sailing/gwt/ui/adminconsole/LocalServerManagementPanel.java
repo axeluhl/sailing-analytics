@@ -6,8 +6,10 @@ import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_O
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -17,9 +19,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.adminconsole.places.advanced.UserGroupManagementPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.advanced.UserManagementPlace;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -41,7 +46,8 @@ public class LocalServerManagementPanel extends SimplePanel {
     private final StringMessages stringMessages;
 
     private final AccessControlledButtonPanel buttonPanel;
-    private Label serverNameInfo, buildVersionInfo, groupOwnerInfo, userOwnerInfo;
+    private Label serverNameInfo, buildVersionInfo;
+    private Anchor groupOwnerInfo, userOwnerInfo;
     private CheckBox isStandaloneServerCheckbox, isPublicServerCheckbox, isSelfServiceServerCheckbox;
 
     private ServerInfoDTO currentServerInfo;
@@ -101,8 +107,8 @@ public class LocalServerManagementPanel extends SimplePanel {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverInformation(), 4);
         serverNameInfo = captionPanel.addInformation(stringMessages.name() + ":");
         buildVersionInfo = captionPanel.addInformation(stringMessages.buildVersion() + ":");
-        groupOwnerInfo = captionPanel.addInformation(stringMessages.ownership() + " - " + stringMessages.group() + ":");
-        userOwnerInfo = captionPanel.addInformation(stringMessages.ownership() + " - " + stringMessages.user() + ":");
+        groupOwnerInfo = captionPanel.addAnchor(stringMessages.ownership() + " - " + stringMessages.group() + ":");
+        userOwnerInfo = captionPanel.addAnchor(stringMessages.ownership() + " - " + stringMessages.user() + ":");
         return captionPanel;
     }
 
@@ -157,7 +163,21 @@ public class LocalServerManagementPanel extends SimplePanel {
         final boolean hasGroupOwner = ownership != null && ownership.getTenantOwner() != null;
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
+        if (hasGroupOwner) {
+            groupOwnerInfo.setHref(
+                    UriUtils.fromString("#"+UserGroupManagementPlace.class.getSimpleName()+":"+AbstractFilterablePlace.FILTER_KEY+"="+ownership.getTenantOwner().getName()+
+                                        "&"+AbstractFilterablePlace.SELECT_EXACT_KEY+"="+ownership.getTenantOwner().getId().toString()));
+        } else {
+            groupOwnerInfo.setHref("javascript:;");
+        }
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
+        if (hasUserOwner) {
+            userOwnerInfo.setHref(
+                    UriUtils.fromString("#"+UserManagementPlace.class.getSimpleName()+":"+AbstractFilterablePlace.FILTER_KEY+"="+ownership.getUserOwner().getName()+
+                                        "&"+AbstractFilterablePlace.SELECT_EXACT_KEY+"="+ownership.getUserOwner().getName()));
+        } else {
+            userOwnerInfo.setHref("javascript:;");
+        }
         // Update changeability
         isSelfServiceServerCheckbox.setEnabled(userService.hasServerPermission(DefaultActions.CHANGE_ACL));
         // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
@@ -204,6 +224,10 @@ public class LocalServerManagementPanel extends SimplePanel {
 
         private Label addInformation(final String labelText) {
             return addWidget(labelText, new Label());
+        }
+        
+        private Anchor addAnchor(final String labelText) {
+            return addWidget(labelText, new Anchor());
         }
 
         private CheckBox addChekBox(final String labelText, final Command callback) {

@@ -26,6 +26,4 @@ public interface RemoteServiceMappingConstants {
     public static final String dataMiningServiceRemotePath = "service/datamining";
 
     public static final String dispatchServiceRemotePath = "service/dispatch";
-
-    public static final String subscriptionServiceRemotePath = "service/subscription";
 }

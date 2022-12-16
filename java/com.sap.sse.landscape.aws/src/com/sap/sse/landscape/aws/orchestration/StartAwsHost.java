@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
@@ -280,7 +279,7 @@ extends StartHost<ShardingKey, HostT> {
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsAvailabilityZone getRandomAvailabilityZone(AwsRegion region, AwsLandscape<ShardingKey> landscape) {
-        final Iterable<AvailabilityZone> azs = landscape.getAvailabilityZones(region);
+        final Iterable<AwsAvailabilityZone> azs = landscape.getAvailabilityZones(region);
         return (AwsAvailabilityZone) Util.get(azs, new Random().nextInt(Util.size(azs)));
     }
 

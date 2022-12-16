@@ -161,11 +161,12 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
+        
         leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings, false, liveRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
-                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()), getClientFactory());
 
         leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
 

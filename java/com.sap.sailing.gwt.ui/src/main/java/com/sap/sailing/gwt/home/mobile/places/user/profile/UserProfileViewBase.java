@@ -13,5 +13,6 @@ public interface UserProfileViewBase extends IsWidget, NeedsAuthenticationContex
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation();
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserSettingsNavigation();
         PlaceNavigation<? extends AbstractUserProfilePlace> getSailorProfilesNavigation();
+        PlaceNavigation<? extends AbstractUserProfilePlace> getUserSubscriptionsNavigation();
     }
 }

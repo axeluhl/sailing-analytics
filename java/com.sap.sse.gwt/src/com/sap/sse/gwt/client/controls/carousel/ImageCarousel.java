@@ -1,7 +1,9 @@
 package com.sap.sse.gwt.client.controls.carousel;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -58,7 +60,8 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
 
-    private LinkedList<TYPE> currentImages = new LinkedList<>();
+    private final LinkedList<TYPE> currentImages = new LinkedList<>();
+    private final Map<String, TYPE> imageDataMap = new HashMap<>();
     /**
      * slick slider property: dots
      */
@@ -87,7 +90,7 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
     /**
      * The height of the images
      */
-    private int imagesHeight = 300;
+    private static final int IMAGES_HEIGHT = 300;
     private int currentSlideIndex = 0;
 
     private final String uniqueId;
@@ -110,9 +113,11 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
     }
 
     public void onClick(EventTarget eventTarget) {
-        if(fsViewer != null && Element.is(eventTarget)) {
-            TYPE imageData = getImageData(eventTarget.<Element>cast());
-            if(imageData != null) {
+        if (fsViewer != null && Element.is(eventTarget)) {
+            // extract SRC URL for key of image data map
+            final String key = eventTarget.<Element>cast().getAttribute("src");
+            final TYPE imageData = imageDataMap.get(key);
+            if (imageData != null) {
                 fsViewer.show(imageData, currentImages);
             }
         }
@@ -164,9 +169,7 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 			'.'
 				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId)
 				+ '>.slick-list>.slick-track')
-		.height(
-			sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::imagesHeight
-				+ 'px');
+		.height(@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::IMAGES_HEIGHT + 'px');
     }-*/;
 
     /**
@@ -179,37 +182,23 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
         String url = image.getSourceRef();
         int height = image.getHeightInPx();
         int width = image.getWidthInPx();
-        
         DivElement imageHolder = Document.get().createDivElement();
         ImageElement imageElement = Document.get().createImageElement();
         imageElement.setAttribute("data-lazy", UriUtils.fromString(url).asString());
-        if(fsViewer != null) {
+        if (fsViewer != null) {
             imageElement.getStyle().setCursor(Cursor.POINTER);
         }
-
-        imageHolder.getStyle().setHeight(imagesHeight, Unit.PX);
-        imageHolder.getStyle().setWidth(Math.round(width * (imagesHeight / (double) height)), Unit.PX);
+        imageHolder.getStyle().setHeight(IMAGES_HEIGHT, Unit.PX);
+        imageHolder.getStyle().setWidth(Math.round(width * (IMAGES_HEIGHT / (double) height)), Unit.PX);
         imageHolder.appendChild(imageElement);
-        setImageData(imageElement, image);
-
+        // persist image data in extra map with key 'image source URL' (SourceRef)
+        imageDataMap.put(image.getSourceRef(), image);
         getElement().appendChild(imageHolder);
-
         if (getElement().getChildCount() > 20) {
             setInfiniteScrolling(false);
             setShowDots(false);
         }
     }
-    
-    private native void setImageData(Element element, TYPE imageData) /*-{
-        element.imageData = imageData;
-    }-*/;
-    
-    private native TYPE getImageData(Element element) /*-{
-        if(typeof element.imageData == "undefined") {
-            return null;
-        }
-        return element.imageData;
-    }-*/;
 
     /**
      * Define spacing between images in carousel. In fact, it is setting the img margins in pixels.

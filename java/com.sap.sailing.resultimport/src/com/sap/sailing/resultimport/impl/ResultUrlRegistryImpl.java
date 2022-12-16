@@ -51,11 +51,10 @@ public class ResultUrlRegistryImpl implements ResultUrlRegistry {
     public Iterable<URL> getReadableResultUrls(String resultProviderName) {
         final Subject subject = SecurityUtils.getSubject();
         final Iterable<URL> result = getAllResultUrls(resultProviderName);
-      for (final Iterator<URL> urlIterator = result.iterator(); urlIterator.hasNext();) {
+        for (final Iterator<URL> urlIterator = result.iterator(); urlIterator.hasNext();) {
             final URL url = urlIterator.next();
-            if (!subject.isPermitted(SecuredDomainType.RESULT_IMPORT_URL
-                    .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
-                            new TypeRelativeObjectIdentifier(resultProviderName, url.toString())))) {
+            if (!subject.isPermitted(SecuredDomainType.RESULT_IMPORT_URL.getStringPermissionForTypeRelativeIdentifier(
+                    DefaultActions.READ, new TypeRelativeObjectIdentifier(resultProviderName, url.toString())))) {
                 urlIterator.remove();
             }
         }

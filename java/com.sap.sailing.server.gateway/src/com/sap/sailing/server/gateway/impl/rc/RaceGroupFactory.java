@@ -27,11 +27,11 @@ import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TargetTimeInfo;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -103,7 +103,7 @@ public class RaceGroupFactory {
     }
     
     private boolean isFirstRaceColumnVirtual(Series series){
-        return series.isFirstColumnIsNonDiscardableCarryForward();
+        return series.isFirstColumnNonDiscardableCarryForward();
     }
 
     /**

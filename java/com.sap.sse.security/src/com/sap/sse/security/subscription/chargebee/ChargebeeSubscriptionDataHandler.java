@@ -11,7 +11,8 @@ public class ChargebeeSubscriptionDataHandler extends AbstractSubscriptionDataHa
         return new ChargebeeSubscription(data.getSubscriptionId(), data.getPlanId(), data.getCustomerId(),
                 data.getTrialStart(), data.getTrialEnd(), data.getSubscriptionStatus(), data.getPaymentStatus(),
                 data.getTransactionType(), data.getTransactionStatus(), data.getInvoiceId(), data.getInvoiceStatus(),
-                data.getSubscriptionCreatedAt(), data.getSubscriptionUpdatedAt(), data.getLatestEventTime(),
-                data.getManualUpdatedAt());
+                data.getReocurringPaymentValue(), data.getCurrencyCode(), data.getSubscriptionCreatedAt(),
+                data.getSubscriptionUpdatedAt(), data.getSubscriptionActivatedAt(), data.getNextBillingAt(),
+                data.getCurrentTermEnd(), data.getCancelledAt(), data.getLatestEventTime(), data.getManualUpdatedAt());
     }
 }

@@ -1,0 +1,1352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sailing.org/techpages/resources/xml/sailingXRR_v1.3.1.xsd" Version="1.3.1" Type="SailingXRR" Date="2022-03-18" Time="10:46:38">
+ <Person PersonID="226302" IFPersonID="ESPJX1" FamilyName="XAMMAR" GivenName="Jordi" NOC="ESP" Gender="male" ClubID="339" Club="Club Nàutic Cambrils" ClassPersonID="" RFEVPersonID="" PassportPersonID="48.032.785 E"/>
+ <Person PersonID="226303" IFPersonID="ESPNR4" FamilyName="RODRIGUEZ" GivenName="Nicolas" NOC="ESP" Gender="male" ClubID="188" Club="Real Club Náutico de Vigo" ClassPersonID="" RFEVPersonID="" PassportPersonID="39.465.798-Y"/>
+ <Person PersonID="226304" IFPersonID="TURDC1" FamilyName="CINAR" GivenName="Deniz" NOC="TUR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="U14894771"/>
+ <Person PersonID="226305" IFPersonID="TURAC2" FamilyName="CINAR" GivenName="Ates" NOC="TUR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="U03185758"/>
+ <Person PersonID="226306" IFPersonID="CZEMK11" FamilyName="KOSTYR" GivenName="Michal" NOC="CZE" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="42235410"/>
+ <Person PersonID="226307" IFPersonID="CZEKK5" FamilyName="KULHANKOVA" GivenName="Klara" NOC="CZE" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="40284416"/>
+ <Person PersonID="226308" IFPersonID="JPNSK15" FamilyName="KAMINOKI" GivenName="Sho" NOC="JPN" Gender="male" Club="YAMAHA Sailing Team Rev's" ClassPersonID="" RFEVPersonID="" PassportPersonID="TZ1348996"/>
+ <Person PersonID="226309" IFPersonID="JPNTH21" FamilyName="HIKIDA" GivenName="Taisei" NOC="JPN" Gender="male" Club="YAMAHA Sailing Team Rev's" ClassPersonID="" RFEVPersonID="" PassportPersonID="TR5847480"/>
+ <Person PersonID="226310" IFPersonID="JPNDT1" FamilyName="TAKAYAMA" GivenName="Daichi" NOC="JPN" Gender="male" Club="YAMAHA MOTOR CO.,LTD." ClassPersonID="" RFEVPersonID="" PassportPersonID="TS2325435"/>
+ <Person PersonID="226311" IFPersonID="JPNKI5" FamilyName="IMAMURA" GivenName="Kimihiko" NOC="JPN" Gender="male" Club="YAMAHA MOTOR CO.,LTD." ClassPersonID="" RFEVPersonID="" PassportPersonID="TS2325440"/>
+ <Person PersonID="227674" IFPersonID="ESPJR52" FamilyName="RUIZ SANCHEZ" GivenName="Jose Manuel" NOC="ESP" Gender="male" ClubID="95" Club="Club Náutico Mar Menor" ClassPersonID="" RFEVPersonID="311" PassportPersonID="15482163N"/>
+ <Person PersonID="227675" IFPersonID="ESPGU2" FamilyName="UTRERA THOMPSON" GivenName="Gabriel" NOC="ESP" Gender="male" ClubID="45" Club="Real Club Mediterráneo" ClassPersonID="" RFEVPersonID="673" PassportPersonID=""/>
+ <Person PersonID="226314" IFPersonID="FRAPT17" FamilyName="PONTHIEU" GivenName="Thomas" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="17CK72140"/>
+ <Person PersonID="226315" IFPersonID="FRAME7" FamilyName="MICHAL" GivenName="Eliott" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226316" IFPersonID="ITAMC150" FamilyName="CAPURRO" GivenName="Matteo" NOC="ITA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="AV0802743"/>
+ <Person PersonID="226317" IFPersonID="ITAMP106" FamilyName="PUPPO" GivenName="Matteo" NOC="ITA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226318" IFPersonID="SUIWK2" FamilyName="WAGEN" GivenName="Kilian" NOC="SUI" Gender="male" Club="CNPully" ClassPersonID="" RFEVPersonID="" PassportPersonID="X4891609"/>
+ <Person PersonID="226319" IFPersonID="SUIGS3" FamilyName="SIEGWART" GivenName="Grégoire" NOC="SUI" Gender="male" Club="CNmorges" ClassPersonID="" RFEVPersonID="" PassportPersonID="X3296429"/>
+ <Person PersonID="226320" IFPersonID="RUSPS1" FamilyName="SOZYKIN" GivenName="Pavel" NOC="RUS" Gender="male" Club="FANTASTICA SAILING TEAM. CSKA VMF. Krasnodar region" ClassPersonID="" RFEVPersonID="" PassportPersonID="111111111111111"/>
+ <Person PersonID="226321" IFPersonID="RUSDG3" FamilyName="GRIBANOV" GivenName="Denis" NOC="RUS" Gender="male" Club="FANTASTICA SAILING TEAM. CSKA VMF. Krasnodar region" ClassPersonID="" RFEVPersonID="" PassportPersonID="11111111111"/>
+ <Person PersonID="226322" IFPersonID="SWEAD5" FamilyName="DAHLBERG" GivenName="Anton" NOC="SWE" Gender="male" Club="RSYC" ClassPersonID="" RFEVPersonID="" PassportPersonID="91378354"/>
+ <Person PersonID="226323" IFPersonID="SWEFB12" FamilyName="BERGSTRÖM" GivenName="Fredrik" NOC="SWE" Gender="male" Club="RSYC" ClassPersonID="" RFEVPersonID="" PassportPersonID="89759453"/>
+ <Person PersonID="226324" IFPersonID="JPNKS11" FamilyName="KOIZUMI" GivenName="Sosaku" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="TR1348750"/>
+ <Person PersonID="226325" IFPersonID="JPNKM32" FamilyName="MATSUO" GivenName="Kotaro" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="MU3862430"/>
+ <Person PersonID="226326" IFPersonID="ITACV27" FamilyName="VALENTI" GivenName="Chiara" NOC="SUI" Gender="female" ClassPersonID="" RFEVPersonID="" PassportPersonID="X5023220"/>
+ <Person PersonID="226327" IFPersonID="SUIJS18" FamilyName="SCHUEPBACH" GivenName="Jann" NOC="SUI" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226328" IFPersonID="SUIYM2" FamilyName="MERMOD" GivenName="Yves" NOC="SUI" Gender="male" Club="Thunersee- Yachtclub" ClassPersonID="" RFEVPersonID="" PassportPersonID="-"/>
+ <Person PersonID="226329" IFPersonID="SUICS17" FamilyName="SCHÜPBACH" GivenName="Cyril" NOC="SUI" Gender="male" Club="Thunersee-Yachtclub" ClassPersonID="" RFEVPersonID="" PassportPersonID="-"/>
+ <Person PersonID="226330" IFPersonID="GERSL22" FamilyName="LANGER" GivenName="Steven" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="L3H86NLXF"/>
+ <Person PersonID="226331" IFPersonID="GERDR16" FamilyName="ROLLE" GivenName="Dennis" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="L3H8706J4"/>
+ <Person PersonID="226332" IFPersonID="GBRBW38" FamilyName="WHALEY" GivenName="Ben" NOC="GBR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="TBC"/>
+ <Person PersonID="226333" IFPersonID="GBRMT42" FamilyName="TRESSLER" GivenName="Marcus George" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226334" IFPersonID="FRAHM11" FamilyName="MACHETTI" GivenName="Hippolyte" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="16CY94080"/>
+ <Person PersonID="226335" IFPersonID="FRASD28" FamilyName="DANTÈS" GivenName="Sidoine" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226336" IFPersonID="HUNBG3" FamilyName="GYAPJAS" GivenName="Balázs" NOC="HUN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="489101LA"/>
+ <Person PersonID="226337" IFPersonID="HUNZG2" FamilyName="GYAPJAS" GivenName="Zsombor" NOC="HUN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226338" IFPersonID="JPNKD4" FamilyName="DEMICHI" GivenName="Kosuke" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="MU6081811"/>
+ <Person PersonID="226339" IFPersonID="JPNTN20" FamilyName="NAKAGAWA" GivenName="Taiga" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="TR3978014"/>
+ <Person PersonID="226340" IFPersonID="JPNRK6" FamilyName="KAWAI" GivenName="Ryutaro" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="TK3136430"/>
+ <Person PersonID="226341" IFPersonID="JPNTN29" FamilyName="NAKAZAWA" GivenName="Taro" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="MU7552374"/>
+ <Person PersonID="226342" IFPersonID="ITAGF75" FamilyName="FERRARI" GivenName="Giacomo" NOC="ITA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="AU9727932"/>
+ <Person PersonID="226343" IFPersonID="ITAGC160" FamilyName="CALABRÒ" GivenName="Giulio" NOC="ITA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="227517" IFPersonID="BRAGM4" FamilyName="MENDES" GivenName="Geison" NOC="BRA" Gender="male" Club="MARINHA DO BRASIL" ClassPersonID="" RFEVPersonID="" PassportPersonID="Yb357360"/>
+ <Person PersonID="227518" IFPersonID="BRAGT1" FamilyName="THIESEN" GivenName="Gustavo Canal" NOC="BRA" Gender="male" Club="Veleiros do Sul - cbvela" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226346" IFPersonID="ISRMA6" FamilyName="ABU" GivenName="Maor" NOC="ISR" Gender="male" Club="I.S.A" ClassPersonID="" RFEVPersonID="" PassportPersonID="31358831"/>
+ <Person PersonID="226347" IFPersonID="ISRYR1" FamilyName="ROOZ" GivenName="Yoav" NOC="ISR" Gender="male" Club="I.S.A" ClassPersonID="" RFEVPersonID="" PassportPersonID="33027018"/>
+ <Person PersonID="226348" IFPersonID="GBRLP11" FamilyName="PATIENCE" GivenName="Luke" NOC="GBR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="510584439"/>
+ <Person PersonID="226349" IFPersonID="GBRCG29" FamilyName="GRUBE" GivenName="Chris" NOC="GBR" Gender="male" Club="Bala" ClassPersonID="" RFEVPersonID="" PassportPersonID="800999398"/>
+ <Person PersonID="226350" IFPersonID="JPNTI15" FamilyName="ISOZAKI" GivenName="Tetsuya" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="MU3190207"/>
+ <Person PersonID="226351" IFPersonID="JPNAT11" FamilyName="TAKAYANAGI" GivenName="Akira" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226352" IFPersonID="NZLPS3" FamilyName="SNOW-HANSEN" GivenName="Paul" NOC="NZL" Gender="male" Club="Wakatere boating club" ClassPersonID="" RFEVPersonID="" PassportPersonID="LK893114"/>
+ <Person PersonID="226353" IFPersonID="NZLDW8" FamilyName="WILLCOX" GivenName="Daaniel" NOC="NZL" Gender="male" Club="M.B.S.C" ClassPersonID="" RFEVPersonID="" PassportPersonID="LM813095"/>
+ <Person PersonID="226354" IFPersonID="AUTNK2" FamilyName="KAMPELMÜHLER" GivenName="Nikolaus" NOC="AUT" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="P7676377"/>
+ <Person PersonID="226355" IFPersonID="AUTTC2" FamilyName="CZAJKA" GivenName="Thomas" NOC="AUT" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226356" IFPersonID="USASM24" FamilyName="MCNAY" GivenName="Stuart" NOC="USA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="12345678USA"/>
+ <Person PersonID="226357" IFPersonID="USADH5" FamilyName="HUGHES" GivenName="David" NOC="USA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226358" IFPersonID="CHNZX1" FamilyName="XU" GivenName="Zangjun" NOC="CHN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="PE1531261"/>
+ <Person PersonID="226359" IFPersonID="CHNCW2" FamilyName="WANG" GivenName="Chao" NOC="CHN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="PE1531260"/>
+ <Person PersonID="226360" IFPersonID="CHNJX4" FamilyName="XU" GivenName="Jianyong" NOC="CHN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="PE1464674"/>
+ <Person PersonID="226361" IFPersonID="CHNYW11" FamilyName="WANG" GivenName="Yang" NOC="CHN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="PE1714221"/>
+ <Person PersonID="226362" IFPersonID="FRAJD68" FamilyName="DEMANGE" GivenName="Jérome" NOC="FRA" Gender="male" Club="85034 CNHR" ClassPersonID="" RFEVPersonID="" PassportPersonID="13AZ51168"/>
+ <Person PersonID="226363" IFPersonID="FRALG45" FamilyName="GUIMBERTAUD" GivenName="Luc" NOC="FRA" Gender="male" Club="85034 CNHR" ClassPersonID="" RFEVPersonID="" PassportPersonID="14AT02917"/>
+ <Person PersonID="226364" IFPersonID="JPNKD3" FamilyName="DOI" GivenName="Kazuto" NOC="JPN" Gender="male" Club="Team ABeam" ClassPersonID="" RFEVPersonID="" PassportPersonID="TR5142051"/>
+ <Person PersonID="226365" IFPersonID="JPNNK14" FamilyName="KIMURA" GivenName="Naoya" NOC="JPN" Gender="male" Club="Team ABeam" ClassPersonID="" RFEVPersonID="" PassportPersonID="TR5513274"/>
+ <Person PersonID="226366" IFPersonID="GERTG30" FamilyName="GERICKE" GivenName="Tim" NOC="GER" Gender="male" Club="ycbg" ClassPersonID="" RFEVPersonID="" PassportPersonID="123456789"/>
+ <Person PersonID="226367" IFPersonID="GERMZ15" FamilyName="ZOSKA" GivenName="Maximilian" NOC="GER" Gender="male" Club="SC Argo 1909" ClassPersonID="" RFEVPersonID="" PassportPersonID="123456789"/>
+ <Person PersonID="226368" IFPersonID="AUSMB11" FamilyName="BELCHER" GivenName="Mathew" NOC="AUS" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="E40742133"/>
+ <Person PersonID="226369" IFPersonID="AUSWR2" FamilyName="RYAN" GivenName="Will" NOC="AUS" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226370" IFPersonID="JPNNI4" FamilyName="ICHINO" GivenName="Naoki" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="TK4221884"/>
+ <Person PersonID="226371" IFPersonID="JPNHT18" FamilyName="HASEGAWA" GivenName="Takashi" NOC="JPN" Gender="female" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226372" IFPersonID="ARGFG6" FamilyName="GWOZDZ" GivenName="Fernando" NOC="ARG" Gender="male" Club="Yacht Club Argentino" ClassPersonID="" RFEVPersonID="" PassportPersonID="30820322N"/>
+ <Person PersonID="226373" IFPersonID="ARGTD1" FamilyName="DIETRICH" GivenName="Tomas" NOC="ARG" Gender="male" Club="Yacht Club Rosario" ClassPersonID="" RFEVPersonID="" PassportPersonID="AAF419452"/>
+ <Person PersonID="226374" IFPersonID="GBRMW97" FamilyName="WRIGLEY" GivenName="Martin" NOC="GBR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="534287819"/>
+ <Person PersonID="226375" IFPersonID="GBRJT83" FamilyName="TAYLOR" GivenName="James" NOC="GBR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226376" IFPersonID="GERDG19" FamilyName="GÖTTLICH" GivenName="Daniel" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="L3G1JJZJ5"/>
+ <Person PersonID="226377" IFPersonID="GERLK38" FamilyName="KLASEN" GivenName="Linus" NOC="GER" Gender="male" Club="VSaW" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226378" IFPersonID="JPNKO14" FamilyName="OKADA" GivenName="Keiju" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="MU3908382"/>
+ <Person PersonID="226379" IFPersonID="JPNJH2" FamilyName="HOKAZONO" GivenName="Jumpei" NOC="JPN" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="TR1209031"/>
+ <Person PersonID="226380" IFPersonID="GBRJL60" FamilyName="LAVERY" GivenName="Jess" NOC="GBR" Gender="female" Club="Emsworth Sailing Club" ClassPersonID="" RFEVPersonID="" PassportPersonID="528980142"/>
+ <Person PersonID="226381" IFPersonID="GBRAH130" FamilyName="HUGHES" GivenName="Alex" NOC="GBR" Gender="male" Club="Sutton Sailing Club" ClassPersonID="" RFEVPersonID="" PassportPersonID="532600759"/>
+ <Person PersonID="227684" IFPersonID="GERTL23" FamilyName="LÖFFLER" GivenName="Theresa" NOC="GER" Gender="female" ClassPersonID="" RFEVPersonID="" PassportPersonID="LF7P275FW"/>
+ <Person PersonID="227685" IFPersonID="GERCH41" FamilyName="HOERR" GivenName="Christopher" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="LG9M34PP2"/>
+ <Person PersonID="226384" IFPersonID="PORGP7" FamilyName="PIRES" GivenName="Gonçalo" NOC="POR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="14815604 5"/>
+ <Person PersonID="226385" IFPersonID="PORRP9" FamilyName="PIRES" GivenName="Rodolfo" NOC="POR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226386" IFPersonID="GERSD8" FamilyName="DIESCH" GivenName="Simon" NOC="GER" Gender="male" Club="Wuerttembergischer Yacht-Club" ClassPersonID="" RFEVPersonID="" PassportPersonID="L9TTNX5FK"/>
+ <Person PersonID="226387" IFPersonID="GERPA2" FamilyName="AUTENRIETH" GivenName="Philipp" NOC="GER" Gender="male" Club="Bayerischer Yacht-Club" ClassPersonID="" RFEVPersonID="" PassportPersonID="LGN49KM3L"/>
+ <Person PersonID="226388" IFPersonID="FRAKP2" FamilyName="PEPONNET" GivenName="Kevin" NOC="FRA" Gender="male" Club="Société des Régates Rochelaises" ClassPersonID="" RFEVPersonID="" PassportPersonID="13AL65409"/>
+ <Person PersonID="226389" IFPersonID="FRATM11" FamilyName="JEREMIE" GivenName="Mion" NOC="FRA" Gender="male" Club="Société des Régates du Havre" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226390" IFPersonID="POLKP13" FamilyName="PASZEK" GivenName="Kacper" NOC="POL" Gender="male" Club="OKŻ Olsztyn" ClassPersonID="" RFEVPersonID="" PassportPersonID="EH2622711"/>
+ <Person PersonID="226391" IFPersonID="POLBR5" FamilyName="REITER" GivenName="Bartosz" NOC="POL" Gender="male" Club="OKŻ Olsztyn" ClassPersonID="" RFEVPersonID="" PassportPersonID="EK4763121"/>
+ <Person PersonID="226392" IFPersonID="NEDCV20" FamilyName="VAN DONGEN" GivenName="Cas" NOC="NED" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="-"/>
+ <Person PersonID="226393" IFPersonID="NEDRB21" FamilyName="BECKER" GivenName="Robin" NOC="NED" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226394" IFPersonID="FRAJD45" FamilyName="DUCELIER" GivenName="Jules" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="15CA18660"/>
+ <Person PersonID="226395" IFPersonID="FRACM44" FamilyName="MICHEL" GivenName="Clément" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="14DR86637"/>
+ <Person PersonID="226396" IFPersonID="GREVP3" FamilyName="PAPOUTSOGLOU" GivenName="Vasilis" NOC="GRE" Gender="male" Club="Piraeus Sailing Club" ClassPersonID="" RFEVPersonID="25443" PassportPersonID="AN1388348"/>
+ <Person PersonID="226397" IFPersonID="GREJO1" FamilyName="ORFANOS" GivenName="Ioannis" NOC="GRE" Gender="male" Club="Piraeus Sailing Club" ClassPersonID="" RFEVPersonID="25443" PassportPersonID="AP1569102"/>
+ <Person PersonID="226398" IFPersonID="SWECF7" FamilyName="FOCK" GivenName="Carl-Fredrik" NOC="SWE" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="92264987"/>
+ <Person PersonID="226399" IFPersonID="SWEMD2" FamilyName="DACKHAMMAR" GivenName="Marcus" NOC="SWE" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226400" IFPersonID="PORDC11" FamilyName="COSTA" GivenName="Diogo" NOC="POR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="14458097"/>
+ <Person PersonID="226401" IFPersonID="PORPC24" FamilyName="COSTA" GivenName="Pedro" NOC="POR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="14458099"/>
+ <Person PersonID="226402" IFPersonID="RUSKC2" FamilyName="CHEKH" GivenName="Kristian" NOC="RUS" Gender="male" Club="Sailing academy Saint-Petersburg" ClassPersonID="" RFEVPersonID="" PassportPersonID="729071527"/>
+ <Person PersonID="226403" IFPersonID="RUSTV4" FamilyName="TARASOV" GivenName="Viktor" NOC="RUS" Gender="male" Club="Sailing academy Saint-Petersburg" ClassPersonID="" RFEVPersonID="" PassportPersonID="654364982"/>
+ <Person PersonID="226404" IFPersonID="FRAAD70" FamilyName="DEMANGE" GivenName="Alexandre" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="18DI90517"/>
+ <Person PersonID="226405" IFPersonID="USAPL70" FamilyName="LEPOUTRE" GivenName="Paco" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226406" IFPersonID="GERMW22" FamilyName="WINKEL" GivenName="Malte" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="C1CH87NPK"/>
+ <Person PersonID="226407" IFPersonID="GERMC4" FamilyName="CIPRA" GivenName="Matti" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226408" IFPersonID="SUITS12" FamilyName="SEGER" GivenName="Till" NOC="SUI" Gender="male" Club="Regatta Club Oberhofen" ClassPersonID="" RFEVPersonID="" PassportPersonID="E1099778"/>
+ <Person PersonID="226409" IFPersonID="SUINZ2" FamilyName="ZELTNER" GivenName="Nick" NOC="SUI" Gender="male" Club="Regatta Club  Oberhofen" ClassPersonID="" RFEVPersonID="" PassportPersonID="E2627251"/>
+ <Person PersonID="228159" IFPersonID="GREPM1" FamilyName="MANTIS" GivenName="Panagiotis" NOC="GRE" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="AP2188689"/>
+ <Person PersonID="228160" IFPersonID="GREPK7" FamilyName="KAGIALIS" GivenName="Pavlos" NOC="GRE" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="151570"/>
+ <Person PersonID="226412" IFPersonID="FRAJM59" FamilyName="MARCHAND" GivenName="Jimmy" NOC="FRA" Gender="male" Club="CN Neptune" ClassPersonID="" RFEVPersonID="" PassportPersonID="15AD59542"/>
+ <Person PersonID="226413" IFPersonID="FRAAB66" FamilyName="BARTHELEMY" GivenName="Aurelien" NOC="FRA" Gender="male" Club="BN Mascareignes" ClassPersonID="" RFEVPersonID="" PassportPersonID="15AP47401"/>
+ <Person PersonID="226414" IFPersonID="FRACL67" FamilyName="LOIRAT" GivenName="Colin" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="16CK04274"/>
+ <Person PersonID="226415" IFPersonID="FRACB63" FamilyName="BRETAGNE" GivenName="Corentin" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="16CK04274"/>
+ <Person PersonID="226416" IFPersonID="FRAPC61" FamilyName="COUSIN" GivenName="Paul" NOC="FRA" Gender="male" Club="CVSAE" ClassPersonID="" RFEVPersonID="" PassportPersonID="17EK46918"/>
+ <Person PersonID="226417" IFPersonID="FRAPW7" FamilyName="WILLIOT" GivenName="Pierre" NOC="FRA" Gender="male" Club="CVSAE" ClassPersonID="" RFEVPersonID="" PassportPersonID="17EF74570"/>
+ <Person PersonID="226418" IFPersonID="FRATP36" FamilyName="PILLOT" GivenName="Titouan" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="18FK49444"/>
+ <Person PersonID="226419" IFPersonID="FRAPP56" FamilyName="PERRINET" GivenName="Pierre Louis" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226420" IFPersonID="FRAEB35" FamilyName="BALANGER" GivenName="Enzo" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="14CV12696"/>
+ <Person PersonID="226421" IFPersonID="FRAGT18" FamilyName="TALLIEU" GivenName="Gaultier" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="16AF98539"/>
+ <Person PersonID="226422" IFPersonID="FRAHL19" FamilyName="LE CLECH" GivenName="Hugo" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="__"/>
+ <Person PersonID="226423" IFPersonID="FRAZL3" FamilyName="LE BRIS" GivenName="Zachary" NOC="FRA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="17EH41586"/>
+ <Person PersonID="226424" IFPersonID="AUTDB1" FamilyName="BARGEHR" GivenName="David" NOC="AUT" Gender="male" Club="Yacht Club Bregenz" ClassPersonID="" RFEVPersonID="" PassportPersonID="P6887044"/>
+ <Person PersonID="226425" IFPersonID="AUTLM1" FamilyName="MÄHR" GivenName="Lukas" NOC="AUT" Gender="male" Club="Yacht Club Bregenz" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226426" IFPersonID="GERTA12" FamilyName="ANDO" GivenName="Tatsumi" NOC="GER" Gender="male" Club="Norddeutscher Regatta Verein" ClassPersonID="" RFEVPersonID="" PassportPersonID="L1VYGYHNL"/>
+ <Person PersonID="226427" IFPersonID="GERLH36" FamilyName="HAGEN" GivenName="Laurenz" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226428" IFPersonID="AUSCC20" FamilyName="CHARLWOOD" GivenName="Chris" NOC="AUS" Gender="male" Club="FSC" ClassPersonID="" RFEVPersonID="" PassportPersonID="PA9560090"/>
+ <Person PersonID="226429" IFPersonID="AUSJD36" FamilyName="DAWSON" GivenName="Josh" NOC="AUS" Gender="male" Club="RPAYC" ClassPersonID="" RFEVPersonID="" PassportPersonID="PA6624182"/>
+ <Person PersonID="226430" IFPersonID="GERLB33" FamilyName="BRANDL" GivenName="Leopold" NOC="GER" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="L3G22KWK8"/>
+ <Person PersonID="226431" IFPersonID="GERMB108" FamilyName="BRANDL" GivenName="Maximilian" NOC="GER" Gender="male" Club="VSaW - Verein Seglerhaus am Wannsee" ClassPersonID="" RFEVPersonID="" PassportPersonID="L3G1KGK4R"/>
+ <Person PersonID="226432" IFPersonID="POLMU3" FamilyName="URBANSKI" GivenName="Marcin" NOC="POL" Gender="male" Club="OKZ Olsztyn" ClassPersonID="" RFEVPersonID="" PassportPersonID="CGJ 738982"/>
+ <Person PersonID="226433" IFPersonID="POLMK65" FamilyName="KRUSIEC" GivenName="Maciej" NOC="POL" Gender="male" Club="OKZ Olsztyn" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="227511" IFPersonID="GBRAH114" FamilyName="HOLMAN" GivenName="Arran" NOC="GBR" Gender="male" Club="470 International Class Association" ClassPersonID="" RFEVPersonID="" PassportPersonID="2626247"/>
+ <Person PersonID="227512" IFPersonID="GBRPG46" FamilyName="GARCIA CRANFIELD" GivenName="Pablo" NOC="GBR" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID="16262387"/>
+ <Person PersonID="226436" IFPersonID="ESPMB38" FamilyName="BOVER" GivenName="Maria" NOC="ESP" Gender="female" ClubID="2" Club="RCN  Palma" ClassPersonID="" RFEVPersonID="0272" PassportPersonID="43235406Y"/>
+ <Person PersonID="226437" IFPersonID="ESPJA76" FamilyName="ALONSO" GivenName="Julio" NOC="ESP" Gender="male" ClubID="39" Club="Real Club Náutico de Gran Canaria" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226438" IFPersonID="BRAHH3" FamilyName="HADDAD" GivenName="Henrique" NOC="BRA" Gender="male" Club="IATE CLUBE DO RIO DE JANEIRO" ClassPersonID="" RFEVPersonID="" PassportPersonID="FY216523"/>
+ <Person PersonID="226439" IFPersonID="BRAFB23" FamilyName="BRITO" GivenName="Felipe" NOC="BRA" Gender="male" Club="IATE CLUBE DO RIO DE JANEIRO" ClassPersonID="" RFEVPersonID="" PassportPersonID="FM022491"/>
+ <Person PersonID="226440" IFPersonID="FRATA24" FamilyName="ANDRE" GivenName="Thomas" NOC="FRA" Gender="male" Club="USAM voile Brest" ClassPersonID="" RFEVPersonID="" PassportPersonID="16AY69462 8"/>
+ <Person PersonID="226441" IFPersonID="FRAEJ13" FamilyName="JARLES" GivenName="Emma" NOC="FRA" Gender="female" Club="CN  plouguerneau" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226442" IFPersonID="ESPLP23" FamilyName="PARÉS BORRELL" GivenName="Lucas" NOC="ESP" Gender="male" ClassPersonID="" RFEVPersonID="03392" PassportPersonID="23896275B"/>
+ <Person PersonID="226443" IFPersonID="ESPTP10" FamilyName="PARÉS BORRELL" GivenName="Teo" NOC="ESP" Gender="male" ClassPersonID="" RFEVPersonID="03393" PassportPersonID="23896273D"/>
+ <Person PersonID="226444" IFPersonID="ITAMM227" FamilyName="MARCHESINI" GivenName="Maria Vittoria " NOC="ITA" Gender="female" ClassPersonID="" RFEVPersonID="" PassportPersonID="YA7525408"/>
+ <Person PersonID="226445" IFPersonID="ITABF20" FamilyName="FESTO" GivenName="Bruno" NOC="ITA" Gender="male" ClassPersonID="" RFEVPersonID="" PassportPersonID=""/>
+ <Person PersonID="226446" IFPersonID="GERNL11" FamilyName="LEHMANN" GivenName="Niclas" NOC="AUT" Gender="male" Club="UYCAs" ClassPersonID="" RFEVPersonID="" PassportPersonID="CFHC88YZX"/>
+ <Person PersonID="226447" IFPersonID="AUTNH3" FamilyName="HABERL" GivenName="Niklas" NOC="AUT" Gender="male" Club="UYCMo" ClassPersonID="" RFEVPersonID="" PassportPersonID="U2553739"/>
+ <Boat BoatID="146270" BoatName="RFEV-MOVISTAR" SailNumber="ESP 44" BowNumber="3"/>
+ <Boat BoatID="146271" SailNumber="TUR 890" BowNumber="15"/>
+ <Boat BoatID="146272" BoatName="NO NAME" SailNumber="CZE 13" BowNumber="71"/>
+ <Boat BoatID="146273" SailNumber="JPN 2" BowNumber="38"/>
+ <Boat BoatID="146274" SailNumber="JPN 15" BowNumber="19"/>
+ <Boat BoatID="146275" BoatName="KUNDAKA" SailNumber="ESP 28" BowNumber="33"/>
+ <Boat BoatID="146276" SailNumber="FRA 11" BowNumber="35"/>
+ <Boat BoatID="146277" SailNumber="ITA 10" BowNumber="28"/>
+ <Boat BoatID="146278" BoatName="MADIROSA" SailNumber="SUI 46" BowNumber="27"/>
+ <Boat BoatID="146279" BoatName="FANTASTICA" SailNumber="RUS 5" BowNumber="21"/>
+ <Boat BoatID="146280" BoatName="ATHENA" SailNumber="SWE 349" BowNumber="2"/>
+ <Boat BoatID="146281" SailNumber="JPN 10" BowNumber="36"/>
+ <Boat BoatID="146282" SailNumber="SUI 24" BowNumber="68"/>
+ <Boat BoatID="146283" BoatName="MILLA" SailNumber="SUI 1478" BowNumber="42"/>
+ <Boat BoatID="146284" SailNumber="GER 68" BowNumber="55"/>
+ <Boat BoatID="146285" SailNumber="GBR 866" BowNumber="48"/>
+ <Boat BoatID="146286" SailNumber="FRA 79" BowNumber="9"/>
+ <Boat BoatID="146287" SailNumber="HUN 1" BowNumber="13"/>
+ <Boat BoatID="146288" SailNumber="JPN 4691" BowNumber="34"/>
+ <Boat BoatID="146289" BoatName="4546" SailNumber="JPN 4546" BowNumber="43"/>
+ <Boat BoatID="146290" SailNumber="ITA 757" BowNumber="8"/>
+ <Boat BoatID="146291" SailNumber="BRA 1" BowNumber="31"/>
+ <Boat BoatID="146292" SailNumber="ISR 10" BowNumber="30"/>
+ <Boat BoatID="146293" BoatName="JEANNIE ANNE" SailNumber="GBR 4" BowNumber="23"/>
+ <Boat BoatID="146294" SailNumber="JPN 7" BowNumber="6"/>
+ <Boat BoatID="146295" BoatName="KOKAKO" SailNumber="NZL 1" BowNumber="16"/>
+ <Boat BoatID="146296" BoatName="STRöCK" SailNumber="AUT 17" BowNumber="29"/>
+ <Boat BoatID="146297" SailNumber="USA 1" BowNumber="4"/>
+ <Boat BoatID="146298" SailNumber="CHN 67" BowNumber="10"/>
+ <Boat BoatID="146299" SailNumber="CHN 673" BowNumber="47"/>
+ <Boat BoatID="146300" BoatName="GORDON" SailNumber="FRA 78" BowNumber="64"/>
+ <Boat BoatID="146301" SailNumber="JPN 11" BowNumber="11"/>
+ <Boat BoatID="146302" SailNumber="GER 44" BowNumber="66"/>
+ <Boat BoatID="146303" BoatName="." SailNumber="AUS 11" BowNumber="1"/>
+ <Boat BoatID="146304" SailNumber="JPN 83" BowNumber="14"/>
+ <Boat BoatID="146305" BoatName="DAPHNE" SailNumber="ARG 87" BowNumber="32"/>
+ <Boat BoatID="146306" SailNumber="GBR 55" BowNumber="25"/>
+ <Boat BoatID="146307" BoatName="FINEM IN OCULO HABERE" SailNumber="GER 22" BowNumber="41"/>
+ <Boat BoatID="146308" SailNumber="JPN 20" BowNumber="5"/>
+ <Boat BoatID="146309" SailNumber="GBR 838" BowNumber="60"/>
+ <Boat BoatID="146310" SailNumber="GER 50" BowNumber="73"/>
+ <Boat BoatID="146311" BoatName="CMPORTIMãO" SailNumber="POR 25" BowNumber="50"/>
+ <Boat BoatID="146312" BoatName="AMY" SailNumber="GER 11" BowNumber="22"/>
+ <Boat BoatID="146313" BoatName="DENISE" SailNumber="FRA 27" BowNumber="7"/>
+ <Boat BoatID="146314" SailNumber="POL 80" BowNumber="74"/>
+ <Boat BoatID="146315" BoatName="JOHAN" SailNumber="NED 1" BowNumber="49"/>
+ <Boat BoatID="146316" BoatName="TITANIC 2" SailNumber="FRA 81" BowNumber="37"/>
+ <Boat BoatID="146317" BoatName="ELISE" SailNumber="GRE 10" BowNumber="24"/>
+ <Boat BoatID="146318" SailNumber="SWE 350" BowNumber="12"/>
+ <Boat BoatID="146319" SailNumber="POR 21" BowNumber="39"/>
+ <Boat BoatID="146320" SailNumber="RUS 10" BowNumber="61"/>
+ <Boat BoatID="146321" SailNumber="FRA 10" BowNumber="40"/>
+ <Boat BoatID="146322" BoatName="ATHENA" SailNumber="GER 13" BowNumber="17"/>
+ <Boat BoatID="146323" BoatName="-" SailNumber="SUI 53" BowNumber="59"/>
+ <Boat BoatID="146324" BoatName="ANATOLI - BLUESTAR FERRIES &amp; EUROBANK" SailNumber="GRE 1" BowNumber="18"/>
+ <Boat BoatID="146325" BoatName="JAMES" SailNumber="FRA 97" BowNumber="57"/>
+ <Boat BoatID="146326" BoatName="ENRICO" SailNumber="FRA 12" BowNumber="52"/>
+ <Boat BoatID="146327" BoatName="JACQUES" SailNumber="FRA 33" BowNumber="51"/>
+ <Boat BoatID="146328" SailNumber="FRA 20" BowNumber="58"/>
+ <Boat BoatID="146329" SailNumber="FRA 23" BowNumber="56"/>
+ <Boat BoatID="146330" SailNumber="FRA 91" BowNumber="54"/>
+ <Boat BoatID="146331" SailNumber="AUT 1" BowNumber="20"/>
+ <Boat BoatID="146332" SailNumber="GER 12" BowNumber="62"/>
+ <Boat BoatID="146333" BoatName="BEWITCHED" SailNumber="AUS 8" BowNumber="26"/>
+ <Boat BoatID="146334" SailNumber="GER 66" BowNumber="53"/>
+ <Boat BoatID="146335" BoatName="WęGORZ KRóL PARKIETU" SailNumber="POL 513" BowNumber="46"/>
+ <Boat BoatID="146336" SailNumber="GBR 859" BowNumber="45"/>
+ <Boat BoatID="146337" SailNumber="ESP 4" BowNumber="70"/>
+ <Boat BoatID="146338" BoatName="FULL AHEAD" SailNumber="BRA 21" BowNumber="44"/>
+ <Boat BoatID="146339" SailNumber="FRA 31" BowNumber="67"/>
+ <Boat BoatID="146340" BoatName="VELA.CAT/HSI/BORO" SailNumber="ESP 11" BowNumber="72"/>
+ <Boat BoatID="146341" BoatName="RAFFY II" SailNumber="ITA 54" BowNumber="75"/>
+ <Boat BoatID="146342" SailNumber="AUT 9" BowNumber="69"/>
+ <Team TeamID="ESP44" BoatID="146270" NOC="ESP" TeamName="RFEV-MOVISTAR" Gender="MEN" Territorial="CAT" GroupAct="Medal Race" Cat="Sr" Club="Club Nàutic Cambrils/Real Club Náutico de Vigo">
+  <Crew PersonID="226302" Position="S"/>
+  <Crew PersonID="226303" Position="C"/>
+ </Team>
+ <Team TeamID="TUR890" BoatID="146271" NOC="TUR" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226304" Position="S"/>
+  <Crew PersonID="226305" Position="C"/>
+ </Team>
+ <Team TeamID="CZE13" BoatID="146272" NOC="CZE" TeamName="NO NAME" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226306" Position="S"/>
+  <Crew PersonID="226307" Position="C"/>
+ </Team>
+ <Team TeamID="JPN2" BoatID="146273" NOC="JPN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="YAMAHA Sailing Team Rev's/YAMAHA Sailing Team Rev's">
+  <Crew PersonID="226308" Position="S"/>
+  <Crew PersonID="226309" Position="C"/>
+ </Team>
+ <Team TeamID="JPN15" BoatID="146274" NOC="JPN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="YAMAHA MOTOR CO.,LTD./YAMAHA MOTOR CO.,LTD.">
+  <Crew PersonID="226310" Position="S"/>
+  <Crew PersonID="226311" Position="C"/>
+ </Team>
+ <Team TeamID="ESP28" BoatID="146275" NOC="ESP" TeamName="KUNDAKA" Gender="MEN" Territorial="MUR" GroupAct="Silver" Cat="Sr" Club="Club Náutico Mar Menor/Real Club Mediterráneo">
+  <Crew PersonID="227674" Position="S"/>
+  <Crew PersonID="227675" Position="C"/>
+ </Team>
+ <Team TeamID="FRA11" BoatID="146276" NOC="FRA" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226314" Position="S"/>
+  <Crew PersonID="226315" Position="C"/>
+ </Team>
+ <Team TeamID="ITA10" BoatID="146277" NOC="ITA" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226316" Position="S"/>
+  <Crew PersonID="226317" Position="C"/>
+ </Team>
+ <Team TeamID="SUI46" BoatID="146278" NOC="SUI" TeamName="MADIROSA" Gender="MEN" Territorial="" GroupAct="Gold" Cat="u24" Club="CNPully/CNmorges">
+  <Crew PersonID="226318" Position="S"/>
+  <Crew PersonID="226319" Position="C"/>
+ </Team>
+ <Team TeamID="RUS5" BoatID="146279" NOC="RUS" TeamName="FANTASTICA" Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="Sr" Club="FANTASTICA SAILING TEAM. CSKA VMF. Krasnodar region/FANTASTICA SAILING TEAM. CSKA VMF. Krasnodar region">
+  <Crew PersonID="226320" Position="S"/>
+  <Crew PersonID="226321" Position="C"/>
+ </Team>
+ <Team TeamID="SWE349" BoatID="146280" NOC="SWE" TeamName="ATHENA" Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="Sr" Club="RSYC/RSYC">
+  <Crew PersonID="226322" Position="S"/>
+  <Crew PersonID="226323" Position="C"/>
+ </Team>
+ <Team TeamID="JPN10" BoatID="146281" NOC="JPN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226324" Position="S"/>
+  <Crew PersonID="226325" Position="C"/>
+ </Team>
+ <Team TeamID="SUI24" BoatID="146282" NOC="SUI" Gender="MIXED" Territorial="" GroupAct="Silver" Cat="u24W">
+  <Crew PersonID="226326" Position="S"/>
+  <Crew PersonID="226327" Position="C"/>
+ </Team>
+ <Team TeamID="SUI1478" BoatID="146283" NOC="SUI" TeamName="MILLA" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="Thunersee- Yachtclub/Thunersee-Yachtclub">
+  <Crew PersonID="226328" Position="S"/>
+  <Crew PersonID="226329" Position="C"/>
+ </Team>
+ <Team TeamID="GER68" BoatID="146284" NOC="GER" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226330" Position="S"/>
+  <Crew PersonID="226331" Position="C"/>
+ </Team>
+ <Team TeamID="GBR866" BoatID="146285" NOC="GBR" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226332" Position="S"/>
+  <Crew PersonID="226333" Position="C"/>
+ </Team>
+ <Team TeamID="FRA79" BoatID="146286" NOC="FRA" Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="u24">
+  <Crew PersonID="226334" Position="S"/>
+  <Crew PersonID="226335" Position="C"/>
+ </Team>
+ <Team TeamID="HUN1" BoatID="146287" NOC="HUN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226336" Position="S"/>
+  <Crew PersonID="226337" Position="C"/>
+ </Team>
+ <Team TeamID="JPN4691" BoatID="146288" NOC="JPN" Gender="MEN" Territorial="" GroupAct="Silver" Cat="Sr">
+  <Crew PersonID="226338" Position="S"/>
+  <Crew PersonID="226339" Position="C"/>
+ </Team>
+ <Team TeamID="JPN4546" BoatID="146289" NOC="JPN" TeamName="4546" Gender="MEN" Territorial="" GroupAct="Silver" Cat="Sr">
+  <Crew PersonID="226340" Position="S"/>
+  <Crew PersonID="226341" Position="C"/>
+ </Team>
+ <Team TeamID="ITA757" BoatID="146290" NOC="ITA" Gender="MEN" Territorial="" GroupAct="Gold" Cat="u24">
+  <Crew PersonID="226342" Position="S"/>
+  <Crew PersonID="226343" Position="C"/>
+ </Team>
+ <Team TeamID="BRA1" BoatID="146291" NOC="BRA" Gender="MEN" Territorial="" GroupAct="Gold" Cat="SrW" Club="MARINHA DO BRASIL/Veleiros do Sul - cbvela">
+  <Crew PersonID="227517" Position="S"/>
+  <Crew PersonID="227518" Position="C"/>
+ </Team>
+ <Team TeamID="ISR10" BoatID="146292" NOC="ISR" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="I.S.A/I.S.A">
+  <Crew PersonID="226346" Position="S"/>
+  <Crew PersonID="226347" Position="C"/>
+ </Team>
+ <Team TeamID="GBR4" BoatID="146293" NOC="GBR" TeamName="JEANNIE ANNE" Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="Sr" Club="Bala">
+  <Crew PersonID="226348" Position="S"/>
+  <Crew PersonID="226349" Position="C"/>
+ </Team>
+ <Team TeamID="JPN7" BoatID="146294" NOC="JPN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226350" Position="S"/>
+  <Crew PersonID="226351" Position="C"/>
+ </Team>
+ <Team TeamID="NZL1" BoatID="146295" NOC="NZL" TeamName="KOKAKO" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="Wakatere boating club/M.B.S.C">
+  <Crew PersonID="226352" Position="S"/>
+  <Crew PersonID="226353" Position="C"/>
+ </Team>
+ <Team TeamID="AUT17" BoatID="146296" NOC="AUT" TeamName="STRöCK" Gender="MEN" Territorial="" GroupAct="Silver" Cat="Sr">
+  <Crew PersonID="226354" Position="S"/>
+  <Crew PersonID="226355" Position="C"/>
+ </Team>
+ <Team TeamID="USA1" BoatID="146297" NOC="USA" Gender="MEN" Territorial="" GroupAct="Silver" Cat="Sr">
+  <Crew PersonID="226356" Position="S"/>
+  <Crew PersonID="226357" Position="C"/>
+ </Team>
+ <Team TeamID="CHN67" BoatID="146298" NOC="CHN" Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="Sr">
+  <Crew PersonID="226358" Position="S"/>
+  <Crew PersonID="226359" Position="C"/>
+ </Team>
+ <Team TeamID="CHN673" BoatID="146299" NOC="CHN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226360" Position="S"/>
+  <Crew PersonID="226361" Position="C"/>
+ </Team>
+ <Team TeamID="FRA78" BoatID="146300" NOC="FRA" TeamName="GORDON" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="85034 CNHR/85034 CNHR">
+  <Crew PersonID="226362" Position="S"/>
+  <Crew PersonID="226363" Position="C"/>
+ </Team>
+ <Team TeamID="JPN11" BoatID="146301" NOC="JPN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="Team ABeam/Team ABeam">
+  <Crew PersonID="226364" Position="S"/>
+  <Crew PersonID="226365" Position="C"/>
+ </Team>
+ <Team TeamID="GER44" BoatID="146302" NOC="GER" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="ycbg/SC Argo 1909">
+  <Crew PersonID="226366" Position="S"/>
+  <Crew PersonID="226367" Position="C"/>
+ </Team>
+ <Team TeamID="AUS11" BoatID="146303" NOC="AUS" TeamName="." Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="Sr">
+  <Crew PersonID="226368" Position="S"/>
+  <Crew PersonID="226369" Position="C"/>
+ </Team>
+ <Team TeamID="JPN83" BoatID="146304" NOC="JPN" Gender="MIXED" Territorial="" GroupAct="Medal Race" Cat="Sr">
+  <Crew PersonID="226370" Position="S"/>
+  <Crew PersonID="226371" Position="C"/>
+ </Team>
+ <Team TeamID="ARG87" BoatID="146305" NOC="ARG" TeamName="DAPHNE" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="Yacht Club Argentino/Yacht Club Rosario">
+  <Crew PersonID="226372" Position="S"/>
+  <Crew PersonID="226373" Position="C"/>
+ </Team>
+ <Team TeamID="GBR55" BoatID="146306" NOC="GBR" Gender="MEN" Territorial="" GroupAct="Gold" Cat="u24">
+  <Crew PersonID="226374" Position="S"/>
+  <Crew PersonID="226375" Position="C"/>
+ </Team>
+ <Team TeamID="GER22" BoatID="146307" NOC="GER" TeamName="FINEM IN OCULO HABERE" Gender="MEN" Territorial="" GroupAct="Gold" Cat="u24" Club="VSaW">
+  <Crew PersonID="226376" Position="S"/>
+  <Crew PersonID="226377" Position="C"/>
+ </Team>
+ <Team TeamID="JPN20" BoatID="146308" NOC="JPN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226378" Position="S"/>
+  <Crew PersonID="226379" Position="C"/>
+ </Team>
+ <Team TeamID="GBR838" BoatID="146309" NOC="GBR" Gender="MIXED" Territorial="" GroupAct="Silver" Cat="SrW" Club="Emsworth Sailing Club/Sutton Sailing Club">
+  <Crew PersonID="226380" Position="S"/>
+  <Crew PersonID="226381" Position="C"/>
+ </Team>
+ <Team TeamID="GER50" BoatID="146310" NOC="GER" Gender="MIXED" Territorial="" GroupAct="Silver" Cat="u24W">
+  <Crew PersonID="227684" Position="S"/>
+  <Crew PersonID="227685" Position="C"/>
+ </Team>
+ <Team TeamID="POR25" BoatID="146311" NOC="POR" TeamName="CMPORTIMãO" Gender="MEN" Territorial="" GroupAct="Silver" Cat="Sr">
+  <Crew PersonID="226384" Position="S"/>
+  <Crew PersonID="226385" Position="C"/>
+ </Team>
+ <Team TeamID="GER11" BoatID="146312" NOC="GER" TeamName="AMY" Gender="MEN" Territorial="" GroupAct="Silver" Cat="Sr" Club="Wuerttembergischer Yacht-Club/Bayerischer Yacht-Club">
+  <Crew PersonID="226386" Position="S"/>
+  <Crew PersonID="226387" Position="C"/>
+ </Team>
+ <Team TeamID="FRA27" BoatID="146313" NOC="FRA" TeamName="DENISE" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="Société des Régates Rochelaises/Société des Régates du Havre">
+  <Crew PersonID="226388" Position="S"/>
+  <Crew PersonID="226389" Position="C"/>
+ </Team>
+ <Team TeamID="POL80" BoatID="146314" NOC="POL" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="OKŻ Olsztyn/OKŻ Olsztyn">
+  <Crew PersonID="226390" Position="S"/>
+  <Crew PersonID="226391" Position="C"/>
+ </Team>
+ <Team TeamID="NED1" BoatID="146315" NOC="NED" TeamName="JOHAN" Gender="MEN" Territorial="" GroupAct="Gold" Cat="u24">
+  <Crew PersonID="226392" Position="S"/>
+  <Crew PersonID="226393" Position="C"/>
+ </Team>
+ <Team TeamID="FRA81" BoatID="146316" NOC="FRA" TeamName="TITANIC 2" Gender="MEN" Territorial="" GroupAct="Gold" Cat="u24">
+  <Crew PersonID="226394" Position="S"/>
+  <Crew PersonID="226395" Position="C"/>
+ </Team>
+ <Team TeamID="GRE10" BoatID="146317" NOC="GRE" TeamName="ELISE" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="Piraeus Sailing Club/Piraeus Sailing Club">
+  <Crew PersonID="226396" Position="S"/>
+  <Crew PersonID="226397" Position="C"/>
+ </Team>
+ <Team TeamID="SWE350" BoatID="146318" NOC="SWE" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226398" Position="S"/>
+  <Crew PersonID="226399" Position="C"/>
+ </Team>
+ <Team TeamID="POR21" BoatID="146319" NOC="POR" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226400" Position="S"/>
+  <Crew PersonID="226401" Position="C"/>
+ </Team>
+ <Team TeamID="RUS10" BoatID="146320" NOC="RUS" Gender="MEN" Territorial="" GroupAct="Silver" Cat="SrW" Club="Sailing academy Saint-Petersburg/Sailing academy Saint-Petersburg">
+  <Crew PersonID="226402" Position="S"/>
+  <Crew PersonID="226403" Position="C"/>
+ </Team>
+ <Team TeamID="FRA10" BoatID="146321" NOC="FRA" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226404" Position="S"/>
+  <Crew PersonID="226405" Position="C"/>
+ </Team>
+ <Team TeamID="GER13" BoatID="146322" NOC="GER" TeamName="ATHENA" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr">
+  <Crew PersonID="226406" Position="S"/>
+  <Crew PersonID="226407" Position="C"/>
+ </Team>
+ <Team TeamID="SUI53" BoatID="146323" NOC="SUI" TeamName="-" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="Regatta Club Oberhofen/Regatta Club  Oberhofen">
+  <Crew PersonID="226408" Position="S"/>
+  <Crew PersonID="226409" Position="C"/>
+ </Team>
+ <Team TeamID="GRE1" BoatID="146324" NOC="GRE" TeamName="ANATOLI - BLUESTAR FERRIES &amp; EUROBANK" Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="Sr">
+  <Crew PersonID="228159" Position="S"/>
+  <Crew PersonID="228160" Position="C"/>
+ </Team>
+ <Team TeamID="FRA97" BoatID="146325" NOC="FRA" TeamName="JAMES" Gender="MEN" Territorial="" GroupAct="Gold" Cat="u24" Club="CN Neptune/BN Mascareignes">
+  <Crew PersonID="226412" Position="S"/>
+  <Crew PersonID="226413" Position="C"/>
+ </Team>
+ <Team TeamID="FRA12" BoatID="146326" NOC="FRA" TeamName="ENRICO" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226414" Position="S"/>
+  <Crew PersonID="226415" Position="C"/>
+ </Team>
+ <Team TeamID="FRA33" BoatID="146327" NOC="FRA" TeamName="JACQUES" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="CVSAE/CVSAE">
+  <Crew PersonID="226416" Position="S"/>
+  <Crew PersonID="226417" Position="C"/>
+ </Team>
+ <Team TeamID="FRA20" BoatID="146328" NOC="FRA" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226418" Position="S"/>
+  <Crew PersonID="226419" Position="C"/>
+ </Team>
+ <Team TeamID="FRA23" BoatID="146329" NOC="FRA" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226420" Position="S"/>
+  <Crew PersonID="226421" Position="C"/>
+ </Team>
+ <Team TeamID="FRA91" BoatID="146330" NOC="FRA" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226422" Position="S"/>
+  <Crew PersonID="226423" Position="C"/>
+ </Team>
+ <Team TeamID="AUT1" BoatID="146331" NOC="AUT" Gender="MEN" Territorial="" GroupAct="Medal Race" Cat="Sr" Club="Yacht Club Bregenz/Yacht Club Bregenz">
+  <Crew PersonID="226424" Position="S"/>
+  <Crew PersonID="226425" Position="C"/>
+ </Team>
+ <Team TeamID="GER12" BoatID="146332" NOC="GER" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="Norddeutscher Regatta Verein">
+  <Crew PersonID="226426" Position="S"/>
+  <Crew PersonID="226427" Position="C"/>
+ </Team>
+ <Team TeamID="AUS8" BoatID="146333" NOC="AUS" TeamName="BEWITCHED" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="FSC/RPAYC">
+  <Crew PersonID="226428" Position="S"/>
+  <Crew PersonID="226429" Position="C"/>
+ </Team>
+ <Team TeamID="GER66" BoatID="146334" NOC="GER" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="VSaW - Verein Seglerhaus am Wannsee">
+  <Crew PersonID="226430" Position="S"/>
+  <Crew PersonID="226431" Position="C"/>
+ </Team>
+ <Team TeamID="POL513" BoatID="146335" NOC="POL" TeamName="WęGORZ KRóL PARKIETU" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="OKZ Olsztyn/OKZ Olsztyn">
+  <Crew PersonID="226432" Position="S"/>
+  <Crew PersonID="226433" Position="C"/>
+ </Team>
+ <Team TeamID="GBR859" BoatID="146336" NOC="GBR" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="470 International Class Association">
+  <Crew PersonID="227511" Position="S"/>
+  <Crew PersonID="227512" Position="C"/>
+ </Team>
+ <Team TeamID="ESP4" BoatID="146337" NOC="ESP" Gender="MIXED" Territorial="BAL" GroupAct="Silver" Cat="u24W" Club="RCN  Palma/Real Club Náutico de Gran Canaria">
+  <Crew PersonID="226436" Position="S"/>
+  <Crew PersonID="226437" Position="C"/>
+ </Team>
+ <Team TeamID="BRA21" BoatID="146338" NOC="BRA" TeamName="FULL AHEAD" Gender="MEN" Territorial="" GroupAct="Gold" Cat="Sr" Club="IATE CLUBE DO RIO DE JANEIRO/IATE CLUBE DO RIO DE JANEIRO">
+  <Crew PersonID="226438" Position="S"/>
+  <Crew PersonID="226439" Position="C"/>
+ </Team>
+ <Team TeamID="FRA31" BoatID="146339" NOC="FRA" Gender="MIXED" Territorial="" GroupAct="Silver" Cat="u24" Club="USAM voile Brest/CN  plouguerneau">
+  <Crew PersonID="226440" Position="S"/>
+  <Crew PersonID="226441" Position="C"/>
+ </Team>
+ <Team TeamID="ESP11" BoatID="146340" NOC="ESP" TeamName="VELA.CAT/HSI/BORO" Gender="MEN" Territorial="CAT" GroupAct="Silver" Cat="u24">
+  <Crew PersonID="226442" Position="S"/>
+  <Crew PersonID="226443" Position="C"/>
+ </Team>
+ <Team TeamID="ITA54" BoatID="146341" NOC="ITA" TeamName="RAFFY II" Gender="MIXED" Territorial="" GroupAct="Silver" Cat="u24W">
+  <Crew PersonID="226444" Position="S"/>
+  <Crew PersonID="226445" Position="C"/>
+ </Team>
+ <Team TeamID="AUT9" BoatID="146342" NOC="AUT" Gender="MEN" Territorial="" GroupAct="Silver" Cat="u24" Club="UYCAs/UYCMo">
+  <Crew PersonID="226446" Position="S"/>
+  <Crew PersonID="226447" Position="C"/>
+ </Team>
+ <Event EventID="6443" IFEventID="ESP201903FIP" IFUploadCode="iJ108YkH0nfM6" Type="Regatta" Title="50 Trofeo S.A.R. Princesa Sofía IBEROSTAR">
+  <Race RaceID="45821" RaceNumber="1" RaceName="1Q" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
+  <Race RaceID="45822" RaceNumber="1" RaceName="1Q" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
+  <Race RaceID="45853" RaceNumber="2" RaceName="2Q" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
+  <Race RaceID="45854" RaceNumber="2" RaceName="2Q" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
+  <Race RaceID="45871" RaceNumber="3" RaceName="3Q" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
+  <Race RaceID="45872" RaceNumber="3" RaceName="3Q" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
+  <Race RaceID="45883" RaceNumber="4" RaceName="4Q" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
+  <Race RaceID="45884" RaceNumber="4" RaceName="4Q" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
+  <Race RaceID="45904" RaceNumber="5" RaceName="5F" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
+  <Race RaceID="45905" RaceNumber="5" RaceName="5F" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
+  <Race RaceID="45921" RaceNumber="6" RaceName="6F" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
+  <Race RaceID="45922" RaceNumber="6" RaceName="6F" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
+  <Race RaceID="45959" RaceNumber="7" RaceName="7F" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
+  <Race RaceID="45960" RaceNumber="7" RaceName="7F" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
+  <Race RaceID="45980" RaceNumber="8" RaceName="8F" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
+  <Race RaceID="45981" RaceNumber="8" RaceName="8F" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
+  <Race RaceID="46029" RaceNumber="9" RaceName="9F" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
+  <Race RaceID="46030" RaceNumber="9" RaceName="9F" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
+  <Race RaceID="46066" RaceNumber="10" RaceName="10F" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
+  <Race RaceID="46067" RaceNumber="10" RaceName="10F" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
+  <Race RaceID="46099" RaceNumber="11" RaceName="MR" RaceStartDate="2019-04-06" RaceStartTime="00:00:00"/>
+  <Division DivisionID="8351" Type="FleetRace" Title="470 Men" ClassID="13" IFClassID="470" IFDivisionID="470" Gender="ALL">
+   <RaceResult RaceID="45821" TeamID="AUS11" RacePoints="38" Discard="true" ScoreCode="DSQ" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="USA1" RacePoints="13" RaceRank="13" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="JPN20" RacePoints="1" RaceRank="1" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="ITA757" RacePoints="3" RaceRank="3" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA79" RacePoints="4" RaceRank="4" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="SWE350" RacePoints="11" RaceRank="11" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="HUN1" RacePoints="19" RaceRank="19" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="NZL1" RacePoints="8" RaceRank="8" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GER13" RacePoints="5" RaceRank="5" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="AUT1" RacePoints="2" RaceRank="2" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="RUS5" RacePoints="7" RaceRank="7" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GRE10" RacePoints="10" RaceRank="10" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GBR55" RacePoints="6" RaceRank="6" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="ITA10" RacePoints="21" RaceRank="21" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="AUT17" RacePoints="14" RaceRank="14" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="ARG87" RacePoints="12" RaceRank="12" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="ESP28" RacePoints="24" RaceRank="24" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="JPN10" RacePoints="22" RaceRank="22" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA81" RacePoints="25" RaceRank="25" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA10" RacePoints="16" RaceRank="16" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GER22" RacePoints="17" RaceRank="17" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="BRA21" RacePoints="26" RaceRank="26" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GBR859" RacePoints="18" RaceRank="18" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GBR866" RacePoints="30" RaceRank="30" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="NED1" RacePoints="9" RaceRank="9" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA12" RacePoints="20" RaceRank="20" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GER66" RacePoints="29" RaceRank="29" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA23" RacePoints="28" RaceRank="28" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA97" RacePoints="23" RaceRank="23" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GBR838" RacePoints="32" RaceRank="32" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="RUS10" RacePoints="31" RaceRank="31" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA78" RacePoints="15" RaceRank="15" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="CZE13" RacePoints="36" RaceRank="36" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="FRA31" RacePoints="35" RaceRank="35" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="GER44" RacePoints="34" RaceRank="34" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="POL80" RacePoints="34" RaceRank="33" ScoreCode="STP" Group="Yellow"/>
+   <RaceResult RaceID="45821" TeamID="SUI24" RacePoints="27" RaceRank="27" Group="Yellow"/>
+   <RaceResult RaceID="45822" TeamID="SWE349" RacePoints="3" RaceRank="3" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="ESP44" RacePoints="1" RaceRank="1" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="JPN7" RacePoints="38" Discard="true" ScoreCode="UFD" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="FRA27" RacePoints="10" RaceRank="10" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="CHN67" RacePoints="6" RaceRank="6" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="JPN11" RacePoints="4" RaceRank="4" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="JPN83" RacePoints="11" RaceRank="11" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="TUR890" RacePoints="5" RaceRank="5" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="GRE1" RacePoints="38" Discard="true" ScoreCode="UFD" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="JPN15" RacePoints="12" RaceRank="12" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="GER11" RacePoints="19" RaceRank="19" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="GBR4" RacePoints="9" RaceRank="9" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="AUS8" RacePoints="8" RaceRank="8" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="SUI46" RacePoints="7" RaceRank="7" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="ISR10" RacePoints="13" RaceRank="13" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="BRA1" RacePoints="2" RaceRank="2" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="JPN4691" RacePoints="16" RaceRank="16" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="FRA11" RacePoints="14" RaceRank="14" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="JPN2" RacePoints="18" RaceRank="18" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="POR21" RacePoints="20" RaceRank="20" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="SUI1478" RacePoints="25" RaceRank="25" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="JPN4546" RacePoints="15" RaceRank="15" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="POL513" RacePoints="38" Discard="true" ScoreCode="UFD" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="CHN673" RacePoints="38" Discard="true" ScoreCode="UFD" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="POR25" RacePoints="26" RaceRank="26" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="FRA33" RacePoints="28" RaceRank="28" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="FRA91" RacePoints="21" RaceRank="21" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="GER68" RacePoints="29" RaceRank="29" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="FRA20" RacePoints="31" RaceRank="31" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="SUI53" RacePoints="30" RaceRank="30" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="GER12" RacePoints="24" RaceRank="24" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="AUT9" RacePoints="23" RaceRank="23" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="ESP4" RacePoints="27" RaceRank="27" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="ESP11" RacePoints="32" RaceRank="32" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="GER50" RacePoints="17" RaceRank="17" Group="Blue"/>
+   <RaceResult RaceID="45822" TeamID="ITA54" RacePoints="22" RaceRank="22" Group="Blue"/>
+   <RaceResult RaceID="45853" TeamID="AUS11" RacePoints="1" RaceRank="1" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="USA1" RacePoints="11" RaceRank="11" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="JPN20" RacePoints="5" RaceRank="5" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="ITA757" RacePoints="15" RaceRank="15" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA79" RacePoints="3" RaceRank="3" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="SWE350" RacePoints="13" RaceRank="13" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="HUN1" RacePoints="6" RaceRank="6" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="NZL1" RacePoints="7" RaceRank="7" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GER13" RacePoints="16" RaceRank="16" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="AUT1" RacePoints="21" RaceRank="21" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="RUS5" RacePoints="2" RaceRank="2" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GRE10" RacePoints="17" RaceRank="17" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GBR55" RacePoints="9" RaceRank="9" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="ITA10" RacePoints="19" RaceRank="19" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="AUT17" RacePoints="20" RaceRank="20" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="ARG87" RacePoints="27" RaceRank="27" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="ESP28" RacePoints="23" RaceRank="23" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="JPN10" RacePoints="4" RaceRank="4" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA81" RacePoints="12" RaceRank="12" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA10" RacePoints="18" RaceRank="18" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GER22" RacePoints="14" RaceRank="14" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="BRA21" RacePoints="24" RaceRank="24" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GBR859" RacePoints="33" RaceRank="33" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GBR866" RacePoints="36" RaceRank="36" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="NED1" RacePoints="8" RaceRank="8" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA12" RacePoints="32" RaceRank="32" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GER66" RacePoints="25" RaceRank="25" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA23" RacePoints="30" RaceRank="30" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA97" RacePoints="10" RaceRank="10" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GBR838" RacePoints="28" RaceRank="28" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="RUS10" RacePoints="26" RaceRank="26" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA78" RacePoints="22" RaceRank="22" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="CZE13" RacePoints="37" RaceRank="37" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="FRA31" RacePoints="35" RaceRank="35" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="GER44" RacePoints="29" RaceRank="29" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="POL80" RacePoints="35" RaceRank="34" ScoreCode="STP" Group="Yellow"/>
+   <RaceResult RaceID="45853" TeamID="SUI24" RacePoints="31" RaceRank="31" Group="Yellow"/>
+   <RaceResult RaceID="45854" TeamID="SWE349" RacePoints="5" RaceRank="5" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="ESP44" RacePoints="2" RaceRank="2" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="JPN7" RacePoints="8" RaceRank="8" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="FRA27" RacePoints="14" RaceRank="14" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="CHN67" RacePoints="10" RaceRank="10" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="JPN11" RacePoints="12" RaceRank="12" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="JPN83" RacePoints="18" RaceRank="18" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="TUR890" RacePoints="27" RaceRank="27" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="GRE1" RacePoints="1" RaceRank="1" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="JPN15" RacePoints="3" RaceRank="3" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="GER11" RacePoints="7" RaceRank="7" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="GBR4" RacePoints="6" RaceRank="6" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="AUS8" RacePoints="4" RaceRank="4" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="SUI46" RacePoints="15" RaceRank="15" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="ISR10" RacePoints="31" RaceRank="31" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="BRA1" RacePoints="9" RaceRank="9" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="JPN4691" RacePoints="17" RaceRank="17" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="FRA11" RacePoints="13" RaceRank="13" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="JPN2" RacePoints="11" RaceRank="11" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="POR21" RacePoints="23" RaceRank="23" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="SUI1478" RacePoints="29" RaceRank="29" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="JPN4546" RacePoints="19" RaceRank="19" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="POL513" RacePoints="22" RaceRank="22" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="CHN673" RacePoints="16" RaceRank="16" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="POR25" RacePoints="20" RaceRank="20" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="FRA33" RacePoints="28" RaceRank="28" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="FRA91" RacePoints="26" RaceRank="26" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="GER68" RacePoints="32" RaceRank="32" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="FRA20" RacePoints="24" RaceRank="24" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="SUI53" RacePoints="35" RaceRank="35" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="GER12" RacePoints="33" RaceRank="33" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="AUT9" RacePoints="25" RaceRank="25" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="ESP4" RacePoints="34" RaceRank="34" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="ESP11" RacePoints="36" RaceRank="36" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="GER50" RacePoints="30" RaceRank="30" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45854" TeamID="ITA54" RacePoints="21" RaceRank="21" Group="Blue"/>
+   <RaceResult RaceID="45871" TeamID="ESP44" RacePoints="15" RaceRank="15" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="SWE349" RacePoints="10" RaceRank="10" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="RUS5" RacePoints="12" RaceRank="12" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="JPN15" RacePoints="4" RaceRank="4" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="GBR4" RacePoints="13" RaceRank="13" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="JPN11" RacePoints="8" RaceRank="8" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="CHN67" RacePoints="11" RaceRank="11" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="GER13" RacePoints="19" RaceRank="19" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="SUI46" RacePoints="5" RaceRank="5" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="USA1" RacePoints="24" RaceRank="24" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="SWE350" RacePoints="18" RaceRank="18" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="JPN10" RacePoints="7" RaceRank="7" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="GRE10" RacePoints="9" RaceRank="9" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="JPN83" RacePoints="1" RaceRank="1" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="GER22" RacePoints="6" RaceRank="6" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="FRA97" RacePoints="3" RaceRank="3" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="AUT17" RacePoints="17" RaceRank="17" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="FRA78" RacePoints="28" RaceRank="28" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="AUS11" RacePoints="22" RaceRank="22" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="ITA10" RacePoints="2" RaceRank="2" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="POR21" RacePoints="16" RaceRank="16" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="POR25" RacePoints="32" RaceRank="32" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="JPN7" RacePoints="14" RaceRank="14" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="AUT9" RacePoints="34" RaceRank="34" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="ESP28" RacePoints="38" Discard="true" ScoreCode="UFD" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="FRA12" RacePoints="21" RaceRank="21" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="SUI1478" RacePoints="25" RaceRank="25" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="GER66" RacePoints="35" RaceRank="35" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="FRA33" RacePoints="29" RaceRank="29" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="RUS10" RacePoints="27" RaceRank="27" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="SUI24" RacePoints="31" RaceRank="31" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="ESP4" RacePoints="26" RaceRank="26" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="GBR838" RacePoints="23" RaceRank="23" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="SUI53" RacePoints="20" RaceRank="20" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="GBR866" RacePoints="30" RaceRank="30" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="FRA31" RacePoints="33" RaceRank="33" Group="Yellow"/>
+   <RaceResult RaceID="45871" TeamID="CZE13" RacePoints="36" RaceRank="36" Group="Yellow"/>
+   <RaceResult RaceID="45872" TeamID="JPN20" RacePoints="5" RaceRank="5" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA79" RacePoints="9" RaceRank="9" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="BRA1" RacePoints="2" RaceRank="2" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="AUS8" RacePoints="22" RaceRank="22" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GBR55" RacePoints="13" RaceRank="13" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="NZL1" RacePoints="38" Discard="true" ScoreCode="BFD" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="NED1" RacePoints="25" RaceRank="25" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="ITA757" RacePoints="6" RaceRank="6" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="AUT1" RacePoints="3" RaceRank="3" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA27" RacePoints="18" RaceRank="18" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="HUN1" RacePoints="4" RaceRank="4" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GER11" RacePoints="21" RaceRank="21" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA11" RacePoints="16" RaceRank="16" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="JPN2" RacePoints="23" RaceRank="23" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="TUR890" RacePoints="14" RaceRank="14" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="JPN4691" RacePoints="29" RaceRank="29" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA10" RacePoints="20" RaceRank="20" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA81" RacePoints="12" RaceRank="12" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GRE1" RacePoints="15" RaceRank="15" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="ARG87" RacePoints="7" RaceRank="7" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="ITA54" RacePoints="11" RaceRank="11" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="ISR10" RacePoints="28" RaceRank="28" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GER50" RacePoints="19" RaceRank="19" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA91" RacePoints="32" RaceRank="32" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="BRA21" RacePoints="1" RaceRank="1" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GBR859" RacePoints="32" RaceRank="31" ScoreCode="STP" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="CHN673" RacePoints="10" RaceRank="10" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA20" RacePoints="38" Discard="true" ScoreCode="BFD" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GER12" RacePoints="33" RaceRank="33" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="JPN4546" RacePoints="17" RaceRank="17" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="FRA23" RacePoints="8" RaceRank="8" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="POL513" RacePoints="24" RaceRank="24" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GER68" RacePoints="27" RaceRank="27" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="GER44" RacePoints="26" RaceRank="26" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="ESP11" RacePoints="30" RaceRank="30" Group="Blue"/>
+   <RaceResult RaceID="45872" TeamID="POL80" RacePoints="38" Discard="true" ScoreCode="BFD" Group="Blue"/>
+   <RaceResult RaceID="45883" TeamID="ESP44" RacePoints="1" RaceRank="1" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="SWE349" RacePoints="2" RaceRank="2" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="RUS5" RacePoints="10" RaceRank="10" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="JPN15" RacePoints="18" RaceRank="18" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="GBR4" RacePoints="5" RaceRank="5" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="JPN11" RacePoints="13" RaceRank="13" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="CHN67" RacePoints="12" RaceRank="12" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="GER13" RacePoints="16" RaceRank="16" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="SUI46" RacePoints="26" RaceRank="26" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="USA1" RacePoints="21" RaceRank="21" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="SWE350" RacePoints="11" RaceRank="11" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="JPN10" RacePoints="9" RaceRank="9" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="GRE10" RacePoints="4" RaceRank="4" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="JPN83" RacePoints="3" RaceRank="3" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="GER22" RacePoints="8" RaceRank="8" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="FRA97" RacePoints="23" RaceRank="23" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="AUT17" RacePoints="24" RaceRank="24" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="FRA78" RacePoints="17" RaceRank="17" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="AUS11" RacePoints="6" RaceRank="6" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="ITA10" RacePoints="14" RaceRank="14" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="POR21" RacePoints="20" RaceRank="20" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="POR25" RacePoints="33" RaceRank="33" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="JPN7" RacePoints="7" RaceRank="7" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="AUT9" RacePoints="35" RaceRank="35" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="ESP28" RacePoints="38" ScoreCode="DSQ" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="FRA12" RacePoints="15" RaceRank="15" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="SUI1478" RacePoints="30" RaceRank="30" Discard="true" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="GER66" RacePoints="34" RaceRank="34" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="FRA33" RacePoints="27" RaceRank="27" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="RUS10" RacePoints="28" RaceRank="28" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="SUI24" RacePoints="19" RaceRank="19" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="ESP4" RacePoints="25" RaceRank="25" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="GBR838" RacePoints="22" RaceRank="22" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="SUI53" RacePoints="29" RaceRank="29" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="GBR866" RacePoints="32" RaceRank="32" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="FRA31" RacePoints="31" RaceRank="31" Group="Yellow"/>
+   <RaceResult RaceID="45883" TeamID="CZE13" RacePoints="36" RaceRank="36" Group="Yellow"/>
+   <RaceResult RaceID="45884" TeamID="JPN20" RacePoints="4" RaceRank="4" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA79" RacePoints="15" RaceRank="15" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="BRA1" RacePoints="19" RaceRank="19" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="AUS8" RacePoints="16" RaceRank="16" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GBR55" RacePoints="20" RaceRank="20" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="NZL1" RacePoints="9" RaceRank="9" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="NED1" RacePoints="27" RaceRank="27" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="ITA757" RacePoints="2" RaceRank="2" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="AUT1" RacePoints="3" RaceRank="3" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA27" RacePoints="17" RaceRank="17" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="HUN1" RacePoints="11" RaceRank="11" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GER11" RacePoints="29" RaceRank="29" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA11" RacePoints="1" RaceRank="1" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="JPN2" RacePoints="13" RaceRank="13" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="TUR890" RacePoints="21" RaceRank="21" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="JPN4691" RacePoints="14" RaceRank="14" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA10" RacePoints="31" RaceRank="31" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA81" RacePoints="8" RaceRank="8" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GRE1" RacePoints="5" RaceRank="5" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="ARG87" RacePoints="6" RaceRank="6" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="ITA54" RacePoints="24" RaceRank="24" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="ISR10" RacePoints="22" RaceRank="22" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GER50" RacePoints="10" RaceRank="10" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA91" RacePoints="33" RaceRank="33" Discard="true" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="BRA21" RacePoints="18" RaceRank="18" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GBR859" RacePoints="30" RaceRank="30" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="CHN673" RacePoints="7" RaceRank="7" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA20" RacePoints="35" RaceRank="35" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GER12" RacePoints="34" RaceRank="34" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="JPN4546" RacePoints="12" RaceRank="12" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="FRA23" RacePoints="23" RaceRank="23" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="POL513" RacePoints="28" RaceRank="28" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GER68" RacePoints="25" RaceRank="25" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="GER44" RacePoints="38" Discard="true" ScoreCode="RET" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="ESP11" RacePoints="26" RaceRank="26" Group="Blue"/>
+   <RaceResult RaceID="45884" TeamID="POL80" RacePoints="32" RaceRank="32" Group="Blue"/>
+   <RaceResult RaceID="45904" TeamID="ESP44" RacePoints="25" RaceRank="25" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="AUT1" RacePoints="8" RaceRank="8" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="JPN20" RacePoints="32" RaceRank="32" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="SWE349" RacePoints="5" RaceRank="5" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="ITA757" RacePoints="15" RaceRank="15" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="BRA1" RacePoints="21" RaceRank="21" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="JPN83" RacePoints="2" RaceRank="2" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="FRA79" RacePoints="26" RaceRank="26" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="RUS5" RacePoints="34" RaceRank="34" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="JPN15" RacePoints="10" RaceRank="10" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="JPN10" RacePoints="37" RaceRank="37" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="GBR4" RacePoints="4" RaceRank="4" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="GRE1" RacePoints="22" RaceRank="22" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="HUN1" RacePoints="14" RaceRank="14" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="GRE10" RacePoints="24" RaceRank="24" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="JPN11" RacePoints="16" RaceRank="16" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="NZL1" RacePoints="6" RaceRank="6" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="ARG87" RacePoints="13" RaceRank="13" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="SUI46" RacePoints="30" RaceRank="30" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="CHN67" RacePoints="33" RaceRank="33" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="FRA11" RacePoints="28" RaceRank="28" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="AUS8" RacePoints="12" RaceRank="12" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="GER22" RacePoints="23" RaceRank="23" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="GBR55" RacePoints="18" RaceRank="18" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="AUS11" RacePoints="7" RaceRank="7" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="JPN7" RacePoints="19" RaceRank="19" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="FRA81" RacePoints="17" RaceRank="17" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="CHN673" RacePoints="20" RaceRank="20" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="ITA10" RacePoints="9" RaceRank="9" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="SWE350" RacePoints="3" RaceRank="3" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="FRA97" RacePoints="11" RaceRank="11" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="GER13" RacePoints="36" RaceRank="36" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="TUR890" RacePoints="1" RaceRank="1" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="FRA27" RacePoints="27" RaceRank="27" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="NED1" RacePoints="35" RaceRank="35" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="JPN2" RacePoints="31" RaceRank="31" Group="Gold"/>
+   <RaceResult RaceID="45904" TeamID="BRA21" RacePoints="29" RaceRank="29" Group="Gold"/>
+   <RaceResult RaceID="45905" TeamID="JPN4546" RacePoints="8" RaceRank="8" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="USA1" RacePoints="12" RaceRank="12" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GER50" RacePoints="3" RaceRank="3" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GER11" RacePoints="1" RaceRank="1" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="JPN4691" RacePoints="5" RaceRank="5" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="AUT17" RacePoints="24" RaceRank="24" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="ITA54" RacePoints="7" RaceRank="7" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA78" RacePoints="20" RaceRank="20" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA10" RacePoints="19" RaceRank="19" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA12" RacePoints="6" RaceRank="6" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="POR21" RacePoints="22" RaceRank="22" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA23" RacePoints="30" RaceRank="30" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="ISR10" RacePoints="10" RaceRank="10" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GBR838" RacePoints="15" RaceRank="15" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="POL513" RacePoints="17" RaceRank="17" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="SUI24" RacePoints="37" Discard="true" ScoreCode="UFD" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="POR25" RacePoints="14" RaceRank="14" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="ESP4" RacePoints="26" RaceRank="26" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="SUI53" RacePoints="33" RaceRank="33" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA91" RacePoints="25" RaceRank="25" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="SUI1478" RacePoints="16" RaceRank="16" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GBR859" RacePoints="9" RaceRank="9" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GER68" RacePoints="23" RaceRank="23" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="RUS10" RacePoints="11" RaceRank="11" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="AUT9" RacePoints="29" RaceRank="29" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA33" RacePoints="2" RaceRank="2" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="ESP28" RacePoints="13" RaceRank="13" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GER66" RacePoints="18" RaceRank="18" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="ESP11" RacePoints="31" RaceRank="31" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GER44" RacePoints="27" RaceRank="27" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA20" RacePoints="35" RaceRank="35" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GER12" RacePoints="34" RaceRank="34" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="GBR866" RacePoints="4" RaceRank="4" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="FRA31" RacePoints="21" RaceRank="21" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="POL80" RacePoints="28" RaceRank="28" Group="Silver"/>
+   <RaceResult RaceID="45905" TeamID="CZE13" RacePoints="32" RaceRank="32" Group="Silver"/>
+   <RaceResult RaceID="45921" TeamID="ESP44" RacePoints="20" RaceRank="20" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="AUT1" RacePoints="9" RaceRank="9" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="JPN20" RacePoints="15" RaceRank="15" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="SWE349" RacePoints="8" RaceRank="8" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="ITA757" RacePoints="26" RaceRank="26" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="BRA1" RacePoints="19" RaceRank="19" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="JPN83" RacePoints="13" RaceRank="13" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="FRA79" RacePoints="25" RaceRank="25" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="RUS5" RacePoints="23" RaceRank="23" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="JPN15" RacePoints="24" RaceRank="24" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="JPN10" RacePoints="35" RaceRank="35" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="GBR4" RacePoints="4" RaceRank="4" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="GRE1" RacePoints="29" RaceRank="29" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="HUN1" RacePoints="6" RaceRank="6" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="GRE10" RacePoints="18" RaceRank="18" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="JPN11" RacePoints="33" RaceRank="33" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="NZL1" RacePoints="2" RaceRank="2" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="ARG87" RacePoints="1" RaceRank="1" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="SUI46" RacePoints="37" RaceRank="37" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="CHN67" RacePoints="12" RaceRank="12" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="FRA11" RacePoints="32" RaceRank="32" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="AUS8" RacePoints="11" RaceRank="11" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="GER22" RacePoints="27" RaceRank="27" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="GBR55" RacePoints="3" RaceRank="3" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="AUS11" RacePoints="7" RaceRank="7" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="JPN7" RacePoints="5" RaceRank="5" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="FRA81" RacePoints="22" RaceRank="22" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="CHN673" RacePoints="17" RaceRank="17" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="ITA10" RacePoints="30" RaceRank="30" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="SWE350" RacePoints="31" RaceRank="31" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="FRA97" RacePoints="36" RaceRank="36" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="GER13" RacePoints="28" RaceRank="28" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="TUR890" RacePoints="14" RaceRank="14" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="FRA27" RacePoints="10" RaceRank="10" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="NED1" RacePoints="16" RaceRank="16" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="JPN2" RacePoints="34" RaceRank="34" Group="Gold"/>
+   <RaceResult RaceID="45921" TeamID="BRA21" RacePoints="21" RaceRank="21" Group="Gold"/>
+   <RaceResult RaceID="45922" TeamID="JPN4546" RacePoints="4" RaceRank="4" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="USA1" RacePoints="1" RaceRank="1" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GER50" RacePoints="6" RaceRank="6" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GER11" RacePoints="5" RaceRank="5" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="JPN4691" RacePoints="29" RaceRank="29" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="AUT17" RacePoints="2" RaceRank="2" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="ITA54" RacePoints="13" RaceRank="13" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA78" RacePoints="3" RaceRank="3" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA10" RacePoints="11" RaceRank="11" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA12" RacePoints="9" RaceRank="9" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="POR21" RacePoints="16" RaceRank="16" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA23" RacePoints="12" RaceRank="12" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="ISR10" RacePoints="7" RaceRank="7" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GBR838" RacePoints="23" RaceRank="23" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="POL513" RacePoints="37" ScoreCode="UFD" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="SUI24" RacePoints="21" RaceRank="21" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="POR25" RacePoints="10" RaceRank="10" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="ESP4" RacePoints="17" RaceRank="17" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="SUI53" RacePoints="27" RaceRank="27" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA91" RacePoints="32" RaceRank="32" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="SUI1478" RacePoints="20" RaceRank="20" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GBR859" RacePoints="37" Discard="true" ScoreCode="UFD" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GER68" RacePoints="19" RaceRank="19" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="RUS10" RacePoints="24" RaceRank="24" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="AUT9" RacePoints="8" RaceRank="8" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA33" RacePoints="18" RaceRank="18" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="ESP28" RacePoints="14" RaceRank="14" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GER66" RacePoints="26" RaceRank="26" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="ESP11" RacePoints="30" RaceRank="30" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GER44" RacePoints="31" RaceRank="31" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA20" RacePoints="34" RaceRank="34" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GER12" RacePoints="28" RaceRank="28" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="GBR866" RacePoints="25" RaceRank="25" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="FRA31" RacePoints="15" RaceRank="15" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="POL80" RacePoints="22" RaceRank="22" Group="Silver"/>
+   <RaceResult RaceID="45922" TeamID="CZE13" RacePoints="33" RaceRank="33" Group="Silver"/>
+   <RaceResult RaceID="45959" TeamID="ESP44" RacePoints="21" RaceRank="21" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="AUT1" RacePoints="18" RaceRank="18" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="JPN20" RacePoints="2" RaceRank="2" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="SWE349" RacePoints="3" RaceRank="3" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="ITA757" RacePoints="24" RaceRank="24" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="BRA1" RacePoints="9" RaceRank="9" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="JPN83" RacePoints="28" RaceRank="28" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="FRA79" RacePoints="15" RaceRank="15" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="RUS5" RacePoints="11" RaceRank="11" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="JPN15" RacePoints="19" RaceRank="19" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="JPN10" RacePoints="32" RaceRank="32" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="GBR4" RacePoints="5" RaceRank="5" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="GRE1" RacePoints="4" RaceRank="4" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="HUN1" RacePoints="23" RaceRank="23" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="GRE10" RacePoints="26" RaceRank="26" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="JPN11" RacePoints="20" RaceRank="20" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="NZL1" RacePoints="12" RaceRank="12" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="ARG87" RacePoints="6" RaceRank="6" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="SUI46" RacePoints="14" RaceRank="14" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="CHN67" RacePoints="17" RaceRank="17" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="FRA11" RacePoints="36" RaceRank="36" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="AUS8" RacePoints="22" RaceRank="22" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="GER22" RacePoints="16" RaceRank="16" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="GBR55" RacePoints="10" RaceRank="10" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="AUS11" RacePoints="1" RaceRank="1" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="JPN7" RacePoints="27" RaceRank="27" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="FRA81" RacePoints="25" RaceRank="25" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="CHN673" RacePoints="34" RaceRank="34" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="ITA10" RacePoints="7" RaceRank="7" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="SWE350" RacePoints="30" RaceRank="30" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="FRA97" RacePoints="31" RaceRank="31" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="GER13" RacePoints="8" RaceRank="8" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="TUR890" RacePoints="13" RaceRank="13" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="FRA27" RacePoints="29" RaceRank="29" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="NED1" RacePoints="33" RaceRank="33" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="JPN2" RacePoints="37" RaceRank="37" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45959" TeamID="BRA21" RacePoints="35" RaceRank="35" Group="Gold"/>
+   <RaceResult RaceID="45960" TeamID="JPN4546" RacePoints="6" RaceRank="6" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="USA1" RacePoints="1" RaceRank="1" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GER50" RacePoints="19" RaceRank="19" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GER11" RacePoints="3" RaceRank="3" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="JPN4691" RacePoints="7" RaceRank="7" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="AUT17" RacePoints="9" RaceRank="9" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="ITA54" RacePoints="5" RaceRank="5" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA78" RacePoints="15" RaceRank="15" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA10" RacePoints="13" RaceRank="13" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA12" RacePoints="20" RaceRank="20" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="POR21" RacePoints="10" RaceRank="10" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA23" RacePoints="4" RaceRank="4" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="ISR10" RacePoints="2" RaceRank="2" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GBR838" RacePoints="17" RaceRank="17" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="POL513" RacePoints="11" RaceRank="11" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="SUI24" RacePoints="22" RaceRank="22" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="POR25" RacePoints="23" RaceRank="23" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="ESP4" RacePoints="32" RaceRank="32" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="SUI53" RacePoints="26" RaceRank="26" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA91" RacePoints="18" RaceRank="18" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="SUI1478" RacePoints="24" RaceRank="24" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GBR859" RacePoints="16" RaceRank="16" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GER68" RacePoints="28" RaceRank="28" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="RUS10" RacePoints="12" RaceRank="12" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="AUT9" RacePoints="25" RaceRank="25" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA33" RacePoints="8" RaceRank="8" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="ESP28" RacePoints="14" RaceRank="14" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GER66" RacePoints="34" RaceRank="34" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="ESP11" RacePoints="33" RaceRank="33" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GER44" RacePoints="30" RaceRank="30" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA20" RacePoints="31" RaceRank="31" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GER12" RacePoints="35" RaceRank="35" Discard="true" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="GBR866" RacePoints="27" RaceRank="27" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="FRA31" RacePoints="21" RaceRank="21" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="POL80" RacePoints="29" RaceRank="29" Group="Silver"/>
+   <RaceResult RaceID="45960" TeamID="CZE13" RacePoints="37" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="45980" TeamID="ESP44" RacePoints="1" RaceRank="1" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="AUT1" RacePoints="38" Discard="true" ScoreCode="UFD" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="JPN20" RacePoints="30" RaceRank="30" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="SWE349" RacePoints="3" RaceRank="3" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="ITA757" RacePoints="20" RaceRank="20" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="BRA1" RacePoints="9" RaceRank="9" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="JPN83" RacePoints="4" RaceRank="4" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="FRA79" RacePoints="12" RaceRank="12" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="RUS5" RacePoints="14" RaceRank="14" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="JPN15" RacePoints="17" RaceRank="17" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="JPN10" RacePoints="13" RaceRank="13" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="GBR4" RacePoints="10" RaceRank="10" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="GRE1" RacePoints="8" RaceRank="8" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="HUN1" RacePoints="28" RaceRank="28" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="GRE10" RacePoints="7" RaceRank="7" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="JPN11" RacePoints="23" RaceRank="23" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="NZL1" RacePoints="5" RaceRank="5" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="ARG87" RacePoints="21" RaceRank="21" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="SUI46" RacePoints="15" RaceRank="15" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="CHN67" RacePoints="2" RaceRank="2" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="FRA11" RacePoints="33" RaceRank="33" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="AUS8" RacePoints="35" RaceRank="35" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="GER22" RacePoints="19" RaceRank="19" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="GBR55" RacePoints="27" RaceRank="27" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="AUS11" RacePoints="6" RaceRank="6" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="JPN7" RacePoints="25" RaceRank="25" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="FRA81" RacePoints="16" RaceRank="16" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="CHN673" RacePoints="24" RaceRank="24" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="ITA10" RacePoints="29" RaceRank="29" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="SWE350" RacePoints="18" RaceRank="18" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="FRA97" RacePoints="32" RaceRank="32" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="GER13" RacePoints="11" RaceRank="11" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="TUR890" RacePoints="26" RaceRank="26" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="FRA27" RacePoints="22" RaceRank="22" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="NED1" RacePoints="34" RaceRank="34" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="JPN2" RacePoints="31" RaceRank="31" Group="Gold"/>
+   <RaceResult RaceID="45980" TeamID="BRA21" RacePoints="38" Discard="true" ScoreCode="UFD" Group="Gold"/>
+   <RaceResult RaceID="45981" TeamID="JPN4546" RacePoints="12" RaceRank="12" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="USA1" RacePoints="1" RaceRank="1" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GER50" RacePoints="13" RaceRank="13" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GER11" RacePoints="9" RaceRank="9" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="JPN4691" RacePoints="37" Discard="true" ScoreCode="UFD" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="AUT17" RacePoints="10" RaceRank="10" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="ITA54" RacePoints="37" Discard="true" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA78" RacePoints="11" RaceRank="11" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA10" RacePoints="4" RaceRank="4" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA12" RacePoints="28" RaceRank="28" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="POR21" RacePoints="6" RaceRank="6" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA23" RacePoints="5" RaceRank="5" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="ISR10" RacePoints="2" RaceRank="2" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GBR838" RacePoints="19" RaceRank="19" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="POL513" RacePoints="15" RaceRank="15" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="SUI24" RacePoints="24" RaceRank="24" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="POR25" RacePoints="37" Discard="true" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="ESP4" RacePoints="37" Discard="true" ScoreCode="UFD" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="SUI53" RacePoints="22" RaceRank="22" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA91" RacePoints="17" RaceRank="17" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="SUI1478" RacePoints="16" RaceRank="16" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GBR859" RacePoints="21" RaceRank="21" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GER68" RacePoints="7" RaceRank="7" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="RUS10" RacePoints="3" RaceRank="3" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="AUT9" RacePoints="20" RaceRank="20" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA33" RacePoints="8" RaceRank="8" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="ESP28" RacePoints="14" RaceRank="14" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GER66" RacePoints="26" RaceRank="26" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="ESP11" RacePoints="23" RaceRank="23" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GER44" RacePoints="31" RaceRank="31" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA20" RacePoints="30" RaceRank="30" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GER12" RacePoints="29" RaceRank="29" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="GBR866" RacePoints="27" RaceRank="27" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="FRA31" RacePoints="25" RaceRank="25" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="POL80" RacePoints="18" RaceRank="18" Group="Silver"/>
+   <RaceResult RaceID="45981" TeamID="CZE13" RacePoints="37" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="46029" TeamID="ESP44" RacePoints="3" RaceRank="3" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="AUT1" RacePoints="32" RaceRank="32" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="JPN20" RacePoints="13" RaceRank="13" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="SWE349" RacePoints="38" Discard="true" ScoreCode="BFD" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="ITA757" RacePoints="9" RaceRank="9" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="BRA1" RacePoints="22" RaceRank="22" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="JPN83" RacePoints="8" RaceRank="8" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="FRA79" RacePoints="5" RaceRank="5" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="RUS5" RacePoints="4" RaceRank="4" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="JPN15" RacePoints="17" RaceRank="17" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="JPN10" RacePoints="23" RaceRank="23" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="GBR4" RacePoints="14" RaceRank="14" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="GRE1" RacePoints="2" RaceRank="2" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="HUN1" RacePoints="10" RaceRank="10" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="GRE10" RacePoints="34" RaceRank="34" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="JPN11" RacePoints="29" RaceRank="29" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="NZL1" RacePoints="19" RaceRank="19" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="ARG87" RacePoints="21" RaceRank="21" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="SUI46" RacePoints="16" RaceRank="16" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="CHN67" RacePoints="1" RaceRank="1" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="FRA11" RacePoints="26" RaceRank="26" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="AUS8" RacePoints="11" RaceRank="11" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="GER22" RacePoints="35" RaceRank="35" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="GBR55" RacePoints="24" RaceRank="24" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="AUS11" RacePoints="7" RaceRank="7" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="JPN7" RacePoints="18" RaceRank="18" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="FRA81" RacePoints="28" RaceRank="28" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="CHN673" RacePoints="20" RaceRank="20" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="ITA10" RacePoints="25" RaceRank="25" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="SWE350" RacePoints="15" RaceRank="15" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="FRA97" RacePoints="31" RaceRank="31" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="GER13" RacePoints="12" RaceRank="12" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="TUR890" RacePoints="27" RaceRank="27" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="FRA27" RacePoints="6" RaceRank="6" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="NED1" RacePoints="36" RaceRank="36" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="JPN2" RacePoints="33" RaceRank="33" Group="Gold"/>
+   <RaceResult RaceID="46029" TeamID="BRA21" RacePoints="30" RaceRank="30" Group="Gold"/>
+   <RaceResult RaceID="46030" TeamID="JPN4546" RacePoints="12" RaceRank="12" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="USA1" RacePoints="2" RaceRank="2" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GER50" RacePoints="10" RaceRank="10" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GER11" RacePoints="3" RaceRank="3" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="JPN4691" RacePoints="9" RaceRank="9" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="AUT17" RacePoints="1" RaceRank="1" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="ITA54" RacePoints="16" RaceRank="16" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA78" RacePoints="8" RaceRank="8" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA10" RacePoints="13" RaceRank="13" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA12" RacePoints="20" RaceRank="20" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="POR21" RacePoints="4" RaceRank="4" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA23" RacePoints="24" RaceRank="24" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="ISR10" RacePoints="7" RaceRank="7" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GBR838" RacePoints="14" RaceRank="14" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="POL513" RacePoints="28" RaceRank="28" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="SUI24" RacePoints="19" RaceRank="19" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="POR25" RacePoints="21" RaceRank="21" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="ESP4" RacePoints="31" RaceRank="31" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="SUI53" RacePoints="23" RaceRank="23" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA91" RacePoints="6" RaceRank="6" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="SUI1478" RacePoints="26" RaceRank="26" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GBR859" RacePoints="11" RaceRank="11" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GER68" RacePoints="22" RaceRank="22" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="RUS10" RacePoints="17" RaceRank="17" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="AUT9" RacePoints="32" RaceRank="32" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA33" RacePoints="37" Discard="true" ScoreCode="BFD" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="ESP28" RacePoints="5" RaceRank="5" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GER66" RacePoints="29" RaceRank="29" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="ESP11" RacePoints="33" RaceRank="33" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GER44" RacePoints="37" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA20" RacePoints="18" RaceRank="18" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GER12" RacePoints="27" RaceRank="27" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="GBR866" RacePoints="30" RaceRank="30" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="FRA31" RacePoints="15" RaceRank="15" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="POL80" RacePoints="25" RaceRank="25" Group="Silver"/>
+   <RaceResult RaceID="46030" TeamID="CZE13" RacePoints="34" RaceRank="34" Group="Silver"/>
+   <RaceResult RaceID="46066" TeamID="ESP44" RacePoints="10" RaceRank="10" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="AUT1" RacePoints="3" RaceRank="3" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="JPN20" RacePoints="29" RaceRank="29" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="SWE349" RacePoints="6" RaceRank="6" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="ITA757" RacePoints="15" RaceRank="15" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="BRA1" RacePoints="13" RaceRank="13" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="JPN83" RacePoints="21" RaceRank="21" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="FRA79" RacePoints="4" RaceRank="4" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="RUS5" RacePoints="12" RaceRank="12" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="JPN15" RacePoints="28" RaceRank="28" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="JPN10" RacePoints="25" RaceRank="25" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="GBR4" RacePoints="14" RaceRank="14" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="GRE1" RacePoints="7" RaceRank="7" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="HUN1" RacePoints="22" RaceRank="22" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="GRE10" RacePoints="26" RaceRank="26" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="JPN11" RacePoints="19" RaceRank="19" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="NZL1" RacePoints="33" RaceRank="33" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="ARG87" RacePoints="30" RaceRank="30" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="SUI46" RacePoints="2" RaceRank="2" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="CHN67" RacePoints="1" RaceRank="1" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="FRA11" RacePoints="20" RaceRank="20" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="AUS8" RacePoints="9" RaceRank="9" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="GER22" RacePoints="27" RaceRank="27" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="GBR55" RacePoints="8" RaceRank="8" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="AUS11" RacePoints="23" RaceRank="23" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="JPN7" RacePoints="5" RaceRank="5" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="FRA81" RacePoints="32" RaceRank="32" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="CHN673" RacePoints="34" RaceRank="34" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="ITA10" RacePoints="24" RaceRank="24" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="SWE350" RacePoints="11" RaceRank="11" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="FRA97" RacePoints="37" RaceRank="37" Discard="true" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="GER13" RacePoints="18" RaceRank="18" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="TUR890" RacePoints="17" RaceRank="17" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="FRA27" RacePoints="16" RaceRank="16" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="NED1" RacePoints="31" RaceRank="31" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="JPN2" RacePoints="36" RaceRank="36" Group="Gold"/>
+   <RaceResult RaceID="46066" TeamID="BRA21" RacePoints="35" RaceRank="35" Group="Gold"/>
+   <RaceResult RaceID="46067" TeamID="JPN4546" RacePoints="12" RaceRank="12" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="USA1" RacePoints="3" RaceRank="3" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GER50" RacePoints="23" RaceRank="23" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GER11" RacePoints="1" RaceRank="1" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="JPN4691" RacePoints="13" RaceRank="13" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="AUT17" RacePoints="14" RaceRank="14" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="ITA54" RacePoints="16" RaceRank="16" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA78" RacePoints="7" RaceRank="7" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA10" RacePoints="2" RaceRank="2" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA12" RacePoints="19" RaceRank="19" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="POR21" RacePoints="11" RaceRank="11" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA23" RacePoints="17" RaceRank="17" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="ISR10" RacePoints="8" RaceRank="8" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GBR838" RacePoints="24" RaceRank="24" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="POL513" RacePoints="9" RaceRank="9" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="SUI24" RacePoints="26" RaceRank="26" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="POR25" RacePoints="4" RaceRank="4" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="ESP4" RacePoints="37" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="SUI53" RacePoints="29" RaceRank="29" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA91" RacePoints="25" RaceRank="25" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="SUI1478" RacePoints="10" RaceRank="10" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GBR859" RacePoints="22" RaceRank="22" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GER68" RacePoints="20" RaceRank="20" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="RUS10" RacePoints="21" RaceRank="21" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="AUT9" RacePoints="28" RaceRank="28" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA33" RacePoints="18" RaceRank="18" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="ESP28" RacePoints="5" RaceRank="5" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GER66" RacePoints="6" RaceRank="6" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="ESP11" RacePoints="32" RaceRank="32" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GER44" RacePoints="37" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA20" RacePoints="27" RaceRank="27" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GER12" RacePoints="33" RaceRank="33" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="GBR866" RacePoints="15" RaceRank="15" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="FRA31" RacePoints="30" RaceRank="30" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="POL80" RacePoints="31" RaceRank="31" Group="Silver"/>
+   <RaceResult RaceID="46067" TeamID="CZE13" RacePoints="37" ScoreCode="DNC" Group="Silver"/>
+   <RaceResult RaceID="46099" TeamID="SWE349" RacePoints="2" RaceRank="1" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="GBR4" RacePoints="16" RaceRank="8" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="CHN67" RacePoints="18" RaceRank="9" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="ESP44" RacePoints="10" RaceRank="5" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="AUS11" RacePoints="14" RaceRank="7" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="JPN83" RacePoints="20" RaceRank="10" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="FRA79" RacePoints="8" RaceRank="4" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="GRE1" RacePoints="12" RaceRank="6" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="RUS5" RacePoints="6" RaceRank="3" Group="Medal Race"/>
+   <RaceResult RaceID="46099" TeamID="AUT1" RacePoints="4" RaceRank="2" Group="Medal Race"/>
+   <SeriesResult TeamID="SWE349" NetPoints="47" TotalPoints="85" Rank="1" Tied="false"/>
+   <SeriesResult TeamID="ESP44" NetPoints="84" TotalPoints="109" Rank="2" Tied="false"/>
+   <SeriesResult TeamID="GBR4" NetPoints="86" TotalPoints="100" Rank="3" Tied="false"/>
+   <SeriesResult TeamID="CHN67" NetPoints="90" TotalPoints="123" Rank="4" Tied="false"/>
+   <SeriesResult TeamID="AUS11" NetPoints="94" TotalPoints="132" Rank="5" Tied="false"/>
+   <SeriesResult TeamID="FRA79" NetPoints="100" TotalPoints="126" Rank="6" Tied="false"/>
+   <SeriesResult TeamID="RUS5" NetPoints="101" TotalPoints="135" Rank="7" Tied="false"/>
+   <SeriesResult TeamID="JPN83" NetPoints="101" TotalPoints="129" Rank="8" Tied="false"/>
+   <SeriesResult TeamID="AUT1" NetPoints="103" TotalPoints="141" Rank="9" Tied="false"/>
+   <SeriesResult TeamID="GRE1" NetPoints="105" TotalPoints="143" Rank="10" Tied="false"/>
+   <SeriesResult TeamID="NZL1" NetPoints="101" TotalPoints="139" Rank="11" Tied="false"/>
+   <SeriesResult TeamID="BRA1" NetPoints="103" TotalPoints="125" Rank="12" Tied="false"/>
+   <SeriesResult TeamID="JPN20" NetPoints="104" TotalPoints="136" Rank="13" Tied="false"/>
+   <SeriesResult TeamID="ITA757" NetPoints="109" TotalPoints="135" Rank="14" Tied="false"/>
+   <SeriesResult TeamID="GBR55" NetPoints="111" TotalPoints="138" Rank="15" Tied="false"/>
+   <SeriesResult TeamID="ARG87" NetPoints="114" TotalPoints="144" Rank="16" Tied="false"/>
+   <SeriesResult TeamID="AUS8" NetPoints="115" TotalPoints="150" Rank="17" Tied="false"/>
+   <SeriesResult TeamID="HUN1" NetPoints="115" TotalPoints="143" Rank="18" Tied="false"/>
+   <SeriesResult TeamID="JPN15" NetPoints="124" TotalPoints="152" Rank="19" Tied="false"/>
+   <SeriesResult TeamID="JPN7" NetPoints="128" TotalPoints="166" Rank="20" Tied="false"/>
+   <SeriesResult TeamID="SUI46" NetPoints="130" TotalPoints="167" Rank="21" Tied="false"/>
+   <SeriesResult TeamID="SWE350" NetPoints="130" TotalPoints="161" Rank="22" Tied="false"/>
+   <SeriesResult TeamID="GER13" NetPoints="133" TotalPoints="169" Rank="23" Tied="false"/>
+   <SeriesResult TeamID="TUR890" NetPoints="138" TotalPoints="165" Rank="24" Tied="false"/>
+   <SeriesResult TeamID="FRA27" NetPoints="140" TotalPoints="169" Rank="25" Tied="false"/>
+   <SeriesResult TeamID="GRE10" NetPoints="141" TotalPoints="175" Rank="26" Tied="false"/>
+   <SeriesResult TeamID="JPN11" NetPoints="144" TotalPoints="177" Rank="27" Tied="false"/>
+   <SeriesResult TeamID="ITA10" NetPoints="150" TotalPoints="180" Rank="28" Tied="false"/>
+   <SeriesResult TeamID="GER22" NetPoints="157" TotalPoints="192" Rank="29" Tied="false"/>
+   <SeriesResult TeamID="FRA81" NetPoints="165" TotalPoints="197" Rank="30" Tied="false"/>
+   <SeriesResult TeamID="JPN10" NetPoints="170" TotalPoints="207" Rank="31" Tied="false"/>
+   <SeriesResult TeamID="CHN673" NetPoints="182" TotalPoints="220" Rank="32" Tied="false"/>
+   <SeriesResult TeamID="FRA11" NetPoints="183" TotalPoints="219" Rank="33" Tied="false"/>
+   <SeriesResult TeamID="FRA97" NetPoints="200" TotalPoints="237" Rank="34" Tied="false"/>
+   <SeriesResult TeamID="NED1" NetPoints="218" TotalPoints="254" Rank="35" Tied="false"/>
+   <SeriesResult TeamID="BRA21" NetPoints="219" TotalPoints="257" Rank="36" Tied="false"/>
+   <SeriesResult TeamID="JPN2" NetPoints="230" TotalPoints="267" Rank="37" Tied="false"/>
+   <SeriesResult TeamID="USA1" NetPoints="65" TotalPoints="89" Rank="38" Tied="false"/>
+   <SeriesResult TeamID="GER11" NetPoints="69" TotalPoints="98" Rank="39" Tied="false"/>
+   <SeriesResult TeamID="JPN4546" NetPoints="98" TotalPoints="117" Rank="40" Tied="false"/>
+   <SeriesResult TeamID="ISR10" NetPoints="99" TotalPoints="130" Rank="41" Tied="false"/>
+   <SeriesResult TeamID="AUT17" NetPoints="111" TotalPoints="135" Rank="42" Tied="false"/>
+   <SeriesResult TeamID="FRA10" NetPoints="116" TotalPoints="147" Rank="43" Tied="false"/>
+   <SeriesResult TeamID="FRA78" NetPoints="118" TotalPoints="146" Rank="44" Tied="false"/>
+   <SeriesResult TeamID="GER50" NetPoints="120" TotalPoints="150" Rank="45" Tied="false"/>
+   <SeriesResult TeamID="POR21" NetPoints="125" TotalPoints="148" Rank="46" Tied="false"/>
+   <SeriesResult TeamID="ITA54" NetPoints="135" TotalPoints="172" Rank="47" Tied="false"/>
+   <SeriesResult TeamID="JPN4691" NetPoints="139" TotalPoints="176" Rank="48" Tied="false"/>
+   <SeriesResult TeamID="ESP28" NetPoints="150" TotalPoints="188" Rank="49" Tied="false"/>
+   <SeriesResult TeamID="FRA23" NetPoints="151" TotalPoints="181" Rank="50" Tied="false"/>
+   <SeriesResult TeamID="FRA12" NetPoints="158" TotalPoints="190" Rank="51" Tied="false"/>
+   <SeriesResult TeamID="FRA33" NetPoints="166" TotalPoints="203" Rank="52" Tied="false"/>
+   <SeriesResult TeamID="RUS10" NetPoints="169" TotalPoints="200" Rank="53" Tied="false"/>
+   <SeriesResult TeamID="POR25" NetPoints="183" TotalPoints="220" Rank="54" Tied="false"/>
+   <SeriesResult TeamID="GBR838" NetPoints="185" TotalPoints="217" Rank="55" Tied="false"/>
+   <SeriesResult TeamID="POL513" NetPoints="191" TotalPoints="229" Rank="56" Tied="false"/>
+   <SeriesResult TeamID="SUI1478" NetPoints="191" TotalPoints="221" Rank="57" Tied="false"/>
+   <SeriesResult TeamID="GBR859" NetPoints="192" TotalPoints="229" Rank="58" Tied="false"/>
+   <SeriesResult TeamID="GER68" NetPoints="200" TotalPoints="232" Rank="59" Tied="false"/>
+   <SeriesResult TeamID="FRA91" NetPoints="202" TotalPoints="235" Rank="60" Tied="false"/>
+   <SeriesResult TeamID="GBR866" NetPoints="220" TotalPoints="256" Rank="61" Tied="false"/>
+   <SeriesResult TeamID="SUI24" NetPoints="220" TotalPoints="257" Rank="62" Tied="false"/>
+   <SeriesResult TeamID="AUT9" NetPoints="224" TotalPoints="259" Rank="63" Tied="false"/>
+   <SeriesResult TeamID="FRA31" NetPoints="226" TotalPoints="261" Rank="64" Tied="false"/>
+   <SeriesResult TeamID="GER66" NetPoints="227" TotalPoints="262" Rank="65" Tied="false"/>
+   <SeriesResult TeamID="SUI53" NetPoints="239" TotalPoints="274" Rank="66" Tied="false"/>
+   <SeriesResult TeamID="POL80" NetPoints="254" TotalPoints="292" Rank="67" Tied="false"/>
+   <SeriesResult TeamID="ESP4" NetPoints="255" TotalPoints="292" Rank="68" Tied="false"/>
+   <SeriesResult TeamID="FRA20" NetPoints="265" TotalPoints="303" Rank="69" Tied="false"/>
+   <SeriesResult TeamID="ESP11" NetPoints="270" TotalPoints="306" Rank="70" Tied="false"/>
+   <SeriesResult TeamID="GER12" NetPoints="275" TotalPoints="310" Rank="71" Tied="false"/>
+   <SeriesResult TeamID="GER44" NetPoints="282" TotalPoints="320" Rank="72" Tied="false"/>
+   <SeriesResult TeamID="CZE13" NetPoints="318" TotalPoints="355" Rank="73" Tied="false"/>
+  </Division>
+ </Event>
+</SailingXRR>

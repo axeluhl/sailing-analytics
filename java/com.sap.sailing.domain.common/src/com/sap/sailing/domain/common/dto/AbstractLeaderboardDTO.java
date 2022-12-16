@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common.dto;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,10 +10,17 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.NamedDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
-public abstract class AbstractLeaderboardDTO extends NamedDTO implements Serializable {
+public abstract class AbstractLeaderboardDTO extends NamedDTO implements SecuredDTO {
     private static final long serialVersionUID = -205106531931903527L;
 
     private List<RaceColumnDTO> races;
@@ -23,10 +29,17 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
     
+    private OwnershipDTO ownership;
+    private AccessControlListDTO acl;
+    
     /**
      * Set to the non-<code>null</code> regatta name if this DTO represents a <code>RegattaLeaderboard</code>.
      */
     public String regattaName;
+    /**
+     * Set if this DTO represents a {@code RegattaLeaderboardWithOtherTieBreakingLeaderboard}
+     */
+    private String otherTieBreakingLeaderboardName;
     public String displayName;
     public List<CourseAreaDTO> courseAreas;
     public ScoringSchemeType scoringScheme;
@@ -49,6 +62,40 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
         this(/* name */ "", boatClass);
     }
     
+    @Override
+    public AccessControlListDTO getAccessControlList() {
+        return acl;
+    }
+
+    @Override
+    public OwnershipDTO getOwnership() {
+        return ownership;
+    }
+
+    @Override
+    public void setAccessControlList(AccessControlListDTO acl) {
+        this.acl = acl;
+    }
+
+    @Override
+    public void setOwnership(OwnershipDTO ownership) {
+        this.ownership = ownership;
+    }
+    
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.LEADERBOARD;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getName());
+    }
+    
     public BoatClassDTO getBoatClass() {
         return boatClass;
     }
@@ -67,6 +114,14 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
         } else {
             return competitorDisplayNames.get(competitor);
         }
+    }
+    
+    public String getOtherTieBreakingLeaderboardName() {
+        return otherTieBreakingLeaderboardName;
+    }
+
+    public void setOtherTieBreakingLeaderboardName(String otherTieBreakingLeaderboardName) {
+        this.otherTieBreakingLeaderboardName = otherTieBreakingLeaderboardName;
     }
 
     /**
@@ -153,7 +208,6 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
      * ensures that a fleet named <code>fleetName</code> is present. If it's not present yet, it's added to the race
      * column's fleet name list. The <code>trackedRaceIdentifier</code> and <code>race</code> are associated with the
      * column for the fleet identified by <code>fleetName</code>.
-     * 
      * @param explicitFactor
      *            factor by which to multiply the race column's points for the overall score; if <code>null</code>, the
      *            default will be determined by whether or not the column is marked as medal race
@@ -169,15 +223,16 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
      *            {@link RaceColumnInSeriesDTO}
      * @param fleetDTO
      *            must not be null
+     * @param oneAlwaysStaysOne TODO
      */
     public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
             String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace,
-            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race, boolean isMetaLeaderboardColumn) {
+            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race, boolean isMetaLeaderboardColumn, boolean oneAlwaysStaysOne) {
         assert fleetDTO != null;
         RaceColumnDTO raceColumnDTO = getRaceColumnByName(raceColumnName);
         if (raceColumnDTO == null) {
             raceColumnDTO = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName, medalRace,
-                explicitFactor, regattaName, seriesName, isMetaLeaderboardColumn);
+                explicitFactor, regattaName, seriesName, isMetaLeaderboardColumn, oneAlwaysStaysOne);
             races.add(raceColumnDTO);
         }
         raceColumnDTO.setEffectiveFactor(effectiveFactor);
@@ -197,9 +252,9 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
     }
 
     public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, String regattaName,
-            String seriesName, boolean isMetaLeaderboardColumn) {
+            String seriesName, boolean isMetaLeaderboardColumn, boolean oneAlwaysStaysOne) {
         final RaceColumnDTO raceColumn = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName,
-                medalRace, /* explicit factor */ null, regattaName, seriesName, isMetaLeaderboardColumn);
+                medalRace, /* explicit factor */ null, regattaName, seriesName, isMetaLeaderboardColumn, oneAlwaysStaysOne);
         races.add(raceColumn);
         return raceColumn;
     }
@@ -393,6 +448,11 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
             if (other.getName() != null)
                 return false;
         } else if (!getName().equals(other.getName()))
+            return false;
+        if (getOtherTieBreakingLeaderboardName() == null) {
+            if (other.getOtherTieBreakingLeaderboardName() != null)
+                return false;
+        } else if (!getOtherTieBreakingLeaderboardName().equals(other.getOtherTieBreakingLeaderboardName()))
             return false;
         if (races == null) {
             if (other.races != null)

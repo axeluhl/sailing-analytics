@@ -6,11 +6,8 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**
- * Uses an existing Amazon Machine Image that is expected to be prepared for "upgrade mode" where
- * it simply does not start any application or reverse proxy processes after booting, by
- * invoking it with very specific user data that trigger the automatic upgrade. Can be used either
- * for only upgrading and creating a new version of the image, or to do specific work that requires
- * the reverse proxy and default application start-up not to happen.
+ * Uses an existing Amazon Machine Image that is expected to not start any application processes after booting. Can be
+ * used to do specific work that requires any default application start-up not to happen.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -21,7 +18,6 @@ public abstract class StartEmptyServer<T extends StartEmptyServer<T, ShardingKey
 ShardingKey, HostT extends AwsInstance<ShardingKey>>
 extends StartAwsHost<ShardingKey, HostT>
 implements Procedure<ShardingKey> {
-    private static final String IMAGE_UPGRADE_USER_DATA = "image-upgrade";
     private static final String NO_SHUTDOWN_USER_DATA = "no-shutdown";
     
     /**
@@ -49,7 +45,7 @@ implements Procedure<ShardingKey> {
     ShardingKey, HostT extends AwsInstance<ShardingKey>>
     extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, HostT>
     implements Builder<BuilderT, T, ShardingKey, HostT> {
-        private boolean noShutdown = true;
+        private boolean noShutdown = false;
         
         protected boolean isNoShutdown() {
             return noShutdown;
@@ -60,15 +56,10 @@ implements Procedure<ShardingKey> {
             this.noShutdown = noShutdown;
             return self();
         }
-
-        protected String getInstanceName() {
-            return super.getInstanceName() == null ? IMAGE_UPGRADE_USER_DATA+" for "+getMachineImage().getId() : super.getInstanceName();
-        }
     }
     
     public StartEmptyServer(BuilderImpl<?, T, ShardingKey, HostT> builder) {
         super(builder);
-        addUserData(Collections.singleton(IMAGE_UPGRADE_USER_DATA));
         if (builder.isNoShutdown()) {
             addUserData(Collections.singleton(NO_SHUTDOWN_USER_DATA));
         }

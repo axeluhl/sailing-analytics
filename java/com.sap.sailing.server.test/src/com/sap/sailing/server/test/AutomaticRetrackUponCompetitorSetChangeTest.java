@@ -139,7 +139,7 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         final String seriesName = "Default";
         service.apply(new UpdateSeries(regattaIdentifier, seriesName, seriesName, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
-                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
+                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false,
                 Arrays.asList(new FleetDTO(RED_FLEET_NAME, 0, Color.RED), new FleetDTO(GREEN_FLEET_NAME, 0, Color.GREEN), new FleetDTO(BLUE_FLEET_NAME, 0, Color.BLUE))));
         service.apply(new CreateRegattaLeaderboard(regattaIdentifier, /* leaderboardDisplayName */ null, new int[0]));
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, FIRST_RACE_COLUMN_NAME));

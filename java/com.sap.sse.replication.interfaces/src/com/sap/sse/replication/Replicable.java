@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -57,7 +58,7 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * <li>Consider using {@link AbstractReplicableWithObjectInputStream} as an abstract base class for your
  * {@link Replicable} implementation.</li>
  * <li>Implement the necessary methods, in particular ensuring that your
- * {@link ReplicableWithObjectInputStream#createObjectInputStreamResolvingAgainstCache(InputStream)} implementation
+ * {@link ReplicableWithObjectInputStream#createObjectInputStreamResolvingAgainstCache(InputStream, Map)} implementation
  * returns an object whose class is loaded by your replicable's class loader, such as an in-place anonymous inner class
  * instantiation of the {@link ObjectInputStreamResolvingAgainstCache} class.</li>
  * <li>In your bundle's {@link BundleActivator activator} create your replicable instance and
@@ -70,6 +71,8 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * <li>Add your replicable's fully-qualified class name to the {@code env-default-rules.sh} file where the
  * {@code REPLICATE_ON_START} variable has its default value defined.</li>
  * </ul>
+ * 
+ * The {@link #getId() ID} must be different from {@link ReplicationReceiver#VERSION_INDICATOR}.<p>
  * 
  * @param <S>
  *            the type of state to which the operations are applied; usually this will be set to the implementing
@@ -165,6 +168,12 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
     void clearReplicaState() throws MalformedURLException, IOException, InterruptedException;
 
     /**
+     * Produces an object input stream that can choose to resolve objects against a cache so that duplicate instances
+     * are avoided.
+     */
+    ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException;
+
+    /**
      * Dual, reading operation for {@link #serializeForInitialReplication(OutputStream)}. In other words, when this
      * operation returns, this service instance is in a state "equivalent" to that of the service instance that produced
      * the stream contents in its {@link #serializeForInitialReplication(OutputStream)}. "Equivalent" here means that a
@@ -187,11 +196,35 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
     void serializeForInitialReplication(OutputStream os) throws IOException;
 
     /**
+     * The class loader to use for de-serializing objects. By default, this object's class's class loader is used.
+     */
+    default ClassLoader getDeserializationClassLoader() {
+        return getClass().getClassLoader();
+    }
+    
+    /**
+     * Implementation of {@link #readOperation(InputStream, Map)}, using the {@link ObjectInputStream} created by
+     * {@link #createObjectInputStreamResolvingAgainstCache(InputStream, Map)}. Before actually reading an operation
+     * object, the current thread's context class loader is set to the {@link #getDeserializationClassLoader() class
+     * loader for de-serialization} and restored to its previous value in the {@code finally} clause.
+     */
+    @SuppressWarnings("unchecked")
+    default O readOperationFromObjectInputStream(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
+        try {
+            return (O) ois.readObject();
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+        }
+    }
+
+    /**
      * From an input stream, reads an operation that can be {@link #apply(OperationWithResult) applied} to this object.
      * Separating reading and applying gives clients an opportunity to queue operations, e.g., in order to wait until
      * receiving and {@link #initiallyFillFrom(InputStream) filling} the initial load has completed.
      */
-    O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException;
+    O readOperation(InputStream inputStream, Map<String, Class<?>> classLoaderCache) throws IOException, ClassNotFoundException;
 
     /**
      * Checks if {@link #hasSentOperationToMaster(OperationWithResultWithIdWrapper) the operation was previously

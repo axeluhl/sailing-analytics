@@ -90,6 +90,7 @@ android {
 dependencies {
     /* support libraries */
     implementation "com.android.support:recyclerview-v7:${rootProject.ext.support}"
+    implementation "com.android.support:customtabs:${rootProject.ext.support}"
 
     /* local dependencies */
     implementation project(":mobile:com.sap.sailing.android.shared")

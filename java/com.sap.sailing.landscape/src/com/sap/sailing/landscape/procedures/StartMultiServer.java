@@ -1,36 +1,28 @@
 package com.sap.sailing.landscape.procedures;
 
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
-import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
-import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
-import com.sap.sse.landscape.ssh.SshCommandChannel;
-import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
- * Starts an empty multi-server. The image will cause a {@code /home/sailing/servers/server} directory to exist, but
- * after successfully launching, that directory will be removed. A {@link DeployProcessOnMultiServer} procedure needs to
- * be run with the {@link #getHost()} of this procedure telling the host on which to deploy the process.<p>
+ * Starts an empty multi-server. The image will cause the {@code /home/sailing/servers/} directory to exist and be
+ * empty. A {@link DeployProcessOnMultiServer} procedure needs to be run with the {@link #getHost()} of this procedure
+ * telling the host on which to deploy the process.
+ * <p>
  * 
- * The implementation specializes the {@link StartEmptyServer} procedure in {@link Builder#setNoShutdown(boolean) no-shutdown} mode.
- * After running that part, the {@code httpd} service is launched.<p>
+ * The implementation specializes the {@link StartEmptyServer} procedure, tags it as a sailing application instance
+ * and names it as a "multi-instance" by default.
+ * <p>
  * 
- * You want to at least specify an {@link Builder#setInstanceName(String) instance name} and {@link Builder#setInstanceType(InstanceType)}.
+ * You want to at least specify an {@link Builder#setInstanceName(String) instance name} and
+ * {@link Builder#setInstanceType(InstanceType)}.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -40,7 +32,6 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public class StartMultiServer<ShardingKey>
 extends StartEmptyServer<StartMultiServer<ShardingKey>, ShardingKey, SailingAnalyticsHost<ShardingKey>>
 implements StartFromSailingAnalyticsImage {
-    private static final Logger logger = Logger.getLogger(StartMultiServer.class.getName());
     private Optional<Duration> optionalTimeout;
     
     /**
@@ -71,11 +62,6 @@ implements StartFromSailingAnalyticsImage {
         }
 
         @Override
-        protected boolean isNoShutdown() {
-            return true;
-        }
-
-        @Override
         protected String getImageType() {
             return super.getImageType() == null ? SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
@@ -86,7 +72,7 @@ implements StartFromSailingAnalyticsImage {
             if (isInstanceNameSet()) {
                 result = super.getInstanceName();
             } else {
-                result = "SL Multi-Server";
+                result = SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_DEFAULT_NAME;
             }
             return result;
         }
@@ -95,15 +81,7 @@ implements StartFromSailingAnalyticsImage {
         protected HostSupplier<ShardingKey, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
             final HostSupplier<ShardingKey, SailingAnalyticsHost<ShardingKey>> result;
             if (super.getHostSupplier() == null) {
-                result = (instanceId, az, privateIpAddress, launchTimePoint, landscape)->
-                    new SailingAnalyticsHostImpl<>(instanceId, az, privateIpAddress, launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
-                        try {
-                            return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
-                                    ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue(), landscape);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                result = new SailingAnalyticsHostSupplier<>();
             } else {
                 result = super.getHostSupplier();
             }
@@ -123,7 +101,7 @@ implements StartFromSailingAnalyticsImage {
         
         @Override
         protected Optional<Tags> getTags() {
-            return Optional.of(super.getTags().orElse(Tags.empty()).and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, "___multi___"));
+            return Optional.of(super.getTags().orElse(Tags.empty()).and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE));
         }
         
         /**
@@ -146,34 +124,7 @@ implements StartFromSailingAnalyticsImage {
     
     @Override
     public void run() throws Exception {
-        super.run(); // this will trigger the "sailing" init.d script running in the background, triggering the image upgrade, then the httpd stop and clean-up
-        final String instanceId = getHost().getInstanceId();
+        super.run(); // this will trigger the "sailing" init.d script running in the background
         getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
-        logger.info("Waiting for image upgrade process to finish on "+getHost());
-        final Callable<Boolean> imageUpgradeFinishedDetector = ()->{
-            boolean fileFound = false;
-            final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
-            sftpChannel.connect();
-            try {
-                final SftpATTRS stat = sftpChannel.stat("/tmp/image-upgrade-finished");
-                if (stat.isReg()) { // regular file; see also /configuration/imageupgrade.sh which writes this file in case of no-shutdown
-                    fileFound = true;
-                }
-            } catch (SftpException e) {
-                fileFound = false;
-            } finally {
-                sftpChannel.getSession().disconnect();
-            }
-            return fileFound;
-        };
-        final boolean imageUpgradeFinished = Wait.wait(
-                imageUpgradeFinishedDetector, optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5),
-                Level.INFO, "Waiting for image upgrade process to finish on "+getHost());
-        logger.info("Image upgrade process on "+getHost()+" did "+(imageUpgradeFinished?"":"not ")+"finish.");
-        final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
-        logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+
-                sshCommandChannel.runCommandAndReturnStdoutAndLogStderr("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start",
-                        "stderr for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \""+instanceId+"\": ", Level.INFO));
-        logger.info("exit status for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \""+instanceId+"\": "+sshCommandChannel.getExitStatus());
     }
 }

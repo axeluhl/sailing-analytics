@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -32,11 +33,12 @@ public class CompetitorTotalRankFilterUIFactory extends AbstractCompetitorNumber
 
     @Override 
     public Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog) {
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.add(createOperatorSelectionWidget(dataEntryDialog));
-        hp.add(createValueInputWidget(dataEntryDialog));
-        hp.setSpacing(5);
-        return hp;
+        Grid hpGrid = new Grid(1, 2);
+        hpGrid.setWidget(0, 0, createOperatorSelectionWidget(dataEntryDialog));
+        hpGrid.setWidget(0, 1, createValueInputWidget(dataEntryDialog));
+        hpGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        hpGrid.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_MIDDLE);
+        return hpGrid;
     }
 
     private Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {

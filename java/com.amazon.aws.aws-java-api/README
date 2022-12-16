@@ -5,7 +5,7 @@ To make this into a valid Eclipse and compilable Maven project, run
 which will download all JARs required, generates MANIFEST.MF, build.properties, and .classpath
 files and aligns the version specification in all related artifacts such as feature.xml,
 target platform definition, and pom.xml accordingly, then builds a local P2 repository
-that serves as alocal update site for the AWS SDK.
+that serves as a local update site for the AWS SDK.
 
 Details:
 

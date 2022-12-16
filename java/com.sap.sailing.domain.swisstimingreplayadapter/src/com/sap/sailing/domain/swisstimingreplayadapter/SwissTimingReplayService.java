@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.List;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
@@ -41,6 +42,7 @@ public interface SwissTimingReplayService {
      *            the SwissTiming ID for the race
      * @param useInternalMarkPassingAlgorithm
      *            use our own instead of the SwissTiming-provided mark rounding / split times
+     * @param markPassingRaceFingerprintRegistry TODO
      * @param boatClassNameName
      *            only required if {@code regattaToAddTo} is {@code null}; used for the retrieval/creation of a default
      *            regatta
@@ -48,7 +50,7 @@ public interface SwissTimingReplayService {
     void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String swissTimingUrl, String raceName,
             String raceID, String boatClassName, TrackerManager trackerManager,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

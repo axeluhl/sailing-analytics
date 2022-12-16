@@ -45,3 +45,9 @@ can look like this:
 ```
 
 Note that the role IDs (the first parameter, such as `"starter"`) is expected to match with a plan ID as specified within the Chargbee web site.
+
+#Chargebee Subscription Manual Upgrade
+
+1. Go to Subscriptions -> Select relevant subscription of user -> cancel subscription (on the right) -> immediately
+2. Go to Product Catalog -> Coupons -> Create Coupon -> create a coupon equivalent to amount to be refunded (One time use). This may be the full amount paid for the original subscription or less depending on circumstances.
+3. Send Coupon code to user

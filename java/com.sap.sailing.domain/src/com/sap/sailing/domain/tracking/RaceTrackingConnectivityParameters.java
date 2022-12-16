@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 
 /**
@@ -33,17 +34,17 @@ public interface RaceTrackingConnectivityParameters extends Serializable {
      * will be stopped (if any), the {@link RaceDefinition} will be removed from the default regatta, and the
      * {@link TrackedRace} will be removed from the {@link TrackedRegatta}. All this happens by means of
      * calling {@link TrackedRegattaRegistry#removeRace(Regatta, com.sap.sailing.domain.base.RaceDefinition)}.
-     * 
      * @param timeoutInMilliseconds
      *            gives the tracker a possibility to abort tracking the race after so many milliseconds of
      *            unsuccessfully waiting for the connection to be established. Support is optional for
      *            implementations, and there is no exact specification what must have happened before
      *            this timeout in order for tracking to continue. So, consider this as a "hint" to the
      *            tracker.
+     * @param markPassingRaceFingerprintRegistry TODO
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler) throws Exception;
+            RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) throws Exception;
     
     /**
      * Starts a {@link RaceTracker}, associating the resulting races with the {@link Regatta} passed as argument instead
@@ -55,10 +56,11 @@ public interface RaceTrackingConnectivityParameters extends Serializable {
      * stopped (if any), the {@link RaceDefinition} will be removed from the default regatta, and the
      * {@link TrackedRace} will be removed from the {@link TrackedRegatta}. All this happens by means of calling
      * {@link TrackedRegattaRegistry#removeRace(Regatta, com.sap.sailing.domain.base.RaceDefinition)}.
+     * @param markPassingRaceFingerprintRegistry TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler) throws Exception;
+            RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) throws Exception;
     
     /**
      * Deliver an ID object equal to that of the {@link RaceTracker#getID()} delivered by the {@link RaceTracker}

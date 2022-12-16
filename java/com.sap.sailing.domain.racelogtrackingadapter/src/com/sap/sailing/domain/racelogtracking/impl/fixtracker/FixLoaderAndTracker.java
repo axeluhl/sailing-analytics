@@ -54,6 +54,8 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.OutlierFilter;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.Duration;
@@ -153,6 +155,12 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     private final SensorFixMapperFactory sensorFixMapperFactory;
     
     /**
+     * If set to {@code true} in the constructor, fixes loaded for competitor tracks will be subject to
+     * outlier removal using the {@link OutlierFilter}.
+     */
+    private final boolean removeOutliersFromCompetitorTracks;
+    
+    /**
      * This flag is used to tell the loaders/trackers whether preemptive stopping has been requested. If switched
      * to {@code true}, running loaders will stop loading fixes and return immediately.
      */
@@ -166,6 +174,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     private AtomicBoolean willBeRemovedAfterStopping = new AtomicBoolean(false);
     
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
+    
     private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         @Override
         public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
@@ -194,6 +203,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             deviceMappings.addRegattaLog(regattaLog);
         }
     };
+    
     private final FixReceivedListener<Timed> listener = new FixReceivedListener<Timed>() {
         @Override
         public Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> fixReceived(DeviceIdentifier device, Timed fix, boolean returnManeuverChanges, boolean returnLiveDelay) {
@@ -392,10 +402,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     public FixLoaderAndTracker(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
-            SensorFixMapperFactory sensorFixMapperFactory) {
+            SensorFixMapperFactory sensorFixMapperFactory, boolean removeOutliersFromCompetitorTracks) {
         this.sensorFixStore = sensorFixStore;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.trackedRace = trackedRace;
+        this.removeOutliersFromCompetitorTracks = removeOutliersFromCompetitorTracks;
         startTracking();
     }
 
@@ -463,7 +474,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             int currentJobNr = 0;
             final int nrOfJobs = Util.size(effectiveRangeToLoad);
             final MultiJobProgressUpdater progressUpdater = new MultiJobProgressUpdater(nrOfJobs);
-            
             for (TimeRange timeRange : effectiveRangeToLoad) {
                 final int jobNr = currentJobNr;
                 loadFixes(timeRange, event, p -> {
@@ -472,7 +482,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 }, stopCallback);
                 currentJobNr++;
             }
-        
         }
     }
     
@@ -556,16 +565,46 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     }
                 }
                 
+                /**
+                 * First loads the fixes into a temporary track which is then subject to outlier filtering (see
+                 * {@link OutlierFilter}). The fixes that make it through outlier filtering are then inserted 
+                 */
                 private void loadForCompetitor(Competitor competitor, RegattaLogDeviceMappingEvent<?> event) {
                     DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     if (track != null) {
                         // for split-fleet racing, device mappings coming from the regatta log may not be relevant
                         // for the trackedRace because the competitors may not compete in it; in this case, the
                         // competitor retrieved from the mapping event does not have a track in trackedRace
+                        final DynamicGPSFixTrack<Competitor, GPSFixMoving> loadedFixes =
+                                new DynamicGPSFixMovingTrackImpl<Competitor>(track.getTrackedItem(), track.getMillisecondsOverWhichToAverageSpeed());
+                        loadedFixes.suspendValidityAndMaxSpeedCaching(); // no validity nor max speed required on this track
                         try {
-                            sensorFixStore.<GPSFixMoving> loadFixes(fix -> track.add(fix, true), event.getDevice(),
+                            final DynamicGPSFixTrack<Competitor, GPSFixMoving> filteredTrack;
+                            sensorFixStore.<GPSFixMoving> loadFixes(fix -> loadedFixes.add(fix, true), event.getDevice(),
                                     timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
                                     stopCallback, progressConsumer);
+                            if (removeOutliersFromCompetitorTracks) {
+                                final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> filtered = new OutlierFilter().findAndRemoveInconsistenciesOnRawFixes(loadedFixes);
+                                loadedFixes.lockForRead();
+                                try {
+                                    logger.info("Filtered competitor track for outliers; "+filtered.getA()+" outliers removed in track with "+Util.size(loadedFixes.getRawFixes())+" fixes");
+                                } finally {
+                                    loadedFixes.unlockAfterRead();
+                                }
+                                filteredTrack = filtered.getB();
+                            } else {
+                                filteredTrack = loadedFixes;
+                            }
+                            track.suspendValidityAndMaxSpeedCaching();
+                            filteredTrack.lockForRead();
+                            try {
+                                for (final GPSFixMoving fix : filteredTrack.getRawFixes()) {
+                                    track.add(fix, true);
+                                }
+                            } finally {
+                                filteredTrack.unlockAfterRead();
+                            }
+                            track.resumeValidityAndMaxSpeedCaching();
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                             logger.log(Level.WARNING, "Could not load competitor track " + competitor + "; device "
                                     + event.getDevice());
@@ -806,7 +845,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             loadingJobs.add(job);
             updateStatusAndProgress();
         }
-        executor.execute(job);
+        executor.execute(job); // nothing security-related happening here, and we may not have a Subject/session; no need to associate with a Subject
     }
     
     /**

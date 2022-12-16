@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
@@ -195,10 +196,20 @@ public interface RaceColumn extends Named {
     void setFactor(Double factor);
 
     /**
-     * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
-     * medal races. Otherwise, the explicit factor is used.
+     * {@link ScoringScheme}s shall prefer this explicit factor, if not <code>null</code>, and otherwise determine a default
+     * based on the rules of the scoring scheme, e.g., defaulting to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
+     * medal races, or similar.
      */
     Double getExplicitFactor();
+    
+    /**
+     * When scores in this column are scaled by some factor, either based on the {@link #getExplicitFactor() explicit factor}
+     * set for this column, or implicitly, e.g., because the {@link ScoringScheme} mandates the doubling of medal race scores
+     * and this column {@link #isMedalRace() represents a medal race}, then some configurations still want the 1.0 score still
+     * to be 1.0. For example, with a column factor of 2.0 scores 1, 2, 3 would end up as 1, 3, 5; or with a column factor of
+     * 3.0 scores 1, 2, 3 would end up as 1, 4, 7. This method tells whether this column shall apply such a scheme.
+     */
+    boolean isOneAlwaysStaysOne();
 
     /**
      * Returns the race log identifier associated with this fleet and race log

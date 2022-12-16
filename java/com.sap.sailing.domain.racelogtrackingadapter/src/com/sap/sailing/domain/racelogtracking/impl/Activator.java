@@ -12,6 +12,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelogsensortracking.impl.SensorFixMapperFactoryImpl;
@@ -32,7 +33,6 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFix
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
-import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;

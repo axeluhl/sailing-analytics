@@ -11,15 +11,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
-import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -53,7 +54,7 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
  * @param <MetricsT>
  * @param <ProcessT>
  */
-public class AwsApplicationReplicaSetImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+public class AwsApplicationReplicaSetImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends ApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>
 implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(AwsApplicationReplicaSetImpl.class.getName());
@@ -179,6 +180,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 }
             }
         }
+        if (!autoScalingGroup.isDone()) { // no auto-scaling group was found after having looked at all target groups
+            autoScalingGroup.complete(null);
+        }
         // "legacy" case where a single target group handles all requests
         if (!masterTargetGroup.isDone() && !publicTargetGroup.isDone() && singleTargetGroupCandidate != null) {
             myMasterTargetGroup = singleTargetGroupCandidate;
@@ -289,6 +293,19 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return result;
     }
 
+    @Override
+    public void stopAllUnmanagedReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
+        logger.info("Stopping all unmanaged replicas of replica set "+this);
+        for (final ProcessT replica : getReplicas()) {
+            if (getAutoScalingGroup() == null || !replica.getHost().isManagedByAutoScalingGroup(getAutoScalingGroup())) {
+                logger.info("Found unmanaged replica "+replica+". Removing from public target group and stopping...");
+                getPublicTargetGroup().removeTarget(replica.getHost());
+                replica.stopAndTerminateIfLast(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            }
+        }
+    }
+
     private boolean hasPublicRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> publicTargetGroupCandidate) {
         return hasListenerRuleWithHostHeaderForward(listenersAndTheirRules, publicTargetGroupCandidate, HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB());
     }
@@ -373,5 +390,24 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     @Override
     public ResourceRecordSet getResourceRecordSet() throws InterruptedException, ExecutionException {
         return resourceRecordSet.get();
+    }
+
+    @Override
+    public void restartAllReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        for (final ProcessT replica : getReplicas()) {
+            logger.info("Restarting replica "+replica+" in replica set "+getName());
+            try {
+                replica.restart(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+                logger.info("Wating until restarted replica "+replica+" in replica set "+getName()+" has become ready:");
+                replica.waitUntilReady(optionalTimeout);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Problem restarting replica "+replica+". Continuing by restarting the next replica if there are more.", e);
+            }
+        }
+    }
+
+    @Override
+    public boolean isLocalReplicaSet() {
+        return getName().equals(ServerInfo.getName());
     }
 }

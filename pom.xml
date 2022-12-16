@@ -96,7 +96,7 @@
   <!--
           <repository>
               <id>sap-nexus</id>
-              <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
+              <url>https://int.repositories.cloud.sap/artifactory/build-snapshots</url>
           </repository>
   --> 
           <repository>

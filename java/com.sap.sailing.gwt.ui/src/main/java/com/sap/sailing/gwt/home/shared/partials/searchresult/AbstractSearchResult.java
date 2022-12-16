@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 
 public abstract class AbstractSearchResult extends Composite {
     
@@ -56,6 +57,10 @@ public abstract class AbstractSearchResult extends Composite {
         getSearchResultAmountUi().setInnerText(StringMessages.INSTANCE.resultsFoundForSearch(resultsCount, searchText));
     }
     
+    public void setBusy(boolean busy) {
+        getBusyIndicatorUi().setBusy(busy);
+    }
+    
     @Override
     protected void onLoad() {
         super.onLoad();
@@ -73,4 +78,6 @@ public abstract class AbstractSearchResult extends Composite {
     protected abstract HasWidgets getSearchResultContainerUi();
     
     protected abstract void addSearchResultItem(SearchResultDTO searchResult);
+    
+    protected abstract BusyIndicator getBusyIndicatorUi();
 }

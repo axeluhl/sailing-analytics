@@ -6,9 +6,11 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class SingleRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<SingleRaceLeaderboardSettings> {
@@ -16,8 +18,8 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     private CheckBox showRaceRankColumn;
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
-            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true);
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboarDTO) {
+        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true, paywallResolver, leaderboarDTO);
     }
 
     @Override
@@ -26,7 +28,6 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, initialSettings.getOverallDetailsToShow());
         List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes, initialSettings.getRaceDetailsToShow());
         List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes, initialSettings.getLegDetailsToShow());
-                
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
@@ -54,9 +55,12 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     
     @Override
     protected FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
-        FlowPanel detailPanel = super.createOverallDetailPanel(dialog);
+        final FlowPanel detailPanel = super.createOverallDetailPanel(dialog);
         showRaceRankColumn = createCheckbox(dialog, stringMessages.showRaceRankColumn(), initialSettings.isShowRaceRankColumn(), null);
-        detailPanel.add(showRaceRankColumn);
+        final FlowPanel overallDetailDialogContentThirdLine = new FlowPanel();
+        overallDetailDialogContentThirdLine.addStyleName("dialogInnerContent");
+        overallDetailDialogContentThirdLine.add(showRaceRankColumn);
+        detailPanel.add(overallDetailDialogContentThirdLine);
         return detailPanel;
     }
 

@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -94,16 +93,23 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         filterUIFactories = new ArrayList<>();
         filterDeleteButtons = new ArrayList<>();
         addFilterButton = new Button(stringMessages.add());
+        addFilterButton.addStyleName("inlineButton");
+        addFilterButton.addStyleName("btn-secondary");
         filterListBox = createListBox(false);
     }
     
     @Override
     protected Widget getAdditionalWidget() {
         mainPanel = new VerticalPanel();
-        HorizontalPanel hPanel = new HorizontalPanel();
-        mainPanel.add(hPanel);
-        hPanel.add(new Label(stringMessages.filterName() + ":"));
-        hPanel.add(filterSetNameTextBox);
+        Grid hGrid = new Grid(1, 2);
+        mainPanel.add(hGrid);
+        hGrid.setWidget(0, 0, new Label(stringMessages.filterName() + ":"));
+        Grid filterSetNameTextBoxWrapperGrid = new Grid(1,1);
+        filterSetNameTextBoxWrapperGrid.setWidget(0, 0, filterSetNameTextBox);
+        filterSetNameTextBoxWrapperGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        hGrid.setWidget(0, 1, filterSetNameTextBoxWrapperGrid);
+        hGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        hGrid.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_MIDDLE);
         filterListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -130,8 +136,11 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
                 updateCompetitorsFiltersGrid(mainPanel);
                 validateAndUpdate();
             }
-        });       
-        mainPanel.add(competitorsFiltersGridHeadline);
+        });
+        Grid competitorsFiltersGridHeadlineGrid = new Grid(1, 1);
+        competitorsFiltersGridHeadlineGrid.setWidget(0, 0, competitorsFiltersGridHeadline);
+        competitorsFiltersGridHeadlineGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        mainPanel.add(competitorsFiltersGridHeadlineGrid);
         mainPanel.add(competitorsFiltersGrid);
         mainPanel.add(competitorsFiltersGridFooter);
         for(FilterWithUI<CompetitorDTO> existingFilter: competitorsFilterSet.getFilters()) {
@@ -143,11 +152,17 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             createFilterDeleteButton(filter);
         }
         updateCompetitorsFiltersGrid(mainPanel);
-        HorizontalPanel addFilterPanel = new HorizontalPanel();
+        Grid addFilterPanel = new Grid(1, 3);
         mainPanel.add(addFilterPanel);
-        addFilterPanel.add(new Label(stringMessages.filterCriteria() + ":"));
-        addFilterPanel.add(filterListBox);
-        addFilterPanel.add(addFilterButton);
+        addFilterPanel.setWidget(0, 0, new Label(stringMessages.filterCriteria() + ":"));
+        Grid filterListBoxWrapperGrid = new Grid(1,1);
+        filterListBoxWrapperGrid.setWidget(0, 0, filterListBox);
+        filterListBoxWrapperGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        addFilterPanel.setWidget(0, 1, filterListBoxWrapperGrid);
+        addFilterPanel.setWidget(0, 2, addFilterButton);
+        addFilterPanel.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        addFilterPanel.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_MIDDLE);
+        addFilterPanel.getCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_MIDDLE);
         return mainPanel;
     }
 
@@ -167,6 +182,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     private Button createFilterDeleteButton(FilterWithUI<CompetitorDTO> filter) {
         final Button filterDeleteBtn = new Button(stringMessages.delete()); 
         filterDeleteBtn.addStyleName("inlineButton");
+        filterDeleteBtn.addStyleName("btn-secondary");
         filterDeleteButtons.add(filterDeleteBtn);
         filterDeleteBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -234,7 +250,6 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         if(filterCount > 0) {
             competitorsFiltersGrid = new Grid(filterCount, 3);
             competitorsFiltersGrid.setCellSpacing(4);
-
             competitorsFiltersGridHeadline.setVisible(showGridHeadline);
             competitorsFiltersGridFooter.setVisible(showGridFooter);
             if(showGridHeadline) {

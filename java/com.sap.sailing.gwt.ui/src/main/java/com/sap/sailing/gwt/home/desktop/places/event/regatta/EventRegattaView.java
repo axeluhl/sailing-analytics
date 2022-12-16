@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.Regatta
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public interface EventRegattaView extends EventView<AbstractEventRegattaPlace, EventRegattaView.Presenter> {
 
@@ -18,6 +19,8 @@ public interface EventRegattaView extends EventView<AbstractEventRegattaPlace, E
         Timer getAutoRefreshTimer();
 
         UserService getUserService();
+
+        SubscriptionServiceFactory getSubscriptionServiceFactory();
 
         void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
                 AsyncCallback<Iterable<DetailType>> asyncCallback);

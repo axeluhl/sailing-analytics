@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse,
+ com.sap.sse.classloading,
  com.sap.sse.gateway,
  com.sap.sse.i18n,
  com.sap.sse.i18n.impl,
@@ -26,7 +27,8 @@ Require-Bundle: com.sap.sse.common,
  org.json.simple;bundle-version="1.1.0",
  org.apache.httpcomponents.httpclient,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
- com.sun.jersey
+ com.sun.jersey,
+ org.apache.shiro.core
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  javax.ws.rs.core;version="1.1.1",

@@ -39,6 +39,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -253,13 +254,13 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
                             final Competitor c = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
                             final TrackedRace trackedRace = c == null || raceColumn == null ? null : raceColumn.getTrackedRace(c);
-                            Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type,
-                                    leaderboardRowDTO, leaderboardEntry, currentLegEntry, trackedRace, raceColumn,
-                                    c, leaderboardTimePoint);
+                            Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(leaderboard,
+                                    type, leaderboardRowDTO, leaderboardEntry, currentLegEntry, trackedRace,
+                                    raceColumn, c, leaderboardTimePoint);
                             if (valueForRaceDetailType != null && valueForRaceDetailType.getA() != null && valueForRaceDetailType.getB() != null) {
                                 jsonRaceDetails.put(valueForRaceDetailType.getA(), valueForRaceDetailType.getB());
                             }
-                        }                    
+                        }
                     }
                 }
             }
@@ -327,153 +328,156 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return new DetailType[] { DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
-    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardRowDTO leaderboardRowDTO,
-            LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry, TrackedRace trackedRace, RaceColumn raceColumn,
-            Competitor competitor, TimePoint timePoint) {
+    private Pair<String, Object> getValueForRaceDetailType(Leaderboard leaderboard, DetailType type,
+            LeaderboardRowDTO leaderboardRowDTO, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry, TrackedRace trackedRace,
+            RaceColumn raceColumn, Competitor competitor, TimePoint timePoint) {
         String name;
         Object value = null;
         Pair<String, Object> result = null;
-        switch (type) {
-            case RACE_GAP_TO_LEADER_IN_SECONDS:
-                name = "gapToLeader-s";
-                if (entry.gapToLeaderInOwnTime != null) {
-                    value = entry.gapToLeaderInOwnTime.asSeconds();
-                }
-                break;
-            case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
-                name = "gapToLeader-m";
-                if (entry.windwardDistanceToCompetitorFarthestAheadInMeters != null) {
-                    value = roundDouble(entry.windwardDistanceToCompetitorFarthestAheadInMeters, 2);                
-                }
-                break;
-            case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
-                name = "averageSpeedOverGround-kts";
-                Distance distance = entry.getDistanceTraveled();
-                Duration timeSailed = entry.getTimeSailed();
-                if (distance != null && timeSailed != null && timeSailed.compareTo(Duration.NULL)>0) {
-                    value = roundDouble(distance.inTime(timeSailed).getKnots(), 2);
-                }
-                break;
-            case RACE_DISTANCE_TRAVELED:
-                name = "distanceTraveled-m";
-                Distance distanceTraveled = entry.getDistanceTraveled();
-                if (distanceTraveled != null) {
-                    value = roundDouble(distanceTraveled.getMeters(), 2);
-                }
-                break;
-            case RACE_TIME_TRAVELED:
-                name = "timeTraveled-s";
-                Duration timeTraveled = entry.getTimeSailed();
-                if (timeTraveled != null) {
-                    value = timeTraveled.asSeconds();
-                }
-                break;
-            case RACE_IMPLIED_WIND:
-                name = "impliedWind-kts";
-                if (entry.impliedWind != null) {
-                    value = entry.impliedWind.getKnots();
-                }
-                break;
-            case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                name = "currentSpeedOverGround-kts";
-                if (entry.currentSpeedAndCourseOverGround != null) {
-                    value = roundDouble(entry.currentSpeedAndCourseOverGround.getKnots(), 2);
-                }
-                break;
-            case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
-                name = "currentCourseOverGround-deg";
-                if (entry.currentSpeedAndCourseOverGround != null) {
-                    value = roundDouble(entry.currentSpeedAndCourseOverGround.getBearing().getDegrees(), 2);
-                }
-                break;
-            case RACE_CURRENT_POSITION_LAT_DEG:
-                name = "currentPositionLatitude-deg";
-                if (trackedRace != null) {
-                    final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    if (track != null) {
-                        final Position position = track.getEstimatedPosition(timePoint, /* extrapolated */ true);
-                        if (position != null) {
-                            value = roundDouble(position.getLatDeg(), 10);
+        if (type.getPremiumAction() == null
+                || SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(type.getPremiumAction(), leaderboard))) {
+            switch (type) {
+                case RACE_GAP_TO_LEADER_IN_SECONDS:
+                    name = "gapToLeader-s";
+                    if (entry.gapToLeaderInOwnTime != null) {
+                        value = entry.gapToLeaderInOwnTime.asSeconds();
+                    }
+                    break;
+                case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
+                    name = "gapToLeader-m";
+                    if (entry.windwardDistanceToCompetitorFarthestAheadInMeters != null) {
+                        value = roundDouble(entry.windwardDistanceToCompetitorFarthestAheadInMeters, 2);
+                    }
+                    break;
+                case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+                    name = "averageSpeedOverGround-kts";
+                    Distance distance = entry.getDistanceTraveled();
+                    Duration timeSailed = entry.getTimeSailed();
+                    if (distance != null && timeSailed != null && timeSailed.compareTo(Duration.NULL)>0) {
+                        value = roundDouble(distance.inTime(timeSailed).getKnots(), 2);
+                    }
+                    break;
+                case RACE_DISTANCE_TRAVELED:
+                    name = "distanceTraveled-m";
+                    Distance distanceTraveled = entry.getDistanceTraveled();
+                    if (distanceTraveled != null) {
+                        value = roundDouble(distanceTraveled.getMeters(), 2);
+                    }
+                    break;
+                case RACE_TIME_TRAVELED:
+                    name = "timeTraveled-s";
+                    Duration timeTraveled = entry.getTimeSailed();
+                    if (timeTraveled != null) {
+                        value = timeTraveled.asSeconds();
+                    }
+                    break;
+                case RACE_IMPLIED_WIND:
+                    name = "impliedWind-kts";
+                    if (entry.impliedWind != null) {
+                        value = entry.impliedWind.getKnots();
+                    }
+                    break;
+                case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+                    name = "currentSpeedOverGround-kts";
+                    if (entry.currentSpeedAndCourseOverGround != null) {
+                        value = roundDouble(entry.currentSpeedAndCourseOverGround.getKnots(), 2);
+                    }
+                    break;
+                case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
+                    name = "currentCourseOverGround-deg";
+                    if (entry.currentSpeedAndCourseOverGround != null) {
+                        value = roundDouble(entry.currentSpeedAndCourseOverGround.getBearing().getDegrees(), 2);
+                    }
+                    break;
+                case RACE_CURRENT_POSITION_LAT_DEG:
+                    name = "currentPositionLatitude-deg";
+                    if (trackedRace != null) {
+                        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                        if (track != null) {
+                            final Position position = track.getEstimatedPosition(timePoint, /* extrapolated */ true);
+                            if (position != null) {
+                                value = roundDouble(position.getLatDeg(), 10);
+                            }
                         }
                     }
-                }
-                break;
-            case RACE_CURRENT_POSITION_LNG_DEG:
-                name = "currentPositionLongitude-deg";
-                if (trackedRace != null) {
-                    final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    if (track != null) {
-                        final Position position = track.getEstimatedPosition(timePoint, /* extrapolated */ true);
-                        if (position != null) {
-                            value = roundDouble(position.getLngDeg(), 10);
+                    break;
+                case RACE_CURRENT_POSITION_LNG_DEG:
+                    name = "currentPositionLongitude-deg";
+                    if (trackedRace != null) {
+                        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                        if (track != null) {
+                            final Position position = track.getEstimatedPosition(timePoint, /* extrapolated */ true);
+                            if (position != null) {
+                                value = roundDouble(position.getLngDeg(), 10);
+                            }
                         }
                     }
-                }
-                break;
-            case NUMBER_OF_MANEUVERS:
-                name = "numberOfManeuvers";
-                Integer numberOfManeuvers = null;
-                Map<ManeuverType, Integer> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(entry);
-                for (Integer maneuverCount : tacksJibesAndPenalties.values()) {
-                    if (maneuverCount != null) {
-                        if (numberOfManeuvers == null) {
-                            numberOfManeuvers = maneuverCount;
-                        } else {
-                            numberOfManeuvers += maneuverCount;
+                    break;
+                case NUMBER_OF_MANEUVERS:
+                    name = "numberOfManeuvers";
+                    Integer numberOfManeuvers = null;
+                    Map<ManeuverType, Integer> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(entry);
+                    for (Integer maneuverCount : tacksJibesAndPenalties.values()) {
+                        if (maneuverCount != null) {
+                            if (numberOfManeuvers == null) {
+                                numberOfManeuvers = maneuverCount;
+                            } else {
+                                numberOfManeuvers += maneuverCount;
+                            }
                         }
                     }
-                }
-                value = numberOfManeuvers;
-                break;
-            case RACE_CURRENT_LEG:
-                name = "currentLeg";
-                int currentLegNumber = entry.getOneBasedCurrentLegNumber();
-                if (currentLegNumber > 0) {
-                    value = currentLegNumber;
-                }
-                break;
-            case OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
-                name = "maxSpeedOverGroundInKnots";
-                value = leaderboardRowDTO.maximumSpeedOverGroundInKnots==null?null:roundDouble(leaderboardRowDTO.maximumSpeedOverGroundInKnots, 2);
-                break;
-            case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
-                name = "legWindwardDistanceToGoInMeters";
-                if (currentLegEntry != null && currentLegEntry.windwardDistanceToGoInMeters != null) {
-                    value = currentLegEntry.windwardDistanceToGoInMeters;
-                }
-                break;
-            case LEG_VELOCITY_MADE_GOOD_IN_KNOTS:
-                name = "legVelocityMadeGoodInKnots";
-                if (currentLegEntry != null && currentLegEntry.velocityMadeGoodInKnots != null) {
-                    value = currentLegEntry.velocityMadeGoodInKnots;
-                }
-                break;
-            case LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
-                name = "legCurrentAbsoluteCrossTrackErrorInMeters";
-                if (currentLegEntry != null && currentLegEntry.currentOrAverageAbsoluteCrossTrackErrorInMeters != null) {
-                    value = currentLegEntry.currentOrAverageAbsoluteCrossTrackErrorInMeters;
-                }
-                break;
-            case LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
-                name = "legCurrentSignedCrossTrackErrorInMeters";
-                if (currentLegEntry != null && currentLegEntry.currentOrAverageSignedCrossTrackErrorInMeters != null) {
-                    value = currentLegEntry.currentOrAverageSignedCrossTrackErrorInMeters;
-                }
-                break;
-            case OVERALL_TIME_ON_TIME_FACTOR:
-                name = CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR;
-                value = leaderboardRowDTO.effectiveTimeOnTimeFactor;
-                break;
-            case OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
-                name = CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE;
-                value = leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile == null ? null : leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds();
-                break;
-            default:
-                name = null;
-                break;
-        }
-        if (name != null && value != null) {
-            result = new Pair<String, Object>(name, value);
+                    value = numberOfManeuvers;
+                    break;
+                case RACE_CURRENT_LEG:
+                    name = "currentLeg";
+                    int currentLegNumber = entry.getOneBasedCurrentLegNumber();
+                    if (currentLegNumber > 0) {
+                        value = currentLegNumber;
+                    }
+                    break;
+                case OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
+                    name = "maxSpeedOverGroundInKnots";
+                    value = leaderboardRowDTO.maximumSpeedOverGroundInKnots==null?null:roundDouble(leaderboardRowDTO.maximumSpeedOverGroundInKnots, 2);
+                    break;
+                case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
+                    name = "legWindwardDistanceToGoInMeters";
+                    if (currentLegEntry != null && currentLegEntry.windwardDistanceToGoInMeters != null) {
+                        value = currentLegEntry.windwardDistanceToGoInMeters;
+                    }
+                    break;
+                case LEG_VELOCITY_MADE_GOOD_IN_KNOTS:
+                    name = "legVelocityMadeGoodInKnots";
+                    if (currentLegEntry != null && currentLegEntry.velocityMadeGoodInKnots != null) {
+                        value = currentLegEntry.velocityMadeGoodInKnots;
+                    }
+                    break;
+                case LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+                    name = "legCurrentAbsoluteCrossTrackErrorInMeters";
+                    if (currentLegEntry != null && currentLegEntry.currentOrAverageAbsoluteCrossTrackErrorInMeters != null) {
+                        value = currentLegEntry.currentOrAverageAbsoluteCrossTrackErrorInMeters;
+                    }
+                    break;
+                case LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+                    name = "legCurrentSignedCrossTrackErrorInMeters";
+                    if (currentLegEntry != null && currentLegEntry.currentOrAverageSignedCrossTrackErrorInMeters != null) {
+                        value = currentLegEntry.currentOrAverageSignedCrossTrackErrorInMeters;
+                    }
+                    break;
+                case OVERALL_TIME_ON_TIME_FACTOR:
+                    name = CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR;
+                    value = leaderboardRowDTO.effectiveTimeOnTimeFactor;
+                    break;
+                case OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
+                    name = CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE;
+                    value = leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile == null ? null : leaderboardRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile.asSeconds();
+                    break;
+                default:
+                    name = null;
+                    break;
+            }
+            if (name != null && value != null) {
+                result = new Pair<>(name, value);
+            }
         }
         return result;
     }
@@ -557,11 +561,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             // if showOnlyActiveRacesForCompetitorIds specifies at least one ID, don't default to delivering
             // all columns, even if raceColumnNames is empty, but only show what resulted from finding the
             // active races combined with columns explicitly specified in raceColumnNames.
+            
             if ((raceColumnNamesAsSet.isEmpty() && (showOnlyActiveRacesForCompetitorIds==null || Util.isEmpty(showOnlyActiveRacesForCompetitorIds)))
                     || raceColumnNamesAsSet.contains(raceColumn.getName())) {
                 raceColumnsToShow.add(raceColumn.getName());
             }
-        }        
+        }
         return raceColumnsToShow;
     }
 

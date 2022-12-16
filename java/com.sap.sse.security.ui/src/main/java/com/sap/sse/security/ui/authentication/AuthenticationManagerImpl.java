@@ -22,6 +22,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -39,6 +40,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private final EventBus eventBus;
     private final String emailConfirmationUrl;
     private final String passwordResetUrl;
+    private final PaywallResolver paywallResolver;
     
     private final StringMessages i18n = StringMessages.INSTANCE;
     private final ErrorMessageView view = new ErrorMessageViewImpl();
@@ -57,8 +59,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      */
     public AuthenticationManagerImpl(WithSecurity clientFactory, EventBus eventBus,
             String emailConfirmationUrl, String passwordResetUrl) {
-        this(clientFactory.getUserManagementWriteService(), clientFactory.getUserService(), eventBus, emailConfirmationUrl,
-                passwordResetUrl);
+        this(clientFactory.getUserManagementWriteService(), clientFactory.getUserService(), 
+                new PaywallResolver(clientFactory.getUserService(), clientFactory.getSubscriptionServiceFactory()),
+                eventBus, emailConfirmationUrl, passwordResetUrl);
     }
     
     /**
@@ -74,22 +77,23 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      * @param passwordResetUrl
      *            URL which is send to users to reset their password
      */
-    public AuthenticationManagerImpl(UserService userService, EventBus eventBus, String emailConfirmationUrl,
-            String passwordResetUrl) {
-        this(userService.getUserManagementWriteService(), userService, eventBus, emailConfirmationUrl, passwordResetUrl);
+    public AuthenticationManagerImpl(UserService userService, PaywallResolver paywallResolver, 
+            EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
+        this(userService.getUserManagementWriteService(), userService, paywallResolver,  eventBus, emailConfirmationUrl, passwordResetUrl);
     }
     
     private AuthenticationManagerImpl(UserManagementWriteServiceAsync userManagementWriteService, UserService userService,
-            final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
+            PaywallResolver paywallResolver, final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
         this.userManagementWriteService = userManagementWriteService;
         this.userService = userService;
         this.eventBus = eventBus;
         this.emailConfirmationUrl = emailConfirmationUrl;
         this.passwordResetUrl = passwordResetUrl;
+        this.paywallResolver = paywallResolver;
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user, userService)));
+                eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user, userService, paywallResolver)));
             }
         });
         eventBus.addHandler(AuthenticationSignOutRequestEvent.TYPE, new AuthenticationSignOutRequestEvent.Handler() {
@@ -250,7 +254,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
 
     @Override
     public AuthenticationContext getAuthenticationContext() {
-        return new AuthenticationContextImpl(userService.getCurrentUser(), userService);
+        return new AuthenticationContextImpl(userService.getCurrentUser(), userService, paywallResolver);
     }
     
     @Override

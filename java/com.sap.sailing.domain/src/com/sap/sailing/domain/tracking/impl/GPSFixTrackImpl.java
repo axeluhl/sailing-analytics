@@ -173,12 +173,13 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     }
 
     @Override
-    public void suspendValidityCaching() {
+    public void suspendValidityAndMaxSpeedCaching() {
         validityCachingSuspended = true;
+        removeListener(maxSpeedCache);
     }
 
     @Override
-    public void resumeValidityCaching() {
+    public void resumeValidityAndMaxSpeedCaching() {
         lockForWrite();
         try {
             this.validityCachingSuspended = false;
@@ -188,6 +189,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         } finally {
             unlockAfterWrite();
         }
+        maxSpeedCache = createMaxSpeedCache();
         getDistanceCache().clear();
     }
 

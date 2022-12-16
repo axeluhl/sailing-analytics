@@ -230,7 +230,13 @@ public class UserProxy implements User {
     }
 
     @Override
-    public boolean hasActiveSubscription() {
+    public boolean hasAnySubscription(String planId) {
+        throw new UnsupportedOperationException();
+    }
+    
+
+    @Override
+    public boolean hasActiveSubscription(String planId) {
         throw new UnsupportedOperationException();
     }
 }

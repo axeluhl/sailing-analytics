@@ -42,6 +42,8 @@ public interface Course extends CourseBase, Renamable {
      * control point list and the control points referenced by this course's waypoints. Change events are propagated
      * to the registered {@link CourseListener}s as if {@link #addWaypoint(int, Waypoint)} and {@link #removeWaypoint(int)}
      * had been used.
+     * 
+     * @param associatedRoles must not be {@code null} but may be empty
      */
     void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, Map<Mark, UUID> associatedRoles,
             UUID originatingCouseTemplateIdOrNull, DomainFactory baseDomainFactory) throws PatchFailedException;

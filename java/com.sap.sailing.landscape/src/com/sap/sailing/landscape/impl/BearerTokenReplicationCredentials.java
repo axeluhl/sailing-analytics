@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
+import com.sap.sse.landscape.Log;
+import com.sap.sse.landscape.Metrics;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.ReplicationCredentials;
 
@@ -21,4 +23,8 @@ public class BearerTokenReplicationCredentials implements ReplicationCredentials
         return result;
     }
 
+    @Override
+    public <LogT extends Log, MetricsT extends Metrics> String getBearerToken(String hostname, Integer port) {
+        return bearerToken;
+    }
 }

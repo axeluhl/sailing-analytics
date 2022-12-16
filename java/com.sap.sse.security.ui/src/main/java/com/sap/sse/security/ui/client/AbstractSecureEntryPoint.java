@@ -4,6 +4,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.sap.sse.gwt.client.StringMessages;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 /**
  * Adds user management service and user service for security management to the general abstract entry point.
@@ -43,5 +44,10 @@ public abstract class AbstractSecureEntryPoint<S extends StringMessages> extends
     @Override
     public UserService getUserService() {
         return securityProvider.getUserService();
+    }
+    
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return securityProvider.getSubscriptionServiceFactory();
     }
 }

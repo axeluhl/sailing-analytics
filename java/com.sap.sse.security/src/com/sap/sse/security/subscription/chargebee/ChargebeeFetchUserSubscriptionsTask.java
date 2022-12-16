@@ -1,12 +1,13 @@
 package com.sap.sse.security.subscription.chargebee;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
@@ -15,19 +16,17 @@ public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptio
 
     @FunctionalInterface
     public static interface OnResultListener {
-        void onSubscriptionsResult(Iterable<Subscription> subscriptions);
+        void onSubscriptionsResult(Map<String, List<Subscription>> userSubscriptions);
     }
 
-    private final User user;
     private final SubscriptionApiRequestProcessor requestProcessor;
     private final OnResultListener listener;
 
-    private List<Subscription> userSubscriptions;
+    private Map<String, List<Subscription>> userSubscriptions;
     private final SubscriptionApiBaseService chargebeeApiServiceParams;
 
-    public ChargebeeFetchUserSubscriptionsTask(User user, SubscriptionApiRequestProcessor requestProcessor,
+    public ChargebeeFetchUserSubscriptionsTask(SubscriptionApiRequestProcessor requestProcessor,
             OnResultListener listener, SubscriptionApiBaseService chargebeeApiServiceParams) {
-        this.user = user;
         this.requestProcessor = requestProcessor;
         this.listener = listener;
         this.chargebeeApiServiceParams = chargebeeApiServiceParams;
@@ -40,18 +39,25 @@ public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptio
     @Override
     public void onSubscriptionListResult(Iterable<ChargebeeApiSubscriptionData> subscriptions, String nextOffset) {
         if (subscriptions != null) {
-            List<Subscription> subscriptionList = new ArrayList<Subscription>();
-            for (ChargebeeApiSubscriptionData sub : subscriptions) {
-                subscriptionList.add(sub.toSubscription());
-            }
-            // Sort subscription list by created date, so newest item goes first in the list
-            Collections.sort(subscriptionList, (s1, s2) -> {
-                return s1.getSubscriptionCreatedAt().compareTo(s2.getSubscriptionCreatedAt()) * -1;
-            });
             if (userSubscriptions == null) {
-                userSubscriptions = new ArrayList<Subscription>();
+                userSubscriptions = new HashMap<>();
             }
-            userSubscriptions.addAll(subscriptionList);
+            for (ChargebeeApiSubscriptionData sub : subscriptions) {
+                final ChargebeeSubscription subscription = sub.toSubscription(chargebeeApiServiceParams.getSubscriptionPlanProvider());
+                final String customerId = subscription.getCustomerId();
+                final List<Subscription> list;
+                if (userSubscriptions.containsKey(customerId)) {
+                    list = userSubscriptions.get(customerId);
+                } else {
+                    list = new ArrayList<>();
+                    userSubscriptions.put(customerId, list);
+                }
+                list.add(subscription);
+            }
+        } else { 
+            // An error might have occurred, nullifying result;
+            userSubscriptions = null;
+            onDone();
         }
         if (nextOffset == null || nextOffset.isEmpty()) {
             onDone();
@@ -61,9 +67,9 @@ public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptio
     }
 
     private void fetchSubscriptionList(String offset) {
-        logger.info(() -> "Schedule fetch Chargebee subscriptions, user: " + user.getName() + ", offset: "
+        logger.info(() -> "Schedule fetch Chargebee subscriptions, offset: "
                 + (offset == null ? "" : offset));
-        requestProcessor.addRequest(new ChargebeeSubscriptionListRequest(user, offset, this, requestProcessor, chargebeeApiServiceParams));
+        requestProcessor.addRequest(new ChargebeeSubscriptionListRequest(offset, this, requestProcessor, chargebeeApiServiceParams));
     }
 
     private void onDone() {

@@ -114,7 +114,8 @@ public class PreLiveRaceLeaderboardWithImagePresenterImpl
                 leaderboardSettings, false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(false),
-                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()), getClientFactory());
+
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
 

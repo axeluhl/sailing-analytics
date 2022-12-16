@@ -159,7 +159,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         eventsById.clear();
         eventListBox.addItem(stringMessages.selectSailingEvent(), "");
         final List<EventDTO> eventsSortedByName = new ArrayList<>();
-        Util.addAll(Util.filter(events, e->userService.hasPermission(e, DefaultActions.UPDATE)), eventsSortedByName);
+        Util.addAll(events, eventsSortedByName);
         Collections.sort(eventsSortedByName, (e1, e2)->{
             int result = e1.getName().compareTo(e2.getName());
             if (result == 0) {
@@ -231,7 +231,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             priorityListBox.setSelectedIndex(0);
         } else {
             for (int i=1; i<priorityListBox.getItemCount(); i++) {
-                if (new Integer(priorityListBox.getValue(i)).equals(priority)) {
+                if (Integer.valueOf(priorityListBox.getValue(i)).equals(priority)) {
                     priorityListBox.setSelectedIndex(i);
                     break;
                 }

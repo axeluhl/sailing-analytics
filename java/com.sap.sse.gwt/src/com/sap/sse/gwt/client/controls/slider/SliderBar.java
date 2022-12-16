@@ -857,11 +857,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @return the text to put in the label
      */
     protected String formatTickLabel(Double value, Double previousValue) {
+        final String result;
         if (tickLabelFormatter != null) {
-            return tickLabelFormatter.formatLabel(this, value, previousValue);
+            result = tickLabelFormatter.formatLabel(this, value, previousValue);
         } else {
-            return (int) (10 * value) / 10.0 + "";
+            result = (int) (10 * value) / 10.0 + "";
         }
+        return result;
     }
 
     /**
@@ -1032,11 +1034,11 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         markerElem = DOM.createDiv();
                         markerElem.getStyle().setPosition(Position.ABSOLUTE);
                         markerElem.getStyle().setDisplay(Display.NONE);
-                        markerElem.setTitle(formatTickLabel(marker.position, null));
                         markerElem.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "sliderBarMarker-" + marker.name);
                         DOM.appendChild(getElement(), markerElem);
                         markerElements.add(markerElem);
                     }
+                    markerElem.setTitle(formatTickLabel(marker.position, null));
                     if (enabled) {
                         markerElem.setPropertyString("className", "gwt-SliderBar-mark");
                     } else {
@@ -1097,9 +1099,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
                         DOM.appendChild(getElement(), label);
-                        label.setTitle(formatTickLabel(marker.position, null));
                         markerLabelElements.add(label);
                     }
+                    label.setTitle(formatTickLabel(marker.position, null));
                     if (enabled) {
                         label.setPropertyString("className", "gwt-SliderBar-markerlabel");
                     } else {

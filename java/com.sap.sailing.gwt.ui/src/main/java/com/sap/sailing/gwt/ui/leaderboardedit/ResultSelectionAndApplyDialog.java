@@ -231,8 +231,8 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                         @Override
                         public void onSuccess(RegattaScoreCorrectionDTO result) {
                             leaderboardPanel.removeBusyTask();
-                                    new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages,
-                                            sailingServiceWrite, errorReporter, result).show();
+                            new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages,
+                                    sailingServiceWrite, errorReporter, result).show();
                         }
             });
         }

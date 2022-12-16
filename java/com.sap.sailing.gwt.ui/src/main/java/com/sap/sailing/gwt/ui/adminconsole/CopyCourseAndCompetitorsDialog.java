@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -40,7 +40,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     
     public CopyCourseAndCompetitorsDialog(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
-            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceToExclude, List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList,
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceToExclude, List<StrippedLeaderboardDTO> availableLeaderboardList,
             String leaderboardName, Distance buoyZoneRadius, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator<CourseAndCompetitorCopyOperation>() {
@@ -58,7 +58,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         this.stringMessages = stringMessages;
         leaderboardDropDown = createListBox(/* multi-select */ false);
         copyMarkDeviceMappingsCheckBox = createCheckbox(stringMessages.copyMarkDeviceMappings());
-        final List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardsSortedByName = availableLeaderboardList.stream()
+        final List<StrippedLeaderboardDTO> availableLeaderboardsSortedByName = availableLeaderboardList.stream()
                 .sorted((lb1, lb2) -> new NaturalComparator().compare(lb1.getName(), lb2.getName()))
                 .collect(Collectors.toList());
         fillLeaderboardDropDownAndSelect(availableLeaderboardsSortedByName, leaderboardName);
@@ -83,11 +83,11 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     }
     
     private void updateRacesTable(String nameOfSelectedLeaderboard,
-        List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList,
+        List<StrippedLeaderboardDTO> availableLeaderboardList,
         RaceColumnDTOAndFleetDTOWithNameBasedEquality raceToExclude, String fromLeaderboardName) {
         racesTable.getDataProvider().getList().clear();
         final List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> newRaces = new ArrayList<>();
-        for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboardList) {
+        for (final StrippedLeaderboardDTO leaderboard : availableLeaderboardList) {
             if (leaderboard.getName().equals(nameOfSelectedLeaderboard)) {
                 for (final RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
                     for (final FleetDTO fleet : raceColumn.getFleets()) {
@@ -104,9 +104,9 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         copyMarkDeviceMappingsCheckBox.setVisible(!nameOfSelectedLeaderboard.equals(fromLeaderboardName));
     }
 
-    private void fillLeaderboardDropDownAndSelect(List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList, String leaderboardNameToSelect) {
+    private void fillLeaderboardDropDownAndSelect(List<StrippedLeaderboardDTO> availableLeaderboardList, String leaderboardNameToSelect) {
         int i=0;
-        for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboardList) {
+        for (final StrippedLeaderboardDTO leaderboard : availableLeaderboardList) {
             leaderboardDropDown.addItem(leaderboard.getName(), leaderboard.getName());
             if (leaderboard.getName().equals(leaderboardNameToSelect)) {
                 leaderboardDropDown.setSelectedIndex(i);

@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -165,12 +165,12 @@ public class TaggingComponent extends ComponentWithoutSettings
      */
     private boolean preventTimeJumpAtSelectionChangeForOnce = false;
 
-    private StrippedLeaderboardDTOWithSecurity leaderboardDTO;
+    private StrippedLeaderboardDTO leaderboardDTO;
 
     public TaggingComponent(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
             RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO, SailingServiceWriteAsync sailingServiceWrite) {
+            StrippedLeaderboardDTO leaderboardDTO, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, context);
 
         this.stringMessages = stringMessages;

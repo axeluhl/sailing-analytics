@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
@@ -137,16 +137,14 @@ public class SpeedRegressionPerAngleClusterProcessor implements
             throws NotEnoughDataHasBeenAddedException {
         List<Speed> windSpeeds = new ArrayList<>();
         for (int i = -2; i <= 2; i++) {
-            
             GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(Math.abs(trueWindAngle.getDegrees()) + i));
             if (regressions.containsKey(key)) {
                 IncrementalLeastSquares incrementalLeastSquares = regressions.get(key);
                 long fixesCount = incrementalLeastSquares.getNumberOfAddedPoints();
                 if (fixesCount > 10) {
-                    double[] coefficiants = incrementalLeastSquares.getOrCreatePolynomialFunction().getCoefficients();
-                    CubicEquation equation = new CubicEquation(coefficiants[3], coefficiants[2], coefficiants[1],
+                    double[] coefficients = incrementalLeastSquares.getOrCreatePolynomialFunction().getCoefficients();
+                    CubicEquation equation = new CubicEquation(coefficients[3], coefficients[2], coefficients[1],
                             -boatSpeed.getKnots());
-
                     double bestWindSpeedCandidateInKnots = Double.MAX_VALUE;
                     double bestOptimalSpeedDifference = Double.MAX_VALUE;
                     double[] windSpeedCandidates = equation.solve();
@@ -170,7 +168,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
 
     private GroupKey createGroupKey(final BoatClass boatClass, final Bearing angle) {
         AngleClusterPolarClusterKey key = new AngleClusterPolarClusterKey() {
-
             @Override
             public BoatClass getBoatClass() {
                 return boatClass;
@@ -180,7 +177,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
             public Cluster<Bearing> getAngleCluster() {
                 return angleClusterGroup.getClusterFor(angle);
             }
-
         };
         GroupKey compoundKey;
         try {

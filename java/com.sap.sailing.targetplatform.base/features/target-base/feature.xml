@@ -107,42 +107,42 @@
          id="org.mongodb.bson"
          download-size="0"
          install-size="0"
-         version="4.3.1"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.bson.source"
          download-size="0"
          install-size="0"
-         version="4.3.1"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-core"
          download-size="0"
          install-size="0"
-         version="4.3.1"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-core.source"
          download-size="0"
          install-size="0"
-         version="4.3.1"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-sync"
          download-size="0"
          install-size="0"
-         version="4.3.1"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
-         id="org.mongodb.driver-sync"
+         id="org.mongodb.driver-sync.source"
          download-size="0"
          install-size="0"
-         version="4.3.1"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
@@ -247,49 +247,42 @@
          id="org.mortbay.jasper.apache-el"
          download-size="0"
          install-size="0"
-         version="8.5.54"
+         version="8.5.70"
          unpack="false"/>
 
    <plugin
          id="org.mortbay.jasper.apache-jsp"
          download-size="0"
          install-size="0"
-         version="8.5.54"
-         unpack="false"/>
-
-   <plugin
-         id="org.mortbay.jasper.apache-jsp.source"
-         download-size="0"
-         install-size="0"
-         version="8.5.54"
+         version="8.5.70"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.apache-jsp"
          download-size="0"
          install-size="0"
-         version="9.4.36.v20210114"
+         version="9.4.44.v20210927"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.apache-jsp.source"
          download-size="0"
          install-size="0"
-         version="9.4.36.v20210114"
+         version="9.4.44.v20210927"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.osgi.boot.jsp"
          download-size="0"
          install-size="0"
-         version="9.4.36.v20210114"
+         version="9.4.44.v20210927"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.osgi.boot.jsp.source"
          download-size="0"
          install-size="0"
-         version="9.4.36.v20210114"
+         version="9.4.44.v20210927"
          unpack="false"/>
 
    <plugin
@@ -312,4 +305,40 @@
          install-size="0"
          version="1.2.5"
          unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.packageadmin"
+         download-size="0"
+         install-size="0"
+         version="1.2.1.202007221806"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.url"
+         download-size="0"
+         install-size="0"
+         version="1.0.1.202007221806"
+         unpack="false"/>
+         
+   <plugin
+         id="redisson"
+         download-size="0"
+         install-size="0"
+         version="3.17.7"
+         unpack="false"/>
+
+   <plugin
+         id="com.amazonaws.aws-lambda-java-core"
+         download-size="0"
+         install-size="0"
+         version="1.2.1"
+         unpack="false"/>
+
+   <plugin
+         id="com.amazonaws.aws-lambda-java-core.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.1"
+         unpack="false"/>
+
 </feature>

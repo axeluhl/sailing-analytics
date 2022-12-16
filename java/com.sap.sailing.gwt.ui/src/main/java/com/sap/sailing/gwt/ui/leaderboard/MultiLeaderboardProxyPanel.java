@@ -36,6 +36,7 @@ import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
  * A panel managing multiple {@link ClassicLeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
@@ -71,6 +72,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
     private final FlagImageResolver flagImageResolver;
     private final Iterable<DetailType> availableDetailTypes;
     private Function<String, SailingServiceAsync> sailingServiceFactory;
+    protected final WithSecurity withSecurity;
 
     public MultiLeaderboardProxyPanel(Component<?> parent, ComponentContext<?> context,
             Function<String, SailingServiceAsync> sailingServiceFactory, String metaLeaderboardName,
@@ -78,7 +80,8 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName,  
             ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails, boolean autoExpandLastRaceColumn,
-            MultiRaceLeaderboardSettings settings, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            MultiRaceLeaderboardSettings settings, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes,
+            WithSecurity withSecurity) {
         super(parent, context);
         this.sailingServiceFactory = sailingServiceFactory;
 
@@ -95,6 +98,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
         this.isEmbedded = isEmbedded;
         this.selectedLeaderboardName = preselectedLeaderboardName;
         this.flagImageResolver = flagImageResolver;
+        this.withSecurity = withSecurity;
         
         selectedLeaderboardFlowPanel = null;
         selectedLeaderboardPanel = null;
@@ -247,7 +251,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
-                    flagImageResolver, availableDetailTypes);
+                    flagImageResolver, availableDetailTypes, withSecurity);
             selectedLeaderboardFlowPanel.add(newSelectedLeaderboardPanel);
             for (LeaderboardUpdateListener listener : leaderboardUpdateListeners) {
                 newSelectedLeaderboardPanel.addLeaderboardUpdateListener(listener);

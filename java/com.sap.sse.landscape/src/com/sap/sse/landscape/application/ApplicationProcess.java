@@ -9,8 +9,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.simple.parser.ParseException;
-
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
@@ -28,6 +26,11 @@ import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
+/**
+ * Equality / hash code is based on the {@link #getHost() host} and {@link #getPort() port}.
+ * 
+ * @author Axel Uhl (d043530)
+ */
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
@@ -55,10 +58,10 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
      * process's OSGi console using the {@link #getTelnetPortToOSGiConsole() telnet port}. If the instance hasn't
      * terminated after some time, a hard kill command will be used terminate the virtual machine. All this is
-     * implemented in the {@code stop} script in the {@link #getServerDirectory() server's directory}.<p>
+     * implemented in the {@code stop} script in the {@link #getServerDirectory(Optional) server's directory}.<p>
      * 
      * The server directory and the {@link #getHost()} are left untouched by this. In particular, a subsequent execution
-     * of the {@code start} script in the {@link #getServerDirectory() server directory} can be expected to start the
+     * of the {@code start} script in the {@link #getServerDirectory(Optional) server directory} can be expected to start the
      * application process again.
      */
     void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
@@ -70,12 +73,12 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
      *         it or to copy files to or read files from there.
      */
-    String getServerDirectory();
+    String getServerDirectory(Optional<Duration> optionalTimeout) throws TimeoutException, Exception;
     
     /**
      * The name that is the basis for the user group name; e.g., a server named "my" will by default be owned by a
      * dedicated user group named "my-server". For multi-instance servers, a default setup will use this server name also
-     * as the base name of the {@link #getServerDirectory() server's directory}. Often, it is also used as the name of
+     * as the base name of the {@link #getServerDirectory(Optional) server's directory}. Often, it is also used as the name of
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
      */
@@ -100,7 +103,8 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     String getMasterServerName(Optional<Duration> optionalTimeout) throws Exception;
 
     /**
-     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
+     * Obtains the last def@Override
+    inition of the process configuration variable specified, or {@code null} if that variable cannot be found
      * in the evaluated {@code env.sh} file.
      * @throws Exception 
      */
@@ -149,7 +153,11 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();
-        return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
+        return new URL(port==443 ? "https" : "http",
+                Wait.wait(()->getHost().getPublicAddress(optionalTimeout),
+                        publicAddress->publicAddress != null, /* retryOnException */ true,
+                        optionalTimeout, /* sleep duration between attempts */ Duration.ONE_SECOND.times(10),
+                        Level.INFO, "Waiting for non-null public address").getCanonicalHostName(), port, pathAndQuery);
     }
     
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
@@ -158,5 +166,11 @@ extends Process<RotatingFileBasedLog, MetricsT> {
 
     Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
-    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException, TimeoutException, Exception;
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws Exception;
+
+    /**
+     * Executes a {@code ./stop; ./start} sequence which waits for the graceful stopping of the process, then starts it again.
+     */
+    void restart(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

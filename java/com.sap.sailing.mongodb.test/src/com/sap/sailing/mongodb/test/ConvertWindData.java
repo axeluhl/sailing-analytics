@@ -7,7 +7,7 @@ import org.bson.Document;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
-import com.sap.sailing.domain.persistence.impl.FieldNames;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.mongodb.MongoDBService;

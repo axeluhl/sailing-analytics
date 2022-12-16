@@ -37,12 +37,18 @@ import com.sap.sse.common.impl.TimeRangeImpl;
  * 
  * This object {@link GPSFixTrack#addListener(GPSTrackListener) observes} the {@link GPSFixTrack} for new fixes. If a
  * new fix arrives and it has a time point newer than the last fix in the current analysis window, it is added to the
- * window, updating the maneuver candidates accordingly. If the fix was delivered "out of order" outside of the current
- * analysis window, a temporary {@link FixWindow} is constructed, and a time range around the new fix is re-scanned,
- * again updating the set of maneuver candidates accordingly. If the out-of-order fix fell in between the first and the
- * last fix in the current analysis window, it is inserted into the window accordingly, and the current window is
- * assessed for maneuvers as usual. Being in between fixes, this case does not influence the current analysis window's
- * duration.
+ * window, updating the {@link #maneuverCandidates maneuver candidates} accordingly. If the fix was delivered "out of
+ * order" outside of the current analysis window, a temporary {@link FixWindow} is constructed, and a time range around
+ * the new fix is re-scanned, again updating the set of maneuver candidates accordingly. If the out-of-order fix fell in
+ * between the first and the last fix in the current analysis window, it is inserted into the window accordingly, and
+ * the current window is assessed for maneuvers as usual. Being in between fixes, this case does not influence the
+ * current analysis window's duration.
+ * <p>
+ * 
+ * For concurrency control, an approximation of this type uses {@code synchronized} methods where mutations may occur
+ * (particularly in the {@link #gpsFixReceived(GPSFixMoving, Competitor, boolean, AddResult)} method), as well as for
+ * the {@link #approximate(TimePoint, TimePoint)} method which is the "reading" accessor. Furthermore, object
+ * serialization obtains this object's monitor by making the {@link #writeObject} method {@code synchronized}.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -54,16 +60,16 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
     private final FixWindow fixWindow;
     
     /**
-     * The following set is a {@code synchronized} navigable set; all simple access methods synchronize trivially on it.
-     * All iterations, including serializing this object, must {@code synchronize} on it.
+     * The set needs no special synchronization; all methods on this {@link CourseChangeBasedTrackApproximation} object
+     * that may mutate it are {@code synchronized} methods.
      */
     private final NavigableSet<GPSFixMoving> maneuverCandidates;
     
     /**
-     * The fix window consists of the list of fixes, a corresponding list with the course
-     * changes at each fix within the window, as well as the aggregated total course change from the beginning of the
-     * window up to the respective fix; furthermore, the window duration is maintained to compare against the maximum
-     * window length.
+     * The fix window consists of the list of fixes, a corresponding list with the course changes at each fix within the
+     * window, as well as the aggregated total course change from the beginning of the window up to the respective fix;
+     * furthermore, the window duration is maintained to compare against the maximum window length.
+     * <p>
      * 
      * @author Axel Uhl (D043530)
      *
@@ -82,7 +88,8 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
         private final LinkedList<SpeedWithBearing> speedForFixesInWindow;
         
         /**
-         * one shorter than "window"; change[i] is from window[i] to window[i]+1
+         * one shorter than "window"; {@link #totalCourseChangeFromBeginningOfWindow}{@code [i]} is from
+         * {@link #window}{@code [i]} to {@link #window}{@code [i+1]}
          */
         private final List<Double> totalCourseChangeFromBeginningOfWindow;
 
@@ -142,7 +149,7 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
          * @return a maneuver candidate from the {@link #window} if one became available by adding the {@code next} fix,
          *         or {@code null} if no maneuver candidate became available
          */
-        public GPSFixMoving add(GPSFixMoving next) {
+        GPSFixMoving add(GPSFixMoving next) {
             assert window.isEmpty() || !next.getTimePoint().before(window.peekFirst().getTimePoint());
             final GPSFixMoving result;
             final SpeedWithBearing nextSpeed = next.isEstimatedSpeedCached() ? next.getCachedEstimatedSpeed() : track.getEstimatedSpeed(next.getTimePoint());
@@ -223,7 +230,7 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
          * @return the maneuver candidate if one was found in the {@link #window}, or {@code null} if no such candidate
          *         was found.
          */
-        public GPSFixMoving tryToExtractManeuverCandidate() {
+        GPSFixMoving tryToExtractManeuverCandidate() {
             final GPSFixMoving result;
             // analysis window has exceeded the typical maneuver duration for the boat class;
             result = getManeuverCandidate();
@@ -307,25 +314,26 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
          * @return {@code true} if and only if this window is empty or the {@code fix} is not earlier than the first fix
          *         in this window
          */
-        public boolean isAtOrAfterFirst(TimePoint fix) {
+        boolean isAtOrAfterFirst(TimePoint fix) {
             return window.isEmpty() || !fix.before(window.peekFirst().getTimePoint());
         }
     }
 
     public CourseChangeBasedTrackApproximation(GPSFixTrack<Competitor, GPSFixMoving> track, BoatClass boatClass) {
-        super();
         this.track = track;
         this.boatClass = boatClass;
         this.fixWindow = new FixWindow();
-        this.maneuverCandidates = Collections.synchronizedNavigableSet(new TreeSet<>(TimedComparator.INSTANCE));
+        this.maneuverCandidates = new TreeSet<>(TimedComparator.INSTANCE);
         track.addListener(this);
         addAllFixesOfTrack();
     }
     
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        synchronized (maneuverCandidates) {
-            oos.defaultWriteObject();
-        }
+    /**
+     * Defined only in order to make it {@code synchronized} so that data will be written to the output stream
+     * consistently.
+     */
+    private synchronized void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
     }
     
     private synchronized void addAllFixesOfTrack() {
@@ -387,18 +395,22 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
                 maneuverCandidates.remove(candidateInRange);
                 rightPartOfTimeRangeToReScan = new TimeRangeImpl(candidateInRange.getTimePoint(), candidateInRange.getTimePoint().plus(maximumWindowLength));
             }
-            TimeRange totalRange = new TimeRangeImpl(leftPartOfTimeRangeToReScan.from(), rightPartOfTimeRangeToReScan.to());
+            final TimeRange totalRange = new TimeRangeImpl(leftPartOfTimeRangeToReScan.from(), rightPartOfTimeRangeToReScan.to());
+            final List<GPSFixMoving> fixesToAdd = new ArrayList<>();
             track.lockForRead();
             try {
                 for (final GPSFixMoving reAnalysisFix : track.getFixes(totalRange.from(), /* fromInclusive */ true, totalRange.to(), /* toInclusive */ true)) {
-                    addFix(reAnalysisFix, outOfOrderWindow);
-                }
-                GPSFixMoving remainingCandidate = outOfOrderWindow.tryToExtractManeuverCandidate(); // even if window isn't full now, look for a candidate
-                if (remainingCandidate != null) {
-                    maneuverCandidates.add(remainingCandidate);
+                    fixesToAdd.add(reAnalysisFix);
                 }
             } finally {
                 track.unlockAfterRead();
+            }
+            for (final GPSFixMoving reAnalysisFix : fixesToAdd) {
+                addFix(reAnalysisFix, outOfOrderWindow);
+            }
+            GPSFixMoving remainingCandidate = outOfOrderWindow.tryToExtractManeuverCandidate(); // even if window isn't full now, look for a candidate
+            if (remainingCandidate != null) {
+                maneuverCandidates.add(remainingCandidate);
             }
         }
     }

@@ -45,6 +45,15 @@ public enum DefaultProcessConfigurationVariables implements ProcessConfiguration
     TOTAL_MEMORY_SIZE_FACTOR,
     
     /**
+     * Can be used to pass additional VM arguments to the Java VM used to run the process configured by these variables.
+     * If you specify a value, make sure to always include the previous value in the new value. Example value:
+     * <pre>
+     *   "${ADDITIONAL_JAVA_ARGS} -Dan.additional.system.property=theValue"
+     * </pre>
+     */
+    ADDITIONAL_JAVA_ARGS,
+    
+    /**
      * The user data variable used to specify the MongoDB connection URI
      */
     MONGODB_URI,
@@ -133,6 +142,17 @@ public enum DefaultProcessConfigurationVariables implements ProcessConfiguration
      * {@link #REPLICATE_MASTER_QUEUE_HOST} variable.
      */
     REPLICATE_MASTER_QUEUE_PORT,
+    
+    /**
+     * If set to any non-empty value, e.g., {@code true}, this will cause the {@link #REPLICATE_ON_START} property to
+     * be set to the full set of replicables known by the solution. Furthermore, it will cause the {@link #REPLICATION_CHANNEL}
+     * variable to be set to {@code ${SERVER_NAME}-${INSTANCE_NAME}} instead of the default {@code ${SERVER_NAME}}.<p>
+     * 
+     * In short, setting this to a non-empty value will make the application launched into a replica in a regular application
+     * replica set. Contrast this with a master process of a regular application replica set which is a "partial replica"
+     * with regards to, e.g., the security service. For those, this property should not be set.
+     */
+    AUTO_REPLICATE,
     
     /**
      * Variable that specifies the IDs (basically the fully-qualified class names) of those {@code Replicable}s to

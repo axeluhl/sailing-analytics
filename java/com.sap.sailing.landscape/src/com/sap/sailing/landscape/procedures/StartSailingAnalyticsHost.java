@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -37,16 +37,17 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
      * {@link StartAwsApplicationHost.Builder}, are:
      * <ul>
      * <li>If no {@link #setInstanceName(String) instance name} is provided, the instance name is constructed from the
-     * {@link #getServerName() server name} by pre-pending the prefix "SL " (see {@link StartSailingAnalyticsHost#INSTANCE_NAME_DEFAULT_PREFIX}).</li>
+     * {@link #getServerName() server name} by pre-pending the prefix "SL " (see
+     * {@link StartSailingAnalyticsHost#INSTANCE_NAME_DEFAULT_PREFIX}).</li>
      * <li>Uses the latest machine image of the type described by
      * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit
      * {@link #setMachineImage(AmazonMachineImage) machine image is set} and no {@link #setImageType(String) image type
      * is set} of which the latest version would be used otherwise.</li>
-     * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/<server-name>}
+     * <li>The {@link #getServerDirectory(Optional) server directory} defaults to {@code /home/sailing/servers/<server-name>}
      * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
-     * <li>The tag {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value equaling the
-     * {@link SailingAnalyticsApplicationConfiguration.Builder#setServerName(String) server name} set in the application
-     * configuration.</li>
+     * <li>If the tag {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is not set, it defaults to
+     * the value equaling the {@link SailingAnalyticsApplicationConfiguration.Builder#setServerName(String) server name}
+     * set in the application configuration.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -86,7 +87,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         
         @Override
         protected Optional<Tags> getTags() {
-            return Optional.of(super.getTags().orElse(Tags.empty()).and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, getApplicationConfigurationBuilder().getServerName()));
+            return Optional.of(
+                    Tags.with(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, getApplicationConfigurationBuilder().getServerName())
+                        .andAll(super.getTags().orElse(Tags.empty())));
         }
 
         @Override

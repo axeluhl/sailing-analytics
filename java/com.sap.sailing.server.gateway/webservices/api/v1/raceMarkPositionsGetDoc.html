@@ -41,6 +41,14 @@ which the data is requested.
 			     if there is no fix for the mark within the interval requested)</div>
 		</td>
 	</tr>
+    <tr>
+        <td>Optional HTTP request header fields:</td>
+        <td>
+            <div>secondaryuserbearertoken: if provided, used to authenticate a subject for which then the <tt>TRACKED_RACE:EXPORT</tt>
+                 permission is checked for the race requested. This will skil the same test for the "primary" user that authenticated
+                 the request.</div>
+        </td>
+    </tr>
 	<tr>
 		<td>Request method:</td>
 		<td>GET</td>

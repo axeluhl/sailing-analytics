@@ -31,21 +31,21 @@
          Due to ECJ/JDT bugs it may fail depending on the Eclipse version tycho is based on 
          (see Bugzilla: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3859). -->
     <!-- Most likely, serialization/replication will fail with tycho versions based on Eclipse Neon R (4.6.0). -->
-    <tycho-version>1.6.0</tycho-version>
-    <gwt.version>2.9.0</gwt.version>
+    <tycho-version>1.7.0</tycho-version> <!-- 1.7.0 is the last Java 1.8 compatible version; since 2.x Tycho requires Java 11 -->
+    <gwt.version>2.11.0</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
-    <gwt.plugin.version>2.9.0</gwt.plugin.version>
-    <gwt.minVersion>2.9.0</gwt.minVersion>
+    <gwt.plugin.version>2.11.0</gwt.plugin.version>
+    <gwt.minVersion>2.11.0</gwt.minVersion>
     <gwt.workers>2</gwt.workers>
     <p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile -->
     <!-- QUESTION: Which properties or settings are system dependent and differ across different machines/environments? QUESTION:
     Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all
     profiles. -->
     <parameters.common>
-      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
+      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9
     </parameters.common>
     <parameters.vm-settings>
-      -ea -Xmx8096m -XX:+UseG1GC
+      -ea -Xmx8192m -XX:+UseG1GC
     </parameters.vm-settings>
     <parameters.tractrac>
       -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost
@@ -76,8 +76,12 @@
           <name>!ldi.releaseBuild</name>
         </property>
       </activation>
+      <properties>
+        <with.not.android.relevant>true</with.not.android.relevant>
+      </properties>
       <modules>
         <module>elemental2</module>
+        <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.landscape.common</module>
@@ -91,7 +95,6 @@
         <module>com.sap.sailing.landscape.test</module>
         <module>com.sap.sailing.landscape.common</module>
         <module>com.sap.sailing.landscape.ui</module>
-        <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
         <module>com.sap.sse.mail</module>
         <module>com.sap.sse.mail.replication.test</module>
@@ -120,6 +123,7 @@
         <module>com.sap.sse.feature.runtime</module>
         <module>com.sap.sailing.competitorimport</module>
         <module>com.sap.sailing.domain</module>
+        <module>com.sap.sailing.awssensorfixstore</module>
         <module>com.sap.sailing.geocoding</module>
         <module>com.sap.sailing.datamining.provider</module>
         <module>com.sap.sailing.datamining</module>
@@ -233,6 +237,8 @@
         <module>com.sap.sailing.manage2sail</module>
         <module>com.sap.sailing.manage2sail.resultimport</module>
         <module>com.sap.sailing.manage2sail.resultimport.test</module>
+        <module>com.sap.sailing.sailti.resultimport</module>
+        <module>com.sap.sailing.sailti.resultimport.test</module>
         <module>com.sap.sailing.yachtscoring.resultimport</module>
         <module>com.sap.sailing.yachtscoring.resultimport.test</module>
         <module>com.sap.sailing.simulator.test</module>
@@ -263,6 +269,36 @@
                 <requirement>
                   <type>eclipse-plugin</type>
                   <id>com.google.gwt.dev</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+              </extraRequirements>
+            </dependency-resolution>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+  <profile>
+    <!-- This profile activates the addition of those JavaEE bundles to the target platform
+         for Tycho that have been removed from JavaSE-11 if not building for Android -->
+    <id>with-java11-non-android-relevant</id>
+    <activation>
+      <jdk>[9.0,21.0)</jdk>
+    </activation>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <dependency-resolution>
+              <extraRequirements>
+                <!-- The bundles that provide those package dropped in JavaSE-11 will be
+                     required by the following fragments -->
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sap.sailing.routeconverterjava11extension</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
               </extraRequirements>
@@ -382,6 +418,35 @@
         </plugin>
       </plugins>
     </build>
+  </profile>
+  <profile>
+    <id>with-aws-lambda</id>
+    <modules>
+      <module>com.google.gwt.dev</module>
+      <module>com.sap.sse.common</module>
+      <module>com.sap.sse.datamining.annotations</module>
+      <module>com.googlecode.java-diff-utils</module>
+      <module>com.sap.sailing.domain</module>
+      <module>com.sap.sailing.geocoding</module>
+      <module>com.sap.sse.datamining.shared</module>
+      <module>com.sap.sse</module>
+      <module>com.sap.sailing.declination</module>
+      <module>com.sap.sse.security</module>
+      <module>com.sap.sse.operationaltransformation</module>
+      <module>com.sap.sse.mail</module>
+      <module>com.sap.sse.replication.interfaces</module>
+      <module>com.sap.sse.security.persistence</module>
+      <module>com.sap.sse.security.interface</module>
+      <module>com.sap.sse.mongodb</module>
+      <module>com.sap.sse.replication</module>
+      <module>com.sap.sse.replication.persistence</module>
+      <module>com.sap.sailing.shared.server</module>
+      <module>com.sap.sailing.shared.persistence</module>
+      <module>com.sap.sailing.server.gateway.interfaces</module>
+      <module>com.sap.sailing.server.gateway.serialization</module>
+      <module>com.sap.sailing.server.gateway.serialization.shared.android</module>
+      <module>com.sap.sailing.ingestion</module>
+    </modules>
   </profile>
 </profiles>
 
@@ -518,6 +583,7 @@
           <exclude>**/*$*</exclude>
         </excludes>
         <reportsDirectory>${reportsdirectory}</reportsDirectory>
+        <showEclipseLog>true</showEclipseLog>
       </configuration>
     </plugin>
     <plugin>

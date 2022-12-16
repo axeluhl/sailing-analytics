@@ -93,6 +93,8 @@ public class SshCommandChannelImpl implements SshCommandChannel {
 
     @Override
     public void disconnect() throws JSchException {
-        channel.getSession().disconnect();
+        if (channel.getSession() != null) {
+            channel.getSession().disconnect();
+        }
     }
 }

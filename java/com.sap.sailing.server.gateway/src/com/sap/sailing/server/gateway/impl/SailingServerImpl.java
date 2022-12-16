@@ -1,9 +1,6 @@
 package com.sap.sailing.server.gateway.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -14,25 +11,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
@@ -54,64 +42,28 @@ import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.MasterDataImportResultJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.util.impl.SecuredServerImpl;
 import com.sap.sse.shared.json.JsonDeserializationException;
-import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
-public class SailingServerImpl implements SailingServer {
+public class SailingServerImpl extends SecuredServerImpl implements SailingServer {
     private static final Logger logger = Logger.getLogger(SailingServerImpl.class.getName());
     private final String GATEWAY_URL_PREFIX = "sailingserver/api";
-    private final String bearerToken;
-    private final URL baseUrl;
     
     public SailingServerImpl(URL baseUrl, String bearerToken) {
-        super();
-        this.baseUrl = baseUrl;
-        this.bearerToken = bearerToken;
-    }
-
-    @Override
-    public URL getBaseUrl() {
-        return baseUrl;
-    }
-
-    @Override
-    public String getBearerToken() {
-        return bearerToken;
+        super(baseUrl, bearerToken);
     }
 
     @Override
     public Iterable<UUID> getLeaderboardGroupIds() throws ClientProtocolException, IOException, ParseException {
-        final URL leaderboardGroupsUrl = new URL(baseUrl, GATEWAY_URL_PREFIX+LeaderboardGroupsResource.V1_LEADERBOARDGROUPS+LeaderboardGroupsResource.IDENTIFIABLE);
+        final URL leaderboardGroupsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+LeaderboardGroupsResource.V1_LEADERBOARDGROUPS+LeaderboardGroupsResource.IDENTIFIABLE);
         final HttpGet getLeaderboards = new HttpGet(leaderboardGroupsUrl.toString());
         final JSONArray jsonResponse = (JSONArray) getJsonParsedResponse(getLeaderboards).getA();
         return Util.map(jsonResponse, o->UUID.fromString(((JSONObject) o).get(LeaderboardGroupConstants.ID).toString()));
     }
 
-    private Pair<Object, Integer> getJsonParsedResponse(final HttpUriRequest request) throws IOException, ClientProtocolException, ParseException {
-        authenticate(request);
-        final HttpClient client = createHttpClient();
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final HttpResponse response = client.execute(request);
-        response.getEntity().writeTo(bos);
-        final Object jsonParseResult = new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
-        return new Pair<>(jsonParseResult, response.getStatusLine().getStatusCode());
-    }
-
-    private CloseableHttpClient createHttpClient() {
-        return HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .build();
-    }
-    
-    private void authenticate(HttpRequest request) {
-        if (bearerToken != null) {
-            request.setHeader("Authorization", "Bearer "+bearerToken);
-        }
-    }
-
     @Override
     public Iterable<UUID> getEventIds() throws ClientProtocolException, IOException, ParseException {
-        final URL eventsUrl = new URL(baseUrl, GATEWAY_URL_PREFIX+EventsResource.V1_EVENTS);
+        final URL eventsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+EventsResource.V1_EVENTS);
         final HttpGet getEvents = new HttpGet(eventsUrl.toString());
         final JSONArray jsonResponse = (JSONArray) getJsonParsedResponse(getEvents).getA();
         return Util.map(jsonResponse, o->UUID.fromString(((JSONObject) o).get(EventBaseJsonSerializer.FIELD_ID).toString()));
@@ -121,7 +73,7 @@ public class SailingServerImpl implements SailingServer {
     public MasterDataImportResult importMasterData(SailingServer from, Iterable<UUID> leaderboardGroupIds,
             boolean override, boolean compress, boolean exportWind, boolean exportDeviceConfigs,
             boolean exportTrackedRacesAndStartTracking, Optional<UUID> progressTrackingUuid) throws ClientProtocolException, IOException, ParseException {
-        final URL mdiUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + MasterDataImportResource.V1_MASTERDATAIMPORT);
+        final URL mdiUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX + MasterDataImportResource.V1_MASTERDATAIMPORT);
         final List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(MasterDataImportResource.REMOTE_SERVER_URL_FORM_PARAM, from.getBaseUrl().toString()));
         params.add(new BasicNameValuePair(MasterDataImportResource.REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM, from.getBearerToken()));
@@ -152,7 +104,7 @@ public class SailingServerImpl implements SailingServer {
 
     @Override
     public DataImportProgress getMasterDataImportProgress(UUID progressTrackingUuid) throws ClientProtocolException, IOException, ParseException {
-        final URL progressUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + MasterDataImportResource.V1_MASTERDATAIMPORT + MasterDataImportResource.PROGRESS+
+        final URL progressUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX + MasterDataImportResource.V1_MASTERDATAIMPORT + MasterDataImportResource.PROGRESS+
                 "?"+MasterDataImportResource.PROGRESS_TRACKING_UUID+"="+progressTrackingUuid);
         final HttpGet getMasterDataImportProgress = new HttpGet(progressUrl.toString());
         final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(getMasterDataImportProgress).getA();
@@ -161,7 +113,7 @@ public class SailingServerImpl implements SailingServer {
 
     @Override
     public CompareServersResult compareServers(Optional<SailingServer> a, SailingServer b, Optional<Iterable<UUID>> leaderboardGroupIds) throws ClientProtocolException, IOException, ParseException {
-        final URL compareServersUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + CompareServersResource.V1_COMPARESERVERS);
+        final URL compareServersUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX + CompareServersResource.V1_COMPARESERVERS);
         final List<NameValuePair> params = new ArrayList<>();
         a.ifPresent(aa->{
             params.add(new BasicNameValuePair(CompareServersResource.BEARER1_FORM_PARAM, aa.getBearerToken()));
@@ -185,7 +137,7 @@ public class SailingServerImpl implements SailingServer {
     
     @Override
     public Iterable<RemoteSailingServerReference> getRemoteServerReferences() throws ClientProtocolException, IOException, ParseException {
-        final URL getRemoteReferencesUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE);
+        final URL getRemoteReferencesUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE);
         final HttpGet getRequest = new HttpGet(getRemoteReferencesUrl.toString());
         final JSONArray remoteServerReferencesJson = (JSONArray) getJsonParsedResponse(getRequest).getA();
         final Set<RemoteSailingServerReference> result = new HashSet<>();
@@ -198,7 +150,7 @@ public class SailingServerImpl implements SailingServer {
 
     @Override
     public RemoteSailingServerReference addRemoteServerReference(SailingServer referencedServer, boolean includeSpecifiedEvents) throws JsonDeserializationException, ClientProtocolException, IOException, ParseException {
-        final URL addRemoteReferenceUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE+RemoteServerReferenceResource.ADD);
+        final URL addRemoteReferenceUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE+RemoteServerReferenceResource.ADD);
         final List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_URL, referencedServer.getBaseUrl().toString()));
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_NAME, referencedServer.getBaseUrl().toString()));
@@ -212,7 +164,7 @@ public class SailingServerImpl implements SailingServer {
     @Override
     public RemoteSailingServerReference removeRemoteServerReference(SailingServer referencedServer) throws JsonDeserializationException, ClientProtocolException, IOException, ParseException {
         final HttpPost removeRequest = new HttpPost(
-                new URL(baseUrl, GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE
+                new URL(getBaseUrl(), GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE
                         + RemoteServerReferenceResource.REMOVE).toString());
         final List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_URL, referencedServer.getBaseUrl().toString()));
@@ -233,7 +185,7 @@ public class SailingServerImpl implements SailingServer {
         final String referencedServerBaseUrl = referencedServer.getBaseUrl().toString();
         final RemoteSailingServerReference existingRef = getExistingRemoteServerReference(referencedServerBaseUrl);
         if (existingRef == null) {
-            final URL addRemoteReferenceUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE+RemoteServerReferenceResource.ADD);
+            final URL addRemoteReferenceUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE+RemoteServerReferenceResource.ADD);
             final List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_URL, referencedServerBaseUrl));
             params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_NAME, referencedServerBaseUrl));
@@ -314,7 +266,7 @@ public class SailingServerImpl implements SailingServer {
 
     private RemoteSailingServerReference doRemoteServerReferenceUpdate(RemoteSailingServerReference updatedRef) throws IOException, Exception {
         final HttpPut updateRequest = new HttpPut(
-                new URL(baseUrl, GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE
+                new URL(getBaseUrl(), GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE
                         + RemoteServerReferenceResource.UPDATE).toString());
         final List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_NAME, updatedRef.getName()));
@@ -337,10 +289,5 @@ public class SailingServerImpl implements SailingServer {
             }
         }
         return null;
-    }
-
-    @Override
-    public String toString() {
-        return baseUrl.toString();
     }
 }

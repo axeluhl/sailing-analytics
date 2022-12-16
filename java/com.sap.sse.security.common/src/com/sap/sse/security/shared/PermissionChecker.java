@@ -91,7 +91,7 @@ public class PermissionChecker {
     
     /**
      * Like
-     * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)},
+     * {@link #isPermitted(WildcardPermission, SecurityUser, SecurityUser, AbstractOwnership, SecurityAccessControlList, Iterable)},
      * determining the groups of the {@code user} and the {@code allUser} through {@link User#getUserGroups()}. See also
      * {@link #getGroupsOfUser(SecurityUser)}.
      * 
@@ -108,7 +108,30 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     boolean isPermitted(WildcardPermission permission, U user, U allUser, O ownership, A acl) {
-        return isPermitted(permission, user, getGroupsOfUser(user), allUser, getGroupsOfUser(allUser), ownership, acl);
+        return isPermitted(permission, user, getGroupsOfUser(user), allUser, getGroupsOfUser(allUser), ownership, acl, null);
+    }
+    
+    /**
+     * Like
+     * {@link #isPermitted(WildcardPermission, SecurityUser, SecurityUser, AbstractOwnership, SecurityAccessControlList)},
+     * Can be parameterized with additional Roles, to check whether the user would be granted access if he aquired these roles. 
+     * 
+     * @param permission
+     *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
+     *            general permission for the data object type is asked after (e.g. "event:create"). If the action
+     *            contains more than one sub-part (divided by {@link WildcardPermission#SUBPART_DIVIDER_TOKEN}) then
+     *            this is considered an error, and an {@link IllegalArgumentException} will be thrown.
+     * @param ownership
+     *            may be {@code null}, causing user- or tenant-parameterized roles and no user ownership override to be
+     *            applied
+     * @param acl
+     *            may be {@code null} in which case no ACL-specific checks are performed
+     * @param additionalRoles
+     *            may be {@code null} in which case no additional Roles are considered.
+     */
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
+    boolean isPermitted(WildcardPermission permission, U user, U allUser, O ownership, A acl, Iterable<R> additionalRoles) {
+        return isPermitted(permission, user, getGroupsOfUser(user), allUser, getGroupsOfUser(allUser), ownership, acl, additionalRoles);
     }
 
     /**
@@ -143,21 +166,20 @@ public class PermissionChecker {
      *            may be {@code null} in which case no ACL-specific checks are performed
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
-    boolean isPermitted(
-            WildcardPermission permission, U user,
-            Iterable<G> groupsOfWhichUserIsMember, U allUser,
-            Iterable<G> groupsOfWhichAllUserIsMember, O ownership, A acl) {
+    boolean isPermitted(WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, U allUser,
+            Iterable<G> groupsOfWhichAllUserIsMember, O ownership, A acl, Iterable<R> additionalRoles) {
         PermissionState result = checkAcl(permission, groupsOfWhichUserIsMember, groupsOfWhichAllUserIsMember, acl);
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
             PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
-                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ false);
+                    ownership, impliesChecker, additionalRoles, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true,
+                    /* matchOnlyNonTransitiveRoles */ false);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
+            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker, additionalRoles,
                     /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ false);
         }
         return result == PermissionState.GRANTED;
@@ -241,7 +263,7 @@ public class PermissionChecker {
     /**
      * This is not the fully featured permission check!<br>
      * This method checks if a user owns all permissions implied by the given {@link WildcardPermission}. If a user
-     * wants to grant another user a specific permissions, he needs to own all permissions that may be implied by the
+     * wants to grant another user a specific permissions, he/she needs to own all permissions that may be implied by the
      * granted permission.<br>
      * The regular permission check only succeeds if a requested permission is completely implied by a granted
      * permission. This is fine when checking for a specific permission like USER:UPDATE:my_user. If one user grants a
@@ -344,10 +366,13 @@ public class PermissionChecker {
                 // now we have the full scan of ACLs for the type/object-id combination; cache it
                 typesAndIdsAndOwnershipsWithFullSetOfAcls.put(collationKeyBasedOnTypeAndObjectIdAndOwnership, denyingAcls);
             }
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
-                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED
-                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, groupsOfAllUser,
-                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED) {
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership, impliesChecker,
+                    /* additionalRoles */ null, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true,
+                    /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED
+                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, groupsOfAllUser, ownership,
+                            impliesChecker, /* additionalRoles */ null,
+                            /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true,
+                            /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED) {
                 return false;
             }
         }
@@ -472,9 +497,9 @@ public class PermissionChecker {
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker, /* additionalRoles */ null,
                     /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false, /* matchOnlyNonTransitiveRoles */false) == PermissionState.GRANTED
-                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser), ownership, impliesAnyChecker,
+                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser), ownership, impliesAnyChecker, /* additionalRoles */ null,
                             /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false, /* matchOnlyNonTransitiveRoles */false) == PermissionState.GRANTED) {
                 return true;
             }
@@ -503,7 +528,8 @@ public class PermissionChecker {
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     PermissionState checkUserPermissions(
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
-            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, boolean matchOnlyNonTransitiveRoles) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, Iterable<R> additionalRoles, 
+            boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, boolean matchOnlyNonTransitiveRoles) {
         PermissionState result = PermissionState.NONE;
         // 1.. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
@@ -531,7 +557,13 @@ public class PermissionChecker {
         }
         // 3. check role permissions
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
-            for (R role : user.getRoles()) {
+            final Iterable<R> userRoles = user.getRoles();
+            final HashSet<R> withAdditionalRoles = new HashSet<R>();
+            userRoles.forEach(withAdditionalRoles::add);
+            if(additionalRoles != null) {
+                additionalRoles.forEach(withAdditionalRoles::add);
+            }
+            for (R role : withAdditionalRoles) {
                 if (implies(role, permission, ownership, permissionChecker,
                         matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, matchOnlyNonTransitiveRoles)) {
                     result = PermissionState.GRANTED;

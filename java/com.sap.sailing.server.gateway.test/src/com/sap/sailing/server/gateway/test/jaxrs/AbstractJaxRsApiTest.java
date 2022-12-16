@@ -66,7 +66,7 @@ public abstract class AbstractJaxRsApiTest {
         service.getDB().drop();
         xrrScoreCorrectionProvider = new ScoreCorrectionProviderImpl(mock(ResultDocumentProvider.class), ParserFactory.INSTANCE);
         racingEventService = Mockito.spy(new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
-                new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false));
+                /* sensorFixStore */ null, new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false));
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
@@ -146,7 +146,7 @@ public abstract class AbstractJaxRsApiTest {
         List<Competitor> result = new ArrayList<Competitor>();
         for (int i = 1; i <= numberOfCompetitorsToCreate; i++) {
             String competitorName = "C" + i;
-            Competitor competitor = new CompetitorImpl(new Integer(i), competitorName, "KYC"+i, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+            Competitor competitor = new CompetitorImpl(Integer.valueOf(i), competitorName, "KYC"+i, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                     new PersonImpl(competitorName, new NationalityImpl("GER"),
                                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

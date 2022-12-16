@@ -68,7 +68,6 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
             final DialogCallback<SettingsType> callback) {
         super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled,
                 linkWithSettingsGenerator, new SettingsDialogCallback<>(component, callback));
-
         if (component.getComponentContext() != null && component.getComponentContext().isStorageSupported(component)) {
             initMakeDefaultButtons(component, stringMessages);
         }
@@ -78,6 +77,8 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
         makeDefaultButton = new Button(stringMessages.makeDefault());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
         makeDefaultButton.ensureDebugId("MakeDefaultButton");
+        makeDefaultButton.addStyleName("btn-secondary");
+        makeDefaultButton.addStyleName("btn-lg");
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -101,6 +102,8 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
             }
         });
         resetDefault = new Button(stringMessages.resetToDefault());
+        resetDefault.addStyleName("btn-secondary");
+        resetDefault.addStyleName("btn-lg");
         resetDefault.addClickHandler(new ClickHandler() {
 
             @Override

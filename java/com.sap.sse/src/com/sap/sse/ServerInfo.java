@@ -110,6 +110,10 @@ public class ServerInfo {
         return result;
     }
     
+    public static File getServerDirectory() throws IOException {
+        return new File(".").getCanonicalFile();
+    }
+    
     public static String getName() {
         return ServerStartupConstants.SERVER_NAME;
     }

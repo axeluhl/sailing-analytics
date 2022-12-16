@@ -16,14 +16,6 @@
       <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
-<!--
-    <dependency>
-      <groupId>com.sap.sailing</groupId>
-      <artifactId>elemental2</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-      <classifier>sources</classifier>
-    </dependency>
--->
     <dependency>
       <groupId>com.google.elemental2</groupId>
       <artifactId>elemental2-core</artifactId>
@@ -45,6 +37,24 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-compiler-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <excludes>
+            <exclude>**/jre/**/*.java</exclude>
+          </excludes>
+          <extraClasspathElements>
+            <!-- gwt-dev is required during build-time for building and using the special manifest linker -->
+            <dependency>
+              <groupId>org.gwtproject</groupId>
+              <artifactId>gwt-dev</artifactId>
+              <version>${gwt.version}</version>
+            </dependency>
+          </extraClasspathElements>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-source-plugin</artifactId>

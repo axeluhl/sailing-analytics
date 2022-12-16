@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -74,6 +75,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     private final IControlRouteChangeListener listener;
     private final boolean useInternalMarkPassingAlgorithm;
     private final RaceLogAndTrackedRaceResolver raceLogResolver;
+    private final MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry;
     private final LeaderboardGroupResolver leaderboardGroupResolver;
 
     private final RaceTrackingHandler raceTrackingHandler;
@@ -84,10 +86,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler) {
+            RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         this.tractracRace = tractracRace;
         this.raceLogResolver = raceLogResolver;
+        this.markPassingRaceFingerprintRegistry = markPassingRaceFingerprintRegistry;
         this.leaderboardGroupResolver = leaderboardGroupResolver;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
@@ -193,7 +196,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                     getTrackedRegatta().getRegatta().getBoatClass(), competitorAndBoats, course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver, tr->updateRaceTimes(tractracRace, tr), tractracRace,
-                    raceTrackingHandler);
+                    raceTrackingHandler, markPassingRaceFingerprintRegistry);
             addAllMarksFromCourseArea(trackedRace);
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
@@ -280,7 +283,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional
                         .empty(),
                 new TrackingConnectorInfoImpl(TracTracAdapter.NAME, TracTracAdapter.DEFAULT_URL,
-                        webUrlString));
+                        webUrlString), markPassingRaceFingerprintRegistry);
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }

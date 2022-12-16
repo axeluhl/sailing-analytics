@@ -37,7 +37,11 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.10.1",
  com.sap.sse.security,
  com.sap.sse.security.common,
  com.sap.sailing.server,
- com.sap.sailing.shared.server
+ com.sap.sailing.shared.server,
+ com.github.haifengl.smile-core;bundle-version="1.5.3",
+ com.github.haifengl.smile-data;bundle-version="1.5.3",
+ com.github.haifengl.smile-graph;bundle-version="1.5.3",
+ com.github.haifengl.smile-math;bundle-version="1.5.3"
 Import-Package: javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",
  javax.xml.bind,
@@ -49,9 +53,5 @@ Web-ContextPath: /windestimation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.windestimation
-Bundle-ClassPath: lib/smile-core-1.5.2.jar,
- lib/smile-data-1.5.2.jar,
- lib/smile-graph-1.5.2.jar,
- lib/smile-math-1.5.2.jar,
- .
+Bundle-ClassPath: .
 Automatic-Module-Name: com.sap.sailing.windestimation

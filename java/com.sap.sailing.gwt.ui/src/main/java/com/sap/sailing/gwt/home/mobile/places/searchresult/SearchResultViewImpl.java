@@ -9,7 +9,6 @@ import com.sap.sailing.gwt.home.mobile.partials.searchresult.SearchResult;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 
 public class SearchResultViewImpl extends Composite implements SearchResultView {
-
     private final SearchResult searchResultUi;
 
     public SearchResultViewImpl(MobilePlacesNavigator navigator) {
@@ -26,4 +25,8 @@ public class SearchResultViewImpl extends Composite implements SearchResultView 
         searchResultUi.updateSearchResult(searchText, searchResultItems);
     }
 
+    @Override
+    public void setBusy(boolean busy) {
+        searchResultUi.setBusy(busy);
+    }
 }

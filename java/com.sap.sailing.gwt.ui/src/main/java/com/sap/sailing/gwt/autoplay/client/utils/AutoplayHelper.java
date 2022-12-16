@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -43,6 +44,10 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AutoplayHelper {
     private static final Logger LOGGER = Logger.getLogger(AutoplayHelper.class.getName());
@@ -178,9 +183,10 @@ public class AutoplayHelper {
         }
     }
 
-    public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
-            UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
-            RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
+    public static void create(SailingServiceAsync sailingService, UserService userService, ErrorReporter errorReporter,
+            String leaderBoardName, UUID eventId, EventDTO event, EventBus eventBus,
+            SailingDispatchSystem sailingDispatchSystem, RegattaAndRaceIdentifier regattaAndRaceIdentifier,
+            AsyncCallback<RVWrapper> callback, SubscriptionServiceFactory subscriptionServiceFactory) {
         LOGGER.info("Creating map for " + regattaAndRaceIdentifier);
         Timer creationTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
 
@@ -213,25 +219,25 @@ public class AutoplayHelper {
                                 mapAlreadyCreated = true;
                                 sailingService.getCompetitorBoats(regattaAndRaceIdentifier,
                                         new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
-                                    @Override
-                                    public void onSuccess(Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
-                                        createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
-                                                competitorsAndTheirBoats, competitors, sailingService,
-                                                AutoplayHelper.asyncActionsExecutor, errorReporter, creationTimer,
-                                                callback, clientTimeWhenResponseWasReceived,
-                                                serverTimeDuringRequest, clientTimeWhenRequestWasSent,
-                                                raceTimesInfo, creationTimeProvider,
-                                                new DefaultQuickFlagDataProvider());
-                                    }
-                                    
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        creationTimeProvider.terminate();
-                                        creationTimer.pause();
-                                        callback.onFailure(
-                                                new IllegalStateException("Error getting Competitor Boats"));
-                                    }
-                                });
+                                            @Override
+                                            public void onSuccess(
+                                                    Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
+                                                createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
+                                                        competitorsAndTheirBoats, competitors, sailingService,
+                                                        userService, AutoplayHelper.asyncActionsExecutor, errorReporter,
+                                                        creationTimer, callback, clientTimeWhenResponseWasReceived,
+                                                        serverTimeDuringRequest, clientTimeWhenRequestWasSent,
+                                                        raceTimesInfo, creationTimeProvider,
+                                                        new DefaultQuickFlagDataProvider(), subscriptionServiceFactory);
+                                            }
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                creationTimeProvider.terminate();
+                                                creationTimer.pause();
+                                                callback.onFailure(
+                                                        new IllegalStateException("Error getting Competitor Boats"));
+                                            }
+                                        });
                             }
                         } else {
                             creationTimeProvider.terminate();
@@ -272,12 +278,12 @@ public class AutoplayHelper {
 
     private static void createRaceMapIfNotExist(RegattaAndRaceIdentifier currentLiveRace,
             StrippedLeaderboardDTO selectedLeaderboard, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
-            Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService,
+            Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
             AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
             long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,
-            RaceTimesInfoProvider creationTimeProvider, AbstractQuickFlagDataProvider provider) {
-
+            RaceTimesInfoProvider creationTimeProvider, AbstractQuickFlagDataProvider provider,
+            SubscriptionServiceFactory subscriptionServiceFactory) {
         ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
@@ -286,26 +292,42 @@ public class AutoplayHelper {
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
-                /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false);
-        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
-        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, competitorsAndTheirBoats);
-        RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
-                /* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
-        for (Entry<CompetitorDTO, BoatDTO> entry : competitorsAndTheirBoats.entrySet()) {
-            competitorSelectionProvider.setBoat(entry.getKey(), entry.getValue());
-        }
-        competitorSelectionProvider.setCompetitors(competitors);
-        RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
-                asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
-                new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, provider);
-        raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
-                serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-        raceboardTimer.setPlayMode(PlayModes.Live);
-        // wait for one update
-        raceboardPerspective.onResize();
-        callback.onSuccess(
-                new RVWrapper(raceboardPerspective, competitorSelectionProvider, raceboardTimer, creationTimeProvider));
+                /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false, /* showWindLadder */ false);
+        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+        userService.createEssentialSecuredDTOByIdAndType(currentLiveRace.getPermissionType(), currentLiveRace.getName(),
+                currentLiveRace.getTypeRelativeObjectIdentifier(), new AsyncCallback<SecuredDTO>() {
+
+                    @Override
+                    public void onSuccess(SecuredDTO raceDtoProxy) {
+                        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE,
+                                paywallResolver, raceDtoProxy);
+                        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace,
+                                competitorsAndTheirBoats);
+                        RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
+                                /* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
+                        for (Entry<CompetitorDTO, BoatDTO> entry : competitorsAndTheirBoats.entrySet()) {
+                            competitorSelectionProvider.setBoat(entry.getKey(), entry.getValue());
+                        }
+                        competitorSelectionProvider.setCompetitors(competitors);
+                        RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings,
+                                sailingService, asyncActionsExecutor, errorReporter, raceboardTimer,
+                                competitorSelectionProvider, new RaceCompetitorSet(competitorSelectionProvider),
+                                StringMessages.INSTANCE, currentLiveRace, raceMapResources, false, provider,
+                                paywallResolver, /* isSimulationEnabled */false);
+                        raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
+                                serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
+                        raceboardTimer.setPlayMode(PlayModes.Live);
+                        // wait for one update
+                        raceboardPerspective.onResize();
+                        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider,
+                                raceboardTimer, creationTimeProvider));
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        LOGGER.log(Level.SEVERE, "Cannot create essential raceDTO", caught);
+                    }
+                });
     }
 
 }

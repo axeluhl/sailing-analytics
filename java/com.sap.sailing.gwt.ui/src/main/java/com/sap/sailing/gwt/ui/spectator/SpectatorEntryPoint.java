@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.shared.ClientConfiguration;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * 
@@ -80,7 +81,8 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint {
 
     private SAPSailingHeaderWithAuthentication getHeader(String title) {
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(title);
-        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);

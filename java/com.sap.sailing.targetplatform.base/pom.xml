@@ -12,6 +12,9 @@
 		config does not skip resolving the target definition defined in the parent 
 		pom. Therefore, the parent was not set here - which means we have to define 
 		$tycho-version again. -->
+	<properties>
+	  <tycho-version>1.6.0</tycho-version>
+	</properties>
 	<groupId>com.sap.sailing</groupId>
 	<version>1.0.0-SNAPSHOT</version>
 	<artifactId>com.sap.sailing.targetplatform.base</artifactId>
@@ -20,7 +23,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
 				<artifactId>tycho-p2-extras-plugin</artifactId>
-				<version>1.0.0</version>
+				<version>${tycho-version}</version>
 				<configuration>
 					<sourceLocation>${basedir}</sourceLocation>
 				</configuration>

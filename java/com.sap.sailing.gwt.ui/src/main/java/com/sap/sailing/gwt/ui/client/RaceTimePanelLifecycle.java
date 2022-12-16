@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class RaceTimePanelLifecycle implements
@@ -11,10 +11,10 @@ public class RaceTimePanelLifecycle implements
     
     public static final String ID = "rt";
 
-    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+    private final SecuredDTO raceDTO;
 
     public RaceTimePanelLifecycle(StringMessages stringMessages, UserService userService,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            final SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
         this.userService = userService;
         this.raceDTO = raceDTO;

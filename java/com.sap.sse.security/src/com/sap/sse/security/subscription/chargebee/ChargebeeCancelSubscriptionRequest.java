@@ -1,13 +1,11 @@
 package com.sap.sse.security.subscription.chargebee;
 
-import static com.chargebee.models.Subscription.cancel;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.chargebee.Result;
 import com.chargebee.models.Subscription;
-import com.chargebee.models.Subscription.CancelRequest;
+import com.chargebee.models.Subscription.CancelForItemsRequest;
 import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
@@ -34,7 +32,7 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
     @Override
     protected ChargebeeInternalApiRequestWrapper createRequest() {
         logger.info(() -> "Cancel Chargebee subscription, subscription id: " + subscriptionId);
-        CancelRequest request = cancel(subscriptionId);
+        CancelForItemsRequest request = Subscription.cancelForItems(subscriptionId).endOfTerm(true);
         return new ChargebeeInternalApiRequestWrapper(request);
     }
 

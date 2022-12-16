@@ -24,6 +24,7 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory {
 
@@ -95,5 +96,10 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     @Override
     public AcceptsOneWidget getContent() {
         return topLevelView.getContent();
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return securityProvider.getSubscriptionServiceFactory();
     }
 }

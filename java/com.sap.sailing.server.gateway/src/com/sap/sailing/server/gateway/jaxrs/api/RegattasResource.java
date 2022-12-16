@@ -25,6 +25,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -89,6 +90,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -96,7 +98,6 @@ import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -176,6 +177,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
+import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -189,6 +191,8 @@ import com.sap.sse.shared.util.impl.UUIDHelper;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
+    private static final String SECONDARY_USER_BEARER_TOKEN = "secondaryuserbearertoken";
+
     private static final Logger logger = Logger.getLogger(RegattasResource.class.getName());
 
     private DataMiningResource dataMiningResource;
@@ -849,7 +853,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("totimeasmillis") Long totimeasmillis, @QueryParam("withtack") Boolean withTack,
             @QueryParam("competitorId") Set<String> competitorIds,
             @DefaultValue("false") @QueryParam("lastknown") boolean addLastKnown,
-            @DefaultValue("false") @QueryParam("raw") boolean raw) {
+            @DefaultValue("false") @QueryParam("raw") boolean raw,
+            @HeaderParam(SECONDARY_USER_BEARER_TOKEN) String secondaryUserBearerToken) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -860,7 +865,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
+                getSecurityService().checkCurrentUserReadPermission(trackedRace);
+                checkExportPermission(trackedRace, secondaryUserBearerToken);
                 TimePoint from;
                 TimePoint to;
                 try {
@@ -969,6 +975,19 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
 
+    private void checkExportPermission(TrackedRace trackedRace, String secondaryUserBearerToken) {
+        if (Util.hasLength(secondaryUserBearerToken)) {
+            logger.info("Found secondary user bearer token");
+            final Subject secondarySubject = new Subject.Builder().buildSubject();
+            secondarySubject.login(new BearerAuthenticationToken(secondaryUserBearerToken));
+            logger.info("Authenticated secondary subject for export permission: "+secondarySubject.getPrincipal());
+            secondarySubject.checkPermission(trackedRace.getPermissionType().getStringPermissionForObject(SecuredDomainType.TrackedRaceActions.EXPORT, trackedRace));
+            logger.info("Secondary subject has export permission for "+trackedRace);
+        } else {
+            getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
+        }
+    }
+
     private JSONObject addCompetitorFixToJsonFixes(JSONArray jsonFixes, GPSFixMoving fix, Tack tack) {
         JSONObject jsonFix = new JSONObject();
         jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
@@ -1000,7 +1019,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             @PathParam("racename") String raceName, @QueryParam("fromtime") String fromtime,
             @QueryParam("fromtimeasmillis") Long fromtimeasmillis, @QueryParam("totime") String totime,
             @QueryParam("totimeasmillis") Long totimeasmillis,
-            @DefaultValue("false") @QueryParam("lastknown") boolean addLastKnown) {
+            @DefaultValue("false") @QueryParam("lastknown") boolean addLastKnown,
+            @HeaderParam(SECONDARY_USER_BEARER_TOKEN) String secondaryUserBearerToken) {
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
@@ -1011,7 +1031,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             return getBadRaceErrorResponse(regattaName, raceName);
         }
         TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-        getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        checkExportPermission(trackedRace, secondaryUserBearerToken);
         TimePoint from;
         TimePoint to;
         try {
@@ -1571,7 +1592,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/highQualityWindFixes")
     public Response getHighQualityWindFixes(@PathParam("regattaname") String regattaName,
-            @PathParam("racename") String raceName) {
+            @PathParam("racename") String raceName,
+            @HeaderParam(SECONDARY_USER_BEARER_TOKEN) String secondaryUserBearerToken) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1586,6 +1608,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+                getSecurityService().checkCurrentUserReadPermission(trackedRace);
+                checkExportPermission(trackedRace, secondaryUserBearerToken);
                 RaceWindJsonSerializer serializer = new RaceWindJsonSerializer();
                 JSONObject jsonWindTracks = serializer.serialize(trackedRace);
                 return Response.ok(streamingOutput(jsonWindTracks)).build();
@@ -1601,7 +1626,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             @DefaultValue("COMBINED") @QueryParam("windsource") String windSource,
             @QueryParam("windsourceid") String windSourceId, @QueryParam("fromtime") String fromtime,
             @QueryParam("fromtimeasmillis") Long fromtimeasmillis, @QueryParam("totime") String totime,
-            @QueryParam("totimeasmillis") Long totimeasmillis) {
+            @QueryParam("totimeasmillis") Long totimeasmillis,
+            @HeaderParam(SECONDARY_USER_BEARER_TOKEN) String secondaryUserBearerToken) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1611,7 +1637,6 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             getSecurityService().checkCurrentUserReadPermission(regatta);
             if (!((fromtime != null && totime != null) || (fromtimeasmillis != null && totimeasmillis != null))) {
-
                 response = Response.status(Status.NOT_FOUND).entity(
                         "Either the 'fromtime' and 'totime' or the 'fromtimeasmillis' and 'totimeasmillis' parameter must be set.")
                         .type(MediaType.TEXT_PLAIN).build();
@@ -1623,7 +1648,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                             .type(MediaType.TEXT_PLAIN).build();
                 } else {
                     TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                    getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, SecuredDomainType.TrackedRaceActions.EXPORT);
+                    getSecurityService().checkCurrentUserReadPermission(trackedRace);
+                    checkExportPermission(trackedRace, secondaryUserBearerToken);
                     TimePoint from;
                     TimePoint to;
                     try {
@@ -2223,7 +2249,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
                 final Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
                 if (leaderboard != null) {
-                    List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
+                    final Iterable<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
                     Integer overallRank = 1;
                     for (Competitor competitor : overallRanking) {
                         if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
@@ -2619,14 +2645,15 @@ public class RegattasResource extends AbstractSailingServerResource {
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
-            String seriesName = (String) requestObject.get("seriesName");
-            String seriesNameNew = (String) requestObject.get("seriesNameNew");
-            boolean isMedal = (boolean) requestObject.get("isMedal");
-            boolean isFleetsCanRunInParallel = (boolean) requestObject.get("isFleetsCanRunInParallel");
-            boolean startsWithZeroScore = (boolean) requestObject.get("startsWithZeroScore");
-            boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
+            final String seriesName = (String) requestObject.get("seriesName");
+            final String seriesNameNew = (String) requestObject.get("seriesNameNew");
+            final boolean isMedal = (boolean) requestObject.get("isMedal");
+            final boolean isFleetsCanRunInParallel = (boolean) requestObject.get("isFleetsCanRunInParallel");
+            final boolean startsWithZeroScore = (boolean) requestObject.get("startsWithZeroScore");
+            final boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
                     .get("firstColumnIsNonDiscardableCarryForward");
-            boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
+            final boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
+            final boolean oneAlwaysStaysOne = (boolean) requestObject.get("oneAlwaysStaysOne");
 
             Integer maximumNumberOfDiscards = null;
             if (requestObject.containsKey("maximumNumberOfDiscards")) {
@@ -2654,7 +2681,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             getService().apply(new UpdateSeries(regatta.getRegattaIdentifier(), seriesName, seriesNameNew, isMedal,
                     isFleetsCanRunInParallel, resultDiscardingThresholds, startsWithZeroScore,
                     firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, maximumNumberOfDiscards,
-                    fleets));
+                    oneAlwaysStaysOne, fleets));
         } else {
             throw new IllegalStateException("RegattaName could not be resolved to regatta " + regattaName);
         }

@@ -311,7 +311,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                 }
                 this.visible = isVisible;
             } else {
-                if (this.swarm.isColored()) {
+                if (swarm != null && this.swarm.isColored()) {
                     this.streamletLegend.setVisible(false);
                 }
                 this.stopStreamlets();

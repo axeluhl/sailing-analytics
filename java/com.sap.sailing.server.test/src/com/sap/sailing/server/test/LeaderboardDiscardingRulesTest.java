@@ -100,6 +100,41 @@ public class LeaderboardDiscardingRulesTest {
      * more races sailed than the competition
      */
     @Test
+    public void testDiscardingRulesWithColumnFactor() throws NoWindException {
+        racingEventService.removeLeaderboard(LEADERBOARDNAME);
+        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 2 }, new LowPoint(), Collections.emptySet());
+        FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
+        assertNotNull(leaderboard);
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("505", /* typicallyStartsUpwind */ true);
+        CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Dr. Hasso Plattner");
+        final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 5, /* started */ true, boatClass);
+        leaderboard.addRace(race1, "R1", /* medalRace */false).setFactor(2.0); // results in score 10
+        final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 9, /* started */ true, boatClass);
+        leaderboard.addRace(race2, "R2", /* medalRace */false);
+        CompetitorWithBoat wolfgang = AbstractLeaderboardTest.createCompetitorWithBoat("Wolfgang Hunger");
+        final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 123, /* started */ true, boatClass);
+        leaderboard.addRace(race3, "R3", /* medalRace */false);
+        final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 124, /* started */ true, boatClass);
+        leaderboard.addRace(race4, "R4", /* medalRace */false);
+        leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R3"), 6.);
+        leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R4"), 3.);
+        leaderboard.getScoreCorrection().correctScore(wolfgang, leaderboard.getRaceColumnByName("R1"), 1.); // results in score 2.0
+        leaderboard.getScoreCorrection().correctScore(wolfgang, leaderboard.getRaceColumnByName("R2"), 2.);
+        TimePoint now = MillisecondsTimePoint.now();
+        // Hunger scores better than Plattner in this case because Hunger's two discards are 123/124, keeping 122/122
+        // whereas Plattner is to discard two of the four 123 results, keeping 123/123, being two points worse than Hunger:
+        double netPointsHasso = leaderboard.getNetPoints(hasso, now);
+        double netPointsWolfgang = leaderboard.getNetPoints(wolfgang, now);
+        assertEquals(123. + 2. + 2., netPointsWolfgang, 0.0000000001); // discards the 124.0 in R4
+        assertEquals(9. + 6. + 3., netPointsHasso,  0.000000001);
+    }
+
+    /**
+     * See bug 892: If a competitor has two or more equally-scored races of which the to-be-discarded number
+     * has to be discarded, ensure that not only one but all of them are discarded and that the sailor isn't awarded
+     * more races sailed than the competition
+     */
+    @Test
     public void testDiscardingRulesForMultipleEquallyBadRacesWithHighPointScoringScheme() throws NoWindException {
         racingEventService.removeLeaderboard(LEADERBOARDNAME);
         racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new HighPoint(), Collections.emptySet());

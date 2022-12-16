@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sse.common.Util;
 
 public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> extends SimpleRaceMetadataDTO {
-    
+    private static final long serialVersionUID = 4338967120989860196L;
     private String regattaName;
     private String regattaDisplayName;
     private FleetMetadataDTO fleet;

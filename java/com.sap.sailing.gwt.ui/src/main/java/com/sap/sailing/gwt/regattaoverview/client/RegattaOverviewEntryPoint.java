@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
 
@@ -52,7 +53,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
         clockLabel.addStyleName(style.clockLabel());
 
         siteHeader = new SAPSailingHeaderWithAuthentication();
-        new FixedSailingAuthentication(getUserService(), siteHeader.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        new FixedSailingAuthentication(getUserService(), paywallResolver, siteHeader.getAuthenticationMenuView());
 
         siteHeader.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(siteHeader, 75);

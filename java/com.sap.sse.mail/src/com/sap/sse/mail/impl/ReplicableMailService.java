@@ -8,9 +8,13 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 
 public interface ReplicableMailService extends MailService {
+    /**
+     * @param toAddress a comma-separated list of e-mail addresses to which to send the message
+     */
     Void internalSendMail(String toAddress, String subject, String body) throws MailException, MessagingException;
 
     /**
+     * @param toAddress a comma-separated list of e-mail addresses to which to send the message
      * @param multipartSupplier
      *            can produce a {@link Multipart} object and must be serializable
      */

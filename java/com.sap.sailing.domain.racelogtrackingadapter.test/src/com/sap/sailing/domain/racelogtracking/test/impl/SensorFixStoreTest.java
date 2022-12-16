@@ -58,12 +58,12 @@ public class SensorFixStoreTest {
     public void setUp() throws UnknownHostException, MongoException {
         dropPersistedData();
         newStore();
-
     }
 
     private void newStore() {
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
+                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
     }
 
     @After

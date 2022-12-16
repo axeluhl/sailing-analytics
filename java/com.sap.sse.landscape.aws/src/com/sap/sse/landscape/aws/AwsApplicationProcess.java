@@ -21,4 +21,13 @@ extends ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     AwsInstance<ShardingKey> getHost();
+    
+    /**
+     * First, {@link #tryShutdown(Optional, Optional, byte[]) shuts this process down}. Then, the process directory will
+     * be removed. If, according to
+     * {@link #getHost()}.{@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
+     * getApplicationProcesses(...)} there are no other processes deployed on the {@link #getHost() host}, the host is
+     * {@link AwsLandscape#terminate(com.sap.sse.landscape.aws.AwsInstance) terminated}.
+     */
+    void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase);
 }

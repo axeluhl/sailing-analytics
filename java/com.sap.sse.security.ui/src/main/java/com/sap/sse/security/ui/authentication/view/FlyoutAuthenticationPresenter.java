@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.authentication.view;
 
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
@@ -55,9 +56,11 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
                 authenticationMenuView.setAuthenticated(event.getCtx().isLoggedIn());
+                authenticationMenuView.showPremium(event.getCtx().hasPermission(event.getCtx().getCurrentUser(), UserActions.BE_PREMIUM));
             }
         });
         authenticationMenuView.setAuthenticated(initialAuthentication.isLoggedIn());
+        authenticationMenuView.showPremium(initialAuthentication.hasPermission(initialAuthentication.getCurrentUser(), UserActions.BE_PREMIUM));
     }
 
     public void showRegister() {

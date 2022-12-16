@@ -72,7 +72,7 @@ figcaption {
   font-size: 1rem;
   position: relative;
   min-height: 100%;
-  padding-bottom: 5em;
+  padding-bottom: 5.333333333333333em;
 }
 .mobile .wrapper {
   padding-bottom: 11.333333333333334em;
@@ -135,7 +135,7 @@ figcaption {
 }
 .buttonprimaryoutlined {
   background-color: transparent;
-  padding: .533333333333333em 1.333333333333333em;
+  padding: .6em 1.333333333333333em;
   border: 1px solid #008fcc;
   color: #008fcc;
 }
@@ -299,6 +299,39 @@ figcaption {
 .label[data-labeltype='bundesliga']:before {
   border-right-color: #005fa7;
 }
+
+.label[data-labeltype='active'],
+.label[data-labeltype='cancelled'],
+.label[data-labeltype='intrial'],
+.label[data-labeltype='unknown'] {
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.label[data-labeltype='active'] {
+  background-color: #8ab54e;
+}
+.label[data-labeltype='active']:before {
+  border-right-color: #8ab54e;
+}
+.label[data-labeltype='cancelled'] {
+  background-color: #005fa7;
+}
+.label[data-labeltype='cancelled']:before {
+  border-right-color: #005fa7;
+}
+.label[data-labeltype='intrial'] {
+  background-color: #efaa00;
+}
+.label[data-labeltype='intrial']:before {
+  border-right-color: #efaa00;
+}
+.label[data-labeltype='unknown'] {
+  background-color: #e94a1b;
+}
+.label[data-labeltype='unknown']:before {
+  border-right-color: #e94a1b;
+}
+
 .morelink {
   color: #008fcc;
   text-transform: uppercase;

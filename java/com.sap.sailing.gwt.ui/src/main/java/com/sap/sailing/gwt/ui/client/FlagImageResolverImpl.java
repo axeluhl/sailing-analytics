@@ -226,6 +226,7 @@ public class FlagImageResolverImpl implements FlagImageResolver {
         flagImagesMap.put("sn", flagImageResources.flagSN());
         flagImagesMap.put("so", flagImageResources.flagSO());
         flagImagesMap.put("sr", flagImageResources.flagSR());
+        flagImagesMap.put("ss", flagImageResources.flagSS());
         flagImagesMap.put("st", flagImageResources.flagST());
         flagImagesMap.put("sv", flagImageResources.flagSV());
         flagImagesMap.put("sy", flagImageResources.flagSY());

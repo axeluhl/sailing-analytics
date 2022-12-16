@@ -10,6 +10,29 @@ We believe that a central *orchestrator* approach should be used to solve this c
 
 ![](https://wiki.sapsailing.com/wiki/images/orchestration/architecture.png)
 
+## Current Status
+
+Parts of the plan outlined by this document around August 2018 have been implemented by February 2022. The document is still left in place because it contains several concepts and ideas not implemented yet. The following things have already been achieved by February 2022:
+
+- SSL offloading at the ALB: all application traffic is taken in through application load balancers (ALBs) by now. The HTTPS/SSL connection is terminated there, using an AWS-managed certificate with automatic renewal.
+- An Apache-based central reverse proxy exists only for archived content and a few basic services such as CI, Bug tracking or HTTPS Git access
+- Automation functionality has been built using the Java/OSGi-based architecture suggested herein. It has been integrated in the existing AdminConsole for now, using a new "Landscape" tab in the "Advanced" category.
+- Automation covers handling and upgrading AMIs (images), DNS records, ALBs, creating and managing shared ("multi") instances, creating and managing auto-scaling groups, migrating application replica sets from shared to dedicated infrastructure and back, scaling master and replicas up and down, archiving content from a replica set into an archive server, scaling MongoDB replica sets up and down, and upgrading replica sets to new application versions.
+- Logging happens primarily from ALB to S3; a synchronization script under ``/var/log/old/cache/aws/sync-alb-access-logs-from-s3.sh`` which is also found in the git folder ``configuration/`` handles the synchronization
+- 
+
+Major topics yet missing:
+
+- Making all relevant AMIs automatically upgradable (Webserver, Hudson build server, MongoDB)
+- Archive server handling (in particular upgrades and automatic failover)
+- Routing based on criteria other than hostname (e.g., in order to allow for more dynamic "scope migrations")
+- The central reverse proxy is still a single point of failure and should be replicated, based on a shared configuration
+- Cross-region set-ups will still require manual preparation (getting at least the sailing server AMI there, setting up security group, avoiding DNS interference if a Global Accelerator is being used, not setting up a master node for an application replica set in every region but only in a primary region or even on site, setting up the auto-scaling group and managing it during upgrades, ...); for the Tokyo 2020 Olympic Games we used scripts found in Git under ``configuration/on-site-scripts`` that helped during the process.
+- MongoDB disk space management automation or at least support
+- MongoDB replica set upgrades
+- automation of AMI production "from scratch" for reverse proxy nodes, MongoDB hosts and application servers
+- automatic management of alarms for every target group created
+
 ## Overview of Cloud Configuration
 
 As of this writing (January 2020), our cloud setup has the following essential components:

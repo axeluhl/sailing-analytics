@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,7 +15,9 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -26,6 +29,7 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxy;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
+import com.sap.sse.shared.util.Wait;
 
 public class ApplicationProcessHostImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
@@ -63,57 +67,24 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
         return Collections.emptyMap();
     }
 
-    /**
-     * The implementation scans the {@link ApplicationProcessHost#DEFAULT_SERVERS_PATH application server deployment
-     * folder} for sub-folders. In those sub-folders, the configuration file is analyzed for the port number to
-     * instantiate an {@link ApplicationProcess} object for each one.
-     * 
-     * @param optionalKeyName
-     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
-     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
-     *            pair that was originally used when the instance was launched will be used.
-     * @param privateKeyEncryptionPassphrase
-     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
-     */
+    private static final String SERVER_DIRECTORY_JSON_PROPERTY = "serverdirectory";
+    private static final String SERVER_PORT_JSON_PROPERTY = "port";
+    private static final String TELNET_PORT_JSON_PROPERTY = "telnetport";
+    private static final String SERVER_NAME_JSON_PROPERTY = "servername";
+
     @Override
-    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String SERVER_DIRECTORY_JSON_PROPERTY = "serverdirectory";
-        final String SERVER_PORT_JSON_PROPERTY = "port";
-        final String TELNET_PORT_JSON_PROPERTY = "telnetport";
-        final String SERVER_NAME_JSON_PROPERTY = "servername";
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, boolean rethrowExceptions)
+            throws Exception {
         final Set<ProcessT> result = new HashSet<>();
         final SshCommandChannel sshChannel = createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         if (sshChannel != null) { // could, e.g., have timed out
             try {
-                final StringBuilder commandLine = new StringBuilder("cd "+DEFAULT_SERVERS_PATH+"; ")
-                    .append("echo -n \"[\"; ")
-                    .append("find * -type d -prune -exec bash -c 'cd '{}'; . env.sh >/dev/null; echo \"{ ")
-                        .append("\\\""+SERVER_DIRECTORY_JSON_PROPERTY+"\\\":\\\"'{}'\\\", ")
-                        .append("\\\""+SERVER_PORT_JSON_PROPERTY+"\\\":${SERVER_PORT} ")
-                        .append("\\\""+TELNET_PORT_JSON_PROPERTY+"\\\":${TELNET_PORT}, ")
-                        .append("\\\""+SERVER_NAME_JSON_PROPERTY+"\\\":\\\"${SERVER_NAME}\\\", ");
-                // query the additional environment properties as specified by getAdditionalEnvironmentPropertiesAndWhetherStringTyped()
-                for (final Entry<String, Boolean> additionalEntryAndWhetherStringTyped : getAdditionalEnvironmentPropertiesAndWhetherStringTyped().entrySet()) {
-                    commandLine.append("\\\""+additionalEntryAndWhetherStringTyped.getKey().toLowerCase()+"\\\":");
-                    if (additionalEntryAndWhetherStringTyped.getValue()) {
-                        commandLine.append("\\\"");
-                    }
-                    commandLine.append("${");
-                    commandLine.append(additionalEntryAndWhetherStringTyped.getKey());
-                    commandLine.append("}");
-                    if (additionalEntryAndWhetherStringTyped.getValue()) {
-                        commandLine.append("\\\"");
-                    }
-                    commandLine.append(", ");
-                }
-                commandLine.append("},\"' \\; ; echo \"{}]\"");
-                final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
-                        commandLine.toString(),
-                        "Error(s) during evaluating server processes", Level.SEVERE);
-                final JSONArray serverDirectoriesAndPorts = (JSONArray) new JSONParser().parse(stdout);
+                final JSONArray serverDirectoriesAndPorts = Wait.wait(()->getServerDirectoriesAndPorts(sshChannel), sdap->true, /* retryOnException */ true,
+                        optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Parsing JSON response describing application processes on host "+this);
                 for (final Object serverDirectoryAndPort : serverDirectoriesAndPorts) {
                     final JSONObject serverDirectoryAndPortObject = (JSONObject) serverDirectoryAndPort;
-                    ProcessT process;
+                    final ProcessT process;
                     final String relativeServerDirectory = (String) serverDirectoryAndPortObject.get(SERVER_DIRECTORY_JSON_PROPERTY);
                     if (relativeServerDirectory != null) { // null means we got the empty "terminator" record
                         final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+relativeServerDirectory;
@@ -129,14 +100,65 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
                             result.add(process);
                         } catch (Exception e) {
                             logger.log(Level.WARNING, "Problem creating application process from directory "+serverDirectory+" on host "+this+"; skipping", e);
+                            if (rethrowExceptions) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 }
-            } finally {
-                sshChannel.disconnect();
+            } catch (RuntimeException e) {
+                throw e;
+            } 
+            finally {
+                if (sshChannel != null) {
+                    sshChannel.disconnect();
+                }
             }
         }
         return result;
+    }
+    
+    @Override
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,
+                /* log and ignore exceptions and only report those processes successfully discovered */ false);
+    }
+
+    private JSONArray getServerDirectoriesAndPorts(final SshCommandChannel sshChannel)
+            throws IOException, InterruptedException, JSchException, ParseException {
+        final StringBuilder commandLine = new StringBuilder("cd "+DEFAULT_SERVERS_PATH+"; ")
+            .append("echo -n \"[\"; ")
+            .append("find * -type d -prune -exec bash -c 'cd '{}'; . env.sh >/dev/null; echo \"{ ")
+                .append("\\\""+SERVER_DIRECTORY_JSON_PROPERTY+"\\\":\\\"'{}'\\\", ")
+                .append("\\\""+SERVER_PORT_JSON_PROPERTY+"\\\":${SERVER_PORT} ")
+                .append("\\\""+TELNET_PORT_JSON_PROPERTY+"\\\":${TELNET_PORT}, ")
+                .append("\\\""+SERVER_NAME_JSON_PROPERTY+"\\\":\\\"${SERVER_NAME}\\\", ");
+        // query the additional environment properties as specified by getAdditionalEnvironmentPropertiesAndWhetherStringTyped()
+        for (final Entry<String, Boolean> additionalEntryAndWhetherStringTyped : getAdditionalEnvironmentPropertiesAndWhetherStringTyped().entrySet()) {
+            commandLine.append("\\\""+additionalEntryAndWhetherStringTyped.getKey().toLowerCase()+"\\\":");
+            if (additionalEntryAndWhetherStringTyped.getValue()) {
+                commandLine.append("\\\"");
+            }
+            commandLine.append("${");
+            commandLine.append(additionalEntryAndWhetherStringTyped.getKey());
+            commandLine.append("}");
+            if (additionalEntryAndWhetherStringTyped.getValue()) {
+                commandLine.append("\\\"");
+            }
+            commandLine.append(", ");
+        }
+        commandLine.append("},\"' \\; ; echo \"{}]\"");
+        final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                commandLine.toString(),
+                "Error(s) during evaluating server processes", Level.SEVERE);
+        try {
+            final JSONArray serverDirectoriesAndPorts = (JSONArray) new JSONParser().parse(stdout);
+            return serverDirectoriesAndPorts;
+        } catch (ParseException e) {
+            logger.severe("Failed to parse as JSON: \""+stdout+"\": "+e.getMessage());
+            throw e;
+        }
     }
 
     private HostT self() {

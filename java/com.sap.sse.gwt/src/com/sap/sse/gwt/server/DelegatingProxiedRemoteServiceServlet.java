@@ -16,15 +16,14 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.sap.sse.common.TimePoint;
 
 public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemoteServiceServlet {
-    private static final Logger logger = Logger.getLogger(DelegatingProxiedRemoteServiceServlet.class.getName())
-            ;
+    private static final Logger logger = Logger.getLogger(DelegatingProxiedRemoteServiceServlet.class.getName());
     private static final long serialVersionUID = -5543378343472849437L;
 
     /**
      * Overwritten version of {@link RemoteServiceServlet#processCall(RPCRequest)} that calls
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} instead of
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, RPCRequest, TimePoint)} instead of
      * {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}.
-     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} in turn calls
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int, RPCRequest, TimePoint)} in turn calls
      * {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)} which subclasses can override
      * in order to customize result serialization, e.g., by picking a cached serialized version.
      */
@@ -36,16 +35,19 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
             try {
                 onAfterRequestDeserialized(rpcRequest);
                 return invokeAndEncodeResponse(delegate, rpcRequest.getMethod(), rpcRequest.getParameters(),
-                        rpcRequest.getSerializationPolicy(), rpcRequest.getFlags());
+                        rpcRequest.getSerializationPolicy(), rpcRequest.getFlags(), rpcRequest, startOfProcessCall);
             } catch (IncompatibleRemoteServiceException ex) {
+                afterProcessCall(rpcRequest, startOfProcessCall);
                 log("An IncompatibleRemoteServiceException was thrown while processing this call.", ex);
                 return RPC.encodeResponseForFailedRequest(rpcRequest, ex);
             } catch (RpcTokenException tokenException) {
+                afterProcessCall(rpcRequest, startOfProcessCall);
                 log("An RpcTokenException was thrown while processing this call.", tokenException);
                 return RPC.encodeResponseForFailedRequest(rpcRequest, tokenException);
             }
-        } finally {
+        } catch (Throwable e) {
             afterProcessCall(rpcRequest, startOfProcessCall);
+            throw e;
         }
     }
 
@@ -55,17 +57,17 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
      * a way to override result serialization.
      */
     private String invokeAndEncodeResponse(Object target, Method serviceMethod, Object[] args,
-            SerializationPolicy serializationPolicy, int flags) throws SerializationException {
+            SerializationPolicy serializationPolicy, int flags, RPCRequest rpcRequest, TimePoint startOfProcessCall) throws SerializationException {
         if (serviceMethod == null) {
             throw new NullPointerException("serviceMethod");
         }
         if (serializationPolicy == null) {
             throw new NullPointerException("serializationPolicy");
         }
-        String responsePayload;
         try {
             Object result = serviceMethod.invoke(target, args);
-            responsePayload = encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
+            afterProcessCall(rpcRequest, startOfProcessCall);
+            return encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
         } catch (IllegalAccessException e) {
             SecurityException securityException = new SecurityException(formatIllegalAccessErrorMessage(target, serviceMethod));
             securityException.initCause(e);
@@ -76,17 +78,17 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
             throw securityException;
         } catch (InvocationTargetException e) {
             // Try to encode the caught exception
+            afterProcessCall(rpcRequest, startOfProcessCall);
             Throwable cause = resolveCause(e);
             logger.log(Level.SEVERE, "Uncaught exception, forwarded to client", cause);
             try {
-                responsePayload = RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
+                return RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
             } catch (SerializationException se) {
                 logger.warning("Couldn't serialize exception of type " + cause.getClass()
                 + "; serializing a RuntimeException with the message \"" + cause.getMessage() + "\" only.");
-                responsePayload = RPC.encodeResponseForFailure(serviceMethod, new RuntimeException(cause.getMessage()), serializationPolicy, flags);
+                return RPC.encodeResponseForFailure(serviceMethod, new RuntimeException(cause.getMessage()), serializationPolicy, flags);
             }
         }
-        return responsePayload;
     }
 
     private Throwable resolveCause(InvocationTargetException e) {
@@ -102,9 +104,7 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
      */
     protected String encodeResponseForSuccess(Method serviceMethod, SerializationPolicy serializationPolicy, int flags,
             Object result) throws SerializationException {
-        final String responsePayload;
-        responsePayload = RPC.encodeResponseForSuccess(serviceMethod, result, serializationPolicy, flags);
-        return responsePayload;
+        return RPC.encodeResponseForSuccess(serviceMethod, result, serializationPolicy, flags);
     }
 
     /**
