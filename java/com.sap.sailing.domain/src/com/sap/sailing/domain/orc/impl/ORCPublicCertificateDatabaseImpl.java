@@ -438,7 +438,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 issuingCountry = CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName(child.getTextContent().trim());
                 break;
             case "Family":
-                family = Util.hasLength(child.getTextContent().trim()) ? CertificateFamily.fromId(new Integer(child.getTextContent().trim())) : null;
+                family = Util.hasLength(child.getTextContent().trim()) ? CertificateFamily.fromId(Integer.valueOf(child.getTextContent().trim())) : null;
                 break;
             case "CertType":
                 certType = child.getTextContent().trim().isEmpty() ? null : Integer.valueOf(child.getTextContent().trim());

@@ -172,7 +172,7 @@ public class PathImpl implements Path, Serializable {
                 ArrayList<TimedPositionWithSpeed> maxPoint = new ArrayList<TimedPositionWithSpeed>();
                 maxPoint.add(path.get(0));
                 ArrayList<Double> maxDist = new ArrayList<Double>();
-                maxDist.add(new Double(0));
+                maxDist.add(Double.valueOf(0));
                 Bearing nextBear = prevPoint.getPosition().getBearingGreatCircle(nextPoint.getPosition());
                 for (int jdx = 0; jdx < points.size(); jdx++) {
 
@@ -183,7 +183,7 @@ public class PathImpl implements Path, Serializable {
                     double lineDist = Math.round(ptmp.getDistance(pcur).getMeters()*1000.0)/1000.0;
                     if (sideChange) {
                         maxCnt++;
-                        maxDist.add(new Double(0));
+                        maxDist.add(Double.valueOf(0));
                         maxPoint.add(path.get(0));
                     }
                     if (lineDist > maxDist.get(maxCnt)) {

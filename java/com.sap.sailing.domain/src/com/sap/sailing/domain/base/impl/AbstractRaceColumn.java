@@ -282,7 +282,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private Pair<RaceDefinition, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered(final Fleet fleet) {
         final Iterable<Competitor> competitors;
         final RaceDefinition raceDefinition;
-        TrackedRace trackedRace = getTrackedRace(fleet);
+        final TrackedRace trackedRace = getTrackedRace(fleet);
         if (trackedRace != null) {
             raceDefinition = trackedRace.getRace();
             competitors = raceDefinition.getCompetitors();
@@ -293,7 +293,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             // race exists, its competitors set takes precedence over what's in the race log. Usually,
             // the tracked race will have the same competitors as those in the race log, or more because
             // those from the regatta log are added to the tracked race as well.
-            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
+            final Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
             competitors = viaRaceLog;
         }
         return new Pair<>(raceDefinition, competitors);

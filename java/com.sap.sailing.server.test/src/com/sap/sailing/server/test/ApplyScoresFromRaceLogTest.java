@@ -68,6 +68,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTestBase {
@@ -197,8 +198,8 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
                 new RacingProcedureFactoryImpl(author, new EmptyRegattaConfiguration()));
         f1RaceState.setFinishPositioningListChanged(now, results);
-        final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
+        final Iterable<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors, Util.asList(rankedCompetitorsBeforeApplying)); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now, results);
         final Function<Competitor, Double> expectedPoints =
                 (c)->scores.get(c)==null?(mprs.get(c) == null || mprs.get(c) == MaxPointsReason.NONE ?
@@ -207,8 +208,8 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
             assertEquals(expectedPoints.apply(c), leaderboard.getTotalPoints(c, f1Column, now), 0.00000001);
         }
         final List<Competitor> expectedNewOrder = new ArrayList<>(competitors);
-        expectedNewOrder.sort((c1, c2)->new Double(expectedPoints.apply(c1)).compareTo(new Double(expectedPoints.apply(c1))));
-        final List<Competitor> rankedCompetitorsAfterApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        expectedNewOrder.sort((c1, c2)->Double.valueOf(expectedPoints.apply(c1)).compareTo(Double.valueOf(expectedPoints.apply(c1))));
+        final Iterable<Competitor> rankedCompetitorsAfterApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         double lastScore = 0;
         for (final Competitor c : rankedCompetitorsAfterApplying) {
             assertEquals(expectedPoints.apply(c), leaderboard.getTotalPoints(c, f1Column, later));
@@ -244,8 +245,8 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
                 new RacingProcedureFactoryImpl(author, new EmptyRegattaConfiguration()));
         f1RaceState.setFinishPositioningListChanged(now, results);
-        final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
+        final Iterable<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors, Util.asList(rankedCompetitorsBeforeApplying)); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now, results);
         
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.DNF,    0, /* score is corrected */ false, later);
@@ -286,8 +287,8 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
                 new RacingProcedureFactoryImpl(author, new EmptyRegattaConfiguration()));
         f1RaceState.setFinishPositioningListChanged(now, results);
-        final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
+        final Iterable<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors, Util.asList(rankedCompetitorsBeforeApplying)); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now, results);
         // validate that it arrived in leaderboard
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);

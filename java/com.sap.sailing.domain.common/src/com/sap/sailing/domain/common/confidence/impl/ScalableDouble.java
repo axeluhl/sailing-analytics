@@ -37,11 +37,11 @@ public class ScalableDouble implements AbstractScalarValue<Double> {
 
     @Override
     public String toString() {
-        return new Double(value).toString();
+        return Double.valueOf(value).toString();
     }
 
     @Override
     public int compareTo(Double o) {
-        return new Double(value).compareTo(o);
+        return Double.valueOf(value).compareTo(o);
     }
 }

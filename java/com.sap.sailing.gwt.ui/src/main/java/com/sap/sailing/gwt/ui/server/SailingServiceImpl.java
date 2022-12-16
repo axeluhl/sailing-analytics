@@ -987,7 +987,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<RaceColumnDTO> raceColumns = convertToRaceColumnDTOs(series.getRaceColumns());
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(), series.isFleetsCanRunInParallel(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
+                        series.isStartsWithZeroScore(), series.isFirstColumnNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
                         series.getMaximumNumberOfDiscards(), series.isOneAlwaysStaysOne());
         return result;
     }
@@ -3089,7 +3089,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         List<Double> values = new ArrayList<Double>();
                         List<CompetitorDTO> competitorDTOs = new ArrayList<>();
                         for (Competitor competitor : e.getValue()) {
-                            values.add(new Double(rank));
+                            values.add(Double.valueOf(rank));
                             competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
                             rank++;
                         }

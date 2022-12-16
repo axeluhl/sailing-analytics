@@ -29,6 +29,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -192,9 +193,8 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
         final int result;
         if (leaderboard.hasScores(competitor, timePoint)) {
-            final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
-            Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
-            result = competitorsFromBestToWorst.indexOf(competitor)+1;
+            final Iterable<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
+            result = Util.indexOf(new ObscuringIterable<>(competitorsFromBestToWorst, getSuppressedCompetitors()), competitor)+1;
         } else {
             result = 0;
         }
