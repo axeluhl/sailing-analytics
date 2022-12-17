@@ -69,21 +69,21 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 newRegatta.useStartTimeInference, newRegatta.controlTrackingFromStartAndFinishTimes,
                 newRegatta.autoRestartTrackingUponCompetitorSetChange, newRegatta.rankingMetricType,
                 new AsyncCallback<RegattaDTO>() {
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());
-            }
+         @Override
+         public void onFailure(Throwable t) {
+        errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());
+         }
 
-            @Override
-            public void onSuccess(RegattaDTO regatta) {
-                // if regatta creation was successful, add race columns as modeled in the creation dialog;
-                // note that the SeriesCreationParametersDTO don't describe race columns.
-                createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
-                reloadRegattas();
-                fillEvents(); // events have their associated regattas
-                openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
-            }
-        });
+         @Override
+         public void onSuccess(RegattaDTO regatta) {
+        // if regatta creation was successful, add race columns as modeled in the creation dialog;
+        // note that the SeriesCreationParametersDTO don't describe race columns.
+        createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
+        reloadRegattas();
+        fillEvents(); // events have their associated regattas
+        openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
+         }
+      });
     }
 
     private void createDefaultRacesIfDefaultSeriesIsPresent(final RegattaDTO newRegatta) {

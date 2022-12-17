@@ -17,7 +17,7 @@ public abstract class SeriesWithRacesFactory {
 
     private static final String DEFAULT_RACE_NAME = "R";
 
-    public static SeriesDTO createSeriesWithRaces(final String regattaName, final int numberOfRaces) {
+    public static SeriesDTO createSeriesWithRaces(final String regattaName, final int numberOfRaces, boolean oneAlwaysStaysOne) {
         final SeriesDTO series = new SeriesDTO();
         series.setName(Series.DEFAULT_NAME);
         series.setMedal(false);
@@ -27,7 +27,7 @@ public abstract class SeriesWithRacesFactory {
         series.setFleets(Collections.singletonList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
         final List<RaceColumnDTO> races = new ArrayList<>();
         for (int i = 1; i <= numberOfRaces; i++) {
-            races.add(new RaceColumnInSeriesDTO(DEFAULT_RACE_NAME + i, series.getName(), regattaName));
+            races.add(new RaceColumnInSeriesDTO(DEFAULT_RACE_NAME + i, series.getName(), regattaName, oneAlwaysStaysOne));
         }
         series.setRaceColumns(races);
         return series;
@@ -38,7 +38,7 @@ public abstract class SeriesWithRacesFactory {
         final SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                 seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                 seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
-                seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
+                seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards(), seriesDTO.isOneAlwaysStaysOne());
         seriesStructure.put(seriesDTO.getName(), seriesPair);
         return seriesStructure;
     }

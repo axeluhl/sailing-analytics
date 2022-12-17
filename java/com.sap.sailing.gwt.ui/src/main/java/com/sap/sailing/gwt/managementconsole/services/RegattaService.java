@@ -34,7 +34,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -95,7 +94,6 @@ public class RegattaService {
     public void addRegatta(UUID eventId, String regattaName, String boatClassName, final RankingMetrics ranking, final Integer numberOfRaces, final ScoringSchemeType scoringSystem,
             AsyncCallback<RegattaDTO> callback) {  
         sailingService.getEventById(eventId, false, new AsyncCallback<EventDTO>() {
-        
             @Override
             public final void onFailure(Throwable t) {
                 callback.onFailure(t);
@@ -103,7 +101,7 @@ public class RegattaService {
             
             @Override
             public void onSuccess(EventDTO event) { 
-                SeriesDTO series = SeriesWithRacesFactory.createSeriesWithRaces(regattaName, numberOfRaces);                               
+                SeriesDTO series = SeriesWithRacesFactory.createSeriesWithRaces(regattaName, numberOfRaces, /* TODO oneAlwaysStaysOne */ false);                               
                 RegattaDTO regattaDTO = RegattaFactory.createDefaultRegatta(regattaName, boatClassName, ranking, scoringSystem, series, event);
                 createNewRegatta(event, regattaDTO, numberOfRaces, callback);
             }
@@ -112,7 +110,6 @@ public class RegattaService {
     
     private void createNewRegatta(final EventDTO event, final RegattaDTO newRegatta, Integer racesCount, AsyncCallback<RegattaDTO> callback) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = SeriesWithRacesFactory.createSeriesStructure(newRegatta.series.get(0));
-        
         sailingService.createRegatta(newRegatta.getName(),
                 newRegatta.boatClass == null ? null : newRegatta.boatClass.getName(),
                 newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.competitorRegistrationType,
@@ -122,31 +119,30 @@ public class RegattaService {
                 newRegatta.useStartTimeInference, newRegatta.controlTrackingFromStartAndFinishTimes,
                 newRegatta.autoRestartTrackingUponCompetitorSetChange, newRegatta.rankingMetricType,
                 new AsyncCallback<RegattaDTO>() {
-            
-            @Override
-            public void onFailure(Throwable t) {
-                callback.onFailure(t);
-            }
+                    @Override
+                    public void onFailure(Throwable t) {
+                        callback.onFailure(t);
+                    }
 
-            @Override
-            public void onSuccess(RegattaDTO regatta) {
-                //createDefaultRacesIfDefaultSeriesIsPresent(event, regatta);
-                createRegattaLeaderboard(event, newRegatta, callback);                       
-            }
-        });
+                    @Override
+                    public void onSuccess(RegattaDTO regatta) {
+                        // createDefaultRacesIfDefaultSeriesIsPresent(event, regatta);
+                        createRegattaLeaderboard(event, newRegatta, callback);
+                    }
+                });
     }
     
     private void createRegattaLeaderboard(final EventDTO event, final RegattaDTO newRegatta, AsyncCallback<RegattaDTO> callback) {
         RegattaIdentifier regattaIdentifier = newRegatta.getRegattaIdentifier();
         sailingService.createRegattaLeaderboard((RegattaName)regattaIdentifier,/* displayName */ null, new int[] {},
-                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                new AsyncCallback<StrippedLeaderboardDTO>() {
         @Override
         public void onFailure(Throwable t) {
             callback.onFailure(t);
         }
 
         @Override
-        public void onSuccess(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard) {
+        public void onSuccess(StrippedLeaderboardDTO newRegattaLeaderboard) {
 
             if (!newRegatta.courseAreas.isEmpty()) {
                 addRegattaToRegattaLeaderboard(newRegattaLeaderboard, event, newRegatta, callback);
@@ -155,7 +151,7 @@ public class RegattaService {
     });
     }
     
-    private void addRegattaToRegattaLeaderboard(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, EventDTO event, final RegattaDTO newRegatta, 
+    private void addRegattaToRegattaLeaderboard(StrippedLeaderboardDTO newRegattaLeaderboard, EventDTO event, final RegattaDTO newRegatta, 
             AsyncCallback<RegattaDTO> callback) {
         List<LeaderboardGroupDTO> leaderboardGroups = event.getLeaderboardGroups();
         if (leaderboardGroups == null || leaderboardGroups.isEmpty()) {
@@ -165,7 +161,7 @@ public class RegattaService {
         }
     }
     
-    private void createLeaderboardGroupAndAddRegattaToLeaderboard(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, EventDTO event, 
+    private void createLeaderboardGroupAndAddRegattaToLeaderboard(StrippedLeaderboardDTO newRegattaLeaderboard, EventDTO event, 
             final RegattaDTO newRegatta, AsyncCallback<RegattaDTO> callback) {
         LeaderboardGroupDescriptor newGroup = LeaderboardGroupFactory.createDefaultLeaderboardGroupDescriptor();
         sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
@@ -185,7 +181,7 @@ public class RegattaService {
         
     }
     
-    private void updateEvent(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, EventDTO event, final RegattaDTO newRegatta, AsyncCallback<RegattaDTO> callback) {
+    private void updateEvent(StrippedLeaderboardDTO newRegattaLeaderboard, EventDTO event, final RegattaDTO newRegatta, AsyncCallback<RegattaDTO> callback) {
         sailingService.updateEvent(event.id, event.getName(), event.getDescription(),
                 event.startDate, event.endDate, event.venue, event.isPublic,
                 event.getLeaderboardGroupIds(), event.getOfficialWebsiteURL(), event.getBaseURL(),
@@ -218,7 +214,7 @@ public class RegattaService {
                 }));
     }
     
-    private void addRegattaToRegattaLeaderboard(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, LeaderboardGroupDTO leaderboardGroup, EventDTO event,
+    private void addRegattaToRegattaLeaderboard(StrippedLeaderboardDTO newRegattaLeaderboard, LeaderboardGroupDTO leaderboardGroup, EventDTO event,
             final RegattaDTO newRegatta, AsyncCallback<RegattaDTO> callback) {
         final List<String> leaderboardNames = new ArrayList<>();
         for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {

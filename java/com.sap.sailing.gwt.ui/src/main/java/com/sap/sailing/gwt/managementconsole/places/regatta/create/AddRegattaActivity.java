@@ -56,7 +56,6 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
         @Override
         public void addRegatta(String regattaName, String boatClassName, final RankingMetrics ranking, final Integer numberOfRaces, final ScoringSchemeType scoringSystem) {  
             getClientFactory().getRegattaService().addRegatta(eventId, regattaName, boatClassName, ranking, numberOfRaces, scoringSystem, new AsyncCallback<RegattaDTO>() {
-            
                 @Override
                 public final void onFailure(Throwable t) {
                     LOG.severe("addRegatta :: Cannot load add regatta");

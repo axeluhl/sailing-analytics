@@ -74,11 +74,10 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
         if (!isRegattaNameValid()) {
             showValidationFailure("Please change Regatta name. It is not unique");
         }
-        if(boatClassNameTextBox.getValue() == null || boatClassNameTextBox.getValue().isEmpty()) {
+        if (boatClassNameTextBox.getValue() == null || boatClassNameTextBox.getValue().isEmpty()) {
             showValidationFailure("Please fill in boat class");
         }
-        
-        if(validationUi.getInnerHTML().isEmpty()) {
+        if (validationUi.getInnerHTML().isEmpty()) {
             presenter.addRegatta(regattaNameInput.getValue(), boatClassNameTextBox.getValue(), 
                     rankingListBox.getValue(), racesInput.getValue(), scoringSystemListBox.getValue());
         }

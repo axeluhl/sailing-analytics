@@ -10,7 +10,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.common.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
