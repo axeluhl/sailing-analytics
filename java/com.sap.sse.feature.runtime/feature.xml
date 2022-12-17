@@ -741,21 +741,21 @@
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="9.0.0.v20201001-1419"
+         version="9.3.0.v20220409-0157"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons"
          download-size="0"
          install-size="0"
-         version="9.0.0.v20201001-1419"
+         version="9.3.0.v20220409-0157"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="9.0.0.v20201001-1419"
+         version="9.3.0.v20220409-0157"
          unpack="false"/>
 
    <plugin
