@@ -8,7 +8,7 @@ fi
 GITROOT="`dirname $0`/.."
 DOCKERDIR="${GITROOT}/docker"
 DOCKERFILE="$DOCKERDIR/Dockerfile"
-FILES_TO_COPY_FROM_JAVA_TARGET="env.sh start configuration/JavaSE-17.profile"
+FILES_TO_COPY_FROM_JAVA_TARGET="env.sh start configuration/JavaSE-11.profile"
 echo "Copying files from GITROOT $GITROOT into Docker workspace"
 for f in ${FILES_TO_COPY_FROM_JAVA_TARGET}; do
   cp "${GITROOT}/java/target/${f}" "$DOCKERDIR"
