@@ -332,11 +332,15 @@
 <plugin id="org.apache.aries.spifly.dynamic.bundle"/>
 <plugin id="org.apache.aries.spifly.dynamic.bundle.source"/>
 <plugin id="org.objectweb.asm"/>
-<plugin id="org.objectweb.asm.commons"/>
-<plugin id="org.objectweb.asm.tree"/>
 <plugin id="org.objectweb.asm.source"/>
+<plugin id="org.objectweb.asm.commons"/>
 <plugin id="org.objectweb.asm.commons.source"/>
+<plugin id="org.objectweb.asm.tree"/>
 <plugin id="org.objectweb.asm.tree.source"/>
+<plugin id="org.objectweb.asm.util"/>
+<plugin id="org.objectweb.asm.util.source"/>
+<plugin id="org.objectweb.asm.analysis"/>
+<plugin id="org.objectweb.asm.analysis.source"/>
 <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
 <plugin id="org.mortbay.jasper.apache-el"/>
 <plugin id="org.mortbay.jasper.apache-jsp"/>
