@@ -103,8 +103,8 @@ implements ApplicationLoadBalancer<ShardingKey> {
      * @throws IllegalStateException
      *          If the requested priority is higher than {@code MAX_PRIORITY}
      */
-    private int getNewPriority(int priority) throws IllegalStateException {
-        if(priority < MAX_PRIORITY) {
+    private int checkNewPriority(int priority) throws IllegalStateException {
+        if (priority < MAX_PRIORITY) {
             return priority;
         } else {
             throw new IllegalStateException("Priority was greater than " + MAX_PRIORITY +"!");
@@ -112,7 +112,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
     
     @Override
-    public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio) {
+    public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio) throws IllegalStateException {
         final Iterable<Rule> rules = getRules();
         final TreeMap<Integer, Rule> rulesSorted = new TreeMap<>();
         final Iterator<Rule> iter = rules.iterator();
@@ -132,29 +132,25 @@ implements ApplicationLoadBalancer<ShardingKey> {
         boolean skipNext = false;
         final Collection<RulePriorityPair> result = new ArrayList<>();
         if (rulesSorted.get(targetPrio) != null) {// if there is a rule on prio
-            for (Entry<Integer, Rule> r : rulesSorted.entrySet()) {
-                if (r.getKey() < targetPrio || skipNext) {
-                    // if prio is lower than target prio
-                    continue;
-                } else {
+            for (Entry<Integer, Rule> entry : rulesSorted.entrySet()) {
+                final Integer priority = entry.getKey();
+                if (priority >= targetPrio && !skipNext) {
                     // if prio is higher than target prio and is not supposed to be skipped
-                    if (lastPrio - r.getKey() > 1) {
+                    if (priority - lastPrio > 0) {
                         // if there is a gap between current prio and the last one. -> so this one is not supposed to be
-                        // skipped
-                        // and every rule after this
+                        // skipped and every rule after this
                         skipNext = true;
                         break;
                     } else {
-                        lastPrio = Integer.valueOf(r.getValue().priority()) + 1;
-                        result.add(RulePriorityPair.builder().ruleArn(r.getValue().ruleArn())
-                                .priority(getNewPriority(lastPrio)).build());
+                        lastPrio = priority + 1;
+                        result.add(RulePriorityPair.builder().ruleArn(entry.getValue().ruleArn())
+                                .priority(checkNewPriority(lastPrio)).build());
                     }
                 }
             }
             landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
         }
-        Iterable<Rule> newRules = getRules();
-        return newRules;
+        return getRules();
     }
     
     @Override
