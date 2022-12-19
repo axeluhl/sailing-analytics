@@ -43,6 +43,8 @@ public interface SailingServer extends SecuredServer {
     Iterable<String> getLeaderboardNames() throws Exception;
     
     String getLeaderboardShardingKey(String leaderboardName) throws Exception;
+    
+    String getLeaderboardFromShardingKey(String shardingKey);
 
     Iterable<UUID> getEventIds() throws Exception;
 
