@@ -826,7 +826,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                             RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
                                     settings.getZoomSettings().isZoomToSelectedCompetitors());
-                            settings = new RaceMapSettings(settings, clearedZoomSettings);
+                            settings = new RaceMapSettings.RaceMapSettingsBuilder(settings).withZoomSettings(clearedZoomSettings).build();
                             simulationOverlay.setVisible(false);
                             if (zoomingAnimationsInProgress == 0) {
                                 showLayoutsAfterAnimationFinishes();
@@ -864,7 +864,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                         RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
                                 settings.getZoomSettings().isZoomToSelectedCompetitors());
-                        settings = new RaceMapSettings(settings, clearedZoomSettings);
+                        settings = new RaceMapSettings.RaceMapSettingsBuilder(settings).withZoomSettings(clearedZoomSettings).build();
                         currentlyDragging = false;
                         refreshMapWithoutAnimation();
                         if (streamletOverlay != null 
@@ -942,19 +942,20 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
                 streamletOverlay.addToMap();
                 streamletOverlay.setColors(settings.isShowWindStreamletColors());
-                if (settings.isShowWindStreamletOverlay()
-                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
+                if (settings.isShowWindStreamletOverlay() && paywallResolver.hasPermission(
+                        SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                     streamletOverlay.setVisible(true);
                 }
                 // determine availability of polar diagram
                 setHasPolar();
                 // initialize simulation canvas
-                simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier,
-                        sailingService, stringMessages, asyncActionsExecutor, coordinateSystem,
-                        () -> updateSettings(new RaceMapSettings(settings, false)));
+                simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService,
+                        stringMessages, asyncActionsExecutor, coordinateSystem,
+                        () -> updateSettings(new RaceMapSettings.RaceMapSettingsBuilder(settings)
+                                .withShowSimulationOverlay(false).build()));
                 simulationOverlay.addToMap();
-                showSimulationOverlay(settings.isShowSimulationOverlay()
-                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO()));
+                showSimulationOverlay(settings.isShowSimulationOverlay() && paywallResolver
+                        .hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO()));
                 metricOverlay = new DetailTypeMetricOverlay(getMap(), 0, coordinateSystem, stringMessages);
                 metricOverlay.setVisible(false);
                 metricOverlay.addToMap();
@@ -2505,8 +2506,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     map.panTo(newBounds.getCenter());
                 }
                 autoZoomLatLngBounds = newBounds;
-                RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors());
-                settings = new RaceMapSettings(settings, restoredZoomSettings);
+                RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings,
+                        settings.getZoomSettings().isZoomToSelectedCompetitors());
+                settings = new RaceMapSettings.RaceMapSettingsBuilder(settings).withZoomSettings(restoredZoomSettings)
+                        .build();
                 setAutoZoomInProgress(false);
                 mapFirstZoomDone = true;
             }

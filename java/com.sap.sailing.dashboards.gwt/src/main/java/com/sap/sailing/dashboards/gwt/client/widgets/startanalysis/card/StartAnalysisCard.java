@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomType
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
@@ -167,12 +168,15 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
             zoomTypes.add(ZoomTypes.BUOYS);
         }
+        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
+        //TODO 5774 fill dtoContext
+        final SecuredDTOProxy dtoContext = new SecuredDTOProxy();
         final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ false,
                 /* defaultForMapOrientationWindUp */ false, /* defaultForViewShowStreamlets */ false,
-                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
+                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false, paywallResolver, dtoContext);
         final RaceMapSettings raceMapSettings = new RaceMapSettings(raceMapZoomSettings, getHelpLineSettings(),
                 defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
                 startAnalysisDTO.tailLenghtInMilliseconds, defaultRaceMapSettings.isWindUp(),
@@ -182,11 +186,10 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
                 defaultRaceMapSettings.isShowDouglasPeuckerPoints(), defaultRaceMapSettings.isShowEstimatedDuration(),
                 defaultRaceMapSettings.getStartCountDownFontSizeScaling(), defaultRaceMapSettings.isShowManeuverLossVisualization(),
-                defaultRaceMapSettings.isShowSatelliteLayer(), defaultRaceMapSettings.isShowWindLadder());
+                defaultRaceMapSettings.isShowSatelliteLayer(), defaultRaceMapSettings.isShowWindLadder(), paywallResolver, dtoContext);
         final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, errorReporter,
                 Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
         // TODO: set RaceDTO to RaceMapLifecycle to enable premium functions
         raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver, null), raceMapSettings,
                 sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,

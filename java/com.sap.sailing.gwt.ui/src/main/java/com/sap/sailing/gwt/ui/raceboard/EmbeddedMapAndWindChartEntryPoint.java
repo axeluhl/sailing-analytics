@@ -68,6 +68,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
@@ -83,11 +84,13 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
     
     @Override
     protected void doOnModuleLoad() {
+        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
+        final SecuredDTOProxy securedDTO = new SecuredDTOProxy();
         super.doOnModuleLoad();
         // read mandatory parameters
         contextDefinition = SERIALIZER.deserializeFromCurrentLocation(new EmbeddedMapAndWindChartContextDefinition());
         if (!contextDefinition.isValidContext()) {
-            createErrorPage(getStringMessages().requiresValidRegatta());
+            createErrorPage(getStringMessages().requiresValidRegatta(), paywallResolver);
             return;
         }
         // read optional parameters
@@ -99,7 +102,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
                 /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
-                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
+                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false, paywallResolver, securedDTO);
         settings = SERIALIZER.deserializeFromCurrentLocation(new EmbeddedMapAndWindChartSettings());
         RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false);
         Set<HelpLineTypes> helpLineTypes = new HashSet<>();
@@ -119,7 +122,9 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                 defaultRaceMapSettings.getStartCountDownFontSizeScaling(),
                 defaultRaceMapSettings.isShowManeuverLossVisualization(),
                 defaultRaceMapSettings.isShowSatelliteLayer(),
-                defaultRaceMapSettings.isShowWindLadder());
+                defaultRaceMapSettings.isShowWindLadder(),
+                paywallResolver,
+                securedDTO);
         final String regattaLikeName = contextDefinition.getRegattaLikeName();
         final String raceColumnName = contextDefinition.getRaceColumnName();
         final String fleetName = contextDefinition.getFleetName();
@@ -128,10 +133,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
             @Override
             public void onSuccess(final Pair<RegattaAndRaceIdentifier, SecuredDTO> selectedRaceIdentifierAndTrackedRaceSecuredDTO) {
                 final RegattaAndRaceIdentifier selectedRaceIdentifier = selectedRaceIdentifierAndTrackedRaceSecuredDTO.getA();
-                final SecuredDTO raceDTOProxy = selectedRaceIdentifierAndTrackedRaceSecuredDTO.getB();
-                if (selectedRaceIdentifier == null) {
-                    createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName, fleetName, /* technicalErrorMessage */ ""));
-                } else {
+                        final SecuredDTO raceDTOProxy = selectedRaceIdentifierAndTrackedRaceSecuredDTO.getB();
+                        if (selectedRaceIdentifier == null) {
+                            createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName,
+                                    fleetName, /* technicalErrorMessage */ ""), paywallResolver);
+                        } else {
+                    securedDTO.setSecuredDTO(raceDTOProxy);
                     getSailingService().getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                         @Override
                         public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
@@ -147,16 +154,16 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
             }
             
             @Override
-            public void onFailure(Throwable caught) {
-                createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName, fleetName, caught.getMessage()));
-            }
-        });
+                    public void onFailure(Throwable caught) {
+                        createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName,
+                                fleetName, caught.getMessage()), paywallResolver);
+                    }
+                });
     }
     
-    private void createErrorPage(String message) {
+    private void createErrorPage(String message, PaywallResolverImpl paywallResolver) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         final SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication();
-        PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
         new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
         RootLayoutPanel.get().add(vp);
         vp.addNorth(header, 100);

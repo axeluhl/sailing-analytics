@@ -63,27 +63,9 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
     private void adjustMapSettings() {
         RaceMap raceMap = getRaceBoardPanel().getMap();
         final RaceMapSettings defaultSettings = raceMap.getLifecycle().createDefaultSettings();
-        final RaceMapSettings additiveSettings = new RaceMapSettings(
-                new RaceMapZoomSettings(Collections.singleton(ZoomTypes.BOATS), /* zoomToSelected */ false),
-                defaultSettings.getHelpLinesSettings(),
-                defaultSettings.getTransparentHoverlines(),
-                defaultSettings.getHoverlineStrokeWeight(),
-                defaultSettings.getTailLengthInMilliseconds(),
-                /* existingMapSettings.isWindUp() */ true,
-                defaultSettings.getBuoyZoneRadius(),
-                defaultSettings.isShowOnlySelectedCompetitors(),
-                defaultSettings.isShowSelectedCompetitorsInfo(),
-                defaultSettings.isShowWindStreamletColors(),
-                defaultSettings.isShowWindStreamletOverlay(),
-                defaultSettings.isShowSimulationOverlay(),
-                defaultSettings.isShowMapControls(),
-                defaultSettings.getManeuverTypesToShow(),
-                defaultSettings.isShowDouglasPeuckerPoints(),
-                defaultSettings.isShowEstimatedDuration(),
-                defaultSettings.getStartCountDownFontSizeScaling(),
-                defaultSettings.isShowManeuverLossVisualization(),
-                defaultSettings.isShowSatelliteLayer(),
-                defaultSettings.isShowWindLadder());
+        RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(Collections.singleton(ZoomTypes.BOATS), /* zoomToSelected */ false);
+        boolean isWindUp = true;
+        final RaceMapSettings additiveSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultSettings).withZoomSettings(raceMapZoomSettings).withWindUp(isWindUp).build();
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {

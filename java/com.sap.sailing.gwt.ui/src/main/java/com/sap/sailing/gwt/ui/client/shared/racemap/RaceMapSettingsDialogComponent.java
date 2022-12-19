@@ -309,7 +309,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
                 initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
                 startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue(),
-                showSatelliteLayerCheckbox.getValue(), windLadderCheckBox.getValue());
+                showSatelliteLayerCheckbox.getValue(), windLadderCheckBox.getValue(), initialSettings.getPaywallResolver(), initialSettings.getSecuredDTO());
     }
     
     private RaceMapZoomSettings getZoomSettings() {

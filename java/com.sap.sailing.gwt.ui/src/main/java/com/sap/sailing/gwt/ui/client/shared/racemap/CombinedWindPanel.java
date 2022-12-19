@@ -100,18 +100,12 @@ public class CombinedWindPanel extends FlowPanel {
         // when off, turn on; when on and no color, turn on color; when on with color, turn off; Only clickable, if permissions granted
         final boolean newShowStreamletsOverlaySetting = (oldRaceMapSettings.isShowWindStreamletOverlay() ?
                 oldRaceMapSettings.isShowWindStreamletColors() ? false : true : true) && hasPermission;
-        final boolean newShowWindStreamletColors = (oldRaceMapSettings.isShowWindStreamletOverlay() ? !oldRaceMapSettings.isShowWindStreamletColors() :
-            false) && hasPermission;
-        final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
-                oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
-                oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), oldRaceMapSettings.isWindUp(),
-                oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
-                oldRaceMapSettings.isShowSelectedCompetitorsInfo(), newShowWindStreamletColors,
-                newShowStreamletsOverlaySetting, oldRaceMapSettings.isShowSimulationOverlay(),
-                oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
-                oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
-                oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
-                        oldRaceMapSettings.isShowSatelliteLayer(), oldRaceMapSettings.isShowWindLadder());
+        final boolean newShowWindStreamletColors = (oldRaceMapSettings.isShowWindStreamletOverlay()
+                ? !oldRaceMapSettings.isShowWindStreamletColors()
+                : false) && hasPermission;
+        final RaceMapSettings newRaceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(oldRaceMapSettings)
+                .withShowWindStreamletOverlay(newShowStreamletsOverlaySetting)
+                .withShowWindStreamletColors(newShowWindStreamletColors).build();
         if (map.getComponentContext() != null
                 && map.getComponentContext().isStorageSupported(map)) {
             map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,

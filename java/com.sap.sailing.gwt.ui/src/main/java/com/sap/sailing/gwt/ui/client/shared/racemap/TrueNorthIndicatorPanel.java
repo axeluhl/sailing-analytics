@@ -51,21 +51,12 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     public void toggle() {
         RaceMapSettings oldRaceMapSettings = map.getSettings();
         boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
-        final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
-                oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(),
-                oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
-                oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
-                oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
-                oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
-                oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
-                oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
-                oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
-                oldRaceMapSettings.isShowSatelliteLayer(), oldRaceMapSettings.isShowWindLadder());
-                if (map.getComponentContext() != null
-                        && map.getComponentContext().isStorageSupported(map)) {
-                    map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,
-                            new DummyOnSettingsStoredCallback());
-                }
+        final RaceMapSettings newRaceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder()
+                .withWindUp(newWindUpSettings).build();
+        if (map.getComponentContext() != null && map.getComponentContext().isStorageSupported(map)) {
+            map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,
+                    new DummyOnSettingsStoredCallback());
+        }
         map.updateSettings(newRaceMapSettings);
     }
 
