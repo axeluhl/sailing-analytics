@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -25,6 +26,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleConditio
  */
 public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
+    private static final Logger logger = Logger.getLogger(RemoveShardingKeyFromShard.class.getName());
+    
     public RemoveShardingKeyFromShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
     }
@@ -55,26 +58,20 @@ public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends Applicatio
         if (shard == null) {
             throw new Exception("Shard not found!");
         }
+        logger.info( "Removing " + String.join(", ", shardingKeys) + " from " + shardName);
         // remove conditions in rules where path is the sharding key
         Set<String> shardingKeysFromConditions = new HashSet<>();
         for (Rule r : shard.getRules()) {
             for (RuleCondition condition : r.conditions()) {
                 if (condition.pathPatternConfig() != null) {
-                    shardingKeysFromConditions.addAll(condition.values());
+                    shardingKeysFromConditions
+                            .addAll(Util.asList(Util.filter(condition.values(), t -> !shardingKeys.contains(t))));
                 }
             }
         }
         getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(shard.getRules(), new Rule[0]));
-        shardingKeysFromConditions = Util.asSet(Util.filter(shardingKeysFromConditions, t -> {
-            for (String s : shardingKeys) {
-                if (s.equals(t)) {
-                    return false;
-                }
-            }
-            return true;
-        }));
         // change ALB rules to new ones
-        addShardingRules(shard.getLoadbalancer(), Util.asSet(shardingKeysFromConditions), shard.getTargetGroup());
+        addShardingRules(shard.getLoadbalancer(), shardingKeysFromConditions, shard.getTargetGroup());
     }
 
     public static <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, BuilderT extends Builder<BuilderT, RemoveShardingKeyFromShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, RemoveShardingKeyFromShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {
