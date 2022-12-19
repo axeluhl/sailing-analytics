@@ -684,7 +684,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
-        JAVA_HOME="${JAVA8_HOME}"  ./gradlew assemble
+        JAVA_HOME="${JAVA8_HOME}" ./gradlew assemble
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
