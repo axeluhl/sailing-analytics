@@ -77,7 +77,12 @@ public class SailingServerImpl extends SecuredServerImpl implements SailingServe
         // but we can as well shortcut it by replicating the implementation here:
         return ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboardName);
     }
-
+    
+    @Override 
+    public String getLeaderboardFromShardingKey(String shardingKey) {
+        return ShardingType.LEADERBOARDNAME.decodeShardingInfo(shardingKey);
+    }
+    
     @Override
     public Iterable<UUID> getEventIds() throws ClientProtocolException, IOException, ParseException {
         final URL eventsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+EventsResource.V1_EVENTS);
