@@ -149,4 +149,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String Autoscalinggroup();
     String keys();
     String enterShardName();
+    String openShardManagement();
 }

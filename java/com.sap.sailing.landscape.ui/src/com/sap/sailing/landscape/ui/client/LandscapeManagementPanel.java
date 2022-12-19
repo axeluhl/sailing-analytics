@@ -115,10 +115,8 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final SimpleBusyIndicator applicationReplicaSetsBusy;
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
-    private final ShardManagementPanel shardManagementPanel;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
-    
     /**
      * The time to wait after archiving a replica set and before starting a "compare servers" run for the content
      * archived. This waiting period is owed to the process of loading the race content which is an asynchronous
@@ -314,6 +312,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return new LinkBuilder().setReplicaSet(replicaSet).setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.AmiSearch).build();
             }
         };
+        
         applicationReplicaSetsTable.addColumn(autoScalingGroupAmiIdColumn, stringMessages.machineImageId(), (rs1, rs2)->new NaturalComparator().compare(rs1.getAutoScalingGroupAmiId(), rs2.getAutoScalingGroupAmiId()));
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
                 new ApplicationReplicaSetsImagesBarCell(userService, stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
@@ -348,7 +347,13 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SCALE_AUTO_SCALING_REPLICAS_UP_DOWN,
                 applicationReplicaSetToUpgrade -> scaleAutoScalingReplicasUpDown(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
+                        regionsTable.getSelectionModel().getSelectedObject(),
+                        Collections.singleton(applicationReplicaSetToUpgrade)));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_OPEN_SHARD_MANAGEMENT,
+                selected -> {
+                    openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                            selected);
+                });
         // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -454,30 +459,9 @@ public class LandscapeManagementPanel extends SimplePanel {
             refreshAllThatNeedsAwsCredentials();
             storeRegionSelection(userService, selectedRegion);
         });
-        
-        final CaptionPanel shardpanel = new CaptionPanel(stringMessages.shard());
-        shardManagementPanel = new ShardManagementPanel(landscapeManagementService, errorReporter, stringMessages);
-        shardpanel.add(shardManagementPanel);
-        mainPanel.add(shardpanel);
-        shardpanel.setVisible(false);
-        // Listen to selected replicasets.
-        applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(event -> {
-            if (applicationReplicaSetsTable.getSelectionModel().getSelectedSet().size() == 1) {
-                shardManagementPanel.setReplicaSet(
-                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet().iterator().next());
-                shardManagementPanel.setRegion(regionsTable.getSelectionModel().getSelectedObject());
-                shardManagementPanel.setPassphrase(sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption());
-                shardpanel.setVisible(true);
-            } else {
-                shardpanel.setVisible(false);
-                shardManagementPanel.setReplicaSet(null);
-            }
-        });
-        
         AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
-                    sshKeyManagementPanel.setPassphraseValidation(result.booleanValue(),stringMessages);
                     addApplicationReplicaSetButton.setVisible(result);
                     applicationReplicaSetsRefreshButton.setVisible(result);
                     applicationReplicaSetsCaptionPanel.setVisible(result);
@@ -502,6 +486,10 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+    }
+    
+    private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
+        new ShardManagementDialog(landscapeManagementService, replicaset, region, sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), errorReporter, stringMessages).show();
     }
     
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {

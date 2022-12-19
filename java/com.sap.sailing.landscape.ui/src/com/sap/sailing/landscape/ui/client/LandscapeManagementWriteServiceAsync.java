@@ -11,6 +11,7 @@ import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
+import com.sap.sailing.landscape.ui.shared.LeaderboardDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
@@ -108,7 +109,7 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,AwsShardDTO shardDTO,
-            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,LeaderboardDTO leaderboard,
             AsyncCallback<SerializationDummyDTO> callback);
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
@@ -198,14 +199,14 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
-            AsyncCallback<ArrayList<String>> names);
+            AsyncCallback<ArrayList<LeaderboardDTO>> names);
 
-    void addShard(String shardName, Set<String> selectedLeaderBoards,
+    void addShard(String shardName, Set<LeaderboardDTO> selectedLeaderBoards,
             SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, String region,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
-    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase,
-            AsyncCallback<Map<AwsShardDTO, Iterable<String>>> callback);
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearertoken,
+            AsyncCallback<Map<AwsShardDTO, Iterable<LeaderboardDTO>>> callback);
 
     /**
      * Removes {@code shard} from the replica set. This deletes the load balancer listener rules, and the auto scaling
@@ -246,7 +247,7 @@ public interface LandscapeManagementWriteServiceAsync {
      * @param passphraseForPrivateKeyDecryption
      * @param callback
      */
-    void appendShardingKeysToShard(Iterable<String> selectedLeaderBoards, String region, String shardName,
+    void appendShardingKeysToShard(Iterable<LeaderboardDTO> selectedLeaderBoards, String region, String shardName,
             SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
@@ -267,7 +268,7 @@ public interface LandscapeManagementWriteServiceAsync {
      * @param passphraseForPrivateKeyDecryption
      * @param callback
      */
-    void removeShardingKeysToShard(Iterable<String> selectedLeaderBoards, String region, String shardName,
+    void removeShardingKeysToShard(Iterable<LeaderboardDTO> selectedLeaderBoards, String region, String shardName,
             SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 }

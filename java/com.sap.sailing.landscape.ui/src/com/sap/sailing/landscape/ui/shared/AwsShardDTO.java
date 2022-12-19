@@ -3,8 +3,10 @@ package com.sap.sailing.landscape.ui.shared;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.Named;
 
-public class AwsShardDTO implements IsSerializable {
+public class AwsShardDTO implements IsSerializable, Named {
+    private static final long serialVersionUID = 1L;
     ArrayList<String> keys;
     String targetGroupArn;
     String targetGroupName;
@@ -88,15 +90,12 @@ public class AwsShardDTO implements IsSerializable {
         return this.autoScalingGroupName;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
     public String getKeysString() {
-        String s = "";
-        for (String i : getKeys()) {
-            s = s + i + ", ";
-        }
-        return s;
+        return String.join(", ", keys);
     }
 }

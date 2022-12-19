@@ -10,6 +10,7 @@ import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
+import com.sap.sailing.landscape.ui.shared.LeaderboardDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
@@ -74,7 +75,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,AwsShardDTO shardDTO,
-            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO, LeaderboardDTO leaderboard);
 
     SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
             String masterInstanceType, String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping,
@@ -145,16 +146,16 @@ public interface LandscapeManagementWriteService extends RemoteService {
             SailingApplicationReplicaSetDTO<String> replicaSet, String instanceTypeName,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    ArrayList<String> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken) throws Exception;
+    ArrayList<LeaderboardDTO> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken) throws Exception;
     
-    void addShard(String shardName, Set<String> selectedLeaderBoardNames, SailingApplicationReplicaSetDTO<String> replicaset,
+    void addShard(String shardName, Set<LeaderboardDTO> selectedLeaderBoardNames, SailingApplicationReplicaSetDTO<String> replicaset,
             String bearertoken, String region, byte[] passphraseForPrivateKeyDecryption) throws Exception;
     
-    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase) throws Exception;
+    public Map<AwsShardDTO, Iterable<LeaderboardDTO>> getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearertoken) throws Exception;
     
     public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase) throws Exception;
     
-    void appendShardingKeysToShard(Iterable<String> selectedLeaderBoardNames, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    void appendShardingKeysToShard(Iterable<LeaderboardDTO> selectedLeaderBoardNames, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
     
-    void removeShardingKeysToShard(Iterable<String> selectedShardingKeys, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    void removeShardingKeysToShard(Iterable<LeaderboardDTO> selectedShardingKeys, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
 }
