@@ -7,9 +7,9 @@ import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.value.StringValue;
 import com.sap.sse.common.settings.value.Value;
 import com.sap.sse.security.paywall.PaywallResolver;
+import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.paywall.settings.AbstractSecuredValueSetting;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.dto.SecuredDTO;
 
 /**
  * Specific setting to hold a {@link BoatClass} instance. The competitor is being serialized using the boat classes'
@@ -18,7 +18,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 public class SecuredBoatClassSetting extends AbstractSecuredValueSetting<BoatClass> {
 
     protected SecuredBoatClassSetting(String name, AbstractGenericSerializableSettings settings,
-            DomainFactory domainFactory, PaywallResolver paywallResolver, Action action, SecuredDTO dtoContext) {
+            DomainFactory domainFactory, PaywallResolver paywallResolver, Action action, SecuredDTOProxy dtoContext) {
         super(name, settings, null, new Converter(domainFactory), paywallResolver, action, dtoContext);
     }
 
