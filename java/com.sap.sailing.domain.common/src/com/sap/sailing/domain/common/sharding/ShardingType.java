@@ -36,6 +36,14 @@ public enum ShardingType {
                 .append(normalize(shardingInfo))
                 .toString();
     }
+    
+    public String decodeShardingInfo(String shardingKey) {
+        if (shardingKey.startsWith(prefix)) {
+            return shardingKey.substring(prefix.length());
+        } else {
+            return shardingKey;
+        }
+    }
 
     private String normalize(String replace) {
         char[] chars = replace.toCharArray();

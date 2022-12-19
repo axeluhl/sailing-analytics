@@ -396,7 +396,7 @@ public interface LandscapeService {
     SailingServer getSailingServer(String hostname, String bearertoken, Optional<Integer> port)
             throws MalformedURLException;
     
-    void removeShardingKeysToShard(Iterable<String> selectedleaderboards, 
+    void removeShardingKeysFromShard(Iterable<String> selectedleaderboards, 
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
             byte[] passphraseForPrivateKeyDecription,AwsRegion region, String shardName, String bearertoken) throws Exception;
     

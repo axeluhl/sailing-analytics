@@ -1570,7 +1570,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
 
     @Override
-    public void removeShardingKeysToShard(Iterable<String> selectedleaderboards,
+    public void removeShardingKeysFromShard(Iterable<String> selectedleaderboards,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
             byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken)
             throws Exception {
