@@ -77,7 +77,6 @@ ext {
 }
 
 if (project.hasProperty("xmake")) {
-    apply plugin: "org.ajoberstar.grgit"
     wrapper {
         distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
     }
