@@ -544,6 +544,9 @@
             <classifier>../com.sap.sailing.targetplatform/definitions/${p2-target}</classifier>
           </artifact>
         </target>
+	<executionEnvironment>
+	  JavaSE-17
+	</executionEnvironment>
         <environments>
           <environment>
             <os>linux</os>
