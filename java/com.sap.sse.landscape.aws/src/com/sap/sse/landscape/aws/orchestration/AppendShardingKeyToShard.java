@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
@@ -32,6 +33,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleConditio
 public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
 
+    private static final Logger logger = Logger.getLogger(AppendShardingKeyToShard.class.getName());
     public AppendShardingKeyToShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
     }
@@ -62,6 +64,7 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
         if (shard == null) {
             throw new Exception("Shard not found!");
         }
+        logger.info( "Appending " + String.join(", ", shardingKeys) + " to " + shardName);
         // list for manipulation -> elements are allowed to be removed!!
         final List<String> manipulatableShardingKeys = new ArrayList<>();
         manipulatableShardingKeys.addAll(shardingKeys);
