@@ -111,18 +111,18 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      * free. 
      * @param index
      *          index supposed to be free
-     * @throws Exception
+     * @throws IllegalStateException
      *          gets thrown if shifting exceeds the limit of priorities
      */
-    Iterable<Rule> shiftRulesToMakeSpaceAt(int index) throws Exception;
+    Iterable<Rule> shiftRulesToMakeSpaceAt(int index) throws IllegalStateException;
     
     /**
      * 
      * @param hostname
      *          hostname of replica set from which the shard gets created
-     * @return priority of a rule with hostname as Host +1, if the rule it was found in is a redirect or the index of the Rule if it is an Forward.
+     * @return priority of a rule with hostname as Host +1, if the rule it was found in is a redirect or the index of the Rule if it is a Forward.
      *          if there is no Rule with this hostname, just return the index after the last rule. This index should be used as the next shard priority.
-     *          You may need to make space at this priority via {@code shiftRulesToMakeSpaceAt}
+     *          You may need to make space at this priority via {@link #shiftRulesToMakeSpaceAt(int)}
      * @throws Exception
      *          if the found priority is higher than the {@code MAX_PRIORITY}
      */         

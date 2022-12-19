@@ -131,8 +131,8 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     boolean isLocalReplicaSet();
     
     /**
-     * Returns a {@code ShardName} that is created from an (user-) entered shard name ({@code shardName}.
-     * {@code ShardName} contains the target group name and the replica set name.
+     * Returns a {@link ShardName} that is created from an (user-) entered shard name ({@code shardName}).
+     * {@link ShardName} contains the target group name and the replica set name.
      * @param shardName
      *          (User-) entered name for the shard.
      * @return
