@@ -229,7 +229,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                     public void ok(final EventDTO newEvent) {
                         createEvent(newEvent);
                     }
-                }, presenter.getMediaServiceWrite());
+                });
         dialog.show();
     }
 

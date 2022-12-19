@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -315,11 +314,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     int dotPos = lastPathSegment.lastIndexOf('.');
                     if (dotPos >= 0) {
                         String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
-                        List<MimeType> possibleMimeTypes = MimeType.byExtension(fileEnding);
-                        if (possibleMimeTypes.size() > 0) {
-                            mediaTrack.mimeType = possibleMimeTypes.get(0);
-                        } else {
+                        MimeType extractedMimeType = MimeType.byExtension(fileEnding);
+                        if (extractedMimeType == MimeType.unknown) {
                             mediaTrack.mimeType = null;
+                        } else {
+                            mediaTrack.mimeType = extractedMimeType;
                         }
                         if (mediaTrack.mimeType != null && MediaSubType.mp4 == mediaTrack.mimeType.getMediaSubType()) {
                             processMp4(mediaTrack);

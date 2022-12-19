@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,15 +74,21 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     protected final TextBox fileNameInput;
     protected final TextBox urlInput;
     protected final FlowPanel files; 
-    //protected final TextBox titleTextBox;
     private final FlowPanel fileExistingPanel;
     private final Button saveButton;
     private FlowPanel progressOverlay;
-    private final List<String> uriList = new ArrayList<>();
-    private final Map<String, MimeType> mimeTypeList = new HashMap<>();
-    private final Map<String, String> titleList = new HashMap<>();
-    private final Map<String, String> subTitleList = new HashMap<>();
-    private final Map<String, String> copyrightList = new HashMap<>();
+    private final Map<String, MediaObject> mediaObjectMap = new LinkedHashMap<>();
+    
+    private static class MediaObject {
+//        String originalFileName;
+//        String size;
+//        String heigth;
+//        String width;
+        String title;
+        String subTitle;
+        String copyright;
+        MimeType mimeType;
+    }
 
     public AbstractMediaUploadPopup(BiConsumer<List<ImageDTO>, List<VideoDTO>> updateImagesAndVideos) {
         this.updateImagesAndVideos = updateImagesAndVideos;
@@ -323,7 +330,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                                 .stringValue();
                         String fileName = resultJson.get(i).isObject().get(FileUploadConstants.FILE_NAME).isString()
                                 .stringValue();
-                        addUri(uri, fileName);
+                        String contentType = resultJson.get(i).isObject().get(FileUploadConstants.CONTENT_TYPE).isString()
+                                .stringValue();
+                        addUri(uri, fileName, MimeType.byContentType(contentType));
                         fileNameInput.setValue(i18n.uploadSuccessful());
                     } else {
                         String status = resultJson.get(i).isObject().get(FileUploadConstants.STATUS).isString()
@@ -363,8 +372,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private void addMedia() {
         List<ImageDTO> imageList = new ArrayList<>();
         List<VideoDTO> videoList = new ArrayList<>();
-        for (int i = 0; i < uriList.size(); i++) {
-            String uri = uriList.get(i);
+        
+        for (Entry<String, MediaObject> mediaObjectEntry: mediaObjectMap.entrySet()) {
+            String uri = mediaObjectEntry.getKey();
             final String uploadUrl;
             if (uri == null) {
                 uploadUrl = "";
@@ -390,7 +400,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 url = uploadUrl;
             }
             if (!url.isEmpty()) {
-                final MimeType mimeType = mimeTypeList.get(url);
+                final MimeType mimeType = mediaObjectEntry.getValue().mimeType;
                 hide();
                 if (mimeType.mediaType == MediaType.image) {
                     GWT.log("add image " + url);
@@ -410,20 +420,22 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
 
     private ImageDTO createImage(String url) {
+        MediaObject mediaObject = mediaObjectMap.get(url);
         final ImageDTO image = new ImageDTO(url, new Date());
-        image.setTitle(titleList.get(url));
-        image.setSubtitle(subTitleList.get(url));
-        image.setCopyright(copyrightList.get(url));
+        image.setTitle(mediaObject.title);
+        image.setSubtitle(mediaObject.subTitle);
+        image.setCopyright(mediaObject.copyright);
         Iterable<String> defaultTags = Collections.singletonList(MediaTagConstants.GALLERY.getName());
         image.setTags(defaultTags);
         return image;
     }
 
     private VideoDTO createVideo(String url, String thumbnailUrl, MimeType mimeType) {
+        MediaObject mediaObject = mediaObjectMap.get(url);
         final VideoDTO video = new VideoDTO(url, mimeType, new Date());
-        video.setTitle(titleList.get(url));
-        video.setSubtitle(subTitleList.get(url));
-        video.setCopyright(copyrightList.get(url));
+        video.setTitle(mediaObject.title);
+        video.setSubtitle(mediaObject.subTitle);
+        video.setCopyright(mediaObject.copyright);
         video.setThumbnailRef(thumbnailUrl);
         Iterable<String> defaultTags = Collections.singletonList(MediaTagConstants.GALLERY.getName());
         video.setTags(defaultTags);
@@ -431,7 +443,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
 
     private void cleanupTempFileUpload() {
-        for (String uri: uriList) {
+        for (String uri: mediaObjectMap.keySet()) {
             if (uri != null) {
                 String url = DELETE_URL + uri;
                 RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.DELETE, url);
@@ -485,8 +497,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 }
             }
         }
-        uriList.clear();
-        mimeTypeList.clear();
+        mediaObjectMap.clear();
     }
 
     /**
@@ -519,17 +530,29 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         collapsebleFilePanel.getHeaderTextAccessor().setText(header);
     }
 
-    private void addUri(String uri, String fileName) {
-        this.uriList.add(uri);
-        final MimeType mimeType = detectMimeTypeFromUrl(uri);
-        this.mimeTypeList.put(uri, mimeType);
+    private void addUri(String uri, String fileName, MimeType mimeType) {
+        MediaObject mediaObject = new MediaObject();
+        mediaObjectMap.put(uri, mediaObject);
+        mediaObject.mimeType = mimeType;
         final String title = getTitleFromFileName(fileName);
-        this.titleList.put(uri, title);
+        mediaObject.title = title;
         final VerticalPanel vPanel = new VerticalPanel();
+        boolean firstCollapsible = true;
+        for (int i=0; i < files.getWidgetCount(); i++) {
+            if (files.getWidget(i) instanceof CollapsablePanel) {
+                firstCollapsible = false;
+                ((CollapsablePanel)files.getWidget(i)).setCollapsingEnabled(true);
+                break;
+            }
+        }
         final CollapsablePanel collapsebleFilePanel = new CollapsablePanel(fileName, true);
-        setCollapsebleFilePanelHeader(collapsebleFilePanel, titleList.get(uri), mimeTypeList.get(uri));
+        setCollapsebleFilePanelHeader(collapsebleFilePanel, title, mimeType);
         collapsebleFilePanel.setContent(vPanel);
         collapsebleFilePanel.setWidth("100%");
+        if (firstCollapsible) {
+            collapsebleFilePanel.setCollapsingEnabled(false);
+            collapsebleFilePanel.setOpen(true);
+        }
         final Label fileNameLabel = new Label(fileName);
         fileNameLabel.addStyleName(sharedHomeResources.sharedHomeCss().subTitle());
         //vPanel.add(fileNameLabel);
@@ -542,8 +565,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         titleTextBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                titleList.put(uri, titleTextBox.getValue());
-                setCollapsebleFilePanelHeader(collapsebleFilePanel, titleList.get(uri), mimeTypeList.get(uri));
+                mediaObject.title = titleTextBox.getValue();
+                setCollapsebleFilePanelHeader(collapsebleFilePanel, mediaObject.title, mediaObject.mimeType);
             }
         });
         vPanel.add(titleTextBox);
@@ -554,7 +577,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         subtitleTextBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                subTitleList.put(uri, subtitleTextBox.getValue());
+                mediaObject.subTitle = subtitleTextBox.getValue();
             }
         });
         subtitleTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
@@ -566,7 +589,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         copyrightTextBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                copyrightList.put(uri, copyrightTextBox.getValue());
+                mediaObject.copyright = copyrightTextBox.getValue();
             }
         });
         copyrightTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
@@ -579,8 +602,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             @Override
             public void onChange(ChangeEvent event) {
                 final MimeType mimeType = MimeType.byName(mediaTypeListBox.getSelectedItemText());
-                mimeTypeList.put(uri, mimeType);
-                setCollapsebleFilePanelHeader(collapsebleFilePanel, titleList.get(uri), mimeTypeList.get(uri));
+                mediaObject.mimeType = mimeType;
+                setCollapsebleFilePanelHeader(collapsebleFilePanel, mediaObject.title, mediaObject.mimeType);
             }
         });
         selectMimeTypeInBox(mediaTypeListBox, getMimeType(uri));
@@ -595,7 +618,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
 
     private void checkSaveButton() {
         boolean urlInputNotEmpty = urlInput.getValue() != null && !urlInput.getValue().trim().isEmpty();
-        boolean uriNotEmpty = !uriList.isEmpty();
+        boolean uriNotEmpty = !mediaObjectMap.isEmpty();
         saveButton.setEnabled(urlInputNotEmpty || uriNotEmpty);
     }
 

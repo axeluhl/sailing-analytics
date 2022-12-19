@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoEditDialog extends VideoDialog {
     public VideoEditDialog(VideoDTO video, StringMessages stringMessages,
-            FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<VideoDTO>> callback,
-            MediaServiceAsync mediaService) {
+            FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<VideoDTO>> callback) {
         super(video.getCreatedAtDate(), new VideoParameterValidator(stringMessages), stringMessages,
-                storageServiceAvailable, callback, mediaService);
+                storageServiceAvailable, callback);
         createdAtLabel = new Label(video.getCreatedAtDate().toString());
         videoURLAndUploadComposite.setUri(video.getSourceRef());
         subtitleTextBox = createTextBox(video.getSubtitle());

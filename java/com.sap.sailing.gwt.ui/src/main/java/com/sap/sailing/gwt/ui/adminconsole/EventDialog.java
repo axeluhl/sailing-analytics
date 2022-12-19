@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -131,7 +130,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
      */
     public EventDialog(EventParameterValidator validator, SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
-            Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback, MediaServiceAsync mediaService) {
+            Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         this.stringMessages = stringMessages;
@@ -165,7 +164,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
         imagesListComposite = new ImagesListComposite(sailingServiceWrite, stringMessages, storageServiceAvailable);
-        videosListComposite = new VideosListComposite(stringMessages, storageServiceAvailable, mediaService);
+        videosListComposite = new VideosListComposite(stringMessages, storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
                 .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()

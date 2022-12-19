@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.impl;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.file.Paths;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
@@ -69,11 +72,25 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                             + MAX_SIZE_IN_MB + "MB");
                     result.put(FileUploadConstants.STATUS, Status.INTERNAL_SERVER_ERROR.name());
                     result.put(FileUploadConstants.MESSAGE, errorMessage);
+                    result.put(FileUploadConstants.FILE_SIZE, fileItem.getSize());
                 } else {
                     final URI fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
                             .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
                     result.put(FileUploadConstants.FILE_NAME, fileName);
                     result.put(FileUploadConstants.FILE_URI, fileUri.toString());
+                    result.put(FileUploadConstants.CONTENT_TYPE, fileItem.getContentType());
+                    result.put(FileUploadConstants.FILE_SIZE, fileItem.getSize());
+                    if (fileItem.getContentType() != null && fileItem.getContentType().startsWith("image/")) {
+                        try (InputStream inputStream = fileItem.getInputStream()) {
+                            BufferedImage image = ImageIO.read(inputStream);
+                            if (image != null) {
+                                int height = image.getHeight();
+                                int width = image.getWidth();
+                                result.put(FileUploadConstants.MEDIA_TYPE_HEIGHT, height);
+                                result.put(FileUploadConstants.MEDIA_TYPE_WIDTH, width);
+                            }
+                        }
+                    }
                 }
             } catch (IOException | OperationFailedException | RuntimeException | InvalidPropertiesException e) {
                 final String errorMessage = "Could not store file"+ (e.getMessage()==null?"":(": " + e.getMessage()));

@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -54,7 +53,6 @@ public class VideosListComposite extends Composite {
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
-    private final MediaServiceAsync mediaService;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -72,10 +70,9 @@ public class VideosListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public VideosListComposite(final StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, MediaServiceAsync mediaService) {
+    public VideosListComposite(final StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable) {
         this.stringMessages = stringMessages;
         this.storageServiceAvailable = storageServiceAvailable;
-        this.mediaService = mediaService;
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
@@ -262,7 +259,7 @@ public class VideosListComposite extends Composite {
                         videoListDataProvider.getList().addAll(newVideos);
                         updateTableVisisbilty();
                     }
-                }, mediaService);
+                });
         dialog.show();
     }
 
@@ -279,7 +276,7 @@ public class VideosListComposite extends Composite {
                         videoListDataProvider.getList().add(updatedVideos.get(0));
                         updateTableVisisbilty();
                     }
-                }, mediaService);
+                });
         dialog.show();
     }
 
