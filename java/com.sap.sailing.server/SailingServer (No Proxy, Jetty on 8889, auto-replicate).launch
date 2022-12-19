@@ -42,7 +42,6 @@
 <setEntry value="org.apache.commons.math@default:default"/>
 <setEntry value="org.apache.httpcomponents.httpclient@default:default"/>
 <setEntry value="org.apache.httpcomponents.httpcore@default:default"/>
-<setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.hyperic.sigar@default:default"/>
 <setEntry value="com.sun.jersey.contribs.jersey-multipart@default:default"/>
 <setEntry value="javax.validation@default:default"/>
@@ -154,13 +153,21 @@
 <setEntry value="com.amazon.aws.aws-java-api.source@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.objectweb.asm.commons@default:default"/>
+<setEntry value="org.objectweb.asm.analysis@default:default"/>
 <setEntry value="org.objectweb.asm.tree@default:default"/>
+<setEntry value="org.objectweb.asm.util@default:default"/>
+<setEntry value="org.objectweb.asm.source@default:default"/>
+<setEntry value="org.objectweb.asm.analysis.source@default:default"/>
+<setEntry value="org.objectweb.asm.commons.source@default:default"/>
+<setEntry value="org.objectweb.asm.tree.source@default:default"/>
+<setEntry value="org.objectweb.asm.util.source@default:default"/>
 <setEntry value="org.eclipse.jetty.apache-jsp@4:true"/>
 <setEntry value="org.eclipse.jetty.apache-jsp.source@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.jsp@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.jsp.source@default:default"/>
 <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
 <setEntry value="org.apache.aries.spifly.dynamic.bundle@3:true"/>
+<setEntry value="org.apache.aries.spifly.dynamic.bundle.source@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
 <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
@@ -287,7 +294,6 @@
 <setEntry value="com.sap.sse.threadmanager@default:default"/>
 <setEntry value="com.sap.sse.security.common@default:default"/>
 <setEntry value="org.json.simple@default:default"/>
-<setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:default"/>
 <setEntry value="org.moxieapps.gwt.highcharts@default:default"/>
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="org.mp4parser.isoparser@default:default"/>
