@@ -18,6 +18,10 @@
 <unit id="org.objectweb.asm.tree.source" version="9.4.0.v20221107-1714"/>
 <unit id="org.objectweb.asm.util" version="9.4.0.v20221107-1714"/>
 <unit id="org.objectweb.asm.util.source" version="9.4.0.v20221107-1714"/>
+<unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317"/>
+<unit id="org.mockito.mockito-core.source" version="4.8.1.v20221103-2317"/>
+<unit id="net.bytebuddy.byte-buddy" version="1.12.18.v20221114-2102"/>
+<unit id="net.bytebuddy.byte-buddy.source" version="1.12.18.v20221114-2102"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20221123021534/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -296,6 +300,7 @@
 <plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
+<plugin id="net.bytebuddy.byte-buddy"/>
 <plugin id="org.mongodb.bson"/>
 <plugin id="org.mongodb.bson.source"/>
 <plugin id="org.mongodb.driver-core"/>

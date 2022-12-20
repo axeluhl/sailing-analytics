@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
@@ -36,11 +36,11 @@ public class MongoUriParserTest {
         final AwsInstance<String> host1 = mock(AwsInstance.class);
         when(host1.getPublicAddress()).thenReturn(wwwExampleCom);
         when(host1.getPrivateAddress()).thenReturn(wwwExampleCom);
-        when(landscape.getHostByPublicIpAddress(Matchers.any(Region.class), Matchers.contains(wwwExampleCom.getHostAddress()), Matchers.any(HostSupplier.class))).thenReturn(host1);
+        when(landscape.getHostByPublicIpAddress(ArgumentMatchers.any(Region.class), ArgumentMatchers.contains(wwwExampleCom.getHostAddress()), ArgumentMatchers.any(HostSupplier.class))).thenReturn(host1);
         final InetAddress loopback = InetAddress.getLoopbackAddress();
         final AwsInstance<String> host2 = mock(AwsInstance.class);
         when(host2.getPrivateAddress()).thenReturn(loopback);
-        when(landscape.getHostByPrivateIpAddress(Matchers.any(Region.class), Matchers.contains(loopback.getHostAddress()), Matchers.any(HostSupplier.class))).thenReturn(host2);
+        when(landscape.getHostByPrivateIpAddress(ArgumentMatchers.any(Region.class), ArgumentMatchers.contains(loopback.getHostAddress()), ArgumentMatchers.any(HostSupplier.class))).thenReturn(host2);
         parser = new MongoUriParser<String>(landscape, new AwsRegion("eu-west-2", landscape));
     }
     

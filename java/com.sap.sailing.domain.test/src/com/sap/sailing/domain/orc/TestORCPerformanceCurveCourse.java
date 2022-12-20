@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -148,18 +148,18 @@ public class TestORCPerformanceCurveCourse {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         final TrackedLeg trackedLeg1 = Mockito.mock(TrackedLeg.class);
         TrackedRace trackedRace = Mockito.mock(TrackedRace.class);
-        Mockito.when(trackedRace.getWindWithConfidence(Matchers.any(Position.class), Matchers.any(TimePoint.class)))
+        Mockito.when(trackedRace.getWindWithConfidence(ArgumentMatchers.any(Position.class), ArgumentMatchers.any(TimePoint.class)))
                 .thenReturn(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(w1, 1.0,
                         new Util.Pair<Position, TimePoint>(new DegreePosition(1.0, 1.0), MillisecondsTimePoint.now()),
                         false));
         Mockito.when(trackedLeg1.getEquidistantReferenceTimePoints(10)).thenReturn(Collections.singleton(new MillisecondsTimePoint(new Date(1))));
-        Mockito.when(trackedLeg1.getEquidistantSectionsOfLeg(Matchers.any(TimePoint.class), Matchers.anyInt())).thenReturn(Collections.singleton(new DegreePosition(1.0d, 1.0d)));
+        Mockito.when(trackedLeg1.getEquidistantSectionsOfLeg(ArgumentMatchers.any(TimePoint.class), ArgumentMatchers.anyInt())).thenReturn(Collections.singleton(new DegreePosition(1.0d, 1.0d)));
         Mockito.when(trackedLeg1.getTrackedRace()).thenReturn(trackedRace);
-        Mockito.when(trackedLeg1.getWindwardDistance(Matchers.any(LegType.class), Matchers.any(TimePoint.class),
-                Matchers.any(WindLegTypeAndLegBearingAndORCPerformanceCurveCache.class))).thenReturn(new NauticalMileDistance(1));
+        Mockito.when(trackedLeg1.getWindwardDistance(ArgumentMatchers.any(LegType.class), ArgumentMatchers.any(TimePoint.class),
+                ArgumentMatchers.any(WindLegTypeAndLegBearingAndORCPerformanceCurveCache.class))).thenReturn(new NauticalMileDistance(1));
         final TrackedLeg trackedLeg2 = Mockito.mock(TrackedLeg.class);
-        Mockito.when(trackedLeg2.getWindwardDistance(Matchers.any(LegType.class), Matchers.any(TimePoint.class),
-                Matchers.any(WindLegTypeAndLegBearingAndORCPerformanceCurveCache.class))).thenReturn(new NauticalMileDistance(2));
+        Mockito.when(trackedLeg2.getWindwardDistance(ArgumentMatchers.any(LegType.class), ArgumentMatchers.any(TimePoint.class),
+                ArgumentMatchers.any(WindLegTypeAndLegBearingAndORCPerformanceCurveCache.class))).thenReturn(new NauticalMileDistance(2));
         legs.add(new ORCPerformanceCurveLegAdapter(trackedLeg1) {
             private static final long serialVersionUID = 2173629869089646863L;
 
