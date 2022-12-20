@@ -300,7 +300,9 @@
 <plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
+<plugin id="org.mockito.mockito-core.source"/>
 <plugin id="net.bytebuddy.byte-buddy"/>
+<plugin id="net.bytebuddy.byte-buddy.source"/>
 <plugin id="org.mongodb.bson"/>
 <plugin id="org.mongodb.bson.source"/>
 <plugin id="org.mongodb.driver-core"/>
