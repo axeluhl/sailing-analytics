@@ -75,7 +75,7 @@ public class ImageConverterTest {
         assertArrayEquals(onePixelJpgExample, byteArray);
         byteArray = converter.inputStreamToByteArray(
                 converter.imageWithMetadataToInputStream(pngImage.getImage(), pngImage.getMetadata(), "png"));
-        if (System.getProperty("java.version").startsWith("11")) {
+        if (System.getProperty("java.version").startsWith("11") || System.getProperty("java.version").startsWith("17")) {
             assertArrayEquals(onePixelPngExample_Java11, byteArray);
         } else {
             assertArrayEquals(onePixelPngExample, byteArray);
