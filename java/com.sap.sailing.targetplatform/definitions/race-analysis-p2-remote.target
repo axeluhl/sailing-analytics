@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="214">
+<target name="Race Analysis Target" sequenceNumber="215">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -22,6 +22,14 @@
 <unit id="org.mockito.mockito-core.source" version="4.8.1.v20221103-2317"/>
 <unit id="net.bytebuddy.byte-buddy" version="1.12.18.v20221114-2102"/>
 <unit id="net.bytebuddy.byte-buddy.source" version="1.12.18.v20221114-2102"/>
+<unit id="net.bytebuddy.byte-buddy-agent" version="1.12.18.v20221114-2102"/>
+<unit id="net.bytebuddy.byte-buddy-agent.source" version="1.12.18.v20221114-2102"/>
+<unit id="com.sun.jna" version="5.12.1.v20221103-2317"/>
+<unit id="com.sun.jna.source" version="5.12.1.v20221103-2317"/>
+<unit id="com.sun.jna.platform" version="5.12.1.v20221103-2317"/>
+<unit id="com.sun.jna.platform.source" version="5.12.1.v20221103-2317"/>
+<unit id="org.objenesis" version="3.3.0.v20221103-2317"/>
+<unit id="org.objenesis.source" version="3.3.0.v20221103-2317"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20221123021534/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -44,8 +52,6 @@
 <unit id="org.junit.source" version="4.13.2.v20211018-1956"/>
 <unit id="org.hamcrest" version="2.2.0.v20210711-0821"/>
 <unit id="org.hamcrest.source" version="2.2.0.v20210711-0821"/>
-<unit id="org.objenesis" version="2.6.0.v20180420-1519"/>
-<unit id="org.objenesis.source" version="2.6.0.v20180420-1519"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20220531185310/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -303,6 +309,12 @@
 <plugin id="org.mockito.mockito-core.source"/>
 <plugin id="net.bytebuddy.byte-buddy"/>
 <plugin id="net.bytebuddy.byte-buddy.source"/>
+<plugin id="net.bytebuddy.byte-buddy-agent"/>
+<plugin id="net.bytebuddy.byte-buddy-agent.source"/>
+<plugin id="com.sun.jna"/>
+<plugin id="com.sun.jna.source"/>
+<plugin id="com.sun.jna.platform"/>
+<plugin id="com.sun.jna.platform.source"/>
 <plugin id="org.mongodb.bson"/>
 <plugin id="org.mongodb.bson.source"/>
 <plugin id="org.mongodb.driver-core"/>
