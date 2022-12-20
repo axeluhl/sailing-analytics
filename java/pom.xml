@@ -36,7 +36,7 @@
          When adjusting tycho-version here, also make sure to adjust it accordingly
          in java/com.amazon.aws.aws-java-api/pom.xml
      -->
-    <tycho-version>1.7.0</tycho-version>
+    <tycho-version>2.7.5</tycho-version>
     <gwt.version>2.11.0</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
     <gwt.plugin.version>2.11.0</gwt.plugin.version>
