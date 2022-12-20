@@ -10,5 +10,5 @@
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.sap.sailing.windestimation.model.SimpleModelsTrainingPart1"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="com.sap.sailing.windestimation.lab"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.windestimation.lab"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms16G -Xmx16G -Dmongo.dbName=windEstimation -Dmongo.port=10202"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="--add-opens java.base/java.lang=ALL-UNNAMED -Xms16G -Xmx16G -Dmongo.dbName=windEstimation -Dmongo.port=10202"/>
 </launchConfiguration>
