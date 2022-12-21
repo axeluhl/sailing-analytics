@@ -30,6 +30,7 @@ public class ShardManagementDialog extends DialogBox {
         setAutoHideEnabled(true);
         add(vPlane);
         center();
+        shardPanel.refresh();
     }
 
     @Override
