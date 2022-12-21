@@ -109,7 +109,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                                     .type(ActionTypeEnum.FORWARD).build())
                             .build();
                     final Iterable<Rule> newRuleSet = loadBalancer.addRules(newRule);
-                    getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, shardName, targetgroup,
+                    getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, getLandscape().getAutoScalingGroupName(shardName), targetgroup,
                             AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET, region);
                     // wait until instances are running
                     Wait.wait(new Callable<Boolean>() {

@@ -1978,7 +1978,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return replicaSetName + "-" + releaseName;
     }
 
-    private String getAutoScalingGroupName(String replicaSetName) {
+    public String getAutoScalingGroupName(String replicaSetName) {
         return replicaSetName+AUTO_SCALING_GROUP_NAME_SUFFIX;
     }
 
@@ -2062,11 +2062,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> void putScalingPolicy(
-            int instanceWarmupTimeInSeconds, String shardname, TargetGroup<ShardingKey> targetgroup,
+            int instanceWarmupTimeInSeconds, String autoScalingGroupName, TargetGroup<ShardingKey> targetgroup,
             int maxRequestPerTarget, com.sap.sse.landscape.Region region) {
-
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
-        final String autoScalingGroupName = getAutoScalingGroupName(shardname);
         autoScalingClient.putScalingPolicy(
                 b -> b.autoScalingGroupName(autoScalingGroupName).estimatedInstanceWarmup(instanceWarmupTimeInSeconds)
                         .policyType("TargetTrackingScaling").policyName("KeepRequestsPerTargetAt" + maxRequestPerTarget)
