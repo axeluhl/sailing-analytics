@@ -114,20 +114,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio) throws IllegalStateException {
         final Iterable<Rule> rules = getRules();
-        final TreeMap<Integer, Rule> rulesSorted = new TreeMap<>();
-        final Iterator<Rule> iter = rules.iterator();
-        // create Map with every priority
-        while (iter.hasNext()) {
-            final Rule r = iter.next();
-            try {
-                if (!r.priority().equalsIgnoreCase("Default")) {
-                    rulesSorted.put(Integer.valueOf(r.priority()), r);
-                }
-            } catch (Exception e) {
-                // Case where prio is not a number, e.g. 'Default' gets ignored.
-                logger.log(Level.WARNING, "Priority '" + r.priority() + "' couldn't be parsed as an Integer.");
-            }
-        }
+        final TreeMap<Integer, Rule> rulesSorted = getRulesSorted(rules);
         int lastPrio = targetPrio;
         boolean skipNext = false;
         final Collection<RulePriorityPair> result = new ArrayList<>();
@@ -154,34 +141,21 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
     
     @Override
-    public int getFirstShardingPriority(String hostname) throws Exception {
+    public int getFirstShardingPriority(String hostname) throws IllegalStateException {
         final Iterable<Rule> rules = getRules();
-        final TreeMap<Integer, Rule> rulesSorted = new TreeMap<Integer, Rule>();
-        final Iterator<Rule> iter = rules.iterator();
-        // create Map with every priority
-        while (iter.hasNext()) {
-            final Rule r = iter.next();
-            try {
-                if (!r.priority().equalsIgnoreCase("Default")) {
-                    rulesSorted.put(Integer.valueOf(r.priority()), r);
-                }
-            } catch (Exception e) {
-                // Case where prio is not a number, e.g. 'Default' gets ignored.
-                logger.log(Level.WARNING, "Priority '" + r.priority() + "' couldn't be parsed as an Integer.");
-            }
-        }
+        final TreeMap<Integer, Rule> rulesSorted = getRulesSorted(rules);
         final Iterator<Entry<Integer, Rule>> iterSorted = rulesSorted.entrySet().iterator();
-        int indexToReturn = -1;
+        int priorityToReturn = -1;
         outher : while (iterSorted.hasNext()) {
             final Rule r = iterSorted.next().getValue();
             for (RuleCondition con : r.conditions()) {
                 if (con.hostHeaderConfig() != null && con.hostHeaderConfig().values().contains(hostname)) {
                     for (Action a : r.actions()) {
                         if (a.forwardConfig() != null) {
-                            indexToReturn = Integer.parseInt(r.priority());
+                            priorityToReturn = Integer.parseInt(r.priority());
                             break outher;
                         } else if (a.redirectConfig() != null) {
-                            indexToReturn = Integer.parseInt(r.priority()) + 1;
+                            priorityToReturn = Integer.parseInt(r.priority()) + 1;
                             break outher;
                         } else {
                             continue;
@@ -190,14 +164,32 @@ implements ApplicationLoadBalancer<ShardingKey> {
                 }
             }
             if (!iterSorted.hasNext()) {
-                indexToReturn = Integer.parseInt(r.priority()) + 1;
+                priorityToReturn = Integer.parseInt(r.priority()) + 1;
                 break outher;
             }
         }
-        if(indexToReturn > MAX_PRIORITY) {
-            throw new Exception("Index higher than " + MAX_PRIORITY + "!");
+        if (priorityToReturn > MAX_PRIORITY) {
+            throw new IllegalStateException("Index higher than " + MAX_PRIORITY + "!");
         }
-        return indexToReturn;
+        return priorityToReturn;
+    }
+
+    private TreeMap<Integer, Rule> getRulesSorted(Iterable<Rule> rules) {
+        final Iterator<Rule> iter = rules.iterator();
+        final TreeMap<Integer, Rule> rulesSorted = new TreeMap<Integer, Rule>();
+        // create Map with every priority
+        while (iter.hasNext()) {
+            final Rule r = iter.next();
+            try {
+                if (!r.priority().equalsIgnoreCase(ApplicationLoadBalancer.DEFAULT_RULE_PRIORITY)) {
+                    rulesSorted.put(Integer.valueOf(r.priority()), r);
+                }
+            } catch (Exception e) {
+                // Case where prio is not a number, e.g. 'Default' gets ignored.
+                logger.log(Level.WARNING, "Priority '" + r.priority() + "' couldn't be parsed as an Integer.");
+            }
+        }
+        return rulesSorted;
     }
 
     @Override
