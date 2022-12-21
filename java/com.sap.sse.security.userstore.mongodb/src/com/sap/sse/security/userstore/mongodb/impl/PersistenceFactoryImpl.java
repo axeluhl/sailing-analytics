@@ -1,5 +1,7 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
@@ -31,5 +33,15 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
     @Override
     public MongoObjectFactory getDefaultMongoObjectFactory() {
         return defaultMongoObjectFactory;
+    }
+
+    @Override
+    public DomainObjectFactory getDomainObjectFactory(ReadConcern readConcern, WriteConcern writeConcern) {
+        return new DomainObjectFactoryImpl(MongoDBService.INSTANCE.getDB().withReadConcern(readConcern).withWriteConcern(writeConcern));
+    }
+
+    @Override
+    public MongoObjectFactory getMongoObjectFactory(ReadConcern readConcern, WriteConcern writeConcern) {
+        return new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB().withReadConcern(readConcern).withWriteConcern(writeConcern));
     }
 }

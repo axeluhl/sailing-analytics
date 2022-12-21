@@ -11,6 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserStoreManagementException;
@@ -32,8 +34,8 @@ public class SecurityServiceAndHasPermissionsProviderTest {
 
     @Before
     public void setup() throws UserStoreManagementException {
-        userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), TEST_DEFAULT_TENANT);
+        userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(ReadConcern.MAJORITY, WriteConcern.MAJORITY),
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(ReadConcern.MAJORITY, WriteConcern.MAJORITY), TEST_DEFAULT_TENANT);
         userStore.ensureDefaultRolesExist();
         userStore.loadAndMigrateUsers();
         accessControlStore = new AccessControlStoreImpl(userStore);
