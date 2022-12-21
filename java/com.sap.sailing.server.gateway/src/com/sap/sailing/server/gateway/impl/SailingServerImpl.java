@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -78,9 +80,16 @@ public class SailingServerImpl extends SecuredServerImpl implements SailingServe
         return ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboardName);
     }
     
-    @Override 
-    public String getLeaderboardFromShardingKey(String shardingKey) {
-        return ShardingType.LEADERBOARDNAME.decodeShardingInfo(shardingKey);
+    /**
+     * Establishes a map with all leaderboardnames and their keys and takes the value for the according shardingkey.
+     */
+    @Override
+    public String getLeaderboardFromShardingKey(String shardingKey) throws Exception {
+        Map<String, String> mapping = new HashMap<>();
+        for (String leaderboard : getLeaderboardNames()) {
+            mapping.put(getLeaderboardFromShardingKey(leaderboard), leaderboard);
+        }
+        return mapping.get(shardingKey);
     }
     
     @Override
