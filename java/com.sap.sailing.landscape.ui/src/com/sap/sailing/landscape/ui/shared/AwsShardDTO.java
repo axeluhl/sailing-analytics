@@ -2,22 +2,22 @@ package com.sap.sailing.landscape.ui.shared;
 
 import java.util.ArrayList;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Named;
 
-public class AwsShardDTO implements IsSerializable, Named {
+public class AwsShardDTO implements Named {
     private static final long serialVersionUID = 1L;
     ArrayList<String> keys;
-    String targetGroupArn;
-    String targetGroupName;
-    String autoScalingGroupArn;
-    String autoScalingGroupName;
-    String autoBalancerArn;
-    String name;
-    String replicaName;
+    private String targetGroupArn;
+    private String targetGroupName;
+    private String autoScalingGroupArn;
+    private String autoScalingGroupName;
+    private String autoBalancerArn;
+    private String name;
+    private String replicaName;
 
-    public AwsShardDTO() {
-    };
+    @SuppressWarnings("unused") // for GWT serialisation only
+    private AwsShardDTO() {
+    }
 
     public AwsShardDTO(Iterable<String> keys, String targetGroupArn, String targetGroupName, String autoScalinggroupArn,
             String autoBalancerArn, String autoScalingGroupName, String name, String replicaName) {
@@ -38,48 +38,24 @@ public class AwsShardDTO implements IsSerializable, Named {
         return replicaName;
     }
 
-    public void setReplicaname(String replicaname) {
-        this.replicaName = replicaname;
-    }
-
     public ArrayList<String> getKeys() {
         return keys;
-    }
-
-    public void setKeys(ArrayList<String> keys) {
-        this.keys = keys;
     }
 
     public String getTargetgroupArn() {
         return targetGroupArn;
     }
 
-    public void setTargetgroupArn(String targetgroupArn) {
-        this.targetGroupArn = targetgroupArn;
-    }
-
     public String getTargetgroupName() {
         return targetGroupName;
-    }
-
-    public void setTargetgroupName(String targetgroupName) {
-        this.targetGroupName = targetgroupName;
     }
 
     public String getAutosclaingGroupArn() {
         return autoScalingGroupArn;
     }
 
-    public void setAutosclaingGroupArn(String autosclaingGroupArn) {
-        this.autoScalingGroupArn = autosclaingGroupArn;
-    }
-
     public String getAutobalancerArn() {
         return autoBalancerArn;
-    }
-
-    public void setAutobalancerArn(String autobalancerArn) {
-        this.autoBalancerArn = autobalancerArn;
     }
 
     public void setName(String name) {
