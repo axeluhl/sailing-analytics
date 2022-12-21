@@ -1,7 +1,7 @@
 package com.sap.sailing.landscape.ui.shared;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Named;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 /**
  * This class is supposed to represent leader board names. It's just a wrapper for ensuring that we can use the
@@ -10,21 +10,13 @@ import com.sap.sse.common.Named;
  * @author I569653
  *
  */
-
-public class LeaderboardDTO implements IsSerializable, Named {
+public class LeaderboardNameDTO extends NamedDTO {
     private static final long serialVersionUID = -173460185784328741L;
-    String name;
 
-    LeaderboardDTO() {
-    };
+    @SuppressWarnings({ "deprecation", "unused" })
+    private LeaderboardNameDTO() {} // for GWT serialisation only
 
-    public LeaderboardDTO(String name) {
-        this.name = name;
+    public LeaderboardNameDTO(String name) {
+        super(name);
     }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
 }
