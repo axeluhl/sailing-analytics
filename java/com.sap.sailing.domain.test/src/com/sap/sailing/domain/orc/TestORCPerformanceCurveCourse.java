@@ -7,11 +7,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.mockito.ArgumentMatchers;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
