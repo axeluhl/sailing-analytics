@@ -43,6 +43,6 @@ public class ScalableInteger implements AbstractScalarValue<Integer> {
 
     @Override
     public int compareTo(Integer o) {
-        return new Integer(value).compareTo(o);
+        return Integer.valueOf(value).compareTo(o);
     }
 }

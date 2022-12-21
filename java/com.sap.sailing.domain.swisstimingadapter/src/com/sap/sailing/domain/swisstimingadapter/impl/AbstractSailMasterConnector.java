@@ -550,7 +550,7 @@ public abstract class AbstractSailMasterConnector extends SailMasterTransceiverI
                         if (maxSequenceNumber != -1) {
                             logger.info("Requesting messages starting from sequence number " + (maxSequenceNumber + 1)+" in "+this);
                             // already received a numbered message; ask only for newer messages with greater sequence number
-                            lsnArgs.add(new Long(maxSequenceNumber + 1).toString());
+                            lsnArgs.add(Long.valueOf(maxSequenceNumber + 1).toString());
                         } else {
                             logger.info("Requesting messages starting from the beginning in "+this);
                             lsnArgs.add("1");
