@@ -1,7 +1,5 @@
 package com.sap.sse.security.userstore.mongodb;
 
-import com.mongodb.ReadConcern;
-import com.mongodb.WriteConcern;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.userstore.mongodb.impl.PersistenceFactoryImpl;
 
@@ -15,7 +13,7 @@ public interface PersistenceFactory {
     DomainObjectFactory getDefaultDomainObjectFactory();
     MongoObjectFactory getDefaultMongoObjectFactory();
 
-    DomainObjectFactory getDomainObjectFactory(ReadConcern readConcern, WriteConcern writeConcern);
+    DomainObjectFactory getDefaultMajorityDomainObjectFactory();
 
-    MongoObjectFactory getMongoObjectFactory(ReadConcern readConcern, WriteConcern writeConcern);
+    MongoObjectFactory getDefaultMajorityMongoObjectFactory();
 }
