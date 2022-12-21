@@ -8,10 +8,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+
+import javax.management.RuntimeErrorException;
+
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
@@ -46,8 +50,6 @@ public abstract class ShardProcedure<ShardingKey,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends AbstractAwsProcedureImpl<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
-    static final String SHARD_SUFFIX = "-S";
-    static final String TEMP_TARGETGROUP_SUFFIX = "-TMP";
     final static int NUMBER_OF_RULES_PER_REPLICA_SET = 5;
     final static int NUMBER_OF_STANDARD_RULES_FOR_SHARDING_RULE = 2;
     protected final String shardName;
@@ -165,60 +167,69 @@ public abstract class ShardProcedure<ShardingKey,
         Region getRegion() {
             return region;
         }
-
     }
 
     protected boolean isTargetgroupNameUnique(String name) {
-        final boolean ret;
         final Iterable<TargetGroup<ShardingKey>> targetGroups = getLandscape().getTargetGroups(region);
-        if (Util.size(Util.filter(targetGroups, t -> t.getName().equals(name))) != 0) {
-            ret = false;
-        } else {
-            ret = true;
-        }
-        return ret;
+        return Util.isEmpty(Util.filter(targetGroups, t -> t.getName().equals(name)));   
     }
 
-    protected Collection<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Set<String> shardingkeys,
-            TargetGroup<ShardingKey> targetgroup) throws Exception {
+    protected Iterable<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Set<String> shardingKeys,
+            TargetGroup<ShardingKey> targetGroup) throws Exception {
         // change ALB rules to new ones
         final Collection<Rule> rules = new ArrayList<Rule>();
         final Set<String> shardingKeyForConsumption = new HashSet<>();
-        shardingKeyForConsumption.addAll(shardingkeys);
+        shardingKeyForConsumption.addAll(shardingKeys);
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
-        while (!shardingKeyForConsumption.isEmpty()) {// first make space at priority 1 <- highest priority
+        while (!shardingKeyForConsumption.isEmpty()) {
             alb.shiftRulesToMakeSpaceAt(ruleIdx);
             final Collection<RuleCondition> conditions = convertShardingKeysToConditions(shardingKeyForConsumption);
             conditions.add(RuleCondition.builder().field("http-header")
                     .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
                             .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
                     .build());
-            alb.addRules(Rule.builder().priority("" + ruleIdx).conditions(conditions)
+            rules.add(Rule.builder().priority("" + ruleIdx).conditions(conditions)
                     .actions(Action.builder()
                             .forwardConfig(ForwardActionConfig.builder()
                                     .targetGroups(TargetGroupTuple.builder()
-                                            .targetGroupArn(targetgroup.getTargetGroupArn()).build())
+                                            .targetGroupArn(targetGroup.getTargetGroupArn()).build())
                                     .build())
                             .type(ActionTypeEnum.FORWARD).build())
-                    .build()).forEach(t -> rules.add(t));
+                    .build());
         }
-        return rules;
+        return alb.addRules(Util.toArray(rules, new Rule[1]));
     }
 
+    /**
+     * Search through all load balancers and returns the first load balancer with enough rules left for
+     * the new sharding keys + the replicaSet's rules. When no load balancer is found, a new one gets created. The replicaSet gets moved to the new load balancer.
+     */
     protected ApplicationLoadBalancer<ShardingKey> getFreeLoadbalancerAndMoveReplicaset() throws Exception {
-        final int requiredRules = numberOfRequiredRules(Util.size(shardingKeys)
-                + (replicaSet.getShards().size() + /* 5 std rules per replicaset */NUMBER_OF_RULES_PER_REPLICA_SET)
-                        * /* for guaranteeing availability */2);
+        int existingShardingRules = 0;
+        for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> s : replicaSet.getShards().entrySet()) {
+            existingShardingRules = existingShardingRules + Util.size(s.getKey().getRules());
+        }
+        final int requiredRules = numberOfRequiredRules(Util.size(shardingKeys))
+                + (existingShardingRules + /* 5 std rules per replicaset */NUMBER_OF_RULES_PER_REPLICA_SET);
         final ApplicationLoadBalancer<ShardingKey> res;
-        if (ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER
-                - Util.size(replicaSet.getLoadBalancer().getRules()) > requiredRules) {
-            // if the replicaset's loadbalancer has enough free rules left
+        if (Util.size(replicaSet.getLoadBalancerRules())
+                + numberOfRequiredRules(Util.size(shardingKeys)) < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
             res = replicaSet.getLoadBalancer();
         } else {
             // Another loadbalancer
             final Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers = getLandscape()
                     .getLoadBalancers(region);
-            ApplicationLoadBalancer<ShardingKey> alb = getLoadbalancerWithRulesLeft(loadBalancers,
+            final Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancersFiltered = Util.filter(loadBalancers,
+                    t -> {
+                        try {
+                            return !t.getArn().equals(replicaSet.getLoadBalancer().getArn());
+                        } catch (InterruptedException | ExecutionException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            throw new RuntimeException(e);
+                        }
+                    });
+            final ApplicationLoadBalancer<ShardingKey> alb = getDNSLoadbalancerWithRulesLeft(loadBalancersFiltered,
                     requiredRules + /* 5 default rules for the replica set */NUMBER_OF_RULES_PER_REPLICA_SET);
             if (alb != null) {
                 // There is an alb left with enough rules
@@ -228,49 +239,82 @@ public abstract class ShardProcedure<ShardingKey,
                 for (ApplicationLoadBalancer<ShardingKey> lb : loadBalancers) {
                     loadBalancerNames.add(lb.getName());
                 }
-                String name = getAvailableDNSMappedAlbName(loadBalancerNames);
+                final String name = getAvailableDNSMappedAlbName(loadBalancerNames);
                 // Create a new alb
-                alb = getLandscape().createLoadBalancer(name, region);
-                res = alb;
+                res = getLandscape().createLoadBalancer(name, region);
             }
-            changeReplicaSetLoadBalancer(alb, replicaSet);
+            changeReplicaSetLoadBalancer(res, replicaSet);
         }
+
         return res;
     }
+    
     /**
-     * This functions changes the {@code replicaSetToMode}'s load balancer to another one.
-     * This function contains a 6min sleep, which is necessary for ensuring that all DNS rules point to the new one. 
-     * This function can fail is the target group names are to long because of the {@code TargetGroup.TEMP_SUFFIX} suffix for temporary target groups.
-     * @param alb
-     *          application load balancer to move to
+     * This method changes the {@code replicaSetToMove}'s load balancer to another one. This method contains a 6min
+     * sleep, which is necessary for ensuring that all DNS rules point to the new one. This method can fail if the
+     * target group names are too long because of the {@link TargetGroup#TEMP_SUFFIX} suffix for temporary target
+     * groups.
+     * 
+     * @param targetAlb
+     *            application load balancer to move to
      * @param replicaSetToMove
-     *          replica set to move
+     *            replica set to move
      */
-    private void changeReplicaSetLoadBalancer(ApplicationLoadBalancer<ShardingKey> alb,
+    private void changeReplicaSetLoadBalancer(ApplicationLoadBalancer<ShardingKey> targetAlb,
             AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSetToMove) throws Exception {
         // Move replicaset to this alb with all shards
         // create temporary targetgroups
-        final TargetGroup<ShardingKey> targetMaster = replicaSetToMove.getMasterTargetGroup();
-        final TargetGroup<ShardingKey> targetPublic = replicaSetToMove.getPublicTargetGroup();
+        final Collection<TargetGroup<ShardingKey>> tempTargetGroups = new ArrayList<>();
+        final Collection<TargetGroup<ShardingKey>> originalTargetGroups = new ArrayList<>();
+        final Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment = new HashMap<>();
+        final Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups = new HashMap<>();
+        final Map<AwsShard<ShardingKey>, TargetGroup<ShardingKey>> shardToTempTargetGroup = new HashMap<>();
+        // add non sharding rules for replicaset
+        final Collection<Rule> tempRules = new ArrayList<>();
+        createTargetGroupsForMoving(shardToTempTargetGroup, tempTargetGroups, replicaSetToMove, targetGroupsToTempTargetgroups, originalTargetGroups, keysAssignment);
+        addRulesForMoving(targetAlb, shardToTempTargetGroup, tempRules, replicaSetToMove, targetGroupsToTempTargetgroups, originalTargetGroups, keysAssignment);
+        // set new DNS record -> overwrites old entry
+        final String hostname = replicaSetToMove.getHostname();
+        getLandscape().setDNSRecordToApplicationLoadBalancer(replicaSetToMove.getHostedZoneId(),
+                hostname, targetAlb, /* force */ true);
+        // wait until new DNS record is alive
+        for (int i = 0; i < 6; i++) {
+            Thread.sleep(AwsLandscape.DEFAULT_DNS_TTL_SECONDS * /* conversion seconds to ms */ 1000);
+            logger.info(()->("Still waiting for DNS record " + hostname));
+        }
+        logger.info(()->("Done waiting for DNS record " + hostname));
+        // remove all old rules pointing to original TargetGroups
+        final Collection<Rule> rulesToRemove = new ArrayList<>();
+        replicaSetToMove.getLoadBalancer().getRulesForTargetGroups(originalTargetGroups)
+                .forEach(t -> rulesToRemove.add(t));
+        rulesToRemove.add(replicaSetToMove.getDefaultRedirectRule());
+        getLandscape().deleteLoadBalancerListenerRules(region, rulesToRemove.toArray(new Rule[0]));
+        for (Entry<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> entry : targetGroupsToTempTargetgroups
+                .entrySet()) {
+            targetAlb.replaceTargetGroupInForwardRules(entry.getValue(), entry.getKey());
+        }
+        for (TargetGroup<ShardingKey> t : tempTargetGroups) {
+            getLandscape().deleteTargetGroup(t);
+        }
+    }
+    
+    private void createTargetGroupsForMoving(
+            Map<AwsShard<ShardingKey>, TargetGroup<ShardingKey>> shardToTempTargetGroup,
+            Collection<TargetGroup<ShardingKey>> tempTargetGroups,
+            AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSetToMove,
+            Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups,
+            Collection<TargetGroup<ShardingKey>> originalTargetGroups,
+            Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment) throws Exception {
         final TargetGroup<ShardingKey> targetgroupMasterTemp = getLandscape()
                 .copyTargetGroup(replicaSetToMove.getMasterTargetGroup(), TargetGroup.TEMP_SUFFIX);
         final TargetGroup<ShardingKey> targetgroupPublicTemp = getLandscape()
                 .copyTargetGroup(replicaSetToMove.getPublicTargetGroup(), TargetGroup.TEMP_SUFFIX);
-        final Collection<TargetGroup<ShardingKey>> temptargetgroups = new ArrayList<>();
-        final Collection<TargetGroup<ShardingKey>> originaltargetgroups = new ArrayList<>();
-        final Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment = new HashMap<>();
-        final Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups = new HashMap<>();
-        temptargetgroups.add(targetgroupMasterTemp);
-        temptargetgroups.add(targetgroupPublicTemp);
-        targetGroupsToTempTargetgroups.put(targetMaster, targetgroupMasterTemp);
-        targetGroupsToTempTargetgroups.put(targetPublic, targetgroupPublicTemp);
-        originaltargetgroups.add(targetMaster);
-        originaltargetgroups.add(targetPublic);
-        // add rules from replicaset
-        final Collection<Rule> tempRules = new ArrayList<Rule>();
-        alb.addRulesAssigningUnusedPriorities(true,
-                createRules(alb, targetgroupMasterTemp, targetgroupPublicTemp, true)).forEach(t -> tempRules.add(t));
-        // For each shard in replicaset -> move
+        tempTargetGroups.add(targetgroupMasterTemp);
+        tempTargetGroups.add(targetgroupPublicTemp);
+        targetGroupsToTempTargetgroups.put(replicaSetToMove.getMasterTargetGroup(), targetgroupMasterTemp);
+        targetGroupsToTempTargetgroups.put(replicaSetToMove.getPublicTargetGroup(), targetgroupPublicTemp);
+        originalTargetGroups.add(replicaSetToMove.getMasterTargetGroup());
+        originalTargetGroups.add(replicaSetToMove.getPublicTargetGroup());
         for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSetToMove.getShards().entrySet()) {
             final TargetGroup<ShardingKey> tempShardTargetGroup = getLandscape()
                     .copyTargetGroup(shard.getKey().getTargetGroup(), TargetGroup.TEMP_SUFFIX);
@@ -278,35 +322,31 @@ public abstract class ShardProcedure<ShardingKey,
             for (ShardingKey key : shard.getValue()) {
                 s.add(key.toString());
             }
+            shardToTempTargetGroup.put(shard.getKey(), tempShardTargetGroup);
             keysAssignment.put(shard.getKey().getTargetGroup(), s);
-            temptargetgroups.add(tempShardTargetGroup);
-            addShardingRules(alb, s, tempShardTargetGroup).forEach(t -> tempRules.add(t));
-            originaltargetgroups.add(shard.getKey().getTargetGroup());
+            tempTargetGroups.add(tempShardTargetGroup);
+            originalTargetGroups.add(shard.getKey().getTargetGroup());
             targetGroupsToTempTargetgroups.put(shard.getKey().getTargetGroup(), tempShardTargetGroup);
         }
-        // set new DNS record -> overwrites old entry
-        getLandscape().setDNSRecordToApplicationLoadBalancer(replicaSetToMove.getHostedZoneId(),
-                replicaSetToMove.getHostname(), alb, /* force */ true);
-        // wait until new DNS record is alive
-        for (int i = 0; i < 6; i++) {
-            Thread.sleep(AwsLandscape.DEFAULT_DNS_TTL_SECONDS * /* conversion seconds to ms */ 1000);
-            logger.info("Still waiting.");
-        }
-        // remove all old rules pointing to original TargetGroups
-        final Collection<Rule> rulesToRemove = new ArrayList<>();
-        replicaSetToMove.getLoadBalancer().getRulesForTargetGroups(originaltargetgroups)
-                .forEach(t -> rulesToRemove.add(t));
-        ;
-        rulesToRemove.add(replicaSetToMove.getDefaultRedirectRule());
-        getLandscape().deleteLoadBalancerListenerRules(region, rulesToRemove.toArray(new Rule[0]));
-        for (Entry<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> entry : targetGroupsToTempTargetgroups
-                .entrySet()) {
-            alb.replaceTargetGroupInForwardRules(entry.getValue(), entry.getKey());
-        }
-        for (TargetGroup<ShardingKey> t : temptargetgroups) {
-            getLandscape().deleteTargetGroup(t);
+    }
+
+    private void addRulesForMoving(ApplicationLoadBalancer<ShardingKey> targetAlb,
+            Map<AwsShard<ShardingKey>, TargetGroup<ShardingKey>> shardToTempTargetGroup, Collection<Rule> tempRules,
+            AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSetToMove,
+            Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups,
+            Collection<TargetGroup<ShardingKey>> originalTargetGroups,
+            Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment) throws Exception {
+        targetAlb.addRulesAssigningUnusedPriorities(true,
+                createRules(targetAlb, targetGroupsToTempTargetgroups.get(replicaSetToMove.getMasterTargetGroup()),
+                        targetGroupsToTempTargetgroups.get(replicaSetToMove.getPublicTargetGroup()), true))
+                .forEach(t -> tempRules.add(t));
+        for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSetToMove.getShards().entrySet()) {
+            addShardingRules(targetAlb, keysAssignment.get(shard.getKey().getTargetGroup()),
+                    shardToTempTargetGroup.get(shard.getKey())).forEach(t -> tempRules.add(t));
         }
     }
+    
+    
 
     protected int numberOfRequiredRules(int numberOfLeaderboards) {
         return (int) (numberOfLeaderboards / NUMBER_OF_RULES_PER_REPLICA_SET - NUMBER_OF_STANDARD_RULES_FOR_SHARDING_RULE)
@@ -355,8 +395,16 @@ public abstract class ShardProcedure<ShardingKey,
     private String getHostName() throws Exception {
         return replicaSet.getHostname();
     }
-
-    private ApplicationLoadBalancer<ShardingKey> getLoadbalancerWithRulesLeft(
+    
+    /**
+     * Returns a DNS-Mapped load balancer with enough rules left 
+     * @param loadBalancers
+     *          list of all load balancers to search through.
+     * @param numberOfRules
+     *          number of required rules left in this load balancer
+     * @return
+     */        
+    private ApplicationLoadBalancer<ShardingKey> getDNSLoadbalancerWithRulesLeft(
             Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers, int numberOfRules) {
         final Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancersFiltered = Util.filter(loadBalancers,
                 t -> t.getName().startsWith(ApplicationLoadBalancer.DNS_MAPPED_ALB_NAME_PREFIX));
@@ -370,10 +418,10 @@ public abstract class ShardProcedure<ShardingKey,
         return res;
     }
 
-    private static Collection<RuleCondition> convertShardingKeysToConditions(Set<String> shardingkeys) {
+    private static Collection<RuleCondition> convertShardingKeysToConditions(Set<String> shardingKeys) {
         final Collection<RuleCondition> res = new ArrayList<RuleCondition>();
         final Collection<String> remove = new ArrayList<String>();
-        final Iterator<String> iter = shardingkeys.iterator();
+        final Iterator<String> iter = shardingKeys.iterator();
         int idx = 0;
         while (idx < 3 && iter.hasNext()) {
             String shardingkey = iter.next();
@@ -381,7 +429,7 @@ public abstract class ShardProcedure<ShardingKey,
             idx++;
         }
         res.add(RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(remove)).build());
-        shardingkeys.removeAll(remove);
+        shardingKeys.removeAll(remove);
         return res;
     }
 
