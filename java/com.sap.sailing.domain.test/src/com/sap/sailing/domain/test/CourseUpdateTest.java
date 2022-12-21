@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -50,6 +51,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHa
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -96,6 +98,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                        setTrackedRace((DynamicTrackedRaceImpl) trackedRace);
                     }
                 },
                 /* delayToLiveInMillis */0l, /* millisecondsOverWhichToAverageWind */30000, /* simulator */null, /* courseDesignUpdateURI */
@@ -113,9 +116,12 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
         addListenersForStoredDataAndStartController(receivers);
+        final Semaphore semaphore = new Semaphore(0);
         for (final Receiver receiver : receivers) {
+            receiver.callBackWhenLoadingQueueIsDone(r->semaphore.release());
             addReceiverToStopDuringTearDown(receiver);
         }
+        semaphore.acquire(receivers.size()); // continue only after all receivers have finished loading their queue
         race = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
         course = race.getCourse();
         assertNotNull(course);
@@ -339,5 +345,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         super.tearDown();
         routeDataFuture = null;
+        domainFactory.removeRace(getTracTracRace().getEvent(), getTracTracRace(),
+                getTrackedRace().getTrackedRegatta().getRegatta(), /* trackedRegattaRegistry */ null);
     }
 }
