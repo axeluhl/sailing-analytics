@@ -78,7 +78,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) throws Exception {
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
         super(replicaSetAndServerName, hostname, master, replicas);
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
@@ -113,7 +113,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             AwsLandscape<ShardingKey> landscape, CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) throws Exception {
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
                 allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations,
                 dnsCache);
