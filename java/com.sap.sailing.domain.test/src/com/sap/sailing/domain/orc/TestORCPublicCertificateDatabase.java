@@ -152,7 +152,7 @@ public class TestORCPublicCertificateDatabase {
 
     @FailIfNoValidOrcCertificates
     @Test
-    public void testGetCertificate() throws Exception {        
+    public void testGetCertificate() throws Exception {
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
         final ORCCertificate cert = certificates.stream().findFirst().get();
         Iterable<CertificateHandle> certHandles = db.search(/* country */ null, LocalDate.now().getYear(), /* referenceNumber */ null, cert.getBoatName(),
