@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -115,9 +116,12 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
         addListenersForStoredDataAndStartController(receivers);
+        final Semaphore semaphore = new Semaphore(0);
         for (final Receiver receiver : receivers) {
+            receiver.callBackWhenLoadingQueueIsDone(r->semaphore.release());
             addReceiverToStopDuringTearDown(receiver);
         }
+        semaphore.acquire(receivers.size()); // continue only after all receivers have finished loading their queue
         race = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
         course = race.getCourse();
         assertNotNull(course);
