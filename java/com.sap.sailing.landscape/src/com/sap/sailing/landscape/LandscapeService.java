@@ -213,6 +213,10 @@ public interface LandscapeService {
      * replicas; wait until they are all ready, then register master and new replicas in TGs and de-register old replicas.
      * Then terminate old auto-scaling replicas and update any unmanaged replica in-place. When the number of auto-scaling
      * replicas has reached the desired size of the auto-scaling group, terminate the replicas created explicitly.
+     * 
+     * Shards are updated by spinning up replicas for the temporary transition and changing the auto scaling config.
+     * After that all shard replicas are getting shutdown and restarted with the new launch config.
+     * It's expected that the replica set has its own auto scaling group if it has shards.
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> upgradeApplicationReplicaSet(AwsRegion region,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
@@ -409,5 +413,4 @@ public interface LandscapeService {
     void addShard(Iterable<String> selectedLeaderboardNames, 
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, 
             AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName) throws Exception;
-
 }

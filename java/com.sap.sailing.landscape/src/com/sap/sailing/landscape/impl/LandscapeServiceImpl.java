@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -865,7 +867,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             String replicaReplicationBearerToken)
             throws MalformedURLException, IOException, TimeoutException, Exception {
         if (replicaSet.isLocalReplicaSet()) {
-            throw new IllegalArgumentException("A replica set cannot upgrade itself. Current replica set: "+ServerInfo.getName());
+            throw new IllegalArgumentException(
+                    "A replica set cannot upgrade itself. Current replica set: " + ServerInfo.getName());
+        }
+        if (replicaSet.getShards().size() > 0 && replicaSet.getAutoScalingGroup() == null) {
+            throw new IllegalStateException(
+                    "A replica set is expected to have an auto scaling group if it has shards");
         }
         final Release release = getRelease(releaseOrNullForLatestMaster);
         final String effectiveReplicaReplicationBearerToken = getEffectiveBearerToken(replicaReplicationBearerToken);
@@ -891,7 +898,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingAnalyticsProcess<String> additionalReplicaStarted = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
                 replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         if (replicaSet.getAutoScalingGroup() != null) {
-            getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), affectedAutoscaligGroups, replicaSet.getName(), release);
+            getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(),
+                    affectedAutoscaligGroups, replicaSet.getName(), release);
         }
         final SailingAnalyticsProcess<String> master = replicaSet.getMaster();
         master.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
@@ -900,13 +908,31 @@ public class LandscapeServiceImpl implements LandscapeService {
         master.waitUntilReady(Optional.of(Duration.ONE_DAY)); // wait a little longer since master may need to re-load many races
         logger.info("Launching upgrade replicas based on current set of replicas for replica set "+replicaSet.getName());
         final Iterable<SailingAnalyticsProcess<String>> temporaryUpgradeReplicas = launchUpgradeReplicasAndWaitUntilReady(
-                replicaSet, release, effectiveReplicaReplicationBearerToken, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                replicaSet, release, effectiveReplicaReplicationBearerToken, Optional.ofNullable(optionalKeyName),
+                privateKeyEncryptionPassphrase);
+        List<SailingAnalyticsProcess<String>> temporaryUpgradeReplicasManipulatable = Util
+                .asList(temporaryUpgradeReplicas);
         // register master again with master and public target group
-        logger.info("Adding master "+master+" and dedicated upgraded temporary replicas to target groups "+
-                replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
+        logger.info("Adding master " + master + " and dedicated upgraded temporary replicas to target groups "
+                + replicaSet.getPublicTargetGroup() + " and " + replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().addTarget(master.getHost());
         replicaSet.getMasterTargetGroup().addTarget(master.getHost());
-        replicaSet.getPublicTargetGroup().addTargets(Util.map(temporaryUpgradeReplicas, temporaryUpgradeReplica->temporaryUpgradeReplica.getHost()));
+        final Map<TargetGroup<String>, Iterable<AwsInstance<String>>> tempShardingTargets = new HashMap<>();
+        Iterator<AwsShard<String>> iter = replicaSet.getShards().keySet().iterator();
+        while (iter.hasNext()) {
+            TargetGroup<String> t = iter.next().getTargetGroup();
+            Collection<AwsInstance<String>> hosts = new ArrayList<>();
+            final int numberOfTargets = t.getRegisteredTargets().size();
+            for (int i = 0; i < numberOfTargets; i++) {
+                t.addTarget(temporaryUpgradeReplicasManipulatable.get(0).getHost());
+                hosts.add(temporaryUpgradeReplicasManipulatable.get(0).getHost());
+                temporaryUpgradeReplicasManipulatable.remove(0);
+            }
+            tempShardingTargets.put(t, hosts);
+        }
+        replicaSet.getPublicTargetGroup().addTargets(Util.map(temporaryUpgradeReplicasManipulatable,
+                temporaryUpgradeReplica -> temporaryUpgradeReplica.getHost()));
+        tempShardingTargets.put(replicaSet.getPublicTargetGroup(), Util.map(temporaryUpgradeReplicasManipulatable, temporaryUpgradeReplica->temporaryUpgradeReplica.getHost()));
         // if a replica was spun up (additionalReplicaStarted), remove from public target group and terminate:
         if (additionalReplicaStarted != null) {
             replicasToStopAfterUpgradingMaster.add(additionalReplicaStarted);
@@ -942,20 +968,29 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         final Iterable<SailingAnalyticsProcess<String>> newUpgradedReplicas;
         if (autoScalingGroup != null && autoScalingReplicaCount > 0) {
-            logger.info("Now waiting until "+autoScalingReplicaCount+" auto-scaling replicas are ready before taking down dedicated temporary upgrade replicas");
-            // Note: the wait call returns *all* of the master's replicas, not only the auto-scaling ones; it's the predicate that
+            logger.info("Now waiting until " + autoScalingReplicaCount
+                    + " auto-scaling replicas are ready before taking down dedicated temporary upgrade replicas");
+            // Note: the wait call returns *all* of the master's replicas, not only the auto-scaling ones; it's the
+            // predicate that
             // filters them down to the auto-scaling ones, counts them and compares them to the required count
-            newUpgradedReplicas = Wait.wait(()->master.getReplicas(Landscape.WAIT_FOR_PROCESS_TIMEOUT, new SailingAnalyticsHostSupplier<String>(), new SailingAnalyticsProcessFactory(this::getLandscape)),
-                    replicas->Util.size(       
-                            Util.filter(replicas,
-                                    replica->replica.getHost().isManagedByAutoScalingGroup(Collections.singleton(autoScalingGroup)))) >= autoScalingReplicaCount,
-                      /* retryOnException */ true,
-                      Optional.of(Duration.ONE_DAY), /* duration between attempts */ Duration.ONE_SECOND.times(30),
-                      Level.INFO, "Waiting for "+autoScalingReplicaCount+" auto-scaling replicas to become ready");
+            newUpgradedReplicas = Wait.wait(() -> master.getReplicas(Landscape.WAIT_FOR_PROCESS_TIMEOUT,
+                    new SailingAnalyticsHostSupplier<String>(), new SailingAnalyticsProcessFactory(this::getLandscape)),
+                    replicas -> {
+                        int size = Util.size(Util.filter(replicas,
+                                replica -> replica.getHost().isManagedByAutoScalingGroup(affectedAutoscaligGroups)));
+                        logger.info("Until now there are " + size + " autoscaling replicas healthy");
+                        return size >= autoScalingReplicaCount;
+                    }, /* retryOnException */ true, Optional.of(Duration.ONE_DAY),
+                    /* duration between attempts */ Duration.ONE_SECOND.times(30), Level.INFO,
+                    "Waiting for " + autoScalingReplicaCount + " auto-scaling replicas to become ready");
         } else {
             logger.info("No auto-scaling group or auto-scaling group did not have managed instances; using only the upgraded unmanaged replicas "+
                     newUpgradedUnmanagedReplicas);
             newUpgradedReplicas = newUpgradedUnmanagedReplicas;
+        }
+        logger.info("Removing targets for all temporary upgrade replicas " + temporaryUpgradeReplicas);
+        for (Entry<TargetGroup<String>, Iterable<AwsInstance<String>>> entry : tempShardingTargets.entrySet()) {
+            entry.getKey().removeTargets(entry.getValue());
         }
         logger.info("Stopping/terminating all temporary upgrade replicas "+temporaryUpgradeReplicas);
         for (final SailingAnalyticsProcess<String> upgradeReplica : temporaryUpgradeReplicas) {
@@ -1082,19 +1117,29 @@ public class LandscapeServiceImpl implements LandscapeService {
      */
     @Override
     public SailingAnalyticsProcess<String> ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
-            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase,
-            final String effectiveReplicaReplicationBearerToken)
-            throws Exception, MalformedURLException, IOException, TimeoutException, InterruptedException,
-            ExecutionException {
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            final String effectiveReplicaReplicationBearerToken) throws Exception, MalformedURLException, IOException,
+            TimeoutException, InterruptedException, ExecutionException {
         final Set<SailingAnalyticsProcess<String>> replicasToStopReplicating = new HashSet<>();
         Util.addAll(replicaSet.getReplicas(), replicasToStopReplicating);
         final SailingAnalyticsProcess<String> additionalReplicaStarted;
-        if (Util.isEmpty(replicaSet.getReplicas())) {
+        if (Util.isEmpty(Util.filter(replicaSet.getReplicas(), replica -> {
+            try {
+                // returns true if the replica is not manges by a shard.
+                return Util.contains(Util.map(replicaSet.getAutoScalingGroup().getAutoScalingGroup().instances(),
+                        t -> t.instanceId()), replica.getHost().getInstanceId());
+            } catch (InterruptedException | ExecutionException e1) {
+                e1.printStackTrace();
+                logger.log(Level.SEVERE, e1.getMessage());
+                throw new RuntimeException(e1.getMessage());
+            }
+        }))) {
             logger.info("No replica found for replica set " + replicaSet.getName()
                     + "; spinning one up and waiting for it to become healthy");
-            additionalReplicaStarted = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
-                    privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
+            additionalReplicaStarted = launchReplicaAndWaitUntilHealthy(replicaSet,
+                    Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase,
+                    effectiveReplicaReplicationBearerToken);
             replicasToStopReplicating.add(additionalReplicaStarted);
         } else {
             additionalReplicaStarted = null;
