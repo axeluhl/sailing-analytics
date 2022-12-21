@@ -45,6 +45,7 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     static final Pattern ALB_NAME_PATTERN = Pattern.compile(DNS_MAPPED_ALB_NAME_PREFIX+"(.*)$");
     static final int MAX_ALBS_PER_REGION = 20;
     static final int MAX_CONDITIONS_PER_RULE = 5;
+    public static final String DEFAULT_RULE_PRIORITY = "Default";
     
     /**
      * The maximum {@link Rule#priority()} that can be used within a listener
@@ -117,7 +118,7 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Iterable<Rule> shiftRulesToMakeSpaceAt(int index) throws IllegalStateException;
     
     /**
-     * 
+     * Returns the priority which should be used as the next sharding priority.
      * @param hostname
      *          hostname of replica set from which the shard gets created
      * @return priority of a rule with hostname as Host +1, if the rule it was found in is a redirect or the index of the Rule if it is a Forward.
@@ -127,7 +128,7 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      *          if the found priority is higher than the {@code MAX_PRIORITY}
      */         
     
-    int getFirstShardingPriority(String hostname) throws Exception;
+    int getFirstShardingPriority(String hostname) throws IllegalStateException;
     
     Iterable<TargetGroup<ShardingKey>> getTargetGroups();
 

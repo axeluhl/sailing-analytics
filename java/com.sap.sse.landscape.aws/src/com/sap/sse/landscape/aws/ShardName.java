@@ -6,7 +6,7 @@ package com.sap.sse.landscape.aws;
  * the target groups tag with the key {@link #TAG_KEY} and creating a {@link ShardName} by a replica set and the (user-)
  * entered shardname. Those created values should be used as names in the AWS landscape.
  * 
- * Only a-z, A-Z and 0-9 are allowed in a shard name due to incoding and there are target group lengh restriction.
+ * Only a-z, A-Z and 0-9 are allowed in a shard name due to encoding and there are target group length restrictions.
  * 
  * @author I569653
  *
@@ -41,8 +41,6 @@ public class ShardName {
     public static ShardName parse(String shardTargetGroupName, String tagString) {
         // Possible options: S-{Replicaname}-{Shardname} or S-{Replicaname}-{Shardname[0:2]}--{Shardname[-2:0]}
         final String shardname, replicaname;
-        
-
         int idxDoubleHyphen = shardTargetGroupName.indexOf(NAMESEPARATOR);
         if (tagString == null || tagString.isEmpty()) {
             final int idxHyphen1 = shardTargetGroupName.lastIndexOf(SEPARATOR);
@@ -66,8 +64,8 @@ public class ShardName {
     /**
      * Creates a ShardName from {@code replicaSetName} and {@code shardname}. {@code shardname} should only contain a-z,
      * A-Z and numbers. This function builds from those inputs a valid shard-target group name. This can have two
-     * patterns: Firstly, S-{replica set name}-{shardname} or S-{relica set name}-{shard name [0:2]}--{shard name
-     * [-2:0]}
+     * patterns: Firstly, S-{replica set name}-{shardname} or S-{relica set name}-{shard name [0:{@code PRE_LENGTH}]}--{shard name
+     * [-{@code POST_LENGTH}:0]}
      * 
      * @param replicaSetName
      *            Replica set name of the shard

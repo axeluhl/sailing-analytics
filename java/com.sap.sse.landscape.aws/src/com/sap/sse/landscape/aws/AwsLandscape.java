@@ -783,15 +783,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
     
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoscalingParent,
             String shardname, TargetGroup<ShardingKey> targetgroup, Optional<Tags> tags);
     
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(
             int instanceWarmupTimeInSeconds, String shardname, TargetGroup<ShardingKey> targetgroup, int maxRequestPerTarget, com.sap.sse.landscape.Region region);
     
-    public Iterable<TagDescription> getTargetGroupTags(String arn, com.sap.sse.landscape.Region region);
+    Iterable<TagDescription> getTargetGroupTags(String arn, com.sap.sse.landscape.Region region);
     
     /**
      * 
@@ -811,5 +811,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * @return
      *          Returns the added Tag
      */
-    public Tags addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
+    Tags addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
+    
+    String getAutoScalingGroupName(String replicaSetName);
 }
