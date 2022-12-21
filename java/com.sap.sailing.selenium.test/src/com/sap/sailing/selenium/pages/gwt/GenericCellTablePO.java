@@ -1,6 +1,10 @@
 package com.sap.sailing.selenium.pages.gwt;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -14,6 +18,8 @@ import org.openqa.selenium.WebElement;
  *   The type of the data entries the table contains.
  */
 public class GenericCellTablePO<T extends DataEntryPO> extends CellTablePO<T> {
+    private static final Logger logger = Logger.getLogger(GenericCellTablePO.class.getName());
+
     /**
      * <p></p>
      * 
@@ -66,18 +72,24 @@ public class GenericCellTablePO<T extends DataEntryPO> extends CellTablePO<T> {
         @Override
         public <S extends CellTablePO<T>> T createEntry(S table, WebElement element) {
             Class<?> clazz = table.getClass();
-            
-            while(clazz != null) {
+            final List<Exception> exceptionsCaught = new ArrayList<>();
+            while (clazz != null) {
                 try {
                     Constructor<T> constructor = this.type.getConstructor(clazz, WebElement.class);
-                    
                     return constructor.newInstance(table, element);
                 } catch (Exception exception) {
                     clazz = clazz.getSuperclass();
+                    exceptionsCaught.add(exception);
                 }
             }
-            
-            throw new RuntimeException("Can't create DataEntry of type " + this.type);
+            logger.warning("Unable to construct a DataEntryPO of type " + this.type.getName() + " for table " + table
+                    + " of type " + (table == null ? null : table.getClass().getName()) + " from web element "
+                    + element);
+            for (final Exception e : exceptionsCaught) {
+                logger.log(Level.WARNING, "Exception caught while trying to create a DataEntryPO of type "+this.type.getName(), e);
+            }
+            throw new RuntimeException("Can't create DataEntry of type " + this.type + " on table of type "
+                    + table.getClass().getName() + " on web element " + element);
         }
     }
     
