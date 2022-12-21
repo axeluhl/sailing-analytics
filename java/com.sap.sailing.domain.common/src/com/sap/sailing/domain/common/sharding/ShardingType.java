@@ -32,17 +32,29 @@ public enum ShardingType {
         if (shardingInfo.startsWith(prefix)) {
             return shardingInfo;
         }
-        return new StringBuilder().append(prefix)
-                .append(normalize(shardingInfo))
-                .toString();
+        return encodeShardingInfo(shardingInfo);
     }
     
-    public String decodeShardingInfo(String shardingKey) {
+    public String encodeShardingInfo(String shardingInfo) {
+        return new StringBuilder().append(prefix).append(normalize(shardingInfo)).toString();
+    }
+    
+    /**
+     * Trims the sharding key, via cutting of the prefix.
+     * Because of {@link normalize}, the shardinginfo may gets manipulated.
+     * @param shardingKey
+     *          sharding key from encodeShardingInfo
+     * @return
+     *          hopefully the sharding info
+     */
+    public String trimShardingInfo(String shardingKey) {
+        final String ret; 
         if (shardingKey.startsWith(prefix)) {
-            return shardingKey.substring(prefix.length());
+            ret = shardingKey.substring(prefix.length());
         } else {
-            return shardingKey;
+            ret = shardingKey;
         }
+        return ret;
     }
 
     private String normalize(String replace) {
