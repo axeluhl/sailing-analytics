@@ -7,6 +7,7 @@ import org.bson.Document;
 import org.junit.After;
 
 import com.mongodb.ConnectionString;
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -81,10 +82,10 @@ public abstract class AbstractStoreMergeTest {
 
     protected void setUp(String sourceVariant, String targetVariant) throws IOException, UserStoreManagementException {
         cfgForTarget = MongoDBConfiguration.getDefaultTestConfiguration();
-        targetDb = cfgForTarget.getService().getDB();
+        targetDb = cfgForTarget.getService().getDB().withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY);
         fill(targetVariant, targetDb);
         cfgForSource = new MongoDBConfiguration(new ConnectionString(importSourceMongoDbUri));
-        fill(sourceVariant, cfgForSource.getService().getDB());
+        fill(sourceVariant, cfgForSource.getService().getDB().withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY));
         merger = new SecurityStoreMerger(cfgForTarget, defaultCreationGroupNameForTarget);
         targetUserStore = merger.getTargetUserStore();
         targetAccessControlStore = merger.getTargetAccessControlStore();
@@ -92,7 +93,7 @@ public abstract class AbstractStoreMergeTest {
     
     @After
     public void tearDown() {
-        cfgForSource.getService().getDB().drop();
+        cfgForSource.getService().getDB().withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY).drop();
     }
 
     private void fill(final String variant, final MongoDatabase db) throws IOException {
