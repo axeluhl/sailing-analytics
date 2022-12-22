@@ -72,8 +72,8 @@
         <activity
             android:name=".ui.activities.LeaderboardWebViewActivity"
             android:label="@string/title_activity_leaderboard"
-            android:screenOrientation="portrait">
             android:exported="true"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.LeaderboardWebViewActivity"/>
@@ -81,16 +81,16 @@
         <activity
             android:name=".ui.activities.RegattaActivity"
             android:label="@string/title_activity_regatta"
-            android:screenOrientation="portrait">
             android:exported="true"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.StartActivity"/>
         </activity>
         <activity
             android:name=".ui.activities.BuoyActivity"
-            android:screenOrientation="portrait">
             android:exported="true"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.StartActivity"/>
@@ -98,8 +98,8 @@
         <activity
             android:name=".ui.activities.TrackingActivity"
             android:label="@string/title_activity_tracking"
-            android:screenOrientation="portrait">
             android:exported="true"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.StartActivity"/>
