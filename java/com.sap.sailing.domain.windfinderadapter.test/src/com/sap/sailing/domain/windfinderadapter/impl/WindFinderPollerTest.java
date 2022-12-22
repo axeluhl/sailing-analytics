@@ -2,8 +2,8 @@ package com.sap.sailing.domain.windfinderadapter.impl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +45,7 @@ public class WindFinderPollerTest {
         when(mockedTrackedRace.recordWind(any(Wind.class), any(WindSourceWithAdditionalID.class))).thenAnswer(new Answer<Boolean>() {
             @Override
             public Boolean answer(InvocationOnMock invocation) throws Throwable {
-                wind.add(new Pair<>(invocation.getArgumentAt(0, Wind.class), invocation.getArgumentAt(1, WindSourceWithAdditionalID.class)));
+                wind.add(new Pair<>(invocation.getArgument(0, Wind.class), invocation.getArgument(1, WindSourceWithAdditionalID.class)));
                 synchronized (monitor) {
                     monitor.notifyAll();
                 }
@@ -55,7 +55,7 @@ public class WindFinderPollerTest {
         when(mockedTrackedRace.recordWind(any(Wind.class), any(WindSourceWithAdditionalID.class), /* applyFilter */ anyBoolean())).thenAnswer(new Answer<Boolean>() {
             @Override
             public Boolean answer(InvocationOnMock invocation) throws Throwable {
-                wind.add(new Pair<>(invocation.getArgumentAt(0, Wind.class), invocation.getArgumentAt(1, WindSourceWithAdditionalID.class)));
+                wind.add(new Pair<>(invocation.getArgument(0, Wind.class), invocation.getArgument(1, WindSourceWithAdditionalID.class)));
                 return true;
             }
         });

@@ -10,7 +10,7 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -53,9 +53,9 @@ public class TrackedRaceCenterTest {
     @Before
     public void setUp() {
         trackedRace = mock(DynamicTrackedRaceImpl.class);
-        when(trackedRace.getCenterOfCourse(Matchers.any(TimePoint.class))).thenCallRealMethod();
-        when(trackedRace.getApproximatePosition(Matchers.any(Waypoint.class), Matchers.any(TimePoint.class))).thenCallRealMethod();
-        when(trackedRace.getApproximatePosition(Matchers.any(Waypoint.class), Matchers.any(TimePoint.class), Matchers.any(MarkPositionAtTimePointCache.class))).thenCallRealMethod();
+        when(trackedRace.getCenterOfCourse(ArgumentMatchers.any(TimePoint.class))).thenCallRealMethod();
+        when(trackedRace.getApproximatePosition(ArgumentMatchers.any(Waypoint.class), ArgumentMatchers.any(TimePoint.class))).thenCallRealMethod();
+        when(trackedRace.getApproximatePosition(ArgumentMatchers.any(Waypoint.class), ArgumentMatchers.any(TimePoint.class), ArgumentMatchers.any(MarkPositionAtTimePointCache.class))).thenCallRealMethod();
         RaceDefinition race = mock(RaceDefinition.class);
         when(trackedRace.getRace()).thenReturn(race);
         mark1 = new MarkImpl("1");
