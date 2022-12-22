@@ -96,14 +96,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         publicTargetGroup = new CompletableFuture<>();
         resourceRecordSet = new CompletableFuture<>();
         shards = new HashMap<>();
+        try {
             allLoadBalancersInRegion.thenCompose(loadBalancers->
                 allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
                     allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
                         allAutoScalingGroups.thenCompose(autoScalingGroups->
                             allLaunchConfigurations.handle((launchConfigurations, e)->establishState(
                                     loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, launchConfigurations, dnsCache))))))
-                    .handle((v, e) -> {
-                        if (e != null) {
                 .handle((v, e)->{
                     if (e != null) {
                         logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
