@@ -10,5 +10,5 @@
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="com.sap.sailing.declination"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="2022 2022 1"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.declination"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="--add-opens java.base/java.lang=ALL-UNNAMED -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080"/>
 </launchConfiguration>
