@@ -26,7 +26,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.mongodb.ConnectionString;
@@ -265,7 +265,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
         Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
-                Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
+                Mockito.any(WithQualifiedObjectIdentifier.class), ArgumentMatchers.<PublicReadableActions> any());
         // Setup source service
         RacingEventServiceImpl sourceService = Mockito.spy(new RacingEventServiceImpl());
         Mockito.doReturn(securityService).when(sourceService).getSecurityService();

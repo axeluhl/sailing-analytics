@@ -3089,7 +3089,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         List<Double> values = new ArrayList<Double>();
                         List<CompetitorDTO> competitorDTOs = new ArrayList<>();
                         for (Competitor competitor : e.getValue()) {
-                            values.add(new Double(rank));
+                            values.add(Double.valueOf(rank));
                             competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
                             rank++;
                         }

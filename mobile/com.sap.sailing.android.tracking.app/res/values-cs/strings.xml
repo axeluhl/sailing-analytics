@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+    
+    <string name="app_name">"SAP Sail InSight"</string>
+    <string name="options_menu_settings">"Nastavení"</string>
+    <string name="options_menu_checkout">"Odhlásit"</string>
+    <string name="options_add_team_photo">"Přidat týmovou fotografii"</string>
+    <string name="options_replace_team_photo">"Nahradit týmovou fotografii"</string>
+    <string name="settings_category_other">"Další nastavení"</string>
+    <string name="device_identifier">"Identifikátor zařízení"</string>
+    <string name="tracker_started">"Trasování bylo úspěšně zahájeno."</string>
+    <string name="tracker_stopped">"Trasování bylo úspěšně zastaveno."</string>
+    <string name="title_activity_regatta">"Regata"</string>
+    <string name="title_activity_leaderboard">"Výsledková tabule"</string>
+    <string name="title_activity_start">"Nastavit GPS lokátor"</string>
+    <string name="title_activity_tracking">"Trasování"</string>
+    <string name="please_confirm">"Potvrďte"</string>
+    <string name="do_you_really_want_to_stop_tracking">"Chcete trasování opravdu zastavit?"</string>
+    <string name="add_team_photo">"Přidat týmovou fotografii"</string>
+    <string name="upload_in_progress">"Uploadování..."</string>
+    <string name="upload_retry">"Chyba při uploadu.\nKlepnutím pokus zopakujte."</string>
+    <string name="upload_io_error">"Chyba při uploadu obrázku:"</string>
+    <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">"Chcete použít stávající obrázek, nebo pořídit nový?"</string>
+    <string name="existing_image">"Stávající"</string>
+    <string name="take_photo">"Pořídit fotografii"</string>
+    <string name="add_photo_select">"Fotografie"</string>
+    <string name="checking_in">"Přihlašování..."</string>
+    <string name="checking_out">"Odhlašování..."</string>
+    <string name="getting_event">"Načítání informací o události..."</string>
+    <string name="getting_leaderboard">"Načítání výsledkové tabule..."</string>
+    <string name="getting_competitor">"Načítání informací o závodnících..."</string>
+    <string name="error">"Chyba"</string>
+    <string name="error_could_not_complete_operation_on_server_try_again">"Operaci nebylo možné na serveru dokončit. Zkuste to znovu."</string>
+    <string name="error_sending_team_image_to_server">"Chyba: týmovou fotografii se nepodařilo odeslat na server."</string>
+    <string name="regatta_starts_in">"Regata začíná za:"</string>
+    <string name="hours">"Hodiny:"</string>
+    <string name="minutes">"Minuty:"</string>
+    <string name="days">"Dny:"</string>
+    <string name="please_listen_to_announcements">"Věnujte pozornost hlášení."</string>
+    <string name="close">"Zavřít"</string>
+    <string name="thank_you_you_successfully_participated">"Děkujeme vám za úspěšnou účast ve fregatě.\n\nVáš tým SAP Sailing"</string>
+    <string name="tracking_colon">"Trasování:"</string>
+    <string name="regatta_in_progress">"Regata probíhá."</string>
+    <string name="heading">"Kurz"</string>
+    <string name="course_over_ground">"Kurz proti dnu"</string>
+    <string name="speed_over_ground">"Rychlost proti dnu"</string>
+    <string name="none">"Nic"</string>
+    <string name="show_leaderboard">"Výsledková tabule"</string>
+    <string name="show_event">"Událost"</string>
+    <string name="error_while_receiving_server_data">"Chyba při příjmu dat ze serveru."</string>
+    <string name="info_already_checked_in_this_qr_code">"Na tuto regatu jste již přihlášeni."</string>
+    <string name="warning">"Upozornění"</string>
+    <string name="enable_gps">"GPS je vypnuté, ale pro trasování jsou polohy podle GPS nezbytné. Chcete v nastavení polohy GPS zapnout?"</string>
+    <string name="gps_turned_off">"GPS je vypnuté. Aby se spustilo trasování, v nastavení Android zapněte polohové služby (GPS)."</string>
+    <string name="knots">"%s uzlů"</string>
+    <string name="preferences">"Preference"</string>
+    
+    
+    
+    
+    
+    <string name="tracking_notification_text">"Momentálně se trasuje %s"</string>
+    <string name="waiting_for_gps">"Čeká se na GPS."</string>
+    
+</resources>

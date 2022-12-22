@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -763,7 +764,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
-            ProcessT master, Iterable<ProcessT> replicas);
+            ProcessT master, Iterable<ProcessT> replicas) throws InterruptedException, ExecutionException, TimeoutException;
 
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
     

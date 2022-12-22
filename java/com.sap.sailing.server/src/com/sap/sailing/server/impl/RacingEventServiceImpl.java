@@ -1687,7 +1687,7 @@ Replicator {
                 } else if (o2 == null) {
                     result = -1;
                 } else {
-                    result = new Long(Math.abs(o1.getTimePoint().until(timePoint).asMillis())).compareTo(
+                    result = Long.valueOf(Math.abs(o1.getTimePoint().until(timePoint).asMillis())).compareTo(
                             Math.abs(o2.getTimePoint().until(timePoint).asMillis()));
                 }
                 return result;

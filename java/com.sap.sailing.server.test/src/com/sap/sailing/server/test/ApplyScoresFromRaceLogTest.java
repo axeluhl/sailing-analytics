@@ -208,7 +208,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
             assertEquals(expectedPoints.apply(c), leaderboard.getTotalPoints(c, f1Column, now), 0.00000001);
         }
         final List<Competitor> expectedNewOrder = new ArrayList<>(competitors);
-        expectedNewOrder.sort((c1, c2)->new Double(expectedPoints.apply(c1)).compareTo(new Double(expectedPoints.apply(c1))));
+        expectedNewOrder.sort((c1, c2)->Double.valueOf(expectedPoints.apply(c1)).compareTo(Double.valueOf(expectedPoints.apply(c1))));
         final Iterable<Competitor> rankedCompetitorsAfterApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         double lastScore = 0;
         for (final Competitor c : rankedCompetitorsAfterApplying) {

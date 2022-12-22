@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -48,7 +48,7 @@ public class TWATest {
         trackedLeg = mock(TrackedLegImpl.class);
         trackedLegOfCompetitor = mock(TrackedLegOfCompetitorImpl.class);
         competitorTrack = mock(DynamicGPSFixMovingTrackImpl.class);
-        when(competitorTrack.getEstimatedPosition((TimePoint) anyObject(), /* extrapolate */ anyBoolean())).thenReturn(new DegreePosition(0, 0));
+        when(competitorTrack.getEstimatedPosition((TimePoint) any(), /* extrapolate */ anyBoolean())).thenReturn(new DegreePosition(0, 0));
         when(trackedLegOfCompetitor.getCompetitor()).thenReturn(competitor);
         when(trackedLegOfCompetitor.getTrackedLeg()).thenReturn(trackedLeg);
         when(trackedRace.getTrack(competitor)).thenReturn(competitorTrack);
@@ -57,15 +57,15 @@ public class TWATest {
     
     private void setUp(final Bearing windToBearing, final Bearing boatToBearing, final Bearing legBearing, LegType legType)
             throws NoWindException {
-        when(trackedLeg.getLegBearing((TimePoint) anyObject())).thenReturn(legBearing);
-        when(trackedLeg.getLegType((TimePoint) anyObject())).thenReturn(legType);
-        when(trackedRace.getWind((Position) anyObject(), (TimePoint) anyObject())).thenReturn(
+        when(trackedLeg.getLegBearing((TimePoint) any())).thenReturn(legBearing);
+        when(trackedLeg.getLegType((TimePoint) any())).thenReturn(legType);
+        when(trackedRace.getWind((Position) any(), (TimePoint) any())).thenReturn(
                 new WindImpl(new DegreePosition(0, 0), MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
                         windToBearing)));
         
-        when(competitorTrack.getEstimatedSpeed((TimePoint) anyObject())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
-        when(trackedRace.getTWA(Matchers.eq(competitor), (TimePoint) anyObject())).thenCallRealMethod();
-        when(trackedRace.getTWA(Matchers.eq(competitor), (TimePoint) anyObject(), (WindLegTypeAndLegBearingAndORCPerformanceCurveCache) anyObject())).thenCallRealMethod();
+        when(competitorTrack.getEstimatedSpeed((TimePoint) any())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
+        when(trackedRace.getTWA(ArgumentMatchers.eq(competitor), (TimePoint) any())).thenCallRealMethod();
+        when(trackedRace.getTWA(ArgumentMatchers.eq(competitor), (TimePoint) any(), (WindLegTypeAndLegBearingAndORCPerformanceCurveCache) any())).thenCallRealMethod();
     }
 
     @Test
