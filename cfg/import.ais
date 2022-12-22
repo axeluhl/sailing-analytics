@@ -9,7 +9,7 @@ imports dslVersion:"1.3", {
         artifactFile "com.google.download.android:tools:zip:linux:26.1.1"
         artifactFile "com.google.download.android:platform-tools:zip:linux:30.0.5"
         artifactFile "com.google.download.android:build-tools:zip:linux:30.0.3"
-        artifactFile "com.google.download.android:platform:zip:30.3"
+        artifactFile "com.google.download.android:platform:zip:31.1"
 
         // optional dependencies for Android SDK - use when required (e.g. appcompat-v7)
         artifactFile "com.google.download.android:google-repository:zip:58"

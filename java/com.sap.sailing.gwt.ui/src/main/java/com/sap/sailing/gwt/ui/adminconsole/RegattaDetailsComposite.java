@@ -391,7 +391,7 @@ public class RegattaDetailsComposite extends Composite {
         if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
             // first remove:
             sailingServiceWrite.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
-                    new AsyncCallback<Void>() {
+                    new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error trying to remove race columns " + raceColumnNamesToAddWithInsertIndex
@@ -402,7 +402,7 @@ public class RegattaDetailsComposite extends Composite {
                         public void onSuccess(Void v) {
                             // when successfully removed, insert:
                             sailingServiceWrite.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
-                                    new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+                                    new MarkedAsyncCallback<>(new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
                                             errorReporter.reportError("Error trying to add race columns " + raceColumnNamesToAddWithInsertIndex
@@ -419,7 +419,8 @@ public class RegattaDetailsComposite extends Composite {
                                                         seriesDescriptor.isStartsWithZeroScore(),
                                                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
                                                         seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
-                                                        seriesDescriptor.isOneAlwaysStaysOne(), series.getFleets(), new AsyncCallback<Void>() {
+                                                        seriesDescriptor.isOneAlwaysStaysOne(), series.getFleets(),
+                                                        new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
                                                     @Override
                                                     public void onFailure(Throwable caught) {
                                                         errorReporter.reportError("Error trying to update series " + series.getName() + ": "
@@ -431,15 +432,15 @@ public class RegattaDetailsComposite extends Composite {
                                                         presenter.getRegattasRefresher().reloadAndCallFillAll();
                                                         presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                                     }
-                                                });
+                                                }));
                                             } else {
                                                 presenter.getRegattasRefresher().reloadAndCallFillAll();
                                                 presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                             }
                                         }
-                                    });
+                                    }));
                         }
-                    });
+                    }));
         }
     }
 

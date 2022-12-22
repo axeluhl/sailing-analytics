@@ -2,9 +2,9 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +67,7 @@ public class ShortTimeWindCacheTest {
         final RaceDefinition race = mock(RaceDefinition.class);
         when(race.getName()).thenReturn("Mocked Test Race");
         when(trackedRace.getRace()).thenReturn(race);
-        when(trackedRace.getWindWithConfidenceUncached(/* position */ any(), same(now), (Iterable<WindSource>) isNull(Iterable.class))).thenAnswer(new Answer<WindWithConfidence<Pair<Position, TimePoint>>>() {
+        when(trackedRace.getWindWithConfidenceUncached(/* position */ any(), same(now), (Iterable<WindSource>) isNull())).thenAnswer(new Answer<WindWithConfidence<Pair<Position, TimePoint>>>() {
             @Override
             public WindWithConfidence<Pair<Position, TimePoint>> answer(InvocationOnMock invocation) throws Throwable {
                 return result;
