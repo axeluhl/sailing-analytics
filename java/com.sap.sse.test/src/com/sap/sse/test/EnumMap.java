@@ -98,7 +98,6 @@ public class EnumMap<K extends Enum<K>, V> extends java.util.EnumMap<K, V> {
     private void readObject(java.io.ObjectInputStream s) throws java.io.IOException, ClassNotFoundException {
         // Read in the key type and any hidden stuff
         s.defaultReadObject();
-        System.out.println(keyType);
         // Read in size (number of Mappings)
         int size = s.readInt();
         // Read the keys and values, and put the mappings in the HashMap
