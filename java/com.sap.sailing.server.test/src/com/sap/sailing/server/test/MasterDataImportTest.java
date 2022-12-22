@@ -39,7 +39,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.mongodb.MongoException;
@@ -215,10 +215,10 @@ public class MasterDataImportTest {
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
         Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
-                Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
+                Mockito.any(WithQualifiedObjectIdentifier.class), ArgumentMatchers.<PublicReadableActions> any());
         Mockito.when(securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
                 Mockito.any(), Mockito.any(), Mockito.any(Callable.class)))
-                .thenAnswer(i -> i.getArgumentAt(3, Callable.class).call());
+                .thenAnswer(i -> i.getArgument(3, Callable.class).call());
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
         DomainFactory sourceDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         DomainObjectFactory dbFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE,

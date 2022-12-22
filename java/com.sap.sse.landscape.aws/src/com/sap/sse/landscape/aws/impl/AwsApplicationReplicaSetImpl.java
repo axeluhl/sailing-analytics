@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +17,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
@@ -75,7 +78,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) {
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
         super(replicaSetAndServerName, hostname, master, replicas);
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
@@ -85,18 +88,23 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         masterTargetGroup = new CompletableFuture<>();
         publicTargetGroup = new CompletableFuture<>();
         resourceRecordSet = new CompletableFuture<>();
-        allLoadBalancersInRegion.thenCompose(loadBalancers->
-            allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
-                allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
-                    allAutoScalingGroups.thenCompose(autoScalingGroups->
-                        allLaunchConfigurations.handle((launchConfigurations, e)->establishState(
-                                loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, launchConfigurations, dnsCache))))))
-            .handle((v, e)->{
-                if (e != null) {
-                    logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
-                }
-                return null;
-            });
+        try {
+            allLoadBalancersInRegion.thenCompose(loadBalancers->
+                allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
+                    allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
+                        allAutoScalingGroups.thenCompose(autoScalingGroups->
+                            allLaunchConfigurations.handle((launchConfigurations, e)->establishState(
+                                    loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, launchConfigurations, dnsCache))))))
+                .handle((v, e)->{
+                    if (e != null) {
+                        logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
+                    }
+                    return null;
+                }).get(Math.round(Landscape.WAIT_FOR_PROCESS_TIMEOUT.get().asMinutes()), TimeUnit.MINUTES);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            logger.log(Level.SEVERE, "Exception while waiting for establishing state of application replica set.");
+            throw e;
+        }
     }
 
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master,
@@ -105,7 +113,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             AwsLandscape<ShardingKey> landscape, CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) {
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
                 allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations,
                 dnsCache);

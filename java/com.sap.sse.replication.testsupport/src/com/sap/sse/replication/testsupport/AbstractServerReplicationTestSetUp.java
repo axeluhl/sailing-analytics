@@ -34,7 +34,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -348,12 +348,12 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                         pw.println("HTTP/1.1 500 Bad Request");
                                         pw.println("Content-Type: text/plain");
                                         pw.println();
-                                        pw.println(invocation.getArgumentAt(1, String.class));
+                                        pw.println(invocation.getArgument(1, String.class));
                                         pw.flush();
                                         error[0] = true;
                                         return null;
                                     }
-                                }).when(responseMock).sendError(Matchers.anyInt(), Matchers.isA(String.class));
+                                }).when(responseMock).sendError(ArgumentMatchers.anyInt(), ArgumentMatchers.isA(String.class));
                                 while (!readLine(inputStream).isEmpty());
                                 servlet.doPost(requestMock, responseMock);
                                 if (!error[0]) {
