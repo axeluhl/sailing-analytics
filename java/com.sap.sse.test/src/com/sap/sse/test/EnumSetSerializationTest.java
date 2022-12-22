@@ -16,13 +16,13 @@ public class EnumSetSerializationTest {
 
     @Test
     public void testEmptyEnumMap() throws IOException, ClassNotFoundException {
-        assertSame(MyBoolean.class, com.sap.sse.test.EnumMap.getEnumMapKeyType(enumMap));
+        assertSame(MyBoolean.class, com.sap.sse.util.EnumMapUtil.getKeyType(enumMap));
     }
 
     @Test
     public void testNonEmptyEnumMap() throws IOException, ClassNotFoundException {
         enumMap.put(MyBoolean.TRUE, 1);
         enumMap.put(MyBoolean.FALSE, 0);
-        assertSame(MyBoolean.class, com.sap.sse.test.EnumMap.getEnumMapKeyType(enumMap));
+        assertSame(MyBoolean.class, com.sap.sse.util.EnumMapUtil.getKeyType(enumMap));
     }
 }
