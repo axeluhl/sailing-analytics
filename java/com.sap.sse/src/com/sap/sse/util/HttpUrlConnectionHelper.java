@@ -6,6 +6,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -163,5 +165,15 @@ public class HttpUrlConnectionHelper {
     public static URLConnection redirectConnection(URL url, String optionalRequestMethod) throws MalformedURLException, IOException {
         return redirectConnection(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, /* pre-connect modifier */ null,
                 /* post-connect modifier */ null, /* optional output stream consumer */ Optional.empty());
+    }
+    
+    public static Charset getCharsetFromConnectionOrDefault(URLConnection connection, String defaultCharsetName) {
+        Charset cs;
+        try {
+            cs = org.apache.http.entity.ContentType.parse(connection.getContentType()).getCharset();
+        } catch (org.apache.http.ParseException | UnsupportedCharsetException e) {
+            cs = Charset.forName(defaultCharsetName);
+        }
+        return cs;
     }
 }

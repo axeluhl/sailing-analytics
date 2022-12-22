@@ -5209,7 +5209,9 @@ Replicator {
                 // try to obtain an error message from the connection's error stream:
                 try {
                     message = new BufferedReader(
-                            new InputStreamReader(((HttpURLConnection) connection).getErrorStream())).readLine();
+                            new InputStreamReader(((HttpURLConnection) connection).getErrorStream(),
+                                    HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8")))
+                                            .readLine();
                 } catch (Exception exceptionTryingToReadErrorStream) {
                     // in this case we just stay with the exception's message
                 }

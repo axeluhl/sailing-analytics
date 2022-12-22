@@ -16,6 +16,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
@@ -28,7 +29,7 @@ public class ConnectivityUtils {
         final Header contentEncoding = response.getEntity().getContentEncoding();
         final Reader reader;
         if (contentEncoding == null) {
-            reader = new InputStreamReader(response.getEntity().getContent());
+            reader = new InputStreamReader(response.getEntity().getContent(), ContentType.getOrDefault(response.getEntity()).getCharset());
         } else {
             reader = new InputStreamReader(response.getEntity().getContent(), contentEncoding.getValue());
         }
@@ -40,7 +41,7 @@ public class ConnectivityUtils {
     public static String getContent(HttpResponse response) throws IOException {
         StringBuilder result = new StringBuilder();
         String line;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), ContentType.getOrDefault(response.getEntity()).getCharset()));
         while ((line=reader.readLine()) != null) {
             result.append(line);
             result.append('\n');

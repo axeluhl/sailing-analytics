@@ -98,7 +98,8 @@ public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeCh
                     logger.info("Using " + startTrackingURI.toString() + " to start tracking");
                     final HttpResponse response = client.execute(request);
                     try {
-                        parseAndLogResponse(new BufferedReader(new InputStreamReader(response.getEntity().getContent())));
+                        parseAndLogResponse(new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
+                                org.apache.http.entity.ContentType.getOrDefault(response.getEntity()).getCharset())));
                     } catch (ParseException e) {
                         logger.log(Level.INFO, "Error parsing TracTrac response for start tracking", e);
                     }

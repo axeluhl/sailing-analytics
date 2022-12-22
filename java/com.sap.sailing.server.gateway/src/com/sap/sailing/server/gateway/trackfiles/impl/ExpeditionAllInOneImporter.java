@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.http.entity.ContentType;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.parser.ParseException;
@@ -301,7 +303,8 @@ public class ExpeditionAllInOneImporter {
         final List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList = new ArrayList<>();
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         final ExpeditionCourseInferrer expeditionCourseInferrer = new ExpeditionCourseInferrer(adapter);
-        final ExpeditionStartData startData = expeditionCourseInferrer.getStartData(fileItem.getInputStream(), filenameWithSuffix);
+        final ExpeditionStartData startData = expeditionCourseInferrer.getStartData(fileItem.getInputStream(), filenameWithSuffix,
+                fileItem.getContentType() == null ? Charset.forName("UTF-8") : ContentType.parse(fileItem.getContentType()).getCharset());
         final Iterable<String> additionalTrackedRaceNames = importStartData ? getNextRaceColumnNames(/* start race index */ 1,
                 /* how many */ Util.size(startData.getStartTimes())) : Collections.emptySet();
         if (importMode == ImportMode.NEW_EVENT) {

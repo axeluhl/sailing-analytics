@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -75,7 +76,8 @@ implements SailingAnalyticsProcess<ShardingKey> {
                     final HttpResponse result = client.execute(getStatusRequest);
                     final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     result.getEntity().writeTo(bos);
-                    return (JSONObject) (new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()))));
+                    return (JSONObject) (new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
+                            ContentType.getOrDefault(result.getEntity()).getCharset())));
                 }, json->json != null, /* retryOnException */ true, optionalTimeout,
                 /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "getStatus() on "+getHost()+":"+getPort());
         updateStartTimePointFromStatus(status);
