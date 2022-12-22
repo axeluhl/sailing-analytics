@@ -47,7 +47,7 @@
     Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all
     profiles. -->
     <parameters.common>
-      -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -Dosgi.java.profile=file://${session.executionRootDirectory}/java/target/configuration/JavaSE-11.profile -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m --add-opens java.base/java.lang=ALL-UNNAMED -Dgwt.rpc.version=9
+      -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -Dosgi.java.profile=file://${session.executionRootDirectory}/java/target/configuration/JavaSE-11.profile -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9
     </parameters.common>
     <parameters.vm-settings>
       -ea -Xmx8192m -XX:+UseG1GC
