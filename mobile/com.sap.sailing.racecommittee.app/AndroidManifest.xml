@@ -9,6 +9,7 @@
         android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!--<uses-permission android:name="android.permission.RECORD_AUDIO"/>-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -86,10 +87,9 @@
         <activity
             android:name="com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity"
             android:screenOrientation="behind"
-            android:exported="true"
             tools:replace="android:screenOrientation" />
-        <activity android:exported="true" android:name=".ui.activities.RacingActivity" />
-        <activity android:exported="true" android:name=".ui.activities.PasswordActivity" />
+        <activity android:name=".ui.activities.RacingActivity" />
+        <activity android:name=".ui.activities.PasswordActivity" />
         <activity
             android:name=".ui.activities.PreferenceActivity"
             android:screenOrientation="behind"
@@ -101,7 +101,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:exported="true" android:name=".ui.activities.SystemInformationActivity" />
+        <activity android:name=".ui.activities.SystemInformationActivity" />
 
         <service
             android:name=".services.polling.RaceLogPollingService"
