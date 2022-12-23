@@ -1,21 +1,14 @@
 package com.sap.sailing.selenium.pages.adminconsole.leaderboard;
 
-import static com.sap.sailing.selenium.pages.gwt.query.Alias.$;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
-
-import com.sap.sailing.selenium.pages.gwt.query.Alias;
-import com.sap.sailing.selenium.pages.gwt.query.TableQuery;
 
 public class LeaderboardGroupDetailsPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "LeaderboardsFilterTextBox")
@@ -40,14 +33,8 @@ public class LeaderboardGroupDetailsPanelPO extends PageArea {
     }
     
     public DataEntryPO findLeaderboardEntry(String name) {
-        CellTablePO<DataEntryPO> table = getLeaderboardsTable();
-        DataEntryPO alias = Alias.alias(DataEntryPO.class);
-        
-        TableQuery<DataEntryPO> query = new TableQuery<>();
-        query.from(table).
-            where($(alias.getColumnContent("Leaderboard Name")).eq(name));
-        
-        return query.firstResult();
+        final CellTablePO<DataEntryPO> table = getLeaderboardsTable();
+        return table.getEntries().stream().filter(e->e.getColumnContent("Leaderboard Name").equals(name)).findFirst().orElse(null);
     }
     
     public void filterLeaderboards(String filterText) {
