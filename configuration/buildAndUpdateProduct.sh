@@ -230,7 +230,7 @@ fi
 rm $START_DIR/build.log
 
 if [[ "$@" == "clean" ]]; then
-    ./gradlew clean
+    JAVA_HOME="${JAVA8_HOME}" ./gradlew clean
     if [[ $? != 0 ]]; then
         exit 100
     fi
@@ -292,6 +292,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
 
@@ -679,11 +680,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         # mobile_extra="-P -with-not-android-relevant -P with-mobile"
 
         echo "Building apps with Gradle..."
-        ./gradlew build
+        JAVA_HOME="${JAVA8_HOME}" ./gradlew build
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
-        ./gradlew assemble
+        JAVA_HOME="${JAVA8_HOME}" ./gradlew assemble
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
@@ -840,7 +841,6 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
     cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
-
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/

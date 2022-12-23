@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="210">
+<target name="Race Analysis Target" sequenceNumber="215">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -8,12 +8,31 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.objectweb.asm" version="9.0.0.v20201001-1419"/>
-<unit id="org.objectweb.asm.source" version="9.0.0.v20201001-1419"/>
-<unit id="org.objectweb.asm.commons" version="9.0.0.v20201001-1419"/>
-<unit id="org.objectweb.asm.commons.source" version="9.0.0.v20201001-1419"/>
-<unit id="org.objectweb.asm.tree" version="9.0.0.v20201001-1419"/>
-<unit id="org.objectweb.asm.tree.source" version="9.0.0.v20201001-1419"/>
+<unit id="org.objectweb.asm" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.source" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.analysis" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.analysis.source" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.commons" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.commons.source" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.tree" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.tree.source" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.util" version="9.4.0.v20221107-1714"/>
+<unit id="org.objectweb.asm.util.source" version="9.4.0.v20221107-1714"/>
+<unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317"/>
+<unit id="org.mockito.mockito-core.source" version="4.8.1.v20221103-2317"/>
+<unit id="net.bytebuddy.byte-buddy" version="1.12.18.v20221114-2102"/>
+<unit id="net.bytebuddy.byte-buddy.source" version="1.12.18.v20221114-2102"/>
+<unit id="net.bytebuddy.byte-buddy-agent" version="1.12.18.v20221114-2102"/>
+<unit id="net.bytebuddy.byte-buddy-agent.source" version="1.12.18.v20221114-2102"/>
+<unit id="com.sun.jna" version="5.12.1.v20221103-2317"/>
+<unit id="com.sun.jna.source" version="5.12.1.v20221103-2317"/>
+<unit id="com.sun.jna.platform" version="5.12.1.v20221103-2317"/>
+<unit id="com.sun.jna.platform.source" version="5.12.1.v20221103-2317"/>
+<unit id="org.objenesis" version="3.3.0.v20221103-2317"/>
+<unit id="org.objenesis.source" version="3.3.0.v20221103-2317"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20221123021534/repository/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.annotation" version="1.3.5.v20200909-1856"/>
 <unit id="org.apache.poi" version="4.1.1.v20200604-1524"/>
 <unit id="org.apache.poi.ooxml" version="4.1.1.v20200820-1148"/>
@@ -33,8 +52,6 @@
 <unit id="org.junit.source" version="4.13.2.v20211018-1956"/>
 <unit id="org.hamcrest" version="2.2.0.v20210711-0821"/>
 <unit id="org.hamcrest.source" version="2.2.0.v20210711-0821"/>
-<unit id="org.objenesis" version="2.6.0.v20180420-1519"/>
-<unit id="org.objenesis.source" version="2.6.0.v20180420-1519"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20220531185310/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -289,6 +306,15 @@
 <plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
+<plugin id="org.mockito.mockito-core.source"/>
+<plugin id="net.bytebuddy.byte-buddy"/>
+<plugin id="net.bytebuddy.byte-buddy.source"/>
+<plugin id="net.bytebuddy.byte-buddy-agent"/>
+<plugin id="net.bytebuddy.byte-buddy-agent.source"/>
+<plugin id="com.sun.jna"/>
+<plugin id="com.sun.jna.source"/>
+<plugin id="com.sun.jna.platform"/>
+<plugin id="com.sun.jna.platform.source"/>
 <plugin id="org.mongodb.bson"/>
 <plugin id="org.mongodb.bson.source"/>
 <plugin id="org.mongodb.driver-core"/>
@@ -323,9 +349,17 @@
 <plugin id="org.eclipse.jetty.plus.source"/>
 <plugin id="javax.annotation-api"/>
 <plugin id="org.apache.aries.spifly.dynamic.bundle"/>
+<plugin id="org.apache.aries.spifly.dynamic.bundle.source"/>
 <plugin id="org.objectweb.asm"/>
+<plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objectweb.asm.commons"/>
+<plugin id="org.objectweb.asm.commons.source"/>
 <plugin id="org.objectweb.asm.tree"/>
+<plugin id="org.objectweb.asm.tree.source"/>
+<plugin id="org.objectweb.asm.util"/>
+<plugin id="org.objectweb.asm.util.source"/>
+<plugin id="org.objectweb.asm.analysis"/>
+<plugin id="org.objectweb.asm.analysis.source"/>
 <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
 <plugin id="org.mortbay.jasper.apache-el"/>
 <plugin id="org.mortbay.jasper.apache-jsp"/>
@@ -340,9 +374,6 @@
 <plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
-<plugin id="org.objectweb.asm.source"/>
-<plugin id="org.objectweb.asm.tree.source"/>
-<plugin id="org.objectweb.asm.commons.source"/>
 <plugin id="javax.annotation"/>
 <plugin id="org.eclipse.jetty.io"/>
 <plugin id="org.eclipse.osgi.util"/>

@@ -38,7 +38,8 @@
         <activity
             android:name=".ui.activities.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -85,12 +86,14 @@
         <activity
             android:name="com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity"
             android:screenOrientation="behind"
+            android:exported="true"
             tools:replace="android:screenOrientation" />
-        <activity android:name=".ui.activities.RacingActivity" />
-        <activity android:name=".ui.activities.PasswordActivity" />
+        <activity android:exported="true" android:name=".ui.activities.RacingActivity" />
+        <activity android:exported="true" android:name=".ui.activities.PasswordActivity" />
         <activity
             android:name=".ui.activities.PreferenceActivity"
             android:screenOrientation="behind"
+            android:exported="true"
             android:theme="@style/PreferenceTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
@@ -98,7 +101,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activities.SystemInformationActivity" />
+        <activity android:exported="true" android:name=".ui.activities.SystemInformationActivity" />
 
         <service
             android:name=".services.polling.RaceLogPollingService"

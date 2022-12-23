@@ -482,7 +482,6 @@ public class PageObject {
      */
     protected void waitForAjaxRequests(String category, int timeoutInSeconds, int pollingEverySoManySeconds) {
         FluentWait<WebDriver> wait = createFluentWait(this.driver, timeoutInSeconds, pollingEverySoManySeconds);
-        
         wait.until(new AjaxCallsComplete(category));
     }
     

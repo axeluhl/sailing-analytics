@@ -43,9 +43,9 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 ### Installations
 
-1. JDK >= 11, it is required by Eclipse and therefore should be referenced in the environment variable `JAVA_HOME`. As an alternative to the environment variable Eclipse can be configured to use a different version of Java see [here](https://stackoverflow.com/questions/18469170/how-to-run-eclipse-with-different-java-version) for further instructions.
+1. JDK >= 11. No longer required by Eclipse because new Eclipse releases bring their own JDK bundled with the installer. Still, if you want to use Java 11 or Java 17, install any such JDK and set the `JAVA_HOME` variable to it.
 2. Eclipse IDE for Eclipse Committers, version 4.24.0 ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers)
-3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`
+3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
 4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
 5. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
 6. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/)
