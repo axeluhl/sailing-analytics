@@ -70,17 +70,13 @@
         </activity>
         <activity
             android:name=".ui.activities.RegattaActivity"
-            android:exported="true"
             android:configChanges="layoutDirection|screenSize|orientation"/>
-        <activity
-            android:exported="true" android:name=".ui.activities.PositioningActivity"/>
+        <activity android:name=".ui.activities.PositioningActivity" />
         <activity
             android:name=".ui.activities.SettingActivity"
-            android:exported="true"
             android:configChanges="layoutDirection|screenSize|orientation"/>
         <activity
             android:name=".ui.activities.AboutActivity"
-            android:exported="true"
             android:configChanges="layoutDirection|screenSize|orientation"/>
 
         <service
