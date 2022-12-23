@@ -23,7 +23,6 @@
                 android:value="ocr"/>
         <activity
             android:name=".ui.activities.BarcodeCaptureActivity"
-            android:exported="true"
             android:screenOrientation="portrait"/>
     </application>
 
