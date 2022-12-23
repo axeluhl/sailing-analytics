@@ -13,7 +13,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:3.6.4'
         classpath "org.ajoberstar:grgit:2.3.0"
     }
 }
@@ -49,6 +49,7 @@ allprojects {
 // dependency versions for all sub modules
 ext {
     // regular
+    buildTools = "30.0.3"
     compileSdk = 31
     minSdk = 16
     targetSdk = 31
@@ -76,6 +77,6 @@ ext {
 
 if (project.hasProperty("xmake")) {
     wrapper {
-        distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-bin.zip"
+        distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
     }
 }
