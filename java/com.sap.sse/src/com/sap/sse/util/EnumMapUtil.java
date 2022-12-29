@@ -50,11 +50,15 @@ public class EnumMapUtil {
 
         @Override
         protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-            final Class<?> result;
+            Class<?> result = null;
             if (desc.getName().equals("java.util.EnumMap")) {
-                result = com.sap.sse.util.EnumMap.class;
+                result = EnumMap.class;
             } else {
-                result = super.resolveClass(desc);
+                try {
+                    result = super.resolveClass(desc);
+                } catch (ClassNotFoundException e) {
+                    result = Class.forName(desc.getName(), false, Thread.currentThread().getContextClassLoader());
+                }
             }
             return result;
         }

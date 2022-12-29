@@ -7,7 +7,9 @@ import java.util.EnumMap;
 
 import org.junit.Test;
 
-public class EnumSetSerializationTest {
+import com.sap.sse.common.SortingOrder;
+
+public class EnumMapSerializationTest {
     private static enum MyBoolean {
         TRUE, FALSE
     };
@@ -24,5 +26,11 @@ public class EnumSetSerializationTest {
         enumMap.put(MyBoolean.TRUE, 1);
         enumMap.put(MyBoolean.FALSE, 0);
         assertSame(MyBoolean.class, com.sap.sse.util.EnumMapUtil.getKeyType(enumMap));
+    }
+    
+    @Test
+    public void testEmptyEnumMapWithSortingOrderKeys() throws IOException, ClassNotFoundException {
+        final EnumMap<SortingOrder, Integer> myEnumMap = new EnumMap<>(SortingOrder.class);
+        assertSame(SortingOrder.class, com.sap.sse.util.EnumMapUtil.getKeyType(myEnumMap));
     }
 }
