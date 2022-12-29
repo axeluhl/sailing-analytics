@@ -29,25 +29,25 @@ public class LogEventComparator implements Comparator<Timed>, Serializable {
         if (o1 instanceof AbstractLogEvent && o2 instanceof AbstractLogEvent) {
             return compareEvents((AbstractLogEvent<?>) o1, (AbstractLogEvent<?>) o2);
         }
-
         // fallback to timed comparison
         return timedComparator.compare(o1, o2);
     }
     
     protected int compareEvents(AbstractLogEvent<?> e1, AbstractLogEvent<?> e2) {
-        //compare author priorities
+        // compare author priorities
         int result = e1.getAuthor().compareTo(e2.getAuthor());
-        if (result != 0) return result;
-        
-        //compare created at timepoints
-        result = e1.getCreatedAt().compareTo(e2.getCreatedAt());
-        if (result != 0) return result;
-        
-        //compare logical timepoints
-        result = Util.compareToWithNull(e1.getLogicalTimePoint(), e2.getLogicalTimePoint(), /* nullIsLess */ false);
-        if (result != 0) return result;
-        
-        //compare ids
-        return e1.getId().toString().compareTo(e2.getId().toString());
+        if (result == 0) {
+            // compare created at timepoints
+            result = e1.getCreatedAt().compareTo(e2.getCreatedAt());
+            if (result == 0) {
+                // compare logical timepoints
+                result = Util.compareToWithNull(e1.getLogicalTimePoint(), e2.getLogicalTimePoint(), /* nullIsLess */ false);
+                if (result == 0) {
+                    // compare ids
+                    result = e1.getId().toString().compareTo(e2.getId().toString());
+                }
+            }
+        }
+        return result;
     }
 }
