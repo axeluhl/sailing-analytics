@@ -39,7 +39,9 @@ public interface ScoreCorrectionProvider extends Named {
     RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint timePoint) throws Exception;
     
     /**
-     * Produces a single {@link RegattaScoreCorrections} object from a single {@link InputStream}.
+     * Produces a single {@link RegattaScoreCorrections} object from a single {@link InputStream}. The implementing
+     * subclass defines the character set encoding used to read characters from the stream if the stream is not
+     * interpreted as a binary source anyway.
      */
     RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception;
 }

@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -127,8 +128,9 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     private PositionsDocument getPositionsDocumentForUrl(final String url)
             throws MalformedURLException, IOException, ParseException {
         final URLConnection result = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(new URL(url), TIMEOUT_FOR_RACE_LOADING, /* bearer token */ null);
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(result, "UTF-8");
         final InputStream inputStream = (InputStream) result.getContent();
-        final PositionsDocument doc = new GetPositionsParser().parse(new InputStreamReader(inputStream), /* inferSpeedAndBearing */ true);
+        final PositionsDocument doc = new GetPositionsParser().parse(new InputStreamReader(inputStream, charset), /* inferSpeedAndBearing */ true);
         return doc;
     }
     

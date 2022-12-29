@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -39,7 +40,8 @@ public class SwissTimingRaceConfigurationTest {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "446483"));
         URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream, charset);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
         assertNull(config_446483.event_name);
@@ -57,7 +59,8 @@ public class SwissTimingRaceConfigurationTest {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "6260"));
         URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream, charset);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
         // TODO There used to be an attribute event_name in the "config" sub-element; around 2017-07-25 these things seem to have vanished;

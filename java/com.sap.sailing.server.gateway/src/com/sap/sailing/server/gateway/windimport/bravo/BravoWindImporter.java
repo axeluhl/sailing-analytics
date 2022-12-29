@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.windimport.bravo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sailing.server.trackfiles.impl.BaseBravoDataImporterImpl;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -50,16 +52,19 @@ public class BravoWindImporter extends AbstractWindImporter {
     }
 
     @Override
-    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, String> inputStreamsAndFilenames) throws IOException, InterruptedException, FormatNotSupportedException {
+    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource,
+            Map<InputStream, Pair<String, Charset>> inputStreamsAndFilenamesAndCharsets)
+            throws IOException, InterruptedException, FormatNotSupportedException {
         final Iterable<Wind> windFixes;
-        if (inputStreamsAndFilenames != null && inputStreamsAndFilenames.size() == 1) {
-            logger.info("Reading Bravo wind data from "+inputStreamsAndFilenames.values().iterator().next());
-            windFixes = readWind(inputStreamsAndFilenames.values().iterator().next(), inputStreamsAndFilenames.keySet().iterator().next());
+        if (inputStreamsAndFilenamesAndCharsets != null && inputStreamsAndFilenamesAndCharsets.size() == 1) {
+            final Pair<String, Charset> filenameAndCharset = inputStreamsAndFilenamesAndCharsets.values().iterator().next();
+            logger.info("Reading Bravo wind data from "+filenameAndCharset);
+            windFixes = readWind(filenameAndCharset.getA(), inputStreamsAndFilenamesAndCharsets.keySet().iterator().next(), filenameAndCharset.getB());
         } else {
             final List<Wind> windList = new LinkedList<>();
-            for (final Entry<InputStream, String> inputStreamAndFileName : inputStreamsAndFilenames.entrySet()) {
-                logger.info("Reading Bravo wind data from "+inputStreamAndFileName.getValue());
-                Util.addAll(readWind(inputStreamAndFileName.getValue(), inputStreamAndFileName.getKey()), windList);
+            for (final Entry<InputStream, Pair<String, Charset>> inputStreamAndFileName : inputStreamsAndFilenamesAndCharsets.entrySet()) {
+                logger.info("Reading Bravo wind data from "+inputStreamAndFileName.getValue().getA());
+                Util.addAll(readWind(inputStreamAndFileName.getValue().getA(), inputStreamAndFileName.getKey(), inputStreamAndFileName.getValue().getB()), windList);
             }
             windFixes = windList;
         }
@@ -72,7 +77,8 @@ public class BravoWindImporter extends AbstractWindImporter {
         Lat, Lon, TWS, TWD;
     }
     
-    private Iterable<Wind> readWind(String filename, InputStream inputStream) throws InterruptedException, IOException, FormatNotSupportedException {
+    private Iterable<Wind> readWind(String filename, InputStream inputStream, Charset charset)
+            throws InterruptedException, IOException, FormatNotSupportedException {
         final List<Wind> result = new LinkedList<>();
         Map<String, Integer> columnsMap = new HashMap<>();
         for (final Fields field : Fields.values()) {
@@ -101,7 +107,7 @@ public class BravoWindImporter extends AbstractWindImporter {
                 while ((entry=zipInputStream.getNextEntry()) != null) {
                     if (entry.getName().toLowerCase().endsWith(".txt")) {
                         logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
-                        importer.importFixes(zipInputStream, callback, entry.getName(), BRAVO_WIND_IMPORT, /* downsample */ false);
+                        importer.importFixes(zipInputStream, Charset.forName("UTF-8"), callback, entry.getName(), BRAVO_WIND_IMPORT, /* downsample */ false);
                     }
                 }
             }
@@ -113,7 +119,7 @@ public class BravoWindImporter extends AbstractWindImporter {
             } else {
                 actualFileName = filename;
             }
-            importer.importFixes(inputStream, callback, actualFileName, BRAVO_WIND_IMPORT, /* downsample */ false);
+            importer.importFixes(inputStream, Charset.forName("UTF-8"), callback, actualFileName, BRAVO_WIND_IMPORT, /* downsample */ false);
         }
         return result;
     }

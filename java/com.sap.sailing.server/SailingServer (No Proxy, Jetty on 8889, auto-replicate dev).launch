@@ -40,7 +40,6 @@
 <setEntry value="org.apache.commons.math@default:default"/>
 <setEntry value="org.apache.httpcomponents.httpclient@default:default"/>
 <setEntry value="org.apache.httpcomponents.httpcore@default:default"/>
-<setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.hyperic.sigar@default:default"/>
 <setEntry value="com.sun.jersey.contribs.jersey-multipart@default:default"/>
 <setEntry value="javax.validation@default:default"/>
@@ -196,7 +195,6 @@
 <setEntry value="com.google.gson.source@default:default"/>
 </setAttribute>
     <setAttribute key="selected_workspace_bundles">
-<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
 <setEntry value="com.sap.sailing.domain@default:default"/>

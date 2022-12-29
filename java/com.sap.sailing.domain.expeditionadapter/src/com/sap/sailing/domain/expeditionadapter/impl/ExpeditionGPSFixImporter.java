@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,16 +30,16 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
     private static final String SOG_COLUMN_HEADING = "sog";
 
     @Override
-    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
-            final String sourceName)
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback,
+            boolean inferSpeedAndBearing, final String sourceName)
             throws FormatNotSupportedException, IOException {
         TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         CompressedStreamsUtil.handlePotentiallyCompressedFiles(sourceName, inputStream,
-                new ExpeditionImportFileHandler() {
+                charset, new ExpeditionImportFileHandler() {
                     @Override
-                    protected void handleExpeditionFile(String fileName, InputStream stream) throws IOException {
-                        final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+                    protected void handleExpeditionFile(String fileName, InputStream stream, Charset charset) throws IOException {
+                        final BufferedReader br = new BufferedReader(new InputStreamReader(stream, charset));
                         final String headerLine = br.readLine();
                         final Map<String, Integer> columnDefinitions = ExpeditionExtendedDataImporterImpl
                                 .parseHeader(headerLine);
