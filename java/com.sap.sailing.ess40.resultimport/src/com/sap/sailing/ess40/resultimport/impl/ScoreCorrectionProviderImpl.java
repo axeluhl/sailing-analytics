@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final long serialVersionUID = -4870646572106575667L;
@@ -112,7 +114,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36");
         conn.setRequestProperty("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
         conn.setRequestProperty("accept-language", "en-US,en;q=0.8,de;q=0.6,da;q=0.4");
-        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(conn, "UTF-8");
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), charset));
         String readLine;
         while ((readLine = br.readLine()) != null) {
             Matcher m = p.matcher(readLine);

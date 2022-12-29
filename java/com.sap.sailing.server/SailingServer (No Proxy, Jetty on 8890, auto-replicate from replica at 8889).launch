@@ -195,7 +195,6 @@
 <setEntry value="com.google.gson.source@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
-<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
 <setEntry value="com.sap.sailing.domain@default:default"/>
@@ -260,6 +259,7 @@
 <setEntry value="com.sap.sailing.expeditionconnector.common@default:default"/>
 <setEntry value="com.sap.sailing.domain.bravoadapter@5:true"/>
 <setEntry value="net.sf.marineapi@default:default"/>
+<setEntry value="com.sap.sailing.routeconverterjava11extension@default:default"/>
 <setEntry value="com.sap.sailing.server.interface@default:default"/>
 <setEntry value="com.sap.sse.datamining.ui@default:default"/>
 <setEntry value="com.sap.sailing.domain.igtimiadapter.gateway@5:true"/>
@@ -292,6 +292,7 @@
 <setEntry value="com.sap.sse.threadmanager@default:default"/>
 <setEntry value="com.sap.sse.security.common@default:default"/>
 <setEntry value="org.json.simple@default:default"/>
+<setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:default"/>
 <setEntry value="org.moxieapps.gwt.highcharts@default:default"/>
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="org.mp4parser.isoparser@default:default"/>

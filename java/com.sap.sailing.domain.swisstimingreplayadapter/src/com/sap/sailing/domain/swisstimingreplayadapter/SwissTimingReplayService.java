@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -23,7 +24,7 @@ public interface SwissTimingReplayService {
 
     List<SwissTimingReplayRace> listReplayRaces(String swissTimingUrlText);
 
-    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream) throws IOException,
+    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream, Charset charset) throws IOException,
             org.json.simple.parser.ParseException;
 
     DateFormat getStartTimeFormat();

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,17 +70,17 @@ public class ExpeditionCourseInferrer {
         this.raceLogTrackingAdapter = raceLogTrackingAdapter;
     }
 
-    public ExpeditionStartData getStartData(InputStream inputStream, String filenameWithSuffix)
+    public ExpeditionStartData getStartData(InputStream inputStream, String filenameWithSuffix, Charset charset)
             throws IOException, FormatNotSupportedException {
         final List<TimePoint> startTimeCandidates = new ArrayList<>();
         final List<GPSFix> startLinePortEndFixes = new ArrayList<>();
         final List<GPSFix> startLineStarboardEndFixes = new ArrayList<>();
-        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filenameWithSuffix, inputStream, new ExpeditionImportFileHandler() {
+        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filenameWithSuffix, inputStream, charset, new ExpeditionImportFileHandler() {
             @Override
-            protected void handleExpeditionFile(String fileName, InputStream inputStream) throws IOException, FormatNotSupportedException {
+            protected void handleExpeditionFile(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException {
                 logger.fine("Start parsing Expedition file");
                 final AtomicLong lineNr = new AtomicLong();
-                try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+                try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream, charset))) {
                     String headerLine = buffer.readLine();
                     lineNr.incrementAndGet();
                     logger.fine("Validate and parse header columns");

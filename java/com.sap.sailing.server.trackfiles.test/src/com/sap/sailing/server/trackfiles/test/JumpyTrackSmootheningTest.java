@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -214,7 +215,7 @@ public class JumpyTrackSmootheningTest {
             inputStream = fileInputStream;
         }
         RouteConverterGPSFixImporterFactory.INSTANCE.createRouteConverterGPSFixImporter().importFixes(inputStream,
-                (fix, device)->track.add((GPSFixMoving) fix), /* inferSpeedAndBearing */ false, filename);
+                Charset.defaultCharset(), (fix, device)->track.add((GPSFixMoving) fix), /* inferSpeedAndBearing */ false, filename);
         return track;
     }
     

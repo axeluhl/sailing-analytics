@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +44,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 /**
  * Importer for CSV data files from Expedition log files, as used, e.g., by Team Phoenix. Note that this importer so far
  * ignores the {@code downsample} parameter of the
- * {@link #importFixes(InputStream, com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback, String, String, boolean)}
+ * {@link #importFixes(InputStream, Charset, com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback, String, String, boolean)}
  * method.
  */
 public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixImporter
@@ -94,14 +95,14 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     }
 
     @Override
-    public boolean importFixes(InputStream inputStream, final Callback callback, String filename, String sourceName,
-            boolean downsample) throws FormatNotSupportedException, IOException {
+    public boolean importFixes(InputStream inputStream, Charset charset, final Callback callback, String filename,
+            String sourceName, boolean downsample) throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
-        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filename, inputStream, new ExpeditionImportFileHandler() {
+        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filename, inputStream, charset, new ExpeditionImportFileHandler() {
             @Override
-            protected void handleExpeditionFile(String fileName, InputStream inputStream) throws IOException, FormatNotSupportedException {
+            protected void handleExpeditionFile(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException {
                 logger.fine("Start parsing Expedition file");
                 final AtomicLong lineNr = new AtomicLong();
                 try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
