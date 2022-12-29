@@ -39,6 +39,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsApplicationProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
@@ -77,7 +78,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
                     final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     result.getEntity().writeTo(bos);
                     return (JSONObject) (new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
-                            ContentType.getOrDefault(result.getEntity()).getCharset())));
+                            HttpUrlConnectionHelper.getCharsetFromHttpEntity(result.getEntity(), "UTF-8"))));
                 }, json->json != null, /* retryOnException */ true, optionalTimeout,
                 /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "getStatus() on "+getHost()+":"+getPort());
         updateStartTimePointFromStatus(status);

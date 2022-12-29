@@ -11,6 +11,9 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+
 import com.sap.sse.common.Duration;
 
 public class HttpUrlConnectionHelper {
@@ -176,5 +179,11 @@ public class HttpUrlConnectionHelper {
             cs = Charset.forName(defaultCharsetName);
         }
         return cs;
+    }
+    
+    public static Charset getCharsetFromHttpEntity(HttpEntity entity, String defaultCharsetName) {
+        final ContentType contentType = ContentType.getOrDefault(entity);
+        final Charset charsetFromContentType = contentType.getCharset();
+        return charsetFromContentType == null ? Charset.forName(defaultCharsetName) : charsetFromContentType;
     }
 }

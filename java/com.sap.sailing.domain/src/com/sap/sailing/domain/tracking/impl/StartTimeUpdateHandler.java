@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
@@ -99,7 +100,7 @@ public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeCh
                     final HttpResponse response = client.execute(request);
                     try {
                         parseAndLogResponse(new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
-                                org.apache.http.entity.ContentType.getOrDefault(response.getEntity()).getCharset())));
+                                HttpUrlConnectionHelper.getCharsetFromHttpEntity(response.getEntity(), "UTF-8"))));
                     } catch (ParseException e) {
                         logger.log(Level.INFO, "Error parsing TracTrac response for start tracking", e);
                     }

@@ -21,6 +21,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class FinishTimeUpdateHandler extends UpdateHandler {
@@ -66,7 +67,7 @@ public class FinishTimeUpdateHandler extends UpdateHandler {
                         final HttpResponse response = client.execute(request);
                         try {
                             parseAndLogResponse(new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
-                                    org.apache.http.entity.ContentType.getOrDefault(response.getEntity()).getCharset())));
+                                    HttpUrlConnectionHelper.getCharsetFromHttpEntity(response.getEntity(), "UTF-8"))));
                         } catch (ParseException e) {
                             logger.log(Level.INFO, "Error parsing TracTrac response for stop tracking", e);
                         }

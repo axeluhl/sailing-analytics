@@ -17,7 +17,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -263,7 +262,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         final HttpEntity entity = client.execute(postRequest).getEntity();
         entity.writeTo(bos);
         return (JSONObject) new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
-                ContentType.getOrDefault(entity).getCharset()));
+                HttpUrlConnectionHelper.getCharsetFromHttpEntity(entity, "UTF-8")));
     }
 
     @Override
