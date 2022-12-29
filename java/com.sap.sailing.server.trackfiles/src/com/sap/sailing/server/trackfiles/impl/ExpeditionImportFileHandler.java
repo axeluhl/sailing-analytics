@@ -2,6 +2,7 @@ package com.sap.sailing.server.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +23,7 @@ public abstract class ExpeditionImportFileHandler implements CompressedStreamsUt
     }
 
     @Override
-    public final void handle(String fileName, InputStream inputStream) throws IOException, FormatNotSupportedException {
+    public final void handle(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException {
         final String lowerCaseFileName = fileName.toLowerCase();
         boolean extensionSupported = false;
         for (String extension : supportedExpeditionLogFileExtensions) {
@@ -32,9 +33,9 @@ public abstract class ExpeditionImportFileHandler implements CompressedStreamsUt
             }
         }
         if (extensionSupported) {
-            handleExpeditionFile(lowerCaseFileName, inputStream);
+            handleExpeditionFile(lowerCaseFileName, inputStream, charset);
         }
     }
 
-    protected abstract void handleExpeditionFile(String fileName, InputStream inputStream) throws IOException, FormatNotSupportedException;
+    protected abstract void handleExpeditionFile(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException;
 }

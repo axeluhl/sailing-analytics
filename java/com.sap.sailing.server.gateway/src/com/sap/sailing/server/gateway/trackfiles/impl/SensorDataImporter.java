@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.FileItemHelper;
 
 public class SensorDataImporter {
     private static final Logger logger = Logger.getLogger(SensorDataImporter.class.getName());
@@ -73,7 +75,8 @@ public class SensorDataImporter {
             try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
                 final String filename = fi.getName();
                 try {
-                    importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
+                    final Charset charset = FileItemHelper.getCharset(fi);
+                    importerToUse.importFixes(in, charset, new DoubleVectorFixImporter.Callback() {
                         @Override
                         public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
                             storeFixes(fixes, device);

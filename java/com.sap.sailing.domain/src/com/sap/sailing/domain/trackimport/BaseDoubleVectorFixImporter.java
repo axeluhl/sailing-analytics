@@ -2,6 +2,7 @@ package com.sap.sailing.domain.trackimport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
@@ -19,6 +20,7 @@ public interface BaseDoubleVectorFixImporter {
      * 
      * @param inputStream
      *            the uploaded file as {@link InputStream}
+     * @param charset the character set to use to decode the {@code inputStream}
      * @param callback
      *            the callback to call for every new fix
      * @param sourceName
@@ -33,8 +35,8 @@ public interface BaseDoubleVectorFixImporter {
      * @throws IOException
      *             if there is a problem while reading the file
      */
-    boolean importFixes(InputStream inputStream, Callback callback, String filename, String sourceName,
-            boolean downsample)
+    boolean importFixes(InputStream inputStream, Charset charset, Callback callback, String filename,
+            String sourceName, boolean downsample)
             throws FormatNotSupportedException, IOException;
 
     /**

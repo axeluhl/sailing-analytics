@@ -18,6 +18,10 @@ import com.sap.sailing.resultimport.impl.DefaultCompetitorEntryImpl;
 import com.sap.sailing.sailwave.resultimport.CsvParser;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Parses CSV files. The input stream passed to the constructor is expected to be encoded with the "cp1252"
+ * character set.
+ */
 public class CsvParserImpl implements CsvParser {
 
     private final InputStream inputStream;
