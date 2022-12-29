@@ -31,7 +31,7 @@ public class FileItemHelper {
         Charset result;
         try {
             final ContentType contentType = fileItem.getContentType() == null ? null : ContentType.parse(fileItem.getContentType());
-            if (contentType != null) {
+            if (contentType != null && contentType.getCharset() != null) {
                 result = contentType.getCharset();
             } else {
                 result = defaultCharset;
