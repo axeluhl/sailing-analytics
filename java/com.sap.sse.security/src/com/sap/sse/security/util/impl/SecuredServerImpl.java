@@ -42,6 +42,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.util.SecuredServer;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SecuredServerImpl implements SecuredServer {
@@ -80,7 +81,8 @@ public class SecuredServerImpl implements SecuredServer {
             response.getEntity().writeTo(bos);
             try {
                 jsonParseResult = new JSONParser()
-                        .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
+                        .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
+                                HttpUrlConnectionHelper.getCharsetFromHttpEntity(response.getEntity(), "UTF-8")));
             } catch (ParseException e) {
                 jsonParseResult = new String(bos.toByteArray());
             }

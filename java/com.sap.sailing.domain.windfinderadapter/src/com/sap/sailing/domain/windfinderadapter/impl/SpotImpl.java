@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,9 +119,10 @@ public class SpotImpl extends SpotDTO implements Spot {
     @Override
     public Iterable<Wind> getAllMeasurements()
             throws IOException, MalformedURLException, ParseException, org.json.simple.parser.ParseException {
-        final InputStream response = (InputStream) HttpUrlConnectionHelper.redirectConnection(
-                getMeasurementsUrl()).getContent();
-        final Iterable<Wind> measurements = parser.parse(getPosition(), (JSONArray) new JSONParser().parse(new InputStreamReader(response)));
+        final URLConnection connection = HttpUrlConnectionHelper.redirectConnection(getMeasurementsUrl());
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        final InputStream response = (InputStream) connection.getContent();
+        final Iterable<Wind> measurements = parser.parse(getPosition(), (JSONArray) new JSONParser().parse(new InputStreamReader(response, charset)));
         return measurements;
     }
 

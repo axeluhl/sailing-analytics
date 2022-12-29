@@ -30,10 +30,10 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollingService;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
-import com.sap.sse.shared.json.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonSerializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +76,13 @@ public class RaceStateService extends Service {
         Intent launcherIntent = new Intent(this, LoginActivity.class);
         launcherIntent.setAction(Intent.ACTION_MAIN);
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
+        int flags;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags = PendingIntent.FLAG_IMMUTABLE;
+        } else {
+            flags = 0;
+        }
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, flags);
         CharSequence title = getText(R.string.service_info);
         String content = customContent != null ? customContent : getString(R.string.service_text_no_races);
         int color = getResources().getColor(R.color.constant_sap_blue_1);
@@ -264,7 +270,13 @@ public class RaceStateService extends Service {
         intent.putExtra(AppConstants.EXTRA_RACE_ID, managedRace.getId());
         intent.putExtra(AppConstants.EXTRA_TIME_POINT_MILLIS, event.getTimePoint().asMillis());
         intent.putExtra(AppConstants.EXTRA_EVENT_NAME, event.getEventName().name());
-        return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        int flags;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+        } else {
+            flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        }
+        return PendingIntent.getService(this, alarmManagerRequestCode++, intent, flags);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

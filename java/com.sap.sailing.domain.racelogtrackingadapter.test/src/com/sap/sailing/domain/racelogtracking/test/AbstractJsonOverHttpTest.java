@@ -7,9 +7,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
+
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public abstract class AbstractJsonOverHttpTest {
     protected static final String URL_BASE = "127.0.0.1";
@@ -52,8 +55,8 @@ public abstract class AbstractJsonOverHttpTest {
         if (is == null) {
             return "";
         }
-
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+        final Charset cs = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        BufferedReader rd = new BufferedReader(new InputStreamReader(is, cs));
         String line;
         StringBuffer response = new StringBuffer();
         while ((line = rd.readLine()) != null) {

@@ -6224,7 +6224,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Integer getAdminConsoleChangeLogSize() {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final URIBuilder url = new URIBuilder(getRequestBaseURL().toURI()).setPath("release_notes_admin.html");
+            // FIXME this will break for any reverse proxy or port-mapping container between the client and this server!
+            final int localPort = getThreadLocalRequest().getLocalPort();
+            final URIBuilder url = new URIBuilder("http://127.0.0.1:"+localPort+"/release_notes_admin.html");
             final HttpGet request = new HttpGet(url.build());
             return client.execute(request, response -> EntityUtils.toString(response.getEntity())).length();
         } catch (IOException | URISyntaxException e) {

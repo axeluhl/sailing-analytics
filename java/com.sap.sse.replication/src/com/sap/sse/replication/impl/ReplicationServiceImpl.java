@@ -711,7 +711,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             final URLConnection initialLoadConnection = HttpUrlConnectionHelper
                     .redirectConnectionWithBearerToken(initialLoadURL, /* HTTP request method */ "POST", master.getBearerToken());
             final InputStream is = (InputStream) initialLoadConnection.getContent();
-            final InputStreamReader queueNameReader = new InputStreamReader(is);
+            final InputStreamReader queueNameReader = new InputStreamReader(is, HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(initialLoadConnection, "UTF-8"));
             final String queueName = new BufferedReader(queueNameReader).readLine();
             queueNameReader.close();
             final Channel channel = master.createChannel();
