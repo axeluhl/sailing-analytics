@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.http.entity.ContentType;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.parser.ParseException;
@@ -110,6 +109,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.util.FileItemHelper;
 
 /**
  * Importer for expedition data that imports all available data for a boat:
@@ -304,7 +304,7 @@ public class ExpeditionAllInOneImporter {
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         final ExpeditionCourseInferrer expeditionCourseInferrer = new ExpeditionCourseInferrer(adapter);
         final ExpeditionStartData startData = expeditionCourseInferrer.getStartData(fileItem.getInputStream(), filenameWithSuffix,
-                fileItem.getContentType() == null ? Charset.forName("UTF-8") : ContentType.parse(fileItem.getContentType()).getCharset());
+                FileItemHelper.getCharset(fileItem, Charset.forName("UTF-8")));
         final Iterable<String> additionalTrackedRaceNames = importStartData ? getNextRaceColumnNames(/* start race index */ 1,
                 /* how many */ Util.size(startData.getStartTimes())) : Collections.emptySet();
         if (importMode == ImportMode.NEW_EVENT) {
@@ -438,8 +438,8 @@ public class ExpeditionAllInOneImporter {
         try {
             final WindImportResult windImportResult = new AbstractWindImporter.WindImportResult();
             final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceId);
-            final Map<InputStream, String> streamsWithFilenames = new HashMap<>();
-            streamsWithFilenames.put(fileItem.getInputStream(), filenameWithSuffix);
+            final Map<InputStream, Pair<String, Charset>> streamsWithFilenames = new HashMap<>();
+            streamsWithFilenames.put(fileItem.getInputStream(), new Pair<>(filenameWithSuffix, FileItemHelper.getCharset(fileItem)));
             new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, trackedRaces, streamsWithFilenames);
             return new ImporterResult(eventId, regattaNameAndleaderboardName, leaderboardGroupName,
                     regattaNameAndleaderboardName, raceNameRaceColumnNameFleetnameList,

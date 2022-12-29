@@ -36,10 +36,10 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
         TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         CompressedStreamsUtil.handlePotentiallyCompressedFiles(sourceName, inputStream,
-                new ExpeditionImportFileHandler() {
+                charset, new ExpeditionImportFileHandler() {
                     @Override
-                    protected void handleExpeditionFile(String fileName, InputStream stream) throws IOException {
-                        final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+                    protected void handleExpeditionFile(String fileName, InputStream stream, Charset charset) throws IOException {
+                        final BufferedReader br = new BufferedReader(new InputStreamReader(stream, charset));
                         final String headerLine = br.readLine();
                         final Map<String, Integer> columnDefinitions = ExpeditionExtendedDataImporterImpl
                                 .parseHeader(headerLine);

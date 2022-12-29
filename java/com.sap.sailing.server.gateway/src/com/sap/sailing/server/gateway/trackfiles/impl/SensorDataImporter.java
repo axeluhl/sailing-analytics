@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.http.entity.ContentType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -27,6 +26,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.FileItemHelper;
 
 public class SensorDataImporter {
     private static final Logger logger = Logger.getLogger(SensorDataImporter.class.getName());
@@ -75,13 +75,7 @@ public class SensorDataImporter {
             try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
                 final String filename = fi.getName();
                 try {
-                    final ContentType contentType = ContentType.parse(fi.getContentType());
-                    final Charset charset;
-                    if (contentType != null) {
-                        charset = contentType.getCharset();
-                    } else {
-                        charset = Charset.defaultCharset();
-                    }
+                    final Charset charset = FileItemHelper.getCharset(fi);
                     importerToUse.importFixes(in, charset, new DoubleVectorFixImporter.Callback() {
                         @Override
                         public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {

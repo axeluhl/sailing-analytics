@@ -100,9 +100,9 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
-        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filename, inputStream, new ExpeditionImportFileHandler() {
+        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filename, inputStream, charset, new ExpeditionImportFileHandler() {
             @Override
-            protected void handleExpeditionFile(String fileName, InputStream inputStream) throws IOException, FormatNotSupportedException {
+            protected void handleExpeditionFile(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException {
                 logger.fine("Start parsing Expedition file");
                 final AtomicLong lineNr = new AtomicLong();
                 try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {

@@ -75,9 +75,9 @@ public class ExpeditionCourseInferrer {
         final List<TimePoint> startTimeCandidates = new ArrayList<>();
         final List<GPSFix> startLinePortEndFixes = new ArrayList<>();
         final List<GPSFix> startLineStarboardEndFixes = new ArrayList<>();
-        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filenameWithSuffix, inputStream, new ExpeditionImportFileHandler() {
+        CompressedStreamsUtil.handlePotentiallyCompressedFiles(filenameWithSuffix, inputStream, charset, new ExpeditionImportFileHandler() {
             @Override
-            protected void handleExpeditionFile(String fileName, InputStream inputStream) throws IOException, FormatNotSupportedException {
+            protected void handleExpeditionFile(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException {
                 logger.fine("Start parsing Expedition file");
                 final AtomicLong lineNr = new AtomicLong();
                 try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream, charset))) {

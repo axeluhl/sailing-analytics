@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,7 +14,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.http.entity.ContentType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -33,6 +31,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.FileItemHelper;
 
 public class TrackFilesImporter {
     private static final Logger logger = Logger.getLogger(TrackFilesImporter.class.getName());
@@ -80,14 +79,7 @@ public class TrackFilesImporter {
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {
                     try {
-                        final ContentType contentType = ContentType.parse(fileItem.getContentType());
-                        final Charset charset;
-                        if (contentType != null) {
-                            charset = contentType.getCharset();
-                        } else {
-                            charset = Charset.defaultCharset();
-                        }
-                        boolean ok = importer.importFixes(in, charset, new Callback() {
+                        boolean ok = importer.importFixes(in, FileItemHelper.getCharset(fileItem), new Callback() {
                             @Override
                             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                                 storeFix(fix, device);
