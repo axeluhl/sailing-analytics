@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -80,7 +81,8 @@ public class SecuredServerImpl implements SecuredServer {
             response.getEntity().writeTo(bos);
             try {
                 jsonParseResult = new JSONParser()
-                        .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
+                        .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
+                                ContentType.getOrDefault(response.getEntity()).getCharset()));
             } catch (ParseException e) {
                 jsonParseResult = new String(bos.toByteArray());
             }

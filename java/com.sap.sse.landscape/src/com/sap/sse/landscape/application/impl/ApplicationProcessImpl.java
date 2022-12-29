@@ -13,9 +13,11 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -258,8 +260,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         final HttpPost postRequest = new HttpPost(url.toString());
         final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        client.execute(postRequest).getEntity().writeTo(bos);
-        return (JSONObject) new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
+        final HttpEntity entity = client.execute(postRequest).getEntity();
+        entity.writeTo(bos);
+        return (JSONObject) new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
+                ContentType.getOrDefault(entity).getCharset()));
     }
 
     @Override
