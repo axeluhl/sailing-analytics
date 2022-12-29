@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,9 +78,11 @@ public class YellowBrickCompetitorProvider extends AbstractResultUrlProvider imp
             throws JAXBException, IOException {
         // assumes that the eventName is the URL
         final Set<CompetitorDescriptor> result = new HashSet<>();
-        final InputStream inputStream = (InputStream) HttpUrlConnectionHelper.redirectConnection(new URL(eventNameWhichIsTheURL)).getContent();
+        final URLConnection connection = HttpUrlConnectionHelper.redirectConnection(new URL(eventNameWhichIsTheURL));
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        final InputStream inputStream = (InputStream) connection.getContent();
         final CSVParser csvParser = new CSVParser();
-        final Pair<List<String>, Iterable<List<String>>> content = csvParser.parseWithHeader(new InputStreamReader(inputStream));
+        final Pair<List<String>, Iterable<List<String>>> content = csvParser.parseWithHeader(new InputStreamReader(inputStream, charset));
         for (final List<String> competitorLine : content.getB()) {
             result.add(parseIntoCompetitorDescriptor(/* header */ content.getA(), competitorLine));
         }

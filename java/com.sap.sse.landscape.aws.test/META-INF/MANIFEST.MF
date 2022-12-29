@@ -16,4 +16,4 @@ Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  org.mongodb.driver-sync;bundle-version="4.3.1",
  com.sap.sailing.landscape.common
 Import-Package: org.mockito,
- org.mockito.stubbing;version="1.10.14"
+ org.mockito.stubbing;version="4.8.1"

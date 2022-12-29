@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ public class PolarDiagramCSV extends PolarDiagramBase {
     public PolarDiagramCSV(String inputFile) throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
         InputStream csvFile = cl.getResourceAsStream(inputFile);
-        InputStreamReader isr = new InputStreamReader(csvFile);
+        InputStreamReader isr = new InputStreamReader(csvFile, Charset.forName("UTF-8"));
         BufferedReader bfr = new BufferedReader(isr);
 
         List<Speed> windSpeeds = new ArrayList<Speed>();

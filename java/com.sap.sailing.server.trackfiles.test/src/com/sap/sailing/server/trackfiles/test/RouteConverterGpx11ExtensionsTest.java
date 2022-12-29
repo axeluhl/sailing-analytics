@@ -1,11 +1,12 @@
 package com.sap.sailing.server.trackfiles.test;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class RouteConverterGpx11ExtensionsTest {
                     return (GPSFix) invocation.callRealMethod();
                 }
             }).when(importer).convertToGPSFix(any(BaseNavigationPosition.class));
-            importer.importFixes(in, new com.sap.sailing.domain.trackimport.GPSFixImporter.Callback() {
+            importer.importFixes(in, Charset.defaultCharset(), new com.sap.sailing.domain.trackimport.GPSFixImporter.Callback() {
                 @Override
                 public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                 }

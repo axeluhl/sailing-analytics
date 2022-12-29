@@ -22,13 +22,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sse.util.HttpUrlConnectionHelper;
+
 public class ConnectivityUtils {
     public static JSONObject getJsonFromResponse(HttpResponse response) throws IllegalStateException, IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         final Header contentEncoding = response.getEntity().getContentEncoding();
         final Reader reader;
         if (contentEncoding == null) {
-            reader = new InputStreamReader(response.getEntity().getContent());
+            reader = new InputStreamReader(response.getEntity().getContent(), HttpUrlConnectionHelper.getCharsetFromHttpEntity(response.getEntity(), "UTF-8"));
         } else {
             reader = new InputStreamReader(response.getEntity().getContent(), contentEncoding.getValue());
         }
@@ -40,7 +42,8 @@ public class ConnectivityUtils {
     public static String getContent(HttpResponse response) throws IOException {
         StringBuilder result = new StringBuilder();
         String line;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
+                HttpUrlConnectionHelper.getCharsetFromHttpEntity(response.getEntity(), "UTF-8")));
         while ((line=reader.readLine()) != null) {
             result.append(line);
             result.append('\n');

@@ -14,7 +14,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.4'
-        classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
         classpath "org.ajoberstar:grgit:2.3.0"
     }
 }
@@ -51,9 +50,9 @@ allprojects {
 ext {
     // regular
     buildTools = "30.0.3"
-    compileSdk = 30
+    compileSdk = 31
     minSdk = 16
-    targetSdk = 30
+    targetSdk = 31
 
     sourceCompatibilityVersion = JavaVersion.VERSION_1_8
     targetCompatibilityVersion = JavaVersion.VERSION_1_8

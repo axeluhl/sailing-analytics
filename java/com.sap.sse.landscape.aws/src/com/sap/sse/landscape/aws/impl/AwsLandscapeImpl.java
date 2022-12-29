@@ -1513,7 +1513,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(com.sap.sse.landscape.Region region,
-            final String serverName, final ProcessT master, final Iterable<ProcessT> replicas) {
+            final String serverName, final ProcessT master, final Iterable<ProcessT> replicas) throws InterruptedException, ExecutionException, TimeoutException {
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
@@ -1531,7 +1531,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             final CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, final DNSCache dnsCache) {
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, final DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
         final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(
                 serverName, master, Optional.ofNullable(replicas), allLoadBalancersInRegion, allTargetGroupsInRegion,
                 allLoadBalancerRulesInRegion, this, allAutoScalingGroups, allLaunchConfigurations, dnsCache);

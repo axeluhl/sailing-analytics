@@ -201,7 +201,13 @@ public class RaceLogPollingService extends Service
             long time = MillisecondsTimePoint.now().asMillis() + (1000 * mAppPreferences.getPollingInterval());
             Intent intent = new Intent(this, this.getClass());
             intent.setAction(AppConstants.ACTION_POLLING_POLL);
-            mPendingIntent = PendingIntent.getService(this, 0, intent, 0);
+            int flags;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags = PendingIntent.FLAG_IMMUTABLE;
+            } else {
+                flags = 0;
+            }
+            mPendingIntent = PendingIntent.getService(this, 0, intent, flags);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 mAlarm.setExact(AlarmManager.RTC_WAKEUP, time, mPendingIntent);
             } else {

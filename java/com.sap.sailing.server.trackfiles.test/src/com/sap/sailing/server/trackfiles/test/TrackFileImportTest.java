@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +27,7 @@ public class TrackFileImportTest {
     @Test
     public void testGpx() throws IOException, FormatNotSupportedException {
         try (InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx")) {
-            new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
+            new RouteConverterGPSFixImporterImpl().importFixes(in, Charset.defaultCharset(), new Callback() {
                 @Override
                 public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                     if (fix instanceof GPSFixMoving) {
@@ -41,7 +42,7 @@ public class TrackFileImportTest {
     @Test
     public void testKmlOnlyLatLong() throws IOException, FormatNotSupportedException {
         try (InputStream in = getClass().getResourceAsStream("/Cardiff Race22 - COMPETITORS.kml")) {
-            new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
+            new RouteConverterGPSFixImporterImpl().importFixes(in, Charset.defaultCharset(), new Callback() {
                 @Override
                 public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                     if (fix instanceof GPSFix) {
