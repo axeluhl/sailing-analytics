@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.windimport.bravo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,7 +102,7 @@ public class BravoWindImporter extends AbstractWindImporter {
                 while ((entry=zipInputStream.getNextEntry()) != null) {
                     if (entry.getName().toLowerCase().endsWith(".txt")) {
                         logger.info("Reading Bravo wind data from "+filename+"'s ZIP entry "+entry.getName());
-                        importer.importFixes(zipInputStream, callback, entry.getName(), BRAVO_WIND_IMPORT, /* downsample */ false);
+                        importer.importFixes(zipInputStream, Charset.forName("UTF-8"), callback, entry.getName(), BRAVO_WIND_IMPORT, /* downsample */ false);
                     }
                 }
             }
@@ -113,7 +114,7 @@ public class BravoWindImporter extends AbstractWindImporter {
             } else {
                 actualFileName = filename;
             }
-            importer.importFixes(inputStream, callback, actualFileName, BRAVO_WIND_IMPORT, /* downsample */ false);
+            importer.importFixes(inputStream, Charset.forName("UTF-8"), callback, actualFileName, BRAVO_WIND_IMPORT, /* downsample */ false);
         }
         return result;
     }

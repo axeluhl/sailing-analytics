@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.http.entity.ContentType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -73,7 +75,14 @@ public class SensorDataImporter {
             try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
                 final String filename = fi.getName();
                 try {
-                    importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
+                    final ContentType contentType = ContentType.parse(fi.getContentType());
+                    final Charset charset;
+                    if (contentType != null) {
+                        charset = contentType.getCharset();
+                    } else {
+                        charset = Charset.defaultCharset();
+                    }
+                    importerToUse.importFixes(in, charset, new DoubleVectorFixImporter.Callback() {
                         @Override
                         public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
                             storeFixes(fixes, device);
