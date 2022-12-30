@@ -859,7 +859,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String bearertoken) throws Exception {
         final SailingServer server = getLandscapeService().getSailingServer(replicaset.getHostname(), bearertoken,
                 /* HTTPS Port */ Optional.of(443));
-        Iterable<String> l = server.getLeaderboardNames();
         return new ArrayList<>(Util.asList(Util.map(server.getLeaderboardNames(), LeaderboardNameDTO::new)));
     }
     

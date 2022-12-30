@@ -14,8 +14,6 @@ import java.util.regex.Matcher;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-import javax.management.RuntimeErrorException;
-
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
