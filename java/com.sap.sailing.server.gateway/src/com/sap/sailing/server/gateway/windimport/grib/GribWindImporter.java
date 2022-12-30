@@ -2,8 +2,10 @@ package com.sap.sailing.server.gateway.windimport.grib;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +20,7 @@ import com.sap.sailing.grib.GribWindField;
 import com.sap.sailing.grib.GribWindFieldFactory;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class GribWindImporter extends AbstractWindImporter {
     private static final Logger logger = Logger.getLogger(GribWindImporter.class.getName());
@@ -34,7 +37,12 @@ public class GribWindImporter extends AbstractWindImporter {
     }
 
     @Override
-    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, String> inputStreamsAndFilenames) throws IOException {
+    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, Pair<String, Charset>> inputStreamsAndFilenamesAndCharsets) throws IOException {
+        // GRIB files are, as the acronym expansion "Gridded BINARY" suggests, binary files where charset / encoding is not relevant:
+        final Map<InputStream, String> inputStreamsAndFilenames = new HashMap<>();
+        for (final Entry<InputStream, Pair<String, Charset>> e : inputStreamsAndFilenamesAndCharsets.entrySet()) {
+            inputStreamsAndFilenames.put(e.getKey(), e.getValue().getA());
+        }
         final GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindFieldFromStreams(logger, Level.INFO, inputStreamsAndFilenames);
         final Map<WindSource, Iterable<Wind>> result = new HashMap<>();
         final Map<Position, WindSource> windSourcesByPosition = new HashMap<>();

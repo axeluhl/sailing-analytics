@@ -2,6 +2,7 @@ package com.sap.sailing.server.trackfiles.test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -49,7 +50,7 @@ public abstract class AbstractBravoDataImportTest {
     
     protected void testImport(ImportDataDefinition importData) throws FormatNotSupportedException, IOException {
         try (final InputStream is = importData.getInputStream()) {
-            bravoDataImporter.importFixes(is, (fixes, device) -> {
+            bravoDataImporter.importFixes(is, Charset.defaultCharset(), (fixes, device) -> {
                 callbackCallCount+=Util.size(fixes);
             }, "filename", "source", /* downsample */ true);
             Assert.assertEquals(importData.getExpectedFixesCount(), downsampler.getCountSourceTtl());

@@ -60,6 +60,7 @@ Import-Package: com.sap.sse.security,
  com.sap.sse.security.shared,
  com.sap.sse.security.shared.dto,
  com.sap.sse.security.shared.impl,
+ javax.xml.bind,
  org.apache.commons.io;version="2.2.0",
  org.apache.commons.io.input;version="2.2.0",
  org.apache.commons.lang;version="2.6.0",
@@ -67,7 +68,7 @@ Import-Package: com.sap.sse.security,
  org.apache.http.client;version="4.5.5",
  org.apache.http.client.entity;version="4.5.5",
  org.apache.http.client.methods;version="4.5.5",
+ org.apache.http.entity;version="4.4.9",
  org.apache.http.impl.client;version="4.5.5",
- org.apache.http.message;version="4.4.9",
- javax.xml.bind
+ org.apache.http.message;version="4.4.9"
 Automatic-Module-Name: com.sap.sailing.domain

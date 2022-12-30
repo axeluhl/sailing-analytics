@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.windimport.nmea;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.nmeaconnector.NmeaFactory;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class NmeaWindImporter extends AbstractWindImporter {
@@ -38,16 +40,19 @@ public class NmeaWindImporter extends AbstractWindImporter {
     }
 
     @Override
-    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, String> inputStreamsAndFilenames) throws IOException, InterruptedException {
+    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource,
+            Map<InputStream, Pair<String, Charset>> inputStreamsAndFilenamesAndCharsets) throws IOException, InterruptedException {
         final Iterable<Wind> windFixes;
-        if (inputStreamsAndFilenames != null && inputStreamsAndFilenames.size() == 1) {
-            logger.info("Reading NMEA wind data from "+inputStreamsAndFilenames.values().iterator().next());
-            windFixes = readWind(inputStreamsAndFilenames.values().iterator().next(), inputStreamsAndFilenames.keySet().iterator().next());
+        if (inputStreamsAndFilenamesAndCharsets != null && inputStreamsAndFilenamesAndCharsets.size() == 1) {
+            final Pair<String, Charset> filenameAndCharset = inputStreamsAndFilenamesAndCharsets.values().iterator().next();
+            logger.info("Reading NMEA wind data from "+filenameAndCharset);
+            windFixes = readWind(filenameAndCharset.getA(), inputStreamsAndFilenamesAndCharsets.keySet().iterator().next(), filenameAndCharset.getB());
         } else {
             final List<Wind> windList = new LinkedList<>();
-            for (final Entry<InputStream, String> inputStreamAndFileName : inputStreamsAndFilenames.entrySet()) {
+            for (final Entry<InputStream, Pair<String, Charset>> inputStreamAndFileName : inputStreamsAndFilenamesAndCharsets.entrySet()) {
                 logger.info("Reading NMEA wind data from "+inputStreamAndFileName.getValue());
-                Util.addAll(readWind(inputStreamAndFileName.getValue(), inputStreamAndFileName.getKey()), windList);
+                Util.addAll(readWind(inputStreamAndFileName.getValue().getA(), inputStreamAndFileName.getKey(),
+                        inputStreamAndFileName.getValue().getB()), windList);
             }
             windFixes = windList;
         }
@@ -56,7 +61,7 @@ public class NmeaWindImporter extends AbstractWindImporter {
         return result;
     }
 
-    private Iterable<Wind> readWind(String filename, InputStream inputStream) throws InterruptedException, IOException {
+    private Iterable<Wind> readWind(String filename, InputStream inputStream, Charset charset) throws InterruptedException, IOException {
         final Iterable<Wind> result;
         if (filename.toLowerCase().endsWith("zip")) {
             logger.info("NMEA file "+filename+" is a ZIP file");

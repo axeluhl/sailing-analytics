@@ -1,7 +1,5 @@
 apply plugin: "com.android.library"
-if (!project.hasProperty("xmake")) {
-    apply plugin: "com.getkeepsafe.dexcount"
-}
+
 android {
     buildToolsVersion rootProject.ext.buildTools
     compileSdkVersion rootProject.ext.compileSdk
