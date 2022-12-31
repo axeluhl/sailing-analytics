@@ -154,7 +154,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region, byte[] passphrase) throws Exception;
     
-    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> selectedLeaderBoardNames, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> shardingKeysToAppend, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
     
-    void removeShardingKeysToShard(Iterable<LeaderboardNameDTO> selectedShardingKeys, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> shardingKeysToRemove, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
 }

@@ -312,7 +312,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return new LinkBuilder().setReplicaSet(replicaSet).setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.AmiSearch).build();
             }
         };
-        
         applicationReplicaSetsTable.addColumn(autoScalingGroupAmiIdColumn, stringMessages.machineImageId(), (rs1, rs2)->new NaturalComparator().compare(rs1.getAutoScalingGroupAmiId(), rs2.getAutoScalingGroupAmiId()));
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
                 new ApplicationReplicaSetsImagesBarCell(userService, stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
@@ -350,10 +349,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_OPEN_SHARD_MANAGEMENT,
-                selected -> {
-                    openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
-                            selected);
-                });
+                selectedReplicaSet -> openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), selectedReplicaSet));
         // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();

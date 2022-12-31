@@ -197,11 +197,11 @@ public interface LandscapeManagementWriteServiceAsync {
             String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
-    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
+    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
             AsyncCallback<ArrayList<LeaderboardNameDTO>> names);
 
     void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoards,
-            SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken, String region,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, String region,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
     void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearertoken,
@@ -267,7 +267,7 @@ public interface LandscapeManagementWriteServiceAsync {
      * @param passphraseForPrivateKeyDecryption
      * @param callback
      */
-    void removeShardingKeysToShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
+    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
             SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 }

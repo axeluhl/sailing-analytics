@@ -69,7 +69,11 @@ public class SailingServerImpl extends SecuredServerImpl implements SailingServe
     public Iterable<String> getLeaderboardNames() throws Exception {
         final URL leaderboardsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+LeaderboardsResource.V1_LEADERBOARDS);
         final HttpGet getLeaderboards = new HttpGet(leaderboardsUrl.toString());
-        final JSONArray jsonResponse = (JSONArray) getJsonParsedResponse(getLeaderboards).getA();
+        final Pair<Object, Integer> jsonParsedResponse = getJsonParsedResponse(getLeaderboards);
+        final JSONArray jsonResponse = (JSONArray) jsonParsedResponse.getA();
+        if (jsonResponse == null) {
+            throw new IllegalAccessError("Error accessing leaderboard names; response status "+jsonParsedResponse.getB());
+        }
         return Util.map(jsonResponse, o->o.toString());
     }
 

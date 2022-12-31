@@ -1593,11 +1593,11 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
 
     @Override
-    public SailingServer getSailingServer(String hostname, String bearertoken, Optional<Integer> port)
+    public SailingServer getSailingServer(String hostname, String bearerToken, Optional<Integer> port)
             throws MalformedURLException {
         final SailingServerFactory fac = sailingServerFactoryTracker.getService();
         return fac.getSailingServer(RemoteServerUtil.getBaseServerUrl(hostname,
-                port.isPresent() ? port.get() : /* defaults to HTTPS */ 443), bearertoken);
+                port.orElse(443 /* defaults to HTTPS */)), bearerToken);
     }
 
     private <BuilderT extends ShardProcedure.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.ShardProcedure.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createShardBuilder() {
@@ -1617,11 +1617,10 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public void removeShardingKeysFromShard(Iterable<String> selectedleaderboards,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken)
+            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearerToken)
             throws Exception {
-        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearertoken,
+        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearerToken,
                 /* HTTPS port */ Optional.of(443));
-
         Set<String> shardingKeys = new HashSet<>();
         for (String leaderboardName : selectedleaderboards) {
             shardingKeys.add(server.getLeaderboardShardingKey(leaderboardName));
@@ -1631,11 +1630,12 @@ public class LandscapeServiceImpl implements LandscapeService {
                 .setPassphrase(passphraseForPrivateKeyDecription).build().run();
     }
 
+    @Override
     public void appendShardingKeysToShard(Iterable<String> selectedLeaderboards,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken)
+            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearerToken)
             throws Exception {
-        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearertoken,
+        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearerToken,
                 /* HTTPS port */ Optional.of(443));
         final Set<String> shardingkeys = new HashSet<String>();
         for (String s : selectedLeaderboards) {
@@ -1646,6 +1646,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 .setPassphrase(passphraseForPrivateKeyDecription).build().run();
     }
 
+    @Override
     public void removeShard(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
             String shardTargetGroupArn) throws Exception {
@@ -1657,11 +1658,12 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
     }
 
+    @Override
     public void addShard(Iterable<String> selectedLeaderboardNames,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName)
+            AwsRegion region, String bearerToken, byte[] passphraseForPrivateKeyDecription, String shardName)
             throws Exception {
-        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearertoken,
+        final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearerToken,
                 Optional.of(443));
         final Set<String> shardingkeys = new HashSet<String>();
         for (final String s : selectedLeaderboardNames) {

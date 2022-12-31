@@ -41,7 +41,7 @@ public class ShardManagementPanel extends SimplePanel {
     private final TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources> regattasTable;
     private final TableWrapperWithMultiSelectionAndFilter<AwsShardDTO, StringMessages, AdminConsoleTableResources> shardTable;
     private final TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources> selectedKeysTable;
-    private final TextBox baerertokenText;
+    private final TextBox bearertokenText;
     private SailingApplicationReplicaSetDTO<String> replicaSet;
     private final BusyIndicator shardBusy;
     private final BusyIndicator leaderboardsBusy;
@@ -106,11 +106,11 @@ public class ShardManagementPanel extends SimplePanel {
         actionPanel.add(removeShardButton);
         mainPanel.add(actionPanel);
         final HorizontalPanel usercredentials = new HorizontalPanel();
-        baerertokenText = new TextBox();
+        bearertokenText = new TextBox();
         final Label brearerhinttext = new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(""));
         brearerhinttext.getElement().getStyle().setFontSize(15, Unit.PX);
         usercredentials.add(brearerhinttext);
-        usercredentials.add(baerertokenText);
+        usercredentials.add(bearertokenText);
         mainPanel.add(usercredentials);
         shardsCaption = new CaptionPanel(StringMessages.INSTANCE.shard());
         shardTable.addColumn(t -> t.getName(), StringMessages.INSTANCE.shardname());
@@ -269,9 +269,8 @@ public class ShardManagementPanel extends SimplePanel {
 
     private void getLeaderboards() {
         setLeaderboardBusy(true);
-        landscapeManagementService.getLeaderboardNames(replicaSet, baerertokenText.getValue(),
+        landscapeManagementService.getLeaderboardNames(replicaSet, getBearerToken(),
                 new AsyncCallback<ArrayList<LeaderboardNameDTO>>() {
-
                     @Override
                     public void onSuccess(ArrayList<LeaderboardNameDTO> result) {
                         leaderboards = result;
@@ -282,15 +281,19 @@ public class ShardManagementPanel extends SimplePanel {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error while retriving regattas.");
-
+                        setLeaderboardBusy(false);
+                        setShardTableBusy(false);
                     }
                 });
     }
 
-    private void getShards() {
-        landscapeManagementService.getShards(replicaSet, region, baerertokenText.getValue(),
-                new AsyncCallback<Map<AwsShardDTO, Iterable<LeaderboardNameDTO>>>() {
+    private String getBearerToken() {
+        return Util.hasLength(bearertokenText.getValue()) ? bearertokenText.getValue(): null;
+    }
 
+    private void getShards() {
+        landscapeManagementService.getShards(replicaSet, region, getBearerToken(),
+                new AsyncCallback<Map<AwsShardDTO, Iterable<LeaderboardNameDTO>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());
@@ -302,16 +305,11 @@ public class ShardManagementPanel extends SimplePanel {
                         shards = result;
                         setShardTableBusy(false);
                         display();
-
                     }
                 });
     }
 
     private void addShardButtonPress() {
-        if (baerertokenText.getValue() == null || baerertokenText.getValue() == "") {
-            errorReporter.reportError("Please enter a bearertoken");
-            return;
-        }
         Set<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
         if (!selectedLeaderboards.isEmpty() && replicaSet != null) {
             DialogBox nameRequest = new DialogBox(false);
@@ -336,8 +334,7 @@ public class ShardManagementPanel extends SimplePanel {
                     ArrayList<LeaderboardNameDTO> l = new ArrayList<>();
                     l.addAll(selectedLeaderboards);
                     landscapeManagementService.addShard(nameText.getValue(), l, replicaSet,
-                            baerertokenText.getValue(), region, passphrase.getBytes(), new AsyncCallback<Void>() {
-
+                            getBearerToken(), region, passphrase.getBytes(), new AsyncCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void result) {
                                     Notification.notify("Created succesfully", NotificationType.SUCCESS);
@@ -362,7 +359,6 @@ public class ShardManagementPanel extends SimplePanel {
         for (AwsShardDTO selection : shardTable.getSelectionModel().getSelectedSet()) {
             landscapeManagementService.removeShard(selection, replicaSet, region, passphrase.getBytes(),
                     new AsyncCallback<Void>() {
-
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(caught.getMessage());
@@ -386,14 +382,16 @@ public class ShardManagementPanel extends SimplePanel {
             final Iterable<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
             final AwsShardDTO shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
             landscapeManagementService.appendShardingKeysToShard(selectedLeaderboards, region, shard.getName(),
-                    replicaSet, baerertokenText.getValue(), passphrase.getBytes(), new AsyncCallback<Void>() {
+                    replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
+                            setLeaderboardBusy(false);
                             errorReporter.reportError(caught.getMessage());
                         }
 
                         @Override
                         public void onSuccess(Void result) {
+                            setLeaderboardBusy(false);
                             appendMessage(stringMessages.successfullyAppendedShardingKeysToShard(Util.join(", ", selectedLeaderboards), shard.getName()));
                             refresh();
                         }
@@ -408,15 +406,17 @@ public class ShardManagementPanel extends SimplePanel {
                 && shardTable.getSelectionModel().getSelectedSet().size() == 1) {
             final Iterable<LeaderboardNameDTO> selectedLeaderboards = selectedKeysTable.getSelectionModel().getSelectedSet();
             final AwsShardDTO shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
-            landscapeManagementService.removeShardingKeysToShard(selectedLeaderboards, region, shard.getName(),
-                    replicaSet, baerertokenText.getValue(), passphrase.getBytes(), new AsyncCallback<Void>() {
+            landscapeManagementService.removeShardingKeysFromShard(selectedLeaderboards, region, shard.getName(),
+                    replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
+                            setLeaderboardBusy(false);
                             errorReporter.reportError(caught.getMessage());
                         }
 
                         @Override
                         public void onSuccess(Void result) {
+                            setLeaderboardBusy(false);
                             appendMessage(stringMessages.successfullyRemovedLeaderboardsFromShard(Util.join(", ", selectedLeaderboards), shard.getName()));
                             refresh();
                         }

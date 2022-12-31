@@ -2,13 +2,13 @@ package com.sap.sse.landscape.aws.orchestration;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -43,6 +43,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
 
     private static int DEFAULT_INSTANCE_STARTUP_TIME = 180;
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
+    private static final String PATH_UNUSED_BY_ANY_APPLICATION = "lauycaluy3cla3yrclaurlIYQL8";
 
     public CreateShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
@@ -51,7 +52,6 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
     static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
             extends
             ShardProcedure.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
-
         @Override
         public CreateShard<ShardingKey, MetricsT, ProcessT> build() throws Exception {
             assert shardingKeys != null;
@@ -100,7 +100,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                                                             .getB()))
                                             .build(),
                                     RuleCondition.builder().field("path-pattern")
-                                            .pathPatternConfig(ppc -> ppc.values(/* just any path */"/temp/")).build())
+                                            .pathPatternConfig(ppc -> ppc.values(PATH_UNUSED_BY_ANY_APPLICATION)).build())
                             .actions(Action.builder()
                                     .forwardConfig(ForwardActionConfig.builder()
                                             .targetGroups(TargetGroupTuple.builder()
@@ -112,25 +112,22 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, getLandscape().getAutoScalingGroupName(shardName), targetgroup,
                             AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET, region);
                     // wait until instances are running
-                    Wait.wait(new Callable<Boolean>() {
-                        public Boolean call() {
-                            boolean ret = true;
-                            final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
-                                    .getTargetHealthDescriptions(targetgroup);
-                            if (healths.isEmpty()) {
-                                ret = false; // if there is no Aws in target
-                            } else {
-                                for (Map.Entry<AwsInstance<ShardingKey>, TargetHealth> instance : healths.entrySet()) {
-                                    if (instance.getValue().state() != TargetHealthStateEnum.HEALTHY) {
-                                        ret = false; // if this instance is unhealthy
-                                        break;
-                                    }
+                    Wait.wait(()->{
+                        boolean ret = true;
+                        final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
+                                .getTargetHealthDescriptions(targetgroup);
+                        if (healths.isEmpty()) {
+                            ret = false; // if there is no Aws in target
+                        } else {
+                            for (Map.Entry<AwsInstance<ShardingKey>, TargetHealth> instance : healths.entrySet()) {
+                                if (instance.getValue().state() != TargetHealthStateEnum.HEALTHY) {
+                                    ret = false; // if this instance is unhealthy
+                                    break;
                                 }
                             }
-                            return ret;
                         }
-                    }, Optional.of(Duration.ONE_MINUTE.times(10)), Duration.ONE_SECOND.times(5), Level.INFO,
-                            "Instances not yet healty");
+                        return ret;
+                    }, Landscape.WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(30), Level.INFO, "Instances not yet healty");
                     // remove dummy-rule
                     for (Rule r : newRuleSet) {
                         loadBalancer.deleteRules(r);

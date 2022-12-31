@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -75,7 +76,8 @@ public class SecuredServerImpl implements SecuredServer {
         final HttpResponse response = client.execute(request);
         final int statusCode = response.getStatusLine().getStatusCode();
         Object jsonParseResult;
-        if (statusCode == Response.Status.NO_CONTENT.getStatusCode()) {
+        if (statusCode == Response.Status.NO_CONTENT.getStatusCode()
+                || Response.Status.fromStatusCode(statusCode).getFamily() != Family.SUCCESSFUL) {
             jsonParseResult = null;
         } else {
             response.getEntity().writeTo(bos);

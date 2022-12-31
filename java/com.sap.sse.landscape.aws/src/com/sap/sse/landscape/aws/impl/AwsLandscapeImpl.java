@@ -2036,8 +2036,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .availabilityZones(availabilityZones)
                 .targetGroupARNs(targetgroup.getTargetGroupArn())
                 .launchConfigurationName(launchConfigurationName);
+            final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
+            final List<software.amazon.awssdk.services.autoscaling.model.TagDescription> parentTags = autoscalingParent.getAutoScalingGroup().tags();
+            for (final software.amazon.awssdk.services.autoscaling.model.TagDescription parentTag : parentTags) {
+                awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder().key(parentTag.key()).value(parentTag.value()).build());
+            }
             tags.ifPresent(t->{
-                final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
                 for (final Entry<String, String> tag : t) {
                     awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
                 }
