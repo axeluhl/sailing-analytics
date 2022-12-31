@@ -2,6 +2,7 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -49,8 +50,8 @@ public class ShardManagementPanel extends SimplePanel {
     private String passphrase;
     private final DialogBox messageBox;
     private final TextArea message;
-    private ArrayList<LeaderboardNameDTO> leaderboards;
-    private Map<AwsShardDTO, Iterable<LeaderboardNameDTO>> shards;
+    private List<LeaderboardNameDTO> leaderboards;
+    private Map<AwsShardDTO, Iterable<String>> shardsAndShardingKeys;
     private final Button addShard;
     private final CaptionPanel leaderboardCaption, shardsCaption, keysCaption;
     private final Button addButton, deleteButton;
@@ -68,7 +69,7 @@ public class ShardManagementPanel extends SimplePanel {
         this.errorReporter = errorReporter;
         landscapeManagementService = pLandscapeManagementService;
         final HorizontalPanel actionPanel = new HorizontalPanel();
-        final Button refreshButton = new Button(StringMessages.INSTANCE.refresh());
+        final Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(event -> refresh());
         actionPanel.add(refreshButton);
         regattasTable = new TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources>(
@@ -82,7 +83,7 @@ public class ShardManagementPanel extends SimplePanel {
                 return res;
             }
         };
-        addShard = new SelectedElementsCountingButton<LeaderboardNameDTO>(StringMessages.INSTANCE.addShard(),
+        addShard = new SelectedElementsCountingButton<LeaderboardNameDTO>(stringMessages.addShard(),
                 regattasTable.getSelectionModel(), e -> removeButtonPress());
         actionPanel.add(addShard);
         addShard.addClickHandler(event -> {
@@ -102,7 +103,7 @@ public class ShardManagementPanel extends SimplePanel {
         };
         removeShardButton = new SelectedElementsCountingButton<AwsShardDTO>(stringMessages.remove(),
                 shardTable.getSelectionModel(), /* element name mapper */ rs -> rs.getName(),
-                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements, e -> removeButtonPress());
+                stringMessages::doYouReallyWantToRemoveSelectedElements, e -> removeButtonPress());
         actionPanel.add(removeShardButton);
         mainPanel.add(actionPanel);
         final HorizontalPanel usercredentials = new HorizontalPanel();
@@ -112,9 +113,9 @@ public class ShardManagementPanel extends SimplePanel {
         usercredentials.add(brearerhinttext);
         usercredentials.add(bearertokenText);
         mainPanel.add(usercredentials);
-        shardsCaption = new CaptionPanel(StringMessages.INSTANCE.shard());
-        shardTable.addColumn(t -> t.getName(), StringMessages.INSTANCE.shardname());
-        shardTable.addColumn(t -> t.getKeysString(), StringMessages.INSTANCE.shardingKeys());
+        shardsCaption = new CaptionPanel(stringMessages.shard());
+        shardTable.addColumn(t -> t.getName(), stringMessages.shardname());
+        shardTable.addColumn(t -> String.join(", ", t.getLeaderboardNames()), stringMessages.shardingKeys());
         final SafeHtmlCell targetgroupCell = new SafeHtmlCell();
         final Column<AwsShardDTO, SafeHtml> targetgroupColumn = new Column<AwsShardDTO, SafeHtml>(targetgroupCell) {
             @Override
@@ -123,16 +124,16 @@ public class ShardManagementPanel extends SimplePanel {
                         .setPathMode(LinkBuilder.pathModes.TargetgroupSearch).build();
             }
         };
-        shardTable.addColumn(targetgroupColumn, StringMessages.INSTANCE.Targetgroup());
-        shardTable.addColumn(t -> t.getAutoscalingGroupName(), StringMessages.INSTANCE.Autoscalinggroup());
+        shardTable.addColumn(targetgroupColumn, stringMessages.Targetgroup());
+        shardTable.addColumn(t -> t.getAutoscalingGroupName(), stringMessages.Autoscalinggroup());
         shardTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateRemoveShardButton();
             updateSelectedKeysTable();
             updateAddDeleteButton();
         });
         updateRemoveShardButton();
-        leaderboardCaption = new CaptionPanel(StringMessages.INSTANCE.leaderboards());
-        regattasTable.addColumn(t -> t.getName(), StringMessages.INSTANCE.leaderboards());
+        leaderboardCaption = new CaptionPanel(stringMessages.leaderboards());
+        regattasTable.addColumn(t -> t.getName(), stringMessages.leaderboards());
         regattasTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateAddDeleteButton();
         });
@@ -140,7 +141,7 @@ public class ShardManagementPanel extends SimplePanel {
         final HorizontalPanel tableRow = new HorizontalPanel();
         leaderboardsBusy = new SimpleBusyIndicator();
         shardBusy = new SimpleBusyIndicator();
-        keysCaption = new CaptionPanel(StringMessages.INSTANCE.keys());
+        keysCaption = new CaptionPanel(stringMessages.keys());
         selectedKeysTable = new TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, false, java.util.Optional.empty(),
                 GWT.create(AdminConsoleTableResources.class), java.util.Optional.empty(), java.util.Optional.empty(),
@@ -154,7 +155,7 @@ public class ShardManagementPanel extends SimplePanel {
                 return result;
             }
         };
-        selectedKeysTable.addColumn(t -> t.getName(), StringMessages.INSTANCE.keys());
+        selectedKeysTable.addColumn(t -> t.getName(), stringMessages.keys());
         selectedKeysTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateAddDeleteButton();
             updateRemoveShardButton();
@@ -190,7 +191,7 @@ public class ShardManagementPanel extends SimplePanel {
         message = new TextArea();
         message.setPixelSize(200, 300);
         dialogMainPanel.add(message);
-        Button closeButton = new Button(StringMessages.INSTANCE.close());
+        Button closeButton = new Button(stringMessages.close());
         closeButton.addClickHandler(event -> messageBox.hide());
         dialogMainPanel.add(closeButton);
         mainPanel.add(tableRow);
@@ -203,7 +204,7 @@ public class ShardManagementPanel extends SimplePanel {
         if (shardTable.getSelectionModel().getSelectedSet().size() == 1) {
             keysCaption.setVisible(true);
             selectedKeysTable
-                    .refresh(Util.map(shardTable.getSelectionModel().getSelectedSet().iterator().next().getKeys(),
+                    .refresh(Util.map(shardTable.getSelectionModel().getSelectedSet().iterator().next().getLeaderboardNames(),
                             t -> new LeaderboardNameDTO(t)));
         } else {
             keysCaption.setVisible(false);
@@ -234,23 +235,17 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     private void display() {
-        final ArrayList<LeaderboardNameDTO> takenLeaderboards = new ArrayList<>();
-        for (Entry<AwsShardDTO, Iterable<LeaderboardNameDTO>> s : shards.entrySet()) {
-            for (LeaderboardNameDTO t : s.getValue()) {
-                takenLeaderboards.add(t);
+        final List<String> takenLeaderboardNames = new ArrayList<>();
+        for (Entry<AwsShardDTO, Iterable<String>> s : shardsAndShardingKeys.entrySet()) {
+            for (String leaderboardName : s.getKey().getLeaderboardNames()) {
+                takenLeaderboardNames.add(leaderboardName);
             }
         }
-        final Iterable<LeaderboardNameDTO> leaderboardsToDisplay = Util.filter(leaderboards, t -> {
-            for (LeaderboardNameDTO key : takenLeaderboards) {
-                if (key.getName().endsWith(t.getName()) || key.getName().equals(t.getName())) {
-                    return false;
-                }
-            }
-            return true;
-        });
+        final Iterable<LeaderboardNameDTO> leaderboardsToDisplay = Util.filter(leaderboards,
+                leaderboardNameDTO -> !takenLeaderboardNames.contains(leaderboardNameDTO.getName()));
         shardsCaption.setVisible(true);
         regattasTable.refresh(leaderboardsToDisplay);
-        shardTable.refresh(shards.keySet());
+        shardTable.refresh(shardsAndShardingKeys.keySet());
         if (parentDialog != null) {
             parentDialog.center();
         }
@@ -293,7 +288,7 @@ public class ShardManagementPanel extends SimplePanel {
 
     private void getShards() {
         landscapeManagementService.getShards(replicaSet, region, getBearerToken(),
-                new AsyncCallback<Map<AwsShardDTO, Iterable<LeaderboardNameDTO>>>() {
+                new AsyncCallback<Map<AwsShardDTO, Iterable<String>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());
@@ -301,8 +296,8 @@ public class ShardManagementPanel extends SimplePanel {
                     }
 
                     @Override
-                    public void onSuccess(Map<AwsShardDTO, Iterable<LeaderboardNameDTO>> result) {
-                        shards = result;
+                    public void onSuccess(Map<AwsShardDTO, Iterable<String>> result) {
+                        shardsAndShardingKeys = result;
                         setShardTableBusy(false);
                         display();
                     }
@@ -317,10 +312,10 @@ public class ShardManagementPanel extends SimplePanel {
             mainPanel.setSpacing(5);
             mainPanel.setWidth("100%");
             nameRequest.add(mainPanel);
-            mainPanel.add(new Label(StringMessages.INSTANCE.enterShardName()));
+            mainPanel.add(new Label(stringMessages.enterShardName()));
             TextBox nameText = new TextBox();
             mainPanel.add(nameText);
-            Button submitButton = new Button(StringMessages.INSTANCE.ok());
+            Button submitButton = new Button(stringMessages.ok());
             mainPanel.add(submitButton);
             submitButton.addClickHandler(event -> {
                 if (nameText.getValue() == null || nameText.getValue() == "") {

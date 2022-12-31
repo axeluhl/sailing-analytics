@@ -6,7 +6,7 @@ import com.sap.sse.common.Named;
 
 public class AwsShardDTO implements Named {
     private static final long serialVersionUID = 1L;
-    ArrayList<String> keys;
+    ArrayList<String> leaderboardNames;
     private String targetGroupArn;
     private String targetGroupName;
     private String autoScalingGroupArn;
@@ -19,11 +19,11 @@ public class AwsShardDTO implements Named {
     private AwsShardDTO() {
     }
 
-    public AwsShardDTO(Iterable<String> keys, String targetGroupArn, String targetGroupName, String autoScalinggroupArn,
+    public AwsShardDTO(Iterable<String> leaderboardNames, String targetGroupArn, String targetGroupName, String autoScalinggroupArn,
             String autoBalancerArn, String autoScalingGroupName, String name, String replicaName) {
-        this.keys = new ArrayList<String>();
-        for (String s : keys) {
-            this.keys.add(s);
+        this.leaderboardNames = new ArrayList<>();
+        for (String s : leaderboardNames) {
+            this.leaderboardNames.add(s);
         }
         this.targetGroupArn = targetGroupArn;
         this.targetGroupName = targetGroupName;
@@ -34,12 +34,12 @@ public class AwsShardDTO implements Named {
         this.replicaName = replicaName;
     }
 
-    public String getReplicaname() {
+    public String getReplicaName() {
         return replicaName;
     }
 
-    public ArrayList<String> getKeys() {
-        return keys;
+    public ArrayList<String> getLeaderboardNames() {
+        return leaderboardNames;
     }
 
     public String getTargetgroupArn() {
@@ -69,9 +69,5 @@ public class AwsShardDTO implements Named {
     @Override
     public String getName() {
         return name;
-    }
-
-    public String getKeysString() {
-        return String.join(", ", keys);
     }
 }

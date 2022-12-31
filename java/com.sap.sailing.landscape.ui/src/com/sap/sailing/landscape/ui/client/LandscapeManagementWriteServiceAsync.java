@@ -204,8 +204,14 @@ public interface LandscapeManagementWriteServiceAsync {
             SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, String region,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
+    /**
+     * @param callback
+     *            returns the shards as keys and the sharding keys (escaped / mangled leaderboard names) as values.
+     *            Those sharding keys are what you get when mangling the {@link AwsShardDTO#getLeaderboardNames()
+     *            leaderboard names} of the shard.
+     */
     void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearertoken,
-            AsyncCallback<Map<AwsShardDTO, Iterable<LeaderboardNameDTO>>> callback);
+            AsyncCallback<Map<AwsShardDTO, Iterable<String>>> callback);
 
     /**
      * Removes {@code shard} from the replica set. This deletes the load balancer listener rules, and the auto scaling

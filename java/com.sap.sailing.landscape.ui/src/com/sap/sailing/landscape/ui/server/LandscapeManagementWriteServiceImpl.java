@@ -875,26 +875,26 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public Map<AwsShardDTO, Iterable<LeaderboardNameDTO>> getShards(SailingApplicationReplicaSetDTO<String> replicaSetDTO,
+    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaSetDTO,
             String region, String bearerToken) throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
-        final Map<AwsShardDTO, Iterable<String>> shardsDTO = new HashMap<>();
+        final Map<AwsShardDTO, Iterable<String>> shardingKeysForShards = new HashMap<>();
         final SailingServer server = getLandscapeService().getSailingServer(replicaSetDTO.getHostname(), bearerToken,
                 Optional.empty());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet = convertFromApplicationReplicaSetDTO(
                 awsRegion, replicaSetDTO);
-        final Map<String, String> mapping = new HashMap<>();
+        final Map<String, String> leaderboardNamesByShardingKeys = new HashMap<>();
         for (String leaderboard : server.getLeaderboardNames()) {
-            mapping.put(server.getLeaderboardShardingKey(leaderboard), leaderboard);
+            leaderboardNamesByShardingKeys.put(server.getLeaderboardShardingKey(leaderboard), leaderboard);
         }
         for (Entry<AwsShard<String>, Iterable<String>> entry : applicationServerReplicaSet.getShards().entrySet()) {
-            shardsDTO.put(createAwsShardDTO(entry.getKey(), applicationServerReplicaSet.getName(), server, mapping),
+            shardingKeysForShards.put(createAwsShardDTO(entry.getKey(), applicationServerReplicaSet.getName(), server, leaderboardNamesByShardingKeys),
                     entry.getValue());
         }
-        final Map<AwsShardDTO, Iterable<LeaderboardNameDTO>> res = new HashMap<>();
-        for (Entry<AwsShardDTO, Iterable<String>> entry : shardsDTO.entrySet()) {
-            res.put(entry.getKey(), Util.asList(Util.map(entry.getValue(), LeaderboardNameDTO::new)));
+        final Map<AwsShardDTO, Iterable<String>> res = new HashMap<>();
+        for (Entry<AwsShardDTO, Iterable<String>> entry : shardingKeysForShards.entrySet()) {
+            res.put(entry.getKey(), entry.getValue());
         }
         return res;
     }
@@ -934,8 +934,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 rs, passphraseForPrivateKeyDecryption, awsRegion, shardName, bearerToken);
     }
 
-    public AwsShardDTO createAwsShardDTO(AwsShard<String> shard, String replicaSetName, SailingServer server, Map<String, String> leaderboardMapping) throws Exception {
-        return new AwsShardDTO(Util.filter(Util.map(shard.getKeys(), t -> leaderboardMapping.get(t)), leaderboardName->leaderboardName!=null),
+    public AwsShardDTO createAwsShardDTO(AwsShard<String> shard, String replicaSetName, SailingServer server,
+            Map<String, String> leaderboardNamesByShardingKeys) throws Exception {
+        return new AwsShardDTO(Util.filter(Util.map(shard.getKeys(),
+                shardingKey -> leaderboardNamesByShardingKeys.get(shardingKey)), leaderboardName->leaderboardName!=null),
                 shard.getTargetGroup().getTargetGroupArn(), shard.getTargetGroup().getName(),
                 shard.getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
                 shard.getTargetGroup().getLoadBalancerArn(), shard.getAutoScalingGroup().getName(),
