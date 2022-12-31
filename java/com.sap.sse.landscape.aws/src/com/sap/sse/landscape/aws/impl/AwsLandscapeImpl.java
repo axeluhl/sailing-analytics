@@ -2019,13 +2019,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoscalingParent,
-            String shardname, TargetGroup<ShardingKey> targetgroup, Optional<Tags> tags) {
+            String shardName, TargetGroup<ShardingKey> targetgroup, Optional<Tags> tags) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoscalingParent.getRegion()));
         final String launchConfigurationName = autoscalingParent.getAutoScalingGroup().launchConfigurationName();
-        final String autoScalingGroupName = getAutoScalingGroupName(shardname);
+        final String autoScalingGroupName = getAutoScalingGroupName(shardName);
         final List<String> availabilityZones = autoscalingParent.getAutoScalingGroup().availabilityZones();
         final int instanceWarmupTimeInSeconds = autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
-        logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardname + ". Inheriting from Autoscalinggroup: " + autoscalingParent.getName());
+        logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoscalingParent.getName());
         autoScalingClient.createAutoScalingGroup(b->{
             b
                 .minSize(autoscalingParent.getAutoScalingGroup().minSize() > 1 ? autoscalingParent.getAutoScalingGroup().minSize() : 2)
@@ -2039,14 +2039,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
             final List<software.amazon.awssdk.services.autoscaling.model.TagDescription> parentTags = autoscalingParent.getAutoScalingGroup().tags();
             for (final software.amazon.awssdk.services.autoscaling.model.TagDescription parentTag : parentTags) {
-                awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder().key(parentTag.key()).value(parentTag.value()).build());
+                awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder()
+                        .key(parentTag.key())
+                        .value(parentTag.key().equals("Name") ? parentTag.value()+" ("+shardName+")" : parentTag.value())
+                        .propagateAtLaunch(parentTag.propagateAtLaunch())
+                        .build());
             }
             tags.ifPresent(t->{
                 for (final Entry<String, String> tag : t) {
                     awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
                 }
-                b.tags(awsTags);
             });
+            b.tags(awsTags);
         });
     }
 
