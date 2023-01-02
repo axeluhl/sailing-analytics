@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws.impl;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsShard;
@@ -63,4 +64,10 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
     public Iterable<Rule> getRules() {
         return rules;
     }
+
+    @Override
+    public String toString() {
+        return "AwsShardImpl [name=" + name + ", replicaSetName=" + replicaSetName + ", keys=" + Util.joinStrings(", ", keys) + "]";
+    }
+    
 }
