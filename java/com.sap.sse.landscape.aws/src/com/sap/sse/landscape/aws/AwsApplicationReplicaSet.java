@@ -131,8 +131,8 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     boolean isLocalReplicaSet();
     
     /**
-     * Returns a {@link ShardName} that is created from an (user-) entered shard name ({@code shardName}).
-     * {@link ShardName} contains the target group name and the replica set name.
+     * Returns a {@link ShardTargetGroupName} that is created from an (user-) entered shard name ({@code shardName}).
+     * {@link ShardTargetGroupName} contains the target group name and the replica set name.
      * @param shardName
      *          (User-) entered name for the shard.
      * @return
@@ -140,7 +140,7 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * @throws Exception
      *          throws when {@code shardName} is not valid or is not parse-able to a shardName.
      */
-    ShardName getNewShardName(String shardName) throws Exception;
+    ShardTargetGroupName getNewShardName(String shardName) throws Exception;
     
     Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards() throws Exception;
     

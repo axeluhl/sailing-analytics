@@ -31,7 +31,7 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
-import com.sap.sse.landscape.aws.ShardName;
+import com.sap.sse.landscape.aws.ShardTargetGroupName;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -336,25 +336,22 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     String tagName = null;
                     Iterable<TagDescription> tagsDesc = e.getKey().getTagDescriptions();
                     for (TagDescription des : tagsDesc) {
-                        Iterable<Tag> tag = Util.filter(des.tags(), t -> t.key().equals(ShardName.TAG_KEY));
+                        Iterable<Tag> tag = Util.filter(des.tags(), t -> t.key().equals(ShardTargetGroupName.TAG_KEY));
                         if (!Util.isEmpty(tag)) {
                             tagName = tag.iterator().next().value();
                             break;
                         }
                     }
-                    ShardName shardName;
                     try {
-                        shardName = ShardName.parse(e.getKey().getName(), tagName);
+                        final ShardTargetGroupName shardName = ShardTargetGroupName.parse(e.getKey().getName(), tagName);
+                        final AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(getName(),
+                                shardName.getShardName(), Util.asList(Util.map(keys, s -> (ShardingKey) s)), e.getKey(),
+                                e.getKey().getLoadBalancer(), pathRules, getShardAutoscalinggroup(e.getKey(), autoScalingGroups, launchConfigurations));
+                        shardMap.put(shard, shard.getKeys());
                     } catch (Exception e1) {
                         logger.info(e1.getMessage());
                         // This entry is no valid shard
-                        continue;
                     }
-                    AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(getName(),
-                            Util.asList(Util.map(keys, s -> (ShardingKey) s)), e.getKey(), shardName,
-                            e.getKey().getLoadBalancer(), pathRules,
-                            getShardAutoscalinggroup(e.getKey(), autoScalingGroups, launchConfigurations));
-                    shardMap.put(shard, shard.getKeys());
                 }
             }
         }
@@ -362,12 +359,12 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     };
     
     private boolean isShardName(String requestedName) {
-            return ShardName.isValidTargetGroupName(requestedName);
+            return ShardTargetGroupName.isValidTargetGroupName(requestedName);
     }
     
     @Override
-    public ShardName getNewShardName(String shardName) throws Exception{
-        return ShardName.create(getName(), shardName);
+    public ShardTargetGroupName getNewShardName(String shardName) throws Exception{
+        return ShardTargetGroupName.create(getName(), shardName);
     }
     
     @Override

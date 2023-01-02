@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
  * <p>
  * 
  * Technically, the shard's name is represented as a tag value on the {@link #getTargetGroup() target group}, hence the
- * restrictions for AWS tag values apply. The tag's key is {@link ShardName.TAG_KEY}. 
+ * restrictions for AWS tag values apply. The tag's key is {@link ShardTargetGroupName.TAG_KEY}. 
  *
  * <p>
  *

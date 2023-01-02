@@ -3,7 +3,6 @@ package com.sap.sse.landscape.aws.impl;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsShard;
-import com.sap.sse.landscape.aws.ShardName;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -16,18 +15,15 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
     private final String replicaSetName;
     private final String name;
     private final AwsAutoScalingGroup autoScalingGroup;
-    private final ShardName shardNameDTO;
     private final ApplicationLoadBalancer<ShardingKey> loadBalancer;
     private final Iterable<Rule> rules;
 
-    public AwsShardImpl(String replicaSetName, Iterable<ShardingKey> keys, TargetGroup<ShardingKey> targetgroup,
-            ShardName shardNameDTO, ApplicationLoadBalancer<ShardingKey> loadBalancer, Iterable<Rule> rules,
-            AwsAutoScalingGroup asg) {
+    public AwsShardImpl(String replicaSetName, String shardName, Iterable<ShardingKey> keys,
+            TargetGroup<ShardingKey> targetgroup, ApplicationLoadBalancer<ShardingKey> loadBalancer, Iterable<Rule> rules, AwsAutoScalingGroup asg) {
         this.keys = keys;
         this.targetGroup = targetgroup;
         this.replicaSetName = replicaSetName;
-        this.shardNameDTO = shardNameDTO;
-        this.name = shardNameDTO.getName();
+        this.name = shardName;
         this.loadBalancer = loadBalancer;
         this.autoScalingGroup = asg;
         this.rules = rules;
@@ -56,10 +52,6 @@ public class AwsShardImpl<ShardingKey> implements AwsShard<ShardingKey> {
     @Override
     public AwsAutoScalingGroup getAutoScalingGroup() {
         return autoScalingGroup;
-    }
-
-    public ShardName getShardNameDTO() {
-        return shardNameDTO;
     }
 
     @Override

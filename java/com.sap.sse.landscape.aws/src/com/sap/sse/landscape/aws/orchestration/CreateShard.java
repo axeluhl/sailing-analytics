@@ -14,7 +14,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsInstance;
-import com.sap.sse.landscape.aws.ShardName;
+import com.sap.sse.landscape.aws.ShardTargetGroupName;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.shared.util.Wait;
 
@@ -64,7 +64,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
 
     @Override
     public void run() throws Exception {
-        final ShardName name;
+        final ShardTargetGroupName name;
         if (shardName == null) {
             throw new Exception("Shardname is null, please enter a name");
         } else {
@@ -79,7 +79,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaSet.getName());
         final TargetGroup<ShardingKey> targetgroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
                 name.getTargetgroupName(), replicaSet.getMaster().getPort());
-        getLandscape().addTargetGroupTag(targetgroup.getTargetGroupArn(), ShardName.TAG_KEY, name.getName(), region);
+        getLandscape().addTargetGroupTag(targetgroup.getTargetGroupArn(), ShardTargetGroupName.TAG_KEY, name.getName(), region);
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
                 + autoScalingGroup.getName());
