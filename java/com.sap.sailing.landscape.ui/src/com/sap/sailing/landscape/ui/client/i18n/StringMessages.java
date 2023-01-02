@@ -152,4 +152,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String openShardManagement();
     String successfullyAppendedShardingKeysToShard(String leaderboardNames, String shardName);
     String successfullyRemovedLeaderboardsFromShard(String leaderboardNames, String shardName);
+    String pleaseProvideANonEmptyShardName();
 }

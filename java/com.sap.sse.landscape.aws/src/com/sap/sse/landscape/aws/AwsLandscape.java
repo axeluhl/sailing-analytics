@@ -783,9 +783,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
     
+    /**
+     * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the auto-scaling group
+     * based on the {@code shareName}, configuring it to create its instances into {@code targetGroup} instead of the
+     * {@code autoScalingParent}'s target group, and optionally adding the {@code tags} to those copied anyhow from
+     * the {@code autoScalingParent}.
+     */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoscalingParent,
-            String shardname, TargetGroup<ShardingKey> targetgroup, Optional<Tags> tags);
+    void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
+            String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags);
     
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(

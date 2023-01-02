@@ -2018,26 +2018,26 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoscalingParent,
-            String shardName, TargetGroup<ShardingKey> targetgroup, Optional<Tags> tags) {
-        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoscalingParent.getRegion()));
-        final String launchConfigurationName = autoscalingParent.getAutoScalingGroup().launchConfigurationName();
+    void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
+            String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags) {
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoScalingParent.getRegion()));
+        final String launchConfigurationName = autoScalingParent.getAutoScalingGroup().launchConfigurationName();
         final String autoScalingGroupName = getAutoScalingGroupName(shardName);
-        final List<String> availabilityZones = autoscalingParent.getAutoScalingGroup().availabilityZones();
-        final int instanceWarmupTimeInSeconds = autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoscalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
-        logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoscalingParent.getName());
+        final List<String> availabilityZones = autoScalingParent.getAutoScalingGroup().availabilityZones();
+        final int instanceWarmupTimeInSeconds = autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
+        logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoScalingParent.getName());
         autoScalingClient.createAutoScalingGroup(b->{
             b
-                .minSize(autoscalingParent.getAutoScalingGroup().minSize() > 1 ? autoscalingParent.getAutoScalingGroup().minSize() : 2)
+                .minSize(autoScalingParent.getAutoScalingGroup().minSize() > 1 ? autoScalingParent.getAutoScalingGroup().minSize() : 2)
                 .minSize(1)
-                .maxSize(autoscalingParent.getAutoScalingGroup().maxSize())
+                .maxSize(autoScalingParent.getAutoScalingGroup().maxSize())
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
                 .availabilityZones(availabilityZones)
-                .targetGroupARNs(targetgroup.getTargetGroupArn())
+                .targetGroupARNs(targetGroup.getTargetGroupArn())
                 .launchConfigurationName(launchConfigurationName);
             final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
-            final List<software.amazon.awssdk.services.autoscaling.model.TagDescription> parentTags = autoscalingParent.getAutoScalingGroup().tags();
+            final List<software.amazon.awssdk.services.autoscaling.model.TagDescription> parentTags = autoScalingParent.getAutoScalingGroup().tags();
             for (final software.amazon.awssdk.services.autoscaling.model.TagDescription parentTag : parentTags) {
                 awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder()
                         .key(parentTag.key())

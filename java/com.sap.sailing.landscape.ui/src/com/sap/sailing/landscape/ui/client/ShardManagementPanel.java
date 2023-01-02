@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.LeaderboardNameDTO;
@@ -34,6 +35,9 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class ShardManagementPanel extends SimplePanel {
@@ -93,7 +97,6 @@ public class ShardManagementPanel extends SimplePanel {
                 stringMessages, errorReporter, false, java.util.Optional.empty(),
                 GWT.create(AdminConsoleTableResources.class), java.util.Optional.empty(), java.util.Optional.empty(),
                 null) {
-
             @Override
             protected Iterable<String> getSearchableStrings(AwsShardDTO t) {
                 final Set<String> res = new HashSet<String>();
@@ -305,46 +308,57 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     private void addShardButtonPress() {
-        Set<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
+        final Set<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
         if (!selectedLeaderboards.isEmpty() && replicaSet != null) {
-            DialogBox nameRequest = new DialogBox(false);
-            final VerticalPanel mainPanel = new VerticalPanel();
-            mainPanel.setSpacing(5);
-            mainPanel.setWidth("100%");
-            nameRequest.add(mainPanel);
-            mainPanel.add(new Label(stringMessages.enterShardName()));
-            TextBox nameText = new TextBox();
-            mainPanel.add(nameText);
-            Button submitButton = new Button(stringMessages.ok());
-            mainPanel.add(submitButton);
-            submitButton.addClickHandler(event -> {
-                if (nameText.getValue() == null || nameText.getValue() == "") {
-                    nameRequest.setVisible(false);
-                    errorReporter.reportError("Name not valid");
-                } else if (region == null || passphrase == null) {
-                    nameRequest.setVisible(false);
-                    errorReporter.reportError("Region and passphrase must be set");
-                } else {
-                    nameRequest.setVisible(false);
-                    ArrayList<LeaderboardNameDTO> l = new ArrayList<>();
-                    l.addAll(selectedLeaderboards);
-                    landscapeManagementService.addShard(nameText.getValue(), l, replicaSet,
-                            getBearerToken(), region, passphrase.getBytes(), new AsyncCallback<Void>() {
-                                @Override
-                                public void onSuccess(Void result) {
-                                    Notification.notify("Created succesfully", NotificationType.SUCCESS);
-                                    refresh();
-                                }
+            final DataEntryDialog<String> nameRequest = new DataEntryDialog<String>(
+                    stringMessages.shardname(), stringMessages.enterShardName(), stringMessages.ok(), stringMessages.cancel(),
+                    new Validator<String>() {
+                        @Override
+                        public String getErrorMessage(String valueToValidate) {
+                            final String errorMessage;
+                            if (!Util.hasLength(valueToValidate)) {
+                                errorMessage = stringMessages.pleaseProvideANonEmptyShardName();
+                            } else {
+                                errorMessage = null;
+                            }
+                            return errorMessage;
+                        }
+                }, new DialogCallback<String>() {
+                        @Override
+                        public void ok(String newShardName) {
+                            ArrayList<LeaderboardNameDTO> l = new ArrayList<>();
+                            l.addAll(selectedLeaderboards);
+                            landscapeManagementService.addShard(newShardName, l, replicaSet,
+                                    getBearerToken(), region, passphrase.getBytes(), new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            Notification.notify("Created succesfully", NotificationType.SUCCESS);
+                                            refresh();
+                                        }
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError(caught.getMessage());
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            errorReporter.reportError(caught.getMessage());
+                                        }
+                                    });
+                        }
 
-                                }
-                            });
+                        @Override
+                        public void cancel() {
+                        }
+                    }) {
+                private final TextBox nameTextBox = createTextBox("", /* length */ 20);
+                
+                @Override
+                protected Widget getAdditionalWidget() {
+                    return nameTextBox;
                 }
-            });
-            nameRequest.center();
+
+                @Override
+                protected String getResult() {
+                    return nameTextBox.getText();
+                }
+            };
             nameRequest.show();
         }
     }
