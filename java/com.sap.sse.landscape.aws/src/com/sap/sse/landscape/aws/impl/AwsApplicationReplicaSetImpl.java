@@ -352,10 +352,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     }
                     AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(getName(),
                             Util.asList(Util.map(keys, s -> (ShardingKey) s)), e.getKey(), shardName,
-                            e.getKey().getLoadBalancer(), pathRules);
-                    shardMap.put(shard, shard.getKeys());
-                    shard.setAutoscalingGroup(
+                            e.getKey().getLoadBalancer(), pathRules,
                             getShardAutoscalinggroup(e.getKey(), autoScalingGroups, launchConfigurations));
+                    shardMap.put(shard, shard.getKeys());
                 }
             }
         }
