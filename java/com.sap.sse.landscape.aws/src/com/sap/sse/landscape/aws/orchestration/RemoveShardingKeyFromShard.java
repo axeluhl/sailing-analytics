@@ -71,7 +71,7 @@ public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends Applicatio
         }
         getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(shard.getRules(), new Rule[0]));
         // change ALB rules to new ones
-        addShardingRules(shard.getLoadbalancer(), shardingKeysFromConditions, shard.getTargetGroup());
+        addShardingRules(shard.getLoadBalancer(), shardingKeysFromConditions, shard.getTargetGroup());
     }
 
     public static <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, BuilderT extends Builder<BuilderT, RemoveShardingKeyFromShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, RemoveShardingKeyFromShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {

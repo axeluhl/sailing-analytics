@@ -30,9 +30,9 @@ public interface AwsShard<ShardingKey> extends Shard<ShardingKey> {
     
     AwsAutoScalingGroup getAutoScalingGroup();
     
-    ApplicationLoadBalancer<ShardingKey> getLoadbalancer();
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
     
-    String getShardname();
+    String getReplicaSetName();
     
     Iterable<Rule> getRules();
 }

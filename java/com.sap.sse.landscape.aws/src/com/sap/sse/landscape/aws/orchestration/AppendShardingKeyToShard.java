@@ -69,7 +69,7 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
         final List<String> manipulatableShardingKeys = new ArrayList<>();
         manipulatableShardingKeys.addAll(shardingKeys);
         final TargetGroup<ShardingKey> targetgroup = shard.getTargetGroup();
-        final ApplicationLoadBalancer<ShardingKey> loadBalancer = shard.getLoadbalancer();
+        final ApplicationLoadBalancer<ShardingKey> loadBalancer = shard.getLoadBalancer();
         final Collection<TargetGroup<ShardingKey>> t = new ArrayList<>();
         t.add(targetgroup);
         // check if there is a rule left with space
