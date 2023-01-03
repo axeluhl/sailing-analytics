@@ -156,4 +156,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String shardNameInvalid(String shardName, String message);
     String shardCreatedSuccessfully(String newShardName);
     String deletedShard(String shardName);
+    String errorFetchingLeaderboardNames(String message);
 }

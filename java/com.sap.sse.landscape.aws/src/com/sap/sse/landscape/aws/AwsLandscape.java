@@ -787,10 +787,12 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the auto-scaling group
      * based on the {@code shareName}, configuring it to create its instances into {@code targetGroup} instead of the
      * {@code autoScalingParent}'s target group, and optionally adding the {@code tags} to those copied anyhow from
-     * the {@code autoScalingParent}.
+     * the {@code autoScalingParent}. The minimum size is copied from the {@code autoScalingParent} unless it is less than two;
+     * in that case, the new auto-scaling group will be configured with a minimum size of two, ensuring availability in case
+     * one target fails.
      */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
+    void createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
             String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags);
     
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 

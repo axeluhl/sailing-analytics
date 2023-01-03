@@ -2018,7 +2018,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoscalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
+    void createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
             String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoScalingParent.getRegion()));
         final String launchConfigurationName = autoScalingParent.getAutoScalingGroup().launchConfigurationName();
@@ -2029,7 +2029,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         autoScalingClient.createAutoScalingGroup(b->{
             b
                 .minSize(autoScalingParent.getAutoScalingGroup().minSize() > 1 ? autoScalingParent.getAutoScalingGroup().minSize() : 2)
-                .minSize(1)
                 .maxSize(autoScalingParent.getAutoScalingGroup().maxSize())
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)

@@ -50,8 +50,7 @@ public class ShardManagementPanel extends SimplePanel {
     private final TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources> selectedKeysTable;
     private final TextBox bearerTokenText;
     private SailingApplicationReplicaSetDTO<String> replicaSet;
-    private final BusyIndicator shardBusy;
-    private final BusyIndicator leaderboardsBusy;
+    private final BusyIndicator busyIndicator;
     private String region;
     private String passphrase;
     private List<LeaderboardNameDTO> leaderboards;
@@ -62,7 +61,7 @@ public class ShardManagementPanel extends SimplePanel {
     private final DialogBox parentDialog;
     private final StringMessages stringMessages;
 
-    public ShardManagementPanel(LandscapeManagementWriteServiceAsync pLandscapeManagementService,
+    public ShardManagementPanel(LandscapeManagementWriteServiceAsync landscapeManagementService,
             ErrorReporter errorReporter, StringMessages stringMessages, DialogBox parentDialog) {
         this.stringMessages = stringMessages;
         final VerticalPanel mainPanel = new VerticalPanel();
@@ -70,7 +69,7 @@ public class ShardManagementPanel extends SimplePanel {
         mainPanel.setWidth("100%");
         add(mainPanel);
         this.errorReporter = errorReporter;
-        landscapeManagementService = pLandscapeManagementService;
+        this.landscapeManagementService = landscapeManagementService;
         final HorizontalPanel actionPanel = new HorizontalPanel();
         final Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(event -> refresh());
@@ -105,32 +104,30 @@ public class ShardManagementPanel extends SimplePanel {
                 stringMessages::doYouReallyWantToRemoveSelectedElements, e -> removeShard());
         actionPanel.add(removeShardButton);
         mainPanel.add(actionPanel);
-        final HorizontalPanel usercredentials = new HorizontalPanel();
+        final HorizontalPanel userCredentials = new HorizontalPanel();
         bearerTokenText = new TextBox();
-        final Label brearerhinttext = new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(""));
-        brearerhinttext.getElement().getStyle().setFontSize(15, Unit.PX);
-        usercredentials.add(brearerhinttext);
-        usercredentials.add(bearerTokenText);
-        mainPanel.add(usercredentials);
+        final Label bearerHintText = new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(""));
+        bearerHintText.getElement().getStyle().setFontSize(15, Unit.PX);
+        userCredentials.add(bearerHintText);
+        userCredentials.add(bearerTokenText);
+        mainPanel.add(userCredentials);
         shardsCaption = new CaptionPanel(stringMessages.shard());
         shardTable.addColumn(t -> t.getName(), stringMessages.shardname());
         shardTable.addColumn(t -> String.join(", ", t.getLeaderboardNames()), stringMessages.shardingKeys());
         final SafeHtmlCell targetgroupCell = new SafeHtmlCell();
-        final Column<AwsShardDTO, SafeHtml> targetgroupColumn = new Column<AwsShardDTO, SafeHtml>(targetgroupCell) {
+        final Column<AwsShardDTO, SafeHtml> targetGroupColumn = new Column<AwsShardDTO, SafeHtml>(targetgroupCell) {
             @Override
             public SafeHtml getValue(AwsShardDTO shard) {
                 return new LinkBuilder().setTargetgroupName(shard.getTargetgroupName()).setRegion(region)
                         .setPathMode(LinkBuilder.pathModes.TargetgroupSearch).build();
             }
         };
-        shardTable.addColumn(targetgroupColumn, stringMessages.Targetgroup());
+        shardTable.addColumn(targetGroupColumn, stringMessages.Targetgroup());
         shardTable.addColumn(t -> t.getAutoscalingGroupName(), stringMessages.Autoscalinggroup());
         shardTable.getSelectionModel().addSelectionChangeHandler(event -> {
-            updateRemoveShardButton();
             updateSelectedKeysTable();
             updateAddDeleteButton();
         });
-        updateRemoveShardButton();
         leaderboardCaption = new CaptionPanel(stringMessages.leaderboards());
         regattasTable.addColumn(t -> t.getName(), stringMessages.leaderboards());
         regattasTable.getSelectionModel().addSelectionChangeHandler(event -> {
@@ -138,8 +135,7 @@ public class ShardManagementPanel extends SimplePanel {
         });
         leaderboardCaption.add(regattasTable);
         final HorizontalPanel tableRow = new HorizontalPanel();
-        leaderboardsBusy = new SimpleBusyIndicator();
-        shardBusy = new SimpleBusyIndicator();
+        busyIndicator = new SimpleBusyIndicator();
         keysCaption = new CaptionPanel(stringMessages.keys());
         selectedKeysTable = new TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, false, java.util.Optional.empty(),
@@ -157,9 +153,7 @@ public class ShardManagementPanel extends SimplePanel {
         selectedKeysTable.addColumn(t -> t.getName(), stringMessages.keys());
         selectedKeysTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateAddDeleteButton();
-            updateRemoveShardButton();
         });
-        keysCaption.setVisible(false);
         keysCaption.add(selectedKeysTable);
         addButton = new Button("<");
         addButton.addClickHandler(event -> addLeaderboardsToShard());
@@ -174,8 +168,6 @@ public class ShardManagementPanel extends SimplePanel {
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
         tableRow.add(shardsCaption);
-        tableRow.add(shardBusy);
-        tableRow.add(leaderboardsBusy);
         insideShardPanel.add(shardTable);
         insideShardPanel.add(keysSpaceholder);
         keysSpaceholder.add(keysCaption);
@@ -186,23 +178,17 @@ public class ShardManagementPanel extends SimplePanel {
         final VerticalPanel dialogMainPanel = new VerticalPanel();
         dialogMainPanel.setSpacing(5);
         mainPanel.add(tableRow);
+        mainPanel.add(busyIndicator);
         updateAddDeleteButton();
     }
 
     private void updateSelectedKeysTable() {
         if (shardTable.getSelectionModel().getSelectedSet().size() == 1) {
-            keysCaption.setVisible(true);
-            selectedKeysTable
-                    .refresh(Util.map(shardTable.getSelectionModel().getSelectedSet().iterator().next().getLeaderboardNames(),
-                            t -> new LeaderboardNameDTO(t)));
+            selectedKeysTable .refresh(
+                    Util.map(shardTable.getSelectionModel().getSelectedSet().iterator().next().getLeaderboardNames(), LeaderboardNameDTO::new));
         } else {
-            keysCaption.setVisible(false);
+            selectedKeysTable.clear();
         }
-    }
-
-    private void updateRemoveShardButton() {
-        removeShardButton.setEnabled(!shardTable.getSelectionModel().getSelectedSet().isEmpty()
-                && selectedKeysTable.getSelectionModel().getSelectedSet().size() == 0);
     }
 
     private void updateAddDeleteButton() {
@@ -213,8 +199,6 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     public void refresh() {
-        setLeaderboardBusy(true);
-        setShardTableBusy(true);
         getLeaderboards();
     }
 
@@ -227,7 +211,6 @@ public class ShardManagementPanel extends SimplePanel {
         }
         final Iterable<LeaderboardNameDTO> leaderboardsToDisplay = Util.filter(leaderboards,
                 leaderboardNameDTO -> !takenLeaderboardNames.contains(leaderboardNameDTO.getName()));
-        shardsCaption.setVisible(true);
         regattasTable.refresh(leaderboardsToDisplay);
         shardTable.refresh(shardsAndShardingKeys.keySet());
         if (parentDialog != null) {
@@ -235,33 +218,24 @@ public class ShardManagementPanel extends SimplePanel {
         }
     }
 
-    private void setLeaderboardBusy(boolean b) {
-        leaderboardCaption.setVisible(!b);
-        leaderboardsBusy.setBusy(b);
-    }
-
-    private void setShardTableBusy(boolean b) {
-        shardsCaption.setVisible(!b);
-        keysCaption.setVisible(false);
-        shardBusy.setBusy(b);
+    private void setBusy(boolean b) {
+        busyIndicator.setBusy(b);
     }
 
     private void getLeaderboards() {
-        setLeaderboardBusy(true);
+        setBusy(true);
         landscapeManagementService.getLeaderboardNames(replicaSet, getBearerToken(),
                 new AsyncCallback<ArrayList<LeaderboardNameDTO>>() {
                     @Override
                     public void onSuccess(ArrayList<LeaderboardNameDTO> result) {
                         leaderboards = result;
-                        setLeaderboardBusy(false);
                         getShards();
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error while retriving regattas.");
-                        setLeaderboardBusy(false);
-                        setShardTableBusy(false);
+                        errorReporter.reportError(stringMessages.errorFetchingLeaderboardNames(caught.getMessage()));
+                        setBusy(false);
                     }
                 });
     }
@@ -271,18 +245,19 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     private void getShards() {
+        setBusy(true);
         landscapeManagementService.getShards(replicaSet, region, getBearerToken(),
                 new AsyncCallback<Map<AwsShardDTO, Iterable<String>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());
-                        setShardTableBusy(false);
+                        setBusy(false);
                     }
 
                     @Override
                     public void onSuccess(Map<AwsShardDTO, Iterable<String>> result) {
                         shardsAndShardingKeys = result;
-                        setShardTableBusy(false);
+                        setBusy(false);
                         display();
                     }
                 });
@@ -314,19 +289,19 @@ public class ShardManagementPanel extends SimplePanel {
                         public void ok(String newShardName) {
                             ArrayList<LeaderboardNameDTO> l = new ArrayList<>();
                             l.addAll(selectedLeaderboards);
-                            leaderboardsBusy.setBusy(true);
+                            busyIndicator.setBusy(true);
                             landscapeManagementService.addShard(newShardName, l, replicaSet,
                                     getBearerToken(), region, passphrase.getBytes(), new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
-                                            leaderboardsBusy.setBusy(false);
+                                            busyIndicator.setBusy(false);
                                             Notification.notify(stringMessages.shardCreatedSuccessfully(newShardName), NotificationType.SUCCESS);
                                             refresh();
                                         }
 
                                         @Override
                                         public void onFailure(Throwable caught) {
-                                            leaderboardsBusy.setBusy(false);
+                                            busyIndicator.setBusy(false);
                                             errorReporter.reportError(caught.getMessage());
                                         }
                                     });
@@ -358,14 +333,14 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     private void removeShard() {
-        setShardTableBusy(true);
+        setBusy(true);
         for (AwsShardDTO selection : shardTable.getSelectionModel().getSelectedSet()) {
             landscapeManagementService.removeShard(selection, replicaSet, region, passphrase.getBytes(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(caught.getMessage());
-                            setShardTableBusy(false);
+                            setBusy(false);
                         }
 
                         @Override
@@ -379,7 +354,7 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     private void addLeaderboardsToShard() {
-        setShardTableBusy(true);
+        setBusy(true);
         if (!regattasTable.getSelectionModel().getSelectedSet().isEmpty()
                 && shardTable.getSelectionModel().getSelectedSet().size() == 1) {
             final Iterable<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
@@ -388,13 +363,13 @@ public class ShardManagementPanel extends SimplePanel {
                     replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            setLeaderboardBusy(false);
+                            setBusy(false);
                             errorReporter.reportError(caught.getMessage());
                         }
 
                         @Override
                         public void onSuccess(Void result) {
-                            setLeaderboardBusy(false);
+                            setBusy(false);
                             Notification.notify(stringMessages.successfullyAppendedShardingKeysToShard(Util.join(", ", selectedLeaderboards), shard.getName()), NotificationType.SUCCESS);
                             refresh();
                         }
@@ -404,7 +379,7 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     private void removeLeaderboardsFromShard() {
-        setShardTableBusy(true);
+        setBusy(true);
         if (!selectedKeysTable.getSelectionModel().getSelectedSet().isEmpty()
                 && shardTable.getSelectionModel().getSelectedSet().size() == 1) {
             final Iterable<LeaderboardNameDTO> selectedLeaderboards = selectedKeysTable.getSelectionModel().getSelectedSet();
@@ -413,13 +388,13 @@ public class ShardManagementPanel extends SimplePanel {
                     replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            setLeaderboardBusy(false);
+                            setBusy(false);
                             errorReporter.reportError(caught.getMessage());
                         }
 
                         @Override
                         public void onSuccess(Void result) {
-                            setLeaderboardBusy(false);
+                            setBusy(false);
                             Notification.notify(stringMessages.successfullyRemovedLeaderboardsFromShard(Util.join(", ", selectedLeaderboards), shard.getName()), NotificationType.SUCCESS);
                             refresh();
                         }

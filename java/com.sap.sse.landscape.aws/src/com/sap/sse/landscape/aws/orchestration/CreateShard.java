@@ -65,8 +65,8 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                             ShardingKey,
                             MetricsT extends ApplicationProcessMetrics,
                             ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-        extends ShardProcedure.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>
-        implements Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
+    extends ShardProcedure.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>
+    implements Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
         private String targetGroupNamePrefix = "";
         
         String getTargetGroupNamePrefix() {
@@ -112,7 +112,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
                 + autoScalingGroup.getName());
-        getLandscape().createAutoscalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
+        getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
         // create one rules to random path for linking ALB to Targetgroup.
         if (loadBalancer != null) {
             final Iterable<Rule> rules = loadBalancer.getRules();

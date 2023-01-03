@@ -879,8 +879,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         checkLandscapeManageAwsPermission();
         final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
         final Map<AwsShardDTO, Iterable<String>> shardingKeysForShards = new HashMap<>();
-        final SailingServer server = getLandscapeService().getSailingServer(replicaSetDTO.getHostname(), bearerToken,
-                Optional.empty());
+        final SailingServer server = getLandscapeService().getSailingServer(replicaSetDTO.getHostname(), bearerToken, Optional.empty());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet = convertFromApplicationReplicaSetDTO(
                 awsRegion, replicaSetDTO);
         final Map<String, String> leaderboardNamesByShardingKeys = new HashMap<>();

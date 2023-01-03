@@ -195,7 +195,7 @@ public abstract class ShardProcedure<ShardingKey,
                             .type(ActionTypeEnum.FORWARD).build())
                     .build());
         }
-        return alb.addRules(Util.toArray(rules, new Rule[1]));
+        return alb.addRules(Util.toArray(rules, new Rule[0]));
     }
 
     /**
