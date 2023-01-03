@@ -376,8 +376,9 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     
 
     protected int numberOfRequiredRules(int numberOfShardingKeys) {
-        return (int) (numberOfShardingKeys / NUMBER_OF_RULES_PER_REPLICA_SET - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE)
-                + /* one more because casting to int rounds down */ 1;
+        return (int) (numberOfShardingKeys / (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE))
+                + (int) Math.signum(/* one more because casting to int rounds down */ numberOfShardingKeys %
+                        (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE));
     }
 
     /**

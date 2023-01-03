@@ -86,17 +86,22 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
                     Util.addAll(Util.filter(con.values(), path->!path.equals(PATH_UNUSED_BY_ANY_APPLICATION)), paths);
                 }
             }
-            while (paths.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
-                    && !mutableShardingKeys.isEmpty()) {
-                paths.add(mutableShardingKeys.get(0));
-                mutableShardingKeys.remove(0);
-                updateRule = true;
-            }
-            final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, paths);
-            // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
-            Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
-            if (updateRule) {
-                getLandscape().modifyRuleConditions(region, proxyRuleWithNewConditions);
+            if (paths.isEmpty()) {
+                // the rule probably only has PATH_UNUSED_BY_ANY_APPLICATION and was a proxy rule, probably at the end of the list; remove
+                loadBalancer.deleteRules(r);
+            } else { // update only non-empty rule because we assume it won't be at the end of the list
+                while (paths.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
+                        && !mutableShardingKeys.isEmpty()) {
+                    paths.add(mutableShardingKeys.get(0));
+                    mutableShardingKeys.remove(0);
+                    updateRule = true;
+                }
+                final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, paths);
+                // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
+                Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
+                if (updateRule) {
+                    getLandscape().modifyRuleConditions(region, proxyRuleWithNewConditions);
+                }
             }
         }
         if (!mutableShardingKeys.isEmpty()) {

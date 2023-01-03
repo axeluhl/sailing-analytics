@@ -1,7 +1,9 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -160,8 +162,14 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     for (Rule r : newRuleSet) {
                         loadBalancer.deleteRules(r);
                     }
+                    final Set<String> shardingKeysToUse;
+                    if (shardingKeys.isEmpty()) {
+                        shardingKeysToUse = Collections.singleton(PATH_UNUSED_BY_ANY_APPLICATION);
+                    } else {
+                        shardingKeysToUse = shardingKeys;
+                    }
                     // change ALB rules to new ones
-                    addShardingRules(loadBalancer, shardingKeys, targetGroup);
+                    addShardingRules(loadBalancer, shardingKeysToUse, targetGroup);
                 } else {
                     throw new Exception("Unexpected Error - No prio left?");
                 }

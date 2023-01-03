@@ -265,7 +265,7 @@ public class ShardManagementPanel extends SimplePanel {
 
     private void addShard() {
         final Set<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
-        if (!selectedLeaderboards.isEmpty() && replicaSet != null) {
+        if (replicaSet != null) {
             final DataEntryDialog<String> nameRequest = new DataEntryDialog<String>(
                     stringMessages.shardname(), stringMessages.enterShardName(), stringMessages.ok(), stringMessages.cancel(),
                     new Validator<String>() {
