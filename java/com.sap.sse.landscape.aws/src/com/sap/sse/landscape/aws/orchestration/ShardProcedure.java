@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.IntStream;
@@ -24,7 +25,6 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -46,12 +46,12 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
 public abstract class ShardProcedure<ShardingKey,
     MetricsT extends ApplicationProcessMetrics, 
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-        extends AbstractAwsProcedureImpl<ShardingKey> {
+extends AbstractAwsProcedureImpl<ShardingKey>
+implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
-    final static int NUMBER_OF_RULES_PER_REPLICA_SET = 5;
-    final static int NUMBER_OF_STANDARD_RULES_FOR_SHARDING_RULE = 2;
+    final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
     protected final String shardName;
-    final Set<String> shardingKeys;
+    final protected Set<String> shardingKeys;
     final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
     final Region region;
     final byte[] passphraseForPrivateKeyDecryption;
@@ -171,6 +171,29 @@ public abstract class ShardProcedure<ShardingKey,
         final Iterable<TargetGroup<ShardingKey>> targetGroups = getLandscape().getTargetGroups(region);
         return Util.isEmpty(Util.filter(targetGroups, t -> t.getName().equals(name)));   
     }
+    
+    /**
+     * Produces conditions for a sharding load balancer rule based on the {@link #replicaSet}'s {@link AwsApplicationReplicaSet#getHostname() hostname},
+     * a header-field condition that requires the request to be tagged for a replica, plus a path-pattern condition with the
+     * sharding keys as patterns.
+     * 
+     * @param shardingKeys their number must not exceed {@link ApplicationLoadBalancer#MAX_CONDITIONS_PER_RULE} - {@link #NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE}
+     */
+    protected Collection<RuleCondition> getShardingRuleConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer, Collection<String> shardingKeys) throws InterruptedException, ExecutionException {
+        if (shardingKeys.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_RULES_PER_REPLICA_SET) {
+            throw new IllegalArgumentException("too many sharding keys for the conditions of a single load balancer rule: "+shardingKeys+
+                    "; a maximum of "+(ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_RULES_PER_REPLICA_SET)+" is allowed");
+        }
+        final Collection<RuleCondition> ruleConditions = new ArrayList<>();
+        ruleConditions.add(loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()));
+        ruleConditions.add(RuleCondition.builder().field("http-header")
+                .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                        .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+                .build());
+        ruleConditions.add(
+                RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(shardingKeys)).build());
+        return ruleConditions;
+    }
 
     protected Iterable<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Set<String> shardingKeys,
             TargetGroup<ShardingKey> targetGroup) throws Exception {
@@ -181,11 +204,13 @@ public abstract class ShardProcedure<ShardingKey,
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         while (!shardingKeyForConsumption.isEmpty()) {
             alb.shiftRulesToMakeSpaceAt(ruleIdx);
-            final Collection<RuleCondition> conditions = convertShardingKeysToConditions(shardingKeyForConsumption);
-            conditions.add(RuleCondition.builder().field("http-header")
-                    .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
-                            .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
-                    .build());
+            final Set<String> shardingKeysForNextRule = new HashSet<>();
+            for (final Iterator<String> i=shardingKeys.iterator();
+                    shardingKeysForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {
+                shardingKeysForNextRule.add(i.next());
+                i.remove();
+            }
+            final Collection<RuleCondition> conditions = getShardingRuleConditions(alb, shardingKeysForNextRule);
             rules.add(Rule.builder().priority("" + ruleIdx).conditions(conditions)
                     .actions(Action.builder()
                             .forwardConfig(ForwardActionConfig.builder()
@@ -202,13 +227,16 @@ public abstract class ShardProcedure<ShardingKey,
      * Search through all load balancers and returns the first load balancer with enough rules left for
      * the new sharding keys + the replicaSet's rules. When no load balancer is found, a new one gets created. The replicaSet gets moved to the new load balancer.
      */
-    protected ApplicationLoadBalancer<ShardingKey> getFreeLoadBalancerAndMoveReplicaset() throws Exception {
+    protected ApplicationLoadBalancer<ShardingKey> getFreeLoadBalancerAndMoveReplicaSet() throws Exception {
         int existingShardingRules = 0;
         for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> s : replicaSet.getShards().entrySet()) {
             existingShardingRules = existingShardingRules + Util.size(s.getKey().getRules());
         }
+        // shardingKeys holds those keys to add/initially create (the remove case doesn't get here);
+        // hence we have to add the rules required for those keys to the existing rules
+        // FIXME shouldn't we compute the number of required rules for the new entire set of sharding keys? What if rules were not / no longer fully filled with conditions? -->cleanup
         final int requiredRules = numberOfRequiredRules(Util.size(shardingKeys))
-                + (existingShardingRules + /* 5 std rules per replicaset */NUMBER_OF_RULES_PER_REPLICA_SET);
+                + (existingShardingRules + /* 5 std rules per replica set */ NUMBER_OF_RULES_PER_REPLICA_SET);
         final ApplicationLoadBalancer<ShardingKey> res;
         if (Util.size(replicaSet.getLoadBalancerRules())
                 + numberOfRequiredRules(Util.size(shardingKeys)) < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
@@ -222,13 +250,12 @@ public abstract class ShardProcedure<ShardingKey,
                         try {
                             return !t.getArn().equals(replicaSet.getLoadBalancer().getArn());
                         } catch (InterruptedException | ExecutionException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            logger.log(Level.WARNING, "Exception while trying to obtain a load balancer's ARN", e);
                             throw new RuntimeException(e);
                         }
                     });
             final ApplicationLoadBalancer<ShardingKey> alb = getDNSLoadbalancerWithRulesLeft(loadBalancersFiltered,
-                    requiredRules + /* 5 default rules for the replica set */NUMBER_OF_RULES_PER_REPLICA_SET);
+                    requiredRules + /* 5 default rules for the replica set */ NUMBER_OF_RULES_PER_REPLICA_SET);
             if (alb != null) {
                 // There is an alb left with enough rules
                 res = alb;
@@ -243,7 +270,6 @@ public abstract class ShardProcedure<ShardingKey,
             }
             changeReplicaSetLoadBalancer(res, replicaSet);
         }
-
         return res;
     }
     
@@ -334,9 +360,11 @@ public abstract class ShardProcedure<ShardingKey,
             Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups,
             Collection<TargetGroup<ShardingKey>> originalTargetGroups,
             Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment) throws Exception {
-        targetAlb.addRulesAssigningUnusedPriorities(true,
-                createRules(targetAlb, targetGroupsToTempTargetgroups.get(replicaSetToMove.getMasterTargetGroup()),
-                        targetGroupsToTempTargetgroups.get(replicaSetToMove.getPublicTargetGroup()), true))
+        targetAlb
+                .addRulesAssigningUnusedPriorities(true,
+                        createRules(targetAlb, replicaSet.getHostname(),
+                                targetGroupsToTempTargetgroups.get(replicaSetToMove.getMasterTargetGroup()),
+                                targetGroupsToTempTargetgroups.get(replicaSetToMove.getPublicTargetGroup())))
                 .forEach(t -> tempRules.add(t));
         for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSetToMove.getShards().entrySet()) {
             addShardingRules(targetAlb, keysAssignment.get(shard.getKey().getTargetGroup()),
@@ -346,54 +374,11 @@ public abstract class ShardProcedure<ShardingKey,
     
     
 
-    protected int numberOfRequiredRules(int numberOfLeaderboards) {
-        return (int) (numberOfLeaderboards / NUMBER_OF_RULES_PER_REPLICA_SET - NUMBER_OF_STANDARD_RULES_FOR_SHARDING_RULE)
-                + /* one more because casting to int round off */ 1;
+    protected int numberOfRequiredRules(int numberOfShardingKeys) {
+        return (int) (numberOfShardingKeys / NUMBER_OF_RULES_PER_REPLICA_SET - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE)
+                + /* one more because casting to int rounds down */ 1;
     }
 
-    private Rule[] createRules(ApplicationLoadBalancer<ShardingKey> alb, TargetGroup<ShardingKey> masterTarget,
-            TargetGroup<ShardingKey> publicTarget, boolean includeDefaultRedirect) throws Exception {
-        final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET - (includeDefaultRedirect ? 0 : 1)];
-        int counter = 0;
-        if (includeDefaultRedirect) {
-            rules[counter++] = alb.getDefaultRedirectRule(getHostName(), new PlainRedirectDTO());
-        }
-        rules[counter++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header")
-                        .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
-                                .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB()))
-                        .build(),
-                alb.createHostHeaderRuleCondition(getHostName()))
-                .actions(createForwardToTargetGroupAction(masterTarget)).build();
-        rules[counter++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header")
-                        .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
-                                .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
-                        .build(),
-                alb.createHostHeaderRuleCondition(getHostName()))
-                .actions(createForwardToTargetGroupAction(publicTarget)).build();
-        rules[counter++] = Rule.builder()
-                .conditions(
-                        RuleCondition.builder().field("http-request-method")
-                                .httpRequestMethodConfig(hrmcb -> hrmcb.values("GET")).build(),
-                        alb.createHostHeaderRuleCondition(getHostName()))
-                .actions(createForwardToTargetGroupAction(publicTarget)).build();
-        rules[counter++] = Rule.builder().conditions(alb.createHostHeaderRuleCondition(getHostName()))
-                .actions(createForwardToTargetGroupAction(masterTarget)).build();
-        assert counter == NUMBER_OF_RULES_PER_REPLICA_SET - (includeDefaultRedirect ? 0 : 1);
-        return rules;
-    }
-
-    private Action createForwardToTargetGroupAction(TargetGroup<ShardingKey> targetGroup) {
-        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc
-                .targetGroups(TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build()))
-                .build();
-    }
-
-    private String getHostName() throws Exception {
-        return replicaSet.getHostname();
-    }
-    
     /**
      * Returns a DNS-Mapped load balancer with enough rules left 
      * @param loadBalancers
@@ -416,32 +401,15 @@ public abstract class ShardProcedure<ShardingKey,
         return res;
     }
 
-    private static Collection<RuleCondition> convertShardingKeysToConditions(Set<String> shardingKeys) {
-        final Collection<RuleCondition> res = new ArrayList<RuleCondition>();
-        final Collection<String> remove = new ArrayList<String>();
-        final Iterator<String> iter = shardingKeys.iterator();
-        int idx = 0;
-        while (idx < 3 && iter.hasNext()) {
-            String shardingkey = iter.next();
-            remove.add(shardingkey);
-            idx++;
-        }
-        res.add(RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(remove)).build());
-        shardingKeys.removeAll(remove);
-        return res;
-    }
-
-    // iterates through all numbers from {@code ApplicationLoadBalancer.MAX_PRIORITY} to 1 (lowest index) and checks if
-    // any priority is not in
-    // the rule set.
-    // returns the first available priority. If no rules is available, it returns -1;
+    /**
+     * iterates through all numbers from {@link ApplicationLoadBalancer#MAX_PRIORITY} to 1 (lowest index) and checks if
+     * any priority is not in the rule set. returns the first available priority. If no rules is available, it returns
+     * -1;
+     */
     protected int getHighestAvailableIndex(Iterable<Rule> rules) {
         for (int i = ApplicationLoadBalancer.MAX_PRIORITY; i > 1; i--) {
             String y = "" + i;
-            if (StreamSupport.stream(rules.spliterator(), false).anyMatch(t -> {
-                return (t.priority().contains(y));
-            })) {
-            } else {
+            if (!StreamSupport.stream(rules.spliterator(), false).anyMatch(t -> t.priority().contains(y))) {
                 return i; // return priority if there was no rule with the same
             }
         }

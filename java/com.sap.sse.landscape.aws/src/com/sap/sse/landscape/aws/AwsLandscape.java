@@ -527,6 +527,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     /**
      * Modifies an existing rule that is identified by the passed {@code rule}'s ARN. Only the conditions are modified and nothing
      * else gets touched.
+     * 
      * @param region
      *          AWS Region
      * @param rule

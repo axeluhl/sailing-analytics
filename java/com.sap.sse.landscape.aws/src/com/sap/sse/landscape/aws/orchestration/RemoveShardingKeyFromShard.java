@@ -60,12 +60,15 @@ public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends Applicatio
         }
         logger.info( "Removing " + String.join(", ", shardingKeys) + " from " + shardName);
         // remove conditions in rules where path is the sharding key
-        Set<String> shardingKeysFromConditions = new HashSet<>();
+        final Set<String> shardingKeysFromConditions = new HashSet<>();
         for (Rule r : shard.getRules()) {
             for (RuleCondition condition : r.conditions()) {
                 if (condition.pathPatternConfig() != null) {
                     shardingKeysFromConditions
                             .addAll(Util.asList(Util.filter(condition.values(), t -> !shardingKeys.contains(t))));
+                } else {
+                    logger.warning("This is strange: shard "+shard.getName()+" of replica set "+shard.getReplicaSetName()+
+                            " has a rule "+r+" that has no path pattern condition; ignoring that rule while removing shard.");
                 }
             }
         }

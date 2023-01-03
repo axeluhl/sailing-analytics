@@ -17,16 +17,11 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerStateEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 
 /**
  * For an {@link ApplicationProcess} creates a set of rules in an {@link ApplicationLoadBalancer} which drives traffic
@@ -77,8 +72,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
  */
 public abstract class CreateLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends ProcedureWithTargetGroup<ShardingKey> {
-    protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 5;
+extends ProcedureWithTargetGroup<ShardingKey>
+implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     protected static final int MAX_RULES_PER_ALB = 100;
     protected static final int MAX_ALBS_PER_REGION = 20;
     private final ProcessT process;
@@ -216,44 +211,13 @@ extends ProcedureWithTargetGroup<ShardingKey> {
                     Level.INFO, "Waiting for instance "+getHost().getId()+" to be in state RUNNING");
             getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
             getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
-            getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true, createRules());
+            getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true,
+            createRules(getLoadBalancerUsed(), getHostName(), masterTargetGroupCreated, publicTargetGroupCreated));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
     
-    private Rule[] createRules() {
-        final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
-        int ruleCount = 0;
-        rules[ruleCount++] = getLoadBalancerUsed().getDefaultRedirectRule(getHostName(), new PlainRedirectDTO());
-        rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).build(),
-                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(getMasterTargetGroupCreated())).
-                build();
-        rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())).build(),
-                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(getPublicTargetGroupCreated())).
-                build();
-        rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-request-method").httpRequestMethodConfig(hrmcb->hrmcb.values("GET")).build(),
-                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(getPublicTargetGroupCreated())).
-                build();
-        rules[ruleCount++] = Rule.builder().conditions(
-                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
-                actions(createForwardToTargetGroupAction(getMasterTargetGroupCreated())).
-                build();
-        assert ruleCount == NUMBER_OF_RULES_PER_REPLICA_SET;
-        return rules;
-    }
-    
-    private Action createForwardToTargetGroupAction(TargetGroup<ShardingKey> targetGroup) {
-        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc.targetGroups(
-                TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())) .build();
-    }
-
     protected String getHostName() {
         return hostname;
     }

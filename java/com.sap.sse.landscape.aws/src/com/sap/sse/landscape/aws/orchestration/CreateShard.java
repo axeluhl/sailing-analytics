@@ -40,7 +40,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  */
 public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
-
     private static int DEFAULT_INSTANCE_STARTUP_TIME = 180;
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     private static final String PATH_UNUSED_BY_ANY_APPLICATION = "lauycaluy3cla3yrclaurlIYQL8";
@@ -103,7 +102,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
             throw new Exception(
                     "targetgroup name with this shardname is not unique. You may change the last or first two chars");
         }
-        final ApplicationLoadBalancer<ShardingKey> loadBalancer = getFreeLoadBalancerAndMoveReplicaset();
+        final ApplicationLoadBalancer<ShardingKey> loadBalancer = getFreeLoadBalancerAndMoveReplicaSet();
         logger.info(
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaSet.getName());
         final TargetGroup<ShardingKey> targetGroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
@@ -113,7 +112,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
                 + autoScalingGroup.getName());
         getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
-        // create one rules to random path for linking ALB to Targetgroup.
+        // create one rule to path unused by any application for linking ALB to target group.
         if (loadBalancer != null) {
             final Iterable<Rule> rules = loadBalancer.getRules();
             if (Util.size(rules) < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER
@@ -122,6 +121,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                 if (rulePrio > 0) {
                     Rule newRule = Rule.builder().priority("" + rulePrio)
                             .conditions(
+                                    loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()),
                                     RuleCondition.builder().field("http-header")
                                             .httpHeaderConfig(hhcb -> hhcb
                                                     .httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)

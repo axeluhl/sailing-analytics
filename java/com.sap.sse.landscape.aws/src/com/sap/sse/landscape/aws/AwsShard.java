@@ -27,13 +27,24 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
  * @param <ShardingKey>
  */
 public interface AwsShard<ShardingKey> extends Shard<ShardingKey> {
+    /**
+     * @return the target group receiving the traffic for this shard
+     */
     TargetGroup<ShardingKey> getTargetGroup();
     
+    /**
+     * The auto-scaling group managing the instances in the {@link #getTargetGroup() target group} receiving the traffic
+     * for this shard.
+     */
     AwsAutoScalingGroup getAutoScalingGroup();
     
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
     
     String getReplicaSetName();
     
+    /**
+     * All ALB listener rules created to route traffic to this shard. These rules belong to a listener of
+     * {@link #getLoadBalancer()}.
+     */
     Iterable<Rule> getRules();
 }

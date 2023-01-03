@@ -3,25 +3,26 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
+
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 
 /**
- * This class is supposed to append {@code shardingKeys} to the shard, identified by {@code shardName} from
- * {@replicaSet}. This is done by adding rule conditions to the shard's rule set and after that just appending new
- * rules. This could lead to moving to replicaset to antoher load balancer, because it may get full with new sharding
+ * This procedure appends {@code shardingKeys} to a shard, identified by {@link #shardName} from
+ * the {@link #replicaSet}. This is done by adding rule conditions to the shard's rule set and after that just appending new
+ * rules. This could lead to moving to replica set to another load balancer, because it may get full with new sharding
  * rules.
  * 
  * @author I569653
@@ -32,8 +33,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleConditio
  */
 public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
-
     private static final Logger logger = Logger.getLogger(AppendShardingKeyToShard.class.getName());
+
     public AppendShardingKeyToShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
     }
@@ -62,17 +63,17 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
             }
         }
         if (shard == null) {
-            throw new Exception("Shard not found!");
+            throw new Exception("Shard "+shardName+" not found in replica set "+replicaSet.getName());
         }
-        logger.info( "Appending " + String.join(", ", shardingKeys) + " to " + shardName);
+        logger.info("Appending " + String.join(", ", shardingKeys) + " to " + shardName);
         // list for manipulation -> elements are allowed to be removed!!
-        final List<String> manipulatableShardingKeys = new ArrayList<>();
-        manipulatableShardingKeys.addAll(shardingKeys);
+        final List<String> mutableShardingKeys = new LinkedList<>();
+        mutableShardingKeys.addAll(shardingKeys);
         final TargetGroup<ShardingKey> targetgroup = shard.getTargetGroup();
         final ApplicationLoadBalancer<ShardingKey> loadBalancer = shard.getLoadBalancer();
         final Collection<TargetGroup<ShardingKey>> t = new ArrayList<>();
         t.add(targetgroup);
-        // check if there is a rule left with space
+        // check if there is a rule with space left for one or more additional conditions:
         for (Rule r : shard.getRules()) {
             boolean updateRule = false;
             final ArrayList<String> keys = new ArrayList<>();
@@ -81,36 +82,30 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
                     keys.addAll(con.values());
                 }
             }
-            while (keys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE
-                    - /* two conditions are required for host and forward to replica */2
-                    && !manipulatableShardingKeys.isEmpty()) {
-                keys.add(manipulatableShardingKeys.get(0));
-                manipulatableShardingKeys.remove(0);
+            while (keys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
+                    && !mutableShardingKeys.isEmpty()) {
+                keys.add(mutableShardingKeys.get(0));
+                mutableShardingKeys.remove(0);
                 updateRule = true;
             }
-            final ArrayList<RuleCondition> rulecon = new ArrayList<>();
-            rulecon.add(
-                    RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(keys)).build());
-            rulecon.add(RuleCondition.builder().field("http-header")
-                    .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
-                            .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
-                    .build());
-            Rule newRule = Rule.builder().ruleArn(r.ruleArn()).conditions(rulecon).build();
+            final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, keys);
+            // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
+            Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
             if (updateRule) {
-                getLandscape().modifyRuleConditions(region, newRule);
+                getLandscape().modifyRuleConditions(region, proxyRuleWithNewConditions);
             }
         }
-        if (!manipulatableShardingKeys.isEmpty()) {
+        if (!mutableShardingKeys.isEmpty()) {
             // check number of rules
-            if (Util.size(loadBalancer.getRules()) + numberOfRequiredRules(
-                    Util.size(shardingKeys)) < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
+            if (Util.size(loadBalancer.getRules()) + numberOfRequiredRules(Util.size(shardingKeys))
+                    < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
                 // enough rules
                 final Set<String> keysCopy = new HashSet<>();
                 keysCopy.addAll(shardingKeys);
                 addShardingRules(loadBalancer, keysCopy, targetgroup);
             } else {
                 // not enough rules
-                final ApplicationLoadBalancer<ShardingKey> alb = getFreeLoadBalancerAndMoveReplicaset();
+                final ApplicationLoadBalancer<ShardingKey> alb = getFreeLoadBalancerAndMoveReplicaSet();
                 // set new rules
                 final Set<String> keysCopy = new HashSet<>();
                 keysCopy.addAll(shardingKeys);
