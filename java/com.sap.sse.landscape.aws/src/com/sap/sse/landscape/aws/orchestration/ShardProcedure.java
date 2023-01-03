@@ -76,7 +76,7 @@ public abstract class ShardProcedure<ShardingKey,
 
         BuilderT setLandscape(AwsLandscape<String> landscape);
 
-        BuilderT setShardingkeys(Set<String> shardingkeys);
+        BuilderT setShardingKeys(Set<String> shardingkeys);
 
         BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
 
@@ -108,7 +108,7 @@ public abstract class ShardProcedure<ShardingKey,
         }
 
         @Override
-        public BuilderT setShardingkeys(Set<String> shardingkeys) {
+        public BuilderT setShardingKeys(Set<String> shardingkeys) {
             this.shardingKeys = shardingkeys;
             return self();
         }

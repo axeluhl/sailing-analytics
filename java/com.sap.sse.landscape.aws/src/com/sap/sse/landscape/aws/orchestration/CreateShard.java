@@ -50,18 +50,35 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         super(builder);
         this.targetGroupNamePrefix = builder.getTargetGroupNamePrefix();
     }
-
-    static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-            extends
-            ShardProcedure.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
+    
+    public static interface Builder<
+        BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
+        T extends CreateShard<ShardingKey, MetricsT, ProcessT>, 
+        ShardingKey, 
+        MetricsT extends ApplicationProcessMetrics, 
+        ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends ShardProcedure.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
+        BuilderT setTargetGroupNamePrefix(String targetGroupNamePrefix);
+    }
+    
+    static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>,
+                            ShardingKey,
+                            MetricsT extends ApplicationProcessMetrics,
+                            ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+        extends ShardProcedure.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>
+        implements Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
         private String targetGroupNamePrefix = "";
         
         String getTargetGroupNamePrefix() {
             return targetGroupNamePrefix;
         }
 
-        public void setTargetGroupNamePrefix(String targetGroupNamePrefix) {
+        public BuilderT setTargetGroupNamePrefix(String targetGroupNamePrefix) {
+            if (!ShardTargetGroupName.isValidTargetGroupNamePrefix(targetGroupNamePrefix)) {
+                throw new IllegalArgumentException("Not a valid target group name prefix: "+targetGroupNamePrefix);
+            }
             this.targetGroupNamePrefix = targetGroupNamePrefix;
+            return self();
         }
 
         @Override

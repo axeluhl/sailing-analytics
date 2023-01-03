@@ -1600,7 +1600,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 port.orElse(443 /* defaults to HTTPS */)), bearerToken);
     }
 
-    private <BuilderT extends ShardProcedure.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.ShardProcedure.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createShardBuilder() {
+    private <BuilderT extends CreateShard.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.CreateShard.Builder<BuilderT, CreateShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createShardBuilder() {
         return CreateShard.<SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, BuilderT, String> builder();
     }
 
@@ -1625,7 +1625,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         for (String leaderboardName : selectedleaderboards) {
             shardingKeys.add(server.getLeaderboardShardingKey(leaderboardName));
         }
-        removeShardingKeyFromShardBuilder().setLandscape(getLandscape()).setShardingkeys(shardingKeys)
+        removeShardingKeyFromShardBuilder().setLandscape(getLandscape()).setShardingKeys(shardingKeys)
                 .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
                 .setPassphrase(passphraseForPrivateKeyDecription).build().run();
     }
@@ -1641,7 +1641,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         for (String s : selectedLeaderboards) {
             shardingkeys.add(server.getLeaderboardShardingKey(s));
         }
-        appendShardingKeyToShardBuilder().setLandscape(getLandscape()).setShardingkeys(shardingkeys)
+        appendShardingKeyToShardBuilder().setLandscape(getLandscape()).setShardingKeys(shardingkeys)
                 .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
                 .setPassphrase(passphraseForPrivateKeyDecription).build().run();
     }
@@ -1669,8 +1669,15 @@ public class LandscapeServiceImpl implements LandscapeService {
         for (final String s : selectedLeaderboardNames) {
             shardingkeys.add(server.getLeaderboardShardingKey(s));
         }
-        createShardBuilder().setLandscape(getLandscape()).setShardingkeys(shardingkeys)
-                .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
-                .setPassphrase(passphraseForPrivateKeyDecription).build().run();
+        createShardBuilder()
+            .setLandscape(getLandscape())
+            .setTargetGroupNamePrefix(LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setShardingKeys(shardingkeys)
+            .setReplicaset(applicationReplicaSet)
+            .setRegion(region)
+            .setShardName(shardName)
+            .setPassphrase(passphraseForPrivateKeyDecription)
+            .build()
+            .run();
     }
 }
