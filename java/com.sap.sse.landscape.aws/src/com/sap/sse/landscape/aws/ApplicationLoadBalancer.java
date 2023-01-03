@@ -115,7 +115,7 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      * @throws IllegalStateException
      *          gets thrown if shifting exceeds the limit of priorities
      */
-    Iterable<Rule> shiftRulesToMakeSpaceAt(int index) throws IllegalStateException;
+    void shiftRulesToMakeSpaceAt(int index) throws IllegalStateException;
     
     /**
      * Returns the priority which should be used as the next sharding priority.

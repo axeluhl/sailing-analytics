@@ -112,7 +112,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
     
     @Override
-    public Iterable<Rule> shiftRulesToMakeSpaceAt(int targetPrio) throws IllegalStateException {
+    public void shiftRulesToMakeSpaceAt(int targetPrio) throws IllegalStateException {
         final Iterable<Rule> rules = getRules();
         final TreeMap<Integer, Rule> rulesSorted = getRulesSorted(rules);
         int lastPrio = targetPrio;
@@ -137,7 +137,6 @@ implements ApplicationLoadBalancer<ShardingKey> {
             }
             landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
         }
-        return getRules();
     }
     
     @Override

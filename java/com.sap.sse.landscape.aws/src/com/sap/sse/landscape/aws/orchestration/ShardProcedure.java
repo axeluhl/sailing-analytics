@@ -206,7 +206,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         while (!shardingKeyForConsumption.isEmpty()) {
             alb.shiftRulesToMakeSpaceAt(ruleIdx);
             final Set<String> shardingKeysForNextRule = new HashSet<>();
-            for (final Iterator<String> i=shardingKeys.iterator();
+            for (final Iterator<String> i=shardingKeyForConsumption.iterator();
                     shardingKeysForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {
                 shardingKeysForNextRule.add(i.next());
                 i.remove();
