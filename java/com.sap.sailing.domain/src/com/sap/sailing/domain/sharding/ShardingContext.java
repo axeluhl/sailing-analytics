@@ -59,7 +59,7 @@ public class ShardingContext {
      * @param shardingInfo
      */
     public static void setShardingConstraint(ShardingType shardingType, String shardingInfo) {
-        final String encodedShardingInfo = shardingType.encodeIfNeeded(shardingInfo);
+        final String encodedShardingInfo = shardingType.encodeShardingInfo(shardingInfo);
         ThreadLocal<String> shardingHolder = shardingMap.computeIfAbsent(shardingType, t -> new ThreadLocal<>());
         checkAndSetShardingInfo(shardingType, encodedShardingInfo, shardingHolder);
     }
@@ -89,7 +89,7 @@ public class ShardingContext {
             logger.warning("No current sharding constraint for " + type.name());
             return;
         }
-        final String encodedShardingInfo = type.encodeIfNeeded(shardingInfo);
+        final String encodedShardingInfo = type.encodeShardingInfo(shardingInfo);
         if (!encodedShardingInfo.equals(currentShardingInfo)) {
             logger.log(Level.SEVERE, "Current sharding constraint vialation for " + type.name() + ". Got "
                     + shardingInfo + ", shard requires " + currentShardingInfo, new RuntimeException());

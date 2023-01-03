@@ -138,7 +138,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("delayToLiveInMillis", leaderboard.getDelayToLiveInMillis());
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
-        jsonLeaderboard.put("shardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
+        jsonLeaderboard.put("shardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeShardingInfo(leaderboard.getName()));
         final ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
         if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
             final ThresholdBasedResultDiscardingRule thresholdBasedResultDiscardingRule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;

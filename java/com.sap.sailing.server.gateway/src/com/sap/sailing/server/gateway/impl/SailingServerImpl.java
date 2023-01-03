@@ -81,7 +81,7 @@ public class SailingServerImpl extends SecuredServerImpl implements SailingServe
     public String getLeaderboardShardingKey(String leaderboardName) throws Exception {
         // We could try to acquire this from the "leaderboards" REST API endpoint, field shardingLeaderboardName,
         // but we can as well shortcut it by replicating the implementation here:
-        return ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboardName);
+        return ShardingType.LEADERBOARDNAME.encodeShardingInfo(leaderboardName);
     }
     
     /**

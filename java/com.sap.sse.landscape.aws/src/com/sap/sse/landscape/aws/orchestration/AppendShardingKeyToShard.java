@@ -76,19 +76,19 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
         // check if there is a rule with space left for one or more additional conditions:
         for (Rule r : shard.getRules()) {
             boolean updateRule = false;
-            final ArrayList<String> keys = new ArrayList<>();
+            final ArrayList<String> paths = new ArrayList<>();
             for (RuleCondition con : r.conditions()) {
                 if (con.pathPatternConfig() != null) {
-                    keys.addAll(con.values());
+                    paths.addAll(con.values());
                 }
             }
-            while (keys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
+            while (paths.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
                     && !mutableShardingKeys.isEmpty()) {
-                keys.add(mutableShardingKeys.get(0));
+                paths.add(mutableShardingKeys.get(0));
                 mutableShardingKeys.remove(0);
                 updateRule = true;
             }
-            final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, keys);
+            final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, paths);
             // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
             Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
             if (updateRule) {

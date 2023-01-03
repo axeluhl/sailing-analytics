@@ -28,13 +28,6 @@ public enum ShardingType {
         this.prefix = prefix;
     }
 
-    public String encodeIfNeeded(String shardingInfo) {
-        if (shardingInfo.startsWith(prefix)) {
-            return shardingInfo;
-        }
-        return encodeShardingInfo(shardingInfo);
-    }
-    
     public String encodeShardingInfo(String shardingInfo) {
         return new StringBuilder().append(prefix).append(normalize(shardingInfo)).toString();
     }

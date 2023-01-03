@@ -177,12 +177,12 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
      * a header-field condition that requires the request to be tagged for a replica, plus a path-pattern condition with the
      * sharding keys as patterns.
      * 
-     * @param shardingKeys their number must not exceed {@link ApplicationLoadBalancer#MAX_CONDITIONS_PER_RULE} - {@link #NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE}
+     * @param paths their number must not exceed {@link ApplicationLoadBalancer#MAX_CONDITIONS_PER_RULE} - {@link #NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE}
      */
-    protected Collection<RuleCondition> getShardingRuleConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer, Collection<String> shardingKeys) throws InterruptedException, ExecutionException {
-        if (shardingKeys.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_RULES_PER_REPLICA_SET) {
-            throw new IllegalArgumentException("too many sharding keys for the conditions of a single load balancer rule: "+shardingKeys+
-                    "; a maximum of "+(ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_RULES_PER_REPLICA_SET)+" is allowed");
+    protected Collection<RuleCondition> getShardingRuleConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer, Collection<String> paths) throws InterruptedException, ExecutionException {
+        if (paths.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) {
+            throw new IllegalArgumentException("too many sharding keys for the conditions of a single load balancer rule: "+paths+
+                    "; a maximum of "+(ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE)+" is allowed");
         }
         final Collection<RuleCondition> ruleConditions = new ArrayList<>();
         ruleConditions.add(loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()));
@@ -191,7 +191,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                         .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
                 .build());
         ruleConditions.add(
-                RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(shardingKeys)).build());
+                RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(paths)).build());
         return ruleConditions;
     }
 
