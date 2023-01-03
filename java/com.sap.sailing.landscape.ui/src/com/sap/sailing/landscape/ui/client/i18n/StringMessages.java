@@ -153,4 +153,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String successfullyAppendedShardingKeysToShard(String leaderboardNames, String shardName);
     String successfullyRemovedLeaderboardsFromShard(String leaderboardNames, String shardName);
     String pleaseProvideANonEmptyShardName();
+    String shardNameInvalid(String shardName, String message);
+    String shardCreatedSuccessfully(String newShardName);
+    String deletedShard(String shardName);
 }

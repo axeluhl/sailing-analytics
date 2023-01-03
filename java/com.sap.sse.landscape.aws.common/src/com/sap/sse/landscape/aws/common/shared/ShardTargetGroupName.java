@@ -76,11 +76,14 @@ public class ShardTargetGroupName {
      *             pattern can be applied.
      */
     public static ShardTargetGroupName create(String replicaSetName, String shardName, String targetGroupNamePrefix) throws IllegalArgumentException {
+        if (!isValidTargetGroupNamePrefix(targetGroupNamePrefix)) {
+            throw new IllegalArgumentException("Target group name prefix "+targetGroupNamePrefix+" is not allowed");
+        }
         if (!shardName.matches("[a-zA-Z0-9]*")) {
-            throw new IllegalArgumentException("Only a-z, A-Z and 0-9 characters are allowed in shardname!");
+            throw new IllegalArgumentException("Only a-z, A-Z and 0-9 characters are allowed in shard name");
         }
         if (shardName.endsWith(TargetGroupConstants.MASTER_SUFFIX) || shardName.endsWith(TargetGroupConstants.TEMP_SUFFIX)){
-            throw new IllegalArgumentException(TargetGroupConstants.MASTER_SUFFIX + " and " + TargetGroupConstants.TEMP_SUFFIX + " are not allowed at the end of Shardnames");
+            throw new IllegalArgumentException(TargetGroupConstants.MASTER_SUFFIX + " and " + TargetGroupConstants.TEMP_SUFFIX + " are not allowed at the end of shard names");
         }
         final String targetGroupNameBySimpleConcatenation = targetGroupNamePrefix + replicaSetName + SEPARATOR + shardName;
         final String targetGroupName;
@@ -100,6 +103,7 @@ public class ShardTargetGroupName {
             targetGroupName = targetGroupNamePrefix + replicaSetName + SEPARATOR + shardName.substring(0, prefixLength)
                     + NAMESEPARATOR + shardName.substring(shardName.length() - postfixLength);
         }
+        assert isValidShardTargetGroupName(targetGroupName);
         return new ShardTargetGroupName(shardName, targetGroupName);
     }
 

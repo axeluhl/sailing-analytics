@@ -16,13 +16,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.LeaderboardNameDTO;
@@ -38,6 +39,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class ShardManagementPanel extends SimplePanel {
@@ -46,14 +48,12 @@ public class ShardManagementPanel extends SimplePanel {
     private final TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources> regattasTable;
     private final TableWrapperWithMultiSelectionAndFilter<AwsShardDTO, StringMessages, AdminConsoleTableResources> shardTable;
     private final TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources> selectedKeysTable;
-    private final TextBox bearertokenText;
+    private final TextBox bearerTokenText;
     private SailingApplicationReplicaSetDTO<String> replicaSet;
     private final BusyIndicator shardBusy;
     private final BusyIndicator leaderboardsBusy;
     private String region;
     private String passphrase;
-    private final DialogBox messageBox;
-    private final TextArea message;
     private List<LeaderboardNameDTO> leaderboards;
     private Map<AwsShardDTO, Iterable<String>> shardsAndShardingKeys;
     private final CaptionPanel leaderboardCaption, shardsCaption, keysCaption;
@@ -87,11 +87,8 @@ public class ShardManagementPanel extends SimplePanel {
             }
         };
         final Button addShard = new SelectedElementsCountingButton<LeaderboardNameDTO>(stringMessages.addShard(),
-                regattasTable.getSelectionModel(), e -> removeButtonPress(), /* enableWhenSelectionEmpty */ true);
+                regattasTable.getSelectionModel(), e -> addShard(), /* enableWhenSelectionEmpty */ true);
         actionPanel.add(addShard);
-        addShard.addClickHandler(event -> {
-            addShardButtonPress();
-        });
         shardTable = new TableWrapperWithMultiSelectionAndFilter<AwsShardDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, false, java.util.Optional.empty(),
                 GWT.create(AdminConsoleTableResources.class), java.util.Optional.empty(), java.util.Optional.empty(),
@@ -105,15 +102,15 @@ public class ShardManagementPanel extends SimplePanel {
         };
         removeShardButton = new SelectedElementsCountingButton<AwsShardDTO>(stringMessages.remove(),
                 shardTable.getSelectionModel(), /* element name mapper */ rs -> rs.getName(),
-                stringMessages::doYouReallyWantToRemoveSelectedElements, e -> removeButtonPress());
+                stringMessages::doYouReallyWantToRemoveSelectedElements, e -> removeShard());
         actionPanel.add(removeShardButton);
         mainPanel.add(actionPanel);
         final HorizontalPanel usercredentials = new HorizontalPanel();
-        bearertokenText = new TextBox();
+        bearerTokenText = new TextBox();
         final Label brearerhinttext = new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(""));
         brearerhinttext.getElement().getStyle().setFontSize(15, Unit.PX);
         usercredentials.add(brearerhinttext);
-        usercredentials.add(bearertokenText);
+        usercredentials.add(bearerTokenText);
         mainPanel.add(usercredentials);
         shardsCaption = new CaptionPanel(stringMessages.shard());
         shardTable.addColumn(t -> t.getName(), stringMessages.shardname());
@@ -186,19 +183,9 @@ public class ShardManagementPanel extends SimplePanel {
         insideShardPanel.add(leaderboardCaption);
         shardsCaption.add(insideShardPanel);
         shardsCaption.setWidth("90%");
-        messageBox = new DialogBox(false);
         final VerticalPanel dialogMainPanel = new VerticalPanel();
         dialogMainPanel.setSpacing(5);
-        messageBox.add(dialogMainPanel);
-        message = new TextArea();
-        message.setPixelSize(200, 300);
-        dialogMainPanel.add(message);
-        Button closeButton = new Button(stringMessages.close());
-        closeButton.addClickHandler(event -> messageBox.hide());
-        dialogMainPanel.add(closeButton);
         mainPanel.add(tableRow);
-        messageBox.center();
-        messageBox.hide();
         updateAddDeleteButton();
     }
 
@@ -223,11 +210,6 @@ public class ShardManagementPanel extends SimplePanel {
                 && regattasTable.getSelectionModel().getSelectedSet().size() > 0);
         deleteButton.setEnabled(shardTable.getSelectionModel().getSelectedSet().size() == 1
                 && selectedKeysTable.getSelectionModel().getSelectedSet().size() > 0);
-    }
-
-    private void appendMessage(String msg) {
-        message.setText(message.getText() + '\n' + msg);
-        messageBox.show();
     }
 
     public void refresh() {
@@ -285,7 +267,7 @@ public class ShardManagementPanel extends SimplePanel {
     }
 
     private String getBearerToken() {
-        return Util.hasLength(bearertokenText.getValue()) ? bearertokenText.getValue(): null;
+        return Util.hasLength(bearerTokenText.getValue()) ? bearerTokenText.getValue(): null;
     }
 
     private void getShards() {
@@ -306,7 +288,7 @@ public class ShardManagementPanel extends SimplePanel {
                 });
     }
 
-    private void addShardButtonPress() {
+    private void addShard() {
         final Set<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
         if (!selectedLeaderboards.isEmpty() && replicaSet != null) {
             final DataEntryDialog<String> nameRequest = new DataEntryDialog<String>(
@@ -314,11 +296,16 @@ public class ShardManagementPanel extends SimplePanel {
                     new Validator<String>() {
                         @Override
                         public String getErrorMessage(String valueToValidate) {
-                            final String errorMessage;
+                            String errorMessage;
                             if (!Util.hasLength(valueToValidate)) {
                                 errorMessage = stringMessages.pleaseProvideANonEmptyShardName();
                             } else {
-                                errorMessage = null;
+                                try {
+                                    ShardTargetGroupName.create(replicaSet.getReplicaSetName(), valueToValidate, LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX);
+                                    errorMessage = null;
+                                } catch (IllegalArgumentException e) {
+                                    errorMessage = stringMessages.shardNameInvalid(valueToValidate, e.getMessage());
+                                }
                             }
                             return errorMessage;
                         }
@@ -327,16 +314,19 @@ public class ShardManagementPanel extends SimplePanel {
                         public void ok(String newShardName) {
                             ArrayList<LeaderboardNameDTO> l = new ArrayList<>();
                             l.addAll(selectedLeaderboards);
+                            leaderboardsBusy.setBusy(true);
                             landscapeManagementService.addShard(newShardName, l, replicaSet,
                                     getBearerToken(), region, passphrase.getBytes(), new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
-                                            Notification.notify("Created succesfully", NotificationType.SUCCESS);
+                                            leaderboardsBusy.setBusy(false);
+                                            Notification.notify(stringMessages.shardCreatedSuccessfully(newShardName), NotificationType.SUCCESS);
                                             refresh();
                                         }
 
                                         @Override
                                         public void onFailure(Throwable caught) {
+                                            leaderboardsBusy.setBusy(false);
                                             errorReporter.reportError(caught.getMessage());
                                         }
                                     });
@@ -354,6 +344,11 @@ public class ShardManagementPanel extends SimplePanel {
                 }
 
                 @Override
+                protected FocusWidget getInitialFocusWidget() {
+                    return nameTextBox;
+                }
+
+                @Override
                 protected String getResult() {
                     return nameTextBox.getText();
                 }
@@ -362,7 +357,7 @@ public class ShardManagementPanel extends SimplePanel {
         }
     }
 
-    private void removeButtonPress() {
+    private void removeShard() {
         setShardTableBusy(true);
         for (AwsShardDTO selection : shardTable.getSelectionModel().getSelectedSet()) {
             landscapeManagementService.removeShard(selection, replicaSet, region, passphrase.getBytes(),
@@ -375,7 +370,7 @@ public class ShardManagementPanel extends SimplePanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            appendMessage("Deleted Shard: " + selection.getName());
+                            Notification.notify(stringMessages.deletedShard(selection.getName()), NotificationType.SUCCESS);
                             refresh();
                         }
                     });
@@ -400,7 +395,7 @@ public class ShardManagementPanel extends SimplePanel {
                         @Override
                         public void onSuccess(Void result) {
                             setLeaderboardBusy(false);
-                            appendMessage(stringMessages.successfullyAppendedShardingKeysToShard(Util.join(", ", selectedLeaderboards), shard.getName()));
+                            Notification.notify(stringMessages.successfullyAppendedShardingKeysToShard(Util.join(", ", selectedLeaderboards), shard.getName()), NotificationType.SUCCESS);
                             refresh();
                         }
                     });
@@ -425,7 +420,7 @@ public class ShardManagementPanel extends SimplePanel {
                         @Override
                         public void onSuccess(Void result) {
                             setLeaderboardBusy(false);
-                            appendMessage(stringMessages.successfullyRemovedLeaderboardsFromShard(Util.join(", ", selectedLeaderboards), shard.getName()));
+                            Notification.notify(stringMessages.successfullyRemovedLeaderboardsFromShard(Util.join(", ", selectedLeaderboards), shard.getName()), NotificationType.SUCCESS);
                             refresh();
                         }
                     });
