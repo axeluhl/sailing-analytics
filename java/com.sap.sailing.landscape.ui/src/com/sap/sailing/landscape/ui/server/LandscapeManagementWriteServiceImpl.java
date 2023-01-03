@@ -82,7 +82,6 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.HostSupplier;
-import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
@@ -701,7 +700,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
             .setHostname(masterHostname)
-            .setTargetGroupNamePrefix(TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setTargetGroupNamePrefix(LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX)
             .setLandscape(getLandscape())
             .build();
         createLoadBalancerMapping.run();

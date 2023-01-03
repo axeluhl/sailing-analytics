@@ -110,7 +110,7 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
                 addShardingRules(loadBalancer, keysCopy, targetgroup);
             } else {
                 // not enough rules
-                final ApplicationLoadBalancer<ShardingKey> alb = getFreeLoadbalancerAndMoveReplicaset();
+                final ApplicationLoadBalancer<ShardingKey> alb = getFreeLoadBalancerAndMoveReplicaset();
                 // set new rules
                 final Set<String> keysCopy = new HashSet<>();
                 keysCopy.addAll(shardingKeys);

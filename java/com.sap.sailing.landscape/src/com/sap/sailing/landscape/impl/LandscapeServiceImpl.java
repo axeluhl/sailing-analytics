@@ -815,7 +815,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
             .setHostname(masterHostname)
-            .setTargetGroupNamePrefix(TargetGroup.SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
             .setLandscape(landscape)
             .build();
         createLoadBalancerMapping.run();

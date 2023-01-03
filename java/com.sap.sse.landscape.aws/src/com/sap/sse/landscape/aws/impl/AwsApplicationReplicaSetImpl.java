@@ -31,8 +31,8 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
-import com.sap.sse.landscape.aws.ShardTargetGroupName;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
@@ -322,21 +322,20 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups,
             Iterable<LaunchConfiguration> launchConfigurations) {
         HashMap<AwsShard<ShardingKey>, Iterable<ShardingKey>> shardMap = new HashMap<>();
-        for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions
-                .entrySet()) {
+        for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
                     && e.getKey().getLoadBalancerArn() != null
                     && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
                 // an HTTP(S) target group that is currently active in a load balancer and forwards to this replica
                 // set master's port
                 final Set<Rule> pathRules = getListenerRulesWithPathToReplica(listenersAndTheirRules, e.getKey());
-                if (!pathRules.isEmpty() && isShardName(e.getKey().getName())) {
+                if (!pathRules.isEmpty() && ShardTargetGroupName.isValidShardTargetGroupName(e.getKey().getName())) {
                     // Is shard
-                    Set<String> keys = getShardingKeys(listenersAndTheirRules, e.getKey());
+                    final Set<String> keys = getShardingKeys(listenersAndTheirRules, e.getKey());
                     String tagName = null;
-                    Iterable<TagDescription> tagsDesc = e.getKey().getTagDescriptions();
-                    for (TagDescription des : tagsDesc) {
-                        Iterable<Tag> tag = Util.filter(des.tags(), t -> t.key().equals(ShardTargetGroupName.TAG_KEY));
+                    Iterable<TagDescription> tagsDescs = e.getKey().getTagDescriptions();
+                    for (final TagDescription des : tagsDescs) {
+                        final Iterable<Tag> tag = Util.filter(des.tags(), t -> t.key().equals(ShardTargetGroupName.TAG_KEY));
                         if (!Util.isEmpty(tag)) {
                             tagName = tag.iterator().next().value();
                             break;
@@ -358,13 +357,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return shardMap;
     };
     
-    private boolean isShardName(String requestedName) {
-            return ShardTargetGroupName.isValidTargetGroupName(requestedName);
-    }
-    
     @Override
-    public ShardTargetGroupName getNewShardName(String shardName) throws Exception{
-        return ShardTargetGroupName.create(getName(), shardName);
+    public ShardTargetGroupName getNewShardName(String shardName, String targetGroupNamePrefix) throws Exception{
+        return ShardTargetGroupName.create(getName(), shardName, targetGroupNamePrefix);
     }
     
     @Override
@@ -455,9 +450,15 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return false;
     }
     
+    /**
+     * Filters the {@link Rule}s that are contained in the values of {@code listenersAndTheirRules} for those
+     * that forward to the {@code shardTargetGroupCandidate} and whose conditions contains a {@code path-pattern}
+     * condition as well as a {@code http-header} condition that checks for the request to allow forwarding to
+     * a replica (see {@link HttpRequestHeaderConstants#HEADER_FORWARD_TO_REPLICA}).
+     */
     private Set<Rule> getListenerRulesWithPathToReplica(Map<Listener, Iterable<Rule>> listenersAndTheirRules,
             TargetGroup<ShardingKey> shardTargetGroupCandidate) {
-        final String publicTargetGroupCandidateArn = shardTargetGroupCandidate.getTargetGroupArn();
+        final String shardTargetGroupCandidateArn = shardTargetGroupCandidate.getTargetGroupArn();
         Set<Rule> res = new HashSet<Rule>();
         for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
             if (Util.equalsWithNull(e.getKey().loadBalancerArn(), shardTargetGroupCandidate.getLoadBalancerArn())) {
@@ -465,8 +466,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     for (final Action action : rule.actions()) {
                         if (action.type() == ActionTypeEnum.FORWARD) {
                             for (final TargetGroupTuple targetGroupTuple : action.forwardConfig().targetGroups()) {
-                                if (Util.equalsWithNull(targetGroupTuple.targetGroupArn(),
-                                        publicTargetGroupCandidateArn)) {
+                                if (Util.equalsWithNull(targetGroupTuple.targetGroupArn(), shardTargetGroupCandidateArn)) {
                                     for (final RuleCondition condition : rule.conditions()) {
                                         if (Util.equalsWithNull(condition.field(), "path-pattern")) {
                                             for (final RuleCondition ruleCondition : rule.conditions()) {

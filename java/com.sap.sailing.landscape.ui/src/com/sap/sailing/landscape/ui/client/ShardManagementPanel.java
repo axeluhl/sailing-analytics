@@ -56,7 +56,6 @@ public class ShardManagementPanel extends SimplePanel {
     private final TextArea message;
     private List<LeaderboardNameDTO> leaderboards;
     private Map<AwsShardDTO, Iterable<String>> shardsAndShardingKeys;
-    private final Button addShard;
     private final CaptionPanel leaderboardCaption, shardsCaption, keysCaption;
     private final Button addButton, deleteButton;
     private final SelectedElementsCountingButton<AwsShardDTO> removeShardButton;
@@ -87,8 +86,8 @@ public class ShardManagementPanel extends SimplePanel {
                 return res;
             }
         };
-        addShard = new SelectedElementsCountingButton<LeaderboardNameDTO>(stringMessages.addShard(),
-                regattasTable.getSelectionModel(), e -> removeButtonPress());
+        final Button addShard = new SelectedElementsCountingButton<LeaderboardNameDTO>(stringMessages.addShard(),
+                regattasTable.getSelectionModel(), e -> removeButtonPress(), /* enableWhenSelectionEmpty */ true);
         actionPanel.add(addShard);
         addShard.addClickHandler(event -> {
             addShardButtonPress();

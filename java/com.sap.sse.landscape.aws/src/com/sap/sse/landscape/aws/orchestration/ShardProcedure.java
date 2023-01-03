@@ -167,7 +167,7 @@ public abstract class ShardProcedure<ShardingKey,
         }
     }
 
-    protected boolean isTargetgroupNameUnique(String name) {
+    protected boolean isTargetGroupNameUnique(String name) {
         final Iterable<TargetGroup<ShardingKey>> targetGroups = getLandscape().getTargetGroups(region);
         return Util.isEmpty(Util.filter(targetGroups, t -> t.getName().equals(name)));   
     }
@@ -202,7 +202,7 @@ public abstract class ShardProcedure<ShardingKey,
      * Search through all load balancers and returns the first load balancer with enough rules left for
      * the new sharding keys + the replicaSet's rules. When no load balancer is found, a new one gets created. The replicaSet gets moved to the new load balancer.
      */
-    protected ApplicationLoadBalancer<ShardingKey> getFreeLoadbalancerAndMoveReplicaset() throws Exception {
+    protected ApplicationLoadBalancer<ShardingKey> getFreeLoadBalancerAndMoveReplicaset() throws Exception {
         int existingShardingRules = 0;
         for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> s : replicaSet.getShards().entrySet()) {
             existingShardingRules = existingShardingRules + Util.size(s.getKey().getRules());

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.aws.common.shared.TargetGroupConstants;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
@@ -16,13 +17,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  * @author Axel Uhl (D043530)
  *
  */
-public interface TargetGroup<ShardingKey> extends Named {
-    
-    final public static int MAX_TARGETGROUP_NAME_LENGTH = 32;
-    final public static String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
-    final public static String MASTER_SUFFIX = "-m";
-    final public static String TEMP_SUFFIX = "-TMP";
-    
+public interface TargetGroup<ShardingKey> extends Named, TargetGroupConstants {
     Region getRegion();
     
     Map<AwsInstance<ShardingKey>, TargetHealth> getRegisteredTargets();

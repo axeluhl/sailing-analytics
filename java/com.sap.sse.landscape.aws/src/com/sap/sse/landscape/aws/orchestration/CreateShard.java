@@ -14,8 +14,8 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsInstance;
-import com.sap.sse.landscape.aws.ShardTargetGroupName;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
 import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
@@ -44,14 +44,26 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
     private static int DEFAULT_INSTANCE_STARTUP_TIME = 180;
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     private static final String PATH_UNUSED_BY_ANY_APPLICATION = "lauycaluy3cla3yrclaurlIYQL8";
+    private final String targetGroupNamePrefix;
 
     public CreateShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
+        this.targetGroupNamePrefix = builder.getTargetGroupNamePrefix();
     }
 
     static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
             extends
             ShardProcedure.BuilderImpl<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
+        private String targetGroupNamePrefix = "";
+        
+        String getTargetGroupNamePrefix() {
+            return targetGroupNamePrefix;
+        }
+
+        public void setTargetGroupNamePrefix(String targetGroupNamePrefix) {
+            this.targetGroupNamePrefix = targetGroupNamePrefix;
+        }
+
         @Override
         public CreateShard<ShardingKey, MetricsT, ProcessT> build() throws Exception {
             assert shardingKeys != null;
@@ -68,22 +80,22 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         if (shardName == null) {
             throw new Exception("Shardname is null, please enter a name");
         } else {
-            name = replicaSet.getNewShardName(shardName);
+            name = replicaSet.getNewShardName(shardName, targetGroupNamePrefix);
         }
-        if (!isTargetgroupNameUnique(name.getTargetgroupName())) {
+        if (!isTargetGroupNameUnique(name.getTargetGroupName())) {
             throw new Exception(
                     "targetgroup name with this shardname is not unique. You may change the last or first two chars");
         }
-        final ApplicationLoadBalancer<ShardingKey> loadBalancer = getFreeLoadbalancerAndMoveReplicaset();
+        final ApplicationLoadBalancer<ShardingKey> loadBalancer = getFreeLoadBalancerAndMoveReplicaset();
         logger.info(
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaSet.getName());
-        final TargetGroup<ShardingKey> targetgroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
-                name.getTargetgroupName(), replicaSet.getMaster().getPort());
-        getLandscape().addTargetGroupTag(targetgroup.getTargetGroupArn(), ShardTargetGroupName.TAG_KEY, name.getName(), region);
+        final TargetGroup<ShardingKey> targetGroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
+                name.getTargetGroupName(), replicaSet.getMaster().getPort());
+        getLandscape().addTargetGroupTag(targetGroup.getTargetGroupArn(), ShardTargetGroupName.TAG_KEY, name.getName(), region);
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
                 + autoScalingGroup.getName());
-        getLandscape().createAutoscalingGroupFromExisting(autoScalingGroup, shardName, targetgroup, Optional.empty());
+        getLandscape().createAutoscalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
         // create one rules to random path for linking ALB to Targetgroup.
         if (loadBalancer != null) {
             final Iterable<Rule> rules = loadBalancer.getRules();
@@ -104,18 +116,18 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                             .actions(Action.builder()
                                     .forwardConfig(ForwardActionConfig.builder()
                                             .targetGroups(TargetGroupTuple.builder()
-                                                    .targetGroupArn(targetgroup.getTargetGroupArn()).build())
+                                                    .targetGroupArn(targetGroup.getTargetGroupArn()).build())
                                             .build())
                                     .type(ActionTypeEnum.FORWARD).build())
                             .build();
                     final Iterable<Rule> newRuleSet = loadBalancer.addRules(newRule);
-                    getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, getLandscape().getAutoScalingGroupName(shardName), targetgroup,
+                    getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, getLandscape().getAutoScalingGroupName(shardName), targetGroup,
                             AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET, region);
                     // wait until instances are running
                     Wait.wait(()->{
                         boolean ret = true;
                         final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
-                                .getTargetHealthDescriptions(targetgroup);
+                                .getTargetHealthDescriptions(targetGroup);
                         if (healths.isEmpty()) {
                             ret = false; // if there is no Aws in target
                         } else {
@@ -133,7 +145,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                         loadBalancer.deleteRules(r);
                     }
                     // change ALB rules to new ones
-                    addShardingRules(loadBalancer, shardingKeys, targetgroup);
+                    addShardingRules(loadBalancer, shardingKeys, targetGroup);
                 } else {
                     throw new Exception("Unexpected Error - No prio left?");
                 }

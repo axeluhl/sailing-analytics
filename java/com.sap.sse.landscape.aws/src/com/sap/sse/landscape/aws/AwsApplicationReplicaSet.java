@@ -11,6 +11,7 @@ import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.RRType;
@@ -135,12 +136,13 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * {@link ShardTargetGroupName} contains the target group name and the replica set name.
      * @param shardName
      *          (User-) entered name for the shard.
+     * @param targetGroupNamePrefix TODO
      * @return
      *          ShardName created from {@code shardName}.
      * @throws Exception
      *          throws when {@code shardName} is not valid or is not parse-able to a shardName.
      */
-    ShardTargetGroupName getNewShardName(String shardName) throws Exception;
+    ShardTargetGroupName getNewShardName(String shardName, String targetGroupNamePrefix) throws Exception;
     
     Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards() throws Exception;
     

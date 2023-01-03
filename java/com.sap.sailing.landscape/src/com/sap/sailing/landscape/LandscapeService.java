@@ -44,6 +44,8 @@ public interface LandscapeService {
     Duration TIME_TO_WAIT_BETWEEN_MDI_COMPLETION_CHECKS = Duration.ONE_SECOND.times(15);
     
     String USER_PREFERENCE_FOR_SESSION_TOKEN = "___aws.session.token___";
+    
+    String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
 
     /**
      * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session

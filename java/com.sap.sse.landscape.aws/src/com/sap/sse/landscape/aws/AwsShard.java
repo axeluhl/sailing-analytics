@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import com.sap.sse.landscape.application.Shard;
+import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
