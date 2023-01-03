@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: LandscapeAWSCommonTest
+Bundle-SymbolicName: com.sap.sse.landscape.aws.common.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Fragment-Host: com.sap.sse.landscape.aws.common
+Import-Package: org.hamcrest;version="2.2.0",
+ org.junit;version="4.8.1"
+Automatic-Module-Name: com.sap.sse.landscape.aws.common.test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
