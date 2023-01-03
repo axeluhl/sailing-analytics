@@ -394,7 +394,6 @@ public class ShardManagementPanel extends SimplePanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            setBusy(false);
                             Notification.notify(stringMessages.successfullyRemovedLeaderboardsFromShard(Util.join(", ", selectedLeaderboards), shard.getName()), NotificationType.SUCCESS);
                             refresh();
                         }

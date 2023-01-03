@@ -78,8 +78,12 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
             boolean updateRule = false;
             final ArrayList<String> paths = new ArrayList<>();
             for (RuleCondition con : r.conditions()) {
+                // if we find a 
                 if (con.pathPatternConfig() != null) {
-                    paths.addAll(con.values());
+                    // eliminate PATH_UNUSED_BY_ANY_APPLICATION in case this proxy key was found;
+                    // it usually indicates an empty shard; when now adding one or more conditions
+                    // it can be replaced.
+                    Util.addAll(Util.filter(con.values(), path->!path.equals(PATH_UNUSED_BY_ANY_APPLICATION)), paths);
                 }
             }
             while (paths.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE

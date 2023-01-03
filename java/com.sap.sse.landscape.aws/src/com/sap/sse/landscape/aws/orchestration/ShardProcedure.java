@@ -50,6 +50,7 @@ extends AbstractAwsProcedureImpl<ShardingKey>
 implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
+    protected static final String PATH_UNUSED_BY_ANY_APPLICATION = "lauycaluy3cla3yrclaurlIYQL8";
     protected final String shardName;
     final protected Set<String> shardingKeys;
     final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;

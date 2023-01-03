@@ -58,7 +58,7 @@ public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends Applicatio
         if (shard == null) {
             throw new Exception("Shard not found!");
         }
-        logger.info( "Removing " + String.join(", ", shardingKeys) + " from " + shardName);
+        logger.info("Removing " + String.join(", ", shardingKeys) + " from " + shardName);
         // remove conditions in rules where path is the sharding key
         final Set<String> shardingKeysFromConditions = new HashSet<>();
         for (Rule r : shard.getRules()) {
@@ -71,6 +71,11 @@ public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends Applicatio
                             " has a rule "+r+" that has no path pattern condition; ignoring that rule while removing shard.");
                 }
             }
+        }
+        if (shardingKeysFromConditions.isEmpty()) {
+            // if the shard runs empty (no more sharding keys defined for it), set a proxy key to keep
+            // the shard discoverable and its target group linked to the load balancer for continued target health checks
+            shardingKeysFromConditions.add(PATH_UNUSED_BY_ANY_APPLICATION);
         }
         getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(shard.getRules(), new Rule[0]));
         // change ALB rules to new ones

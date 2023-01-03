@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.ui.shared;
 import java.util.ArrayList;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
 
 public class AwsShardDTO implements Named {
     private static final long serialVersionUID = 1L;
@@ -22,9 +23,7 @@ public class AwsShardDTO implements Named {
     public AwsShardDTO(Iterable<String> leaderboardNames, String targetGroupArn, String targetGroupName, String autoScalinggroupArn,
             String autoBalancerArn, String autoScalingGroupName, String name, String replicaName) {
         this.leaderboardNames = new ArrayList<>();
-        for (String s : leaderboardNames) {
-            this.leaderboardNames.add(s);
-        }
+        Util.addAll(leaderboardNames, this.leaderboardNames);
         this.targetGroupArn = targetGroupArn;
         this.targetGroupName = targetGroupName;
         this.autoBalancerArn = autoBalancerArn;

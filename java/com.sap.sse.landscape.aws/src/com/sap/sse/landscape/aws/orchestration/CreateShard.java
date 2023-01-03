@@ -42,7 +42,6 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
     private static int DEFAULT_INSTANCE_STARTUP_TIME = 180;
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
-    private static final String PATH_UNUSED_BY_ANY_APPLICATION = "lauycaluy3cla3yrclaurlIYQL8";
     private final String targetGroupNamePrefix;
 
     public CreateShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
