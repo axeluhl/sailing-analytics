@@ -33,6 +33,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
+import com.sap.sse.landscape.aws.orchestration.ShardProcedure;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
@@ -195,7 +196,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                                 || !Util.isEmpty(Util.filter(e.getValue(),
                                         target -> target.target().id().equals(getMaster().getHost().getId()))))
                         && hasPublicRuleForward(listenersAndTheirRules, e.getKey())
-                        && !hasPathCondition(listenersAndTheirRules, e.getKey())) {
+                        && !hasPathCondition(listenersAndTheirRules, e.getKey())) { // not a shard target group
                     // this replica set's master or at least one of the replicas of this replica set is registered with
                     // the target group, and there is a rule that forwards
                     // requests with explicit replica-markup to this target group:
@@ -316,7 +317,6 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return autoscalinggroup;
     }
 
-    @SuppressWarnings("unchecked")
     private HashMap<AwsShard<ShardingKey>, Iterable<ShardingKey>> establishShards(
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
             Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups,
@@ -331,7 +331,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 final Set<Rule> pathRules = getListenerRulesWithPathToReplica(listenersAndTheirRules, e.getKey());
                 if (!pathRules.isEmpty() && ShardTargetGroupName.isValidShardTargetGroupName(e.getKey().getName())) {
                     // Is shard
-                    final Set<String> keys = getShardingKeys(listenersAndTheirRules, e.getKey());
+                    final Set<ShardingKey> shardingKeys = getShardingKeys(listenersAndTheirRules, e.getKey());
                     String tagName = null;
                     Iterable<TagDescription> tagsDescs = e.getKey().getTagDescriptions();
                     for (final TagDescription des : tagsDescs) {
@@ -344,7 +344,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     try {
                         final ShardTargetGroupName shardName = ShardTargetGroupName.parse(e.getKey().getName(), tagName);
                         final AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(getName(),
-                                shardName.getShardName(), Util.asList(Util.map(keys, s -> (ShardingKey) s)), e.getKey(),
+                                shardName.getShardName(), shardingKeys, e.getKey(),
                                 e.getKey().getLoadBalancer(), pathRules, getShardAutoscalinggroup(e.getKey(), autoScalingGroups, launchConfigurations));
                         shardMap.put(shard, shard.getKeys());
                     } catch (Exception e1) {
@@ -398,6 +398,10 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return hasListenerRuleWithHostHeaderForward(listenersAndTheirRules, publicTargetGroupCandidate, HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB());
     }
 
+    /**
+     * Checks if any of the load balancer listeners passed has a rule that forwards to the
+     * {@code shardingTargetGroupCandidate} and has a {@code path-pattern} condition.
+     */
     private boolean hasPathCondition(Map<Listener, Iterable<Rule>> listenersAndTheirRules,
             TargetGroup<ShardingKey> shardingTargetGroupCandidate) {
         final String shardTargetGroupCandidateArn = shardingTargetGroupCandidate.getTargetGroupArn();
@@ -407,8 +411,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     for (final Action action : rule.actions()) {
                         if (action.type() == ActionTypeEnum.FORWARD) {
                             for (final TargetGroupTuple targetGroupTuple : action.forwardConfig().targetGroups()) {
-                                if (Util.equalsWithNull(targetGroupTuple.targetGroupArn(),
-                                        shardTargetGroupCandidateArn)) {
+                                if (Util.equalsWithNull(targetGroupTuple.targetGroupArn(), shardTargetGroupCandidateArn)) {
                                     for (final RuleCondition condition : rule.conditions()) {
                                         if (Util.equalsWithNull(condition.field(), "path-pattern")) {
                                             return true;
@@ -493,10 +496,10 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return res;
     }
 
-    private Set<String> getShardingKeys(Map<Listener, Iterable<Rule>> listenersAndTheirRules,
+    private Set<ShardingKey> getShardingKeys(Map<Listener, Iterable<Rule>> listenersAndTheirRules,
             TargetGroup<ShardingKey> shardTargetGroupCandidate) {
         final String publicTargetGroupCandidateArn = shardTargetGroupCandidate.getTargetGroupArn();
-        Set<String> res = new HashSet<>();
+        Set<ShardingKey> shardingKeys = new HashSet<>();
         for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
             if (Util.equalsWithNull(e.getKey().loadBalancerArn(), shardTargetGroupCandidate.getLoadBalancerArn())) {
                 for (final Rule rule : e.getValue()) {
@@ -513,7 +516,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                                                         HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())) {
                                             for (final RuleCondition ruleCondition : rule.conditions()) {
                                                 if (Util.equalsWithNull(ruleCondition.field(), "path-pattern")) {
-                                                    res.addAll(ruleCondition.values());
+                                                    Util.addAll(Util.map(ruleCondition.values(), ShardProcedure::getShardingKeyFromPathCondition), shardingKeys);
                                                 }
                                             }
                                         }
@@ -525,7 +528,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 }
             }
         }
-        return res;
+        return shardingKeys;
     }
 
     private boolean hasMasterRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> masterTargetGroupCandidate) {

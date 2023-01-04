@@ -130,7 +130,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                                                             .getB()))
                                             .build(),
                                     RuleCondition.builder().field("path-pattern")
-                                            .pathPatternConfig(ppc -> ppc.values(PATH_UNUSED_BY_ANY_APPLICATION)).build())
+                                            .pathPatternConfig(ppc -> ppc.values(getPathConditionForShardingKey(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION))).build())
                             .actions(Action.builder()
                                     .forwardConfig(ForwardActionConfig.builder()
                                             .targetGroups(TargetGroupTuple.builder()
@@ -162,9 +162,9 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     for (Rule r : newRuleSet) {
                         loadBalancer.deleteRules(r);
                     }
-                    final Set<String> shardingKeysToUse;
+                    final Set<ShardingKey> shardingKeysToUse;
                     if (shardingKeys.isEmpty()) {
-                        shardingKeysToUse = Collections.singleton(PATH_UNUSED_BY_ANY_APPLICATION);
+                        shardingKeysToUse = Collections.singleton(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION);
                     } else {
                         shardingKeysToUse = shardingKeys;
                     }

@@ -48,11 +48,13 @@ public abstract class ShardProcedure<ShardingKey,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends AbstractAwsProcedureImpl<ShardingKey>
 implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
+    private static final String PATH_PREFIX_FOR_SHARDING_KEY = "*"; // TODO make this a configurable option of this procedure; see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5627#c26
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
-    protected static final String PATH_UNUSED_BY_ANY_APPLICATION = "lauycaluy3cla3yrclaurlIYQL8";
+    @SuppressWarnings("unchecked") // this silently assumes that a String can be cast to a ShardingKey without problems
+    protected final ShardingKey SHARDING_KEY_UNUSED_BY_ANY_APPLICATION = (ShardingKey) "lauycaluy3cla3yrclaurlIYQL8";
     protected final String shardName;
-    final protected Set<String> shardingKeys;
+    final protected Set<ShardingKey> shardingKeys;
     final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
     final Region region;
     final byte[] passphraseForPrivateKeyDecryption;
@@ -77,7 +79,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
 
         BuilderT setLandscape(AwsLandscape<String> landscape);
 
-        BuilderT setShardingKeys(Set<String> shardingkeys);
+        BuilderT setShardingKeys(Set<ShardingKey> shardingkeys);
 
         BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
 
@@ -97,7 +99,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             implements
             Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         protected String shardName;
-        protected Set<String> shardingKeys;
+        protected Set<ShardingKey> shardingKeys;
         protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
         protected Region region;
         protected byte[] passphraseForPrivateKeyDecryption;
@@ -109,7 +111,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         }
 
         @Override
-        public BuilderT setShardingKeys(Set<String> shardingkeys) {
+        public BuilderT setShardingKeys(Set<ShardingKey> shardingkeys) {
             this.shardingKeys = shardingkeys;
             return self();
         }
@@ -155,7 +157,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             return replicaSet;
         }
 
-        Set<String> getShardingKeys() {
+        Set<ShardingKey> getShardingKeys() {
             return shardingKeys;
         }
 
@@ -174,18 +176,24 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     }
     
     /**
-     * Produces conditions for a sharding load balancer rule based on the {@link #replicaSet}'s {@link AwsApplicationReplicaSet#getHostname() hostname},
-     * a header-field condition that requires the request to be tagged for a replica, plus a path-pattern condition with the
-     * sharding keys as patterns.
+     * Produces conditions for a sharding load balancer rule based on the {@link #replicaSet}'s
+     * {@link AwsApplicationReplicaSet#getHostname() hostname}, a header-field condition that requires the request to be
+     * tagged for a replica, plus a path-pattern condition with the sharding keys as patterns.
      * 
-     * @param paths their number must not exceed {@link ApplicationLoadBalancer#MAX_CONDITIONS_PER_RULE} - {@link #NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE}
+     * @param shardingKeys
+     *            their number must not exceed {@link ApplicationLoadBalancer#MAX_CONDITIONS_PER_RULE} -
+     *            {@link #NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE}; pass sharding keys (as the name suggests),
+     *            not full paths; the paths for the {@code path-pattern} condition will be constructed from the sharding
+     *            keys by this method. See also {@link #getPathConditionForShardingKey(String)}.
      */
-    protected Collection<RuleCondition> getShardingRuleConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer, Collection<String> paths) throws InterruptedException, ExecutionException {
-        if (paths.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) {
-            throw new IllegalArgumentException("too many sharding keys for the conditions of a single load balancer rule: "+paths+
+    protected Collection<RuleCondition> getShardingRuleConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer,
+            Collection<ShardingKey> shardingKeys) throws InterruptedException, ExecutionException {
+        if (shardingKeys.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) {
+            throw new IllegalArgumentException("too many sharding keys for the conditions of a single load balancer rule: "+shardingKeys+
                     "; a maximum of "+(ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE)+" is allowed");
         }
         final Collection<RuleCondition> ruleConditions = new ArrayList<>();
+        final Collection<String> paths = Util.mapToArrayList(shardingKeys, ShardProcedure::getPathConditionForShardingKey);
         ruleConditions.add(loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()));
         ruleConditions.add(RuleCondition.builder().field("http-header")
                 .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
@@ -196,17 +204,17 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         return ruleConditions;
     }
 
-    protected Iterable<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Set<String> shardingKeys,
+    protected Iterable<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Iterable<ShardingKey> shardingKeys,
             TargetGroup<ShardingKey> targetGroup) throws Exception {
         // change ALB rules to new ones
         final Collection<Rule> rules = new ArrayList<Rule>();
-        final Set<String> shardingKeyForConsumption = new HashSet<>();
-        shardingKeyForConsumption.addAll(shardingKeys);
+        final Set<ShardingKey> shardingKeyForConsumption = new HashSet<>();
+        Util.addAll(shardingKeys, shardingKeyForConsumption);
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         while (!shardingKeyForConsumption.isEmpty()) {
             alb.shiftRulesToMakeSpaceAt(ruleIdx);
-            final Set<String> shardingKeysForNextRule = new HashSet<>();
-            for (final Iterator<String> i=shardingKeyForConsumption.iterator();
+            final Set<ShardingKey> shardingKeysForNextRule = new HashSet<>();
+            for (final Iterator<ShardingKey> i=shardingKeyForConsumption.iterator();
                     shardingKeysForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {
                 shardingKeysForNextRule.add(i.next());
                 i.remove();
@@ -291,13 +299,13 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         // create temporary targetgroups
         final Collection<TargetGroup<ShardingKey>> tempTargetGroups = new ArrayList<>();
         final Collection<TargetGroup<ShardingKey>> originalTargetGroups = new ArrayList<>();
-        final Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment = new HashMap<>();
+        final Map<TargetGroup<ShardingKey>, Iterable<ShardingKey>> shardingKeysPerTargetGroup = new HashMap<>();
         final Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups = new HashMap<>();
         final Map<AwsShard<ShardingKey>, TargetGroup<ShardingKey>> shardToTempTargetGroup = new HashMap<>();
         // add non sharding rules for replicaset
         final Collection<Rule> tempRules = new ArrayList<>();
-        createTargetGroupsForMoving(shardToTempTargetGroup, tempTargetGroups, replicaSetToMove, targetGroupsToTempTargetgroups, originalTargetGroups, keysAssignment);
-        addRulesForMoving(targetAlb, shardToTempTargetGroup, tempRules, replicaSetToMove, targetGroupsToTempTargetgroups, originalTargetGroups, keysAssignment);
+        createTargetGroupsForMoving(shardToTempTargetGroup, tempTargetGroups, replicaSetToMove, targetGroupsToTempTargetgroups, originalTargetGroups, shardingKeysPerTargetGroup);
+        addRulesForMoving(targetAlb, shardToTempTargetGroup, tempRules, replicaSetToMove, targetGroupsToTempTargetgroups, originalTargetGroups, shardingKeysPerTargetGroup);
         // set new DNS record -> overwrites old entry
         final String hostname = replicaSetToMove.getHostname();
         getLandscape().setDNSRecordToApplicationLoadBalancer(replicaSetToMove.getHostedZoneId(),
@@ -329,7 +337,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSetToMove,
             Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups,
             Collection<TargetGroup<ShardingKey>> originalTargetGroups,
-            Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment) throws Exception {
+            Map<TargetGroup<ShardingKey>, Iterable<ShardingKey>> shardingKeysPerTargetGroup) throws Exception {
         final TargetGroup<ShardingKey> targetgroupMasterTemp = getLandscape()
                 .copyTargetGroup(replicaSetToMove.getMasterTargetGroup(), TargetGroup.TEMP_SUFFIX);
         final TargetGroup<ShardingKey> targetgroupPublicTemp = getLandscape()
@@ -340,18 +348,14 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         targetGroupsToTempTargetgroups.put(replicaSetToMove.getPublicTargetGroup(), targetgroupPublicTemp);
         originalTargetGroups.add(replicaSetToMove.getMasterTargetGroup());
         originalTargetGroups.add(replicaSetToMove.getPublicTargetGroup());
-        for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSetToMove.getShards().entrySet()) {
+        for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shardAndShardingKeys : replicaSetToMove.getShards().entrySet()) {
             final TargetGroup<ShardingKey> tempShardTargetGroup = getLandscape()
-                    .copyTargetGroup(shard.getKey().getTargetGroup(), TargetGroup.TEMP_SUFFIX);
-            final Set<String> s = new HashSet<>();
-            for (ShardingKey key : shard.getValue()) {
-                s.add(key.toString());
-            }
-            shardToTempTargetGroup.put(shard.getKey(), tempShardTargetGroup);
-            keysAssignment.put(shard.getKey().getTargetGroup(), s);
+                    .copyTargetGroup(shardAndShardingKeys.getKey().getTargetGroup(), TargetGroup.TEMP_SUFFIX);
+            shardToTempTargetGroup.put(shardAndShardingKeys.getKey(), tempShardTargetGroup);
+            shardingKeysPerTargetGroup.put(shardAndShardingKeys.getKey().getTargetGroup(), shardAndShardingKeys.getValue());
             tempTargetGroups.add(tempShardTargetGroup);
-            originalTargetGroups.add(shard.getKey().getTargetGroup());
-            targetGroupsToTempTargetgroups.put(shard.getKey().getTargetGroup(), tempShardTargetGroup);
+            originalTargetGroups.add(shardAndShardingKeys.getKey().getTargetGroup());
+            targetGroupsToTempTargetgroups.put(shardAndShardingKeys.getKey().getTargetGroup(), tempShardTargetGroup);
         }
     }
 
@@ -360,21 +364,19 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSetToMove,
             Map<TargetGroup<ShardingKey>, TargetGroup<ShardingKey>> targetGroupsToTempTargetgroups,
             Collection<TargetGroup<ShardingKey>> originalTargetGroups,
-            Map<TargetGroup<ShardingKey>, Set<String>> keysAssignment) throws Exception {
+            Map<TargetGroup<ShardingKey>, Iterable<ShardingKey>> shardingKeysPerTargetGroup) throws Exception {
         targetAlb
                 .addRulesAssigningUnusedPriorities(true,
                         createRules(targetAlb, replicaSet.getHostname(),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getMasterTargetGroup()),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getPublicTargetGroup())))
                 .forEach(t -> tempRules.add(t));
-        for (Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shard : replicaSetToMove.getShards().entrySet()) {
-            addShardingRules(targetAlb, keysAssignment.get(shard.getKey().getTargetGroup()),
-                    shardToTempTargetGroup.get(shard.getKey())).forEach(t -> tempRules.add(t));
+        for (final Entry<AwsShard<ShardingKey>, Iterable<ShardingKey>> shardAndShardingKeys : replicaSetToMove.getShards().entrySet()) {
+            addShardingRules(targetAlb, shardingKeysPerTargetGroup.get(shardAndShardingKeys.getKey().getTargetGroup()),
+                    shardToTempTargetGroup.get(shardAndShardingKeys.getKey())).forEach(t -> tempRules.add(t)); 
         }
     }
     
-    
-
     protected int numberOfRequiredRules(int numberOfShardingKeys) {
         return (int) (numberOfShardingKeys / (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE))
                 + (int) Math.signum(/* one more because casting to int rounds down */ numberOfShardingKeys %
@@ -433,5 +435,23 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         return ApplicationLoadBalancer.DNS_MAPPED_ALB_NAME_PREFIX
                 + IntStream.range(0, ApplicationLoadBalancer.MAX_ALBS_PER_REGION).filter(i -> !numbersTaken.contains(i))
                         .min().getAsInt();
+    }
+
+    /**
+     * Path conditions are constructed by pre-pending a "*" to the sharding key.
+     * <p>
+     * TODO pass a path condition prefix to this procedure during construction so we can go for exact matches
+     */
+    public static <ShardingKey> String getPathConditionForShardingKey(ShardingKey shardingKey) {
+        return PATH_PREFIX_FOR_SHARDING_KEY+shardingKey.toString();
+    }
+
+    public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path) {
+        if (!path.startsWith(PATH_PREFIX_FOR_SHARDING_KEY)) {
+            throw new IllegalStateException("path condition \""+path+"\" does not start with \""+PATH_PREFIX_FOR_SHARDING_KEY+"\" which is unexpected");
+        }
+        @SuppressWarnings("unchecked") // this silently assumes that a String casts into a ShardingKey without problems
+        final ShardingKey result = (ShardingKey) path.substring(PATH_PREFIX_FOR_SHARDING_KEY.length());
+        return result;
     }
 }

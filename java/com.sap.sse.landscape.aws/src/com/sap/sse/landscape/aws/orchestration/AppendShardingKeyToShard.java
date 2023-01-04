@@ -65,9 +65,9 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
         if (shard == null) {
             throw new Exception("Shard "+shardName+" not found in replica set "+replicaSet.getName());
         }
-        logger.info("Appending " + String.join(", ", shardingKeys) + " to " + shardName);
+        logger.info("Appending " + Util.joinStrings(", ", shardingKeys) + " to " + shardName);
         // list for manipulation -> elements are allowed to be removed!!
-        final List<String> mutableShardingKeys = new LinkedList<>();
+        final List<ShardingKey> mutableShardingKeys = new LinkedList<>();
         mutableShardingKeys.addAll(shardingKeys);
         final TargetGroup<ShardingKey> targetgroup = shard.getTargetGroup();
         final ApplicationLoadBalancer<ShardingKey> loadBalancer = shard.getLoadBalancer();
@@ -76,27 +76,31 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
         // check if there is a rule with space left for one or more additional conditions:
         for (Rule r : shard.getRules()) {
             boolean updateRule = false;
-            final ArrayList<String> paths = new ArrayList<>();
+            final ArrayList<ShardingKey> shardingKeys = new ArrayList<>();
             for (RuleCondition con : r.conditions()) {
                 // if we find a 
                 if (con.pathPatternConfig() != null) {
                     // eliminate PATH_UNUSED_BY_ANY_APPLICATION in case this proxy key was found;
                     // it usually indicates an empty shard; when now adding one or more conditions
                     // it can be replaced.
-                    Util.addAll(Util.filter(con.values(), path->!path.equals(PATH_UNUSED_BY_ANY_APPLICATION)), paths);
+                    Util.addAll(
+                            Util.filter(
+                                    Util.map(con.values(), ShardProcedure::getShardingKeyFromPathCondition),
+                                            shardingKey->!shardingKey.equals(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION)),
+                            shardingKeys);
                 }
             }
-            if (paths.isEmpty()) {
+            if (shardingKeys.isEmpty()) {
                 // the rule probably only has PATH_UNUSED_BY_ANY_APPLICATION and was a proxy rule, probably at the end of the list; remove
                 loadBalancer.deleteRules(r);
             } else { // update only non-empty rule because we assume it won't be at the end of the list
-                while (paths.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
+                while (shardingKeys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
                         && !mutableShardingKeys.isEmpty()) {
-                    paths.add(mutableShardingKeys.get(0));
+                    shardingKeys.add(mutableShardingKeys.get(0));
                     mutableShardingKeys.remove(0);
                     updateRule = true;
                 }
-                final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, paths);
+                final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, shardingKeys);
                 // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
                 Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
                 if (updateRule) {
@@ -106,18 +110,16 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
         }
         if (!mutableShardingKeys.isEmpty()) {
             // check number of rules
+            final Set<ShardingKey> keysCopy = new HashSet<>();
+            keysCopy.addAll(shardingKeys);
             if (Util.size(loadBalancer.getRules()) + numberOfRequiredRules(Util.size(shardingKeys))
                     < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
                 // enough rules
-                final Set<String> keysCopy = new HashSet<>();
-                keysCopy.addAll(shardingKeys);
                 addShardingRules(loadBalancer, keysCopy, targetgroup);
             } else {
                 // not enough rules
                 final ApplicationLoadBalancer<ShardingKey> alb = getFreeLoadBalancerAndMoveReplicaSet();
                 // set new rules
-                final Set<String> keysCopy = new HashSet<>();
-                keysCopy.addAll(shardingKeys);
                 addShardingRules(alb, keysCopy, targetgroup);
             }
         }
