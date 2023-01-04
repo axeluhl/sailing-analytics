@@ -65,6 +65,9 @@ import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlRoute;
+import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
+import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
+import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 
 import difflib.Chunk;
 import difflib.Delta;
@@ -113,9 +116,25 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 }
             }
         });
+        final Semaphore loadingStatusSemaphore = new Semaphore(0);
+        getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {
+            @Override
+            public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
+            }
+
+            @Override
+            public void gotLiveDataEvent(ILiveDataEvent liveDataEvent) {
+            }
+
+            @Override
+            public void stopped(Object subscribedObject) {
+                loadingStatusSemaphore.release();
+            }
+        });
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
         addListenersForStoredDataAndStartController(receivers);
+        loadingStatusSemaphore.acquire();
         final Semaphore semaphore = new Semaphore(0);
         for (final Receiver receiver : receivers) {
             receiver.callBackWhenLoadingQueueIsDone(r->semaphore.release());
@@ -126,7 +145,6 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));
-        
         // make sure leg is initialized correctly in CourseImpl
         assertEquals("start/finish", course.getLegs().get(0).getFrom().getName());
         assertEquals("top", course.getLegs().get(1).getFrom().getName());
