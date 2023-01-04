@@ -69,7 +69,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
  * successfully it is necessary to have valid AWS credentials for region {@code EU_WEST_2} that allow the
  * AWS user account to create keys and launch instances, etc. These are to be provided as explained
- * in the documentation of {@link AwsLandscape#obtain()}. You will need an MFA token generator, too,
+ * in the documentation of {@link AwsLandscape#obtain(String)}. You will need an MFA token generator, too,
  * such as the Google Authenticator.<p>
  * 
  * Run the test by providing your AWS access key ID as system property {@code com.sap.sse.landscape.aws.accesskeyid},
@@ -93,6 +93,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     private static byte[] keyPass;
     private static String AXELS_KEY_PASS;
     private static final String AXELS_KEY_NAME = "Axel";
+    private static final String pathPrefixForShardingKey = "/sse/landscape/test";
     
     @BeforeClass
     public static void setUp() {
@@ -100,18 +101,18 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
             landscape = AwsLandscape.obtain(
                     System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
                     System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME),
-                    System.getProperty(AwsLandscape.SESSION_TOKEN_SYSTEM_PROPERTY_NAME));
+                    System.getProperty(AwsLandscape.SESSION_TOKEN_SYSTEM_PROPERTY_NAME), pathPrefixForShardingKey);
         } else {
             final AwsLandscape<String> tmpLandscape = AwsLandscape.obtain(
                     System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
-                    System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+                    System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME), pathPrefixForShardingKey);
             final Credentials credentials = tmpLandscape.getMfaSessionCredentials(
                     System.getProperty(AwsLandscape.MFA_TOKEN_CODE_SYSTEM_PROPERTY_NAME));
             logger.info("-D"+AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME+"="+
                     credentials.accessKeyId()+" -D"+AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME+"="+
                     credentials.secretAccessKey()+" -D"+AwsLandscape.SESSION_TOKEN_SYSTEM_PROPERTY_NAME+"="+
                     credentials.sessionToken());
-            landscape = AwsLandscape.obtain(credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken());
+            landscape = AwsLandscape.obtain(credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken(), pathPrefixForShardingKey);
         }
         region = new AwsRegion(Region.EU_WEST_2, landscape);
         AXELS_KEY_PASS = new String(Base64.getDecoder().decode(System.getProperty("axelskeypassphrase")));

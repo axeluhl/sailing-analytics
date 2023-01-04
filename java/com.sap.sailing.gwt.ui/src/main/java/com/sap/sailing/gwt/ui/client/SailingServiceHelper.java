@@ -5,6 +5,7 @@ import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_RE
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
 

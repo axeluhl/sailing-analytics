@@ -85,7 +85,7 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
                     // it can be replaced.
                     Util.addAll(
                             Util.filter(
-                                    Util.map(con.values(), ShardProcedure::getShardingKeyFromPathCondition),
+                                    Util.map(con.values(), this::getShardingKeyFromPathCondition),
                                             shardingKey->!shardingKey.equals(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION)),
                             shardingKeys);
                 }

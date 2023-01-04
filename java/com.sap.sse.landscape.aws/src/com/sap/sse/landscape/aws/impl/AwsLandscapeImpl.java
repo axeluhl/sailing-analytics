@@ -204,30 +204,32 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private final Optional<String> sessionToken;
     private final AwsRegion globalRegion;
     private final AwsLandscapeState landscapeState;
+    private final String pathPrefixForShardingKey;
     
-    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String pathPrefixForShardingKey) {
         this(awsLandscapeState,
              System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
-             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME), pathPrefixForShardingKey);
     }
     
-    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey) {
-        this(awsLandscapeState, accessKeyId, secretAccessKey, /* no session token */ null);
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey, String pathPrefixForShardingKey) {
+        this(awsLandscapeState, accessKeyId, secretAccessKey, /* no session token */ null, pathPrefixForShardingKey);
     }
     
-    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey, String sessionToken) {
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey, String sessionToken, String pathPrefixForShardingKey) {
         this(accessKeyId, secretAccessKey, sessionToken,
                 // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
-                PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE), PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), awsLandscapeState);
+                PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE), PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), awsLandscapeState, pathPrefixForShardingKey);
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            String sessionToken, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState landscapeState) {
+            String sessionToken, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState landscapeState, String pathPrefixForShardingKey) {
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.sessionToken = Optional.ofNullable(sessionToken);
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL, this);
         this.landscapeState = landscapeState;
+        this.pathPrefixForShardingKey = pathPrefixForShardingKey;
     }
     
     private static byte[] getPrivateKeyBytes(KeyPair unencryptedKeyPair) {
@@ -1575,7 +1577,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, final DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
         final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(
                 serverName, master, Optional.ofNullable(replicas), allLoadBalancersInRegion, allTargetGroupsInRegion,
-                allLoadBalancerRulesInRegion, this, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
+                allLoadBalancerRulesInRegion, this, allAutoScalingGroups, allLaunchConfigurations, dnsCache, pathPrefixForShardingKey);
         return replicaSet;
     }
     

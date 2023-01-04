@@ -77,7 +77,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * <p>
  * 
  * Clients may also create dedicated instances of this service wrapper, using their own credentials. See
- * {@link #obtain(String, String, Optional)}.
+ * {@link #obtain(String, String, Optional, String)}.
  * <p>
  * 
  * This object interacts with an instance of {@link AwsLandscapeState} which keeps persistent and replicable state about
@@ -143,8 +143,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain() {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState());
+    AwsLandscape<ShardingKey> obtain(String pathPrefixForShardingKey) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), pathPrefixForShardingKey);
         return result;
     }
     
@@ -155,8 +155,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain(String accessKey, String secret) {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String pathPrefixForShardingKey) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, pathPrefixForShardingKey);
         return result;
     }
     
@@ -167,8 +167,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String sessionToken) {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, sessionToken);
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String sessionToken, String pathPrefixForShardingKey) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, sessionToken, pathPrefixForShardingKey);
         return result;
     }
     

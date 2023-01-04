@@ -40,6 +40,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.procedures.CreateLaunchConfigurationAndAutoScalingGroup;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
@@ -638,7 +639,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             keyId = sessionCredentials.getAccessKeyId();
             secret = sessionCredentials.getSecretAccessKey();
             sessionToken = sessionCredentials.getSessionToken();
-            result = AwsLandscape.obtain(keyId, secret, sessionToken);
+            result = AwsLandscape.obtain(keyId, secret, sessionToken, RemoteServiceMappingConstants.pathPrefixForShardingKey);
         } else {
             result = null;
         }
@@ -672,7 +673,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     
     @Override
     public void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode) {
-        final Credentials credentials = AwsLandscape.obtain(awsAccessKey, awsSecret).getMfaSessionCredentials(mfaTokenCode);
+        final Credentials credentials = AwsLandscape.obtain(awsAccessKey, awsSecret, RemoteServiceMappingConstants.pathPrefixForShardingKey).getMfaSessionCredentials(mfaTokenCode);
         final AwsSessionCredentialsWithExpiryImpl result = new AwsSessionCredentialsWithExpiryImpl(
                 credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken(),
                 TimePoint.of(credentials.expiration().toEpochMilli()));
@@ -856,7 +857,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
-                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
+                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion,
+                        autoScalingGroups, launchConfigurations, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
         return applicationReplicaSet;
     }
 
@@ -1620,9 +1622,16 @@ public class LandscapeServiceImpl implements LandscapeService {
         for (String leaderboardName : selectedleaderboards) {
             shardingKeys.add(server.getLeaderboardShardingKey(leaderboardName));
         }
-        removeShardingKeyFromShardBuilder().setLandscape(getLandscape()).setShardingKeys(shardingKeys)
-                .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
-                .setPassphrase(passphraseForPrivateKeyDecription).build().run();
+        removeShardingKeyFromShardBuilder()
+            .setLandscape(getLandscape())
+            .setRegion(region)
+            .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
+            .setShardingKeys(shardingKeys)
+            .setReplicaset(applicationReplicaSet)
+            .setShardName(shardName)
+            .setPassphrase(passphraseForPrivateKeyDecription)
+            .build()
+            .run();
     }
 
     @Override
@@ -1636,9 +1645,16 @@ public class LandscapeServiceImpl implements LandscapeService {
         for (String s : selectedLeaderboards) {
             shardingkeys.add(server.getLeaderboardShardingKey(s));
         }
-        appendShardingKeyToShardBuilder().setLandscape(getLandscape()).setShardingKeys(shardingkeys)
-                .setReplicaset(applicationReplicaSet).setRegion(region).setShardName(shardName)
-                .setPassphrase(passphraseForPrivateKeyDecription).build().run();
+        appendShardingKeyToShardBuilder()
+            .setLandscape(getLandscape())
+            .setRegion(region)
+            .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
+            .setShardingKeys(shardingkeys)
+            .setReplicaset(applicationReplicaSet)
+            .setShardName(shardName)
+            .setPassphrase(passphraseForPrivateKeyDecription)
+            .build()
+            .run();
     }
 
     @Override
@@ -1670,6 +1686,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setShardingKeys(shardingkeys)
             .setReplicaset(applicationReplicaSet)
             .setRegion(region)
+            .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardName(shardName)
             .setPassphrase(passphraseForPrivateKeyDecription)
             .build()

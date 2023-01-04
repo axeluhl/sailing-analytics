@@ -67,7 +67,7 @@ public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends Applicatio
                     shardingKeysFromConditions.addAll(
                             Util.asList(
                                     Util.filter(
-                                            Util.map(condition.values(), ShardProcedure::getShardingKeyFromPathCondition), 
+                                            Util.map(condition.values(), this::getShardingKeyFromPathCondition), 
                                             shardingKey -> !shardingKeys.contains(shardingKey))));
                 } else {
                     logger.warning("This is strange: shard "+shard.getName()+" of replica set "+shard.getReplicaSetName()+

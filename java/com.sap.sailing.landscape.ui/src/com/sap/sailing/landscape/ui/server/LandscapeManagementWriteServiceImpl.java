@@ -38,6 +38,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
@@ -181,7 +182,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public ArrayList<String> getRegions() {
         checkLandscapeManageAwsPermission();
         final ArrayList<String> result = new ArrayList<>();
-        Util.addAll(Util.map(AwsLandscape.obtain().getRegions(), r->r.getId()), result);
+        Util.addAll(Util.map(AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey).getRegions(), r->r.getId()), result);
         return result;
     }
     
@@ -390,7 +391,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public byte[] getEncryptedSshPrivateKey(String regionId, String keyName) throws JSchException {
-        final AwsLandscape<String> landscape = AwsLandscape.obtain();
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey);
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId, landscape), keyName);
         getSecurityService().checkCurrentUserReadPermission(keyPair);
         return keyPair.getEncryptedPrivateKey();
@@ -398,7 +399,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public byte[] getSshPublicKey(String regionId, String keyName) throws JSchException {
-        final AwsLandscape<String> landscape = AwsLandscape.obtain();
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey);
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId, landscape), keyName);
         getSecurityService().checkCurrentUserReadPermission(keyPair);
         return keyPair.getPublicKey();

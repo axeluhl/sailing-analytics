@@ -48,7 +48,6 @@ public abstract class ShardProcedure<ShardingKey,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends AbstractAwsProcedureImpl<ShardingKey>
 implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
-    private static final String PATH_PREFIX_FOR_SHARDING_KEY = "*"; // TODO make this a configurable option of this procedure; see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5627#c26
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
     @SuppressWarnings("unchecked") // this silently assumes that a String can be cast to a ShardingKey without problems
@@ -58,6 +57,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
     final Region region;
     final byte[] passphraseForPrivateKeyDecryption;
+    private final String pathPrefixForShardingKey;
 
     protected ShardProcedure(BuilderImpl<?,?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
@@ -66,6 +66,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         this.replicaSet = builder.getReplicaSet();
         this.shardingKeys = builder.getShardingKeys();
         this.region = builder.getRegion();
+        this.pathPrefixForShardingKey = builder.getPathPrefixForShardingKey();
     }
 
     public static interface Builder<
@@ -75,6 +76,8 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         MetricsT extends ApplicationProcessMetrics, 
         ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
             extends AbstractAwsProcedureImpl.Builder<BuilderT, T, ShardingKey> {
+        BuilderT setPathPrefixForShardingKey(String pathPrefixForShardingKey);
+        
         BuilderT setShardName(String name);
 
         BuilderT setLandscape(AwsLandscape<String> landscape);
@@ -92,8 +95,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         T extends ShardProcedure<ShardingKey,MetricsT,ProcessT>,
         ShardingKey, 
         MetricsT extends ApplicationProcessMetrics, 
-        ProcessT extends ApplicationProcess<ShardingKey, 
-        MetricsT, ProcessT>>
+        ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
             extends
             AbstractAwsProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey>
             implements
@@ -103,6 +105,13 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
         protected Region region;
         protected byte[] passphraseForPrivateKeyDecryption;
+        private String pathPrefixForShardingKey;
+        
+        @Override
+        public BuilderT setPathPrefixForShardingKey(String pathPrefixForShardingKey) {
+            this.pathPrefixForShardingKey = pathPrefixForShardingKey;
+            return self();
+        }
 
         @Override
         public BuilderT setShardName(String name) {
@@ -168,8 +177,12 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         Region getRegion() {
             return region;
         }
+        
+        String getPathPrefixForShardingKey() {
+            return pathPrefixForShardingKey;
+        }
     }
-
+    
     protected boolean isTargetGroupNameUnique(String name) {
         final Iterable<TargetGroup<ShardingKey>> targetGroups = getLandscape().getTargetGroups(region);
         return Util.isEmpty(Util.filter(targetGroups, t -> t.getName().equals(name)));   
@@ -184,7 +197,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
      *            their number must not exceed {@link ApplicationLoadBalancer#MAX_CONDITIONS_PER_RULE} -
      *            {@link #NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE}; pass sharding keys (as the name suggests),
      *            not full paths; the paths for the {@code path-pattern} condition will be constructed from the sharding
-     *            keys by this method. See also {@link #getPathConditionForShardingKey(String)}.
+     *            keys by this method. See also {@link #getPathConditionForShardingKey(String, String)}.
      */
     protected Collection<RuleCondition> getShardingRuleConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer,
             Collection<ShardingKey> shardingKeys) throws InterruptedException, ExecutionException {
@@ -193,7 +206,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                     "; a maximum of "+(ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE)+" is allowed");
         }
         final Collection<RuleCondition> ruleConditions = new ArrayList<>();
-        final Collection<String> paths = Util.mapToArrayList(shardingKeys, ShardProcedure::getPathConditionForShardingKey);
+        final Collection<String> paths = Util.mapToArrayList(shardingKeys, shardingKey->getPathConditionForShardingKey(shardingKey, pathPrefixForShardingKey));
         ruleConditions.add(loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()));
         ruleConditions.add(RuleCondition.builder().field("http-header")
                 .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
@@ -439,19 +452,28 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
 
     /**
      * Path conditions are constructed by pre-pending a "*" to the sharding key.
-     * <p>
-     * TODO pass a path condition prefix to this procedure during construction so we can go for exact matches
      */
-    public static <ShardingKey> String getPathConditionForShardingKey(ShardingKey shardingKey) {
-        return PATH_PREFIX_FOR_SHARDING_KEY+shardingKey.toString();
+    public static <ShardingKey> String getPathConditionForShardingKey(ShardingKey shardingKey, String pathPrefixForShardingKey) {
+        return pathPrefixForShardingKey+shardingKey.toString();
     }
 
-    public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path) {
-        if (!path.startsWith(PATH_PREFIX_FOR_SHARDING_KEY)) {
-            throw new IllegalStateException("path condition \""+path+"\" does not start with \""+PATH_PREFIX_FOR_SHARDING_KEY+"\" which is unexpected");
+    public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path, String pathPrefixForShardingKey) {
+        if (!path.startsWith(pathPrefixForShardingKey)) {
+            throw new IllegalStateException("path condition \""+path+"\" does not start with \""+pathPrefixForShardingKey+"\" which is unexpected");
         }
         @SuppressWarnings("unchecked") // this silently assumes that a String casts into a ShardingKey without problems
-        final ShardingKey result = (ShardingKey) path.substring(PATH_PREFIX_FOR_SHARDING_KEY.length());
+        final ShardingKey result = (ShardingKey) path.substring(pathPrefixForShardingKey.length());
         return result;
+    }
+
+    /**
+     * Path conditions are constructed by pre-pending a "*" to the sharding key.
+     */
+    protected String getPathConditionForShardingKey(ShardingKey shardingKey) {
+        return getPathConditionForShardingKey(shardingKey, pathPrefixForShardingKey);
+    }
+
+    protected ShardingKey getShardingKeyFromPathCondition(String path) {
+        return getShardingKeyFromPathCondition(path, pathPrefixForShardingKey);
     }
 }
