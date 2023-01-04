@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -107,7 +106,6 @@ public class ShardManagementPanel extends SimplePanel {
         final HorizontalPanel userCredentials = new HorizontalPanel();
         bearerTokenText = new TextBox();
         final Label bearerHintText = new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(""));
-        bearerHintText.getElement().getStyle().setFontSize(15, Unit.PX);
         userCredentials.add(bearerHintText);
         userCredentials.add(bearerTokenText);
         mainPanel.add(userCredentials);

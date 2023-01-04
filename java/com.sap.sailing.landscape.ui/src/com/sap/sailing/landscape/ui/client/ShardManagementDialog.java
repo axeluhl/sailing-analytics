@@ -32,10 +32,4 @@ public class ShardManagementDialog extends DialogBox {
         center();
         shardPanel.refresh();
     }
-
-    @Override
-    public void show() {
-        super.show();
-    }
-
 }
