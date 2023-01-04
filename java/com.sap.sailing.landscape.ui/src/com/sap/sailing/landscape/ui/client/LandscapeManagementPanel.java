@@ -286,7 +286,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> masterInstanceIdColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(masterInstanceIdCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                return new LinkBuilder().setRegion(regionsTable.getSelectionModel().getSelectedObject()).setInstanceId(replicaSet.getMaster().getHost().getInstanceId()).setPathMode(LinkBuilder.pathModes.InstanstanceSearch).build();
+                return new LinkBuilder().setRegion(regionsTable.getSelectionModel().getSelectedObject()).setInstanceId(replicaSet.getMaster().getHost().getInstanceId()).setPathMode(LinkBuilder.pathModes.InstanceSearch).build();
             }
         };
         applicationReplicaSetsTable.addColumn(masterInstanceIdColumn, stringMessages.masterInstanceId(),
@@ -458,12 +458,13 @@ public class LandscapeManagementPanel extends SimplePanel {
         AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
+                    sshKeyManagementPanel.setPassphraseValidation(result.booleanValue(), stringMessages);
                     addApplicationReplicaSetButton.setVisible(result);
                     applicationReplicaSetsRefreshButton.setVisible(result);
                     applicationReplicaSetsCaptionPanel.setVisible(result);
                     machineImagesCaptionPanel.setVisible(result);
                     mongoEndpointsCaptionPanel.setVisible(result);
-                    if(result) {
+                    if (result) {
                         refreshApplicationReplicaSetsTable();
                     }
                 }
@@ -473,19 +474,32 @@ public class LandscapeManagementPanel extends SimplePanel {
                 };
             };
         sshKeyManagementPanel.addSshKeySelectionChangedHandler(event->{
-            validatePassphrase(stringMessages,validatePassphraseCallback);
+            validatePassphrase(stringMessages, validatePassphraseCallback);
         });
         sshKeyManagementPanel.addOnPassphraseChangedListener(event -> {
-            validatePassphrase(stringMessages,validatePassphraseCallback);
+            validatePassphrase(stringMessages, validatePassphraseCallback);
         });
-        validatePassphrase(stringMessages,validatePassphraseCallback);
+        validatePassphrase(stringMessages, validatePassphraseCallback);
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
     
     private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
-        new ShardManagementDialog(landscapeManagementService, replicaset, region, sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), errorReporter, stringMessages).show();
+        new ShardManagementDialog(landscapeManagementService, replicaset, region, sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), errorReporter, stringMessages,
+                new DialogCallback<Boolean>() {
+                    @Override
+                    public void ok(Boolean hasAnythingChanged) {
+                        if (hasAnythingChanged) {
+                            refreshApplicationReplicaSetsTable();
+                        }
+                    }
+
+                    @Override
+                    public void cancel() {
+                        // there is no cancel button
+                    }
+        }).show();
     }
     
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {

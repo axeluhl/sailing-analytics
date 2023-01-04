@@ -157,4 +157,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String shardCreatedSuccessfully(String newShardName);
     String deletedShard(String shardName);
     String errorFetchingLeaderboardNames(String message);
+    String shardingDescription();
 }

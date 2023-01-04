@@ -9,22 +9,28 @@ import com.sap.sse.common.Builder;
 public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
 
     static public enum pathModes {
-        InstanstanceSearch, ImageSearch, AmiSearch, Hostname, ReplicaLinks, Version, MasterHost, TargetgroupSearch
+        InstanceSearch, ImageSearch, AmiSearch, Hostname, ReplicaLinks, Version, MasterHost, TargetGroupSearch, AutoScalingGroupSearch
     };
 
     private pathModes pathMode;
     private String region;
     private String instanceId;
     private SailingApplicationReplicaSetDTO<String> replicaSet;
-    private String targetgroupName;
+    private String targetGroupName;
+    private String autoScalingGroupName;
 
     LinkBuilder setPathMode(pathModes mode) {
         pathMode = mode;
         return self();
     }
 
-    LinkBuilder setTargetgroupName(String name) {
-        this.targetgroupName = name;
+    LinkBuilder setTargetGroupName(String name) {
+        this.targetGroupName = name;
+        return self();
+    }
+
+    LinkBuilder setAutoScalingGroupName(String name) {
+        this.autoScalingGroupName = name;
         return self();
     }
 
@@ -47,9 +53,13 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
         return getEc2ConsoleBaseUrlForSelectedRegion() + "#Instances:search=" + instanceId;
     }
 
-    private String getEc2ConsoleLinkForTargetGroupArn(String name) {
-        return getEc2ConsoleBaseUrlForSelectedRegion() + "#TargetGroups:name=" + name;
-    };
+    private String getEc2ConsoleLinkForTargetGroupName(String name) {
+        return getEc2ConsoleBaseUrlForSelectedRegion() + "#TargetGroups:search=" + name;
+    }
+
+    private String getEc2ConsoleLinkForAutoScalingGroupName(String name) {
+        return getEc2ConsoleBaseUrlForSelectedRegion() + "#AutoScalingGroupDetails:id="+name+";view=details";
+    }
 
     private String getEc2ConsoleLinkForAmiId(String amiId) {
         return getEc2ConsoleBaseUrlForSelectedRegion() + "#Images:visibility=owned-by-me;search=" + amiId;
@@ -75,8 +85,13 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
         appendEc2Link(builder, ec2Link, amiId);
     }
 
-    private void appendEc2TargetgroupLink(final SafeHtmlBuilder builder, final String name) {
-        final String ec2Link = getEc2ConsoleLinkForTargetGroupArn(name);
+    private void appendEc2TargetGroupLink(final SafeHtmlBuilder builder, final String name) {
+        final String ec2Link = getEc2ConsoleLinkForTargetGroupName(name);
+        appendEc2Link(builder, ec2Link, name);
+    }
+
+    private void appendEc2AutoScalingGroupLink(final SafeHtmlBuilder builder, final String name) {
+        final String ec2Link = getEc2ConsoleLinkForAutoScalingGroupName(name);
         appendEc2Link(builder, ec2Link, name);
     }
 
@@ -133,7 +148,7 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
                 break;
             case ImageSearch:
                 break;
-            case InstanstanceSearch:
+            case InstanceSearch:
                 checkAttribute(region, "Region");
                 appendEc2InstanceLink(builder, instanceId);
                 break;
@@ -151,10 +166,15 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
                 builder.appendEscaped(replicaSet.getMaster().getHost().getPublicIpAddress());
                 builder.appendHtmlConstant("</a>");
                 break;
-            case TargetgroupSearch:
+            case TargetGroupSearch:
                 checkAttribute(region, "Region");
-                checkAttribute(targetgroupName, "Targetgroupname");
-                appendEc2TargetgroupLink(builder, targetgroupName);
+                checkAttribute(targetGroupName, "Target Group Name");
+                appendEc2TargetGroupLink(builder, targetGroupName);
+                break;
+            case AutoScalingGroupSearch:
+                checkAttribute(region, "Region");
+                checkAttribute(autoScalingGroupName, "Auto-Scaling Group Name");
+                appendEc2AutoScalingGroupLink(builder, autoScalingGroupName);
                 break;
             default:
                 break;

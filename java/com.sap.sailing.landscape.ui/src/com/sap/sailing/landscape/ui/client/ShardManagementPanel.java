@@ -14,8 +14,8 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -54,17 +54,17 @@ public class ShardManagementPanel extends SimplePanel {
     private String passphrase;
     private List<LeaderboardNameDTO> leaderboards;
     private Map<AwsShardDTO, Iterable<String>> shardsAndShardingKeys;
-    private final CaptionPanel leaderboardCaption, shardsCaption, leaderboardsInShardCaption;
+    private final CaptionPanel leaderboardCaption, leaderboardsInShardCaption;
     private final Button addButton, deleteButton;
     private final SelectedElementsCountingButton<AwsShardDTO> removeShardButton;
-    private final DialogBox parentDialog;
     private final StringMessages stringMessages;
+    private boolean hasAnythingChanged;
 
     public ShardManagementPanel(LandscapeManagementWriteServiceAsync landscapeManagementService,
-            ErrorReporter errorReporter, StringMessages stringMessages, DialogBox parentDialog) {
+            ErrorReporter errorReporter, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
+        hasAnythingChanged = false;
         final VerticalPanel mainPanel = new VerticalPanel();
-        this.parentDialog = parentDialog;
         mainPanel.setWidth("100%");
         add(mainPanel);
         this.errorReporter = errorReporter;
@@ -103,25 +103,32 @@ public class ShardManagementPanel extends SimplePanel {
                 stringMessages::doYouReallyWantToRemoveSelectedElements, e -> removeShard());
         actionPanel.add(removeShardButton);
         mainPanel.add(actionPanel);
-        final HorizontalPanel userCredentials = new HorizontalPanel();
+        final Grid userCredentials = new Grid(1, 2);
         bearerTokenText = new TextBox();
         final Label bearerHintText = new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(""));
-        userCredentials.add(bearerHintText);
-        userCredentials.add(bearerTokenText);
+        userCredentials.setWidget(0, 0, bearerHintText);
+        userCredentials.setWidget(0, 1, bearerTokenText);
         mainPanel.add(userCredentials);
-        shardsCaption = new CaptionPanel(stringMessages.shard());
         shardTable.addColumn(t -> t.getName(), stringMessages.shardName());
         shardTable.addColumn(t -> String.join(", ", t.getLeaderboardNames()), stringMessages.shardingKeys());
-        final SafeHtmlCell targetgroupCell = new SafeHtmlCell();
-        final Column<AwsShardDTO, SafeHtml> targetGroupColumn = new Column<AwsShardDTO, SafeHtml>(targetgroupCell) {
+        final SafeHtmlCell targetGroupCell = new SafeHtmlCell();
+        final Column<AwsShardDTO, SafeHtml> targetGroupColumn = new Column<AwsShardDTO, SafeHtml>(targetGroupCell) {
             @Override
             public SafeHtml getValue(AwsShardDTO shard) {
-                return new LinkBuilder().setTargetgroupName(shard.getTargetgroupName()).setRegion(region)
-                        .setPathMode(LinkBuilder.pathModes.TargetgroupSearch).build();
+                return new LinkBuilder().setTargetGroupName(shard.getTargetGroupName()).setRegion(region)
+                        .setPathMode(LinkBuilder.pathModes.TargetGroupSearch).build();
             }
         };
         shardTable.addColumn(targetGroupColumn, stringMessages.targetGroup());
-        shardTable.addColumn(t -> t.getAutoscalingGroupName(), stringMessages.autoScalingGroup());
+        final SafeHtmlCell ausoScalingGroupCell = new SafeHtmlCell();
+        final Column<AwsShardDTO, SafeHtml> autoScalingGroupColumn = new Column<AwsShardDTO, SafeHtml>(ausoScalingGroupCell) {
+            @Override
+            public SafeHtml getValue(AwsShardDTO shard) {
+                return new LinkBuilder().setAutoScalingGroupName(shard.getAutoScalingGroupName()).setRegion(region)
+                        .setPathMode(LinkBuilder.pathModes.AutoScalingGroupSearch).build();
+            }
+        };
+        shardTable.addColumn(autoScalingGroupColumn, stringMessages.autoScalingGroup());
         shardTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateSelectedKeysTable();
             updateAddDeleteButton();
@@ -165,16 +172,12 @@ public class ShardManagementPanel extends SimplePanel {
         buttonPanel.add(spaceholder);
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
-        tableRow.add(shardsCaption);
+        tableRow.add(insideShardPanel);
         insideShardPanel.add(shardTable);
         insideShardPanel.add(keysSpaceholder);
         keysSpaceholder.add(leaderboardsInShardCaption);
         insideShardPanel.add(buttonPanel);
         insideShardPanel.add(leaderboardCaption);
-        shardsCaption.add(insideShardPanel);
-        shardsCaption.setWidth("90%");
-        final VerticalPanel dialogMainPanel = new VerticalPanel();
-        dialogMainPanel.setSpacing(5);
         mainPanel.add(tableRow);
         mainPanel.add(busyIndicator);
         updateAddDeleteButton();
@@ -211,9 +214,6 @@ public class ShardManagementPanel extends SimplePanel {
                 leaderboardNameDTO -> !takenLeaderboardNames.contains(leaderboardNameDTO.getName()));
         regattasTable.refresh(leaderboardsToDisplay);
         shardTable.refresh(shardsAndShardingKeys.keySet());
-        if (parentDialog != null) {
-            parentDialog.center();
-        }
     }
 
     private void setBusy(boolean b) {
@@ -285,6 +285,7 @@ public class ShardManagementPanel extends SimplePanel {
                 }, new DialogCallback<String>() {
                         @Override
                         public void ok(String newShardName) {
+                            hasAnythingChanged = true;
                             ArrayList<LeaderboardNameDTO> l = new ArrayList<>();
                             l.addAll(selectedLeaderboards);
                             busyIndicator.setBusy(true);
@@ -333,6 +334,7 @@ public class ShardManagementPanel extends SimplePanel {
     private void removeShard() {
         setBusy(true);
         for (AwsShardDTO selection : shardTable.getSelectionModel().getSelectedSet()) {
+            hasAnythingChanged = true;
             landscapeManagementService.removeShard(selection, replicaSet, region, passphrase.getBytes(),
                     new AsyncCallback<Void>() {
                         @Override
@@ -348,7 +350,6 @@ public class ShardManagementPanel extends SimplePanel {
                         }
                     });
         }
-
     }
 
     private void addLeaderboardsToShard() {
@@ -357,6 +358,7 @@ public class ShardManagementPanel extends SimplePanel {
                 && shardTable.getSelectionModel().getSelectedSet().size() == 1) {
             final Iterable<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
             final AwsShardDTO shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
+            hasAnythingChanged = true;
             landscapeManagementService.appendShardingKeysToShard(selectedLeaderboards, region, shard.getName(),
                     replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
                         @Override
@@ -382,6 +384,7 @@ public class ShardManagementPanel extends SimplePanel {
                 && shardTable.getSelectionModel().getSelectedSet().size() == 1) {
             final Iterable<LeaderboardNameDTO> selectedLeaderboards = selectedKeysTable.getSelectionModel().getSelectedSet();
             final AwsShardDTO shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
+            hasAnythingChanged = true;
             landscapeManagementService.removeShardingKeysFromShard(selectedLeaderboards, region, shard.getName(),
                     replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
                         @Override
@@ -409,6 +412,10 @@ public class ShardManagementPanel extends SimplePanel {
 
     public void setPassphrase(String passphrase) {
         this.passphrase = passphrase;
+    }
+
+    public Boolean hasAnythingChanged() {
+        return hasAnythingChanged;
     }
 
 }

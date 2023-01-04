@@ -1,35 +1,32 @@
 package com.sap.sailing.landscape.ui.client;
 
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class ShardManagementDialog extends DialogBox {
+public class ShardManagementDialog extends DataEntryDialog<Boolean> {
     private final ShardManagementPanel shardPanel;
 
     ShardManagementDialog(LandscapeManagementWriteServiceAsync landscapeManagementWriteServiceAsync,
             SailingApplicationReplicaSetDTO<String> applicastionReplicaSet, String region, String passphrase,
-            ErrorReporter errorReporter, StringMessages stringMessages) {
-        shardPanel = new ShardManagementPanel(landscapeManagementWriteServiceAsync, errorReporter, stringMessages,
-                this);
+            ErrorReporter errorReporter, StringMessages stringMessages, DialogCallback<Boolean> callback) {
+        super(stringMessages.shard(), stringMessages.shardingDescription(), stringMessages.ok(), /* no cancel button */ null, /* validator */ null, callback);
+        shardPanel = new ShardManagementPanel(landscapeManagementWriteServiceAsync, errorReporter, stringMessages);
         shardPanel.setRegion(region);
         shardPanel.setPassphrase(passphrase);
         shardPanel.setReplicaSet(applicastionReplicaSet);
-        VerticalPanel vPlane = new VerticalPanel();
-        CaptionPanel caption = new CaptionPanel(stringMessages.shard());
-        caption.add(shardPanel);
-        vPlane.add(caption);
-        final Button closeButton = new Button(stringMessages.close());
-        closeButton.addClickHandler(event -> hide());
-        vPlane.add(closeButton);
-        setGlassEnabled(true);
-        setAutoHideEnabled(true);
-        add(vPlane);
-        center();
         shardPanel.refresh();
+    }
+    
+    @Override
+    protected Widget getAdditionalWidget() {
+        return shardPanel;
+    }
+
+    @Override
+    protected Boolean getResult() {
+        return shardPanel.hasAnythingChanged();
     }
 }

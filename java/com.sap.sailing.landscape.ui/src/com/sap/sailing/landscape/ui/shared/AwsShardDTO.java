@@ -45,7 +45,7 @@ public class AwsShardDTO implements Named {
         return targetGroupArn;
     }
 
-    public String getTargetgroupName() {
+    public String getTargetGroupName() {
         return targetGroupName;
     }
 
@@ -61,7 +61,7 @@ public class AwsShardDTO implements Named {
         this.name = name;
     }
 
-    public String getAutoscalingGroupName() {
+    public String getAutoScalingGroupName() {
         return this.autoScalingGroupName;
     }
 
