@@ -70,6 +70,7 @@ public class ShardManagementPanel extends SimplePanel {
         this.errorReporter = errorReporter;
         this.landscapeManagementService = landscapeManagementService;
         final HorizontalPanel actionPanel = new HorizontalPanel();
+        actionPanel.setSpacing(5);
         final Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(event -> refresh());
         actionPanel.add(refreshButton);
