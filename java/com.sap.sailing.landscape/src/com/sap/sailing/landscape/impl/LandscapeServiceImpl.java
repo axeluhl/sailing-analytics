@@ -1568,11 +1568,6 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     @Override
-    public String getShardingKey(SailingServer server, String leaderboardName) throws Exception{
-        return server.getLeaderboardShardingKey(leaderboardName);
-    }
-
-    @Override
     public ArrayList<String> getLeaderboardNames(SailingServer server) throws Exception {
         try {
             ArrayList<String> list = new ArrayList<String>();

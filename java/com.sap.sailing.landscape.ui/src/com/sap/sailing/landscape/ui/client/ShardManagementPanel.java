@@ -55,7 +55,7 @@ public class ShardManagementPanel extends SimplePanel {
     private String passphrase;
     private List<LeaderboardNameDTO> leaderboards;
     private Map<AwsShardDTO, Iterable<String>> shardsAndShardingKeys;
-    private final CaptionPanel leaderboardCaption, shardsCaption, keysCaption;
+    private final CaptionPanel leaderboardCaption, shardsCaption, leaderboardsInShardCaption;
     private final Button addButton, deleteButton;
     private final SelectedElementsCountingButton<AwsShardDTO> removeShardButton;
     private final DialogBox parentDialog;
@@ -112,7 +112,7 @@ public class ShardManagementPanel extends SimplePanel {
         userCredentials.add(bearerTokenText);
         mainPanel.add(userCredentials);
         shardsCaption = new CaptionPanel(stringMessages.shard());
-        shardTable.addColumn(t -> t.getName(), stringMessages.shardname());
+        shardTable.addColumn(t -> t.getName(), stringMessages.shardName());
         shardTable.addColumn(t -> String.join(", ", t.getLeaderboardNames()), stringMessages.shardingKeys());
         final SafeHtmlCell targetgroupCell = new SafeHtmlCell();
         final Column<AwsShardDTO, SafeHtml> targetGroupColumn = new Column<AwsShardDTO, SafeHtml>(targetgroupCell) {
@@ -122,21 +122,21 @@ public class ShardManagementPanel extends SimplePanel {
                         .setPathMode(LinkBuilder.pathModes.TargetgroupSearch).build();
             }
         };
-        shardTable.addColumn(targetGroupColumn, stringMessages.Targetgroup());
-        shardTable.addColumn(t -> t.getAutoscalingGroupName(), stringMessages.Autoscalinggroup());
+        shardTable.addColumn(targetGroupColumn, stringMessages.targetGroup());
+        shardTable.addColumn(t -> t.getAutoscalingGroupName(), stringMessages.autoScalingGroup());
         shardTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateSelectedKeysTable();
             updateAddDeleteButton();
         });
-        leaderboardCaption = new CaptionPanel(stringMessages.leaderboards());
-        regattasTable.addColumn(t -> t.getName(), stringMessages.leaderboards());
+        leaderboardCaption = new CaptionPanel(stringMessages.unshardedLeaderboards());
+        regattasTable.addColumn(t -> t.getName(), stringMessages.name());
         regattasTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateAddDeleteButton();
         });
         leaderboardCaption.add(regattasTable);
         final HorizontalPanel tableRow = new HorizontalPanel();
         busyIndicator = new SimpleBusyIndicator();
-        keysCaption = new CaptionPanel(stringMessages.keys());
+        leaderboardsInShardCaption = new CaptionPanel(stringMessages.leaderboardsInShard());
         selectedKeysTable = new TableWrapperWithMultiSelectionAndFilter<LeaderboardNameDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, false, java.util.Optional.empty(),
                 GWT.create(AdminConsoleTableResources.class), java.util.Optional.empty(), java.util.Optional.empty(),
@@ -150,11 +150,11 @@ public class ShardManagementPanel extends SimplePanel {
                 return result;
             }
         };
-        selectedKeysTable.addColumn(t -> t.getName(), stringMessages.keys());
+        selectedKeysTable.addColumn(t -> t.getName(), stringMessages.name());
         selectedKeysTable.getSelectionModel().addSelectionChangeHandler(event -> {
             updateAddDeleteButton();
         });
-        keysCaption.add(selectedKeysTable);
+        leaderboardsInShardCaption.add(selectedKeysTable);
         addButton = new Button("<");
         addButton.addClickHandler(event -> addLeaderboardsToShard());
         deleteButton = new Button(">");
@@ -170,7 +170,7 @@ public class ShardManagementPanel extends SimplePanel {
         tableRow.add(shardsCaption);
         insideShardPanel.add(shardTable);
         insideShardPanel.add(keysSpaceholder);
-        keysSpaceholder.add(keysCaption);
+        keysSpaceholder.add(leaderboardsInShardCaption);
         insideShardPanel.add(buttonPanel);
         insideShardPanel.add(leaderboardCaption);
         shardsCaption.add(insideShardPanel);
@@ -267,7 +267,7 @@ public class ShardManagementPanel extends SimplePanel {
         final Set<LeaderboardNameDTO> selectedLeaderboards = regattasTable.getSelectionModel().getSelectedSet();
         if (replicaSet != null) {
             final DataEntryDialog<String> nameRequest = new DataEntryDialog<String>(
-                    stringMessages.shardname(), stringMessages.enterShardName(), stringMessages.ok(), stringMessages.cancel(),
+                    stringMessages.shardName(), stringMessages.enterShardName(), stringMessages.ok(), stringMessages.cancel(),
                     new Validator<String>() {
                         @Override
                         public String getErrorMessage(String valueToValidate) {
