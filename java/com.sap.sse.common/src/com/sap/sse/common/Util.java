@@ -785,10 +785,20 @@ public class Util {
         }
         return result;
     }
-
+    
+    /**
+     * 
+     * @param <T>
+     *          Type of {@code iterable}
+     * @param iterable
+     *          Input Iterable
+     * @return
+     *          returns List<T> if {@code iterable} is an instance of List<?> and if it is an instance Serializable. If not,
+     *          an ArrayList<T> gets constructed and filled with all items of {@code iterable}   
+     */
     public static <T> List<T> asList(Iterable<T> iterable) {
         final List<T> list;
-        if (iterable instanceof List<?>) {
+        if (iterable instanceof List<?> && iterable instanceof Serializable) {
             list = (List<T>) iterable;
         } else {
             list = new ArrayList<>();

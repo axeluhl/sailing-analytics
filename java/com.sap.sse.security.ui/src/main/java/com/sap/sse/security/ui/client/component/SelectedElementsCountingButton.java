@@ -20,13 +20,20 @@ import com.sap.sse.common.Named;
  *
  */
 public class SelectedElementsCountingButton<T extends Named> extends Button {
+    private final boolean enableWhenSelectionEmpty;
+    
     /**
      * Constructs the button without a confirmation callback installed. The {@code clickHandler}
      * will be invoked immediately with the selection when the button is clicked.
      */
     public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
             final ClickHandler clickHandler) {
-        this(html, selectionModel, /* no confirmation dialog */ (Supplier<Boolean>) null, clickHandler);
+        this(html, selectionModel, clickHandler, /* enableWhenSelectionEmpty */ false);
+    }
+    
+    public SelectedElementsCountingButton(String html,
+            SetSelectionModel<T> selectionModel, ClickHandler clickHandler, boolean enableWhenSelectionEmpty) {
+        this(html, selectionModel, /* no confirmation dialog */ (Supplier<Boolean>) null, clickHandler, enableWhenSelectionEmpty);
     }
     
     /**
@@ -60,8 +67,24 @@ public class SelectedElementsCountingButton<T extends Named> extends Button {
      */
     public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
             final Supplier<Boolean> asker, final ClickHandler clickHandler) {
+        this(html, selectionModel, asker, clickHandler, /* enableWhenSelectionEmpty */ false);
+    }
+    
+    /**
+     * Allows callers to implement specific behavior for the confirmation step if a non-{@code null} {@code asker} is
+     * passed. A non-{@code null} {@code asker} will be invoked when the button is clicked. The {@code clickHandler}
+     * will be invoked after the button has been clicked and either {@code asker} was {@code null} or
+     * {@link Supplier#get() invoking} the {@code asker} has returned a {@code true} result.
+     * 
+     * @param enableWhenSelectionEmpty
+     *            when {@code true}, the button will also be enabled when the selection is empty; otherwise, the button
+     *            will be disabled for an empty selection.
+     */
+    public SelectedElementsCountingButton(final String html, final SetSelectionModel<T> selectionModel,
+            final Supplier<Boolean> asker, final ClickHandler clickHandler, boolean enableWhenSelectionEmpty) {
         super(html);
-        setEnabled(!selectionModel.getSelectedSet().isEmpty());
+        this.enableWhenSelectionEmpty = enableWhenSelectionEmpty;
+        setEnabled(enableWhenSelectionEmpty || !selectionModel.getSelectedSet().isEmpty());
         addSelectionEventHandler(html, selectionModel);
         addClickHandler(asker, selectionModel, clickHandler);
     }
@@ -70,7 +93,7 @@ public class SelectedElementsCountingButton<T extends Named> extends Button {
         selectionModel.addSelectionChangeHandler(event -> {
             Set<T> selectedSet = selectionModel.getSelectedSet();
             setText(selectedSet.isEmpty() ? html : html + " (" + selectedSet.size() + ")");
-            setEnabled(!selectedSet.isEmpty());
+            setEnabled(enableWhenSelectionEmpty || !selectedSet.isEmpty());
         });
     }
 
