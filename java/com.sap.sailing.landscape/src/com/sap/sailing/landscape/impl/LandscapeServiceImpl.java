@@ -1570,18 +1570,6 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     @Override
-    public ArrayList<String> getLeaderboardNames(SailingServer server) throws Exception {
-        try {
-            ArrayList<String> list = new ArrayList<String>();
-            server.getLeaderboardNames().forEach(t -> list.add(t));
-            return list;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    @Override
     public SailingServer getSailingServer(String hostname, String username, String password, Optional<Integer> port)
             throws MalformedURLException {
         final SailingServerFactory fac = sailingServerFactoryTracker.getService();

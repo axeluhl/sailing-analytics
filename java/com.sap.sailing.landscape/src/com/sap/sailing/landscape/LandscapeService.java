@@ -2,7 +2,6 @@ package com.sap.sailing.landscape;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -44,7 +43,7 @@ public interface LandscapeService {
     Duration TIME_TO_WAIT_BETWEEN_MDI_COMPLETION_CHECKS = Duration.ONE_SECOND.times(15);
     
     String USER_PREFERENCE_FOR_SESSION_TOKEN = "___aws.session.token___";
-    
+   
     String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
 
     /**
@@ -214,7 +213,7 @@ public interface LandscapeService {
      * TODO bug5674: before registering the master with the TGs, spin up as many new replicas as there are currently
      * replicas; wait until they are all ready, then register master and new replicas in TGs and de-register old replicas.
      * Then terminate old auto-scaling replicas and update any unmanaged replica in-place. When the number of auto-scaling
-     * replicas has reached the desired size of the auto-scaling group, terminate the replicas created explicitly.
+     * replicas has reached the desired size of the auto-scaling group, terminate the replicas created explicitly.<p>
      * 
      * Shards are updated by spinning up replicas for the temporary transition and changing the auto scaling config.
      * After that all shard replicas are getting shutdown and restarted with the new launch config.
@@ -391,9 +390,6 @@ public interface LandscapeService {
 
     <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> waitForProcessTimeout,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
-    
-
-    ArrayList<String> getLeaderboardNames(SailingServer server) throws Exception;
 
     SailingServer getSailingServer(String hostname, String username, String password, Optional<Integer> port)
             throws MalformedURLException;
