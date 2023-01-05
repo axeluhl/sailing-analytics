@@ -13,10 +13,10 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopClientFactory;
 import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 

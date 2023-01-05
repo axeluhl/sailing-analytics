@@ -89,7 +89,7 @@ public class TestORCRankingMetricCollaborationWithRaceLogAndRegattaLog {
     }
     
     @Test
-    public void testCertificateAssignments() {
+    public void testCertificateAssignments() throws InterruptedException {
         // no logs attached; therefore no certs
         assertNoCertificate(boat1);
         assertNoCertificate(boat2);
@@ -101,16 +101,20 @@ public class TestORCRankingMetricCollaborationWithRaceLogAndRegattaLog {
         regattaLog.add(createRegattaLogCertificateAssignmentEvent(boat1RegattaCert1, boat1, authorP1));
         assertCertificate(boat1, boat1RegattaCert1);
         ORCCertificate boat1RegattaCert2 = mock(ORCCertificate.class);
+        Thread.sleep(10); // ensure we get a new timestamp
         regattaLog.add(createRegattaLogCertificateAssignmentEvent(boat1RegattaCert2, boat1, authorP2));
         // the priority for Cert2 was 2 and therefore the P1 assignment still takes precedence
         assertCertificate(boat1, boat1RegattaCert1);
+        Thread.sleep(10); // ensure we get a new timestamp
         regattaLog.add(createRegattaLogCertificateAssignmentEvent(boat1RegattaCert2, boat1, authorP1));
         assertCertificate(boat1, boat1RegattaCert2);
         ORCCertificate boat2RegattaCert1 = mock(ORCCertificate.class);
+        Thread.sleep(10); // ensure we get a new timestamp
         regattaLog.add(createRegattaLogCertificateAssignmentEvent(boat2RegattaCert1, boat2, authorP2));
         assertCertificate(boat2, boat2RegattaCert1);
         // now override on race log level:
         ORCCertificate boat1RaceCert1 = mock(ORCCertificate.class);
+        Thread.sleep(10); // ensure we get a new timestamp
         raceLog.add(createRaceLogCertificateAssignmentEvent(boat1RaceCert1, boat1, authorP2));
         assertCertificate(boat1, boat1RaceCert1);
         trackedRace.detachRaceLog(raceLog.getId());

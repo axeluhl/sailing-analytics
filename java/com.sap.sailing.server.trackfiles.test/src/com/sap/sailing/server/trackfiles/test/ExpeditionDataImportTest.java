@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,7 +34,7 @@ public class ExpeditionDataImportTest {
     
     protected void testImport(ImportDataDefinition importData) throws FormatNotSupportedException, IOException {
         try (final InputStream is = importData.getInputStream()) {
-            expeditionDataImporter.importFixes(is, (fixes, device) -> {
+            expeditionDataImporter.importFixes(is, Charset.defaultCharset(), (fixes, device) -> {
                 for (DoubleVectorFix fix : fixes) {
                     if (fix != null) {
                         callbackCallCount++;

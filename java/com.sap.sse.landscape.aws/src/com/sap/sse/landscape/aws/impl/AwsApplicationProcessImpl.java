@@ -27,6 +27,7 @@ import com.sap.sse.landscape.aws.MongoUriParser;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.util.IPAddressUtil;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -110,7 +111,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private <HostT extends AwsInstance<ShardingKey>> Pair<HostT, Integer> getHostAndOptionalTargetPortFromIpAddress(HostSupplier<ShardingKey, HostT> hostSupplier, final String ipAddressOrHostname) {
         HostT host;
         Integer targetPort;
-        final ApplicationLoadBalancer<ShardingKey> alb = landscape.getDNSMappedLoadBalancerFor(ipAddressOrHostname);
+        final ApplicationLoadBalancer<ShardingKey> alb = IPAddressUtil.isIPAddressLiteral(ipAddressOrHostname) ? null : landscape.getDNSMappedLoadBalancerFor(ipAddressOrHostname);
         if (alb != null) {
             logger.info("Found a hostname mapped to a load balancer; trying to find master through target group...");
             host = null;

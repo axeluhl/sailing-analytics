@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,13 +18,16 @@ import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class JSONServiceImpl implements JSONService {
     private final String regattaName;
     private final List<RaceRecord> raceRecords;
     
     public JSONServiceImpl(URL jsonURL, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
+        final URLConnection connection = jsonURL.openConnection();
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        JSONObject jsonObject = parseJSONObject(connection.getInputStream(), charset);
         raceRecords = new ArrayList<RaceRecord>();
         regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
@@ -50,7 +55,9 @@ public class JSONServiceImpl implements JSONService {
     }
     
     public JSONServiceImpl(URL jsonURL, String raceEntryId, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
+        final URLConnection connection = jsonURL.openConnection();
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        JSONObject jsonObject = parseJSONObject(connection.getInputStream(), charset);
         raceRecords = new ArrayList<RaceRecord>();
         regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
@@ -72,7 +79,7 @@ public class JSONServiceImpl implements JSONService {
         return Collections.unmodifiableList(raceRecords);
     }
 
-    private JSONObject parseJSONObject(InputStream is) throws IOException, ParseException, org.json.simple.parser.ParseException {
+    private JSONObject parseJSONObject(InputStream is, Charset charset) throws IOException, ParseException, org.json.simple.parser.ParseException {
         JSONParser parser = new JSONParser();
         Object result = parser.parse(new InputStreamReader(is));
         return (JSONObject) result;
