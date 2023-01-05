@@ -15,6 +15,7 @@ import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 /**
@@ -74,7 +75,11 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     /**
      * The auto-scaling group is responsible for scaling the set of replicas registered with the
      * {@link #getPublicTargetGroup() public target group}. This is optional, so {@code null} may
-     * be returned.
+     * be returned.<p>
+     * 
+     * Note that in the presence of {@link #getShards() shards} those shards will each have their
+     * own {@link AwsShard#getAutoScalingGroup() auto-scaling group} which will share a launch
+     * configuration with the auto-scaling group returned by this method.
      */
     AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException;
     
@@ -145,7 +150,26 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     ShardTargetGroupName getNewShardName(String shardName, String targetGroupNamePrefix) throws Exception;
     
-    Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards() throws Exception;
+    /**
+     * Retrieves information about sharding in this replica set, representing the situation at the point in time
+     * this object was created (not a live copy of the current landscape configuration). For that time point the
+     * map returned tells which shard handles requests for which sharding keys. All other reading traffic will
+     * be routed to this replica set's {@link #getPublicTargetGroup() public target group}.
+     * 
+     * @return Keys are the {@link AwsShard shards}, values are the {@code ShardingKey}s managed by the corresponding
+     *         key's shard.
+     */
+    Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards();
     
+    /**
+     * Removes the {@code shard} from this replica set. This will remove the load balancer routing rules that so far
+     * directed traffic for the shard's keys to the shard; it will also remove the auto-scaling group for the shard's
+     * target group which will also terminate all instances created by that auto-scaling group so far; finally, the
+     * shard's target group is removed.
+     * <p>
+     * 
+     * In effect, this will make all traffic for the shard's keys default back to the {@link #getPublicTargetGroup()
+     * public target group}.
+     */
     void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception;
 }

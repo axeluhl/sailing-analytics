@@ -1,7 +1,6 @@
 package com.sap.sse.landscape.application;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -102,8 +101,6 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
      */
     boolean isReadFromMaster();
 
-    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>>> getShardingInfo();
-    
     /**
      * Activates sharding for the {@code shard} by configuring this replica set such that requests for the {@code shard}
      * are usually submitted to any instance from the {@code processesToPrimarilyHandleShard} set. Only if no process

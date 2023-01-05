@@ -2,7 +2,6 @@ package com.sap.sse.landscape.application.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -108,12 +107,6 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.isReadFromMaster(...)
         // for this it would be helpful to understand the ALB / TargetGroup assignments
         return false;
-    }
-
-    @Override
-    public Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>>> getShardingInfo() {
-        // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.getShardingInfo(...)
-        return null;
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,7 +117,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         }
     }
     
-    public Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards() throws Exception{
+    public Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards() {
         return shards;
     }
 
@@ -612,11 +610,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception {
-        Collection<TargetGroup<ShardingKey>> targetGroups = new ArrayList<>();
-        targetGroups.add(shard.getTargetGroup());
         // remove rules for targetgrouo
         landscape.deleteLoadBalancerListenerRules(shard.getTargetGroup().getRegion(),
-                Util.toArray(getLoadBalancer().getRulesForTargetGroups(targetGroups), new Rule[0]));
+                Util.toArray(getLoadBalancer().getRulesForTargetGroups(Collections.singleton(shard.getTargetGroup())), new Rule[0]));
         // remove autoscaling group
         landscape.removeAutoScalingGroup(shard.getAutoScalingGroup());
         // remove targetgroup
