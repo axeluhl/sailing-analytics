@@ -41,11 +41,11 @@ public interface AwsInstance<ShardingKey> extends Host {
     boolean isManagedByAutoScalingGroup();
 
     /**
-     * Finds out whether this instance is managed by the particular {@code autoScalingGroup} passed as parameter. The
+     * Finds out whether this instance is managed by any of the {@code autoScalingGroups} passed as parameter. The
      * implementation checks the {@link #AWS_AUTOSCALING_GROUP_NAME_TAG} tag's value and compares it to the
      * {@code autoScalingGroup}'s name.
      */
-    boolean isManagedByAutoScalingGroup(Iterable<AwsAutoScalingGroup> autoScalingGroup);
+    boolean isManagedByAutoScalingGroup(Iterable<AwsAutoScalingGroup> autoScalingGroups);
     
     default String getId() {
         return getInstanceId();

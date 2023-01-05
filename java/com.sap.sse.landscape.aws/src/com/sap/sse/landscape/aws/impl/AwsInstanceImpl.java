@@ -275,10 +275,10 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     }
 
     @Override
-    public boolean isManagedByAutoScalingGroup(Iterable<AwsAutoScalingGroup> autoScalingGroup) {
-        return getInstance().tags().stream().filter(tag -> !Util.isEmpty(autoScalingGroup)
+    public boolean isManagedByAutoScalingGroup(Iterable<AwsAutoScalingGroup> autoScalingGroups) {
+        return getInstance().tags().stream().filter(tag -> !Util.isEmpty(autoScalingGroups)
                 && tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG)
-                && Util.stream(autoScalingGroup).filter(t -> t.getName().equals(tag.value())).findAny().isPresent())
+                && Util.stream(autoScalingGroups).filter(t -> t.getName().equals(tag.value())).findAny().isPresent())
                 .findAny().isPresent();
     }
 

@@ -134,13 +134,14 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     /**
      * Returns a {@link ShardTargetGroupName} that is created from an (user-) entered shard name ({@code shardName}).
      * {@link ShardTargetGroupName} contains the target group name and the replica set name.
+     * 
      * @param shardName
-     *          (User-) entered name for the shard.
-     * @param targetGroupNamePrefix TODO
-     * @return
-     *          ShardName created from {@code shardName}.
+     *            (User-) entered name for the shard.
+     * @param targetGroupNamePrefix
+     *            a prefix for the target group name; must not be {@code null} but may be empty
+     * @return {@link ShardTargetGroupName} created from {@code shardName}.
      * @throws Exception
-     *          throws when {@code shardName} is not valid or is not parse-able to a shardName.
+     *             throws when {@code shardName} is not valid or is not parse-able to a shardName.
      */
     ShardTargetGroupName getNewShardName(String shardName, String targetGroupNamePrefix) throws Exception;
     
