@@ -117,6 +117,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final AwsMfaLoginWidget mfaLoginWidget;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
+    
     /**
      * The time to wait after archiving a replica set and before starting a "compare servers" run for the content
      * archived. This waiting period is owed to the process of loading the race content which is an asynchronous
@@ -573,7 +574,7 @@ public class LandscapeManagementPanel extends SimplePanel {
 
         @Override
         public void onFailure(Throwable caught) {
-            errorReporter.reportError(caught.getMessage());
+            errorReporter.reportError(caught.getMessage() == null ? caught.getClass().getName() : caught.getMessage());
             if (!replicaSetIterator.hasNext()) {
                 applicationReplicaSetsBusy.setBusy(false);
             } else {

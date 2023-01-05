@@ -1,11 +1,14 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -86,6 +89,20 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException;
     
+    /**
+     * Returns a non-{@code null} but possibly empty iterable of all auto-scaling groups for this replica set.
+     * These can be the default {@link #getAutoScalingGroup() auto-scaling group} for the public target group
+     * as well as any {@link #getShards() shards' auto-scaling groups}.
+     */
+    default Iterable<AwsAutoScalingGroup> getAllAutoScalingGroups() throws InterruptedException, ExecutionException {
+        final Set<AwsAutoScalingGroup> result = new HashSet<>();
+        if (getAutoScalingGroup() != null) {
+            result.add(getAutoScalingGroup());
+        }
+        Util.addAll(Util.map(getShards().keySet(), shard->shard.getAutoScalingGroup()), result);
+        return result;
+    }
+
     /**
      * Checks whether the {@code host} is eligible for accepting a deployment of a process that belongs to this
      * application replica set, either its master or a replica. In order to be eligible, the host must

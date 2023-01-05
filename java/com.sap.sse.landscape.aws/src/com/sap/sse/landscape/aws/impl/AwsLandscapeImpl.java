@@ -1331,7 +1331,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         tags.add(software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(key).value(value).build());
         getLoadBalancingClient(getRegion(region)).addTags(t -> t.resourceArns(arn).tags(tags));
         return new TagsImpl(key,value);
-        
     }
 
     @Override
@@ -1801,17 +1800,17 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public void updateReleaseInAutoScalingGroup(com.sap.sse.landscape.Region region,
-            LaunchConfiguration oldLaunchConfiguration, Iterable<AwsAutoScalingGroup> affectedAutoScalingGroups,
+    public void updateReleaseInAutoScalingGroups(com.sap.sse.landscape.Region region,
+            LaunchConfiguration oldLaunchConfiguration, Iterable<AwsAutoScalingGroup> autoScalingGroups,
             String replicaSetName, Release release) {
-        logger.info("Adjusting release for auto-scaling groups "+Util.join(", ", affectedAutoScalingGroups)+" to "+release);
+        logger.info("Adjusting release for auto-scaling groups "+Util.join(", ", autoScalingGroups)+" to "+release);
         final String releaseName = release.getName();
         final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         final String oldUserData = new String(Base64.getDecoder().decode(oldLaunchConfiguration.userData().getBytes()));
         final String newUserData = oldUserData.replaceFirst(
                 "(?m)^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
                 DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name() + "=\"" + release.getName() + "\"");
-        updateLaunchConfiguration(region, oldLaunchConfiguration, affectedAutoScalingGroups, newLaunchConfigurationName,
+        updateLaunchConfiguration(region, oldLaunchConfiguration, autoScalingGroups, newLaunchConfigurationName,
                 b -> b.userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
     }
     
@@ -1835,31 +1834,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public void updateImageInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami) {
-        logger.info("Adjusting AMI for auto-scaling group "+autoScalingGroup.getName()+" to "+ami);
+    public void updateImageInAutoScalingGroups(com.sap.sse.landscape.Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, AmazonMachineImage<ShardingKey> ami) {
+        logger.info("Adjusting AMI for auto-scaling group(s) "+Util.join(", ", autoScalingGroups)+" to "+ami);
         final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, ami.getId());
-        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName, b->b.imageId(ami.getId()));
+        updateLaunchConfiguration(region, autoScalingGroups, newLaunchConfigurationName, b->b.imageId(ami.getId()));
     }
 
     @Override
-    public void updateInstanceTypeInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType) {
-        logger.info("Adjusting instance type for auto-scaling group "+autoScalingGroup.getName()+" to "+instanceType);
-        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+    public void updateInstanceTypeInAutoScalingGroup(com.sap.sse.landscape.Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, InstanceType instanceType) {
+        logger.info("Adjusting instance type for auto-scaling group(s) "+Util.join(", ", autoScalingGroups)+" to "+instanceType);
+        final LaunchConfiguration oldLaunchConfiguration = Util.first(autoScalingGroups).getLaunchConfiguration();
         final String newLaunchConfigurationName = oldLaunchConfiguration.launchConfigurationName()+"-"+instanceType.name();
-        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName, b->b.instanceType(instanceType.toString()));
+        updateLaunchConfiguration(region, autoScalingGroups, newLaunchConfigurationName, b->b.instanceType(instanceType.toString()));
     }
 
-    private void updateLaunchConfigurationForAutoScalingGroup(final AutoScalingClient autoScalingClient,
-            AwsAutoScalingGroup autoScalingGroup, final LaunchConfiguration oldLaunchConfiguration,
-            final String newLaunchConfigurationName) {
-        logger.info("Telling auto-scaling group "+autoScalingGroup.getName()+" to use new launch configuration "+newLaunchConfigurationName);
-        autoScalingClient.updateAutoScalingGroup(b->b
-                .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
-                .launchConfigurationName(newLaunchConfigurationName));
-        logger.info("Removing old launch configuration "+oldLaunchConfiguration.launchConfigurationName());
-        autoScalingClient.deleteLaunchConfiguration(b->b.launchConfigurationName(oldLaunchConfiguration.launchConfigurationName()));
-    }
-    
     private void updateLaunchConfigurationForAutoScalingGroups(final AutoScalingClient autoScalingClient,
             Iterable<AwsAutoScalingGroup> autoScalingGroups, final LaunchConfiguration oldLaunchConfiguration,
             final String newLaunchConfigurationName) {
@@ -1910,17 +1898,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         updateLaunchConfigurationForAutoScalingGroups(autoScalingClient, affectedAutoScalingGroups, oldLaunchConfiguration, newLaunchConfigurationName);
     }
     
-    private void updateLaunchConfiguration(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup,
+    private void updateLaunchConfiguration(com.sap.sse.landscape.Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups,
             String newLaunchConfigurationName, Consumer<CreateLaunchConfigurationRequest.Builder> builderConsumer) {
-        if (newLaunchConfigurationName == null) {
-            throw new NullPointerException("New launch configuration name for auto-scaling group "+autoScalingGroup.getName()+" must not be null");
+        if (Util.isEmpty(autoScalingGroups)) {
+            throw new IllegalArgumentException("At least one auto-scaling group must be provided for updating a launch configuration");
         }
-        logger.info("Adjusting launch configuration for auto-scaling group "+autoScalingGroup.getName());
+        if (newLaunchConfigurationName == null) {
+            throw new NullPointerException("New launch configuration name for auto-scaling group(s) "+Util.join(", ", autoScalingGroups)+" must not be null");
+        }
+        logger.info("Adjusting launch configuration for auto-scaling group(s) "+Util.join(", ", autoScalingGroups));
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
-        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        final LaunchConfiguration oldLaunchConfiguration = Util.first(autoScalingGroups).getLaunchConfiguration();
         if (newLaunchConfigurationName.equals(oldLaunchConfiguration.launchConfigurationName())) {
-            throw new IllegalArgumentException("New launch configuration name "+newLaunchConfigurationName+" for auto-scaling group "+
-                    autoScalingGroup.getName()+" equals the old one");
+            throw new IllegalArgumentException("New launch configuration name "+newLaunchConfigurationName+" for auto-scaling group(s) "+
+                    Util.join(", ", autoScalingGroups)+" equals the old one");
         }
         final CreateLaunchConfigurationRequest.Builder createLaunchConfigurationRequestBuilder = copyLaunchConfigurationToCreateRequestBuilder(oldLaunchConfiguration);
         builderConsumer.accept(createLaunchConfigurationRequestBuilder);
@@ -1928,7 +1919,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CreateLaunchConfigurationRequest createLaunchConfigurationRequest = createLaunchConfigurationRequestBuilder.build();
         logger.info("Creating new launch configuration "+newLaunchConfigurationName);
         autoScalingClient.createLaunchConfiguration(createLaunchConfigurationRequest);
-        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+        updateLaunchConfigurationForAutoScalingGroups(autoScalingClient, autoScalingGroups, oldLaunchConfiguration, newLaunchConfigurationName);
     }
 
     @Override

@@ -609,7 +609,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,AwsShardDTO shardDTO,
+    public SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO, AwsShardDTO shardDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO, LeaderboardNameDTO leaderboard) {
         return null;
     }
@@ -855,23 +855,23 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public ArrayList<LeaderboardNameDTO> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaset,
-            String bearertoken) throws Exception {
-        final SailingServer server = getLandscapeService().getSailingServer(replicaset.getHostname(), bearertoken,
+    public ArrayList<LeaderboardNameDTO> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet,
+            String bearerToken) throws Exception {
+        final SailingServer server = getLandscapeService().getSailingServer(replicaSet.getHostname(), bearerToken,
                 /* HTTPS Port */ Optional.of(443));
         return new ArrayList<>(Util.asList(Util.map(server.getLeaderboardNames(), LeaderboardNameDTO::new)));
     }
     
     @Override
     public void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoardNames,
-            SailingApplicationReplicaSetDTO<String> replicaSetDTO, String bearertoken, String region,
+            SailingApplicationReplicaSetDTO<String> replicaSetDTO, String bearerToken, String region,
             byte[] passphraseForPrivateKeyDecryption) throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet = convertFromApplicationReplicaSetDTO(
                 awsRegion, replicaSetDTO);
         getLandscapeService().addShard(Util.map(selectedLeaderBoardNames, t -> t.getName()), awsReplicaSet, awsRegion,
-                bearertoken, passphraseForPrivateKeyDecryption, shardName);
+                bearerToken, passphraseForPrivateKeyDecryption, shardName);
     }
 
     @Override

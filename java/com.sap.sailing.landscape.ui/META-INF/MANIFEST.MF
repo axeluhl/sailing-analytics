@@ -34,7 +34,6 @@ Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sse.landscape.aws.co
  com.sap.sailing.landscape.ui.shared
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.domain.common,
- com.sap.sailing.landscape.ui.client,
  com.sap.sailing.server.gateway.interfaces,
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"

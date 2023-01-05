@@ -375,7 +375,7 @@ public interface LandscapeService {
             InterruptedException, ExecutionException, Exception;
 
     /**
-     * If the {@code replicaSet} provided has an auto-scaling group, its launch configuration is adjusted such that it
+     * If the {@code replicaSet} provided has one or more auto-scaling groups, their launch configuration is adjusted such that it
      * matches the {@code optionalInstanceType}. The existing replicas managed currently by the auto-scaling group are
      * replaced one by one with new instances with the new configuration. This happens by setting the auto-scaling
      * group's new minimum size to the current number of instances managed by the auto-scaling group plus one, then

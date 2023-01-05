@@ -205,7 +205,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     publicTargetGroup.complete(e.getKey());
                     tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups, launchConfigurations);
                 }
-            }   
+            }
         }
         shards.putAll(establishShards(targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules,
                 autoScalingGroups, launchConfigurations));
@@ -285,7 +285,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             if (!defaultRedirectRule.isDone()) {
                 defaultRedirectRule.complete(null); // no default redirect rule found
             }
-        } else {  
+        } else {
             logger.fine("Couldn't find hostname, target group(s) and rules for "+getName());
             loadBalancerRules.complete(Collections.emptySet());
             defaultRedirectRule.complete(null); // no default redirect rule found
@@ -303,7 +303,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return null;
     }
 
-    AwsAutoScalingGroup getShardAutoscalinggroup(TargetGroup<ShardingKey> targetGroup,
+    private AwsAutoScalingGroup getShardAutoscalingGroup(TargetGroup<ShardingKey> targetGroup,
             Iterable<AutoScalingGroup> autoScalingGroups, Iterable<LaunchConfiguration> launchConfigurations) {
         AwsAutoScalingGroup autoscalinggroup = Util
                 .stream(autoScalingGroups).filter(
@@ -347,7 +347,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                         final ShardTargetGroupName shardName = ShardTargetGroupName.parse(e.getKey().getName(), tagName);
                         final AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(getName(),
                                 shardName.getShardName(), shardingKeys, e.getKey(),
-                                e.getKey().getLoadBalancer(), pathRules, getShardAutoscalinggroup(e.getKey(), autoScalingGroups, launchConfigurations));
+                                e.getKey().getLoadBalancer(), pathRules, getShardAutoscalingGroup(e.getKey(), autoScalingGroups, launchConfigurations));
                         shardMap.put(shard, shard.getKeys());
                     } catch (Exception e1) {
                         logger.info(e1.getMessage());

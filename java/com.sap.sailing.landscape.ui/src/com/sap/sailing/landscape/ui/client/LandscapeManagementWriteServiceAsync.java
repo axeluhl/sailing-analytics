@@ -107,8 +107,8 @@ public interface LandscapeManagementWriteServiceAsync {
             Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
-    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,AwsShardDTO shardDTO,
-            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,LeaderboardNameDTO leaderboard,
+    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO, AwsShardDTO shardDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO, LeaderboardNameDTO leaderboard,
             AsyncCallback<SerializationDummyDTO> callback);
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
@@ -210,7 +210,7 @@ public interface LandscapeManagementWriteServiceAsync {
      *            Those sharding keys are what you get when mangling the {@link AwsShardDTO#getLeaderboardNames()
      *            leaderboard names} of the shard.
      */
-    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearertoken,
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearerToken,
             AsyncCallback<Map<AwsShardDTO, Iterable<String>>> callback);
 
     /**
@@ -219,7 +219,7 @@ public interface LandscapeManagementWriteServiceAsync {
      * 
      * @param shard
      *            the shard to remove
-     * @param replicaset
+     * @param replicaSet
      *            the replica set which contains the shard.
      * @param region
      *            replica set's region
@@ -228,7 +228,7 @@ public interface LandscapeManagementWriteServiceAsync {
      * @param callback
      * 
      */
-    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaset, String region,
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region,
             byte[] passphrase, AsyncCallback<Void> callback);
 
     /**
@@ -246,14 +246,14 @@ public interface LandscapeManagementWriteServiceAsync {
      *            landscape region
      * @param shardName
      *            shard's name where the keys are supposed to be appended
-     * @param replicaset
+     * @param replicaSet
      *            shard's replica set
-     * @param bearertoken
+     * @param bearerToken
      * @param passphraseForPrivateKeyDecryption
      * @param callback
      */
     void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
-            SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
     /**
@@ -267,13 +267,13 @@ public interface LandscapeManagementWriteServiceAsync {
      *            shard's regio
      * @param shardName
      *            Shard's name where the keys should be removed from
-     * @param replicaset
+     * @param replicaSet
      *            replica set which contains the shard
-     * @param bearertoken
+     * @param bearerToken
      * @param passphraseForPrivateKeyDecryption
      * @param callback
      */
     void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
-            SailingApplicationReplicaSetDTO<String> replicaset, String bearertoken,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 }

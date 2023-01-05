@@ -375,17 +375,17 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public Iterable<Rule> getRulesForTargetGroups(Iterable<TargetGroup<ShardingKey>> targetGroups) {
         ArrayList<Rule> ret = new ArrayList<Rule>();
-        for(Rule rule : getRules()) {
-            for(Action action : rule.actions()) {
-                if(action.type() == ActionTypeEnum.FORWARD) {
-                for(String arn : Util.map(action.forwardConfig().targetGroups(), s -> s.targetGroupArn())) {
-                    for(String targetArn : Util.map(targetGroups, s -> s.getTargetGroupArn())) {
-                        if(arn.equals(targetArn)) {
-                            ret.add(rule);
+        for (Rule rule : getRules()) {
+            for (Action action : rule.actions()) {
+                if (action.type() == ActionTypeEnum.FORWARD) {
+                    for (String arn : Util.map(action.forwardConfig().targetGroups(), s -> s.targetGroupArn())) {
+                        for (String targetArn : Util.map(targetGroups, s -> s.getTargetGroupArn())) {
+                            if (arn.equals(targetArn)) {
+                                ret.add(rule);
+                            }
                         }
                     }
-                    
-                }}
+                }
             }
         }
         return ret;
@@ -412,7 +412,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
                     newActions[i++] = a;
                 }
             }
-            if(modified) {
+            if (modified) {
                 landscape.modifyRuleActions(region, Rule.builder().actions(newActions).ruleArn(r.ruleArn()).build())
                     .forEach(t -> modifiedRules.add(t));
             }
