@@ -35,7 +35,7 @@ public interface AwsInstance<ShardingKey> extends Host {
     }
 
     /**
-     * Finds out whether this instance is managed by an auto-scaling group.The implementation checks the
+     * Finds out whether this instance is managed by an auto-scaling group. The implementation checks the
      * {@link #AWS_AUTOSCALING_GROUP_NAME_TAG} tag's value and compares it to the {@code autoScalingGroup}'s name.
      */
     boolean isManagedByAutoScalingGroup();

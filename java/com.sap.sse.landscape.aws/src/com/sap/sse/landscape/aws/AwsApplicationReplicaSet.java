@@ -163,7 +163,7 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * {@link CreateShard}, {@link AddShardingKeyToShard}, and {@link RemoveShardingKeyFromShard} procedures.
      * 
      * @return Keys are the {@link AwsShard shards}, values are the {@code ShardingKey}s managed by the corresponding
-     *         key's shard.
+     *         key's shard. Never {@code null}, but may of course be empty.
      */
     Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards();
     

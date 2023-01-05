@@ -9,13 +9,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -872,7 +871,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             throw new IllegalArgumentException(
                     "A replica set cannot upgrade itself. Current replica set: " + ServerInfo.getName());
         }
-        if (replicaSet.getShards().size() > 0 && replicaSet.getAutoScalingGroup() == null) {
+        if (!replicaSet.getShards().isEmpty() && replicaSet.getAutoScalingGroup() == null) {
             throw new IllegalStateException(
                     "A replica set is expected to have an auto scaling group if it has shards");
         }
@@ -880,14 +879,14 @@ public class LandscapeServiceImpl implements LandscapeService {
         final String effectiveReplicaReplicationBearerToken = getEffectiveBearerToken(replicaReplicationBearerToken);
         final int oldAutoScalingGroupMinSize;
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
-        final Collection<AwsAutoScalingGroup> affectedAutoscaligGroups = new ArrayList<>();
+        final Collection<AwsAutoScalingGroup> affectedAutoScalingGroups = new ArrayList<>();
         final int autoScalingReplicaCount;
-        replicaSet.getShards().keySet().forEach(t -> affectedAutoscaligGroups.add(t.getAutoScalingGroup()));
+        replicaSet.getShards().keySet().forEach(t -> affectedAutoScalingGroups.add(t.getAutoScalingGroup()));
         if (autoScalingGroup != null) {
-            affectedAutoscaligGroups.add(autoScalingGroup);
+            affectedAutoScalingGroups.add(autoScalingGroup);
             oldAutoScalingGroupMinSize = autoScalingGroup.getAutoScalingGroup().minSize();
             int tempAutoScalingReplicaCount = 0;
-            for (AwsAutoScalingGroup asg : affectedAutoscaligGroups) {
+            for (AwsAutoScalingGroup asg : affectedAutoScalingGroups) {
                 tempAutoScalingReplicaCount = tempAutoScalingReplicaCount + asg.getAutoScalingGroup().desiredCapacity();
             }
             autoScalingReplicaCount = tempAutoScalingReplicaCount;
@@ -900,8 +899,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingAnalyticsProcess<String> additionalReplicaStarted = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
                 replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         if (replicaSet.getAutoScalingGroup() != null) {
-            getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(),
-                    affectedAutoscaligGroups, replicaSet.getName(), release);
+            getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup().getLaunchConfiguration(),
+                    affectedAutoScalingGroups, replicaSet.getName(), release);
         }
         final SailingAnalyticsProcess<String> master = replicaSet.getMaster();
         master.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
@@ -912,36 +911,38 @@ public class LandscapeServiceImpl implements LandscapeService {
         final Iterable<SailingAnalyticsProcess<String>> temporaryUpgradeReplicas = launchUpgradeReplicasAndWaitUntilReady(
                 replicaSet, release, effectiveReplicaReplicationBearerToken, Optional.ofNullable(optionalKeyName),
                 privateKeyEncryptionPassphrase);
-        List<SailingAnalyticsProcess<String>> temporaryUpgradeReplicasManipulatable = Util
-                .asList(temporaryUpgradeReplicas);
+        final List<SailingAnalyticsProcess<String>> temporaryUpgradeReplicasMutable = Util.asList(temporaryUpgradeReplicas);
         // register master again with master and public target group
         logger.info("Adding master " + master + " and dedicated upgraded temporary replicas to target groups "
                 + replicaSet.getPublicTargetGroup() + " and " + replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().addTarget(master.getHost());
         replicaSet.getMasterTargetGroup().addTarget(master.getHost());
-        final Map<TargetGroup<String>, Iterable<AwsInstance<String>>> tempShardingTargets = new HashMap<>();
-        Iterator<AwsShard<String>> iter = replicaSet.getShards().keySet().iterator();
-        while (iter.hasNext()) {
-            TargetGroup<String> t = iter.next().getTargetGroup();
-            Collection<AwsInstance<String>> hosts = new ArrayList<>();
-            final int numberOfTargets = t.getRegisteredTargets().size();
+        // the following map stores the assignment of the temporary upgrade replicas to the public / shard target groups
+        // for later removal as the final auto-scaling replicas start to replace them:
+        final Map<TargetGroup<String>, Iterable<AwsInstance<String>>> tempUpgradeReplicasByTargetGroup = new HashMap<>();
+        // add as many temporary upgrade replicas to each shard's target group as the target group has targets now:
+        for (final AwsShard<String> shard : replicaSet.getShards().keySet()) {
+            final TargetGroup<String> shardTargetGroup = shard.getTargetGroup();
+            final Collection<AwsInstance<String>> hosts = new ArrayList<>();
+            final int numberOfTargets = shardTargetGroup.getRegisteredTargets().size();
             for (int i = 0; i < numberOfTargets; i++) {
-                t.addTarget(temporaryUpgradeReplicasManipulatable.get(0).getHost());
-                hosts.add(temporaryUpgradeReplicasManipulatable.get(0).getHost());
-                temporaryUpgradeReplicasManipulatable.remove(0);
+                final SailingAnalyticsProcess<String> tempUpgradeReplicaProcess = temporaryUpgradeReplicasMutable.remove(0);
+                shardTargetGroup.addTarget(tempUpgradeReplicaProcess.getHost());
+                hosts.add(tempUpgradeReplicaProcess.getHost());
             }
-            tempShardingTargets.put(t, hosts);
+            tempUpgradeReplicasByTargetGroup.put(shardTargetGroup, hosts);
         }
-        replicaSet.getPublicTargetGroup().addTargets(Util.map(temporaryUpgradeReplicasManipulatable,
+        // add all other temporary upgrade replicas not used for shards to the public target group:
+        replicaSet.getPublicTargetGroup().addTargets(Util.map(temporaryUpgradeReplicasMutable,
                 temporaryUpgradeReplica -> temporaryUpgradeReplica.getHost()));
-        tempShardingTargets.put(replicaSet.getPublicTargetGroup(), Util.map(temporaryUpgradeReplicasManipulatable, temporaryUpgradeReplica->temporaryUpgradeReplica.getHost()));
+        tempUpgradeReplicasByTargetGroup.put(replicaSet.getPublicTargetGroup(), Util.map(temporaryUpgradeReplicasMutable, temporaryUpgradeReplica->temporaryUpgradeReplica.getHost()));
         // if a replica was spun up (additionalReplicaStarted), remove from public target group and terminate:
         if (additionalReplicaStarted != null) {
             replicasToStopAfterUpgradingMaster.add(additionalReplicaStarted);
             if (replicaSet.getAutoScalingGroup() != null) {
                 // run updating the auto-scaling group in the background; it's more time-critical now
                 // to remove the old replicas from the target group
-                for (AwsAutoScalingGroup asg : affectedAutoscaligGroups) {
+                for (AwsAutoScalingGroup asg : affectedAutoScalingGroups) {
                     ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor()
                             .execute(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(() -> {
                                 getLandscape().updateAutoScalingGroupMinSize(asg, oldAutoScalingGroupMinSize);
@@ -955,7 +956,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         replicaSet.getPublicTargetGroup().removeTargets(Util.map(replicasToStopAfterUpgradingMaster, replica->replica.getHost()));
         for (final SailingAnalyticsProcess<String> replica : replicasToStopAfterUpgradingMaster) {
             // if managed by auto-scaling group or if it's an "unmanaged" / "explicit" replica and it's the one launched in order to have at least one, stop/terminate;
-            final boolean managedByAutoScalingGroup = replica.getHost().isManagedByAutoScalingGroup(affectedAutoscaligGroups);
+            final boolean managedByAutoScalingGroup = replica.getHost().isManagedByAutoScalingGroup(affectedAutoScalingGroups);
             if (managedByAutoScalingGroup ||
                     (additionalReplicaStarted != null && replica.getHost().getInstanceId().equals(additionalReplicaStarted.getHost().getInstanceId()))) {
                 logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicasToStopAfterUpgradingMaster);
@@ -972,15 +973,14 @@ public class LandscapeServiceImpl implements LandscapeService {
         if (autoScalingGroup != null && autoScalingReplicaCount > 0) {
             logger.info("Now waiting until " + autoScalingReplicaCount
                     + " auto-scaling replicas are ready before taking down dedicated temporary upgrade replicas");
-            // Note: the wait call returns *all* of the master's replicas, not only the auto-scaling ones; it's the
-            // predicate that
+            // Note: the wait call returns *all* of the master's replicas, not only the auto-scaling ones; it's the predicate that
             // filters them down to the auto-scaling ones, counts them and compares them to the required count
             newUpgradedReplicas = Wait.wait(() -> master.getReplicas(Landscape.WAIT_FOR_PROCESS_TIMEOUT,
                     new SailingAnalyticsHostSupplier<String>(), new SailingAnalyticsProcessFactory(this::getLandscape)),
                     replicas -> {
                         int size = Util.size(Util.filter(replicas,
-                                replica -> replica.getHost().isManagedByAutoScalingGroup(affectedAutoscaligGroups)));
-                        logger.info("Until now there are " + size + " autoscaling replicas healthy");
+                                replica -> replica.getHost().isManagedByAutoScalingGroup(affectedAutoScalingGroups)));
+                        logger.info("Until now there are " + size + " auto-scaling replicas healthy");
                         return size >= autoScalingReplicaCount;
                     }, /* retryOnException */ true, Optional.of(Duration.ONE_DAY),
                     /* duration between attempts */ Duration.ONE_SECOND.times(30), Level.INFO,
@@ -991,7 +991,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             newUpgradedReplicas = newUpgradedUnmanagedReplicas;
         }
         logger.info("Removing targets for all temporary upgrade replicas " + temporaryUpgradeReplicas);
-        for (Entry<TargetGroup<String>, Iterable<AwsInstance<String>>> entry : tempShardingTargets.entrySet()) {
+        for (Entry<TargetGroup<String>, Iterable<AwsInstance<String>>> entry : tempUpgradeReplicasByTargetGroup.entrySet()) {
             entry.getKey().removeTargets(entry.getValue());
         }
         logger.info("Stopping/terminating all temporary upgrade replicas "+temporaryUpgradeReplicas);
@@ -1126,18 +1126,11 @@ public class LandscapeServiceImpl implements LandscapeService {
         final Set<SailingAnalyticsProcess<String>> replicasToStopReplicating = new HashSet<>();
         Util.addAll(replicaSet.getReplicas(), replicasToStopReplicating);
         final SailingAnalyticsProcess<String> additionalReplicaStarted;
-        if (Util.isEmpty(Util.filter(replicaSet.getReplicas(), replica -> {
-            try {
-                // returns true if the replica is not manges by a shard.
-                return Util.contains(Util.map(replicaSet.getAutoScalingGroup().getAutoScalingGroup().instances(),
-                        t -> t.instanceId()), replica.getHost().getInstanceId());
-            } catch (InterruptedException | ExecutionException e1) {
-                e1.printStackTrace();
-                logger.log(Level.SEVERE, e1.getMessage());
-                throw new RuntimeException(e1.getMessage());
-            }
-        }))) {
-            logger.info("No replica found for replica set " + replicaSet.getName()
+        if (Util.isEmpty(Util.filter(new HashSet<>(replicasToStopReplicating), replica ->
+            // exclude replicas belonging to a shard
+            !replica.getHost().isManagedByAutoScalingGroup(replicaSet.getShards().keySet().stream().map(
+                    shard->shard.getAutoScalingGroup())::iterator)))) {
+            logger.info("No replica that doesn't belong to any shard was found for replica set " + replicaSet.getName()
                     + "; spinning one up and waiting for it to become healthy");
             additionalReplicaStarted = launchReplicaAndWaitUntilHealthy(replicaSet,
                     Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase,
