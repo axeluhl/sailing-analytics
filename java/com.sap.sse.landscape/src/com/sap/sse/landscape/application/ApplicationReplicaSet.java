@@ -2,7 +2,6 @@ package com.sap.sse.landscape.application;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sse.common.Duration;
@@ -100,24 +99,6 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
      * See {@link #setReadFromMaster(boolean)}
      */
     boolean isReadFromMaster();
-
-    /**
-     * Activates sharding for the {@code shard} by configuring this replica set such that requests for the {@code shard}
-     * are usually submitted to any instance from the {@code processesToPrimarilyHandleShard} set. Only if no process
-     * within that set is available, the replica set will allow requests for {@code shard} to be handled by any other
-     * process in this replica set as a default.
-     * 
-     * @param processesToPrimarilyHandleShard must not be {@code null} but can be empty
-     * 
-     * @see #removeSharding
-     */
-    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>> processesToPrimarilyHandleShard);
-    
-    /**
-     * Re-configures this replica set such that requests for {@code shard} will be spread across all processes
-     * of this replica set.
-     */
-    void removeSharding(Shard<ShardingKey> shard);
 
     /**
      * The fully-qualified host name by which this application replica set is publicly reachable. When resolving this

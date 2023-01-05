@@ -12,6 +12,9 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
+import com.sap.sse.landscape.aws.orchestration.AddShardingKeyToShard;
+import com.sap.sse.landscape.aws.orchestration.CreateShard;
+import com.sap.sse.landscape.aws.orchestration.RemoveShardingKeyFromShard;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.RRType;
@@ -154,7 +157,10 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * Retrieves information about sharding in this replica set, representing the situation at the point in time
      * this object was created (not a live copy of the current landscape configuration). For that time point the
      * map returned tells which shard handles requests for which sharding keys. All other reading traffic will
-     * be routed to this replica set's {@link #getPublicTargetGroup() public target group}.
+     * be routed to this replica set's {@link #getPublicTargetGroup() public target group}.<p>
+     * 
+     * Shards can be removed using {@link #removeShard(AwsShard, AwsLandscape)}. To create and manipulate shards, use the
+     * {@link CreateShard}, {@link AddShardingKeyToShard}, and {@link RemoveShardingKeyFromShard} procedures.
      * 
      * @return Keys are the {@link AwsShard shards}, values are the {@code ShardingKey}s managed by the corresponding
      *         key's shard.

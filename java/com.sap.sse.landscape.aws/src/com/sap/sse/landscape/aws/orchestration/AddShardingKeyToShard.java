@@ -31,25 +31,25 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleConditio
  * @param <MetricsT>
  * @param <ProcessT>
  */
-public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+public class AddShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
         extends ShardProcedure<ShardingKey, MetricsT, ProcessT> {
-    private static final Logger logger = Logger.getLogger(AppendShardingKeyToShard.class.getName());
+    private static final Logger logger = Logger.getLogger(AddShardingKeyToShard.class.getName());
 
-    public AppendShardingKeyToShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
+    public AddShardingKeyToShard(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
     }
 
-    static class BuilderImpl<BuilderT extends Builder<BuilderT, AppendShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    static class BuilderImpl<BuilderT extends Builder<BuilderT, AddShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
             extends
-            ShardProcedure.BuilderImpl<BuilderT, AppendShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
+            ShardProcedure.BuilderImpl<BuilderT, AddShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
 
         @Override
-        public AppendShardingKeyToShard<ShardingKey, MetricsT, ProcessT> build() throws Exception {
+        public AddShardingKeyToShard<ShardingKey, MetricsT, ProcessT> build() throws Exception {
             assert shardingKeys != null;
             assert replicaSet != null;
             assert region != null;
             assert passphraseForPrivateKeyDecryption != null;
-            return new AppendShardingKeyToShard<ShardingKey, MetricsT, ProcessT>(this);
+            return new AddShardingKeyToShard<ShardingKey, MetricsT, ProcessT>(this);
         }
     }
 
@@ -125,7 +125,7 @@ public class AppendShardingKeyToShard<ShardingKey, MetricsT extends ApplicationP
         }
     }
 
-    public static <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, BuilderT extends Builder<BuilderT, AppendShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, AppendShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {
+    public static <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, BuilderT extends Builder<BuilderT, AddShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, AddShardingKeyToShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {
         return new BuilderImpl<BuilderT, ShardingKey, MetricsT, ProcessT>();
     }
 }

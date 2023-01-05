@@ -86,7 +86,7 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 import com.sap.sse.landscape.aws.impl.AwsApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.DNSCache;
-import com.sap.sse.landscape.aws.orchestration.AppendShardingKeyToShard;
+import com.sap.sse.landscape.aws.orchestration.AddShardingKeyToShard;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.aws.orchestration.CopyAndCompareMongoDatabase;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
@@ -1589,8 +1589,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         return CreateShard.<SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, BuilderT, String> builder();
     }
 
-    private <BuilderT extends ShardProcedure.Builder<BuilderT, AppendShardingKeyToShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.ShardProcedure.Builder<BuilderT, AppendShardingKeyToShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> appendShardingKeyToShardBuilder() {
-        return AppendShardingKeyToShard
+    private <BuilderT extends ShardProcedure.Builder<BuilderT, AddShardingKeyToShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> com.sap.sse.landscape.aws.orchestration.ShardProcedure.Builder<BuilderT, AddShardingKeyToShard<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> appendShardingKeyToShardBuilder() {
+        return AddShardingKeyToShard
                 .<SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, BuilderT, String> builder();
     }
 

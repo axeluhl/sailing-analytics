@@ -14,7 +14,6 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
-import com.sap.sse.landscape.application.Shard;
 
 public class ApplicationReplicaSetImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -107,18 +106,5 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.isReadFromMaster(...)
         // for this it would be helpful to understand the ALB / TargetGroup assignments
         return false;
-    }
-
-    @Override
-    public void setSharding(Shard<ShardingKey> shard,
-            Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>> processesToPrimarilyHandleShard) {
-        // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.setSharding(...)
-        
-    }
-
-    @Override
-    public void removeSharding(Shard<ShardingKey> shard) {
-        // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.removeSharding(...)
-        
     }
 }
