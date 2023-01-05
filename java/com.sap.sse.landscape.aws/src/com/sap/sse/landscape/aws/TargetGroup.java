@@ -5,8 +5,10 @@ import java.util.Map;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.aws.common.shared.TargetGroupConstants;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
 /**
@@ -15,7 +17,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  * @author Axel Uhl (D043530)
  *
  */
-public interface TargetGroup<ShardingKey> extends Named {
+public interface TargetGroup<ShardingKey> extends Named, TargetGroupConstants {
     Region getRegion();
     
     Map<AwsInstance<ShardingKey>, TargetHealth> getRegisteredTargets();
@@ -36,6 +38,13 @@ public interface TargetGroup<ShardingKey> extends Named {
      * @return the traffic port
      */
     Integer getPort();
+    
+    /**
+     * 
+     * @return
+     *          returns all tag descriptions for this target group
+     */
+    Iterable<TagDescription> getTagDescriptions();
     
     /**
      * @return the traffic protocol; usually either one of {@link ProtocolEnum#HTTP} or {@link ProtocolEnum#HTTPS}

@@ -14,6 +14,7 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
+import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.Release;
@@ -212,7 +213,11 @@ public interface LandscapeService {
      * TODO bug5674: before registering the master with the TGs, spin up as many new replicas as there are currently
      * replicas; wait until they are all ready, then register master and new replicas in TGs and de-register old replicas.
      * Then terminate old auto-scaling replicas and update any unmanaged replica in-place. When the number of auto-scaling
-     * replicas has reached the desired size of the auto-scaling group, terminate the replicas created explicitly.
+     * replicas has reached the desired size of the auto-scaling group, terminate the replicas created explicitly.<p>
+     * 
+     * Shards are updated by spinning up replicas for the temporary transition and changing the auto scaling config.
+     * After that all shard replicas are getting shutdown and restarted with the new launch config.
+     * It's expected that the replica set has its own auto scaling group if it has shards.
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> upgradeApplicationReplicaSet(AwsRegion region,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
@@ -370,7 +375,7 @@ public interface LandscapeService {
             InterruptedException, ExecutionException, Exception;
 
     /**
-     * If the {@code replicaSet} provided has an auto-scaling group, its launch configuration is adjusted such that it
+     * If the {@code replicaSet} provided has one or more auto-scaling groups, their launch configuration is adjusted such that it
      * matches the {@code optionalInstanceType}. The existing replicas managed currently by the auto-scaling group are
      * replaced one by one with new instances with the new configuration. This happens by setting the auto-scaling
      * group's new minimum size to the current number of instances managed by the auto-scaling group plus one, then
@@ -385,4 +390,24 @@ public interface LandscapeService {
 
     <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> waitForProcessTimeout,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    SailingServer getSailingServer(String hostname, String username, String password, Optional<Integer> port)
+            throws MalformedURLException;
+
+    SailingServer getSailingServer(String hostname, String bearertoken, Optional<Integer> port)
+            throws MalformedURLException;
+    
+    void removeShardingKeysFromShard(Iterable<String> selectedleaderboards, 
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            byte[] passphraseForPrivateKeyDecription,AwsRegion region, String shardName, String bearertoken) throws Exception;
+    
+    public void appendShardingKeysToShard(Iterable<String> selectedLeaderboards,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken) throws Exception;
+    
+    void removeShard(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, String shardTargetGroupArn) throws Exception;
+    
+    void addShard(Iterable<String> selectedLeaderboardNames, 
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, 
+            AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName) throws Exception;
 }
