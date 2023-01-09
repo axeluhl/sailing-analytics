@@ -180,7 +180,7 @@ public abstract class DataEntryDialog<T> {
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 // wait for any outstanding validation request and check last validation result; call OK only if the pending validation was OK
-                ifLastValidationRequestSuccesssful(()->{
+                ifLastValidationRequestSuccessful(()->{
                     dataEntryDialog.hide();
                     if (callback != null) {
                         callback.ok(getResult());
@@ -195,7 +195,7 @@ public abstract class DataEntryDialog<T> {
      * call {@code callback}. If an action is still pending in the {@link #validationExecutor}, wait until no more
      * action is pending and invoke {@code callback} if the last validation state was OK.
      */
-    protected void ifLastValidationRequestSuccesssful(Runnable callback) {
+    protected void ifLastValidationRequestSuccessful(Runnable callback) {
         validationExecutor.runAfterLastActionReturned(VALIDATION_ACTION_CATEGORY, ()->{
             if (!dialogInInvalidState) {
                 callback.run();
