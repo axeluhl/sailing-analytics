@@ -1455,7 +1455,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds)
             throws MalformedURLException, UnauthorizedException {
-        final TimePoint startTimePoint= startDate != null ? new MillisecondsTimePoint(startDate) : null;
+        final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
         final URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
         final URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
@@ -1469,9 +1469,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         } else if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
                 EventActions.UPLOAD_MEDIA, typeRelativeObjectIdentifier))) {
             final EventDTO currentEventState = getEventById(eventId, false);
-            if (!Util.equalsWithNull(startTimePoint, currentEventState.startDate)
-             || !Util.equalsWithNull(startTimePoint, currentEventState.startDate)
-             || !Util.equalsWithNull(endTimePoint, currentEventState.endDate)
+            if (!Util.equalsWithNull(startTimePoint, TimePoint.of(currentEventState.startDate))
+             || !Util.equalsWithNull(endTimePoint, TimePoint.of(currentEventState.endDate))
              || !Util.equalsWithNull(officialWebsiteURLString, currentEventState.getOfficialWebsiteURL())
              || !Util.equalsWithNull(baseURLAsString, currentEventState.getBaseURL())
              || !Util.equalsWithNull(sailorsInfoWebsiteURLsByLocaleName, currentEventState.getSailorsInfoWebsiteURLs())
@@ -1480,8 +1479,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
              || !Util.equalsWithNull(windFinderReviewedSpotCollectionIds, currentEventState.getWindFinderReviewedSpotsCollectionIds())
              || !Util.equalsWithNull(leaderboardGroupIds, currentEventState.getLeaderboardGroupIds())
              || !Util.equalsWithNull(isPublic, currentEventState.isPublic)
-             || !Util.isOnlyAdding(images, currentEventState.getImages())
-             || !Util.isOnlyAdding(videos, currentEventState.getVideos())) {
+             || !Util.isOnlyAdding(images, currentEventState.getImages(), (a, b)->a.compareTo(b) == 0)
+             || !Util.isOnlyAdding(videos, currentEventState.getVideos(), (a, b)->a.compareTo(b) == 0)) {
                 throw new UnauthorizedException("You are not permitted to edit event " + eventId + " other than by adding images and videos");
             }
         } else {

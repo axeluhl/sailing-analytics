@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -1078,6 +1079,17 @@ public class Util {
      *         method for the objects in the lists.
      */
     public static <T> boolean isOnlyAdding(final Iterable<T> newSequence, final Iterable<T> oldSequence) {
+        return isOnlyAdding(newSequence, oldSequence, (a, b)->Util.equalsWithNull(a,  b));
+    }
+    
+    /**
+     * Like {@link #isOnlyAdding(Iterable, Iterable)}, but with a configurable equivalence relation
+     * 
+     * @return {@code true} if {@code newSequence} contains at least all elements of {@code oldSequence} in the same
+     *         order in which they appear in {@code oldSequence}. The "contains" check is based on the
+     *         {@code equivalenceRelation}.
+     */
+    public static <T> boolean isOnlyAdding(final Iterable<T> newSequence, final Iterable<T> oldSequence, BiFunction<T, T, Boolean> equivalenceRelation) {
         final Iterator<T> nIter = newSequence.iterator();
         final Iterator<T> oIter = oldSequence.iterator();
         boolean result = true;
@@ -1085,7 +1097,7 @@ public class Util {
             final T nextFromOld = oIter.next();
             result = false;
             while (!result && nIter.hasNext()) {
-                if (nIter.next().equals(nextFromOld)) {
+                if (equivalenceRelation.apply(nIter.next(), nextFromOld)) {
                     result = true;
                 }
             }

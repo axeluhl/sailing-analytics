@@ -39,7 +39,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions FILE_STORAGE = new SecuredDomainType("FILE_STORAGE");
     
     // AdminConsole permissions
-    public static final HasPermissions EVENT = new SecuredDomainType("EVENT", EventActions.UPLOAD_MEDIA);
+    public static final HasPermissions EVENT = new SecuredDomainType("EVENT", DefaultActions
+            .plus(EventActions.UPLOAD_MEDIA));
 
     public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA");
 
