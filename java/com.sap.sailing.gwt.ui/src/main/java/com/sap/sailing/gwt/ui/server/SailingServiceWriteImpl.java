@@ -1482,6 +1482,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
              || !Util.isOnlyAdding(images, currentEventState.getImages(), (a, b)->a.compareTo(b) == 0)
              || !Util.isOnlyAdding(videos, currentEventState.getVideos(), (a, b)->a.compareTo(b) == 0)) {
                 throw new UnauthorizedException("You are not permitted to edit event " + eventId + " other than by adding images and videos");
+            } else {
+                final Set<String> sourceRefsOfImagesAdded = new HashSet<>();
+                Util.addAll(Util.map(images, ImageDTO::getSourceRef), sourceRefsOfImagesAdded);
+                Util.removeAll(Util.map(currentEventState.getImages(), ImageDTO::getSourceRef), sourceRefsOfImagesAdded);
+                final Set<String> sourceRefsOfVideosAdded = new HashSet<>();
+                Util.addAll(Util.map(videos, VideoDTO::getSourceRef), sourceRefsOfVideosAdded);
+                Util.removeAll(Util.map(currentEventState.getVideos(), VideoDTO::getSourceRef), sourceRefsOfVideosAdded);
+                logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" is adding the following media to event "+currentEventState.getName()+
+                        " with ID "+currentEventState.getId()+": images: "+sourceRefsOfVideosAdded+", videos: "+sourceRefsOfVideosAdded);
             }
         } else {
             throw new UnauthorizedException("You are not permitted to edit event " + eventId);
