@@ -1071,4 +1071,26 @@ public class Util {
     public static <K, V> MapBuilder<K, V> mapBuilder() {
         return new MapBuilderImpl<>();
     }
+
+    /**
+     * @return {@code true} if {@code newSequence} contains at least all elements of {@code oldSequence} in the same order
+     *         in which they appear in {@code oldSequence}. The "contains" check is made based on the {@link Object#equals(Object)}
+     *         method for the objects in the lists.
+     */
+    public static <T> boolean isOnlyAdding(final Iterable<T> newSequence, final Iterable<T> oldSequence) {
+        final Iterator<T> nIter = newSequence.iterator();
+        final Iterator<T> oIter = oldSequence.iterator();
+        boolean result = true;
+        while (result && oIter.hasNext()) {
+            final T nextFromOld = oIter.next();
+            result = false;
+            while (!result && nIter.hasNext()) {
+                if (nIter.next().equals(nextFromOld)) {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
 }

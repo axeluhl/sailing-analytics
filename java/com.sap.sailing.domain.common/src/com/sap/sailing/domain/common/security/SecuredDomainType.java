@@ -39,7 +39,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions FILE_STORAGE = new SecuredDomainType("FILE_STORAGE");
     
     // AdminConsole permissions
-    public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
+    public static final HasPermissions EVENT = new SecuredDomainType("EVENT", EventActions.UPLOAD_MEDIA);
 
     public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA");
 
@@ -50,6 +50,10 @@ public class SecuredDomainType extends HasPermissionsImpl {
 
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE",
             TrackedRaceActions.ALL_ACTIONS);
+    
+    public static enum EventActions implements Action {
+        UPLOAD_MEDIA
+    }
     
     public static enum LeaderboardActions implements Action {
         PREMIUM_LEADERBOARD_INFORMATION
