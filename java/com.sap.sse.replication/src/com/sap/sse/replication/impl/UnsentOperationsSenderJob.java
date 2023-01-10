@@ -1,6 +1,5 @@
 package com.sap.sse.replication.impl;
 
-import java.io.IOException;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
