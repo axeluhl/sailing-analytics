@@ -221,7 +221,9 @@ public interface Regatta
 
     RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 
-    // Hereby all races in a regatta must have the same ranking metric
+    /**
+     * All races in this regatta use this same ranking metric
+     */
     default RankingMetrics getRankingMetricType() {
         return RankingMetricsFactory.getForClass(getRankingMetricConstructor().apply(/* trackedRace */ null).getClass());
     }
