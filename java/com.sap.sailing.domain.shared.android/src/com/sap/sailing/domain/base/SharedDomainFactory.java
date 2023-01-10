@@ -51,7 +51,6 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
             String pattern, UUID originatingMarkTemplateId, UUID originatingMarkPropertiesId);
 
     /**
-     * @param shortName TODO
      * @see #getOrCreateMark(String, String, String)
      */
     Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName, MarkType type, Color color, String shape, String pattern);
