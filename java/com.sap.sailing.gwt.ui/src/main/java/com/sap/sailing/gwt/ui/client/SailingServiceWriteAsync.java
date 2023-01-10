@@ -38,6 +38,8 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.EventActions;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.adminconsole.RemoteSailingServerEventsSelectionDialog;
@@ -85,6 +87,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.pairinglist.PairingList;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface SailingServiceWriteAsync extends FileStorageManagementGwtServiceAsync, SailingServiceAsync {
@@ -458,8 +461,21 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             List<VideoDTO> videos, List<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
 
+    /**
+     * Extracts all fields from {@code eventDTO}, then delegates to
+     * {@link #updateEvent(UUID, String, String, Date, Date, VenueDTO, boolean, List, String, String, Map, List, List, List, AsyncCallback)}.
+     */
     void updateEvent(EventDTO eventDTO, AsyncCallback<EventDTO> callback);
 
+    /**
+     * Updates the {@link Event} identified by {@code eventId}. This generally requires the
+     * {@link SecuredDomainType#EVENT EVENT}{@code :}{@link DefaultActions#UPDATE UPDATE} permission for the event
+     * identified by {@code eventId}; however, if the calling subject has at least the {@link SecuredDomainType#EVENT
+     * EVENT}{@code :}{@link EventActions#UPLOAD_MEDIA UPLOAD_MEDIA} permission then changes to the {@code images} and
+     * {@code videos} are permitted; if the user only has the {@link EventActions#UPLOAD_MEDIA UPLOAD_MEDIA} but not the
+     * more general {@link DefaultActions#UPDATE UPDATE} permission, changes other than for {@code images} and
+     * {@code videos} will cause a {@link UnauthorizedException} to be thrown.
+     */
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURL,
             String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
