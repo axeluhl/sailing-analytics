@@ -237,8 +237,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
-     * When computing the ne
-     * t points sum after all columns up to and including the race column that is the key of the resulting
+     * When computing the net points sum after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
      * 
