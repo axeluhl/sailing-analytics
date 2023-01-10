@@ -2678,7 +2678,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             }
             getService().apply(new UpdateSeries(regatta.getRegattaIdentifier(), seriesName, seriesNameNew, isMedal,
                     isFleetsCanRunInParallel, resultDiscardingThresholds, startsWithZeroScore,
-                    firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, hasCrossFleetMergedRanking ,maximumNumberOfDiscards,
+                    firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, hasCrossFleetMergedRanking, maximumNumberOfDiscards,
                     oneAlwaysStaysOne, fleets));
         } else {
             throw new IllegalStateException("RegattaName could not be resolved to regatta " + regattaName);
