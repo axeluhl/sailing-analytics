@@ -80,13 +80,13 @@ public class WildcardPermissionPanelPO extends PageArea {
         }
     }
     
-    public void clickAddButtonAndExpectPermissionError() {
+    public void clickAddButtonAndExpectPermissionError(String username) {
         if (!addButton.isEnabled()) {
             throw new ElementNotSelectableException("Add Button was disabled");
         } else {
             addButton.click();
         }
-        waitForAlertContainingMessageAndAccept("Not permitted to grant permission");
+        waitForAlertContainingMessageAndAccept("User "+username+" is not permitted to grant permission");
     }
     
     public void deleteEntry(String name){

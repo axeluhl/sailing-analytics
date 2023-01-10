@@ -35,24 +35,9 @@ public class SailingImageDTO extends ImageDTO {
         return eventLink;
     }
 
-    // TODO Move to {@link AbstractMediaDTO} ---
     @Override
     public int compareTo(AbstractMediaDTO o) {
         int createdAtDateComp = compareToByCreatedAtDate(o); 
         return createdAtDateComp == 0 ? getSourceRef().compareTo(o.getSourceRef()) : createdAtDateComp;
     }
-    
-    private int compareToByCreatedAtDate(AbstractMediaDTO o) {
-        if(getCreatedAtDate() == o.getCreatedAtDate()) {
-            return 0;
-        }
-        if(getCreatedAtDate() == null) {
-            return 1;
-        }
-        if(o.getCreatedAtDate() == null) {
-            return -1;
-        }
-        return -getCreatedAtDate().compareTo(o.getCreatedAtDate());
-    }
-    // TODO END ---
 }
