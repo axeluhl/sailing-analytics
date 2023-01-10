@@ -108,7 +108,6 @@ public interface RaceLogTrackingAdapter {
     /**
      * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
      * 
-     * @param appUrl
      * @throws MailException
      */
     void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, Regatta regatta,

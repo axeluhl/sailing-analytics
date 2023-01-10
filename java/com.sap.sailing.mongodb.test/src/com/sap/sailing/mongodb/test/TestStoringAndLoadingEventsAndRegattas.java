@@ -119,20 +119,20 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     
     public TestStoringAndLoadingEventsAndRegattas() throws UnknownHostException, MongoException {
         super();
-        
+
         Calendar cal = Calendar.getInstance();
 
         cal.set(2012, 12, 1);
         eventStartDate = new MillisecondsTimePoint(cal.getTimeInMillis());
         cal.set(2012, 12, 5);
         eventEndDate = new MillisecondsTimePoint(cal.getTimeInMillis());
-        
+
         cal.set(2012, 12, 2);
         regattaStartDate = new MillisecondsTimePoint(cal.getTimeInMillis());
         cal.set(2012, 12, 3);
         regattaEndDate = new MillisecondsTimePoint(cal.getTimeInMillis());
     }
-    
+
     private LeaderboardGroup createLeaderboardGroup(String name) {
         return new LeaderboardGroupImpl(name, "Description for "+name, /* displayName */ null, /* displayInReverseOrder */ false, Collections.<Leaderboard>emptyList());
     }
@@ -148,7 +148,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final URL sailorsInfoWebsiteURL = new URL("http://sailorsinfo.website.com");
         final URL sailorsInfoWebsiteURLDE = new URL("http://sailorsinfo-de.website.com");
         final Venue venue = new VenueImpl(venueName);
-        
+
         for (String courseAreaName : courseAreaNames) {
             CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
             venue.addCourseArea(courseArea);
@@ -165,7 +165,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
         event.setSailorsInfoWebsiteURL(Locale.GERMAN, sailorsInfoWebsiteURLDE);
         mof.storeEvent(event);
-        
+
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
         final Event loadedEvent = dof.loadEvent(eventName);
         dof.loadLeaderboardGroupLinksForEvents(new EventResolver() {
@@ -178,7 +178,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             public LeaderboardGroup getLeaderboardGroupByName(String leaderboardGroupName) {
                 return leaderboardGroupName.equals(lg1.getName()) ? lg1 : leaderboardGroupName.equals(lg2.getName()) ? lg2 : null;
             }
-            
+
             @Override
             public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
                 return leaderboardGroupID.equals(lg1.getId()) ? lg1 : leaderboardGroupID.equals(lg2.getId()) ? lg2 : null;
@@ -977,7 +977,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             finalSeries.addRaceColumn(raceColumnName, /* trackedRegattaRegistry */ null);
         }
     }
-    
+
     @Test
     public void testRegattaRaceAssociationStore() throws Exception {
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("112er", /* typicallyStartsUpwind */ true);
@@ -991,10 +991,10 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         competitorsAndBoats.put(c, b);
         Iterable<Waypoint> waypoints = Collections.emptyList();
         Course course = new CourseImpl("Course", waypoints);
-        
+
         RaceDefinition racedef = new RaceDefinitionImpl("M1", course, boatClass, competitorsAndBoats);
         regatta.addRace(racedef);
-        
+
         RacingEventServiceImpl evs = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
                 .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
         assertNull(evs.getRememberedRegattaForRace(racedef.getId()));
