@@ -13,7 +13,7 @@ public class SeriesCreationParametersDTO implements Serializable {
     private boolean isFleetsCanRunInParallel;
 
     private boolean isStartsWithZeroScore;
-
+    
     private boolean firstColumnIsNonDiscardableCarryForward;
 
     private int[] discardingThresholds;
@@ -23,9 +23,9 @@ public class SeriesCreationParametersDTO implements Serializable {
     private boolean hasCrossFleetMergedRanking;
 
     private Integer maximumNumberOfDiscards;
-
+    
     private boolean oneAlwaysStaysOne;
-
+    
     SeriesCreationParametersDTO() {}
 
     public SeriesCreationParametersDTO(List<FleetDTO> fleets, boolean isMedal, boolean isFleetsCanRunInParallel, boolean isStartsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
@@ -58,7 +58,7 @@ public class SeriesCreationParametersDTO implements Serializable {
     public boolean isFleetsCanRunInParallel() {
         return isFleetsCanRunInParallel;
     }
-
+    
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }
