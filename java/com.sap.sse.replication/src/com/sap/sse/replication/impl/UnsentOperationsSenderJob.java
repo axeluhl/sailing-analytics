@@ -120,7 +120,7 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
         try {
             sender.sendReplicaInitiatedOperationToMaster(operation);
             result = true;
-        } catch (IOException e) {
+        } catch (Throwable e) {
             result = false;
             // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
             sender.hasSentOperationToMaster(operation);
