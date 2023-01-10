@@ -64,7 +64,7 @@ public class FixCombinationLambda implements RequestStreamHandler {
      * Entry point for the λ on AWS. Defines the operation needed to combine single fixes to collections.
      */
     @Override
-    public void handleRequest(final InputStream input, final OutputStream output, final Context context) {
+    public void handleRequest(final InputStream inputAsStream, final OutputStream outputAsStream, final Context context) {
         try {
             logger.info("FixCombination Lambda is starting");
             final Map<DeviceIdentifier, List<S3Object>> allSingleFixMetadataFromDevices = this.getMetadataOfNewFixes();
@@ -76,12 +76,12 @@ public class FixCombinationLambda implements RequestStreamHandler {
             logger.log(Level.SEVERE, e.awsErrorDetails().errorMessage());
         } finally {
             try {
-                input.close();
+                inputAsStream.close();
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Exception trying to close input: " + e.getMessage());
             }
             try {
-                output.close();
+                outputAsStream.close();
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Exception trying to close output: " + e.getMessage());
             }

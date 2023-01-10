@@ -153,7 +153,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public Iterable<? extends RaceColumnInSeries> getRaceColumns() {
-        return raceColumns;
+        return new ArrayList<>(raceColumns);
     }
 
     /**
@@ -449,7 +449,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
-    public boolean isFirstColumnIsNonDiscardableCarryForward() {
+    public boolean isFirstColumnNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
 

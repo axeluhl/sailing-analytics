@@ -184,7 +184,7 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
                 }
             }
         }
-        final List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(timePointOfViewingTheLeaderboard);
+        final Iterable<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(timePointOfViewingTheLeaderboard);
         Iterator<Competitor> it = rankedCompetitors.iterator();
         for (String currentCompetitor : expectedCompetitorOrder) {
             if (it.hasNext())

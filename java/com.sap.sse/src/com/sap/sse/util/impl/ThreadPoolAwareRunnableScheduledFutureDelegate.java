@@ -32,7 +32,13 @@ public class ThreadPoolAwareRunnableScheduledFutureDelegate<V> extends KnowsExec
     }
 
     public int compareTo(Delayed o) {
-        return future.compareTo(o);
+        final int result;
+        if (o instanceof ThreadPoolAwareRunnableScheduledFutureDelegate) {
+            result = future.compareTo(((ThreadPoolAwareRunnableScheduledFutureDelegate<?>) o).future);
+        } else {
+            result = future.compareTo(o);
+        }
+        return result;
     }
 
     public boolean isCancelled() {

@@ -23,10 +23,13 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter
      */
     public static Integer getIntParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
+        final Integer result;
         if (req.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Integer.valueOf(getRequiredIntParameter(req, name));
         }
-        return new Integer(getRequiredIntParameter(req, name));
+        return result;
     }
 
     /**
@@ -92,11 +95,13 @@ public abstract class HttpRequestUtils {
      * @return the Long value, or <code>null</code> if not present
      */
     public static Long getLongParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
+        final Long result;
         if (req.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Long.valueOf(getRequiredLongParameter(req, name));
         }
-        return new Long(getRequiredLongParameter(req, name));
+        return result;
     }
 
     /**
@@ -109,14 +114,17 @@ public abstract class HttpRequestUtils {
      *            the default value to use as fallback
      */
     public static long getLongParameter(HttpServletRequest req, String name, long defaultValue) {
+        long result;
         if (req.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredLongParameter(req, name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredLongParameter(req, name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -126,11 +134,13 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static long[] getLongParameters(HttpServletRequest req, String name) {
+        long[] result;
         try {
-            return getRequiredLongParameters(req, name);
+            result = getRequiredLongParameters(req, name);
         } catch (ParseHttpParameterException ex) {
-            return new long[0];
+            result = new long[0];
         }
+        return result;
     }
 
     /**
@@ -140,7 +150,6 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter
      */
     public static long getRequiredLongParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
         return LONG_PARSER.parseLong(name, req.getParameter(name));
     }
 
@@ -163,11 +172,13 @@ public abstract class HttpRequestUtils {
      * @return the Float value, or <code>null</code> if not present
      */
     public static Float getFloatParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
+        final Float result;
         if (req.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Float.valueOf(getRequiredFloatParameter(req, name));
         }
-        return new Float(getRequiredFloatParameter(req, name));
+        return result;
     }
 
     /**
@@ -222,7 +233,6 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static float[] getRequiredFloatParameters(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
         return FLOAT_PARSER.parseFloats(name, req.getParameterValues(name));
     }
 
@@ -235,11 +245,13 @@ public abstract class HttpRequestUtils {
      * @return the Double value, or <code>null</code> if not present
      */
     public static Double getDoubleParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
+        final Double result;
         if (req.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = Double.valueOf(getRequiredDoubleParameter(req, name));
         }
-        return new Double(getRequiredDoubleParameter(req, name));
+        return result;
     }
 
     /**
@@ -252,14 +264,17 @@ public abstract class HttpRequestUtils {
      *            the default value to use as fallback
      */
     public static double getDoubleParameter(HttpServletRequest req, String name, double defaultValue) {
+        double result;
         if (req.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredDoubleParameter(req, name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredDoubleParameter(req, name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -283,7 +298,6 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter
      */
     public static double getRequiredDoubleParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
         return DOUBLE_PARSER.parseDouble(name, req.getParameter(name));
     }
 
@@ -294,7 +308,6 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static double[] getRequiredDoubleParameters(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
         return DOUBLE_PARSER.parseDoubles(name, req.getParameterValues(name));
     }
 
@@ -310,11 +323,13 @@ public abstract class HttpRequestUtils {
      * @return the Boolean value, or <code>null</code> if not present
      */
     public static Boolean getBooleanParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
+        final Boolean result;
         if (req.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = (getRequiredBooleanParameter(req, name) ? Boolean.TRUE : Boolean.FALSE);
         }
-        return (getRequiredBooleanParameter(req, name) ? Boolean.TRUE : Boolean.FALSE);
+        return result;
     }
 
     /**
@@ -330,14 +345,17 @@ public abstract class HttpRequestUtils {
      *            the default value to use as fallback
      */
     public static boolean getBooleanParameter(HttpServletRequest req, String name, boolean defaultValue) {
+        boolean result;
         if (req.getParameter(name) == null) {
-            return defaultValue;
+            result = defaultValue;
+        } else {
+            try {
+                result = getRequiredBooleanParameter(req, name);
+            } catch (ParseHttpParameterException ex) {
+                result = defaultValue;
+            }
         }
-        try {
-            return getRequiredBooleanParameter(req, name);
-        } catch (ParseHttpParameterException ex) {
-            return defaultValue;
-        }
+        return result;
     }
 
     /**
@@ -380,7 +398,6 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter
      */
     public static boolean[] getRequiredBooleanParameters(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
         return BOOLEAN_PARSER.parseBooleans(name, req.getParameterValues(name));
     }
 
@@ -394,11 +411,13 @@ public abstract class HttpRequestUtils {
      *             a subclass of ServletException, so it doesn't need to be caught
      */
     public static String getStringParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
+        final String result;
         if (req.getParameter(name) == null) {
-            return null;
+            result = null;
+        } else {
+            result = getRequiredStringParameter(req, name);
         }
-        return getRequiredStringParameter(req, name);
+        return result;
     }
 
     /**
@@ -422,11 +441,13 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter with multiple possible values
      */
     public static String[] getStringParameters(HttpServletRequest req, String name) {
+        String[] result;
         try {
-            return getRequiredStringParameters(req, name);
+            result = getRequiredStringParameters(req, name);
         } catch (ParseHttpParameterException ex) {
-            return new String[0];
+            result = new String[0];
         }
+        return result;
     }
 
     /**
@@ -436,7 +457,6 @@ public abstract class HttpRequestUtils {
      *            the name of the parameter
      */
     public static String getRequiredStringParameter(HttpServletRequest req, String name) throws ParseHttpParameterException {
-
         return STRING_PARSER.validateRequiredString(name, req.getParameter(name));
     }
 

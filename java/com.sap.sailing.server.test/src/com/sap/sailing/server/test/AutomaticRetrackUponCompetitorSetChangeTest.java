@@ -25,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -101,7 +101,7 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
     @Before
     public void setUp() throws Exception {
         final BundleContext contextMock = mock(BundleContext.class);
-        when(contextMock.createFilter(Matchers.anyObject())).thenReturn(null);
+        when(contextMock.createFilter(ArgumentMatchers.any())).thenReturn(null);
         mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.getDB().drop();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);

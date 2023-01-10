@@ -2249,7 +2249,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 final Iterable<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
                 final Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
                 if (leaderboard != null) {
-                    List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
+                    final Iterable<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
                     Integer overallRank = 1;
                     for (Competitor competitor : overallRanking) {
                         if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,

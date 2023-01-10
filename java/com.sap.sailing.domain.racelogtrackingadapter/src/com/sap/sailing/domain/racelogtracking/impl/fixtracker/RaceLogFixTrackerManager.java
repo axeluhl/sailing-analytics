@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
-import java.security.acl.Owner;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -23,7 +22,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
  * This class manages the lifecycle of the {@link FixLoaderAndTracker} by listening to
  * {@link RaceLogDenoteForTrackingEvent}, race log attached and stop tracking race changes.<p>
  * 
- * Once the race is stopped, it notifies its own {@link Owner} so that all reference to this instance can be cleanly
+ * Once the race is stopped, it notifies its own owner so that all reference to this instance can be cleanly
  * removed to prevent memory leaks.
  */
 public class RaceLogFixTrackerManager implements TrackingDataLoader {

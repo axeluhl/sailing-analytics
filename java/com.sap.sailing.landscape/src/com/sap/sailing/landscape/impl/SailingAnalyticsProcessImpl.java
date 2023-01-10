@@ -38,6 +38,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsApplicationProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
@@ -75,7 +76,8 @@ implements SailingAnalyticsProcess<ShardingKey> {
                     final HttpResponse result = client.execute(getStatusRequest);
                     final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     result.getEntity().writeTo(bos);
-                    return (JSONObject) (new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()))));
+                    return (JSONObject) (new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
+                            HttpUrlConnectionHelper.getCharsetFromHttpEntity(result.getEntity(), "UTF-8"))));
                 }, json->json != null, /* retryOnException */ true, optionalTimeout,
                 /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "getStatus() on "+getHost()+":"+getPort());
         updateStartTimePointFromStatus(status);
@@ -217,7 +219,12 @@ implements SailingAnalyticsProcess<ShardingKey> {
             logger.info("Removing server directory "+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT)+" of "+this);
             getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
                 .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT)+"\"", "Removing server directory "+getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT), Level.INFO);
-            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost()
+                    .getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase,
+                            /*
+                             * Should throw an exception if there was an error for preventing false positives (process
+                             * is running, but there was an error) -> Bug5786
+                             */ true);
             if (Util.isEmpty(applicationProcesses)) {
                 logger.info("No more application processes running on "+getHost()+"; terminating");
                 getHost().terminate();

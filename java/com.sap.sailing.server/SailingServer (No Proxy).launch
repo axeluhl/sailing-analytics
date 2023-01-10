@@ -13,6 +13,7 @@
     <intAttribute key="default_start_level" value="4"/>
     <setAttribute key="deselected_workspace_bundles"/>
     <booleanAttribute key="includeOptional" value="false"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.pde.ui.launcher.PDESourceLookupDirector"/>
     <stringAttribute key="org.eclipse.debug.core.source_locator_memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;sourceLookupDirector&gt;&#13;&#10;    &lt;sourceContainers duplicates=&quot;false&quot;&gt;&#13;&#10;        &lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;directory nest=&amp;quot;false&amp;quot; path=&amp;quot;C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\jetty.project\apache-jsp\src\main\java&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.directory&quot;/&gt;&#13;&#10;        &lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;classpathContainer path=&amp;quot;com.google.gwt.eclipse.core.GWT_CONTAINER&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.jdt.launching.sourceContainer.classpathContainer&quot;/&gt;&#13;&#10;        &lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;default/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.default&quot;/&gt;&#13;&#10;    &lt;/sourceContainers&gt;&#13;&#10;&lt;/sourceLookupDirector&gt;&#13;&#10;"/>
     <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
@@ -23,7 +24,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console 12001 -clean"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=5010 -Xmx6000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -Drestore.tracked.races=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=50000000 -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dchargebee.site=sailytics-test -Dchargebee.apikey=test_G8QP4NUM1f4MCeZeni1VFC04cdIGZSNyp -Dsubscriptions.disableMailVerificationRequirement=true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=5010 -Xmx6000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -Drestore.tracked.races=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=50000000 -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dchargebee.site=sailytics-test -Dchargebee.apikey=test_G8QP4NUM1f4MCeZeni1VFC04cdIGZSNyp -Dsubscriptions.disableMailVerificationRequirement=true -Dgwt.rpc.version=9"/>
     <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
     <stringAttribute key="pde.version" value="3.3"/>
     <stringAttribute key="profilingTraceType-ALLOCATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%INCREASE_COUNT%CTX_KEY%8192%CTX_ENTRY%KEY_MIN_SIZE%CTX_KEY%32%CTX_ENTRY%KEY_MAX_SIZE%CTX_KEY%65536%CTX_ENTRY%KEY_INC_LINE_NRS%CTX_KEY%true%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%CLASS_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ADAPTIVE%CTX_KEY%false%CTX_ENTRY%"/>
@@ -44,6 +45,8 @@
         <setEntry value="com.github.haifengl.smile-graph@default:default"/>
         <setEntry value="com.github.haifengl.smile-math.source"/>
         <setEntry value="com.github.haifengl.smile-math@default:default"/>
+        <setEntry value="com.google.gson.source"/>
+        <setEntry value="com.google.gson@default:default"/>
         <setEntry value="com.jcraft.jsch@default:default"/>
         <setEntry value="com.rabbitmq.client.source"/>
         <setEntry value="com.rabbitmq.client@default:default"/>
@@ -61,12 +64,14 @@
         <setEntry value="javax.annotation@default:default"/>
         <setEntry value="javax.validation@default:default"/>
         <setEntry value="javax.ws.rs@default:default"/>
+        <setEntry value="javax.xml.soap@default:default"/>
         <setEntry value="javax.xml.stream@default:default"/>
         <setEntry value="javax.xml.ws@default:default"/>
         <setEntry value="javax.xml@default:default"/>
         <setEntry value="jaxb-api@default:default"/>
         <setEntry value="jcl.over.slf4j@default:default"/>
         <setEntry value="lz4-java@default:default"/>
+        <setEntry value="org.apache.aries.spifly.dynamic.bundle.source"/>
         <setEntry value="org.apache.aries.spifly.dynamic.bundle@3:true"/>
         <setEntry value="org.apache.commons.beanutils.source@default:default"/>
         <setEntry value="org.apache.commons.beanutils@default:default"/>
@@ -169,8 +174,15 @@
         <setEntry value="org.mongodb.driver-sync@default:default"/>
         <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
         <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
+        <setEntry value="org.objectweb.asm.analysis.source"/>
+        <setEntry value="org.objectweb.asm.analysis@default:default"/>
+        <setEntry value="org.objectweb.asm.commons.source"/>
         <setEntry value="org.objectweb.asm.commons@default:default"/>
+        <setEntry value="org.objectweb.asm.source"/>
+        <setEntry value="org.objectweb.asm.tree.source"/>
         <setEntry value="org.objectweb.asm.tree@default:default"/>
+        <setEntry value="org.objectweb.asm.util.source"/>
+        <setEntry value="org.objectweb.asm.util@default:default"/>
         <setEntry value="org.objectweb.asm@default:default"/>
         <setEntry value="org.osgi.service.packageadmin@default:default"/>
         <setEntry value="org.osgi.service.url@default:default"/>
@@ -274,7 +286,6 @@
         <setEntry value="com.sap.sse.filestorage@4:true"/>
         <setEntry value="com.sap.sse.gwt.adminconsole@default:default"/>
         <setEntry value="com.sap.sse.gwt@default:default"/>
-        <setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:false"/>
         <setEntry value="com.sap.sse.landscape.aws.common@default:default"/>
         <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
         <setEntry value="com.sap.sse.landscape.aws@4:true"/>

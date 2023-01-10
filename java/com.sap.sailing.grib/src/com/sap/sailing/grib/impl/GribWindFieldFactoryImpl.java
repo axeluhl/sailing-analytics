@@ -156,13 +156,14 @@ public class GribWindFieldFactoryImpl implements GribWindFieldFactory {
     }
 
     @Override
-    public GribWindField createGribWindFieldFromStreams(Map<InputStream, String> streamsAndFilenames) throws IOException {
+    public GribWindField createGribWindFieldFromStreams(
+            Map<InputStream, String> streamsAndFilenames) throws IOException {
         return createGribWindFieldFromStreams(logger, DEFAULT_ERROR_LOG_LEVEL, streamsAndFilenames);
     }
 
     @Override
-    public GribWindField createGribWindFieldFromStreams(Logger logger, Level level, Map<InputStream, String> streamsAndFilenames)
-            throws IOException {
+    public GribWindField createGribWindFieldFromStreams(Logger logger, Level level,
+            Map<InputStream, String> streamsAndFilenames) throws IOException {
         return createGribWindFieldFromStreams(createLogFormatter(logger, level), streamsAndFilenames);
     }
 

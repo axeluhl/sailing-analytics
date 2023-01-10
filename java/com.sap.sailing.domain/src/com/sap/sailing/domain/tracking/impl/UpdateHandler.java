@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sse.common.Duration;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
  * An update handler can be registered as a listener on a {@link TrackedRace} and can then propagate information to
@@ -148,7 +150,8 @@ public class UpdateHandler {
 
     private BufferedReader getResponseOnUpdateFromProvider(HttpURLConnection connection) throws IOException {
         InputStream inputStream = connection.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset));
         return reader;
     }
 

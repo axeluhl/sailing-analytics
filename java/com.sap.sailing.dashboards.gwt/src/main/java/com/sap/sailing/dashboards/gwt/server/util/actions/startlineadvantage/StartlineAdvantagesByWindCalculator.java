@@ -351,7 +351,7 @@ public class StartlineAdvantagesByWindCalculator {
         sortedAdvantages.addAll(advantages);
         if (sortedAdvantages != null && sortedAdvantages.size() > 0) {
             Collections.sort(sortedAdvantages, StartLineAdvantageDTO.startlineAdvantageComparatorByAdvantageDesc);
-            result = new Double(sortedAdvantages.get(0).startLineAdvantage);
+            result = Double.valueOf(sortedAdvantages.get(0).startLineAdvantage);
         }
         return result;
     }

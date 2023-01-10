@@ -16,7 +16,7 @@ public class UnmergedOperationsQueue<O extends Operation<S>, S> {
     
     public UnmergedOperationsQueue() {
 	numberOfFirstInList = 0;
-	unmergedOperations = new ArrayList<O>(5);
+	unmergedOperations = new ArrayList<>(5);
     }
     
     /**
@@ -37,7 +37,7 @@ public class UnmergedOperationsQueue<O extends Operation<S>, S> {
      *            merge of any local operation yet.
      */
     public synchronized List<O> getUnmergedOperations(int numberOfConfirmedLocalOperations) {
-	return new ArrayList<O>(unmergedOperations.subList(
+	return new ArrayList<>(unmergedOperations.subList(
 		numberOfConfirmedLocalOperations-numberOfFirstInList,
 		unmergedOperations.size()));
     }

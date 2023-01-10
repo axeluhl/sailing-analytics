@@ -11,8 +11,10 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -49,8 +51,6 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
@@ -65,7 +65,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         implements RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
-    static final Double DOUBLE_0 = new Double(0);
+    static final Double DOUBLE_0 = Double.valueOf(0);
 
     private final SettableScoreCorrection scoreCorrection;
 
@@ -85,11 +85,9 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     private final Map<Competitor, Double> carriedPoints;
 
     /**
-     * A set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}. Access is
-     * controlled by the {@link #suppressedCompetitorsLock} lock.
+     * A set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
      */
-    private final Set<Competitor> suppressedCompetitors;
-    private final NamedReentrantReadWriteLock suppressedCompetitorsLock;
+    private final ConcurrentHashMap<Competitor, Competitor> suppressedCompetitors;
 
     private final RaceColumnListeners raceColumnListeners;
 
@@ -223,8 +221,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         this.scoreCorrection = createScoreCorrection();
         this.displayNames = new HashMap<Competitor, String>();
         this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
-        this.suppressedCompetitors = new HashSet<Competitor>();
-        this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
+        this.suppressedCompetitors = new ConcurrentHashMap<>();
     }
 
     protected RaceColumnListeners getRaceColumnListeners() {
@@ -512,30 +509,21 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Double getNetPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
-            TimePoint timePoint) {
-        // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race
-        // from there on
-        boolean needToResetScoreUponNextNonEmptyEntry = false;
-        double result = getCarriedPoints(competitor);
-        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
-                raceColumnsToConsider, timePoint, getScoringScheme());
-        for (RaceColumn raceColumn : raceColumnsToConsider) {
-            if (raceColumn.isStartsWithZeroScore()) {
-                needToResetScoreUponNextNonEmptyEntry = true;
-            }
-            if (getScoringScheme().isValidInNetScore(this, raceColumn, competitor, timePoint)) {
-                final Double netPoints = getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
-                if (netPoints != null) {
-                    if (needToResetScoreUponNextNonEmptyEntry) {
-                        result = 0;
-                        needToResetScoreUponNextNonEmptyEntry = false;
-                    }
-                    result += netPoints;
-                }
-            }
-        }
-        return result;
+    public Double getNetPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        return getScoringScheme().getNetPoints(this, competitor, raceColumnsToConsider, timePoint);
+    }
+
+    /**
+     * Like {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)},
+     * but here callers can provide the total points as a {@link Function} that maps {@link Competitor}s to their
+     * total points at {@code timePoint} for {@code raceColumn}. The default for computing this would be
+     * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
+     */
+    @Override
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint,
+                competitor->getTotalPoints(competitor, raceColumn, timePoint, cache), cache);
     }
 
     /**
@@ -544,8 +532,8 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * points.
      */
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> totalPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
             Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, cache);
@@ -897,22 +885,12 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Iterable<Competitor> getSuppressedCompetitors() {
-        LockUtil.lockForRead(suppressedCompetitorsLock);
-        try {
-            return new HashSet<Competitor>(suppressedCompetitors);
-        } finally {
-            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
-        }
+        return new HashSet<>(suppressedCompetitors.keySet());
     }
 
     @Override
     public boolean isSuppressed(Competitor competitor) {
-        LockUtil.lockForRead(suppressedCompetitorsLock);
-        try {
-            return suppressedCompetitors.contains(competitor);
-        } finally {
-            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
-        }
+        return suppressedCompetitors.containsKey(competitor);
     }
 
     @Override
@@ -920,15 +898,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         if (competitor == null) {
             throw new IllegalArgumentException("Cannot change suppression for a null competitor");
         }
-        LockUtil.lockForWrite(suppressedCompetitorsLock);
-        try {
-            if (suppressed) {
-                suppressedCompetitors.add(competitor);
-            } else {
-                suppressedCompetitors.remove(competitor);
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(suppressedCompetitorsLock);
+        if (suppressed) {
+            suppressedCompetitors.put(competitor, competitor);
+        } else {
+            suppressedCompetitors.remove(competitor);
         }
         getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
     }

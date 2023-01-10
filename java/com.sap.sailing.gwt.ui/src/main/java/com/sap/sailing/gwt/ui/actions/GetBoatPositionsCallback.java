@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -15,8 +16,12 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MultiTimeRangeImpl;
 import com.sap.sse.gwt.client.async.TimeRangeAsyncCallback;
 
+/**
+ * The third type parameter ({@link String}) for {@link TimeRangeAsyncCallback} represents the stringified
+ * competitor IDs which form the key for the result structure.
+ */
 public class GetBoatPositionsCallback
-        implements TimeRangeAsyncCallback<CompactBoatPositionsDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>, String> {
+        implements TimeRangeAsyncCallback<CompactBoatPositionsDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable, String> {
     private final AsyncCallback<CompactBoatPositionsDTO> callback;
 
     public GetBoatPositionsCallback(AsyncCallback<CompactBoatPositionsDTO> callback) {
@@ -24,23 +29,23 @@ public class GetBoatPositionsCallback
     }
 
     @Override
-    public Map<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> unzipResult(CompactBoatPositionsDTO result) {
+    public Map<String, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> unzipResult(CompactBoatPositionsDTO result) {
         return result.getBoatPositions();
     }
 
     @Override
-    public CompactBoatPositionsDTO zipSubResults(Map<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> subResultMap) {
+    public CompactBoatPositionsDTO zipSubResults(Map<String, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> subResultMap) {
         return CompactBoatPositionsDTO.fromCompetitorIds(subResultMap);
     }
 
     @Override
-    public List<GPSFixDTOWithSpeedWindTackAndLegType> joinSubResults(TimeRange timeRange,
-            List<Pair<TimeRange, List<GPSFixDTOWithSpeedWindTackAndLegType>>> toJoin) {
-        final List<Pair<TimeRange, List<GPSFixDTOWithSpeedWindTackAndLegType>>> toJoinSorted = new ArrayList<>(toJoin);
+    public GPSFixDTOWithSpeedWindTackAndLegTypeIterable joinSubResults(TimeRange timeRange,
+            List<Pair<TimeRange, GPSFixDTOWithSpeedWindTackAndLegTypeIterable>> toJoin) {
+        final List<Pair<TimeRange, GPSFixDTOWithSpeedWindTackAndLegTypeIterable>> toJoinSorted = new ArrayList<>(toJoin);
         toJoinSorted.sort(Comparator.comparing(Pair::getA));
         final List<GPSFixDTOWithSpeedWindTackAndLegType> resultList = new ArrayList<>();
         MultiTimeRange collectedMultiTimeRange = new MultiTimeRangeImpl(new TimeRange[0]);
-        for (final Pair<TimeRange, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : toJoinSorted) {
+        for (final Pair<TimeRange, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : toJoinSorted) {
             final TimeRange potentiallyWantedTimeRange = e.getA().intersection(timeRange);
             if (potentiallyWantedTimeRange != null && e.getB() != null) {
                 final MultiTimeRange toCollectMultiTimeRange = new MultiTimeRangeImpl(potentiallyWantedTimeRange)
@@ -55,7 +60,7 @@ public class GetBoatPositionsCallback
                 }
             }
         }
-        return resultList;
+        return new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(resultList);
     }
 
     @Override
@@ -67,5 +72,4 @@ public class GetBoatPositionsCallback
     public void onFailure(Throwable caught) {
         callback.onFailure(caught);
     }
-
 }

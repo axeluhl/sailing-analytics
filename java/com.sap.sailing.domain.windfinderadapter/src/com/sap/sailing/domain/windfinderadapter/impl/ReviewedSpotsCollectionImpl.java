@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -108,15 +110,21 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     private Iterable<Spot> loadSpots() {
         Iterable<Spot> result = Collections.emptySet();
         if (!backoffTracker.backOff()) {
-            try (InputStreamReader in = new InputStreamReader((InputStream) HttpUrlConnectionHelper
-                    .redirectConnection(
-                            new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS + "/" + getId() + SPOT_LIST_DOCUMENT_SUFFIX),
-                            /* timeout */ Duration.ONE_SECOND.times(10), /* preConnectionModifier */ null)
-                    .getContent())) {
-                JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
-                result = parser.parseSpots(spotsAsJson, this);
-                backoffTracker.clear();
-            } catch (Exception e) {
+            try {
+                final URLConnection connection = HttpUrlConnectionHelper
+                        .redirectConnection(
+                                new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS + "/" + getId() + SPOT_LIST_DOCUMENT_SUFFIX),
+                                /* timeout */ Duration.ONE_SECOND.times(10), /* preConnectionModifier */ null);
+                final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+                try (InputStreamReader in = new InputStreamReader((InputStream) connection.getContent(), charset)) {
+                    JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
+                    result = parser.parseSpots(spotsAsJson, this);
+                    backoffTracker.clear();
+                } catch (IOException | ParseException e) {
+                    logger.log(Level.SEVERE, "Problem loading spots for spot collection " + id, e);
+                    backoffTracker.logFailure();
+                }
+            } catch (IOException e) {
                 logger.log(Level.SEVERE, "Problem loading spots for spot collection " + id, e);
                 backoffTracker.logFailure();
             }

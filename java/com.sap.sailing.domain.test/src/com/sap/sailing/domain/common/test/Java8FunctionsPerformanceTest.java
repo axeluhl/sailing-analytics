@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.omg.CORBA.LongHolder;
 
 /**
  * Compare Java 8 stream and function performance to direct method call performance
@@ -45,20 +44,20 @@ public class Java8FunctionsPerformanceTest {
     @Test
     public void intArraySumWithStream() {
         long start = System.currentTimeMillis();
-        final LongHolder sum = new LongHolder(0);
-        intList.stream().forEach((i) -> sum.value += i);
+        final long[] sum = new long[1];
+        intList.stream().forEach((i) -> sum[0] += i);
         long end = System.currentTimeMillis();
-        assertEquals(((long) SIZE)*((long) SIZE-1l)/2, sum.value);
+        assertEquals(((long) SIZE)*((long) SIZE-1l)/2, sum[0]);
         logger.info("took "+(end-start)+"ms");
     }
 
     @Test
     public void intArraySumWithForEach() {
         long start = System.currentTimeMillis();
-        final LongHolder sum = new LongHolder(0);
-        intList.forEach((i) -> sum.value += i);
+        final long[] sum = new long[1];
+        intList.forEach((i) -> sum[0] += i);
         long end = System.currentTimeMillis();
-        assertEquals(((long) SIZE)*((long) SIZE-1l)/2, sum.value);
+        assertEquals(((long) SIZE)*((long) SIZE-1l)/2, sum[0]);
         logger.info("took "+(end-start)+"ms");
     }
 
@@ -66,10 +65,10 @@ public class Java8FunctionsPerformanceTest {
     public void intArraySumWithIntRangeStream() {
         IntStream is = IntStream.range(0, SIZE);
         long start = System.currentTimeMillis();
-        final LongHolder sum = new LongHolder(0);
-        is.forEach(i -> sum.value += i);
+        final long[] sum = new long[1];
+        is.forEach(i -> sum[0] += i);
         long end = System.currentTimeMillis();
-        assertEquals(((long) SIZE)*((long) SIZE-1l)/2, sum.value);
+        assertEquals(((long) SIZE)*((long) SIZE-1l)/2, sum[0]);
         logger.info("took "+(end-start)+"ms");
     }
 

@@ -329,7 +329,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return new Boolean(hasWindData(r1)).compareTo(hasWindData(r2));
+                return Boolean.valueOf(hasWindData(r1)).compareTo(hasWindData(r2));
             }
 
             private boolean hasWindData(RaceDTO race) {
@@ -353,7 +353,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return new Boolean(hasGPSData(r1)).compareTo(hasGPSData(r2));
+                return Boolean.valueOf(hasGPSData(r1)).compareTo(hasGPSData(r2));
             }
 
             private boolean hasGPSData(RaceDTO race) {
@@ -375,9 +375,9 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 if (r1.status != null && r2.status != null) {
                     if (r1.status.status == TrackedRaceStatusEnum.LOADING
                             && r2.status.status == TrackedRaceStatusEnum.LOADING) {
-                        return new Double(r1.status.loadingProgress).compareTo(r2.status.loadingProgress);
+                        return Double.valueOf(r1.status.loadingProgress).compareTo(r2.status.loadingProgress);
                     }
-                    return new Integer(r1.status.status.getOrder()).compareTo(r2.status.status.getOrder());
+                    return Integer.valueOf(r1.status.status.getOrder()).compareTo(r2.status.status.getOrder());
                 }
 
                 return r1.status == null ? (r2.status == null ? 0 : -1) : 1;

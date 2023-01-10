@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
+import com.google.gwt.user.client.rpc.RpcRequestBuilder;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -37,6 +38,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * This servlet additionally measures the response time that this servlet takes for each request.
  * Should the response time exceed {@link #LOG_REQUESTS_TAKING_LONGER_THAN} then the request
  * will be logged.
+ * 
+ * @see RpcRequestBuilder#MODULE_BASE_HEADER
  * 
  * @author Simon Pamies (info@pamies.de)
  * @since Oct 10, 2012
@@ -62,7 +65,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     @Override
     protected SerializationPolicy doGetSerializationPolicy(
             HttpServletRequest request, String moduleBaseURL, String strongName) {
-        String moduleBaseURLHdr = request.getHeader("X-GWT-Module-Base");
+        String moduleBaseURLHdr = request.getHeader(RpcRequestBuilder.MODULE_BASE_HEADER);
         if (moduleBaseURLHdr != null) {
             moduleBaseURL = moduleBaseURLHdr;
         }
@@ -125,8 +128,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     public String processCall(RPCRequest rpcRequest) throws SerializationException {
         final TimePoint startOfRequestProcessing = beforeProcessCall();
         try {
-            final String result = super.processCall(rpcRequest);
-            return result;
+            return super.processCall(rpcRequest);
         } finally {
             afterProcessCall(rpcRequest, startOfRequestProcessing);
         }

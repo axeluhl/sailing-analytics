@@ -16,7 +16,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/sapjvm_8"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y -ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=2010 -Xms8000m -Xmx8000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar -Drestore.tracked.races=true -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y -ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=2010 -Xms8000m -Xmx8000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120"/>
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_target_bundles">
@@ -36,7 +36,6 @@
 <setEntry value="org.apache.commons.math@default:default"/>
 <setEntry value="org.apache.httpcomponents.httpclient@default:default"/>
 <setEntry value="org.apache.httpcomponents.httpcore@default:default"/>
-<setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.hyperic.sigar@default:default"/>
 <setEntry value="com.sun.jersey.contribs.jersey-multipart@default:default"/>
 <setEntry value="javax.validation@default:default"/>
@@ -139,6 +138,7 @@
 <setEntry value="com.sun.xml.bind.jaxb-impl@default:default"/>
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
+<setEntry value="javax.xml.soap@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
 <setEntry value="org.eclipse.osgi.util.source@default:default"/>
 <setEntry value="com.chargebee.chargebee-java@default:default"/>
@@ -147,13 +147,21 @@
 <setEntry value="com.amazon.aws.aws-java-api.source@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.objectweb.asm.commons@default:default"/>
+<setEntry value="org.objectweb.asm.analysis@default:default"/>
 <setEntry value="org.objectweb.asm.tree@default:default"/>
+<setEntry value="org.objectweb.asm.util@default:default"/>
+<setEntry value="org.objectweb.asm.source@default:default"/>
+<setEntry value="org.objectweb.asm.analysis.source@default:default"/>
+<setEntry value="org.objectweb.asm.commons.source@default:default"/>
+<setEntry value="org.objectweb.asm.tree.source@default:default"/>
+<setEntry value="org.objectweb.asm.util.source@default:default"/>
 <setEntry value="org.eclipse.jetty.apache-jsp@4:true"/>
 <setEntry value="org.eclipse.jetty.apache-jsp.source@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.jsp@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.jsp.source@default:default"/>
 <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
 <setEntry value="org.apache.aries.spifly.dynamic.bundle@3:true"/>
+<setEntry value="org.apache.aries.spifly.dynamic.bundle.source@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
 <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
@@ -179,6 +187,8 @@
 <setEntry value="com.github.haifengl.smile-graph.source@default:default"/>
 <setEntry value="com.github.haifengl.smile-math@default:default"/>
 <setEntry value="com.github.haifengl.smile-math.source@default:default"/>
+<setEntry value="com.google.gson@default:default"/>
+<setEntry value="com.google.gson.source@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
@@ -278,7 +288,6 @@
 <setEntry value="com.sap.sse.threadmanager@default:default"/>
 <setEntry value="com.sap.sse.security.common@default:default"/>
 <setEntry value="org.json.simple@default:default"/>
-<setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:default"/>
 <setEntry value="org.moxieapps.gwt.highcharts@default:default"/>
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="org.mp4parser.isoparser@default:default"/>

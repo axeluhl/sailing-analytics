@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -37,6 +38,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
@@ -49,7 +51,9 @@ import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
+import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
+import com.sap.sailing.landscape.ui.shared.LeaderboardNameDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
@@ -60,6 +64,7 @@ import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
+import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -76,6 +81,7 @@ import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
@@ -176,7 +182,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public ArrayList<String> getRegions() {
         checkLandscapeManageAwsPermission();
         final ArrayList<String> result = new ArrayList<>();
-        Util.addAll(Util.map(AwsLandscape.obtain().getRegions(), r->r.getId()), result);
+        Util.addAll(Util.map(AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey).getRegions(), r->r.getId()), result);
         return result;
     }
     
@@ -385,7 +391,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public byte[] getEncryptedSshPrivateKey(String regionId, String keyName) throws JSchException {
-        final AwsLandscape<String> landscape = AwsLandscape.obtain();
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey);
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId, landscape), keyName);
         getSecurityService().checkCurrentUserReadPermission(keyPair);
         return keyPair.getEncryptedPrivateKey();
@@ -393,7 +399,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public byte[] getSshPublicKey(String regionId, String keyName) throws JSchException {
-        final AwsLandscape<String> landscape = AwsLandscape.obtain();
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey);
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId, landscape), keyName);
         getSecurityService().checkCurrentUserReadPermission(keyPair);
         return keyPair.getPublicKey();
@@ -603,8 +609,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
-            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO) {
+    public SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO, AwsShardDTO shardDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO, LeaderboardNameDTO leaderboard) {
         return null;
     }
     
@@ -846,5 +852,94 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return convertToSailingApplicationReplicaSetDTO(
                 getLandscapeService().changeAutoScalingReplicasInstanceType(replicaSet, InstanceType.valueOf(instanceTypeName)),
                 Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+    }
+
+    @Override
+    public ArrayList<LeaderboardNameDTO> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet,
+            String bearerToken) throws Exception {
+        final SailingServer server = getLandscapeService().getSailingServer(replicaSet.getHostname(), bearerToken,
+                /* HTTPS Port */ Optional.of(443));
+        return new ArrayList<>(Util.asList(Util.map(server.getLeaderboardNames(), LeaderboardNameDTO::new)));
+    }
+    
+    @Override
+    public void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoardNames,
+            SailingApplicationReplicaSetDTO<String> replicaSetDTO, String bearerToken, String region,
+            byte[] passphraseForPrivateKeyDecryption) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> awsReplicaSet = convertFromApplicationReplicaSetDTO(
+                awsRegion, replicaSetDTO);
+        getLandscapeService().addShard(Util.map(selectedLeaderBoardNames, t -> t.getName()), awsReplicaSet, awsRegion,
+                bearerToken, passphraseForPrivateKeyDecryption, shardName);
+    }
+
+    @Override
+    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaSetDTO,
+            String region, String bearerToken) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
+        final Map<AwsShardDTO, Iterable<String>> shardingKeysForShards = new HashMap<>();
+        final SailingServer server = getLandscapeService().getSailingServer(replicaSetDTO.getHostname(), bearerToken, Optional.empty());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet = convertFromApplicationReplicaSetDTO(
+                awsRegion, replicaSetDTO);
+        final Map<String, String> leaderboardNamesByShardingKeys = new HashMap<>();
+        for (String leaderboard : server.getLeaderboardNames()) {
+            leaderboardNamesByShardingKeys.put(server.getLeaderboardShardingKey(leaderboard), leaderboard);
+        }
+        for (Entry<AwsShard<String>, Iterable<String>> entry : applicationServerReplicaSet.getShards().entrySet()) {
+            shardingKeysForShards.put(createAwsShardDTO(entry.getKey(), applicationServerReplicaSet.getName(), server, leaderboardNamesByShardingKeys),
+                    entry.getValue());
+        }
+        final Map<AwsShardDTO, Iterable<String>> res = new HashMap<>();
+        for (Entry<AwsShardDTO, Iterable<String>> entry : shardingKeysForShards.entrySet()) {
+            res.put(entry.getKey(), entry.getValue());
+        }
+        return res;
+    }
+
+    @Override
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSetDTO, String region,
+            byte[] passphrase) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion awsRegion = new AwsRegion(replicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet = convertFromApplicationReplicaSetDTO(
+                awsRegion, replicaSetDTO);
+        getLandscapeService().removeShard(applicationServerReplicaSet, shard.getTargetgroupArn());
+    }
+
+    @Override
+    public void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> sharindKeysToAppend, String region,
+            String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            byte[] passphraseForPrivateKeyDecryption) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion awsRegion = new AwsRegion(replicaSet.getMaster().getHost().getRegion(), getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> rs = convertFromApplicationReplicaSetDTO(
+                awsRegion, replicaSet);
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet = getLandscape()
+                .getApplicationReplicaSet(awsRegion, rs.getServerName(), rs.getMaster(), rs.getReplicas());
+        getLandscapeService().appendShardingKeysToShard(Util.map(sharindKeysToAppend, t -> t.getName()),
+                applicationReplicaSet, passphraseForPrivateKeyDecryption, awsRegion, shardName, bearerToken);
+    }
+
+    public void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> selectedShardingKeys, String region,
+            String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            byte[] passphraseForPrivateKeyDecryption) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion awsRegion = new AwsRegion(region, getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> rs = convertFromApplicationReplicaSetDTO(
+                awsRegion, replicaSet);
+        getLandscapeService().removeShardingKeysFromShard(Util.asList(Util.map(selectedShardingKeys, t -> t.getName())),
+                rs, passphraseForPrivateKeyDecryption, awsRegion, shardName, bearerToken);
+    }
+
+    public AwsShardDTO createAwsShardDTO(AwsShard<String> shard, String replicaSetName, SailingServer server,
+            Map<String, String> leaderboardNamesByShardingKeys) throws Exception {
+        return new AwsShardDTO(Util.filter(Util.map(shard.getKeys(),
+                shardingKey -> leaderboardNamesByShardingKeys.get(shardingKey)), leaderboardName->leaderboardName!=null),
+                shard.getTargetGroup().getTargetGroupArn(), shard.getTargetGroup().getName(),
+                shard.getAutoScalingGroup().getAutoScalingGroup().autoScalingGroupARN(),
+                shard.getTargetGroup().getLoadBalancerArn(), shard.getAutoScalingGroup().getName(),
+                shard.getName() == null ? "" : shard.getName(), replicaSetName);
     }
 }

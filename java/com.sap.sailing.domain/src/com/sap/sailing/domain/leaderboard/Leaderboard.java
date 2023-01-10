@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Boat;
@@ -443,7 +444,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
      */
     Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    
+    Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
@@ -451,7 +455,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException
      */
-    default List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    default Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
@@ -461,7 +465,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * created per call, so the caller may freely manipulate the result.
      * @throws NoWindException
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
@@ -752,23 +756,18 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     boolean hasScores(Competitor competitor, TimePoint timePoint);
 
     /**
-     * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, {@code false} is returned
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint. If the
+     * competitor is not scored for this race, {@code false} is returned. See
+     * {@link ScoringScheme#isWin(Leaderboard, Competitor, RaceColumn, TimePoint)}.
      */
     default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        final Double points = getTotalPoints(competitor, raceColumn, timePoint);
-        final boolean result;
-        final double tolerance = 0.05;
-        if (points == null) {
-            result = false;
-        } else if (getScoringScheme().isHigherBetter()) {
-            // FIXME this is broken for the high point variants where the winner gets more points than the number of competitors in the race because then even 2nd and 3rd rank may be considered a "win"
-            double competitorCount = Util.size(getCompetitors());
-            result = points >= (competitorCount - tolerance);
-        } else {
-            result = points <= 1.0 + tolerance;
-        }
-        return result;
+        final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+        return isWin(competitor, raceColumn, timePoint, cache);
+    }
+
+    default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getScoringScheme().isWin(this, competitor, raceColumn, timePoint, c->getTotalPoints(c, raceColumn, timePoint, cache), cache);
     }
 
     @Override

@@ -212,6 +212,7 @@ import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceExcep
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.EventActions;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
@@ -1454,21 +1455,50 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds)
             throws MalformedURLException, UnauthorizedException {
+        final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+        final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+        final URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
+        final URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+        final Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
+        final List<ImageDescriptor> eventImages = convertToImages(images);
+        final List<VideoDescriptor> eventVideos = convertToVideos(videos);
+        final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = EventBaseImpl.getTypeRelativeObjectIdentifier(eventId);
         if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
-                DefaultActions.UPDATE, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId)))) {
-            TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
-            TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
-            URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
-            URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-            Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
-            List<ImageDescriptor> eventImages = convertToImages(images);
-            List<VideoDescriptor> eventVideos = convertToVideos(videos);
-            getService().apply(new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint,
-                    venue.getName(), isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
-                    eventImages, eventVideos, windFinderReviewedSpotCollectionIds));
-            return getEventById(eventId, false);
+                DefaultActions.UPDATE, typeRelativeObjectIdentifier))) {
+            // it's fine; the subject has full UPDATE permission for the event
+        } else if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
+                EventActions.UPLOAD_MEDIA, typeRelativeObjectIdentifier))) {
+            final EventDTO currentEventState = getEventById(eventId, false);
+            if (!Util.equalsWithNull(startTimePoint, TimePoint.of(currentEventState.startDate))
+             || !Util.equalsWithNull(endTimePoint, TimePoint.of(currentEventState.endDate))
+             || !Util.equalsWithNull(officialWebsiteURLString, currentEventState.getOfficialWebsiteURL())
+             || !Util.equalsWithNull(baseURLAsString, currentEventState.getBaseURL())
+             || !Util.equalsWithNull(sailorsInfoWebsiteURLsByLocaleName, currentEventState.getSailorsInfoWebsiteURLs())
+             || !Util.equalsWithNull(venue.getName(), currentEventState.venue.getName())
+             || !Util.equalsWithNull(eventName, currentEventState.getName())
+             || !Util.equalsWithNull(windFinderReviewedSpotCollectionIds, currentEventState.getWindFinderReviewedSpotsCollectionIds())
+             || !Util.equalsWithNull(leaderboardGroupIds, currentEventState.getLeaderboardGroupIds())
+             || !Util.equalsWithNull(isPublic, currentEventState.isPublic)
+             || !Util.isOnlyAdding(images, currentEventState.getImages(), (a, b)->a.compareTo(b) == 0)
+             || !Util.isOnlyAdding(videos, currentEventState.getVideos(), (a, b)->a.compareTo(b) == 0)) {
+                throw new UnauthorizedException("You are not permitted to edit event " + eventId + " other than by adding images and videos");
+            } else {
+                final Set<String> sourceRefsOfImagesAdded = new HashSet<>();
+                Util.addAll(Util.map(images, ImageDTO::getSourceRef), sourceRefsOfImagesAdded);
+                Util.removeAll(Util.map(currentEventState.getImages(), ImageDTO::getSourceRef), sourceRefsOfImagesAdded);
+                final Set<String> sourceRefsOfVideosAdded = new HashSet<>();
+                Util.addAll(Util.map(videos, VideoDTO::getSourceRef), sourceRefsOfVideosAdded);
+                Util.removeAll(Util.map(currentEventState.getVideos(), VideoDTO::getSourceRef), sourceRefsOfVideosAdded);
+                logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" is adding the following media to event "+currentEventState.getName()+
+                        " with ID "+currentEventState.getId()+": images: "+sourceRefsOfVideosAdded+", videos: "+sourceRefsOfVideosAdded);
+            }
+        } else {
+            throw new UnauthorizedException("You are not permitted to edit event " + eventId);
         }
-        throw new UnauthorizedException("You are not permitted to edit event " + eventId);
+        getService().apply(new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint,
+                venue.getName(), isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
+                eventImages, eventVideos, windFinderReviewedSpotCollectionIds));
+        return getEventById(eventId, false);
     }
 
     @Override
@@ -3266,7 +3296,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
                         metadata, fileType);
                 sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
-                        .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
+                        .storeFile(fileStorageStream, "." + fileType, Long.valueOf(fileStorageStream.available()))
                         .toString());
             }
         } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException

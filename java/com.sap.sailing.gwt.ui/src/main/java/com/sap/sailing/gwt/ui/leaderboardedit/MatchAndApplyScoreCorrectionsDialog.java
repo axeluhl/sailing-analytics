@@ -265,7 +265,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
                     final Double officialTotalPointsWithFactorApplied = officialCorrectionEntry == null ? null :
-                        officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
+                        officialCorrectionEntry.isDiscarded() ? Double.valueOf(0) : officialCorrectionEntry.getScore();
                     final Double officialTotalPoints = officialCorrectionEntry == null ? null :
                         officialCorrectionEntry.getScore() == null ? null :
                         ScoringSchemeType.getUnscaledScore(raceColumn.getEffectiveFactor(), officialCorrectionEntry.getScore(), raceColumn.isOneAlwaysStaysOne());
@@ -275,8 +275,8 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     // entries not considered "different' in case we haven't got an entry for the competitor/race at all;
                     // those non-existing "entries" will be ignored by getResults anyhow
                     boolean entriesDiffer = officialCorrectionEntry != null &&
-                           (((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !new Double(entry.totalPoints).equals(officialTotalPoints)))) ||
-                            ((officialTotalPointsWithFactorApplied == null && entry.netPoints != null) || (officialTotalPointsWithFactorApplied != null && (entry.netPoints == null || !new Double(entry.netPoints).equals(officialTotalPointsWithFactorApplied)))) ||
+                           (((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !Double.valueOf(entry.totalPoints).equals(officialTotalPoints)))) ||
+                            ((officialTotalPointsWithFactorApplied == null && entry.netPoints != null) || (officialTotalPointsWithFactorApplied != null && (entry.netPoints == null || !Double.valueOf(entry.netPoints).equals(officialTotalPointsWithFactorApplied)))) ||
                             ((officialMaxPointsReason == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
                                     officialMaxPointsReason != null && officialMaxPointsReason != entry.reasonForMaxPoints));
                     if (entriesDiffer) {

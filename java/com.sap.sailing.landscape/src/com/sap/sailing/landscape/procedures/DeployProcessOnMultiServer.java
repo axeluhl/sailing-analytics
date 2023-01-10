@@ -180,7 +180,7 @@ implements Procedure<ShardingKey> {
             final AwsAvailabilityZone azOfHostToDeployTo = hostToDeployTo.getAvailabilityZone();
             int numberOfSharedHostsInOtherAZs = 0;
             final ConcurrentHashBag<Integer> portsOccupiedInSharedHostsInOtherAZs = new ConcurrentHashBag<>();
-            for (final SailingAnalyticsHost<ShardingKey> sharedHost : getLandscape().getHostsWithTagValue(getApplicationConfigurationBuilder().getRegion(),
+            for (final SailingAnalyticsHost<ShardingKey> sharedHost : getLandscape().getRunningHostsWithTagValue(getApplicationConfigurationBuilder().getRegion(),
                     SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE,
                     new SailingAnalyticsHostSupplier<ShardingKey>())) {
                 // accept only ports for which not all other shared instances in other AZs have that port occupied

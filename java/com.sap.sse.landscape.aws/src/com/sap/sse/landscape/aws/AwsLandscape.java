@@ -1,10 +1,10 @@
 package com.sap.sse.landscape.aws;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -37,6 +37,7 @@ import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -51,6 +52,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.Route53Client;
@@ -75,7 +77,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * <p>
  * 
  * Clients may also create dedicated instances of this service wrapper, using their own credentials. See
- * {@link #obtain(String, String, Optional)}.
+ * {@link #obtain(String, String, Optional, String)}.
  * <p>
  * 
  * This object interacts with an instance of {@link AwsLandscapeState} which keeps persistent and replicable state about
@@ -87,6 +89,8 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * @param <MetricsT>
  */
 public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
+    static final long DEFAULT_DNS_TTL_SECONDS = 60l;
+    
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
@@ -139,8 +143,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain() {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState());
+    AwsLandscape<ShardingKey> obtain(String pathPrefixForShardingKey) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), pathPrefixForShardingKey);
         return result;
     }
     
@@ -151,8 +155,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain(String accessKey, String secret) {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String pathPrefixForShardingKey) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, pathPrefixForShardingKey);
         return result;
     }
     
@@ -163,8 +167,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String sessionToken) {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, sessionToken);
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String sessionToken, String pathPrefixForShardingKey) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, sessionToken, pathPrefixForShardingKey);
         return result;
     }
     
@@ -408,6 +412,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(Region region);
 
     CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> getTargetGroupsAsync(Region region);
+    
+    Iterable<TargetGroup<ShardingKey>> getTargetGroups(com.sap.sse.landscape.Region region);
 
     CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(Region region, TargetGroup<ShardingKey> targetGroup);
 
@@ -484,6 +490,16 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn);
+    /**
+     * Copies a target group from an existing target group. The name gets extended with {@code suffix}
+     * @param parent 
+     *          target group to copy from
+     * @param suffix
+     *          suffix to append to the parent's name for the name of the new created target group
+     * @return
+     *          newly created target group.
+     */
+    TargetGroup<ShardingKey> copyTargetGroup(TargetGroup<ShardingKey> parent, String suffix);
 
     default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn,
             String loadBalancerArn, ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol,
@@ -508,6 +524,30 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     <SK> void deleteTargetGroup(TargetGroup<SK> targetGroup);
 
     Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
+    /**
+     * Modifies an existing rule that is identified by the passed {@code rule}'s ARN. Only the conditions are modified and nothing
+     * else gets touched.
+     * 
+     * @param region
+     *          AWS Region
+     * @param rule
+     *          The Rule to modify. Only ARN and conditions are necessary.
+     * @return
+     *          the modified Rule as an Iterable.
+     */
+    Iterable<Rule> modifyRuleConditions(Region region, Rule rule);
+    
+    /**
+     * Modifies an existing rule that is identified by the passed {@code rule}'s ARN. Only the actions are modified and nothing
+     * else gets touched.
+     * @param region
+     *          AWS Region
+     * @param rule
+     *          The Rule to modify. Only ARN and actions are necessary.
+     * @return
+     *          the modified Rule as an Iterable.
+     */
+    Iterable<Rule> modifyRuleActions(Region region, Rule rule);
 
     /**
      * Use {@link Rule.Builder} to create {@link Rule} objects you'd like to set for the {@link Listener} passed as parameter.
@@ -522,7 +562,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     void updateLoadBalancerListenerRule(Region region, Rule ruleToUpdate);
 
-    void updateLoadBalancerListenerRulePriorities(Region region, Collection<RulePriorityPair> newRulePriorities);
+    void updateLoadBalancerListenerRulePriorities(Region region, Iterable<RulePriorityPair> newRulePriorities);
 
     void deleteLoadBalancerListener(Region region, Listener listener);
 
@@ -725,18 +765,80 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
-            ProcessT master, Iterable<ProcessT> replicas);
+            ProcessT master, Iterable<ProcessT> replicas) throws InterruptedException, ExecutionException, TimeoutException;
 
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
-
+    
+    CompletableFuture<DeleteAutoScalingGroupResponse> removeAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup);
+    
     /**
      * updates minimum and desired size to {@code minSize}
      */
     void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize);
 
-    void updateReleaseInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release);
+    /**
+     * @param autoScalingGroups
+     *            {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() All} auto-scaling groups of the replica set;
+     *            this is important because the method will eventually remove the old launch configuration used by those
+     *            auto-scaling groups, and this will fail if there is any other auto-scaling group still using it.
+     */
+    void updateReleaseInAutoScalingGroups(Region region, LaunchConfiguration oldLaunchConfiguration, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, Release release);
 
-    void updateImageInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami);
+    /**
+     * @param autoScalingGroups
+     *            {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() All} auto-scaling groups of the replica set;
+     *            this is important because the method will eventually remove the old launch configuration used by those
+     *            auto-scaling groups, and this will fail if there is any other auto-scaling group still using it.
+     */
+    void updateImageInAutoScalingGroups(Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, AmazonMachineImage<ShardingKey> ami);
 
-    void updateInstanceTypeInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType);
+    /**
+     * @param autoScalingGroups
+     *            {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() All} auto-scaling groups of the replica set;
+     *            this is important because the method will eventually remove the old launch configuration used by those
+     *            auto-scaling groups, and this will fail if there is any other auto-scaling group still using it.
+     */
+    void updateInstanceTypeInAutoScalingGroup(Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, InstanceType instanceType);
+
+    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
+    
+    /**
+     * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the auto-scaling group
+     * based on the {@code shareName}, configuring it to create its instances into {@code targetGroup} instead of the
+     * {@code autoScalingParent}'s target group, and optionally adding the {@code tags} to those copied anyhow from
+     * the {@code autoScalingParent}. The minimum size is copied from the {@code autoScalingParent} unless it is less than two;
+     * in that case, the new auto-scaling group will be configured with a minimum size of two, ensuring availability in case
+     * one target fails.
+     */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
+    void createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
+            String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags);
+    
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
+    void putScalingPolicy(
+            int instanceWarmupTimeInSeconds, String shardname, TargetGroup<ShardingKey> targetgroup, int maxRequestPerTarget, com.sap.sse.landscape.Region region);
+    
+    Iterable<TagDescription> getTargetGroupTags(String arn, com.sap.sse.landscape.Region region);
+    
+    /**
+     * 
+     *  See AWS doc for tag restrictions: 
+     *  https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-tags.html
+     *   If a resource already has a tag with the same key,
+     *   the value gets updated.
+     *  
+     * @param arn
+     *          Target group's ARN to add the tag to. 
+     * @param key
+     *          Key of the tag. See AWS logs for restrictions. 
+     * @param value
+     *          value of tag. See AWS logs for restrictions. 
+     * @param region
+     *          AWS Region of target group
+     * @return
+     *          Returns the added Tag
+     */
+    Tags addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
+    
+    String getAutoScalingGroupName(String replicaSetName);
 }

@@ -119,7 +119,7 @@ android=1
 java=1
 reporting=0
 suppress_confirmation=0
-export extra='--batch-mode'
+export extra='--batch-mode -DtestSuffix=.noAutomaticTestingBasedOnBundleName'
 parallelexecution=0
 p2local=0
 
@@ -230,7 +230,7 @@ fi
 rm $START_DIR/build.log
 
 if [[ "$@" == "clean" ]]; then
-    ./gradlew clean
+    JAVA_HOME="${JAVA8_HOME}" ./gradlew clean
     if [[ $? != 0 ]]; then
         exit 100
     fi
@@ -292,6 +292,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
 
@@ -601,7 +602,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 		    cp $i $i.bak
 		    cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
 		    mv $i.sed $i
-		    
 		done
 	    fi
 	else
@@ -659,7 +659,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools/bin
         PATH=$PATH:$ANDROID_HOME/platform-tools
-        SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
+        SDK_MANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
         if [ \! -x "$SDK_MANAGER" ]; then
             SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
@@ -668,8 +668,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "BUILD_TOOLS_VERSION=$BUILD_TOOLS_VERSION"
         TARGET_API_VERSION=`grep "targetSdk = " build.gradle | cut -d "=" -f 2 | sed 's/ //g'`
         echo "TARGET_API_VERSION=$TARGET_API_VERSION"
-        $SDK_MANAGER --update && yes | $SDK_MANAGER --licenses
-        $SDK_MANAGER "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
+        echo "Updating Android SDK at ${ANDROID_HOME}"
+        $SDK_MANAGER --update --sdk_root=${ANDROID_HOME} && yes | $SDK_MANAGER --licenses
+        echo "Getting Android build-tools, platform-tools and platform ${TARGET_API_VERSION}"
+        $SDK_MANAGER --sdk_root=${ANDROID_HOME} "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
 
         # TODO: make distinction available for gradle builds as well
         # Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
@@ -677,11 +679,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         # Use the following line for regular builds with no staged Nexus artifacts:
         # mobile_extra="-P -with-not-android-relevant -P with-mobile"
 
-        ./gradlew build
+        echo "Building apps with Gradle..."
+        JAVA_HOME="${JAVA8_HOME}" ./gradlew build
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
-        ./gradlew assemble
+        JAVA_HOME="${JAVA8_HOME}" ./gradlew assemble
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
@@ -744,6 +747,8 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         fi
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
+	echo "Building and installing forked GWT version..."
+	JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
     
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
@@ -836,7 +841,6 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
     cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
-
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/

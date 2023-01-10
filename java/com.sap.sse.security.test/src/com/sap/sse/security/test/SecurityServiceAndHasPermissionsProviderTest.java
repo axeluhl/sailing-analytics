@@ -32,8 +32,8 @@ public class SecurityServiceAndHasPermissionsProviderTest {
 
     @Before
     public void setup() throws UserStoreManagementException {
-        userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), TEST_DEFAULT_TENANT);
+        userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultMajorityDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), TEST_DEFAULT_TENANT);
         userStore.ensureDefaultRolesExist();
         userStore.loadAndMigrateUsers();
         accessControlStore = new AccessControlStoreImpl(userStore);

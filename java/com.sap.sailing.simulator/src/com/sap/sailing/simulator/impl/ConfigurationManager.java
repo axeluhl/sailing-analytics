@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public enum ConfigurationManager {
                 this.status = ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE;
                 this.errorMessage = "Invalid configuration file path ( " + configFileLocation + ")! Using default configuration values!";
             }
-            final InputStreamReader reader = new InputStreamReader(inputStream);
+            final InputStreamReader reader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
             final BufferedReader buffer = new BufferedReader(reader);
             String line = null;
             String[] elements = null;

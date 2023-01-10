@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.hamcrest.number.OrderingComparison.greaterThan;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 import java.net.MalformedURLException;

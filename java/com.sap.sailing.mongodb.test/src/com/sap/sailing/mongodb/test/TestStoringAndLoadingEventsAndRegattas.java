@@ -1037,12 +1037,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
 
         assertEquals(series.hasCrossFleetMergedRanking(), loadedSeries.hasCrossFleetMergedRanking());
         assertEquals(series.hasSplitFleetContiguousScoring(), loadedSeries.hasSplitFleetContiguousScoring());
-        assertEquals(series.isFirstColumnIsNonDiscardableCarryForward(), loadedSeries.isFirstColumnIsNonDiscardableCarryForward());
+        assertEquals(series.isFirstColumnNonDiscardableCarryForward(), loadedSeries.isFirstColumnNonDiscardableCarryForward());
         assertEquals(series.isMedal(), loadedSeries.isMedal());
         assertEquals(series.isFleetsCanRunInParallel(), loadedSeries.isFleetsCanRunInParallel());
-
-
-
     }
 
 }

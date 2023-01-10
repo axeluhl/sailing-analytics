@@ -547,7 +547,8 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             successInfo = new SuccessInfo(true, message, /* redirectURL */null,
                     new Triple<>(userDTO, getAllUser(), getServerInfo()));
         } catch (UserManagementException | UnauthorizedException e) {
-            successInfo = new SuccessInfo(false, "Not permitted to grant permission " + permission + " for user "
+            successInfo = new SuccessInfo(false, "User "+SecurityUtils.getSubject().getPrincipal()+
+                    " is not permitted to grant permission " + permission + " to user "
                     + username + " or the user or permission did not exist.", /* redirectURL */null, null);
         }
         return successInfo;
@@ -708,5 +709,4 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             throw new UnauthorizedException("Not permitted to update the ACL for a user");
         }
     }
-
 }
