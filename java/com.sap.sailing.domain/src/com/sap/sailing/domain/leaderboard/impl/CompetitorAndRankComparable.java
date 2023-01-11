@@ -5,7 +5,12 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.leaderboard.RankComparable;
 
-public class CompetitorAndRankComparable implements Comparable<CompetitorAndRankComparable>{
+/**
+ * A {@link Competitor} and a corresponding {@link RankComparable} for that competitor.
+ * The {@link Comparable} implementation is based on the comparison of the {@link RankComparable}'s
+ * "natural order."
+ */
+public class CompetitorAndRankComparable implements Comparable<CompetitorAndRankComparable> {
     private final RankComparable rankComparable; 
     private final Competitor competitor;
     
