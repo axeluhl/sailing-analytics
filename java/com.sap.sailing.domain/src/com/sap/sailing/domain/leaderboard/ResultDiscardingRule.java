@@ -21,7 +21,6 @@ public interface ResultDiscardingRule extends Serializable {
     /**
      * @param raceColumnsToConsider if a column is <code>not</code> contained, its existence will be ignored for determining the
      * columns to discard. It affects the count of races. Only columns contained can be part of the result.
-     * @param scoringScheme TODO
      */
     Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint, ScoringScheme scoringScheme);

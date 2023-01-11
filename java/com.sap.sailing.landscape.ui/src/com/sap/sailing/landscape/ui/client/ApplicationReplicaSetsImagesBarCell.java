@@ -24,6 +24,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_SWITCH_TO_REPLICA_ON_SHARED_INSTANCE = "ACTION_SWITCH_TO_REPLICA_ON_SHARED_INSTANCE";
     public static final String ACTION_MOVE_MASTER_TO_OTHER_INSTANCE = "ACTION_MOVE_MASTER_TO_OTHER_INSTANCE";
     public static final String ACTION_SCALE_AUTO_SCALING_REPLICAS_UP_DOWN = "ACTION_SCALE_AUTO_SCALING_REPLICAS_UP_DOWN";
+    public static final String ACTION_OPEN_SHARD_MANAGEMENT = "ACTION_OPEN_SHARD_MANAGEMENT";
 
     private final StringMessages stringMessages;
     private final UserService userService;
@@ -63,6 +64,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
         if (applicationReplicaSet.getAutoScalingGroupAmiId() != null) {
             result.add(new ImageSpec(ACTION_UPDATE_AMI_FOR_AUTO_SCALING_REPLICAS, stringMessages.updateAmiForAutoScalingReplicas(), IconResources.INSTANCE.redGearsIcon()));
             result.add(new ImageSpec(ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY, stringMessages.switchToAutoScalingReplicasOnly(), IconResources.INSTANCE.scaleUpIcon()));
+            result.add(new ImageSpec(ACTION_OPEN_SHARD_MANAGEMENT, stringMessages.openShardManagement(), IconResources.INSTANCE.shardManagementIcon()));
         }
         result.add(new ImageSpec(ACTION_SWITCH_TO_REPLICA_ON_SHARED_INSTANCE, stringMessages.switchToReplicaOnSharedInstance(), IconResources.INSTANCE.scaleDownIcon()));
         if (!applicationReplicaSet.isLocalReplicaSet(userService)) {

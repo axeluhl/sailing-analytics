@@ -96,7 +96,7 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements MediaSynch
 
     @Override
     public void setControlsVisible(boolean isVisible) {
-        videoJsDelegate.setControllsVisible(isVisible);
+        videoJsDelegate.setControlsVisible(isVisible);
     }
 
     @Override

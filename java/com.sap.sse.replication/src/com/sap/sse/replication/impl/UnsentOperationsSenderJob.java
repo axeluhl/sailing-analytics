@@ -1,6 +1,5 @@
 package com.sap.sse.replication.impl;
 
-import java.io.IOException;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -120,7 +119,7 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
         try {
             sender.sendReplicaInitiatedOperationToMaster(operation);
             result = true;
-        } catch (IOException e) {
+        } catch (Throwable e) {
             result = false;
             // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
             sender.hasSentOperationToMaster(operation);

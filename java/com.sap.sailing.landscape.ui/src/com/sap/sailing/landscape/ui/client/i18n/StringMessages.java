@@ -139,4 +139,23 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String errorDuringImport(String message);
     String errorWhileComparingServerContent();
     String differencesInServerContentFound(String serverAName, String aDiffs, String serverBName, String bDiffs);
+    String shard();
+    String shardName();
+    String addShard();
+    String removeShard();
+    String unshardedLeaderboards();
+    String shardingKeys();
+    String targetGroup();
+    String autoScalingGroup();
+    String leaderboardsInShard();
+    String enterShardName();
+    String openShardManagement();
+    String successfullyAppendedShardingKeysToShard(String leaderboardNames, String shardName);
+    String successfullyRemovedLeaderboardsFromShard(String leaderboardNames, String shardName);
+    String pleaseProvideANonEmptyShardName();
+    String shardNameInvalid(String shardName, String message);
+    String shardCreatedSuccessfully(String newShardName);
+    String deletedShard(String shardName);
+    String errorFetchingLeaderboardNames(String message);
+    String shardingDescription();
 }
