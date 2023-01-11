@@ -184,8 +184,8 @@ public class TimeOnTimeAndDistanceRankingMetric extends NonPerformanceCurveRanki
         final boolean fastestCompetitorHasStartedLeg;
         if (fastestCompetitorInLeg != null) {
             final TrackedLegOfCompetitor trackedLegOfFastestCompetitorInLeg = trackedLeg.getTrackedLeg(fastestCompetitorInLeg);
-            // May be false if there is a gap in the logging. Example: We get a finishing time for a competitor whos tracker has failed. 
-            // He now can be the fastest competitor in the finishing leg but there is no start for the given leg. 
+            // May be false if there is a gap in the logging. Example: We get a finishing time for a competitor whose tracker has failed. 
+            // The competitor now can be the fastest competitor in the finishing leg but there is no start for the given leg. 
             // In this case it is not possible to compare a competitor that has not started the finishing leg against the fastest competitor -> so they are ranked equal.
             fastestCompetitorHasStartedLeg = isAssumedToHaveStartedLeg(timePoint, trackedLegOfFastestCompetitorInLeg);
             final Distance totalWindwardDistanceLegLeaderTraveledUpToTimePointOrLegEnd;
