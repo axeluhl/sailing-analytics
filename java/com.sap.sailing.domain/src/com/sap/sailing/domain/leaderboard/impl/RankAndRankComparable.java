@@ -2,6 +2,10 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import com.sap.sailing.domain.leaderboard.RankComparable;
 
+/**
+ * Combines a per-race rank with a {@link RankComparable} that allows for cross-race
+ * comparison of competitors.
+ */
 public class RankAndRankComparable implements Comparable<RankAndRankComparable> {
     private final Integer rank; 
     private final RankComparable rankComparable;
