@@ -797,7 +797,6 @@ Replicator {
      *            {@code false}, all restore information is
      *            {@link MongoObjectFactory#removeAllConnectivityParametersForRacesToRestore() cleared} from the
      *            database, and the server starts out with an empty list of tracked races.
-     * @param competitorProviderServiceTracker TODO
      * @param securityServiceAvailable
      *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
      *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
@@ -919,7 +918,7 @@ Replicator {
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
         loadMarkPassingRaceFingerprints();
-        // Stores all events which run through a data migration 
+        // Stores all events which run through a data migration
         // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
         for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
             if (eventAndRequireStoreFlag.getB()) {
@@ -939,7 +938,7 @@ Replicator {
             this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
         }
     }
-    
+
     private void loadMarkPassingRaceFingerprints() {
         markPassingRaceFingerprints.putAll(domainObjectFactory.loadFingerprintsForMarkPassingHashes());
     }
@@ -988,7 +987,7 @@ Replicator {
     }
     
     /**
-     * FIXME: Attention! This method is a migration effort. It shall not be called outside of the Activators initial startup, 
+     * FIXME: Attention! This method is a migration effort. It shall not be called outside of the Activators initial startup,
      * since it does manipulate Preference Objects directly, outside of the preferenceLock in the UserStoreImpl.
      */
     public void migrateCompetitorNotificationPreferencesWithCompetitorNames() {
