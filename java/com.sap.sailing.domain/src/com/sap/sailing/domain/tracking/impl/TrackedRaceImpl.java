@@ -430,7 +430,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * the leg's rhumb line for reaching legs, then comparing positions. For handicap races using a time-on-time,
      * time-on-distance, combination thereof or a more complicated scheme such as ORC Performance Curve, the ranking
      * process needs to take into account the competitor-specific correction factors defined in the measurement
-     * certificate.
+     * certificate.<p>
      * 
      * The RankingMetric for all {@link TrackedRace} within one {@link Regatta} must be the same. 
      */
@@ -487,8 +487,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     /**
-     * Constructs the tracked race with a configurable ranking metric.
-     * All {@link TrackedRace}s use the same {@link RankingMetric}. This is given by the fact that this constructor is only called in the {@link DynamicTrackedRaceImpl#DynamicTrackedRaceImpl(TrackedRegatta, RaceDefinition, Iterable, WindStore, long, long, long, long, boolean, RankingMetricConstructor, RaceLogAndTrackedRaceResolver, TrackingConnectorInfo)} constructor wich its self is only called from {@link TrackedRegattaImpl#createTrackedRace(RaceDefinition, Iterable, WindStore, long, long, long, com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet, boolean, RaceLogAndTrackedRaceResolver, Optional, TrackingConnectorInfo)}
+     * Constructs the tracked race with a configurable ranking metric. All {@link TrackedRace}s use the same
+     * {@link RankingMetric}. This is given by the fact that this constructor is only called in the
+     * {@link DynamicTrackedRaceImpl#DynamicTrackedRaceImpl(TrackedRegatta, RaceDefinition, Iterable, WindStore, long, long, long, long, boolean, RankingMetricConstructor, RaceLogAndTrackedRaceResolver, TrackingConnectorInfo)}
+     * constructor which itself is only called from
+     * {@link TrackedRegattaImpl#createTrackedRace(RaceDefinition, Iterable, WindStore, long, long, long, com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet, boolean, RaceLogAndTrackedRaceResolver, Optional, TrackingConnectorInfo)}
+     * 
      * @param rankingMetricConstructor
      *            the function that creates the ranking metric, passing this tracked race as argument. Callers may use a
      *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
@@ -1579,12 +1583,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        Competitor result = null;
-        Iterator<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint, cache).iterator();
-        if (ranks.hasNext()) {
-            result = ranks.next();
-        }
-        return result;
+        return Util.first(getCompetitorsFromBestToWorst(timePoint, cache));
     }
 
     private boolean hasZeroRankBecauseNoMarkPassingsAtOrBeforeTimePoint(Competitor competitor, TimePoint timePoint) {
@@ -1615,7 +1614,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (competitor == null) {
                 result = 0;
             } else {
-                result = rankAndRankComparable.getRank(); 
+                result = rankAndRankComparable.getRank();
             }
         }
         return result;
@@ -1701,8 +1700,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // RaceRankComparator requires course read lock
                     getRace().getCourse().lockForRead();
                     try {
-                        // here the rankingmetrics need to return the RankComparables so that they could be ranked accordingly. 
-                        // encapsulate sorting providing etc. in a method of the Ranking metric. To Update this cache 
+                        // TODO bug5147: here the ranking metrics need to return the RankComparables so that they could be ranked accordingly.
+                        // encapsulate sorting providing etc. in a method of the Ranking metric. To Update this cache
                         final Comparator<Competitor> comparator = getRankingMetric().getRaceRankingComparator(timePoint, cache);
                         final List<Competitor> tempList = new ArrayList<Competitor>();
                         for (Competitor c : getRace().getCompetitors()) {
