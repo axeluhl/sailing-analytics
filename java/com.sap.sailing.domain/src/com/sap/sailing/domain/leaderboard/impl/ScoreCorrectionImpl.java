@@ -454,7 +454,6 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <code>competitor</code>'s key, it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
      * @param scoringScheme
      *            used to transform the tracked rank into a score if there is no score correction applied
-     * @param cache TODO
      * 
      * @return <code>null</code> in case the <code>competitor</code> has no score assigned in that race which is the
      *         case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code>

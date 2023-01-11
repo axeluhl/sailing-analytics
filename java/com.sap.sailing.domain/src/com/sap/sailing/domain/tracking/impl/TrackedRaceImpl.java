@@ -486,7 +486,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            the function that creates the ranking metric, passing this tracked race as argument. Callers may use a
      *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
      *            {@link TrackedRace} argument.
-     * @param markPassingRaceFingerprintRegistry TODO
      */
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
             final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,

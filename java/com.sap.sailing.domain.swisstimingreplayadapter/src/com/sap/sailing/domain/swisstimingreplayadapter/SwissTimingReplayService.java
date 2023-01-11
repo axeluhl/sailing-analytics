@@ -43,7 +43,6 @@ public interface SwissTimingReplayService {
      *            the SwissTiming ID for the race
      * @param useInternalMarkPassingAlgorithm
      *            use our own instead of the SwissTiming-provided mark rounding / split times
-     * @param markPassingRaceFingerprintRegistry TODO
      * @param boatClassNameName
      *            only required if {@code regattaToAddTo} is {@code null}; used for the retrieval/creation of a default
      *            regatta
