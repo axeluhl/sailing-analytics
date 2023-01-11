@@ -46,7 +46,6 @@ public interface GPSFixImporter {
 
     /**
      * Retrieves the fixes from the {@code inputStream}, and calls the {@code callback} with every new fix.
-     * @param charset TODO
      * @param inferSpeedAndBearing
      *            Should speed and bearing be inferred by looking at the previous fix, if that data is not directly
      *            present within the file?
