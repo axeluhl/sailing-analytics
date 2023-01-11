@@ -298,8 +298,9 @@ public interface TrackedRace
      * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their fleet.
      * If the race hasn't {@link #hasStarted(TimePoint) started} yet, the result is undefined.
      *
-     * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.
-     *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric} . The rank starts with 1 for the winner.
+     * @return <code>(0,0)</code> in case the {@link Competitor} has not started / participated yet.
+     *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric}.
+     *         The rank starts with 1 for the winner.
      */
     default int getRank(Competitor competitor, TimePoint timePoint) {
         return getRank(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
@@ -803,33 +804,38 @@ public interface TrackedRace
     Competitor getCompetitorOfBoat(Boat boat);
 
     /**
-     * Returns the competitors of this tracked race, according to their ranking within in this Race (iteration order). Competitors whose
-     * {@link #getRank} is 0 will be sorted "worst".
+     * Returns the competitors of this tracked race, ordered according to their ranking within in this Race (iteration
+     * order). Competitors whose {@link #getRank} is 0 will be sorted "worst".
      *
-     * @return If no ranking can be computed for the given {@link TimePoint} an empty LinkeHashMap is returned not null.
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link LinkeHashMap} is returned,
+     *         but never {@code null}.
      */
     LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint);
 
     /**
-     * Same as {@link #getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
-     * bearing values.
+     * Same as {@link #getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint)}, using a cache for wind, leg
+     * type and leg bearing values.
      *
-     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link LinkedHashMap} is returned not null.
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link LinkedHashMap} is returned,
+     *         but never {@code null}.
      */
     LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     /**
-     * Returns the competitors and their RankComparables of this tracked race, according to their ranking within in this Race (iteration order). 
+     * Returns the competitors and their {@link RankComparable}s of this tracked race, ordered according to their
+     * ranking within in this Race (iteration order).
      *
-     * @return If no ranking can be computed for the given {@link TimePoint} an empty  {@link List} is returned not null.
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link List} is returned, but
+     *         never {@code null}.
      */
     List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint);
     
     /**
-     * Same as {@link #getCompetitorsFromBestToWorstAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
-     * bearing values.
+     * Same as {@link #getCompetitorsFromBestToWorstAndRankComparable(TimePoint)}, using a cache for wind, leg type and
+     * leg bearing values.
      *
-     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link List} is returned not null.
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link List} is returned, but
+     *         never {@code null}.
      */
     List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
@@ -837,16 +843,18 @@ public interface TrackedRace
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      *
-     * @return If no ranking can be computed for the given {@link TimePoint} an {@link Iterable} with no Objects in it is returned not null.
+     * @return If no ranking can be computed for the given {@link TimePoint} an {@link Iterable} with no competitors in
+     *         it is returned, but never {@code null}.
      */
     Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     /**
-     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
-     * bearing values.
+     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg bearing
+     * values.
      *
-     * @return If no ranking can be computed for the given {@link TimePoint} an {@link Iterable} with no Objects in it is returned not null.
-
+     * @return If no ranking can be computed for the given {@link TimePoint} an {@link Iterable} with no competitors in
+     *         it is returned, but never {@code null}.
+     * 
      */
     Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
