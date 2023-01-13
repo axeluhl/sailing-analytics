@@ -106,6 +106,11 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     }
 
     @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return false;
+    }
+
+    @Override
     public boolean hasSplitFleets() {
         return Util.size(getFleets()) > 1;
     }
