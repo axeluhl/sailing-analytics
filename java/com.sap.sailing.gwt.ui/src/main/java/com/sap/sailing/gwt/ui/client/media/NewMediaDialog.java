@@ -95,10 +95,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (media.title == null || media.title.trim().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.name());
-            } else if (media.mimeType == null && media.url != null && !isMediaTypeSupported(media.url)) {
-                errorMessage = stringMessages.fileTypeNotSupported();
             } else if (media.mimeType == null) {
-                errorMessage = stringMessages.pleaseEnterA(stringMessages.mimeType());
+                errorMessage = stringMessages.fileTypeNotSupported();
             } else if (media.startTime == null) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.startTime());
             } else if (media.duration == null) {
