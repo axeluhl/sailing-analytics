@@ -1,8 +1,5 @@
 package com.sap.sse.common.media;
 
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
-
 public enum MimeType {
 
     mp4(MediaType.video, MediaSubType.mp4, "mp4"),
@@ -83,9 +80,7 @@ public enum MimeType {
             if (fileEnding != null) {
                 for (MimeType mimeType : MimeType.values()) {
                     if (!mimeType.getEndingPattern().isEmpty()) {
-                        RegExp regExp = RegExp.compile(mimeType.getEndingPattern());
-                        MatchResult matcher = regExp.exec(fileEnding.toLowerCase());
-                        boolean matchFound = matcher != null;
+                        boolean matchFound = fileEnding.toLowerCase().matches(mimeType.endingPattern);
                         if (matchFound) {
                             bestMatch = mimeType;
                             break;
