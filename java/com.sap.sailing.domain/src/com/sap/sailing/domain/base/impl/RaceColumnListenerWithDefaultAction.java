@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * can easily provide a default action to be executed for all callback methods except for maybe a few which then need to
  * be explicitly overridden. If not most methods need to perform the same action then instead of implementing a default
  * action subclasses should rather override the {@link RaceColumnListener} operations individually.
- * 
+ *
  * @author Alexander Ries (D062114)
  *
  */
@@ -27,56 +27,61 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
      * override {@link RaceColumnListener} methods.
      */
     void defaultAction();
-    
+
     @Override
     default void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn,
             boolean firstColumnIsNonDiscardableCarryForward) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
-        defaultAction(); 
+        defaultAction();
+    }
+
+    @Override
+    default void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        defaultAction();
     }
 
     @Override
     default void raceColumnAddedToContainer(RaceColumn raceColumn) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
@@ -86,34 +91,39 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
 
     @Override
     default void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        defaultAction();
+    }
+
+    @Override
+    default void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
         defaultAction(); 
     }
 
     @Override
     default void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
             ResultDiscardingRule newDiscardingRule) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards,
             Integer newMaximumNumberOfDiscards) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override
     default void regattaLogEventAdded(RegattaLogEvent event) {
-        defaultAction(); 
+        defaultAction();
     }
 
     @Override

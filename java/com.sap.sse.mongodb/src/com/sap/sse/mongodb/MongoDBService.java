@@ -49,4 +49,6 @@ public interface MongoDBService {
      * Those weak references that got cleared will be removed from the cache.
      */
     ClientSession startAutoRefreshingSession();
+
+    ClientSession startCausallyConsistentSession();
 }

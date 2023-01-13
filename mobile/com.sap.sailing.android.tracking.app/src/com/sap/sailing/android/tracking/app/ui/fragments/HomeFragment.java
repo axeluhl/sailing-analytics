@@ -352,8 +352,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         // -1, because there's a header row
         Cursor cursor = (Cursor) adapter.getItem(position - 1);
         final String checkinDigest = cursor
-                .getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
-        final int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
+                .getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
+        final int type = cursor.getInt(cursor.getColumnIndexOrThrow(AnalyticsContract.Checkin.CHECKIN_TYPE));
         DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setMessage(getString(R.string.confirm_delete_checkin));
@@ -429,8 +429,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             Cursor cursor = (Cursor) adapter.getItem(position - 1);
 
             String checkinDigest = cursor
-                    .getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
-            int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
+                    .getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
+            int type = cursor.getInt(cursor.getColumnIndexOrThrow(AnalyticsContract.Checkin.CHECKIN_TYPE));
             startRegatta(checkinDigest, type);
         }
     }

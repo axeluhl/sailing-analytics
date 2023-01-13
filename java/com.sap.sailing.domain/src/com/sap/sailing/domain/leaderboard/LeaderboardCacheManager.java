@@ -20,21 +20,19 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.concurrent.ConcurrentWeakHashMap;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Manages a {@link LeaderboardCache}. When a {@link Leaderboard} is {@link LeaderboardCache#add added} to the cache, it
- * start observing the leaderboard for changes through the linked {@link TrackedRace}s as a {@link RaceChangeListener}
+ * starts observing the leaderboard for changes through the linked {@link TrackedRace}s as a {@link RaceChangeListener}
  * and through the race columns as a {@link RaceColumnListener}. When changes affecting a leaderboard occur, the
  * {@link LeaderboardCache#removeFromCache(Leaderboard)} method is called on the leaderboard cache.
  * 
@@ -200,7 +198,7 @@ public class LeaderboardCacheManager {
         }
     }
     
-    private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {
+    private class CacheInvalidationUponScoreCorrectionListener extends AbstractScoreCorrectionListenerWithDefaultAction {
         private final Leaderboard leaderboard;
         
         public CacheInvalidationUponScoreCorrectionListener(Leaderboard leaderboard) {
@@ -208,34 +206,7 @@ public class LeaderboardCacheManager {
         }
 
         @Override
-        public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn,
-                MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void timePointOfLastCorrectionsValidityChanged(TimePoint oldTimePointOfLastCorrectionsValidity,
-                TimePoint newTimePointOfLastCorrectionsValidity) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
-        public void commentChanged(String oldComment, String newComment) {
+        public void defaultAction() {
             removeFromCache(leaderboard);
         }
     }
@@ -374,12 +345,12 @@ public class LeaderboardCacheManager {
         trackedRace.addListener(listener);
         invalidationListeners = invalidationListenersPerLeaderboard.get(leaderboard);
         if (invalidationListeners == null) {
-            invalidationListeners = new ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>>();
+            invalidationListeners = new ConcurrentHashMap<>();
             invalidationListenersPerLeaderboard.put(leaderboard, invalidationListeners);
         }
         Set<CacheInvalidationListener> listeners = invalidationListeners.get(trackedRace);
         if (listeners == null) {
-            listeners = Collections.synchronizedSet(new HashSet<CacheInvalidationListener>());
+            listeners = Collections.synchronizedSet(new HashSet<>());
             invalidationListeners.put(trackedRace, listeners);
         }
         listeners.add(listener);

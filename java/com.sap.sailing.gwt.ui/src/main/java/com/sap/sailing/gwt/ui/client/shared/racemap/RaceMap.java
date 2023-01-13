@@ -116,12 +116,14 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickF
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sailing.gwt.ui.client.shared.racemap.windladder.WindLadder;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
@@ -330,6 +332,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final Map<String, HandlerRegistration> courseMarkClickHandlers;
 
+    private WindLadder windLadder;
+
     /**
      * Maps from the {@link MarkDTO#getIdAsString() mark's ID converted to a string} to the corresponding {@link MarkDTO}
      */
@@ -396,7 +400,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
     private final FlowPanel topLeftControlsWrapperPanel;
 
-    private final TimeRangeActionsExecutor<CompactBoatPositionsDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>, String> timeRangeActionsExecutor;
+    private final TimeRangeActionsExecutor<CompactBoatPositionsDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable, String> timeRangeActionsExecutor;
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     /**
@@ -770,6 +774,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         trueNorthIndicatorButtonButtonGroup.getElement().getStyle().setProperty("transform", "rotate(" + coordinateSystem.mapDegreeBearing(0) + "deg)");
                         if (trueNorthIndicatorPanel.isVisible()) {
                             trueNorthIndicatorPanel.redraw();
+                        }
+                        if (combinedWindPanel.isVisible()) {
+                            combinedWindPanel.redraw();
                         }
                         orientationChangeInProgress = false;
                     }
@@ -1520,7 +1527,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                             simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
-                        Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
+                        Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData = raceMapDataDTO.boatPositions;
                         Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData);
                         quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
                         // Do boat specific actions
@@ -1541,6 +1548,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
+                        showWindLadder(raceMapDataDTO, transitionTimeInMillis);
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
@@ -1573,12 +1581,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
 
             private Map<CompetitorDTO, Double> getCompetitorsSpeedInKnotsMap(
-                    Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData) {
+                    Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData) {
                 Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = new HashMap<>();
                 for (CompetitorDTO competitor : boatData.keySet()) {
-                    List<GPSFixDTOWithSpeedWindTackAndLegType> fixesList = boatData.get(competitor);
+                    GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesList = boatData.get(competitor);
                     if (!fixesList.isEmpty()) {
-                        SpeedWithBearingDTO speedWithBearing = fixesList.get(fixesList.size() - 1).speedWithBearing;
+                        SpeedWithBearingDTO speedWithBearing = fixesList.last().speedWithBearing;
                         if (speedWithBearing != null) {
                             Double speedInKnots = speedWithBearing.speedInKnots;
                             quickSpeedsFromServerInKnots.put(competitor, speedInKnots);
@@ -1632,7 +1640,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
-            final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData,
+            final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData,
             boolean updateTailsOnly, boolean detailTypeChanged) {
         if (zoomingAnimationsInProgress == 0) {
             fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis, detailTypeChanged);
@@ -2093,7 +2101,33 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
     }
-    
+
+    private void showWindLadder(RaceMapDataDTO raceMapDataDTO, long timeForPositionTransitionMillis) {
+        if (settings.isShowWindLadder() && map != null && raceMapDataDTO != null && lastCombinedWindTrackInfoDTO != null) {
+            Pair<Integer, CompetitorDTO> bestVisibleCompetitor = getBestVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
+            if (bestVisibleCompetitor != null) {
+                final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixes = raceMapDataDTO.boatPositions.get(bestVisibleCompetitor.getB());
+                if (fixes != null) {
+                    Position competitorPosition = fixes.last().position;
+                    WindTrackInfoDTO windTrackDTO = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(bestVisibleCompetitor.getA() - 1); // Zero based
+                    WindDTO windFix = null;
+                    if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
+                        windFix = windTrackDTO.windFixes.get(0);
+                    }
+                    if (windLadder == null) {
+                        windLadder = new WindLadder(map, 0 /* TODO z-index */, coordinateSystem);
+                    }
+                    windLadder.update(windFix, competitorPosition, timeForPositionTransitionMillis);
+                    if (!windLadder.isVisible()) {
+                        windLadder.setVisible(true);
+                    }
+                }
+            }
+        } else if (windLadder != null && windLadder.isVisible()) {
+            windLadder.setVisible(false);
+        }
+    }
+
     private final StringBuilder windwardStartLineMarkToFirstMarkLineText = new StringBuilder();
     private final StringBuilder leewardStartLineMarkToFirstMarkLineText = new StringBuilder();
     

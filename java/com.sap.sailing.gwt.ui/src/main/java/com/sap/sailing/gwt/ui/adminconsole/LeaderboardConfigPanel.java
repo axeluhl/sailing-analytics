@@ -66,6 +66,7 @@ import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
@@ -75,7 +76,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
-import com.sap.sailing.gwt.ui.adminconsole.help.AdminConsoleHelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.Refresher;
@@ -163,11 +163,15 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 stringMessages.createRegattaLeaderboardWithEliminations() + " ...",
                 leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithEliminations);
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
+        final Button createRegattaLeaderboardWithOtherTieBreakingLeaderboardBtn = buttonPanel.addAction(
+                stringMessages.createRegattaLeaderboardWithOtherTieBreakingLeaderboard() + " ...",
+                leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithOtherTieBreakingLeaderboard);
+        createRegattaLeaderboardWithOtherTieBreakingLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardWithOtherTieBreakingLeaderboardButton");
 
         leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), leaderboardSelectionModel, true,
                 () -> removeLeaderboards(leaderboardSelectionModel.getSelectedSet()));
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
-        buttonPanel.addUnsecuredWidget(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
+        buttonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
                 stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4"));
     }
 
@@ -402,7 +406,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             AbstractLeaderboardDialog<?> dialog;
             switch (leaderboardDTO.type) {
             case RegattaLeaderboard:
-                dialog = new RegattaLeaderboardEditDialog(Collections.unmodifiableCollection(otherExistingLeaderboard),
+                dialog = new RegattaLeaderboardEditDialog<>(Collections.unmodifiableCollection(otherExistingLeaderboard),
                         Collections.unmodifiableCollection(allRegattas),
                         createLeaderboardDescriptor(leaderboardDTO,
                                 /* scoring scheme is provided by regatta, not leaderboard */ null),
@@ -413,6 +417,25 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
                             @Override
                             public void ok(LeaderboardDescriptor result) {
+                                updateLeaderboard(oldLeaderboardName, result);
+                            }
+                        });
+                dialog.show();
+                break;
+            case RegattaLeaderboardWithOtherTieBreakingLeaderboard:
+                dialog = new RegattaLeaderboardWithOtherTieBreakingLeaderboardEditDialog(Collections.unmodifiableCollection(otherExistingLeaderboard),
+                        Collections.unmodifiableCollection(allRegattas),
+                        new LeaderboardDescriptorWithOtherTieBreakingLeaderboard(
+                                leaderboardDTO.getName(), leaderboardDTO.displayName, /* scoringScheme is provided by regatta, not leaderboard */ null,
+                                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, Util.mapToArrayList(leaderboardDTO.courseAreas, CourseAreaDTO::getId),
+                                leaderboardDTO.getOtherTieBreakingLeaderboardName()),
+                        stringMessages, errorReporter, new DialogCallback<LeaderboardDescriptorWithOtherTieBreakingLeaderboard>() {
+                            @Override
+                            public void cancel() {
+                            }
+
+                            @Override
+                            public void ok(LeaderboardDescriptorWithOtherTieBreakingLeaderboard result) {
                                 updateLeaderboard(oldLeaderboardName, result);
                             }
                         });
@@ -930,10 +953,10 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void createRegattaLeaderboard() {
-        RegattaLeaderboardCreateDialog dialog = new RegattaLeaderboardCreateDialog(
+        RegattaLeaderboardCreateDialog<LeaderboardDescriptor> dialog = new RegattaLeaderboardCreateDialog<LeaderboardDescriptor>(
                 Collections.unmodifiableCollection(availableLeaderboardList),
-                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(allRegattas), new LeaderboardDescriptor(), stringMessages,
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }
@@ -1005,6 +1028,39 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     }
                 });
         dialog.ensureDebugId("RegattaLeaderboardCreateDialog");
+        dialog.show();
+    }
+
+    private void createRegattaLeaderboardWithOtherTieBreakingLeaderboard() {
+        RegattaLeaderboardWithOtherTieBreakingLeaderboardCreateDialog dialog = new RegattaLeaderboardWithOtherTieBreakingLeaderboardCreateDialog(
+                Collections.unmodifiableCollection(availableLeaderboardList),
+                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter,
+                new DialogCallback<LeaderboardDescriptorWithOtherTieBreakingLeaderboard>() {
+                    @Override
+                    public void cancel() {
+                    }
+
+                    @Override
+                    public void ok(final LeaderboardDescriptorWithOtherTieBreakingLeaderboard newLeaderboard) {
+                        final RegattaName regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
+                        sailingServiceWrite.createRegattaLeaderboardWithOtherTieBreakingLeaderboard(
+                                regattaIdentifier, newLeaderboard.getDisplayName(),
+                                newLeaderboard.getDiscardThresholds(), newLeaderboard.getOtherTieBreakingLeaderboardName(),
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError("Error trying to create the new regatta leaderboard "
+                                                + newLeaderboard.getName() + ": " + t.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(StrippedLeaderboardDTO result) {
+                                        addLeaderboard(result);
+                                    }
+                                });
+                    }
+                });
+        dialog.ensureDebugId("RegattaLeaderboardWithOtherTieBreakingLeaderboardCreateDialog");
         dialog.show();
     }
 

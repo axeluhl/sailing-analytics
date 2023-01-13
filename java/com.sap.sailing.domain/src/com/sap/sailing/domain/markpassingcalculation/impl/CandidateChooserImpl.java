@@ -126,7 +126,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * Methods operating on this collection and the collections embedded in it must be {@code synchronized} in order to
      * avoid overlapping operations. This will generally not limit concurrency further than usual, except for the
      * start-up phase where a background thread may be spawned by the constructor in case the
-     * {@link MarkPassingCalculator#MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} constructor is invoked
+     * {@link MarkPassingCalculator#MarkPassingCalculator(DynamicTrackedRace, boolean, boolean, MarkPassingRaceFingerprintRegistry)} constructor is invoked
      * with the {@code waitForInitialMarkPassingCalculation} parameter set to {@code false}. In this case, mark passing
      * calculation will be launched in the background and will not be waited for. This then needs to be synchronized
      * with the dynamic (re-)calculations triggered by fixes and other data popping in.

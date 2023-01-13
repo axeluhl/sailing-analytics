@@ -165,7 +165,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         final ClassLoader oldThreadContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getJoinedClassLoader());
         try (final ObjectInputStream in = new ObjectInputStreamResolvingAgainstCache<Object>(
-                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null) {}) {
+                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null, /* classLoaderCache */ new HashMap<>()) {}) {
             Object o = in.readObject();
             if (o instanceof StatisticQueryDefinitionDTO) {
                 return (StatisticQueryDefinitionDTO) o;

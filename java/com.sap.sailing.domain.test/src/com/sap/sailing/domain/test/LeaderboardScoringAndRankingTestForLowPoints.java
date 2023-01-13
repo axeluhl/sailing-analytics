@@ -23,12 +23,12 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -41,12 +41,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardScoringAndRankingTestBase {
     private static final double EPSILON = 0.000001;
-
-    protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
-            Regatta regatta, String leaderboardName, int[] discardingThresholds) {
-        return new DelegatingRegattaLeaderboardWithCompetitorElimination(
-                () -> createLeaderboard(regatta, discardingThresholds), leaderboardName);
-    }
 
     private void executePreSeries(List<Competitor> yellow, List<Competitor> blue, TimePoint now) {
         RaceColumn qColumn = series.get(0).getRaceColumnByName("Q");
@@ -143,8 +137,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
 
@@ -199,8 +193,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst);
@@ -229,9 +223,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(6, leaderboard.getNetPoints(preThird, later), EPSILON);
         Assert.assertEquals(8, leaderboard.getNetPoints(preFourth, later), EPSILON);
         
-        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
-        Assert.assertEquals(res.get(0), preFirst);
-        Assert.assertEquals(res.get(1), preSecond);
+        Iterable<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(Util.get(res, 0), preFirst);
+        Assert.assertEquals(Util.get(res, 1), preSecond);
         
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -251,11 +245,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(9, leaderboard.getNetPoints(preThird, m2later), EPSILON);
         Assert.assertEquals(12, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
         
-        List<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
-        Assert.assertEquals(res2.get(0), preSecond);
-        Assert.assertEquals(res2.get(1), preFirst);
-        Assert.assertEquals(res2.get(2), preThird);
-        Assert.assertEquals(res2.get(3), preFourth);
+        Iterable<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
+        Assert.assertEquals(Util.get(res2, 0), preSecond);
+        Assert.assertEquals(Util.get(res2, 1), preFirst);
+        Assert.assertEquals(Util.get(res2, 2), preThird);
+        Assert.assertEquals(Util.get(res2, 3), preFourth);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -286,8 +280,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst);
@@ -316,9 +310,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(6, leaderboard.getNetPoints(preThird, later), EPSILON);
         Assert.assertEquals(8, leaderboard.getNetPoints(preFourth, later), EPSILON);
         // assert that during tie-breaking the pre-series carry score takes precedence
-        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
-        Assert.assertEquals(res.get(0), preFirst);
-        Assert.assertEquals(res.get(1), preSecond);
+        Iterable<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(Util.get(res, 0), preFirst);
+        Assert.assertEquals(Util.get(res, 1), preSecond);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -338,11 +332,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(9, leaderboard.getNetPoints(preThird, m2later), EPSILON);
         Assert.assertEquals(12, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
         
-        List<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
-        Assert.assertEquals(res2.get(0), preFirst);
-        Assert.assertEquals(res2.get(1), preSecond);
-        Assert.assertEquals(res2.get(2), preThird);
-        Assert.assertEquals(res2.get(3), preFourth);
+        Iterable<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
+        Assert.assertEquals(Util.get(res2, 0), preFirst);
+        Assert.assertEquals(Util.get(res2, 1), preSecond);
+        Assert.assertEquals(Util.get(res2, 2), preThird);
+        Assert.assertEquals(Util.get(res2, 3), preFourth);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -372,8 +366,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst);
@@ -402,10 +396,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(5, leaderboard.getNetPoints(preSecond, later), EPSILON);
         Assert.assertEquals(7, leaderboard.getNetPoints(preThird, later), EPSILON);
         
-        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
-        Assert.assertEquals(res.get(0), preFirst);
-        Assert.assertEquals(res.get(1), preSecond);
-        Assert.assertEquals(res.get(2), preFourth);
+        Iterable<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(Util.get(res, 0), preFirst);
+        Assert.assertEquals(Util.get(res, 1), preSecond);
+        Assert.assertEquals(Util.get(res, 2), preFourth);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -425,11 +419,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(8, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
         Assert.assertEquals(11, leaderboard.getNetPoints(preThird, m2later), EPSILON);
         
-        List<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
-        Assert.assertEquals(res2.get(0), preFourth);
-        Assert.assertEquals(res2.get(1), preFirst);
-        Assert.assertEquals(res2.get(2), preSecond);
-        Assert.assertEquals(res2.get(3), preThird);
+        Iterable<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
+        Assert.assertEquals(Util.get(res2, 0), preFourth);
+        Assert.assertEquals(Util.get(res2, 1), preFirst);
+        Assert.assertEquals(Util.get(res2, 2), preSecond);
+        Assert.assertEquals(Util.get(res2, 3), preThird);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -459,8 +453,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst);
@@ -490,10 +484,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(7, leaderboard.getNetPoints(preThird, later), EPSILON);
         
         
-        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
-        Assert.assertEquals(res.get(0), preFirst);
-        Assert.assertEquals(res.get(1), preSecond);
-        Assert.assertEquals(res.get(2), preFourth);
+        Iterable<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(Util.get(res, 0), preFirst);
+        Assert.assertEquals(Util.get(res, 1), preSecond);
+        Assert.assertEquals(Util.get(res, 2), preFourth);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -534,32 +528,25 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         blue.removeAll(yellow);
         Collections.shuffle(yellow);
         Collections.shuffle(blue);
-
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
-
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
-        List<Competitor> medalCompetitors = preSeriesRankResult.subList(0, 4);
-
+        List<Competitor> medalCompetitors = Util.subList(preSeriesRankResult, 0, 4);
         manuallyTransferCarry(leaderboard, medalCompetitors);
-
         Competitor preFirst = medalCompetitors.get(0);
         Competitor preSecond = medalCompetitors.get(1);
         Competitor preThird = medalCompetitors.get(2);
         Competitor preFourth = medalCompetitors.get(3);
-
         RaceColumn m1 = leaderboard.getRaceColumnByName("M1");
-
         ArrayList<Competitor> m1Results = new ArrayList<>();
         m1Results.add(preFirst);
         m1Results.add(preSecond);
         m1Results.add(preThird);
         m1Results.add(preFourth);
-
         TrackedRace mDefault = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), mDefault);
 
@@ -599,8 +586,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst);
@@ -677,8 +664,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst);
@@ -708,9 +695,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(16, leaderboard.getNetPoints(preFourth, later), EPSILON);
         
         
-        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
-        Assert.assertEquals(res.get(0), preSecond);
-        Assert.assertEquals(res.get(1), preFirst);
+        Iterable<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(Util.get(res, 0), preSecond);
+        Assert.assertEquals(Util.get(res, 1), preFirst);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -756,8 +743,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
 
@@ -787,10 +774,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(10, leaderboard.getNetPoints(preSecond, later), EPSILON);
         Assert.assertEquals(14, leaderboard.getNetPoints(preThird, later), EPSILON);
         
-        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
-        Assert.assertEquals(res.get(0), preFirst);
-        Assert.assertEquals(res.get(1), preFourth);
-        Assert.assertEquals(res.get(2), preSecond);
+        Iterable<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(Util.get(res, 0), preFirst);
+        Assert.assertEquals(Util.get(res, 1), preFourth);
+        Assert.assertEquals(Util.get(res, 2), preSecond);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -836,8 +823,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
         executePreSeries(yellow, blue, now);
 
-        List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
-        List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
+        Iterable<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
+        List<Competitor> medalCompetitorsBestToWorst = Util.subList(preSeriesRankResult, 0, 4);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
                 leaderboard);
         manuallyTransferCarry(leaderboard, medalCompetitorsBestToWorst);
@@ -866,10 +853,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(10, leaderboard.getNetPoints(preSecond, later), EPSILON);
         Assert.assertEquals(14, leaderboard.getNetPoints(preThird, later), EPSILON);
         
-        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
-        Assert.assertEquals(res.get(0), preFirst);
-        Assert.assertEquals(res.get(1), preFourth);
-        Assert.assertEquals(res.get(2), preSecond);
+        Iterable<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(Util.get(res, 0), preFirst);
+        Assert.assertEquals(Util.get(res, 1), preFourth);
+        Assert.assertEquals(Util.get(res, 2), preSecond);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -889,14 +876,13 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(16, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
         Assert.assertEquals(16, leaderboard.getNetPoints(preThird, m2later), EPSILON);
         
-        List<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
-        Assert.assertEquals(res2.get(0), preFirst);
-        Assert.assertEquals(res2.get(1), preThird);
-        Assert.assertEquals(res2.get(2), preSecond);
-        Assert.assertEquals(res2.get(3), preFourth);
+        Iterable<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(m2later);
+        Assert.assertEquals(Util.get(res2, 0), preFirst);
+        Assert.assertEquals(Util.get(res2, 1), preThird);
+        Assert.assertEquals(Util.get(res2, 2), preSecond);
+        Assert.assertEquals(Util.get(res2, 3), preFourth);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
     }
-
 }

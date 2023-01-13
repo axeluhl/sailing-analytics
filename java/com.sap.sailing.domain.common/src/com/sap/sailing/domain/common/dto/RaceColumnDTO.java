@@ -23,6 +23,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private Map<FleetDTO, RaceDTO> racesPerFleet;
     private Double explicitFactor;
     private double effectiveFactor;
+    private boolean oneAlwaysStaysOne;
     private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos;
     
     public enum RaceColumnLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE };
@@ -30,12 +31,18 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     @Deprecated
     RaceColumnDTO() {} // for GWT RPC serialization only
     
-    public RaceColumnDTO(String name) {
+    /**
+     * @param oneAlwaysStaysOne
+     *            tells whether when scaling results with the {@link #getEffectiveFactor() effective column factor}, the
+     *            1.0 score shall always remain 1.0.
+     */
+    public RaceColumnDTO(String name, boolean oneAlwaysStaysOne) {
         super(name);
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     public RaceColumnLiveState getLiveState(long serverTimePointAsMillis) {
@@ -58,6 +65,10 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     
     public void setExplicitFactor(Double explicitFactor) {
         this.explicitFactor = explicitFactor;
+    }
+    
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
     }
 
     public boolean hasTrackedRace(RaceIdentifier raceIdentifier) {

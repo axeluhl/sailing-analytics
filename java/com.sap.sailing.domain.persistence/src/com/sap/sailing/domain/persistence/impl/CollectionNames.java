@@ -120,6 +120,11 @@ public enum CollectionNames {
     /**
      * Contains the known anniversaries
      */
-    ANNIVERSARIES;
+    ANNIVERSARIES,
+    
+    /**
+     * Contains the Hashes for the {@link MarkPassingHashFingerprint}
+     */
+    MARKPASSINGS;
 
 }

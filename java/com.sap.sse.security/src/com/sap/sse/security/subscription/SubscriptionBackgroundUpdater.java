@@ -29,7 +29,7 @@ public class SubscriptionBackgroundUpdater {
 
     public void start(CompletableFuture<SecurityService> securityService) {
         logger.info(() -> "Start subscription background update task");
-        executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService, subscriptionApiServiceTracker),
-                /* initial */ 1, /* period */ 720, TimeUnit.MINUTES);
+        executor.schedule(new SubscriptionUpdateTask(securityService, subscriptionApiServiceTracker),
+                /* initial */ 1, TimeUnit.MINUTES);
     }
 }

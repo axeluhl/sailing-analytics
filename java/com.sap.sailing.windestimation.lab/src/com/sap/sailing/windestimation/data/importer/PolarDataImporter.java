@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.data.importer;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
@@ -15,6 +16,7 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class PolarDataImporter {
+    private static final Logger logger = Logger.getLogger(PolarDataImporter.class.getName());
 
     private static final String polarDataSourceUrl = "https://www.sapsailing.com";
 
@@ -33,9 +35,9 @@ public class PolarDataImporter {
     }
 
     public void persistPolarDataRegressionAsBytes(File targetFile, InputStream inputStream) throws IOException {
-        LoggingUtil.logInfo("Persisting polar regression data");
+        logger.info("Persisting polar regression data to file "+targetFile+" (canonical path: "+targetFile.getCanonicalPath()+")");
         FileUtils.copyInputStreamToFile(inputStream, targetFile);
-        LoggingUtil.logInfo("Persisting polar regression data succeeded");
+        logger.info("Persisting polar regression data succeeded");
     }
 
     private String getAPIString() {

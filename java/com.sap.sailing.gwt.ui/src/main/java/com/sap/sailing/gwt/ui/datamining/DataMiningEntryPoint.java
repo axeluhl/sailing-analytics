@@ -26,10 +26,11 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
 import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
@@ -143,6 +144,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     }
                 });
                 queryDefinitionProvider.addControl(orientationAnchor);
+                queryDefinitionProvider.addControl(new HelpButton(DataMiningHelpButtonResources.INSTANCE,
+                        getStringMessages().videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/360019913740-An-Introduction-to-the-SAP-Sailing-Analytics-Data-Mining-Tool"));
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the

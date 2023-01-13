@@ -34,7 +34,7 @@ public class PositionsDocument {
      * From all positions in the document returns the latest time stamp, or {@code null} if no position fix exists in this document
      */
     public TimePoint getTimePointOfLastFix() {
-        final Stream<TeamPositions> teams = StreamSupport.stream(getTeams().spliterator(), /* parallel */ true);
+        final Stream<TeamPositions> teams = StreamSupport.stream(getTeams().spliterator(), /* parallel */ false);
         final Function<TeamPositions, Stream<TeamPosition>> mapper = tp->StreamSupport.stream(tp.getPositions().spliterator(), /* parallel */ true);
         return teams.flatMap(mapper).map(p->p.getTimePoint()).max(Comparator.naturalOrder()).orElse(null);
     }

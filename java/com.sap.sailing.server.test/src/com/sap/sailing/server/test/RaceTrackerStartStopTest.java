@@ -90,25 +90,25 @@ public class RaceTrackerStartStopTest {
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogAndTrackedRaceResolver.class),
-                Optional.empty(), /* trackingConnectorInfo */ null);
+                Optional.empty(), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null);
         regatta.addRace(raceDef2);
         trackedRegatta1.createTrackedRace(raceDef2, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogAndTrackedRaceResolver.class),
-                Optional.empty(), null);
+                Optional.empty(), null, /* markPassingRaceFingerprintRegistry */ null);
         regatta.addRace(raceDef3);
         trackedRegatta1.createTrackedRace(raceDef3, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogAndTrackedRaceResolver.class),
-                Optional.empty(), null);
-        Long trackerID1 = new Long(1);
-        Long trackerID2 = new Long(2);
-        Long trackerID3 = new Long(3);
-        raceTracker1 = new RaceTrackerMock(new Long(1), regatta, raceDef1, true);
-        raceTracker2 = new RaceTrackerMock(new Long(2), regatta, raceDef2, true);
-        raceTracker3 = new RaceTrackerMock(new Long(3), regatta, raceDef3, true);
+                Optional.empty(), null, /* markPassingRaceFingerprintRegistry */ null);
+        Long trackerID1 = Long.valueOf(1);
+        Long trackerID2 = Long.valueOf(2);
+        Long trackerID3 = Long.valueOf(3);
+        raceTracker1 = new RaceTrackerMock(Long.valueOf(1), regatta, raceDef1, true);
+        raceTracker2 = new RaceTrackerMock(Long.valueOf(2), regatta, raceDef2, true);
+        raceTracker3 = new RaceTrackerMock(Long.valueOf(3), regatta, raceDef3, true);
         raceTrackerSet.add(raceTracker1);
         raceTrackerSet.add(raceTracker2);
         raceTrackerSet.add(raceTracker3);

@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -22,6 +24,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -63,15 +66,17 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     public SwissTimingRaceConfig loadRaceConfig(String raceId) {
         try {
             URL configUrl = new URL(MessageFormat.format(RACE_CONFIG_URL_TEMPLATE, raceId));
-            InputStream configDataStream = configUrl.openStream();
-            return loadRaceConfig(configDataStream);
+            final URLConnection connection = configUrl.openConnection();
+            final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+            InputStream configDataStream = connection.getInputStream();
+            return loadRaceConfig(configDataStream, charset);
         } catch (Exception e) { // MalformedURLException | ParseException | org.json.simple.parser.ParseException)
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream) throws IOException,
+    public SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream, Charset charset) throws IOException,
             org.json.simple.parser.ParseException {
         JSONObject jsonRaceConfig = (JSONObject) new JSONParser().parse(new InputStreamReader(configDataStream));
         JSONObject jsonConfigEntry = (JSONObject) jsonRaceConfig.get("config");
@@ -153,7 +158,7 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     public void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String swissTimingUrl, String raceName,
             String raceID, String boatClassName, TrackerManager trackerManager,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
         trackerManager
                 .addRace(regattaToAddTo, new SwissTimingReplayConnectivityParameters(link, swissTimingUrl, raceName,

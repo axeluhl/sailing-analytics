@@ -6,7 +6,7 @@ import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sse.common.Duration;
 
 public class RaceListRaceDTO extends RaceMetadataDTO<WindStatisticsDTO> {
-    
+    private static final long serialVersionUID = -5011180120061703265L;
     private Duration duration;
     private SimpleCompetitorDTO winner;
     private int windSourcesCount;

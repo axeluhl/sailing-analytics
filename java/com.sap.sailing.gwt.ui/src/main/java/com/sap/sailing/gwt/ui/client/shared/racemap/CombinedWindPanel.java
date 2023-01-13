@@ -111,7 +111,7 @@ public class CombinedWindPanel extends FlowPanel {
                 oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
                 oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
                 oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
-                oldRaceMapSettings.isShowSatelliteLayer());
+                        oldRaceMapSettings.isShowSatelliteLayer(), oldRaceMapSettings.isShowWindLadder());
         if (map.getComponentContext() != null
                 && map.getComponentContext().isStorageSupported(map)) {
             map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,

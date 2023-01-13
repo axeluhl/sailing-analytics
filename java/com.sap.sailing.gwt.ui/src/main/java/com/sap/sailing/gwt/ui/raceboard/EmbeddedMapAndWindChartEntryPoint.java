@@ -118,7 +118,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                 defaultRaceMapSettings.isShowDouglasPeuckerPoints(), true,
                 defaultRaceMapSettings.getStartCountDownFontSizeScaling(),
                 defaultRaceMapSettings.isShowManeuverLossVisualization(),
-                defaultRaceMapSettings.isShowSatelliteLayer());
+                defaultRaceMapSettings.isShowSatelliteLayer(),
+                defaultRaceMapSettings.isShowWindLadder());
         final String regattaLikeName = contextDefinition.getRegattaLikeName();
         final String raceColumnName = contextDefinition.getRaceColumnName();
         final String fleetName = contextDefinition.getFleetName();

@@ -930,7 +930,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         associatedComponentToWidget.setVisible(false);
                     }
                 }
-                splitter.setAssociatedWidgetSize(0, /* forceLayout */false);
+                splitter.setAssociatedWidgetSize(0, /* forceLayout */true);
 
                 // need to ensure visibility of dragger, do NOT use setVisible() as south/north splitter should be shown always
                 splitter.setDraggerVisible(!hidden);
@@ -945,10 +945,10 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     //it is not yet sized
                     if(layoutData.oldSize > 0) {
                         //and we have a stored old size it had before minimizing it
-                        splitter.setAssociatedWidgetSize(layoutData.oldSize, /* forceLayout */false);
+                        splitter.setAssociatedWidgetSize(layoutData.oldSize, /* forceLayout */true);
                     } else {
                         //and we do not have any size yet, so use the default size
-                        splitter.setAssociatedWidgetSize(initialSize, /* forceLayout */false);
+                        splitter.setAssociatedWidgetSize(initialSize, /* forceLayout */true);
                     }
                 }
                 splitter.setDraggerVisible(!hidden);

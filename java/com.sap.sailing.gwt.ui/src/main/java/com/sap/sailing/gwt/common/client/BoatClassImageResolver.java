@@ -40,10 +40,12 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.ALBIN_EXPRESS.getDisplayName(), imageResources.AlbinExpressIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ALBIN_BALLAD.getDisplayName(), imageResources.AlbinBalladIcon());
         boatClassIconsMap.put(BoatClassMasterdata.B_ONE.getDisplayName(), imageResources.BOneIcon());
-        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_41S.getDisplayName(), imageResources.BavariaCruiser41S());
-        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_45.getDisplayName(), imageResources.BavariaCruiser45());
-        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_46.getDisplayName(), imageResources.BavariaCruiser46());
+        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_41S.getDisplayName(), imageResources.BavariaCruiser41SIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_45.getDisplayName(), imageResources.BavariaCruiser45Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_46.getDisplayName(), imageResources.BavariaCruiser46Icon());
         boatClassIconsMap.put(BoatClassMasterdata.BB10M.getDisplayName(), imageResources.BB10MIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.BENETEAU_FIRST_35.getDisplayName(), imageResources.BeneteauFirst35Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.BENETEAU_FIRST_45.getDisplayName(), imageResources.BeneteauFirst45Icon());
         boatClassIconsMap.put(BoatClassMasterdata.BRASSFAHRT_I.getDisplayName(), imageResources.Brassfahrt1Icon());
         boatClassIconsMap.put(BoatClassMasterdata.BRASSFAHRT_II.getDisplayName(), imageResources.Brassfahrt2Icon());
         boatClassIconsMap.put(BoatClassMasterdata.BRASSFAHRT_III.getDisplayName(), imageResources.Brassfahrt3Icon());

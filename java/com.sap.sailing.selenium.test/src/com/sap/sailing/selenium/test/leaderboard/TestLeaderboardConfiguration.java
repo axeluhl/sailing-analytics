@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,19 +77,16 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, false);
             LeaderboardTablePO table = leaderboard.getLeaderboardTable();
             List<String> races = table.getRaceNames();
-            
+            // test that set-up worked:
             assertThat(races.size(), equalTo(5));
             assertThat(table.getEntries().size(), equalTo(28)); // the regatta already has the races linked; regatta leaderboard obtains competitors from regatta 
-            
             final WebDriver adminConsoleWindowDriver = adminConsoleWindow.switchToWindow();
             setUpAuthenticatedSession(adminConsoleWindowDriver);
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(adminConsoleWindowDriver, getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
             LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
-            
             Integer[] expectedPointsForFindelJens = new Integer[] {2, 18, 12, 4, 7};
             Integer[] expectedRankForFindelJens = new Integer[] {2, 9, 11, 7, 6}; // Bogacki with no score in R1 expected to end up at end of leaderboard
-            
             // Link the races and check the leaderboard again
             for (int i = 0; i < 5; i++) {
                 leaderboardDetails.linkRace(this.leaderboardRaces.get(i), this.trackedRaces.get(i));

@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
@@ -31,10 +32,26 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleConditio
  * will only see the non-default rule set of the HTTPS listener which is used to dynamically configure the
  * landscape.
  * 
+ * On https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-limits.html are some restrictions
+ * listed for the load balanancer's setup. 
+ * 
  * @author Axel Uhl (D043530)
  *
  */
 public interface ApplicationLoadBalancer<ShardingKey> extends Named {
+    
+    static final int MAX_RULES_PER_LOADBALANCER = 100;
+    static final String DNS_MAPPED_ALB_NAME_PREFIX = "DNSMapped-";
+    static final Pattern ALB_NAME_PATTERN = Pattern.compile(DNS_MAPPED_ALB_NAME_PREFIX+"(.*)$");
+    static final int MAX_ALBS_PER_REGION = 20;
+    static final int MAX_CONDITIONS_PER_RULE = 5;
+    public static final String DEFAULT_RULE_PRIORITY = "Default";
+    
+    /**
+     * The maximum {@link Rule#priority()} that can be used within a listener
+     */
+    public static final int MAX_PRIORITY = 50000;
+    
     /**
      * The DNS name of this load balancer; can be used, e.g., to set a CNAME DNS record pointing
      * to this load balancer.
@@ -89,6 +106,30 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      */
     Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules);
     
+    /**
+     * For inserting e.g. Shard at a specific priority, we must ensure that the priority is unique in the ruleset.
+     * This function shifts every priority starting at the highest priority one higher for making the priority at {@code index}
+     * free. 
+     * @param index
+     *          index supposed to be free
+     * @throws IllegalStateException
+     *          gets thrown if shifting exceeds the limit of priorities
+     */
+    void shiftRulesToMakeSpaceAt(int index) throws IllegalStateException;
+    
+    /**
+     * Returns the priority which should be used as the next sharding priority.
+     * @param hostname
+     *          hostname of replica set from which the shard gets created
+     * @return priority of a rule with hostname as Host +1, if the rule it was found in is a redirect or the index of the Rule if it is a Forward.
+     *          if there is no Rule with this hostname, just return the index after the last rule. This index should be used as the next shard priority.
+     *          You may need to make space at this priority via {@link #shiftRulesToMakeSpaceAt(int)}
+     * @throws Exception
+     *          if the found priority is higher than the {@code MAX_PRIORITY}
+     */         
+    
+    int getFirstShardingPriority(String hostname) throws IllegalStateException;
+    
     Iterable<TargetGroup<ShardingKey>> getTargetGroups();
 
     /**
@@ -117,4 +158,8 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Rule getDefaultRedirectRule(String hostName, PlainRedirectDTO plainRedirectDTO);
 
     RuleCondition createHostHeaderRuleCondition(String hostname);
+    
+    Iterable<Rule> getRulesForTargetGroups(Iterable<TargetGroup<ShardingKey>> targetGroups);
+
+    Iterable<Rule> replaceTargetGroupInForwardRules(TargetGroup<ShardingKey> oldTargetGroup, TargetGroup<ShardingKey> newTargetGroup );
 }

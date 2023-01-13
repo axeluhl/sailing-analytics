@@ -63,8 +63,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private IntegerBox hoverlineStrokeWeight;
     private DoubleBox startCountDownFontSizeScalingBox;
     private CheckBox maneuverLossVisualizationCheckBox;
+    private CheckBox windLadderCheckBox;
     private boolean hasPolar;
-    
+
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
@@ -234,6 +235,11 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         maneuverLossVisualizationCheckBox = dialog.createCheckbox(stringMessages.maneuverLoss());
         maneuverLossVisualizationCheckBox.setValue(initialSettings.isShowManeuverLossVisualization());
         vp.add(maneuverLossVisualizationCheckBox);
+
+        windLadderCheckBox = dialog.createCheckbox(stringMessages.showWindLadder());
+        windLadderCheckBox.setValue(initialSettings.isShowWindLadder());
+        vp.add(windLadderCheckBox);
+
         transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
         transparentHoverlines.ensureDebugId("transparentHoverlinesCheckBox");
         transparentHoverlines.setValue(initialSettings.getTransparentHoverlines());
@@ -303,7 +309,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
                 initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
                 startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue(),
-                showSatelliteLayerCheckbox.getValue());
+                showSatelliteLayerCheckbox.getValue(), windLadderCheckBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {

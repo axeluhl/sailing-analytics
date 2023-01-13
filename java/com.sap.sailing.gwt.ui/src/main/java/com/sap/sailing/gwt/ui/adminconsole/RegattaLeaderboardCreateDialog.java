@@ -9,13 +9,13 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
+public class RegattaLeaderboardCreateDialog<LD extends LeaderboardDescriptor> extends RegattaLeaderboardDialog<LD> {
 
     public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards,
-            Collection<RegattaDTO> existingRegattas, StringMessages stringMessages, ErrorReporter errorReporter,
-            DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringMessages,
-                errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards),
+            Collection<RegattaDTO> existingRegattas, LD initialLeaderboardDescriptor, StringMessages stringMessages,
+            ErrorReporter errorReporter, DialogCallback<LD> callback) {
+        super(stringMessages.createRegattaLeaderboard(), initialLeaderboardDescriptor, existingRegattas, stringMessages,
+                errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator<LD>(stringMessages, existingLeaderboards),
                 callback);
         displayNameTextBox = createTextBox(null);
         displayNameTextBox.ensureDebugId("DisplayNameTextBox");

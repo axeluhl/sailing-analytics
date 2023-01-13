@@ -38,8 +38,8 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -441,7 +441,7 @@ public class PolarDataMiner {
     }
 
     public void raceFinishedTracking(final TrackedRace race) {
-        processRacesThatFinishedLoadingExecutor.execute(()->{
+        processRacesThatFinishedLoadingExecutor.execute(()->{ // no Subject association necessary here
             logger.info("All queued fixes for newly loaded race will process now. "
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName()));
             for (final Competitor competitor : race.getRace().getCompetitors()) {

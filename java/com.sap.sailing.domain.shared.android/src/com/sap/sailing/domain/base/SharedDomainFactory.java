@@ -51,7 +51,6 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
             String pattern, UUID originatingMarkTemplateId, UUID originatingMarkPropertiesId);
 
     /**
-     * @param shortName TODO
      * @see #getOrCreateMark(String, String, String)
      */
     Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName, MarkType type, Color color, String shape, String pattern);
@@ -70,7 +69,7 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
      */
     Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction);
 
-    Waypoint getExistingWaypointById(Waypoint waypointPrototype);
+    Waypoint getExistingWaypointById(Serializable waypointId);
 
     /**
      * Atomically checks if a waypoint by an equal {@link Waypoint#getId()} as <code>waypoint</code> exists in this domain factory's

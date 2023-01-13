@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -18,7 +19,6 @@ import java.util.UUID;
 
 import org.apache.shiro.SecurityUtils;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -148,8 +148,8 @@ public class LoginTest {
         AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
-        Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
-        Assert.assertThat(result.get(null), Matchers.contains("UPDATE"));
+        assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
+        assertThat(result.get(null), Matchers.contains("UPDATE"));
     }
     
     @Test

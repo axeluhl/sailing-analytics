@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public interface EventViewBase extends IsWidget {
 
@@ -70,5 +71,7 @@ public interface EventViewBase extends IsWidget {
         EventBus getEventBus();
 
         UserService getUserService();
+        
+        SubscriptionServiceFactory getSubscriptionServiceFactory();
     }
 }

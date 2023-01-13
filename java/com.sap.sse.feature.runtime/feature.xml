@@ -689,6 +689,13 @@
          unpack="false"/>
 
    <plugin
+         id="javax.xml.soap"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.v201005080501"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.osgi.util"
          download-size="0"
          install-size="0"
@@ -720,35 +727,84 @@
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
-         version="2.17.124"
+         version="2.18.8"
          unpack="false"/>
 
    <plugin
          id="com.amazon.aws.aws-java-api.source"
          download-size="0"
          install-size="0"
-         version="2.17.124"
+         version="2.18.8"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="9.0.0.v20201001-1419"
+         version="9.4.0.v20221107-1714"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons"
          download-size="0"
          install-size="0"
-         version="9.0.0.v20201001-1419"
+         version="9.4.0.v20221107-1714"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.analysis"
+         download-size="0"
+         install-size="0"
+         version="9.4.0.v20221107-1714"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="9.0.0.v20201001-1419"
+         version="9.4.0.v20221107-1714"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.util"
+         download-size="0"
+         install-size="0"
+         version="9.4.0.v20221107-1714"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.0.v20221107-1714"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.analysis.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.0.v20221107-1714"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.commons.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.0.v20221107-1714"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.tree.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.0.v20221107-1714"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.util.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.0.v20221107-1714"
          unpack="false"/>
 
    <plugin
@@ -791,7 +847,14 @@
          id="org.apache.aries.spifly.dynamic.bundle"
          download-size="0"
          install-size="0"
-         version="1.2.4"
+         version="1.3.6"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.aries.spifly.dynamic.bundle.source"
+         download-size="0"
+         install-size="0"
+         version="1.3.6"
          unpack="false"/>
 
    <plugin
@@ -967,6 +1030,20 @@
          download-size="0"
          install-size="0"
          version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.gson"
+         download-size="0"
+         install-size="0"
+         version="2.8.9.v20220111-1409"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.gson.source"
+         download-size="0"
+         install-size="0"
+         version="2.8.9.v20220111-1409"
          unpack="false"/>
 
 </feature>

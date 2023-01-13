@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -771,5 +772,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan);
 
     SubscriptionPlan getSubscriptionPlanByItemPriceId(String itemPriceId);
-    
+
+    /**
+     * Updates the currently held SubscriptionPlanPrices for all known SubscriptionPlans
+     * @param itemPrices
+     */
+    void updateSubscriptionPlanPrices(Map<String, BigDecimal> itemPrices);
+
 }

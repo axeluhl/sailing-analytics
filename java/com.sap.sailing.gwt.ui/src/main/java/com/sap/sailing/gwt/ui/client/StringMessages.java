@@ -52,7 +52,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitorWithBoat();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
-    String newDotDotDot();
     String editScores();
     String columnNamesInSelectedLeaderboard();
     String addDotDotDot();
@@ -176,7 +175,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pointsToLoad();
     String speed();
     String distance();
-    String in();
     String secondsUnit();
     String secondsPerNauticalMileUnit();
     String metersUnit();
@@ -376,7 +374,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveRegatta(String name);
     String errorLoadingScoreCorrectionProviders(String message);
     String selectResultListToImportFrom();
-    String of();
     String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName, String string, String message);
     String assignRaceNumbersToRaceColumns();
     String importOfficialResults();
@@ -463,8 +460,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
     String createRegattaLeaderboardWithEliminations();
+    String createRegattaLeaderboardWithOtherTieBreakingLeaderboard();
     String editFlexibleLeaderboard();
     String editRegattaLeaderboard();
+    String editRegattaLeaderboardWithEliminations();
+    String editRegattaLeaderboardWithOtherTieBreakingLeaderboard();
     String defaultRegatta();
     String useOverallLeaderboard();
     String overallStandings();
@@ -763,9 +763,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String hide();
     String leftWind();
     String rightWind();
-    String strategyOption1();
-    String strategyOption2();
-    String strategyOption3();
     String legLabel();
     String raceLabel();
     String competitorLabel();
@@ -1039,9 +1036,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String releaseNotes();
     String pwaAnchor();
     String hasSplitFleetContiguousScoring();
+    String hasCrossFleetMergedRanking();
     String eventOverview();
-    String addRaceLogTracker();
-    String addRaceLogTrackers();
     String denoteForRaceLogTracking();
     String startRaceLogTracking();
     String filterByLeaderboard();
@@ -2370,6 +2366,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String landscape();
     String identifier();
     String selectARole();
+    String showWindLadder();
+    String windLadderOverride();
+    String windLadderManeuverAngle();
     String raceOfficerOnVessel();
     String shoreControl();
     String demoMode();
@@ -2410,4 +2409,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String goToSelfServicePortalDialogTitle();
     String goToSelfServicePortalDialogText();
     String failedFetchingSelfServicePortalSession();
+    String oneAlwaysStaysOne();
+    String otherTieBreakingLeaderboard();
+    String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboard();
+    String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboardDescription();
+    String helptextLinkingRaces();
 }

@@ -1,17 +1,27 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
+import com.sap.sse.landscape.aws.orchestration.AddShardingKeyToShard;
+import com.sap.sse.landscape.aws.orchestration.CreateShard;
+import com.sap.sse.landscape.aws.orchestration.RemoveShardingKeyFromShard;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 /**
@@ -71,10 +81,28 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     /**
      * The auto-scaling group is responsible for scaling the set of replicas registered with the
      * {@link #getPublicTargetGroup() public target group}. This is optional, so {@code null} may
-     * be returned.
+     * be returned.<p>
+     * 
+     * Note that in the presence of {@link #getShards() shards} those shards will each have their
+     * own {@link AwsShard#getAutoScalingGroup() auto-scaling group} which will share a launch
+     * configuration with the auto-scaling group returned by this method.
      */
     AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException;
     
+    /**
+     * Returns a non-{@code null} but possibly empty iterable of all auto-scaling groups for this replica set.
+     * These can be the default {@link #getAutoScalingGroup() auto-scaling group} for the public target group
+     * as well as any {@link #getShards() shards' auto-scaling groups}.
+     */
+    default Iterable<AwsAutoScalingGroup> getAllAutoScalingGroups() throws InterruptedException, ExecutionException {
+        final Set<AwsAutoScalingGroup> result = new HashSet<>();
+        if (getAutoScalingGroup() != null) {
+            result.add(getAutoScalingGroup());
+        }
+        Util.addAll(Util.map(getShards().keySet(), shard->shard.getAutoScalingGroup()), result);
+        return result;
+    }
+
     /**
      * Checks whether the {@code host} is eligible for accepting a deployment of a process that belongs to this
      * application replica set, either its master or a replica. In order to be eligible, the host must
@@ -121,4 +149,50 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * is temporarily reduced by no more than one replica at a time.
      */
     void restartAllReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    /**
+     * @return {@code true} if this replica set is the one that this method is being run on. See
+     * {@link ServerInfo}.
+     */
+    boolean isLocalReplicaSet();
+    
+    /**
+     * Returns a {@link ShardTargetGroupName} that is created from an (user-) entered shard name ({@code shardName}).
+     * {@link ShardTargetGroupName} contains the target group name and the replica set name.
+     * 
+     * @param shardName
+     *            (User-) entered name for the shard.
+     * @param targetGroupNamePrefix
+     *            a prefix for the target group name; must not be {@code null} but may be empty
+     * @return {@link ShardTargetGroupName} created from {@code shardName}.
+     * @throws Exception
+     *             throws when {@code shardName} is not valid or is not parse-able to a shardName.
+     */
+    ShardTargetGroupName getNewShardName(String shardName, String targetGroupNamePrefix) throws Exception;
+    
+    /**
+     * Retrieves information about sharding in this replica set, representing the situation at the point in time
+     * this object was created (not a live copy of the current landscape configuration). For that time point the
+     * map returned tells which shard handles requests for which sharding keys. All other reading traffic will
+     * be routed to this replica set's {@link #getPublicTargetGroup() public target group}.<p>
+     * 
+     * Shards can be removed using {@link #removeShard(AwsShard, AwsLandscape)}. To create and manipulate shards, use the
+     * {@link CreateShard}, {@link AddShardingKeyToShard}, and {@link RemoveShardingKeyFromShard} procedures.
+     * 
+     * @return Keys are the {@link AwsShard shards}, values are the {@code ShardingKey}s managed by the corresponding
+     *         key's shard. Never {@code null}, but may of course be empty.
+     */
+    Map<AwsShard<ShardingKey>, Iterable<ShardingKey>> getShards();
+    
+    /**
+     * Removes the {@code shard} from this replica set. This will remove the load balancer routing rules that so far
+     * directed traffic for the shard's keys to the shard; it will also remove the auto-scaling group for the shard's
+     * target group which will also terminate all instances created by that auto-scaling group so far; finally, the
+     * shard's target group is removed.
+     * <p>
+     * 
+     * In effect, this will make all traffic for the shard's keys default back to the {@link #getPublicTargetGroup()
+     * public target group}.
+     */
+    void removeShard(AwsShard<ShardingKey> shard, AwsLandscape<ShardingKey> landscape) throws Exception;
 }

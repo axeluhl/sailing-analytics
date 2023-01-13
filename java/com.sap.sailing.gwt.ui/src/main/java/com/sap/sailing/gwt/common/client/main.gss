@@ -135,7 +135,7 @@ figcaption {
 }
 .buttonprimaryoutlined {
   background-color: transparent;
-  padding: .533333333333333em 1.333333333333333em;
+  padding: .6em 1.333333333333333em;
   border: 1px solid #008fcc;
   color: #008fcc;
 }

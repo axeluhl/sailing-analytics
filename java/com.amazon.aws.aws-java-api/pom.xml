@@ -12,20 +12,20 @@
         pom. Therefore, the parent was not set here - which means we have to define 
         $tycho-version again. -->
     <properties>
-      <tycho-version>1.6.0</tycho-version>
+      <tycho-version>1.7.0</tycho-version>
     </properties>       
     <groupId>com.amazon.aws</groupId>
     <artifactId>com.amazon.aws.aws-java-api</artifactId>
-    <version>2.17.124</version>
+    <version>2.18.8</version>
     <packaging>eclipse-plugin</packaging>
         <build>
         <plugins>
-		    <plugin>
-		      <groupId>org.eclipse.tycho</groupId>
-		      <artifactId>tycho-maven-plugin</artifactId>
-		      <version>${tycho-version}</version>
-		      <extensions>true</extensions>
-		    </plugin>
-        </plugins>
+	  <plugin>
+	    <groupId>org.eclipse.tycho</groupId>
+	    <artifactId>tycho-maven-plugin</artifactId>
+	    <version>${tycho-version}</version>
+	    <extensions>true</extensions>
+	  </plugin>
+      </plugins>
     </build>
 </project>

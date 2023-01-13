@@ -134,13 +134,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.objectweb.asm"
-         download-size="0"
-         install-size="0"
-         version="9.0.0.v20201001-1419"
-         unpack="false"/>
-
-   <plugin
          id="org.hyperic.sigar"
          download-size="0"
          install-size="0"

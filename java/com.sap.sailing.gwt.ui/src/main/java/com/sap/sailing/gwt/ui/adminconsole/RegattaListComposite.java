@@ -62,7 +62,7 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
- * A composite showing the list of all regattas 
+ * A composite showing the list of all regattas
  * @author Frank
  */
 public class RegattaListComposite extends Composite {
@@ -77,7 +77,7 @@ public class RegattaListComposite extends Composite {
     private final ErrorReporter errorReporter;
     private final Presenter presenter;
     protected final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
-    private final UserService userService;   
+    private final UserService userService;
     private List<RegattaDTO> allRegattas;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -88,15 +88,15 @@ public class RegattaListComposite extends Composite {
             sb.append(safeHtml);
         }
     }
-    
+
     private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-        
+
         @Override
         public void fill(Iterable<RegattaDTO> result) {
             fillRegattas(result);
         }
     };
-    
+
     public Displayer<RegattaDTO> getRegattasDisplayer() {
         return regattasDisplayer;
     }
@@ -145,13 +145,13 @@ public class RegattaListComposite extends Composite {
         panel.add(regattaTable);
         initWidget(panel);
     }
-    
+
     /**
      * True {@link RegattaDTO}s as managed by this panel usually shall be filterable based on the user's
      * permission to update. However, this panel may also be subclassed and used for objects that have not
      * yet been committed to the server or for other reasons are lacking ownership / security information.
      * Those subclasses should override this method to not set a filter.<p>
-     * 
+     *
      * This implementation sets a filter that requires the user to have {@link DefaultActions#UPDATE} permission
      * for the regatta in question.
      */
@@ -159,7 +159,7 @@ public class RegattaListComposite extends Composite {
         filterablePanelRegattas
                 .setUpdatePermissionFilterForCheckbox(regatta -> userService.hasPermission(regatta, DefaultActions.UPDATE));
     }
-    
+
     public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
         return refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(handler);
     }
@@ -181,7 +181,7 @@ public class RegattaListComposite extends Composite {
                         return t.getRegattaIdentifier().hashCode();
                     }
                 }, filterablePanelRegattas.getAllListDataProvider(), table);
-        
+
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getComparator());
@@ -207,7 +207,7 @@ public class RegattaListComposite extends Composite {
         regattaCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
         columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
                 (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
-        
+
         TextColumn<RegattaDTO> competitorRegistrationTypeColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -380,14 +380,15 @@ public class RegattaListComposite extends Composite {
                     final SeriesDTO series = seriesIter.next();
                     sailingServiceWrite.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
                         series.isFleetsCanRunInParallel(), series.getDiscardThresholds(), series.isStartsWithZeroScore(),
-                        series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                        series.getMaximumNumberOfDiscards(), series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(), series.hasCrossFleetMergedRanking(),
+                        series.getMaximumNumberOfDiscards(), series.isOneAlwaysStaysOne(), series.getFleets(),
+                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName()
                                         + ": " + caught.getMessage());
                             }
-    
+
                             @Override
                             public void onSuccess(Void result) {
                                 presenter.getRegattasRefresher().reloadAndCallFillAll();
@@ -416,9 +417,9 @@ public class RegattaListComposite extends Composite {
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
-        filterablePanelRegattas.updateAll(allRegattas);    
+        filterablePanelRegattas.updateAll(allRegattas);
     }
-    
+
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {
         BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingServiceWrite, userService,
                 stringMessages, errorReporter, new RegattaBoatCertificatesPanel(sailingServiceWrite, userService, regatta, stringMessages, errorReporter));

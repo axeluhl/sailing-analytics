@@ -9,3 +9,4 @@ encoding//src/com/sap/sailing/domain/common/orc/impl/ORCPerformanceCurveLegImpl.
 encoding//src/com/sap/sailing/domain/common/tracking/impl/AbstractCompactGPSFixMovingImpl.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/tracking/impl/CompactPositionHelper.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/tracking/impl/VeryCompactGPSFixMovingImpl.java=UTF-8
+encoding/<project>=UTF-8

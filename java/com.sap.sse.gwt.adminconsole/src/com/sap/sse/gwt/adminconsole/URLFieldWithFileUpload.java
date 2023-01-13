@@ -99,6 +99,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         removePanel.setMethod(FormPanel.METHOD_POST);
         removeButton = new Button();
         removeButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().deleteButtonClass(), true);
+        removeButton.addStyleName("btn-primary");
         removeButton.setEnabled(false); // the button shall only be enabled as long as we know the URI for removal
         removeButton.ensureDebugId("RemoveButton");
         removeButton.setTitle(stringMessages.resetToDefault());
@@ -121,6 +122,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         imageUrlPanel.add(urlTextBox);
         final Button selectUploadButton = new Button();
         selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass(), true);
+        selectUploadButton.addStyleName("btn-primary");
         imageUrlPanel.add(selectUploadButton);
         imageUrlPanel.add(removePanel);
         // the upload panel

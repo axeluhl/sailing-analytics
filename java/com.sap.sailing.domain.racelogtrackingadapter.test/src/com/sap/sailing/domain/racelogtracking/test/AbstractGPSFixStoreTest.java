@@ -12,6 +12,7 @@ import org.junit.Before;
 
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
@@ -54,6 +55,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     protected RacingEventService service;
@@ -67,6 +69,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "GER 234", null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
+    private ClientSession clientSession, metadataCollectionClientSession;
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),
@@ -83,22 +86,25 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
         regattaLog = new RegattaLogImpl("regattalog");
+        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+        metadataCollectionClientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
         dropPersistedData();
         store = new MongoSensorFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
-                serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
+                serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY, clientSession, metadataCollectionClientSession);
     }
 
     @After
     public void after() {
         dropPersistedData();
+        clientSession.close();
     }
 
     private void dropPersistedData() {
         MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
-        mongoOF.getGPSFixCollection().drop();
-        mongoOF.getGPSFixMetadataCollection().drop();
-        mongoOF.getRaceLogCollection().drop();
-        mongoOF.getRegattaLogCollection().drop();
+        mongoOF.getGPSFixCollection(clientSession).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        mongoOF.getGPSFixMetadataCollection().withWriteConcern(WriteConcern.MAJORITY).drop(metadataCollectionClientSession);
+        mongoOF.getRaceLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        mongoOF.getRegattaLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
     }
 
     protected void map(RegattaLog regattaLog, Competitor comp, DeviceIdentifier device, long from, long to) {
@@ -131,7 +137,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
                 /* endDate */null, null, null, "a", null, /* registrationLinkSecret */ UUID.randomUUID().toString()));
         return new DynamicTrackedRaceImpl(regatta, raceDefinition, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null);
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {

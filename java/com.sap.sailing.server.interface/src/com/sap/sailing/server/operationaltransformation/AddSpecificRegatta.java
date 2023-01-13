@@ -92,6 +92,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
             s.setSplitFleetContiguousScoring(e.getValue().hasSplitFleetContiguousScoring());
             s.setFirstColumnIsNonDiscardableCarryForward(e.getValue().isFirstColumnIsNonDiscardableCarryForward());
             s.setMaximumNumberOfDiscards(e.getValue().getMaximumNumberOfDiscards());
+            s.setOneAlwaysStaysOne(e.getValue().isOneAlwaysStaysOne());
             result.add(s);
         }
         return result;

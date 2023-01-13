@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.ThreadLocalTransporter;
@@ -67,7 +68,8 @@ public interface TrackedRegatta extends Serializable {
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogAndTrackedRaceResolver raceLogResolver,
-            Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler, TrackingConnectorInfo trackingConnectorInfo);
+            Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler, TrackingConnectorInfo trackingConnectorInfo,
+            MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry);
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created

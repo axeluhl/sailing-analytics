@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -351,7 +351,7 @@ public class StartlineAdvantagesByWindCalculator {
         sortedAdvantages.addAll(advantages);
         if (sortedAdvantages != null && sortedAdvantages.size() > 0) {
             Collections.sort(sortedAdvantages, StartLineAdvantageDTO.startlineAdvantageComparatorByAdvantageDesc);
-            result = new Double(sortedAdvantages.get(0).startLineAdvantage);
+            result = Double.valueOf(sortedAdvantages.get(0).startLineAdvantage);
         }
         return result;
     }

@@ -6,6 +6,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,15 +33,9 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     static final AtomicInteger operationCounter = new AtomicInteger(0);
     
     /**
-     * Produces an object input stream that can choose to resolve objects against a cache so that duplicate instances
-     * are avoided.
-     */
-    ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException;
-
-    /**
      * Implementation of {@link #initiallyFillFrom(InputStream)} which receives an {@link ObjectInputStream} instead of
      * an {@link InputStream}. The {@link ObjectInputStream} is expected to have been produced by
-     * {@link #createObjectInputStreamResolvingAgainstCache(InputStream)}.
+     * {@link #createObjectInputStreamResolvingAgainstCache(InputStream, Map)}.
      */
     void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException, InterruptedException;
 
@@ -48,21 +44,12 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      */
     void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException;
 
-    /**
-     * Implementation of {@link #readOperation(InputStream)}, using the {@link ObjectInputStream} created by
-     * {@link #createObjectInputStreamResolvingAgainstCache(InputStream)}.
-     */
-    @SuppressWarnings("unchecked")
-    default O readOperationInternal(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        return (O) ois.readObject();
-    }
-
     @Override
     default void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
         assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(); // no nested receiving of initial load
         setCurrentlyFillingFromInitialLoad(true);
         try {
-            final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
+            final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is, /* classLoaderCache */ new HashMap<>());
             ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
             Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
             try {
@@ -73,13 +60,6 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         } finally {
             setCurrentlyFillingFromInitialLoad(false);
         }
-    }
-    
-    /**
-     * The class loader to use for de-serializing objects. By default, this object's class's class loader is used.
-     */
-    default ClassLoader getDeserializationClassLoader() {
-        return getClass().getClassLoader();
     }
     
     /**
@@ -94,14 +74,8 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     }
     
     @Override
-    default O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException {
-        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
-        try {
-            return readOperationInternal(createObjectInputStreamResolvingAgainstCache(inputStream));
-        } finally {
-            Thread.currentThread().setContextClassLoader(oldContextClassloader);
-        }
+    default O readOperation(InputStream inputStream, Map<String, Class<?>> classLoaderCache) throws IOException, ClassNotFoundException {
+        return readOperationFromObjectInputStream(createObjectInputStreamResolvingAgainstCache(inputStream, classLoaderCache));
     }
 
     @Override

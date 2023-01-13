@@ -27,19 +27,15 @@ import com.sap.sse.security.shared.subscription.SubscriptionPrice.PaymentInterva
 public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final String USD_CURRENCY_CODE = "usd";
     private static final long serialVersionUID = 2563619370274543312L;
-    private static final String TRIAL_PREMIUM_PLAN_ID = "trial_premium";
     private static final String WEEKLY_PREMIUM_PLAN_ID = "weekly_premium";
     private static final String YEARLY_PREMIUM_PLAN_ID = "yearly_premium";
-    private static final String TRIAL_DATA_MINING_ARCHIVE_PLAN_ID = "trial_data_mining_archive";
     private static final String WEEKLY_DATA_MINING_ARCHIVE_PLAN_ID = "weekly_data_mining_archive";
     private static final String YEARLY_DATA_MINING_ARCHIVE_PLAN_ID = "yearly_data_mining_archive";
     private static final String TRIAL_DATA_MINING_ALL_PLAN_ID = "trial_data_mining_all";
     private static final String WEEKLY_DATA_MINING_ALL_PLAN_ID = "weekly_data_mining_all";
     private static final String YEARLY_DATA_MINING_ALL_PLAN_ID = "yearly_data_mining_all";
-    private static final String TRIAL_PREMIUM_PLAN_ITEMPRICE_ID = "trial_premium_usd_daily";
     private static final String WEEKLY_PREMIUM_PLAN_ITEMPRICE_ID = "weekly_premium_usd_weekly";
     private static final String YEARLY_PREMIUM_PLAN_ITEMPRICE_ID = "yearly_premium_usd_yearly";
-    private static final String TRIAL_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID = "trial_data_mining_archive_usd_daily";
     private static final String WEEKLY_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID = "weekly_data_mining_archive_usd_weekly";
     private static final String YEARLY_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID = "yearly_data_mining_archive_usd_yearly";
     private static final String TRIAL_DATA_MINING_ALL_PLAN_ITEMPRICE_ID = "trial_data_mining_all_usd_daily";
@@ -53,12 +49,6 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
         plansById.put(id, this);
     }
 
-    public static final SubscriptionPlan PREMIUM_TRIAL = new SailingSubscriptionPlan(TRIAL_PREMIUM_PLAN_ID,
-            Stream.of(new SubscriptionPrice(TRIAL_PREMIUM_PLAN_ITEMPRICE_ID, new BigDecimal(0), USD_CURRENCY_CODE,
-                    PaymentInterval.DAY, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
-            PlanGroup.PREMIUM,
-            new SubscriptionPlanRole(PremiumRole.getRoleId()));
     public static final SubscriptionPlan PREMIUM_WEEKLY = new SailingSubscriptionPlan(WEEKLY_PREMIUM_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_PREMIUM_PLAN_ITEMPRICE_ID, new BigDecimal(8.99), USD_CURRENCY_CODE,
                     PaymentInterval.WEEK, true)).collect(Collectors.toSet()),
@@ -72,14 +62,6 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
             PlanGroup.PREMIUM,
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
 
-    public static final SubscriptionPlan DATA_MINING_ARCHIVE_TRIAL = new SailingSubscriptionPlan(
-            TRIAL_DATA_MINING_ARCHIVE_PLAN_ID,
-            Stream.of(new SubscriptionPrice(TRIAL_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID, new BigDecimal(0),
-                    USD_CURRENCY_CODE, PaymentInterval.DAY, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
-            PlanGroup.DATA_MINING_ARCHIVE,
-            new SubscriptionPlanRole(PremiumRole.getRoleId()),
-            new SubscriptionPlanRole(ArchiveDataMiningRole.getRoleId()));
     public static final SubscriptionPlan DATA_MINING_ARCHIVE_WEEKLY = new SailingSubscriptionPlan(
             WEEKLY_DATA_MINING_ARCHIVE_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID, new BigDecimal(89.99),
@@ -97,13 +79,6 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
             new SubscriptionPlanRole(PremiumRole.getRoleId()),
             new SubscriptionPlanRole(ArchiveDataMiningRole.getRoleId()));
 
-    public static final SubscriptionPlan DATA_MINING_ALL_TRIAL = new SailingSubscriptionPlan(
-            TRIAL_DATA_MINING_ALL_PLAN_ID,
-            Stream.of(new SubscriptionPrice(TRIAL_DATA_MINING_ALL_PLAN_ITEMPRICE_ID, new BigDecimal(0),
-                    USD_CURRENCY_CODE, PaymentInterval.DAY, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
-            PlanGroup.DATA_MINING_ALL,
-            new SubscriptionPlanRole(PremiumRole.getRoleId()), new SubscriptionPlanRole(AllDataMiningRole.getRoleId()));
     public static final SubscriptionPlan DATA_MINING_ALL_WEEKLY = new SailingSubscriptionPlan(
             WEEKLY_DATA_MINING_ALL_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_DATA_MINING_ALL_PLAN_ITEMPRICE_ID, new BigDecimal(189.99),
@@ -117,6 +92,14 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
                     USD_CURRENCY_CODE, PaymentInterval.YEAR, false)).collect(Collectors.toSet()),
             Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
             PlanGroup.DATA_MINING_ALL,
+            new SubscriptionPlanRole(PremiumRole.getRoleId()), new SubscriptionPlanRole(AllDataMiningRole.getRoleId()));
+    
+    public static final SubscriptionPlan DATA_MINING_ALL_TRIAL = new SailingSubscriptionPlan(
+            TRIAL_DATA_MINING_ALL_PLAN_ID,
+            Stream.of(new SubscriptionPrice(TRIAL_DATA_MINING_ALL_PLAN_ITEMPRICE_ID, new BigDecimal(0),
+                    USD_CURRENCY_CODE, PaymentInterval.DAY, false)).collect(Collectors.toSet()),
+            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
+            PlanGroup.TRIAL,
             new SubscriptionPlanRole(PremiumRole.getRoleId()), new SubscriptionPlanRole(AllDataMiningRole.getRoleId()));
 
     public static Map<Serializable, SubscriptionPlan> getAllInstances() {

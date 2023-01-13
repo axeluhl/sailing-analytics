@@ -30,7 +30,7 @@ public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderb
             Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
             LeaderboardDescriptorWithEliminations leaderboardDescriptor, StringMessages stringMessages, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
-        super(sailingServiceWrite, userService, stringMessages.editRegattaLeaderboard(), leaderboardDescriptor,
+        super(sailingServiceWrite, userService, stringMessages.editRegattaLeaderboardWithEliminations(), leaderboardDescriptor,
                 existingRegattas, otherExistingLeaderboards, stringMessages,
                 errorReporter,
                 new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages,

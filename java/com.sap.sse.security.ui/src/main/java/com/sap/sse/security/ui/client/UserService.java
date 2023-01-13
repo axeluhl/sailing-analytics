@@ -248,7 +248,7 @@ public class UserService {
             }
 
             @Override
-                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
+            public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, /* notifyOtherInstances */ true);
                         logger.info(authProviderName + " user '" + result.getA().getName() + "' is verified!\n");
                         callback.onSuccess(result.getA());

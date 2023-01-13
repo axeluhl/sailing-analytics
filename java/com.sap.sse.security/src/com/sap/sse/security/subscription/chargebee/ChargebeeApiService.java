@@ -67,14 +67,14 @@ public class ChargebeeApiService implements SubscriptionApiService {
 
     @Override
     public void cancelSubscription(String subscriptionId, OnCancelSubscriptionResultListener listener) {
-        new ChargebeeCancelSubscriptionTask(subscriptionId, requestProcessor, result -> listener.onCancelResult(result), this)
-                .run();
+        new ChargebeeCancelSubscriptionTask(subscriptionId, requestProcessor, result -> listener.onCancelResult(result),
+                this).run();
     }
-    
+
     @Override
     public void getUserSelfServicePortalSession(String userId, OnSelfServicePortalSessionResultListener listener) {
-        new ChargeBeeGetSelfServicePortalSessionTask(userId, requestProcessor, result -> listener.onSessionResult(result), this)
-        .run();
+        new ChargeBeeGetSelfServicePortalSessionTask(userId, requestProcessor,
+                result -> listener.onSessionResult(result), this).run();
     }
 
     @Override
@@ -85,6 +85,11 @@ public class ChargebeeApiService implements SubscriptionApiService {
     @Override
     public SubscriptionPlanProvider getSubscriptionPlanProvider() {
         return subscriptionPlanProvider;
+    }
+
+    @Override
+    public void getItemPrices(OnItemPriceResultListener listener) {
+        new ChargebeeFetchItemPricesTask(requestProcessor, result -> listener.onItemPriceResult(result), this).run();
     }
     
 }

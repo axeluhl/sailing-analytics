@@ -15,7 +15,6 @@ import java.util.function.Function;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Timer;
@@ -29,6 +28,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -125,6 +125,9 @@ public class LandscapeManagementPanel extends SimplePanel {
      */
     private static final Duration DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS = Duration.ONE_MINUTE.times(5);
     private static final int DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS = 5;
+    
+    //Spacing for Setupbar (AWS/SSH/REGION)
+    private static final int DEFAULT_SETUPBAR_HEIGHT = 300;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -136,10 +139,11 @@ public class LandscapeManagementPanel extends SimplePanel {
         final HorizontalPanel awsCredentialsAndSshKeys = new HorizontalPanel();
         mainPanel.add(awsCredentialsAndSshKeys);
         final CaptionPanel awsCredentialsPanel = new CaptionPanel(stringMessages.awsCredentials());
+        awsCredentialsPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         awsCredentialsAndSshKeys.add(awsCredentialsPanel);
         mfaLoginWidget = new AwsMfaLoginWidget(landscapeManagementService, errorReporter, userService, stringMessages);
         mfaLoginWidget.addListener(validSession->refreshAllThatNeedsAwsCredentials());
-        awsCredentialsPanel.add(mfaLoginWidget);
+        awsCredentialsPanel.add(mfaLoginWidget);       
         regionsTable = new TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -153,8 +157,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
                 landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel());
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
-        awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
-        sshKeysCaptionPanel.add(sshKeyManagementPanel);
+        sshKeysCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         regionsTable.addColumn(new TextColumn<String>() {
             @Override
             public String getValue(String s) {
@@ -162,9 +165,19 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         }, stringMessages.region(), new NaturalComparator());
         final CaptionPanel regionsCaptionPanel = new CaptionPanel(stringMessages.region());
-        regionsCaptionPanel.add(regionsTable);
-        mainPanel.add(regionsCaptionPanel);
+        final SimplePanel regionPanel = new  SimplePanel();
+        final ScrollPanel regionScrollPanel = new ScrollPanel();
+        regionsCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
+        regionScrollPanel.setHeight("" + (DEFAULT_SETUPBAR_HEIGHT - 35)  + "px");
+        regionScrollPanel.setAlwaysShowScrollBars(true);
+        regionPanel.add(regionsTable);
+        regionScrollPanel.add(regionPanel);
+        regionsCaptionPanel.add(regionScrollPanel); 
+        awsCredentialsAndSshKeys.add(regionsCaptionPanel);
         refreshRegionsTable(userService);
+        awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
+        sshKeysCaptionPanel.add(sshKeyManagementPanel);
+        
         // MongoDB endpoints:
         mongoEndpointsTable = new TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
@@ -233,6 +246,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                 result.add(Integer.toString(t.getMaster().getPort()));
                 result.add(t.getMaster().getServerName());
                 result.add(t.getMaster().getHost().getInstanceId());
+                if (t.getAutoScalingGroupAmiId() != null) {
+                    result.add(t.getAutoScalingGroupAmiId());
+                }
                 for (final SailingAnalyticsProcessDTO replica : t.getReplicas()) {
                     result.add(replica.getHostname());
                     result.add(replica.getServerName());
@@ -246,11 +262,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> versionColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(versionCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                final String version = replicaSet.getVersion();
-                final String releaseNotesLink = getReleaseNotesLink(version);
-                appendEc2Link(builder, releaseNotesLink, version);
-                return builder.toSafeHtml();
+                return new LinkBuilder().setReplicaSet(replicaSet).setPathMode(LinkBuilder.pathModes.Version).build();
             }
         };
         applicationReplicaSetsTable.addColumn(versionColumn, stringMessages.versionHeader(), (rs1, rs2)->new NaturalComparator().compare(rs1.getVersion(), rs2.getVersion()));
@@ -258,12 +270,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> masterColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(masterCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                final String gwtStatusLink = getGwtStatusLink(replicaSet.getMaster().getHost().getPublicIpAddress(), replicaSet.getMaster().getPort());
-                builder.appendHtmlConstant("<a target=\"_blank\" href=\""+gwtStatusLink+"\">");
-                builder.appendEscaped(replicaSet.getMaster().getHost().getPublicIpAddress());
-                builder.appendHtmlConstant("</a>");
-                return builder.toSafeHtml();
+                return new LinkBuilder().setPathMode(LinkBuilder.pathModes.MasterHost).setReplicaSet(replicaSet).build();
             }
         };
         applicationReplicaSetsTable.addColumn(masterColumn, stringMessages.masterHostName(), (rs1, rs2)->new NaturalComparator().compare(rs1.getMaster().getHost().getPublicIpAddress(), rs2.getMaster().getHost().getPublicIpAddress()));
@@ -272,23 +279,15 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> hostnameColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(hostnameCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                final String hostnameLink = "https://"+replicaSet.getHostname();
-                builder.appendHtmlConstant("<a target=\"_blank\" href=\""+hostnameLink+"\">");
-                builder.appendEscaped(replicaSet.getHostname());
-                builder.appendHtmlConstant("</a>");
-                return builder.toSafeHtml();
-            }
+                return new LinkBuilder().setReplicaSet(replicaSet).setPathMode(LinkBuilder.pathModes.Hostname).build()
+;            }
         };
-        applicationReplicaSetsTable.addColumn(hostnameColumn, stringMessages.hostname(), (rs1, rs2)->new NaturalComparator().compare(rs1.getMaster().getHost().getInstanceId(), rs2.getMaster().getHost().getInstanceId()));
+        applicationReplicaSetsTable.addColumn(hostnameColumn, stringMessages.hostname(), (rs1, rs2)->new NaturalComparator().compare(rs1.getHostname(), rs2.getMaster().getHostname()));
         final SafeHtmlCell masterInstanceIdCell = new SafeHtmlCell();
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> masterInstanceIdColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(masterInstanceIdCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                final String instanceId = replicaSet.getMaster().getHost().getInstanceId();
-                appendEc2InstanceLink(builder, instanceId);
-                return builder.toSafeHtml();
+                return new LinkBuilder().setRegion(regionsTable.getSelectionModel().getSelectedObject()).setInstanceId(replicaSet.getMaster().getHost().getInstanceId()).setPathMode(LinkBuilder.pathModes.InstanceSearch).build();
             }
         };
         applicationReplicaSetsTable.addColumn(masterInstanceIdColumn, stringMessages.masterInstanceId(),
@@ -299,21 +298,10 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> replicasColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(replicasCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (final SailingAnalyticsProcessDTO replica : replicaSet.getReplicas()) {
-                    final String gwtStatusLink = getGwtStatusLink(replica.getHost().getPublicIpAddress(), replica.getPort());
-                    builder.appendHtmlConstant("<a target=\"_blank\" href=\""+gwtStatusLink+"\">");
-                    builder.appendEscaped(replica.getHost().getPublicIpAddress()+":"+replica.getPort());
-                    builder.appendHtmlConstant("</a>");
-                    final String replicaInstanceId = replica.getHost().getInstanceId();
-                    builder.appendEscaped(" (");
-                    builder.appendEscaped(replica.getServerName());
-                    builder.appendEscaped(", ");
-                    appendEc2InstanceLink(builder, replicaInstanceId);
-                    builder.appendEscaped(")");
-                    builder.appendHtmlConstant("<br>");
-                }
-                return builder.toSafeHtml();
+                LinkBuilder linkBuilder = new LinkBuilder();
+                linkBuilder.setReplicaSet(replicaSet);
+                linkBuilder.setPathMode(LinkBuilder.pathModes.ReplicaLinks).setRegion(regionsTable.getSelectionModel().getSelectedObject());
+                return linkBuilder.build();
             }
         };
         applicationReplicaSetsTable.addColumn(replicasColumn, stringMessages.replicas());
@@ -322,16 +310,12 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> autoScalingGroupAmiIdColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(autoScalingGroupAmiIdCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                if (replicaSet.getAutoScalingGroupAmiId() != null) {
-                    appendEc2AmiLink(builder, replicaSet.getAutoScalingGroupAmiId());
-                }
-                return builder.toSafeHtml();
+                return new LinkBuilder().setReplicaSet(replicaSet).setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.AmiSearch).build();
             }
         };
-        applicationReplicaSetsTable.addColumn(autoScalingGroupAmiIdColumn, stringMessages.machineImageId());
+        applicationReplicaSetsTable.addColumn(autoScalingGroupAmiIdColumn, stringMessages.machineImageId(), (rs1, rs2)->new NaturalComparator().compare(rs1.getAutoScalingGroupAmiId(), rs2.getAutoScalingGroupAmiId()));
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
-                new ApplicationReplicaSetsImagesBarCell(stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
+                new ApplicationReplicaSetsImagesBarCell(userService, stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_ARCHIVE,
                 applicationReplicaSetToArchive -> archiveApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToArchive));
@@ -357,13 +341,16 @@ public class LandscapeManagementPanel extends SimplePanel {
                         Collections.singleton(applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_REPLICA_ON_SHARED_INSTANCE,
                 applicationReplicaSetToUpgrade -> switchToReplicaOnSharedInstance(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
+                        Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY,
                 applicationReplicaSetToUpgrade -> switchToAutoScalingReplicasOnly(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SCALE_AUTO_SCALING_REPLICAS_UP_DOWN,
                 applicationReplicaSetToUpgrade -> scaleAutoScalingReplicasUpDown(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
+                        regionsTable.getSelectionModel().getSelectedObject(),
+                        Collections.singleton(applicationReplicaSetToUpgrade)));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_OPEN_SHARD_MANAGEMENT,
+                selectedReplicaSet -> openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), selectedReplicaSet));
         // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -379,11 +366,13 @@ public class LandscapeManagementPanel extends SimplePanel {
                 stringMessages.remove(), applicationReplicaSetsTable.getSelectionModel(), /* element name mapper */ rs -> rs.getName(),
                 StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                 e -> removeApplicationReplicaSets(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        disableButtonWhenLocalReplicaSetIsSelected(removeApplicationReplicaSetButton, userService);
         applicationReplicaSetsButtonPanel.add(removeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> upgradeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
                 stringMessages.upgrade(), applicationReplicaSetsTable.getSelectionModel(),
                 e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        disableButtonWhenLocalReplicaSetIsSelected(upgradeApplicationReplicaSetButton, userService);
         applicationReplicaSetsButtonPanel.add(upgradeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> stopReplicatingAndUnregisterMasterButton = new SelectedElementsCountingButton<>(
                 stringMessages.stopReplicating(), applicationReplicaSetsTable.getSelectionModel(),
@@ -397,8 +386,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsButtonPanel.add(useOnlyAutoScalingReplicasButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> useSharedInsteadOfDedicatedAutoScalingReplicasButton = new SelectedElementsCountingButton<>(
                 stringMessages.switchToReplicaOnSharedInstance(), applicationReplicaSetsTable.getSelectionModel(),
-                e->switchToReplicaOnSharedInstance(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
-                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+                e->switchToReplicaOnSharedInstance(stringMessages, applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> scaleAutoScalingReplicasUpDown = new SelectedElementsCountingButton<>(
                 stringMessages.scaleAutoScalingReplicasUpOrDown(), applicationReplicaSetsTable.getSelectionModel(),
@@ -468,9 +456,63 @@ public class LandscapeManagementPanel extends SimplePanel {
             refreshAllThatNeedsAwsCredentials();
             storeRegionSelection(userService, selectedRegion);
         });
+        AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    sshKeyManagementPanel.setPassphraseValidation(result.booleanValue(), stringMessages);
+                    addApplicationReplicaSetButton.setVisible(result);
+                    applicationReplicaSetsRefreshButton.setVisible(result);
+                    applicationReplicaSetsCaptionPanel.setVisible(result);
+                    machineImagesCaptionPanel.setVisible(result);
+                    mongoEndpointsCaptionPanel.setVisible(result);
+                    if (result) {
+                        refreshApplicationReplicaSetsTable();
+                    }
+                }
+
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(stringMessages.passphraseCheckError());
+                };
+            };
+        sshKeyManagementPanel.addSshKeySelectionChangedHandler(event->{
+            validatePassphrase(stringMessages, validatePassphraseCallback);
+        });
+        sshKeyManagementPanel.addOnPassphraseChangedListener(event -> {
+            validatePassphrase(stringMessages, validatePassphraseCallback);
+        });
+        validatePassphrase(stringMessages, validatePassphraseCallback);
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+    }
+    
+    private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
+        new ShardManagementDialog(landscapeManagementService, replicaset, region, sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), errorReporter, stringMessages,
+                new DialogCallback<Boolean>() {
+                    @Override
+                    public void ok(Boolean hasAnythingChanged) {
+                        if (hasAnythingChanged) {
+                            refreshApplicationReplicaSetsTable();
+                        }
+                    }
+
+                    @Override
+                    public void cancel() {
+                        // there is no cancel button
+                    }
+        }).show();
+    }
+    
+    private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
+        applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
+                !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO->arsDTO.isLocalReplicaSet(userService)).findAny().isPresent()));
+    }
+    
+    private void validatePassphrase(StringMessages stringMessages, AsyncCallback<Boolean> callback) {
+        landscapeManagementService.verifyPassphrase(regionsTable.getSelectionModel().getSelectedObject(),
+                sshKeyManagementPanel.getSelectedKeyPair(),
+                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), callback);
+
     }
 
     private void moveMasterToOtherInstance(StringMessages stringMessages, String regionId, Set<SailingApplicationReplicaSetDTO<String>> replicaSetsForWhichToMoveMaster) {
@@ -532,7 +574,7 @@ public class LandscapeManagementPanel extends SimplePanel {
 
         @Override
         public void onFailure(Throwable caught) {
-            errorReporter.reportError(caught.getMessage());
+            errorReporter.reportError(caught.getMessage() == null ? caught.getClass().getName() : caught.getMessage());
             if (!replicaSetIterator.hasNext()) {
                 applicationReplicaSetsBusy.setBusy(false);
             } else {
@@ -556,7 +598,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         }
     }
 
-    private void switchToReplicaOnSharedInstance(StringMessages stringMessages, String selectedObject, Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
+    private void switchToReplicaOnSharedInstance(StringMessages stringMessages, Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
         new SwitchToReplicaOnSharedInstanceDialog(stringMessages, errorReporter, landscapeManagementService,
                 new DialogCallback<SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions>() {
                     @Override
@@ -705,14 +747,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                         applicationReplicaSetsTable.refresh();
                     }
                 });
-    }
-
-    private String getGwtStatusLink(final String host, int port) {
-        return (port == 443 ? "https" : "http") + "://" + host + ":" + port + "/gwt/status";
-    }
-
-    private String getReleaseNotesLink(final String version) {
-        return "https://releases.sapsailing.com/"+version+"/release-notes.txt";
     }
 
     private void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
@@ -1440,34 +1474,5 @@ public class LandscapeManagementPanel extends SimplePanel {
         EntryPointHelper.registerASyncService((ServiceDefTarget) result,
                 RemoteServiceMappingConstants.landscapeManagementServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         return result;
-    }
-
-    private String getEc2ConsoleLinkForInstanceId(String instanceId) {
-        return getEc2ConsoleBaseUrlForSelectedRegion()+"#Instances:search="+instanceId;
-    }
-
-    private void appendEc2InstanceLink(final SafeHtmlBuilder builder, final String instanceId) {
-        final String ec2Link = getEc2ConsoleLinkForInstanceId(instanceId);
-        appendEc2Link(builder, ec2Link, instanceId);
-    }
-
-    private void appendEc2Link(final SafeHtmlBuilder builder, final String ec2Link, final String text) {
-        builder.appendHtmlConstant("<a target=\"_blank\" href=\""+ec2Link+"\">");
-        builder.appendEscaped(text);
-        builder.appendHtmlConstant("</a>");
-    }
-    
-    private String getEc2ConsoleBaseUrlForSelectedRegion() {
-        return "https://"+regionsTable.getSelectionModel().getSelectedObject()+
-                ".console.aws.amazon.com/ec2/v2/home?region="+regionsTable.getSelectionModel().getSelectedObject();
-    }
-    
-    private String getEc2ConsoleLinkForAmiId(String amiId) {
-        return getEc2ConsoleBaseUrlForSelectedRegion()+"#Images:imageId="+amiId;
-    }
-
-    private void appendEc2AmiLink(final SafeHtmlBuilder builder, final String amiId) {
-        final String ec2Link = getEc2ConsoleLinkForAmiId(amiId);
-        appendEc2Link(builder, ec2Link, amiId);
     }
 }

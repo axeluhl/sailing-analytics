@@ -364,6 +364,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private final AsyncActionsExecutor asyncActionsExecutor;
 
+    
     /**
      * See also {@link #getDefaultSortColumn()}. If no other column is explicitly selected for sorting and this
      * attribute holds a non-<code>null</code> string identifying a valid race by name that is represented in this
@@ -1996,10 +1997,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * @author Axel Uhl (D043530)
      * 
      */
-    private class TotalNetPointssColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
+    private class TotalNetPointsColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
         private final String columnStyle;
 
-        protected TotalNetPointssColumn(String columnStyle) {
+        protected TotalNetPointsColumn(String columnStyle) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.columnStyle = columnStyle;
             setHorizontalAlignment(ALIGN_CENTER);
@@ -3118,7 +3119,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     private void addRaceColumn(RaceColumn<?> raceColumn) {
         if (getLeaderboardTable().getColumn(
-                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn) {
+                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointsColumn) {
             removeColumn(getLeaderboardTable().getColumnCount() - 1);
         }
         addColumn(raceColumn);
@@ -3250,8 +3251,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private void ensureTotalsColumn() {
         // add a totals column on the right
         if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable().getColumn(
-                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn)) {
-            addColumn(new TotalNetPointssColumn(TOTAL_COLUMN_STYLE));
+                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointsColumn)) {
+            addColumn(new TotalNetPointsColumn(TOTAL_COLUMN_STYLE));
         }
     }
 

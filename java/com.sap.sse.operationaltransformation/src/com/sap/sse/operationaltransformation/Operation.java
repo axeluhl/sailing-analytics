@@ -30,7 +30,7 @@ public interface Operation<S> extends Cloneable {
 
     /**
      * If it is allowed to apply this operation {@link #requiresSynchronousExecution() asynchronously} then this method
-     * should provide a key such that operations two operations that may potentially block each other return equal keys.
+     * should provide a key such that two operations that may potentially block each other return equal keys.
      * <p>
      * 
      * For example, if this operation, when applied, will insert a GPS fix into a competitor's track, its key should be

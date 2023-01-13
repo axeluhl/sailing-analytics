@@ -292,7 +292,7 @@ public class AutoplayHelper {
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
-                /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false);
+                /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false, /* showWindLadder */ false);
         final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
         userService.createEssentialSecuredDTOByIdAndType(currentLiveRace.getPermissionType(), currentLiveRace.getName(),
                 currentLiveRace.getTypeRelativeObjectIdentifier(), new AsyncCallback<SecuredDTO>() {

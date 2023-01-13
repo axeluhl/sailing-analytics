@@ -482,7 +482,6 @@ public class PageObject {
      */
     protected void waitForAjaxRequests(String category, int timeoutInSeconds, int pollingEverySoManySeconds) {
         FluentWait<WebDriver> wait = createFluentWait(this.driver, timeoutInSeconds, pollingEverySoManySeconds);
-        
         wait.until(new AjaxCallsComplete(category));
     }
     
@@ -666,7 +665,7 @@ public class PageObject {
     protected void waitForAlertContainingMessageAndAccept(int timeoutInSeconds, String message) {
         Alert alert = waitForAlert(timeoutInSeconds);
         if (!alert.getText().contains(message)) {
-            throw new RuntimeException("The expected message '" + message + "' does not math the actual message '"
+            throw new RuntimeException("The expected message '" + message + "' does not match the actual message '"
                     + alert.getText() + "' in the alert.");
         }
         alert.accept();

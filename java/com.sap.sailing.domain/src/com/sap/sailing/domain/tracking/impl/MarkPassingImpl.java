@@ -43,4 +43,41 @@ public class MarkPassingImpl implements MarkPassing {
         return this;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
+        result = prime * result + ((timePoint == null) ? 0 : timePoint.hashCode());
+        result = prime * result + ((waypoint == null) ? 0 : waypoint.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MarkPassingImpl other = (MarkPassingImpl) obj;
+        if (competitor == null) {
+            if (other.competitor != null)
+                return false;
+        } else if (!competitor.equals(other.competitor))
+            return false;
+        if (timePoint == null) {
+            if (other.timePoint != null)
+                return false;
+        } else if (!timePoint.equals(other.timePoint))
+            return false;
+        if (waypoint == null) {
+            if (other.waypoint != null)
+                return false;
+        } else if (!waypoint.equals(other.waypoint))
+            return false;
+        return true;
+    }
+
 }

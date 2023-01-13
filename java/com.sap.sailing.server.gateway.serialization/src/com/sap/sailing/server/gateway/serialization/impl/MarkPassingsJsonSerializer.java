@@ -141,7 +141,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                                 return totalPointsForRaceColumn;
                             };
                             final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard,
-                                    leaderboard.getRaceColumns(), markPassing.getTimePoint(), totalPointsSupplier, cache);
+                                    leaderboard.getRaceColumns(), markPassing.getTimePoint(), leaderboard.getScoringScheme(), totalPointsSupplier, cache);
                             final Double netPoints = leaderboard.getNetPoints(competitor, raceColumnAndFleet.getA(),
                                     markPassing.getTimePoint(), discardedRaceColumns, ()->totalPoints);
                             markPassingJson.put(POINTS_BASED_ON_PASSING_ORDER, totalPoints);

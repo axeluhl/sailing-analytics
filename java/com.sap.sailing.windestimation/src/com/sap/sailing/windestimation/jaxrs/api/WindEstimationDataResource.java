@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
@@ -60,7 +61,7 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
         subject.checkPermission(SecuredDomainType.WIND_ESTIMATION_MODELS.getStringPermissionForTypeRelativeIdentifier(
                 DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         ObjectInputStream ois = getWindEstimationFactoryServiceImpl()
-                .createObjectInputStreamResolvingAgainstCache(inputStream);
+                .createObjectInputStreamResolvingAgainstCache(inputStream, /* classLoaderCache */ new HashMap<>());
         ExportedModels exportedModels = (ExportedModels) ois.readObject();
         WindEstimationModelsUpdateOperation windEstimationModelsUpdateOperation = new WindEstimationModelsUpdateOperation(
                 exportedModels);

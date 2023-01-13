@@ -113,4 +113,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String serverInformation();
 
     String serverName(String buildVersion);
+    
+    String validPassphrase();
+    
+    String invalidPassphrase();
+    
+    String passphraseCheckError();
 }

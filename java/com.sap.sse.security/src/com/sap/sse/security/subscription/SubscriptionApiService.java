@@ -1,5 +1,6 @@
 package com.sap.sse.security.subscription;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,10 @@ public interface SubscriptionApiService extends SubscriptionApiBaseService {
     
     public static interface OnSubscriptionsResultListener{
         void onSubscriptionsResult(Map<String, List<Subscription>> subscriptions);
+    }
+    
+    public static interface OnItemPriceResultListener{
+        void onItemPriceResult(Map<String, BigDecimal> itemPrices);
     }
     
     public static interface OnCancelSubscriptionResultListener{
@@ -30,6 +35,14 @@ public interface SubscriptionApiService extends SubscriptionApiBaseService {
      * @param listener will be notified once result is available
      */
     void getUserSubscriptions(OnSubscriptionsResultListener listener);
+    
+    /**
+     * Fetch subscription plans from payment service provider. The logic of fetching subscription plans should be done in
+     * background.
+     * 
+     * @param listener will be notified once result is available
+     */
+    void getItemPrices(OnItemPriceResultListener listener);
 
     /**
      * Cancel user subscription by its {@link Subscription#getSubscriptionId() id}

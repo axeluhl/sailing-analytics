@@ -25,7 +25,7 @@ echo "Creating .project file from dot_project template to allow for Eclipse work
 cp dot_project .project
 echo "Downloading libraries..."
 rm -rf ${LIB}/*
-${WORKSPACE}/gradlew downloadLibs
+JAVA_HOME=${JAVA8_HOME} ${WORKSPACE}/gradlew downloadLibs
 cd ${LIB}
 VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/' | sort | tail -n 1`
 echo VERSION=${VERSION}
@@ -88,7 +88,7 @@ echo "Building the wrapper bundle..."
 cd ..
 echo "NOT USING ${extra} arguments for Maven to avoid using local target definition already for building local repo"
 echo "In folder $(pwd) using: mvn clean install"
-mvn clean install
+mvn --batch-mode clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
 # Note: the JAR ends up in target/ because the SDK project does not use any parent pom, so

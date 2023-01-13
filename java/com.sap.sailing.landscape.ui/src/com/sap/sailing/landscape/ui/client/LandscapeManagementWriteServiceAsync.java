@@ -1,13 +1,16 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
+import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
+import com.sap.sailing.landscape.ui.shared.LeaderboardNameDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
@@ -44,6 +47,12 @@ public interface LandscapeManagementWriteServiceAsync {
      * {@link CREATE_OBJECT} permission on the server on which this is called.
      */
     void generateSshKeyPair(String regionId, String keyName, String privateKeyEncryptionPassphrase, AsyncCallback<SSHKeyPairDTO> callback);
+    
+    /**
+     * Verifies a passphrase for an SSH private key. Returns {@code true} if the passphrase can decipher the private key
+     * and {@code false} if this does not work or the key is invalid, or the key is {@code null}.
+     */
+    void verifyPassphrase(String regionId, SSHKeyPairDTO key, String privateKeyEncryptionPassphrase, AsyncCallback<Boolean> callback);
 
     /**
      * The calling subject must have {@code CREATE} permission for the key requested as well as the
@@ -98,8 +107,8 @@ public interface LandscapeManagementWriteServiceAsync {
             Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
-    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
-            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
+    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO, AwsShardDTO shardDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO, LeaderboardNameDTO leaderboard,
             AsyncCallback<SerializationDummyDTO> callback);
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
@@ -187,4 +196,84 @@ public interface LandscapeManagementWriteServiceAsync {
     void changeAutoScalingReplicasInstanceType(SailingApplicationReplicaSetDTO<String> replicaSet,
             String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            AsyncCallback<ArrayList<LeaderboardNameDTO>> names);
+
+    void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoards,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, String region,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+
+    /**
+     * @param callback
+     *            returns the shards as keys and the sharding keys (escaped / mangled leaderboard names) as values.
+     *            Those sharding keys are what you get when mangling the {@link AwsShardDTO#getLeaderboardNames()
+     *            leaderboard names} of the shard.
+     */
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearerToken,
+            AsyncCallback<Map<AwsShardDTO, Iterable<String>>> callback);
+
+    /**
+     * Removes {@code shard} from the replica set. This deletes the load balancer listener rules, and the auto scaling
+     * group and the target group.
+     * 
+     * @param shard
+     *            the shard to remove
+     * @param replicaSet
+     *            the replica set which contains the shard.
+     * @param region
+     *            replica set's region
+     * @param passphrase
+     *            passphrase for the private key decription.
+     * @param callback
+     * 
+     */
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region,
+            byte[] passphrase, AsyncCallback<Void> callback);
+
+    /**
+     * Appends sharding keys for each leader board in {@code selectedLeaderboards} to the shard, identified by
+     * {@code shardName}, from the {@code replicaset}. This function inserts rules to the replica set's load balancer
+     * for each {@selectedLeaderboards}'s sharding key. It the replica set's load balancer does not have enough rules
+     * left, a new one gets created. For inserting the rules, first every existing rule of this shard get's checked for
+     * space left and if there is, it gets filled with a sharding key and after that new rules are created. Throws an
+     * Exception if: - the shard is not found. - shards cannot be retrived - sharding rules cannot be inserted - the is
+     * no free load balancer or the process of moving the replica set to another load balancer failed.
+     * 
+     * @param selectedLeaderBoards
+     *            list of selected leaderboards. These are the names and not sharding keys.
+     * @param region
+     *            landscape region
+     * @param shardName
+     *            shard's name where the keys are supposed to be appended
+     * @param replicaSet
+     *            shard's replica set
+     * @param bearerToken
+     * @param passphraseForPrivateKeyDecryption
+     * @param callback
+     */
+    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+
+    /**
+     * Removes the shardingkeys for {@selectedLeaderBoards} from a shard, identified by {@code shardName} from
+     * {@code replicaset}. Throws Exception if: - no shard is found - replicaset is not found - shards from replica set
+     * cannot be retrieved. - sharding rules cannot be updated
+     * 
+     * @param selectedLeaderBoards
+     *            Sharding keys for all selected leader boards.
+     * @param region
+     *            shard's regio
+     * @param shardName
+     *            Shard's name where the keys should be removed from
+     * @param replicaSet
+     *            replica set which contains the shard
+     * @param bearerToken
+     * @param passphraseForPrivateKeyDecryption
+     * @param callback
+     */
+    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 }

@@ -77,15 +77,6 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     private final WindEstimationInteraction windEstimationInteraction;
 
     /**
-     * Constructor for unit tests only.
-     */
-    public IncrementalManeuverDetectorImpl() {
-        super();
-        approximatedFixesCalculator = null;
-        windEstimationInteraction = null;
-    }
-
-    /**
      * Constructs incremental maneuver detector which is supposed to be used for maneuver detection within the provided
      * tracked race for provided competitor.
      * 

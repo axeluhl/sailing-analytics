@@ -64,8 +64,9 @@ public class PersistedManeuverClassifiersScorePrinter {
                     if (classifierModel != null) {
                         allClassifierModels.add(classifierModel);
                     }
-                } catch(ModelNotFoundException e) {
-                    //ignore
+                } catch (ModelNotFoundException e) {
+                    logger.info("Model not found: "+e.getMessage()+"; ignoring...");
+                    // ignore
                 } catch (ModelPersistenceException e) {
                     logger.log(Level.SEVERE, "Exception while loading model", e);
                 }
@@ -84,5 +85,4 @@ public class PersistedManeuverClassifiersScorePrinter {
         outputStr = outputStr.replaceAll(Pattern.quote(" \t| "), ";");
         Files.write(Paths.get("maneuverClassifierScores.csv"), outputStr.getBytes());
     }
-
 }

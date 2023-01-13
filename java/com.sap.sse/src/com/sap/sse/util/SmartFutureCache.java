@@ -20,6 +20,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shiro.subject.Subject;
+
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -206,7 +208,10 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * the Future hasn't been cancelled yet. To avoid that the Future is cancelled after the client has fetched it from
      * {@link SmartFutureCache#ongoingRecalculations}, the client can call {@link #dontCancel()} on this
      * future. After that, calls to {@link #cancel(boolean)} will return <code>false</code> immediately and the Future
-     * will be executed as originally scheduled.
+     * will be executed as originally scheduled.<p>
+     * 
+     * A task of this sort will always {@link Subject#associateWith(Runnable) associate} any current {@link Subject}
+     * to the task when it is executed.
      * 
      * @author Axel Uhl (D043530)
      * 
@@ -239,7 +244,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         
         public FutureTaskWithCancelBlocking(SettableCallable<V> callable, final K key, final U updateInterval,
                 final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
-            super(callable);
+            super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(callable));
             tracingGetHelper = new KnowsExecutorAndTracingGetImpl<>();
             callable.setCallable(this);
             this.gettingThreads = new HashSet<>();
@@ -247,11 +252,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             this.updateInterval = updateInterval;
             this.callerWaitsSynchronouslyForResult = callerWaitsSynchronouslyForResult;
             this.callerThread = callerThread;
-        }
-
-        @Override
-        public Map<ThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
-            return tracingGetHelper.getThreadLocalValuesToInherit();
         }
 
         /**
@@ -297,7 +297,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
         @Override
         public V call() {
-            tracingGetHelper.setInheritableThreadLocalValues();
             try {
                 final U updateInterval;
                 final Set<Thread> locksPropagatedFromGettingThreads;
@@ -371,8 +370,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         LockUtil.unpropagateLockSetFrom(callerThread);
                     }
                     gettingThreads.clear();
-                    tracingGetHelper.removeInheritableThreadLocalValues();
-                    tracingGetHelper.removeThreadLocalValues();
                 }
             } catch (Exception e) {
                 // cache won't be updated
@@ -663,6 +660,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         // is too expensive here.
         // logger.finest("creating future task on cache "+nameForLocks+" for key "+key);
         ongoingRecalculations.put(key, future);
+        // the FutureTaskWithCancelBlocking associates any current Subject with the task while it is executed
         recalculator.execute(future);
         return future;
     }

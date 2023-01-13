@@ -1,24 +1,18 @@
 package com.sap.sse.replication.impl;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,6 +37,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
@@ -61,7 +56,6 @@ import com.sap.sse.replication.persistence.MongoObjectFactory;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
-import net.jpountz.lz4.LZ4BlockOutputStream;
 
 /**
  * Manages a set of observers of {@link Replicable}, receiving notifications for the operations they perform that
@@ -90,7 +84,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService, OperationsToMasterSendingQueue {
+public class ReplicationServiceImpl implements ReplicationService, OperationsToMasterSendingQueue, ReplicationMessageSender {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
 
     private final ReplicationInstancesManager replicationInstancesManager;
@@ -147,14 +141,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     private Thread replicatorThread;
 
     /**
-     * Used to synchronize write access and replacements of {@link #outboundBuffer}, {@link #outboundObjectBuffer} and
-     * {@link #outboundBufferClasses} when the timer scoops up the messages to send. Ensure we get a unique object
-     * by using a random number appended to an empty string; otherwise, string collation may collate different monitors
-     * constructed from equal string literals.
-     */
-    private final Object outboundBufferMonitor = ""+new Random().nextDouble();
-    
-    /**
      * Allow queued outbound replication messages to consume at most 1/4 of the maximum amount of memory available to this VM.
      */
     private static final long SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES = Runtime.getRuntime().maxMemory() / 4;
@@ -162,18 +148,26 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     /**
      * All outbound sending jobs go through this queue where a thread removing from this queue picks them up and sends
      * them out. The order is first-in, first-out (FIFO). The total size of the {@code byte[]} objects contained in the
-     * queue is counted in {@link #totalSendJobsSize}. If the {@link #SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES} is exceeded,
-     * messages are dropped, which is logged as a {@link Level#SEVERE} error.<p>
+     * queue is counted in {@link #totalSendJobsSize}. If the {@link #SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES} is
+     * exceeded, messages are dropped, which is logged as a {@link Level#SEVERE} error.
+     * <p>
+     * 
+     * Being a {@link BlockingDeque}, the queue is thread-safe. Multiple threads can {@link BlockingDeque#add(Object)
+     * add} to it without problems, and the single thread created in {@link #createSendJob()} will continue to
+     * {@link BlockingDeque#take() take} elements from it as they become available. This way, this queue serves as a
+     * serialization and synchronization element for sending out replication operations to a message queue.
+     * <p>
      * 
      * Any significant queue-up may be expected if...
      * <ul>
-     * <li>...writing to the RabbitMQ queue connected to the fanout exchange is slower than new replication
-     * content is produced; in this case the network simply is too slow to support the replication scenario at hand.</li>
-     * <li>...the connection to the RabbitMQ queue connected to the fanout exchange is temporarily or permanently interrupted;
-     * for temporary interruptions there is hope that re-connecting attempts succeed before the buffer runs over and that after
-     * successfully re-connecting the buffer can be send out message by message. For connections interrupted permanently a
-     * buffer overrun has to be expected at some point, and it will be better to at least keep the master healthy instead of
-     * letting it run into an {@link OutOfMemoryError} because the buffer eats up all available heap space.</li>
+     * <li>...writing to the RabbitMQ queue connected to the fanout exchange is slower than new replication content is
+     * produced; in this case the network simply is too slow to support the replication scenario at hand.</li>
+     * <li>...the connection to the RabbitMQ queue connected to the fanout exchange is temporarily or permanently
+     * interrupted; for temporary interruptions there is hope that re-connecting attempts succeed before the buffer runs
+     * over and that after successfully re-connecting the buffer can be send out message by message. For connections
+     * interrupted permanently a buffer overrun has to be expected at some point, and it will be better to at least keep
+     * the master healthy instead of letting it run into an {@link OutOfMemoryError} because the buffer eats up all
+     * available heap space.</li>
      * </ul>
      */
     private final BlockingDeque<Pair<byte[], List<Class<?>>>> sendJobQueue;
@@ -193,60 +187,23 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     private static final Duration DURATION_BETWTEEN_SEND_RETRIES = Duration.ONE_SECOND.times(5);
 
     /**
-     * Sending operations as serialized Java objects using binary RabbitMQ messages comes at an overhead. To reduce the
-     * overhead, several operations can be serialized into a single message. The actual serialization of the buffer
-     * happens after a short duration has passed since the last sending, managed by a {@link Timer}. Writers need to
-     * synchronize on {@link #outboundBufferMonitor} which protects all of {@link #outboundBuffer},
-     * {@link #outboundObjectBuffer} and {@link #outboundBufferClasses} which are replaced or cleared when the timer
-     * scoops up the currently buffered operations to send them out.
+     * A buffer for operations that need to be sent out to replicas through a fan-out exchange and that require
+     * {@link Operation#requiresSynchronousExecution() synchronous execution}.
      */
-    private ByteArrayOutputStream outboundBuffer;
+    private final OperationSerializerBufferImpl outboundBufferForOperationsRequiringSynchronousExecution;
 
     /**
-     * The {@link #outboundBuffer} contains a message with serialized operations originating from a single
-     * {@link Replicable} whose {@link Replicable#getId() ID} is written as its string value to the beginning of the
-     * stream using {@link DataOutputStream#writeUTF(String)}. When an operation of a {@link Replicable} with a
-     * different ID is to be {@link #broadcastOperation(OperationWithResult, Replicable) broadcast}, the existing
-     * {@link #outboundBuffer} needs to be transmitted and a new one is started for the {@link Replicable} now wanting
-     * to replicate an operation. Access is synchronized, as for {@link #outboundBuffer} using the
-     * {@link #outboundBufferMonitor}.
+     * A buffer pool for all operations to be sent out to replicas through a fan-out exchange for which replicas may
+     * choose to apply them asynchronously. See {@link Operation#requiresSynchronousExecution()}. After construction,
+     * the pool is in the "stopped" state. It needs to be {@link OperationSerializerBufferPool#start}ed to 
      */
-    private String outboundBufferReplicableIdAsString;
-
-    /**
-     * An object output stream that writes to {@link #outboundBuffer}. Operations are serialized into this stream until
-     * the timer acquires the {@link #outboundBufferMonitor}, closes the stream and transmits the contents of
-     * {@link #outboundBuffer} as a RabbitMQ message. While still holding the monitor, the timer task creates a new
-     * {@link #outboundBuffer} and a new {@link #outboundObjectBuffer} wrapping the {@link #outboundBuffer}.
-     */
-    private ObjectOutputStream outboundObjectBuffer;
-
-    /**
-     * Remembers the classes of the operations serialized into {@link #outboundObjectBuffer}. The list of classes in
-     * this list matches with the sequence of objects written to {@link #outboundObjectBuffer} as long as the
-     * {@link #outboundBufferMonitor} is being held.
-     */
-    private List<Class<?>> outboundBufferClasses;
+    private final OperationSerializerBufferPool outboundBufferPoolForOperationsAllowingForAsynchronousExecution;
 
     /**
      * Used to schedule the sending of all operations in {@link #outboundBuffer} using the {@link #sendingTask}.
      */
     private final Timer timer;
 
-    /**
-     * Sends all operations in {@link #outboundBuffer}. When holding the monitor of {@link #outboundBuffer}, the
-     * following rules hold:
-     * 
-     * <ul>
-     * <li>if <code>null</code>, adding an operation to {@link #outboundBuffer} needs to create and assign a new timer
-     * that schedules a sending task.</li>
-     * <li>if not <code>null</code>, an operation added to {@link #outboundBuffer} is guaranteed to be sent by the timer
-     * </li>
-     * </ul>
-     * 
-     */
-    private TimerTask sendingTask;
-    
     private final UnsentOperationsSenderJob unsentOperationsSenderJob;
 
     /**
@@ -255,13 +212,13 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      * more operations are likely to be sent per message transmitted, reducing overhead but correspondingly increasing
      * latency.
      */
-    private final long TRANSMISSION_DELAY_MILLIS = 100;
+    private static final Duration TRANSMISSION_DELAY = Duration.ofMillis(100);
 
     /**
-     * Defines at which message size in bytes the message will be sent regardless the {@link #TRANSMISSION_DELAY_MILLIS}
+     * Defines at which message size in bytes the message will be sent regardless the {@link #TRANSMISSION_DELAY}
      * .
      */
-    private final int TRIGGER_MESSAGE_SIZE_IN_BYTES = 1024 * 1024;
+    private static final int TRIGGER_MESSAGE_SIZE_IN_BYTES = 1024 * 1024;
 
     /**
      * Counts the messages sent out by this replicator
@@ -369,11 +326,13 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName, String exchangeHost, int exchangePort,
             ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws Exception {
         this.sendJobQueue = new LinkedBlockingDeque<>();
+        timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
+        this.outboundBufferForOperationsRequiringSynchronousExecution = new OperationSerializerBufferImpl(/* sender */ this, TRANSMISSION_DELAY, TRIGGER_MESSAGE_SIZE_IN_BYTES, timer);
+        this.outboundBufferPoolForOperationsAllowingForAsynchronousExecution = new OperationSerializerBufferPool(/* sender */ this, TRANSMISSION_DELAY, TRIGGER_MESSAGE_SIZE_IN_BYTES, timer);
         this.totalSendJobsSize = new AtomicLong(0);
         createSendJob().start();
         this.mongoObjectFactory = optionalMongoObjectFactory;
         this.replicationStartingListeners = new HashSet<>();
-        timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
         unsentOperationsSenderJob = new UnsentOperationsSenderJob();
         executionListenersByReplicableIdAsString = new ConcurrentHashMap<>();
         initialLoadChannels = new ConcurrentHashMap<>();
@@ -462,16 +421,19 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         synchronized (replicationInstancesManager) {
             // need to establish the outbound messaging channel only when this is the first replica to be added:
             if (!replicationInstancesManager.hasReplicas()) {
-                synchronized (this) {
-                    if (masterChannel == null) {
-                        masterChannel = createMasterChannelAndDeclareFanoutExchange();
-                    }
-                }
+                openOutboundReplicationChannel();
             }
             replicationInstancesManager.registerReplica(replica);
             recordRegisteredReplicaPersistently(replica);
         }
         logger.info("Registered replica " + replica);
+    }
+
+    private synchronized void openOutboundReplicationChannel() throws Exception {
+        if (masterChannel == null) {
+            masterChannel = createMasterChannelAndDeclareFanoutExchange();
+        }
+        outboundBufferPoolForOperationsAllowingForAsynchronousExecution.start();
     }
 
     private void recordRegisteredReplicaPersistently(ReplicaDescriptor replica) {
@@ -515,12 +477,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             }
             if (hadReplicas && !replicationInstancesManager.hasReplicas()) {
                 logger.info("Last replica got unregistered. Stopping to send out operations and closing outbound queue.");
-                synchronized (this) {
-                    if (masterChannel != null) {
-                        masterChannel.getConnection().close();
-                        masterChannel = null;
-                    }
-                }
+                closeOutboundReplicationChannel();
             }
             return unregisteredReplica;
         }
@@ -551,7 +508,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     /**
      * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already
-     * scheduled, a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
+     * scheduled, a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY} milliseconds.
      * 
      * @param replicable
      *            the replicable by which the operation was executed that now will be broadcast to all replicas; the
@@ -559,116 +516,35 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      */
     <S, O extends OperationWithResult<S, ?>> void broadcastOperation(OperationWithResult<?, ?> operation,
             Replicable<S, O> replicable) throws IOException {
-        // need to write the operations one by one, making sure the ObjectOutputStream always writes
-        // identical objects again if required because they may have changed state in between
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        replicable.writeOperation(operation, bos, /* close stream */true);
-        final byte[] serializedOperation = bos.toByteArray();
-        synchronized (outboundBufferMonitor) {
-            final String replicaIdAsString = replicable.getId().toString();
-            if (outboundBuffer != null && !Util.equalsWithNull(outboundBufferReplicableIdAsString, replicaIdAsString)) {
-                flushBufferToRabbitMQ(); // operation from a replicable different from that for which operations are
-                                         // buffered so far --> flush
-            } // still holding the monitor, so no other broadcast request from a different replicable can step in
-              // between
-            if (outboundBuffer == null) {
-                outboundBuffer = new ByteArrayOutputStream();
-                outboundBufferReplicableIdAsString = replicaIdAsString;
-                ObjectOutputStream compressingObjectOutputStream = createCompressingObjectOutputStream(replicaIdAsString, outboundBuffer);
-                outboundObjectBuffer = compressingObjectOutputStream;
-                outboundBufferClasses = new ArrayList<>();
-            }
-            outboundObjectBuffer.writeObject(serializedOperation);
-            outboundBufferClasses.add(operation.getClassForLogging());
-            if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
-                logger.info("Triggering replication because buffer holds " + outboundBuffer.size()
-                        + " bytes which exceeds trigger size " + TRIGGER_MESSAGE_SIZE_IN_BYTES + " bytes");
-                flushBufferToRabbitMQ();
-            } else {
-                if (sendingTask == null) {
-                    sendingTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            try {
-                                sendingTask = null;
-                                logger.fine("Running timer task, flushing buffer");
-                                flushBufferToRabbitMQ();
-                            } catch (Exception e) {
-                                logger.log(Level.SEVERE, "Exception while trying to replicate operations", e);
-                            }
-                        }
-                    };
-                    timer.schedule(sendingTask, TRANSMISSION_DELAY_MILLIS);
-                }
-            }
-            if (++messageCount % 10000l == 0) {
-                logger.info("Handled " + messageCount
-                        + " messages for replication. Current outbound replication queue size: "
-                        + outboundBufferClasses.size());
-            }
+        final OperationSerializerBuffer bufferToWriteTo = operation.requiresSynchronousExecution()
+                ? outboundBufferForOperationsRequiringSynchronousExecution
+                : outboundBufferPoolForOperationsAllowingForAsynchronousExecution;
+        bufferToWriteTo.write(operation, replicable);
+        if (++messageCount % 10000l == 0) {
+            logger.info("Handled " + messageCount
+                    + " messages for replication. Current outbound replication queue size: "
+                    + outboundBufferForOperationsRequiringSynchronousExecution.size());
+        }
+    }
+    
+    @Override
+    public void send(byte[] message, List<Class<?>> typesInMessage) {
+        if (totalSendJobsSize.get() < SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES) {
+            sendJobQueue.add(new Pair<>(message, typesInMessage));
+            final long newTotalSendJobsSize = totalSendJobsSize.addAndGet(message.length);
+            logger.fine("Successfully handed " + typesInMessage.size() +
+                    " operations to broadcaster; new outbound send queue length "+sendJobQueue.size()+
+                    " ("+newTotalSendJobsSize+"B)");
+        } else {
+            logger.severe("Queue for outbound replication operations full ("+totalSendJobsSize.get()+
+                    "B. Dropping operations buffer with size "+message.length+"B");
         }
     }
 
-    private static ObjectOutputStream createCompressingObjectOutputStream(final String replicaIdAsString, OutputStream streamToWrap) throws IOException {
-        LZ4BlockOutputStream zipper = new LZ4BlockOutputStream(streamToWrap);
-        new DataOutputStream(zipper).writeUTF(replicaIdAsString);
-        ObjectOutputStream compressingObjectOutputStream = new ObjectOutputStream(zipper);
-        return compressingObjectOutputStream;
-    }
-    
     static InputStream createUncompressingInputStream(InputStream streamToWrap) {
         return new LZ4BlockInputStream(streamToWrap);
     }
 
-    /**
-     * Obtains the monitor on {@link #outboundBufferMonitor}, copies the references to the buffers, nulls out the
-     * buffers, then releases the monitor and broadcasts the buffer.
-     */
-    private void flushBufferToRabbitMQ() {
-        logger.fine("Trying to acquire monitor");
-        final byte[] bytesToSend;
-        final List<Class<?>> classesOfOperationsToSend;
-        final boolean doSend;
-        synchronized (outboundBufferMonitor) {
-            if (outboundBuffer != null) {
-                logger.fine("Preparing " + outboundBufferClasses.size()
-                        + " operations for sending to RabbitMQ exchange");
-                try {
-                    outboundObjectBuffer.close();
-                    logger.fine("Sucessfully closed ObjectOutputStream");
-                } catch (IOException e) {
-                    logger.log(Level.SEVERE, "Error trying to replicate " + outboundBufferClasses.size()
-                            + " operations", e);
-                }
-                bytesToSend = outboundBuffer.toByteArray();
-                logger.fine("Successfully produced bytesToSend array of length " + bytesToSend.length);
-                classesOfOperationsToSend = outboundBufferClasses;
-                doSend = true;
-                outboundBuffer = null;
-                outboundBufferReplicableIdAsString = null;
-                outboundObjectBuffer = null;
-                outboundBufferClasses = null;
-            } else {
-                logger.fine("No buffer set; probably two timer tasks were scheduled concurrently. No problem, just not sending this time around.");
-                doSend = false;
-                bytesToSend = null;
-                classesOfOperationsToSend = null;
-            }
-            if (doSend) {
-                if (totalSendJobsSize.get() < SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES) {
-                    sendJobQueue.add(new Pair<>(bytesToSend, classesOfOperationsToSend));
-                    final long newTotalSendJobsSize = totalSendJobsSize.addAndGet(bytesToSend.length);
-                    logger.fine("Successfully handed " + classesOfOperationsToSend.size() +
-                            " operations to broadcaster; new outbound send queue length "+sendJobQueue.size()+
-                            " ("+newTotalSendJobsSize+"B)");
-                } else {
-                    logger.severe("Queue for outbound replication operations full ("+totalSendJobsSize.get()+
-                            "B. Dropping operations buffer with size "+bytesToSend.length+"B");
-                }
-            }
-        }
-    }
-    
     /**
      * Constructs the thread assigned to {@link #sendJob}, which is responsible for watching the {@link #sendJobQueue},
      * {@link BlockingDeque#take() taking} element from the queue and trying to send them to the {@link #exchangeHost}/{@link #exchangePort}
@@ -729,7 +605,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     }
 
     /**
-     * Bytes arriving here have gone through Java object serialization and compession, probably also grouping based on
+     * Bytes arriving here have gone through Java object serialization and compression, probably also grouping based on
      * time delays, and are supposed to be sent out immediately. During sending, exceptions may occur, e.g., due to an
      * interrupted connection, the message queuing system being temporarily unavailable or some form of re-configuration
      * or scaling that is taking place. In order not to lose such messages, a FIFO queue exists which keeps track of all
@@ -835,7 +711,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             final URLConnection initialLoadConnection = HttpUrlConnectionHelper
                     .redirectConnectionWithBearerToken(initialLoadURL, /* HTTP request method */ "POST", master.getBearerToken());
             final InputStream is = (InputStream) initialLoadConnection.getContent();
-            final InputStreamReader queueNameReader = new InputStreamReader(is);
+            final InputStreamReader queueNameReader = new InputStreamReader(is, HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(initialLoadConnection, "UTF-8"));
             final String queueName = new BufferedReader(queueNameReader).readLine();
             queueNameReader.close();
             final Channel channel = master.createChannel();
@@ -1002,14 +878,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         if (replicationInstancesManager.hasReplicas()) {
             replicationInstancesManager.removeAll();
             removeAsListenerFromReplicables();
-            synchronized (this) {
-                if (masterChannel != null) {
-                    masterChannel.getConnection().close();
-                    masterChannel = null;
-                }
-            }
+            closeOutboundReplicationChannel();
             logger.info("Unregistered all replicas from this server!");
         }
+    }
+
+    private synchronized void closeOutboundReplicationChannel() throws IOException {
+        if (masterChannel != null) {
+            masterChannel.getConnection().close();
+            masterChannel = null;
+        }
+        outboundBufferPoolForOperationsAllowingForAsynchronousExecution.stop();
     }
 
     @Override

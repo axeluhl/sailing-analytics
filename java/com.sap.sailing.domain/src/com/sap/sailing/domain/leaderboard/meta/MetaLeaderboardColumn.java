@@ -30,7 +30,7 @@ import com.sap.sse.common.Util.Pair;
 /**
  * All {@link RaceColumnListener} events received from the underlying leaderboard's race columns
  * are forwarded to this object's {@link RaceColumnListener}s.
- * 
+ *
  * @author Axel Uhl
  *
  */
@@ -38,7 +38,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     private static final long serialVersionUID = 3092096133388262955L;
     private final Leaderboard leaderboard;
     private final Fleet metaFleet;
-    
+
     public MetaLeaderboardColumn(Leaderboard leaderboard, Fleet metaFleet) {
         super();
         this.leaderboard = leaderboard;
@@ -55,7 +55,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public Leaderboard getLeaderboard() {
         return leaderboard;
     }
-    
+
     @Override
     public String getName() {
         return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
@@ -110,6 +110,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public boolean isOneAlwaysStaysOne() {
+        return false;
+    }
+
+    @Override
     public void releaseTrackedRace(Fleet fleet) {
     }
 
@@ -146,6 +151,16 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+    }
+
+    @Override
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        getRaceColumnListeners().notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+    }
+
+    @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        getRaceColumnListeners().notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
     }
 
     @Override
@@ -238,7 +253,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         return leaderboard.getAllCompetitorsWithRaceDefinitionsConsidered();
     }
-    
+
     @Override
     public Iterable<Competitor> getAllCompetitors(Fleet fleet) {
         final Iterable<Competitor> result;
@@ -258,7 +273,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats(Fleet fleet) {
-        // TODO bug2822: What should we do here? Returning a boat makes only sense when the competitors keep their boats through all regattas 
+        // TODO bug2822: What should we do here? Returning a boat makes only sense when the competitors keep their boats through all regattas
         return Collections.emptyMap();
     }
 

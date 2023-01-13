@@ -56,7 +56,7 @@ public class NOAAImporter extends DeclinationImporter {
         Date date = timePoint.asDate();
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
-        URL url = new URL(QUERY_URL+"?lon1="+position.getLngDeg()+"&lat1="+position.getLatDeg()+"&startYear=" + calendar.get(Calendar.YEAR) + "&startMonth="
+        URL url = new URL(QUERY_URL+"?key=zNEw7&lon1="+position.getLngDeg()+"&lat1="+position.getLatDeg()+"&startYear=" + calendar.get(Calendar.YEAR) + "&startMonth="
                 + (calendar.get(Calendar.MONTH) + 1) + "&startDay=" + calendar.get(Calendar.DAY_OF_MONTH)+"&resultFormat=xml");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");

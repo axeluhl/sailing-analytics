@@ -282,9 +282,9 @@ public class Activator implements BundleActivator {
         ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker = ServiceTrackerFactory
                 .createAndOpen(context, ResultUrlRegistry.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
-                serviceFinderFactory, trackedRegattaListener, notificationService,
-                trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker, sharedSailingDataTracker,
-                replicationServiceTracker, scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
+                /* sensorFixStore */ null, serviceFinderFactory, trackedRegattaListener,
+                notificationService, trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker,
+                sharedSailingDataTracker, replicationServiceTracker, scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
         // start watching out for MasterDataImportClassLoaderService instances in the OSGi service registry and manage
         // the combined class loader accordingly:

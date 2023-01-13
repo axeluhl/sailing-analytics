@@ -132,6 +132,8 @@ public abstract class DataEntryDialog<T> {
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
         okButton.ensureDebugId("OkButton");
+        okButton.addStyleName("btn-lg");
+        okButton.addStyleName("btn-primary");
         FlowPanel dialogFPanel = new FlowPanel();
         dialogFPanel.setWidth("100%");
         statusLabel = new HTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
@@ -160,6 +162,8 @@ public abstract class DataEntryDialog<T> {
             cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
             cancelButton.ensureDebugId("CancelButton");
             rightButtonPanel.add(cancelButton);
+            cancelButton.addStyleName("btn-lg");
+            cancelButton.addStyleName("btn-secondary");
             cancelButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -176,7 +180,7 @@ public abstract class DataEntryDialog<T> {
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 // wait for any outstanding validation request and check last validation result; call OK only if the pending validation was OK
-                ifLastValidationRequestSuccesssful(()->{
+                ifLastValidationRequestSuccessful(()->{
                     dataEntryDialog.hide();
                     if (callback != null) {
                         callback.ok(getResult());
@@ -191,7 +195,7 @@ public abstract class DataEntryDialog<T> {
      * call {@code callback}. If an action is still pending in the {@link #validationExecutor}, wait until no more
      * action is pending and invoke {@code callback} if the last validation state was OK.
      */
-    protected void ifLastValidationRequestSuccesssful(Runnable callback) {
+    protected void ifLastValidationRequestSuccessful(Runnable callback) {
         validationExecutor.runAfterLastActionReturned(VALIDATION_ACTION_CATEGORY, ()->{
             if (!dialogInInvalidState) {
                 callback.run();
@@ -596,7 +600,24 @@ public abstract class DataEntryDialog<T> {
         dataEntryDialog.center();
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {
-            Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
+            if (focusWidget.isEnabled()) {
+                Scheduler.get().scheduleFinally(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        focusWidget.setFocus(true);
+                    }
+                });
+            } else {
+                DialogUtils.linkEscapeToButton(okButton, okButton);
+                Scheduler.get().scheduleFinally(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        okButton.setFocus(true);
+                    }
+                });
+            }
+        } else {
+            okButton.setFocus(true);
         }
     }
     

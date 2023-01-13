@@ -3,17 +3,21 @@ package com.sap.sailing.xrr.structureimport;
 public class SeriesParameters {
     private boolean firstColumnIsNonDiscardableCarryForward = false;
     private boolean hasSplitFleetContiguousScoring = false;
+    private boolean hasCrossFleetMergedRanking = false;
     private boolean startswithZeroScore = false;
     private int[] discardingThresholds = null;
     private Integer maximumNumberOfDiscards = null;
+    private boolean oneAlwaysStaysOne;
 
     public SeriesParameters(boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            boolean startswithZeroScore, int[] discardingThresholds, Integer maximumNumberOfDiscards) {
+            boolean hasCrossFleetMergedRanking, boolean startswithZeroScore, int[] discardingThresholds, Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne) {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
         this.startswithZeroScore = startswithZeroScore;
         this.discardingThresholds = discardingThresholds;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
@@ -28,8 +32,16 @@ public class SeriesParameters {
         return hasSplitFleetContiguousScoring;
     }
 
-    public void setHasSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
+    public boolean isHasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
+    }
+
+    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+    }
+
+    public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
     }
 
     public boolean isStartswithZeroScore() {
@@ -50,5 +62,9 @@ public class SeriesParameters {
 
     public Integer getMaximumNumberOfDiscards() {
         return maximumNumberOfDiscards;
+    }
+
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
     }
 }

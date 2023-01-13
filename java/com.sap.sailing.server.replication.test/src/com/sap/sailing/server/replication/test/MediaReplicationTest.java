@@ -3,7 +3,7 @@ package com.sap.sailing.server.replication.test;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -26,7 +26,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.mongodb.ConnectionString;
@@ -265,7 +265,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
         Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
-                Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
+                Mockito.any(WithQualifiedObjectIdentifier.class), ArgumentMatchers.<PublicReadableActions> any());
         // Setup source service
         RacingEventServiceImpl sourceService = Mockito.spy(new RacingEventServiceImpl());
         Mockito.doReturn(securityService).when(sourceService).getSecurityService();

@@ -48,7 +48,7 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 
   //calling xmake signing script
   //paths are relative to gen/out in files2sign.json
-  assert execute("python", SIGN_DOCKER_FILE_PY, "${gendir}", "${cfgdir}/files2sign.json", "${importdir}") == 0
+  assert execute("python3", SIGN_DOCKER_FILE_PY, "${gendir}", "${cfgdir}/files2sign.json", "${importdir}") == 0
   repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
     def apkUnsigned = apkFile.getAbsolutePath()
     def name = apkFile.getName()

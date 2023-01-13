@@ -8,7 +8,26 @@ import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.operationaltransformation.Operation;
 
+/**
+ * Collaborates with {@link ReplicationReceiverImpl} to allow parallel execution of operations, but only for those
+ * that have different {@link Operation#getKeyForAsynchronousExecution() keys for asynchronous execution}. The receiver
+ * {@link #schedule(Object, Runnable) schedules} operations (wrapped as {@link Runnable}s) with an object of this type
+ * which puts it into a {@link Deque double-ended queue} specific to the key for asynchronous execution as provided by
+ * the operation. If it is the first operation in a new {@link Deque} then a task is scheduled for immediate execution
+ * which continues to poll the {@link Deque} and apply its operations until drained. This way, if the replication
+ * received continues to receive operations with the same key while the first operation with that key is being applied,
+ * the next operations with an equal key will be enqueued in the same queue and will be picked up by the already running
+ * task that is specific to the key. When the queue is drained, the task terminates and the queue is removed from
+ * {@link #operationQueuesByKey}.<p>
+ * 
+ * With this approach, only one task per equal key is scheduled with the {@link Executor} passed to the constructor,
+ * ensuring that operations with equal keys don't block each other during parallel execution.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class OperationQueueByKeyExecutor {
     private static final Logger logger = Logger.getLogger(OperationQueueByKeyExecutor.class.getName());
 

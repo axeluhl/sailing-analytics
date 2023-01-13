@@ -819,11 +819,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
             }
         });
         if (DeviceDetector.isDesktop()) {
-            scoreCorrectionInfoGrid.setWidget(1, 4, new Label("Race Selection" + ":"));
+            scoreCorrectionInfoGrid.setWidget(1, 4, new Label(stringMessages.raceSelection() + ":"));
             scoreCorrectionInfoGrid.setWidget(1, 5, raceListBox);
         } else {
             scoreCorrectionInfoGrid.getFlexCellFormatter().setColSpan(4, 1, 2);
-            scoreCorrectionInfoGrid.setWidget(4, 0, new Label("Race Selection" + ":"));
+            scoreCorrectionInfoGrid.setWidget(4, 0, new Label(stringMessages.raceSelection() + ":"));
             scoreCorrectionInfoGrid.setWidget(4, 1, raceListBox);
         }
         raceListSelection = Window.Location.getParameter("selectedRace");

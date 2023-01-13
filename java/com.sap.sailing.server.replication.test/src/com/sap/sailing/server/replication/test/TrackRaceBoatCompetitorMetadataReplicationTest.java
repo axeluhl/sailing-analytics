@@ -55,7 +55,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     public void testTearDownIsNotBeingCalledWhenSetUpFailsWithAnException() {
         // no-op
     }
-    
+
     @Before
     @Override
     public void setUp() throws Exception {
@@ -115,8 +115,8 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
         master.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
-                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
-                Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
+                /* hasSplitFleetContiguousScoring */ false, /* hasCrossFleetMergedRanking */ false, /* maximumNumberOfDiscards */ null,
+                /* oneAlwaysStaysOne */ false, Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
         racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000,
                 new DefaultRaceTrackingHandler());
     }
@@ -129,16 +129,16 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         }
         replicaReplicator.waitUntilQueueIsEmpty();
     }
-    
+
     @Test
     public void testStartTrackingRaceReplication() throws Exception {
-        final String boat1CompetitorName = "CYC"; 
+        final String boat1CompetitorName = "CYC";
         final String boat1Name = "Boot 1";
         final String boat1Color = "#141414";
-        final String boat2CompetitorName = "SVI"; 
+        final String boat2CompetitorName = "SVI";
         final String boat2Name = "Boot 2";
         final String boat2Color = "#606060";
-        final String boat3CompetitorName = "BYCÜ"; 
+        final String boat3CompetitorName = "BYCÜ";
         final String boat3Name = "Boot 3";
         final String boat3Color = "#0169EF";
         startTracking();
@@ -178,7 +178,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         assertEquals(masterBoat.getColor(), replicaBoat.getColor());
         assertEquals(expectedBoatName, replicaBoat.getName());
         assertEquals(expectedBoatColor, replicaBoat.getColor().getAsHtml());
-    }        
+    }
 
     private Competitor findCompetitor(Iterable<Competitor> competitors, Competitor otherCompetitor) {
         for (Competitor competitor : competitors) {
@@ -188,7 +188,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         }
         return null;
     }
-    
+
     @After
     @Override
     public void tearDown() throws Exception {

@@ -194,7 +194,7 @@ public class SmartFutureCacheTest {
         assertNull(sfc.get("Trala", /* waitForLatest */ false));
         assertFalse(updateWasCalled[0]);
         sfc.triggerUpdate("Trala", new FromAToBUpdateInterval(43, 49)); // should result in update interval 42..49
-        assertEquals(new Integer(91), sfc.get("Trala", /* waitForLatest */ true));
+        assertEquals(Integer.valueOf(91), sfc.get("Trala", /* waitForLatest */ true));
         assertTrue(updateWasCalled[0]);
     }
 
@@ -232,7 +232,7 @@ public class SmartFutureCacheTest {
             }
         }
         assertTrue(updateWasCalled[0]);
-        assertEquals(new Integer(91), sfc.get("Trala", /* waitForLatest */ true));
+        assertEquals(Integer.valueOf(91), sfc.get("Trala", /* waitForLatest */ true));
     }
     
     @Ignore // used only to solve bug 1314; it's hard to test re-cycling of tasks reliably without depending on timing issues

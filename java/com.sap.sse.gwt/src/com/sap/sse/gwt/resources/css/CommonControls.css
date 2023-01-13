@@ -723,17 +723,19 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-DialogBox .Caption {
-	font-size: 14px;
+	font-size: 15px;
+	color: #555;
 	padding: 8px 10px;
-	background-color: #ededed;
-	border-bottom: 1px solid #3e3e3e;
+	background-color: #fff;
 	font-family: 'Open Sans', Verdana, Arial, sans-serif;
 	font-weight: 600;
+	border-radius: 4px 4px 0 0;
 }
 
 .gwt-DialogBox .dialogContent {
 	background: #ffffff;
 	padding: 10px;
+	border-radius: 0 0 4px 4px;
 }
 
 .gwt-Button, .gwt-Button:visited {
@@ -923,3 +925,42 @@ video {
 label {
 	padding-left: 4px;
 }
+
+.gwt-DialogBox button.btn-secondary {
+    background-color: #fff;
+    color: #008fcc;
+    border: 1px solid #008fcc;
+    padding: 2px 8px 3px;
+}
+
+.gwt-DialogBox button.btn-secondary:hover {
+    background-color: #0081b8;
+    color: #fff;
+}
+
+.gwt-DialogBox button.btn-primary {
+    background-color: #008fcc;
+    color: #fff;
+    margin-right: 2px;
+    border: 1px solid #008fcc;
+}
+
+.gwt-DialogBox button.btn-primary:hover {
+    background-color: #0081b8;
+    color: #fff;
+}
+
+.gwt-DialogBox button.btn-primary:disabled {
+    background-color: #cfcfcf
+}
+
+.gwt-DialogBox button.btn-secondary.btn-lg, .gwt-DialogBox button.btn-primary.btn-lg {
+    padding: .666666666666667em 2em;
+    font-weight: 600; 
+}
+
+.gwt-DialogBox button.btn-secondary:disabled, .gwt-DialogBox button.btn-primary:disabled {
+    margin: 1px;
+    border: 1px solid #cfcfcf;
+}
+

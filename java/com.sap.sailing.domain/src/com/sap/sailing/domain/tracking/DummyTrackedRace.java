@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -32,10 +33,12 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
+import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -59,7 +62,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         this(competitorsAndBoats, regatta, trackedRegatta, new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint>emptyList()),
                 regatta.getBoatClass(), competitorsAndBoats, raceId), windStore);
     }
-    
+
     public DummyTrackedRace(final Map<Competitor, Boat> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
             RaceDefinition race, WindStore windStore) {
         super(race, trackedRegatta, windStore, -1);
@@ -313,7 +316,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
-    
+
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
@@ -436,7 +439,17 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
+        return null;
+    }
+    
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         return null;
     }
 
@@ -681,7 +694,18 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return null;
+    }
+
+    @Override
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return null;
+    }
+
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -689,7 +713,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
-    
+
     @Override
     public Competitor getCompetitorOfBoat(Boat boat) {
         return null;
@@ -774,7 +798,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public WindSummary getWindSummary() {
         return null;
     }
-    
+
     @Override
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         return false;
@@ -782,7 +806,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void removeWind(Wind wind, WindSource windSource) {
-        
+
     }
 
     @Override

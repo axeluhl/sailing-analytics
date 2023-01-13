@@ -275,14 +275,25 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     }
 
     @Override
-    public boolean isManagedByAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup) {
-        return getInstance().tags().stream().filter(tag -> autoScalingGroup != null
-                && tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName()))
+    public boolean isManagedByAutoScalingGroup(Iterable<AwsAutoScalingGroup> autoScalingGroups) {
+        return getInstance().tags().stream().filter(tag -> tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG)
+                && Util.stream(autoScalingGroups).filter(autoScalingGroup -> autoScalingGroup.getName().equals(tag.value())).findAny().isPresent())
                 .findAny().isPresent();
     }
 
     @Override
     public String toString() {
         return getInstanceId();
+    }
+
+    @Override
+    public boolean verifySshKey( Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
+        final String keyName = optionalKeyName.orElseGet(()->getInstance().keyName()); // the SSH key pair name that can be used to log on
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
+        if (keyPair == null) {
+            return false;
+        }
+        final JSch jsch = new JSch();
+        return keyPair.checkPassphrase(jsch, privateKeyEncryptionPassphrase);
     }
 }

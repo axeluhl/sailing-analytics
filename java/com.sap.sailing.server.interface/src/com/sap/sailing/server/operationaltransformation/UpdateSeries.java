@@ -18,7 +18,7 @@ import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 
 public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private static final long serialVersionUID = 6356089749049112710L;
-    
+
     private final List<FleetDTO> fleets;
     private final boolean isMedal;
     private final boolean isFleetsCanRunInParallel;
@@ -26,14 +26,16 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private final boolean startsWithZeroScore;
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final boolean hasSplitFleetContiguousScoring;
+    private final boolean hasCrossFleetMergedRanking;
     private final boolean seriesNameChanged;
     private final String newSeriesName;
     private final Integer maximumNumberOfDiscards;
+    private final boolean oneAlwaysStaysOne;
 
     public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking,
+            Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne, List<FleetDTO> fleets) {
         super(regattaIdentifier, seriesName);
         this.seriesNameChanged = !seriesName.equals(newSeriesName);
         this.newSeriesName = newSeriesName;
@@ -43,8 +45,10 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         this.startsWithZeroScore = startsWithZeroScore;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
         this.fleets = fleets;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     @Override
@@ -63,13 +67,15 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         series.setStartsWithZeroScore(startsWithZeroScore);
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoring);
+        series.setCrossFleetMergedRanking(hasCrossFleetMergedRanking);
         series.setMaximumNumberOfDiscards(maximumNumberOfDiscards);
+        series.setOneAlwaysStaysOne(oneAlwaysStaysOne);
         if (series.getRegatta().isPersistent()) {
             toState.updateStoredRegatta(series.getRegatta());
         }
         return null;
     }
-    
+
     private Series createSeries(RacingEventService toState) {
         Regatta regatta = toState.getRegatta(getRegattaIdentifier());
         final List<String> emptyRaceColumnNames = Collections.emptyList();

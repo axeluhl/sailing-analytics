@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
+import com.sap.sse.security.ui.client.UserService;
 
 public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSerializable {
     private static final long serialVersionUID = 8449684019896974806L;
@@ -75,6 +77,14 @@ public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSe
      */
     public RedirectDTO getDefaultRedirect() {
         return RedirectDTO.from(getDefaultRedirectPath());
+    }
+    
+    /**
+     * @return {@code true} if this replica set is the one that this method is being run on. See
+     * {@link ServerInfoDTO} and {@link UserService#getServerInfo()}.
+     */
+    public boolean isLocalReplicaSet(UserService userService) {
+        return getName().equals(userService.getServerInfo().getName());
     }
 
     @Override

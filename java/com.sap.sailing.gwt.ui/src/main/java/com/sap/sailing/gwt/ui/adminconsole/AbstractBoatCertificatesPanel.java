@@ -42,7 +42,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.gwt.common.client.help.HelpButton;
-import com.sap.sailing.gwt.ui.adminconsole.help.AdminConsoleHelpButtonResources;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -180,7 +180,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         final Button suggestCertificatesButton = topButtonPanel.addAction(stringMessages.suggestCertificatesForSelectedBoats(),
                 contextUpdatePermissionCheck, this::suggestCertificates);
         suggestCertificatesButton.ensureDebugId("SuggestCertificatesButton");
-        topButtonPanel.addUnsecuredWidget(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
+        topButtonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
                 stringMessages.orcExplanation(), "https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta#setting-up-an-orc-regatta-with-performance-curve-scoring-pcs"));
         // TABLE - Boats
         CaptionPanel boatCaptionPanel = new CaptionPanel(stringMessages.boats());

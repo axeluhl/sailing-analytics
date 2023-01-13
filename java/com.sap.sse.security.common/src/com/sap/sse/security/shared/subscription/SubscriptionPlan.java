@@ -47,7 +47,7 @@ public abstract class SubscriptionPlan implements Serializable {
      * The order of this enumeration is usually also the main order on the UI.
      */
     public enum PlanGroup {
-        PREMIUM("premium"), DATA_MINING_ARCHIVE("data_mining_archive"), DATA_MINING_ALL("data_mining_all");
+        PREMIUM("premium"), DATA_MINING_ARCHIVE("data_mining_archive"), DATA_MINING_ALL("data_mining_all"), TRIAL("trial");
         final String id;
         PlanGroup(String id) {
             this.id = id;

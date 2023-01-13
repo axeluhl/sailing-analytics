@@ -34,6 +34,9 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
+    
+    String HEALTH_CHECK_PATH = "/gwt/status";
+    
     static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
     static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH+"?"+ReplicationServletActions.ACTION_PARAMETER_NAME+"="+
                             ReplicationServletActions.Action.STATUS.name();
@@ -153,7 +156,11 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();
-        return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
+        return new URL(port==443 ? "https" : "http",
+                Wait.wait(()->getHost().getPublicAddress(optionalTimeout),
+                        publicAddress->publicAddress != null, /* retryOnException */ true,
+                        optionalTimeout, /* sleep duration between attempts */ Duration.ONE_SECOND.times(10),
+                        Level.INFO, "Waiting for non-null public address").getCanonicalHostName(), port, pathAndQuery);
     }
     
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {

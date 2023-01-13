@@ -40,6 +40,4 @@ public class ReplicationStopTest extends AbstractServerReplicationTest {
         regattas.add("Day2");
         return master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
     }
-    
-    
 }

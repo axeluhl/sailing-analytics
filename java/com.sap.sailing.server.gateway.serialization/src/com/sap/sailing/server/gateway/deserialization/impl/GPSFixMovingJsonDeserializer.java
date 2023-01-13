@@ -24,7 +24,7 @@ public class GPSFixMovingJsonDeserializer extends TypeBasedJsonDeserializer<GPSF
         double speedKnots = (Double) object.get(FIELD_SPEED_KNOTS);
         JSONObject clone = (JSONObject) object.clone();
         clone.put(TypeBasedJsonDeserializer.FIELD_TYPE, GPSFixJsonDeserializer.TYPE);
-        GPSFix baseFix = new GPSFixJsonDeserializer().deserialize(object);
+        GPSFix baseFix = new GPSFixJsonDeserializer().deserialize(clone);
         Bearing bearing = new DegreeBearingImpl(bearingDeg);
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(
                 speedKnots, bearing);

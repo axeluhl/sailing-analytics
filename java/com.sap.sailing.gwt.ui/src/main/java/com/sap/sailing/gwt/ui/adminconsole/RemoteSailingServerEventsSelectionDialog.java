@@ -93,8 +93,10 @@ public class RemoteSailingServerEventsSelectionDialog extends DataEntryDialog<Re
         multiSelectionPanel.setSpacing(3);
         final Button selectAllButton = new Button(stringMessages.selectAll());
         selectAllButton.addClickHandler(createMultiSelectionHandler(true));
+        selectAllButton.addStyleName("btn-secondary");
         final Button deselectAllButton = new Button(stringMessages.deselectAll());
         deselectAllButton.addClickHandler(createMultiSelectionHandler(false));
+        deselectAllButton.addStyleName("btn-secondary");
         multiSelectionPanel.add(selectAllButton);
         multiSelectionPanel.add(deselectAllButton);
         mainPanel.add(multiSelectionPanel);
