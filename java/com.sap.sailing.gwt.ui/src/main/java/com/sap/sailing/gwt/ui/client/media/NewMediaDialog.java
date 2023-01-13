@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
@@ -107,16 +107,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         }
         
         private boolean isMediaTypeSupported(String url) {
-            final boolean supported;
-            int dotPos = url.lastIndexOf('.');
-            if (dotPos >= 0) {
-                String fileEnding = url.substring(dotPos + 1).toLowerCase();
-                List<MimeType> possibleMimeTypes = MimeType.byExtension(fileEnding);
-                supported = possibleMimeTypes.size() > 0;
-            } else {
-                supported = false;
-            }
-            return supported;
+            return MimeType.byExtension(url) != MimeType.unknown;
         }
     }
 
@@ -275,6 +266,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 }
             }
         }
+        if (mimeTypeListBox.getSelectedIndex() < 1) {
+            mediaTrack.mimeType = null;
+        }
     }
 
     protected void updateFromUrl() {
@@ -327,20 +321,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     anchor.setHref(url);
                     //remove trailing / as well
                     String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
-                    int dotPos = lastPathSegment.lastIndexOf('.');
-                    if (dotPos >= 0) {
-                        String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
-                        List<MimeType> possibleMimeTypes = MimeType.byExtension(fileEnding);
-                        if (possibleMimeTypes.size() > 0) {
-                            mediaTrack.mimeType = possibleMimeTypes.get(0);
-                        } else {
-                            mediaTrack.mimeType = null;
-                        }
-                        if (mediaTrack.mimeType != null && MediaSubType.mp4 == mediaTrack.mimeType.getMediaSubType()) {
-                            processMp4(mediaTrack);
-                        } else {
-                            loadMediaDuration();
-                        }
+                    MimeType mimeType = MimeType.byExtension(lastPathSegment);
+                    GWT.log("found mimeType: " + mimeType);
+                    if (mimeType != MimeType.unknown) {
+                        mediaTrack.mimeType = mimeType;
                     } else {
                         mediaTrack.mimeType = null;
                     }
