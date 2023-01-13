@@ -53,15 +53,17 @@ public class SecurityStoreMerger {
     }
 
     private AccessControlStore loadAccessControlStore(final PersistenceFactory targetPf, UserStore userStore) {
-        final AccessControlStore accessControlStore = new AccessControlStoreImpl(targetPf.getDefaultDomainObjectFactory(), targetPf.getDefaultMongoObjectFactory(), userStore);
+        final AccessControlStore accessControlStore = new AccessControlStoreImpl(
+                targetPf.getDefaultMajorityDomainObjectFactory(),
+                targetPf.getDefaultMajorityMongoObjectFactory(), userStore);
         accessControlStore.loadACLsAndOwnerships();
         return accessControlStore;
     }
 
     private UserStoreImpl loadUserStore(final PersistenceFactory targetPf, String defaultTenantName)
             throws UserStoreManagementException {
-        final UserStoreImpl userStore = new UserStoreImpl(targetPf.getDefaultDomainObjectFactory(),
-                targetPf.getDefaultMongoObjectFactory(), defaultTenantName);
+        final UserStoreImpl userStore = new UserStoreImpl(targetPf.getDefaultMajorityDomainObjectFactory(),
+                targetPf.getDefaultMajorityMongoObjectFactory(), defaultTenantName);
         userStore.ensureDefaultRolesExist();
         // actually load the users and migrate them if required
         userStore.loadAndMigrateUsers();

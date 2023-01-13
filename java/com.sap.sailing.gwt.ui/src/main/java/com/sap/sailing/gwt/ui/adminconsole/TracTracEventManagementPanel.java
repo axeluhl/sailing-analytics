@@ -543,7 +543,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
     
     public void refreshTracTracConnectors() {
         connectionsTable.refreshTracTracConnectionList();
-        raceList.getList().clear();
     }
     
     @Override

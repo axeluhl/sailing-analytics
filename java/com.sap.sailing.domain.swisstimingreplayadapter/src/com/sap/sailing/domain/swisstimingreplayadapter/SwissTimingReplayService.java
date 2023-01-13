@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -23,7 +24,7 @@ public interface SwissTimingReplayService {
 
     List<SwissTimingReplayRace> listReplayRaces(String swissTimingUrlText);
 
-    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream) throws IOException,
+    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream, Charset charset) throws IOException,
             org.json.simple.parser.ParseException;
 
     DateFormat getStartTimeFormat();
@@ -42,7 +43,6 @@ public interface SwissTimingReplayService {
      *            the SwissTiming ID for the race
      * @param useInternalMarkPassingAlgorithm
      *            use our own instead of the SwissTiming-provided mark rounding / split times
-     * @param markPassingRaceFingerprintRegistry TODO
      * @param boatClassNameName
      *            only required if {@code regattaToAddTo} is {@code null}; used for the retrieval/creation of a default
      *            regatta

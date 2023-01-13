@@ -23,6 +23,30 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">January 2023</h2>
+          <ul class="bulletList">
+            <li>Support for managing sharded replication in the "Landscape" panel of the "Advanced" category in the
+                <a href="https://www.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:">admin console</a>),
+                offered as a new icon in the "Action" column of the replica sets table: in the new dialog that pops
+                up you can create and remove so-called "shards" to which you can assign zero or more leaderboards
+                offered by that replica set. Each shard gets its own auto-scaling group and target group in addition to the regular
+                auto-scaling group / target group pair used for the public target group. By default a minimum of two instances
+                are required by each shard to ensure availability. They are created with the same launch configuration
+                used by the replica set's regular public target group. When a shard's instances are healthy,
+                rules are managed in the replica set's load balancer to route traffic regarding the leaderboards
+                selected for the shard to the shard's target group. This reduces traffic on the default public
+                target group, and the instances of the shard can focus on the sub-set of leaderboards configured
+                instead of having to compute all leaderboards in parallel. This helps reduce the leaderboard
+                re-calculation times for live events with parallel live races in several classes and tens of
+                competitors per leaderboard.
+            </li>
+            <li>Introduced new permission <tt>EVENT:UPLOAD_MEDIA</tt>. With this special permission, a user who does
+                not have the full <tt>EVENT:UPDATE</tt> permission can still add (not remove or edit) media to an
+                event, in particular images and videos. In our production environment the role <tt>event_manager</tt>
+                grants this permission now, too, so users having that role can grant <tt>EVENT:UPLOAD_MEDIA</tt>
+                to other users or the general public at their likings.
+            </li>
+          </ul>
           <h2 class="articleSubheadline">December 2022</h2>
           <ul class="bulletList">
             <li>Added Czech language support</li>

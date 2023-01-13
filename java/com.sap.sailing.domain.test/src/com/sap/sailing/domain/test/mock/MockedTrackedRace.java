@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -49,7 +50,10 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -730,7 +734,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
-    
+
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
@@ -893,8 +897,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
+        return getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+     
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         return null;
+    }
+
+    @Override
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
@@ -1213,7 +1227,19 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return null;
+    }
+
+    @Override
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return null;
+    }
+
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
@@ -1242,7 +1268,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void setFinishedTime(TimePoint newFinishedTime) {
     }
-    
+
     @Override
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
             Competitor competitor, String trackName) {
@@ -1275,7 +1301,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix,
             boolean onlyWhenInTrackingTimeInterval) {
     }
-    
+
     @Override
     public void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
     }
@@ -1289,7 +1315,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
         return null;
     }
-    
+
     @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
@@ -1299,7 +1325,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
-    
+
     @Override
     public Competitor getCompetitorOfBoat(Boat boat) {
         return null;

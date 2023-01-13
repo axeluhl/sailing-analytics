@@ -104,6 +104,7 @@ public class RegattaDetailsCompositePO extends PageArea {
     }
     
     public void waitForRacesOfSeries(final String series, final List<String> races) {
+        waitForAjaxRequests();
         waitUntil(() -> Objects.equal(getRaceNames(series), races));
     }
 }

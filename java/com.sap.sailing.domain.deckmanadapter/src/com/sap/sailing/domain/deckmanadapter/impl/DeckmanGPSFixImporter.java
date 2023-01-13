@@ -3,6 +3,7 @@ package com.sap.sailing.domain.deckmanadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -19,8 +20,8 @@ import com.sap.sailing.domain.trackimport.GPSFixImporter;
 public class DeckmanGPSFixImporter implements GPSFixImporter {
 
     @Override
-    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
-            String sourceName)
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback,
+            boolean inferSpeedAndBearing, String sourceName)
             throws FormatNotSupportedException, IOException {
         DeckmanAdapter deckmanAdapter = DeckmanAdapterFactoryImpl.INSTANCE.createDeckmanAdapter();
         TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());

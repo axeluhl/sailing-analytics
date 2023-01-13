@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
@@ -29,7 +28,7 @@ public class MockedTrackedRaceWithStartTimeAndZeroRanks extends MockedTrackedRac
     }
 
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
+    public int getRank(Competitor competitor) {
         return 0;
     }
 

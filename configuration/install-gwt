@@ -9,7 +9,7 @@ GWT_ROOT="${GWT}/trunk"
 cd "${GWT}"
 echo "GWT directory: ${GWT}"
 # Use the following two lines for the new gwt-2.10-api-checker stuff
-git clone https://github.com/axeluhl/gwt.git -b issue-7987-compatibility trunk
+git clone https://github.com/axeluhl/gwt.git -b issue-7987-compatibility-with-issue-9584 trunk
 git clone https://github.com/Vertispan/tools.git -b gwt-2.10-api-checker
 # Or alternatively:
 #git clone https://github.com/axeluhl/gwt.git -b issue-7987-compatibility trunk

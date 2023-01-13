@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
@@ -29,7 +30,7 @@ public class ExpeditionStartDataTest {
         final String filename = "2018Apr28_05.csv.gz";
         final ExpeditionStartData result = new ExpeditionCourseInferrer(
                 RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE)).getStartData(
-                        getClass().getResourceAsStream(filename), filename);
+                        getClass().getResourceAsStream(filename), filename, Charset.forName("UTF-8"));
         assertNotNull(result);
         final Set<TimePoint> startTimes = new HashSet<>();
         Util.addAll(result.getStartTimes(), startTimes);

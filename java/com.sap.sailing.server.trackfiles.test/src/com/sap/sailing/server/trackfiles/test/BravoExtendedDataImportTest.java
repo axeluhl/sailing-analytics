@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,11 +58,11 @@ public class BravoExtendedDataImportTest extends AbstractBravoDataImportTest {
         try (final ByteArrayInputStream inputStream = new ByteArrayInputStream((
                 HEADER_ORDER_DEFAULT+DUMMY_CONTENT+DUMMY_CONTENT2).getBytes(StandardCharsets.UTF_8))) {
             bravoDataImporter.importFixes(inputStream,
-                    (fixes, device) -> {
-                for (DoubleVectorFix fix : fixes) {
-                    track.add(new BravoExtendedFixImpl(fix));
-                }
-            }, "filename", "source", /* downsample */ true);
+                    Charset.defaultCharset(), (fixes, device) -> {
+            for (DoubleVectorFix fix : fixes) {
+            track.add(new BravoExtendedFixImpl(fix));
+            }
+         }, "filename", "source", /* downsample */ true);
             final TimePoint t1 = new MillisecondsTimePoint(1500648308500l);
             final TimePoint t2 = new MillisecondsTimePoint(1500648309500l);
             final BravoExtendedFix bef1, bef2;

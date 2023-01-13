@@ -12,8 +12,6 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
-
 /**
  * An abstract base class for procedures dealing with the public and master target groups in a
  * {@link ApplicationLoadBalancer load balancer}, e.g., creating them or fetching them, or
@@ -27,7 +25,6 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     private final ApplicationLoadBalancer<ShardingKey> loadBalancerUsed;
     private final String targetGroupNamePrefix;
     private final String serverName;
-    private Iterable<Rule> rulesAdded;
     
     /**
      * If no {@link #setTargetGroupNamePrefix(String) target group name prefix} is specified, the target group names are
@@ -127,9 +124,5 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     
     public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() {
         return loadBalancerUsed;
-    }
-
-    public Iterable<Rule> getRulesAdded() {
-        return rulesAdded;
     }
 }

@@ -11,6 +11,6 @@ public interface ProvidesLeaderboardRouting extends ServiceRoutingProvider {
     String getLeaderboardName();
     
     default String routingSuffixPath() {
-        return ShardingType.LEADERBOARDNAME.encodeIfNeeded(getLeaderboardName());
+        return ShardingType.LEADERBOARDNAME.encodeShardingInfo(getLeaderboardName());
     }
 }

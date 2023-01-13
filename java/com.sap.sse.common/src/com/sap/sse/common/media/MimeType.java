@@ -66,7 +66,7 @@ public enum MimeType {
 
     /**
      * Parses a file name by it's extension and return the matching {@link MimeType}.
-     * 
+     *
      * @param fileName
      *            String of the file name
      * @return the matching MimeTpye or else {@link MimeType#unknown}
@@ -79,9 +79,12 @@ public enum MimeType {
             MimeType bestMatch = unknown;
             if (fileEnding != null) {
                 for (MimeType mimeType : MimeType.values()) {
-                    if (mimeType.getEndingPattern().contains(fileEnding.toLowerCase())) {
-                        bestMatch = mimeType;
-                        break;
+                    if (!mimeType.getEndingPattern().isEmpty()) {
+                        boolean matchFound = fileEnding.toLowerCase().matches(mimeType.endingPattern);
+                        if (matchFound) {
+                            bestMatch = mimeType;
+                            break;
+                        }
                     }
                 }
             }
@@ -94,10 +97,10 @@ public enum MimeType {
 
     /**
      * Gets a mime type based on content type, e.g. image/jpeg, video/mp4, ...
-     * 
+     *
      * The media type must always match (image, video, audio). Then it will compare the sub type first by mime type
      * name, then by ending pattern and then by sub type name
-     * 
+     *
      * @param contentType
      *            the content type of the media in String form
      * @return the matching {@link MimeType} or else {@link MimeType#unknown}
@@ -109,7 +112,7 @@ public enum MimeType {
             String subType = contentType.split("/")[1];
             MimeType bestMatch = unknown;
             for (MimeType mimeType : MimeType.values()) {
-                if (mimeType.mediaType.name().equals(mediaType) 
+                if (mimeType.mediaType.name().equals(mediaType)
                         && (mimeType.name().equals(subType)
                                 || mimeType.getEndingPattern().contains(subType.toLowerCase())
                                 || mimeType.getMediaSubType().name().equals(subType))) {

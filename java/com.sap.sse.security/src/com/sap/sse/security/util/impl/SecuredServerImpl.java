@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -42,6 +43,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.util.SecuredServer;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SecuredServerImpl implements SecuredServer {
@@ -74,13 +76,15 @@ public class SecuredServerImpl implements SecuredServer {
         final HttpResponse response = client.execute(request);
         final int statusCode = response.getStatusLine().getStatusCode();
         Object jsonParseResult;
-        if (statusCode == Response.Status.NO_CONTENT.getStatusCode()) {
+        if (statusCode == Response.Status.NO_CONTENT.getStatusCode()
+                || Response.Status.fromStatusCode(statusCode).getFamily() != Family.SUCCESSFUL) {
             jsonParseResult = null;
         } else {
             response.getEntity().writeTo(bos);
             try {
                 jsonParseResult = new JSONParser()
-                        .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
+                        .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()),
+                                HttpUrlConnectionHelper.getCharsetFromHttpEntity(response.getEntity(), "UTF-8")));
             } catch (ParseException e) {
                 jsonParseResult = new String(bos.toByteArray());
             }

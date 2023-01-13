@@ -2,6 +2,7 @@ package com.sap.sailing.domain.bravoadapter.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,12 +23,12 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class BravoGPSFixImporter implements GPSFixImporter {
     @Override
-    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, final String filename)
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback, boolean inferSpeedAndBearing, final String filename)
             throws FormatNotSupportedException, IOException {
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(filename, getType() + "@" + new Date());
         new BravoExtendedDataImporterImpl().importFixes(inputStream,
-                (Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier deviceIdentifier)->{
+                charset, (Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier deviceIdentifier)->{
                     for (final DoubleVectorFix fix : fixes) {
                         GPSFixMoving gpsFix = new GPSFixMovingImpl(
                                 new DegreePosition(FunnyDegreeConverter.funnyLatLng(fix.get(BravoExtendedSensorDataMetadata.LAT.getColumnIndex())),

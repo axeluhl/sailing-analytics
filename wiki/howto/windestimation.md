@@ -73,7 +73,7 @@ For your account that is equipped with the ``TRACKED_RACE:EXPORT`` permission yo
               -m 10g --rm -d \
               -e MONGODB_URI="mongodb://172.17.0.1/windestimation?retryWrites=true" \
               -e BEARER_TOKEN="{your-bearer-token-here}" \
-              -e MEMORY=-Xmx8g \
+              -e MEMORY=-Xmx6g \
               docker.sapsailing.com/windestimationtraining:latest
 ```
 If successful (and you may want to remove the ``--rm`` option otherwise to allow you to inspect logs after unsuccessful execution) you will find the output under ``/tmp/windEstimationModels.dat`` which you can upload as usual, e.g., as in

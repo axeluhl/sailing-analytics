@@ -1,7 +1,4 @@
 apply plugin: "com.android.application"
-if (!project.hasProperty("xmake")) {
-    apply plugin: "com.getkeepsafe.dexcount"
-}
 
 android {
     buildToolsVersion rootProject.ext.buildTools
