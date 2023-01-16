@@ -9,7 +9,10 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -30,7 +33,11 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE; // bug5799: should this be made visible always if user has update permission?
+        final ManageMediaModel model = new ManageMediaModel(
+                SailingServiceHelper.createSailingServiceWriteInstance(), currentPresenter.getUserService(), currentPresenter.getEventDTO(), StringMessages.INSTANCE);
+        return currentPresenter.hasMedia() || model.hasPermissions()
+                        ? TabView.State.VISIBLE
+                        : TabView.State.INVISIBLE;
     }
 
     @Override

@@ -9,8 +9,10 @@ import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultirega
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -35,8 +37,9 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.hasMedia() || currentPresenter.getUserService()
-                .hasPermission(currentPresenter.getEventDTO(), HasPermissions.DefaultActions.UPDATE) // bug5799: this is redundant to RegattaMediaTabView and the general permission check
+        final ManageMediaModel model = new ManageMediaModel(
+                SailingServiceHelper.createSailingServiceWriteInstance(), currentPresenter.getUserService(), currentPresenter.getEventDTO(), StringMessages.INSTANCE);
+        return currentPresenter.hasMedia() || model.hasPermissions()
                         ? TabView.State.VISIBLE
                         : TabView.State.INVISIBLE;
     }
