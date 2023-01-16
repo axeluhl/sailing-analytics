@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    <string name="yes">"Ano"</string>
+    <string name="no">"Ne"</string>
+    <string name="confirm_data_hello_name">"Vítejte {full_name}."</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Přihlašujete se jako {sail_id}."</string>
+    <string name="confirm_data_is_correct">"OK"</string>
+    <string name="decline_data_is_incorrect">"To nejsem já!"</string>
+    <string name="confirm_delete_checkin">"Chcete toto přihlášení opravdu odstranit?"</string>
+    <string name="download_team_image_message">"Stahování týmového obrázku...."</string>
+    <string name="checkout_warning_message">"Opravdu se chcete odhlásit? Pro vstup do regaty se budete muset znovu přihlásit pomocí dodaného QR kódu."</string>
+</resources>

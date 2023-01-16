@@ -23,6 +23,35 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">January 2023</h2>
+          <ul class="bulletList">
+            <li>Support for managing sharded replication in the "Landscape" panel of the "Advanced" category in the
+                <a href="https://www.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:">admin console</a>),
+                offered as a new icon in the "Action" column of the replica sets table: in the new dialog that pops
+                up you can create and remove so-called "shards" to which you can assign zero or more leaderboards
+                offered by that replica set. Each shard gets its own auto-scaling group and target group in addition to the regular
+                auto-scaling group / target group pair used for the public target group. By default a minimum of two instances
+                are required by each shard to ensure availability. They are created with the same launch configuration
+                used by the replica set's regular public target group. When a shard's instances are healthy,
+                rules are managed in the replica set's load balancer to route traffic regarding the leaderboards
+                selected for the shard to the shard's target group. This reduces traffic on the default public
+                target group, and the instances of the shard can focus on the sub-set of leaderboards configured
+                instead of having to compute all leaderboards in parallel. This helps reduce the leaderboard
+                re-calculation times for live events with parallel live races in several classes and tens of
+                competitors per leaderboard.
+            </li>
+            <li>Introduced new permission <tt>EVENT:UPLOAD_MEDIA</tt>. With this special permission, a user who does
+                not have the full <tt>EVENT:UPDATE</tt> permission can still add (not remove or edit) media to an
+                event, in particular images and videos. In our production environment the role <tt>event_manager</tt>
+                grants this permission now, too, so users having that role can grant <tt>EVENT:UPLOAD_MEDIA</tt>
+                to other users or the general public at their likings.
+            </li>
+          </ul>
+          <h2 class="articleSubheadline">December 2022</h2>
+          <ul class="bulletList">
+            <li>Added Czech language support</li>
+            <li>Imported magnetic declination tables for 2023 from NOAA</li>
+          </ul>
           <h2 class="articleSubheadline">November 2022</h2>
           <ul class="bulletList">
             <li>Bug fix: when archiving a replica set, waiting for the MongoDB hash computation to complete
@@ -31,6 +60,23 @@
                 passphrase before using it in interacting with systems.</li>
             <li>Column for auto-scaling group's AMI ID in landscape management panel is now searchable and
                 sortable.</li>
+            <li>New scoring scheme for the 2024 Olympic Kite format, called
+                "Low Point System, First with three wins in medals is winner": it uses regular low point
+                scoring for the opening series (anything up to and excluding any medal series race) with
+                the usual RRS A8.1 tie breaking; for any subsequent sequence of medal series the scheme
+                counts the wins, and a non-discardable carry column starting a medal series is taken to
+                mean "wins carried into that series," not points. A competitor is said to have "won" a
+                race if no other competitor scored better in that race, including any penalty points or
+                other score corrections. Should this definition apply to more than one competitor, e.g.,
+                because all competitors got disqualified, were OCS or DNF, or because the first to cross
+                the finish line received an STP of one point and hence scores equal to the competitor
+                crossing the finish line in second position, then a winner is picked randomly. To decide
+                a winner in this case, a manual score correction in favor of the desired winner is required.<p>
+                In the net points sum column, the leaderboard will show wins, not points,
+                for competitors who sailed in the medal series. Tie breaking for medal series competitors
+                is first by the index of the medal series competed in (finalists rank better than semi-finalists
+                who did not sail in the final); second by the number of wins; third by the score obtained
+                in the competitors last medal race; and fourth by the rank obtained in the opening series.</li>
           </ul>
           <h2 class="articleSubheadline">October 2022</h2>
           <ul class="bulletList">

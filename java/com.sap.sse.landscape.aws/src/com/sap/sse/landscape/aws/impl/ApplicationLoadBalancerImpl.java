@@ -1,13 +1,18 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -28,15 +33,13 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActi
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 
 public class ApplicationLoadBalancerImpl<ShardingKey>
 implements ApplicationLoadBalancer<ShardingKey> {
-    private static final long serialVersionUID = -5297220031399131769L;
+    private static final Logger logger = Logger.getLogger(ApplicationLoadBalancerImpl.class.getName());
     
-    /**
-     * The maximum {@link Rule#priority()} that can be used within a listener
-     */
-    private static final int MAX_PRIORITY = 50000;
+    private static final long serialVersionUID = -5297220031399131769L;
     
     private final LoadBalancer loadBalancer;
 
@@ -89,6 +92,103 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public Iterable<Rule> addRules(Rule... rulesToAdd) {
         return landscape.createLoadBalancerListenerRules(region, getListener(ProtocolEnum.HTTPS), rulesToAdd);
+    }
+    
+    /**
+     * Returns the priority if the priority is not higher than {@code MAX_PRIORITY}
+     * @param priority
+     *          requested priority
+     * @return  
+     *          Priority if it's valid
+     * @throws IllegalStateException
+     *          If the requested priority is higher than {@code MAX_PRIORITY}
+     */
+    private int checkNewPriority(int priority) throws IllegalStateException {
+        if (priority < MAX_PRIORITY) {
+            return priority;
+        } else {
+            throw new IllegalStateException("Priority was greater than " + MAX_PRIORITY +"!");
+        }
+    }
+    
+    @Override
+    public void shiftRulesToMakeSpaceAt(int targetPrio) throws IllegalStateException {
+        final Iterable<Rule> rules = getRules();
+        final TreeMap<Integer, Rule> rulesSorted = getRulesSorted(rules);
+        int lastPrio = targetPrio;
+        boolean skipNext = false;
+        final Collection<RulePriorityPair> result = new ArrayList<>();
+        if (rulesSorted.get(targetPrio) != null) {// if there is a rule on prio
+            for (Entry<Integer, Rule> entry : rulesSorted.entrySet()) {
+                final Integer priority = entry.getKey();
+                if (priority >= targetPrio && !skipNext) {
+                    // if prio is higher than target prio and is not supposed to be skipped
+                    if (priority - lastPrio > 0) {
+                        // if there is a gap between current prio and the last one. -> so this one is not supposed to be
+                        // skipped and every rule after this
+                        skipNext = true;
+                        break;
+                    } else {
+                        lastPrio = priority + 1;
+                        result.add(RulePriorityPair.builder().ruleArn(entry.getValue().ruleArn())
+                                .priority(checkNewPriority(lastPrio)).build());
+                    }
+                }
+            }
+            landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
+        }
+    }
+    
+    @Override
+    public int getFirstShardingPriority(String hostname) throws IllegalStateException {
+        final Iterable<Rule> rules = getRules();
+        final TreeMap<Integer, Rule> rulesSorted = getRulesSorted(rules);
+        final Iterator<Entry<Integer, Rule>> iterSorted = rulesSorted.entrySet().iterator();
+        int priorityToReturn = -1;
+        outher : while (iterSorted.hasNext()) {
+            final Rule r = iterSorted.next().getValue();
+            for (RuleCondition con : r.conditions()) {
+                if (con.hostHeaderConfig() != null && con.hostHeaderConfig().values().contains(hostname)) {
+                    for (Action a : r.actions()) {
+                        if (a.forwardConfig() != null) {
+                            priorityToReturn = Integer.parseInt(r.priority());
+                            break outher;
+                        } else if (a.redirectConfig() != null) {
+                            priorityToReturn = Integer.parseInt(r.priority()) + 1;
+                            break outher;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+            }
+            if (!iterSorted.hasNext()) {
+                priorityToReturn = Integer.parseInt(r.priority()) + 1;
+                break outher;
+            }
+        }
+        if (priorityToReturn > MAX_PRIORITY) {
+            throw new IllegalStateException("Index higher than " + MAX_PRIORITY + "!");
+        }
+        return priorityToReturn;
+    }
+
+    private TreeMap<Integer, Rule> getRulesSorted(Iterable<Rule> rules) {
+        final Iterator<Rule> iter = rules.iterator();
+        final TreeMap<Integer, Rule> rulesSorted = new TreeMap<Integer, Rule>();
+        // create Map with every priority
+        while (iter.hasNext()) {
+            final Rule r = iter.next();
+            try {
+                if (!r.priority().equalsIgnoreCase(ApplicationLoadBalancer.DEFAULT_RULE_PRIORITY)) {
+                    rulesSorted.put(Integer.valueOf(r.priority()), r);
+                }
+            } catch (Exception e) {
+                // Case where prio is not a number, e.g. 'Default' gets ignored.
+                logger.log(Level.WARNING, "Priority '" + r.priority() + "' couldn't be parsed as an Integer.");
+            }
+        }
+        return rulesSorted;
     }
 
     @Override
@@ -270,5 +370,59 @@ implements ApplicationLoadBalancer<ShardingKey> {
                 rule.conditions().stream().filter(condition->condition.field().equals("path-pattern")
                                                && condition.pathPatternConfig().values().size() == 1
                                                && condition.pathPatternConfig().values().contains("/")).findAny().isPresent();
+    }
+    
+    @Override
+    public Iterable<Rule> getRulesForTargetGroups(Iterable<TargetGroup<ShardingKey>> targetGroups) {
+        ArrayList<Rule> ret = new ArrayList<Rule>();
+        for (Rule rule : getRules()) {
+            for (Action action : rule.actions()) {
+                if (action.type() == ActionTypeEnum.FORWARD) {
+                    for (String arn : Util.map(action.forwardConfig().targetGroups(), s -> s.targetGroupArn())) {
+                        for (String targetArn : Util.map(targetGroups, s -> s.getTargetGroupArn())) {
+                            if (arn.equals(targetArn)) {
+                                ret.add(rule);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+    
+    /**
+     * Goes through all rules in this load balancer and replaces every target group in a forward-action that has the
+     * same ARN as the {@code oldTargetgroup} with the {@code newTargetgroup}
+     */
+    @Override
+    public Iterable<Rule> replaceTargetGroupInForwardRules(TargetGroup<ShardingKey> oldTargetGroup,
+            TargetGroup<ShardingKey> newTargetGroup) {
+        Iterable<Rule> rules = getRules();
+        Collection<Rule> modifiedRules = new ArrayList<>();
+        for (Rule r : rules) {
+            int i = 0;
+            boolean modified = false;
+            Action[] newActions = new Action[r.actions().size()];
+            for (Action a : r.actions()) {
+                if (a.forwardConfig() != null && a.targetGroupArn().equals(oldTargetGroup.getTargetGroupArn())) {
+                    newActions[i++] = createForwardToTargetGroupAction(newTargetGroup);
+                    modified = true;
+                } else {
+                    newActions[i++] = a;
+                }
+            }
+            if (modified) {
+                landscape.modifyRuleActions(region, Rule.builder().actions(newActions).ruleArn(r.ruleArn()).build())
+                    .forEach(t -> modifiedRules.add(t));
+            }
+        }
+        return modifiedRules;
+    }
+    
+    private Action createForwardToTargetGroupAction(TargetGroup<ShardingKey> targetGroup) {
+        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc
+                .targetGroups(TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build()))
+                .build();
     }
 }

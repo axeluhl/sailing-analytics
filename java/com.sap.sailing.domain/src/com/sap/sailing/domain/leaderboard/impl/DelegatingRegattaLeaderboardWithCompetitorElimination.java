@@ -2,7 +2,6 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -51,21 +51,21 @@ import com.sap.sse.common.Util.Pair;
  * regatta ("total") rank, and all competitors advance by as many ranks compared to the original leaderboard as there
  * are eliminated competitors ranking better in the original leaderboard.
  * <p>
- * 
+ *
  * This behavior is achieved by overriding any method returning a collection of {@link Competitor}s, such as
  * {@link #getCompetitors()}, such that the eliminated competitors are removed from the result which should let any
  * leaderboard panel displaying the contents of this leaderboard list only the non-eliminated competitors. This includes
  * {@link #getCompetitorsFromBestToWorst(TimePoint)} which also leads the implementation of
  * {@link #getTotalRankOfCompetitor(Competitor, TimePoint)} to calculate the ranks based on the competitor list without
  * those eliminated.
- * 
+ *
  * @author Axel Uhl (d043530)
  */
 public class DelegatingRegattaLeaderboardWithCompetitorElimination extends AbstractLeaderboardWithCache implements RegattaLeaderboardWithEliminations {
     private static final long serialVersionUID = 8331154893189722924L;
     private final String name;
     private final DelegateLeaderboard fullLeaderboard;
-    
+
     /**
      * Competitors eliminated from this leaderboard for regatta ranking; those competitors are not part of
      * {@link #getCompetitors()} but appear in {@link #getAllCompetitors()}. They may have an overlap with
@@ -90,7 +90,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     public String getName() {
         return name;
     }
-    
+
     private RegattaLeaderboard getDelegateLeaderboard() {
         return fullLeaderboard.getDelegateLeaderboard();
     }
@@ -99,7 +99,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     public Iterable<Competitor> getCompetitors() {
         return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitors(), eliminatedCompetitors.keySet());
     }
-    
+
     @Override
     public void setEliminated(Competitor competitor, boolean eliminated) {
         if (eliminated) {
@@ -109,7 +109,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         }
         getLeaderboardDTOCache().invalidate(this);
     }
-    
+
     @Override
     public boolean isEliminated(Competitor competitor) {
         return eliminatedCompetitors.containsKey(competitor);
@@ -140,22 +140,24 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         }
         return result;
     }
-    
+
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitorsFromBestToWorst(raceColumn, timePoint, cache), eliminatedCompetitors.keySet());
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final List<Competitor> result = new ArrayList<>();
-        for (final Competitor c : getDelegateLeaderboard().getCompetitorsFromBestToWorst(timePoint, cache)) {
-            if (!isEliminated(c)) {
-                result.add(c);
-            }
-        }
-        return result;
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitorsFromBestToWorst(timePoint, cache), eliminatedCompetitors.keySet());
+    }
+
+    @Override
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitorsFromBestToWorst(raceColumn, timePoint, totalPointsSupplier, cache),
+                eliminatedCompetitors.keySet());
     }
 
     @Override
@@ -282,6 +284,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getDelegateLeaderboard().getCarriedPoints(competitor);
     }
 
+    @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getDelegateLeaderboard().getTrackedRank(competitor, race, timePoint, cache);
     }

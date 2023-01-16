@@ -103,7 +103,7 @@ public class RaceGroupFactory {
     }
     
     private boolean isFirstRaceColumnVirtual(Series series){
-        return series.isFirstColumnIsNonDiscardableCarryForward();
+        return series.isFirstColumnNonDiscardableCarryForward();
     }
 
     /**

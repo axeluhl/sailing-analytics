@@ -11,7 +11,7 @@ public class BearingComparator implements Comparator<Bearing>, Serializable {
 
     @Override
     public int compare(Bearing arg0, Bearing arg1) {
-        return new Double(arg0.getDegrees()).compareTo(new Double(arg1.getDegrees()));
+        return Double.valueOf(arg0.getDegrees()).compareTo(Double.valueOf(arg1.getDegrees()));
     }
     
 }

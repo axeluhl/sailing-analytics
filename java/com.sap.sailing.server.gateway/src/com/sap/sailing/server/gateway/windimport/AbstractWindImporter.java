@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.windimport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,7 +25,9 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult.RaceEntry;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.util.FileItemHelper;
 
 public abstract class AbstractWindImporter {
     public static class UploadRequest {
@@ -158,11 +161,11 @@ public abstract class AbstractWindImporter {
                 }
             }
         }
-        final Map<InputStream, String> streamsWithFilenames = new HashMap<>(); 
+        final Map<InputStream, Pair<String, Charset>> streamsWithFilenamesAndCharsets = new HashMap<>(); 
         for (FileItem file : uploadRequest.files) {
-            streamsWithFilenames.put(file.getInputStream(), file.getName());
+            streamsWithFilenamesAndCharsets.put(file.getInputStream(), new Pair<>(file.getName(), FileItemHelper.getCharset(file, Charset.forName("UTF-8"))));
         }
-        importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, trackedRaces, streamsWithFilenames);
+        importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, trackedRaces, streamsWithFilenamesAndCharsets);
     }
 
     /**
@@ -171,9 +174,9 @@ public abstract class AbstractWindImporter {
      *            fixes for which no explicit wind source has been returned by the {@link #importWind(WindSource, Map)} method.
      */
     public void importWindToWindSourceAndTrackedRaces(RacingEventService service, WindImportResult windImportResult, WindSource defaultWindSource,
-            List<DynamicTrackedRace> trackedRaces, final Map<InputStream, String> streamsWithFilenames)
+            List<DynamicTrackedRace> trackedRaces, final Map<InputStream, Pair<String, Charset>> streamsWithFilenamesAndCharsets)
             throws IOException, InterruptedException, FormatNotSupportedException {
-        Map<WindSource, Iterable<Wind>> windFixes = importWind(defaultWindSource, streamsWithFilenames);
+        Map<WindSource, Iterable<Wind>> windFixes = importWind(defaultWindSource, streamsWithFilenamesAndCharsets);
         for (final Entry<WindSource, Iterable<Wind>> windForSource : windFixes.entrySet()) {
             if (!Util.isEmpty(windForSource.getValue())) {
                 for (DynamicTrackedRace trackedRace : trackedRaces) {
@@ -197,9 +200,14 @@ public abstract class AbstractWindImporter {
      *            the default wind source to use as the key of the map returned; implementations may, however, use this
      *            default wind source only as a copy template to produce finer-grained wind sources based on what the
      *            import stream contains
+     * @param streamsWithFilenamesAndCharsets
+     *            keys are the {@link InputStream}s from which to read wind data; values are pairs of which the first
+     *            element is the filename, and the second is the character set to use for decoding the stream.
+     *            The character sets must not be {@code null}. See {@link Charset#defaultCharset()}.
      * @return a map whose values are the wind fixes imported, keyed by the {@link WindSource} to which to add them.
      */
-    protected abstract Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, String> streamsWithFilenames)
+    protected abstract Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource,
+            Map<InputStream, Pair<String, Charset>> streamsWithFilenamesAndCharsets)
             throws IOException, InterruptedException, FormatNotSupportedException;
 
     protected abstract WindSource getDefaultWindSource(UploadRequest uploadRequest);

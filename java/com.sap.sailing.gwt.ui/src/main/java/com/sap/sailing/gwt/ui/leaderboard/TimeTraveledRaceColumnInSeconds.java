@@ -69,7 +69,7 @@ public class TimeTraveledRaceColumnInSeconds extends ExpandableSortableColumn<St
                 }
             }
         }
-        return result == null ? null : new Long(result / 1000).doubleValue();
+        return result == null ? null : Long.valueOf(result / 1000).doubleValue();
     }
     
     @Override

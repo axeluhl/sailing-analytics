@@ -187,7 +187,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {
                         long value = axisLabelsData.getValueAsLong() % 360;
-                        return new Long(value < 0 ? value + 360 : value).toString();
+                        return Long.valueOf(value < 0 ? value + 360 : value).toString();
                     }
                 }));
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")").setMin(0)

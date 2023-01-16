@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -108,6 +109,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.util.FileItemHelper;
 
 /**
  * Importer for expedition data that imports all available data for a boat:
@@ -134,7 +136,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
  * The imported {@link GPSFixMoving} and {@link BravoExtendedFix} tracks aren't mapped to a {@link Competitor} by the
  * importer. Instead the IDs of the imported tracks are contained in the result and are expected to be mapped by the
  * user afterwards.
- * 
+ *
  * This importer is intended to be used by {@link ExpeditionAllInOneImportServlet}.
  */
 public class ExpeditionAllInOneImporter {
@@ -142,14 +144,14 @@ public class ExpeditionAllInOneImporter {
     private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImporter.class.getName());
 
     private static final double VENUE_RANGE_CHECK = 10;
-    
+
     /**
      * For sessions created automatically from start times found in the log, tries to set the tracking start
      * time this much before the race start, unless it would be before the first fix received which then would
      * provide the start of tracking time instead.
      */
     private static final Duration TRACKING_DURATION_BEFORE_START = Duration.ONE_MINUTE.times(5);
-    
+
     /**
      * This prefix is used to create race columns based on start times automatically.
      */
@@ -219,7 +221,7 @@ public class ExpeditionAllInOneImporter {
         this.serviceFinderFactory = serviceFinderFactory;
         this.context = context;
     }
-    
+
     private static class TimePointsOfFirstAndLastFix {
         private final TimePoint firstFixAt;
         private final TimePoint lastFixAt;
@@ -235,7 +237,7 @@ public class ExpeditionAllInOneImporter {
             return lastFixAt;
         }
     }
-    
+
     private TimePointsOfFirstAndLastFix importFixes(final String filenameWithSuffix, final FileItem fileItem,
             final ImportResult jsonHolderForGpsFixImport, final ImportResult jsonHolderForSensorFixImport,
             final List<ErrorImportDTO> errors) throws AllInOneImportException {
@@ -301,7 +303,8 @@ public class ExpeditionAllInOneImporter {
         final List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList = new ArrayList<>();
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         final ExpeditionCourseInferrer expeditionCourseInferrer = new ExpeditionCourseInferrer(adapter);
-        final ExpeditionStartData startData = expeditionCourseInferrer.getStartData(fileItem.getInputStream(), filenameWithSuffix);
+        final ExpeditionStartData startData = expeditionCourseInferrer.getStartData(fileItem.getInputStream(), filenameWithSuffix,
+                FileItemHelper.getCharset(fileItem, Charset.forName("UTF-8")));
         final Iterable<String> additionalTrackedRaceNames = importStartData ? getNextRaceColumnNames(/* start race index */ 1,
                 /* how many */ Util.size(startData.getStartTimes())) : Collections.emptySet();
         if (importMode == ImportMode.NEW_EVENT) {
@@ -435,8 +438,8 @@ public class ExpeditionAllInOneImporter {
         try {
             final WindImportResult windImportResult = new AbstractWindImporter.WindImportResult();
             final WindSourceWithAdditionalID windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceId);
-            final Map<InputStream, String> streamsWithFilenames = new HashMap<>();
-            streamsWithFilenames.put(fileItem.getInputStream(), filenameWithSuffix);
+            final Map<InputStream, Pair<String, Charset>> streamsWithFilenames = new HashMap<>();
+            streamsWithFilenames.put(fileItem.getInputStream(), new Pair<>(filenameWithSuffix, FileItemHelper.getCharset(fileItem)));
             new WindImporter().importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, trackedRaces, streamsWithFilenames);
             return new ImporterResult(eventId, regattaNameAndleaderboardName, leaderboardGroupName,
                     regattaNameAndleaderboardName, raceNameRaceColumnNameFleetnameList,
@@ -446,7 +449,7 @@ public class ExpeditionAllInOneImporter {
             throw new AllInOneImportException(e, errors);
         }
     }
-    
+
     /**
      * Checks whether the current {@link Subject} is permitted to created the {@link SecuredDomainType#TRACKED_RACE
      * tracked races} named as specified by {@code trackedRaceName} and the additional strings in
@@ -465,7 +468,7 @@ public class ExpeditionAllInOneImporter {
             return checkTrackedRaceCreationPermissionRecursively(regattaName, additionalTrackedRaceNamesIterator, action);
         });
     }
-    
+
     private <T> T checkTrackedRaceCreationPermissionRecursively(final String regattaName, final Iterator<String> additionalTrackedRaceNamesIterator,
             final Callable<T> terminalAction) throws Exception {
         if (additionalTrackedRaceNamesIterator.hasNext()) {
@@ -488,7 +491,7 @@ public class ExpeditionAllInOneImporter {
      * result of {@link #getStartTimesAndStartAndEndOfTrackingTimes(Iterable, TimePoint, TimePoint)} and passes those on
      * to the {@code consumer} passed.
      * <p>
-     * 
+     *
      * Idea: use this to first determine all race names to check permissions ("dry run"). If no permission problems
      * exist, use a second call to actually perform the race creation.
      */
@@ -509,7 +512,7 @@ public class ExpeditionAllInOneImporter {
                     /* fleet name */ session.getC()));
         }
     }
-    
+
     private Iterable<String> getNextRaceColumnNames(Regatta regatta, int howMany) {
         return getNextRaceColumnNames(getNextAvailableStartBasedSessionCount(regatta), howMany);
     }
@@ -522,7 +525,7 @@ public class ExpeditionAllInOneImporter {
         }
         return result;
     }
-    
+
     private Triple<DynamicTrackedRace, String, String> createSessionForStartTime(TimePoint startTime,
             TimePoint firstFixAt, TimePoint lastFixAt, List<ErrorImportDTO> errors, Regatta regatta,
             RegattaLeaderboard regattaLeaderboard) throws AllInOneImportException {
@@ -577,7 +580,7 @@ public class ExpeditionAllInOneImporter {
         }
         return new Triple<>(trackedRace, raceColumnName, fleetName);
     }
-    
+
     private void ensureEventLongEnough(TimePoint firstFixAt, TimePoint lastFixAt, UUID eventId) {
         Event event = service.getEvent(eventId);
         TimePoint startDate = event.getStartDate();
@@ -588,7 +591,7 @@ public class ExpeditionAllInOneImporter {
         if (lastFixAt.after(endDate)) {
             endDate = lastFixAt;
         }
-        Iterable<UUID> leaderboardGroups = StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId()).collect(Collectors.toList()); 
+        Iterable<UUID> leaderboardGroups = StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId()).collect(Collectors.toList());
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), startDate,
                 endDate, event.getVenue().getName(), event.isPublic(),
                 leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(),
@@ -625,7 +628,7 @@ public class ExpeditionAllInOneImporter {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regattaName);
         // This is just the default used in the UI
         final Double buoyZoneRadiusInHullLengths = 3.0;
-        final String seriesName = Series.DEFAULT_NAME;
+        final String seriesName = LeaderboardNameConstants.DEFAULT_SERIES_NAME;
         final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, filename, true, eventId);
         final UUID courseAreaId = addDefaultCourseArea(event);
         final Regatta regatta = createRegattaWithOneRaceColumn(boatClassName, regattaNameAndleaderboardName,
@@ -757,7 +760,7 @@ public class ExpeditionAllInOneImporter {
         seriesCreationParameters.put(seriesName,
                 new SeriesCreationParametersDTO(fleets, /*isMedal*/ false,
                         /* isFleetsCanRunInParallel */ false, /*isStartsWithZeroScore*/ false, /*firstColumnIsNonDiscardableCarryForward*/false, /*discardingThresholds*/ null,
-                        /*hasSplitFleetContiguousScoring*/ false, /*maximumNumberOfDiscards*/ null, /* oneAlwaysStaysOne */ false));
+                        /*hasSplitFleetContiguousScoring*/ false, /* hasCrossFleetMergedRanking */ false, /*maximumNumberOfDiscards*/ null, /* oneAlwaysStaysOne */ false));
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(seriesCreationParameters);
         regatta = service.apply(new AddSpecificRegatta(regattaNameAndleaderboardName, boatClassName,
                 /* can boats of competitors change */ false, CompetitorRegistrationType.CLOSED,

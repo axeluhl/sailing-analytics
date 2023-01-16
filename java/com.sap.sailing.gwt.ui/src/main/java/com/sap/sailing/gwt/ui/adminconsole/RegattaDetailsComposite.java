@@ -202,6 +202,12 @@ public class RegattaDetailsComposite extends Composite {
                 return series.hasSplitFleetContiguousScoring() ? stringMessages.yes() : stringMessages.no();
             }
         };
+        TextColumn<SeriesDTO> hasCrossFleetMergedRankingColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.hasCrossFleetMergedRanking() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
         TextColumn<SeriesDTO> isFirstColumnIsNonDiscardableCarryForwardColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -316,13 +322,14 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(isFirstColumnIsNonDiscardableCarryForwardColumn, stringMessages.firstRaceIsNonDiscardableCarryForward());
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
+        table.addColumn(hasCrossFleetMergedRankingColumn, stringMessages.hasCrossFleetMergedRanking());
         table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
         table.addColumn(isOneAlwaysStaysOneColumn, stringMessages.oneAlwaysStaysOne());
         table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
         table.addColumn(actionsColumn, stringMessages.actions());
         return table;
     }
-    
+
     public RegattaDTO getRegatta() {
         return regatta;
     }
@@ -333,7 +340,7 @@ public class RegattaDetailsComposite extends Composite {
     }
 
     private void editRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series) {
-        SeriesEditDialog raceDialog = new SeriesEditDialog(regatta, series, stringMessages, 
+        SeriesEditDialog raceDialog = new SeriesEditDialog(regatta, series, stringMessages,
                 new DialogCallback<SeriesDescriptor>() {
                     @Override
                     public void cancel() {
@@ -356,6 +363,7 @@ public class RegattaDetailsComposite extends Composite {
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
         final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
+        final boolean hasCrossFleetMergedRankingChanged = series.hasCrossFleetMergedRanking() != seriesDescriptor.hasCrossFleetMergedRanking();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());
         final boolean maximumNumberOfDiscardsChanged = series.getMaximumNumberOfDiscards() != seriesDescriptor.getMaximumNumberOfDiscards();
@@ -391,7 +399,7 @@ public class RegattaDetailsComposite extends Composite {
         if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
             // first remove:
             sailingServiceWrite.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
-                    new AsyncCallback<Void>() {
+                    new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error trying to remove race columns " + raceColumnNamesToAddWithInsertIndex
@@ -402,7 +410,7 @@ public class RegattaDetailsComposite extends Composite {
                         public void onSuccess(Void v) {
                             // when successfully removed, insert:
                             sailingServiceWrite.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
-                                    new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+                                    new MarkedAsyncCallback<>(new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
                                             errorReporter.reportError("Error trying to add race columns " + raceColumnNamesToAddWithInsertIndex
@@ -413,33 +421,34 @@ public class RegattaDetailsComposite extends Composite {
                                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                                             if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                                                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
-                                                    || seriesNameChanged || maximumNumberOfDiscardsChanged || oneAlwaysStaysOneChanged) {
+                                                    || hasCrossFleetMergedRankingChanged || seriesNameChanged || maximumNumberOfDiscardsChanged || oneAlwaysStaysOneChanged) {
                                                 sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
                                                         seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                                                         seriesDescriptor.isStartsWithZeroScore(),
                                                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
-                                                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
-                                                        seriesDescriptor.isOneAlwaysStaysOne(), series.getFleets(), new AsyncCallback<Void>() {
+                                                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.hasCrossFleetMergedRanking(), seriesDescriptor.getMaximumNumberOfDiscards(),
+                                                        seriesDescriptor.isOneAlwaysStaysOne(), series.getFleets(),
+                                                        new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
                                                     @Override
                                                     public void onFailure(Throwable caught) {
                                                         errorReporter.reportError("Error trying to update series " + series.getName() + ": "
                                                                 + caught.getMessage());
                                                     }
-                                                    
+
                                                     @Override
                                                     public void onSuccess(Void result) {
                                                         presenter.getRegattasRefresher().reloadAndCallFillAll();
                                                         presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                                     }
-                                                });
+                                                }));
                                             } else {
                                                 presenter.getRegattasRefresher().reloadAndCallFillAll();
                                                 presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                             }
                                         }
-                                    });
+                                    }));
                         }
-                    });
+                    }));
         }
     }
 
@@ -472,6 +481,6 @@ public class RegattaDetailsComposite extends Composite {
             rankingMetric.setText(rankingMetricText);
             seriesListDataProvider.getList().clear();
             seriesListDataProvider.getList().addAll(regatta.series);
-        } 
+        }
     }
 }

@@ -150,7 +150,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public boolean hasSentOperationToMaster(OperationWithResult<S, ?> operation) {
-        return this.operationsSentToMasterForReplication.contains(operation);
+        return this.operationsSentToMasterForReplication.remove(operation);
     }
 
     @Override

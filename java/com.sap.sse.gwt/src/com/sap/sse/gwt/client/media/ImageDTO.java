@@ -31,4 +31,13 @@ public class ImageDTO extends AbstractMediaDTO {
         this.widthInPx = widthInPx;
         this.heightInPx = heightInPx;
     }
+    
+    @Override
+    public int compareTo(AbstractMediaDTO other) {
+        int result = super.compareTo(other);
+        if (result == 0) {
+            result = getSourceRef().compareTo(other.getSourceRef());
+        }
+        return result;
+    }
 }

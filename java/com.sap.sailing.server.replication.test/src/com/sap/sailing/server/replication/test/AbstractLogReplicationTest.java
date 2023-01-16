@@ -34,11 +34,11 @@ import com.sap.sse.common.Util;
 public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>
         extends AbstractServerReplicationTest {
     protected static final String BOAT_CLASS_NAME_49er = "49er";
-    
+
     /**
      * Uses a new master that loads the existing regatta and race log to append an event to the race log. This will store it to the DB so that if the original
      * master re-loads the race log it should see the new race log event.
-     * @throws Exception 
+     * @throws Exception
      */
     protected void addEventToDB(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent createRaceStatusEvent, String regattaName, String raceColumnName, String fleetName) throws Exception {
         final RacingEventServiceImpl temporaryMaster = createNewMaster();
@@ -47,7 +47,7 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         RaceLog masterLog = series.getRaceColumnByName(raceColumnName).getRaceLog(series.getFleetByName(fleetName));
         masterLog.add(createRaceStatusEvent);
     }
-    
+
     /**
      * Validation is done based only on the identifier and type of the {@link RaceLogEvent}s.
      */
@@ -100,7 +100,7 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         SeriesCreationParametersDTO creationParametersForDefaultSeries = new SeriesCreationParametersDTO(
                 Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */ false, /* fleetsCanRunInParallel */ true, /* startsWithZero */
                 false, /* firstColumnIsNonDiscardableCarryForward */ false, /* discardingThresholds */ new int[0], /* hasSplitFleetContiguousScoring */
-                false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false);
+                false, /* hasCrossFleetMergedRanking */ false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false);
         seriesCreationParameters.put(seriesName, creationParametersForDefaultSeries);
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);

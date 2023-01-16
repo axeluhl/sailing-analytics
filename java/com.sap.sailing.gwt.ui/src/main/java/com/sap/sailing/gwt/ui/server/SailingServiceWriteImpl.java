@@ -212,6 +212,7 @@ import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceExcep
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.EventActions;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
@@ -771,7 +772,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
                 .updateRemoteServerEventCacheSynchronously(serverRef, false);
         return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
-        
+
     }
 
     @Override
@@ -1294,9 +1295,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         Map<String, RegattaResults> cachedRegattaEntriesLists = new HashMap<String, RegattaResults>();
         for (SwissTimingRaceRecordDTO rr : rrs) {
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(rr.boatClass);
-            String raceDescription = rr.regattaName != null ? rr.regattaName : ""; 
+            String raceDescription = rr.regattaName != null ? rr.regattaName : "";
             raceDescription += rr.seriesName != null ? "/" + rr.seriesName : "";
-            raceDescription += raceDescription.length() > 0 ?  "/" + rr.getName() : rr.getName();
+            raceDescription += raceDescription.length() > 0 ? "/" + rr.getName() : rr.getName();
             // try to find a cached entry list for the regatta
             RegattaResults regattaResults = cachedRegattaEntriesLists.get(rr.xrrEntriesUrl);
             if (regattaResults == null && rr.xrrEntriesUrl != null) {
@@ -1454,21 +1455,50 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds)
             throws MalformedURLException, UnauthorizedException {
+        final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+        final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+        final URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
+        final URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+        final Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
+        final List<ImageDescriptor> eventImages = convertToImages(images);
+        final List<VideoDescriptor> eventVideos = convertToVideos(videos);
+        final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = EventBaseImpl.getTypeRelativeObjectIdentifier(eventId);
         if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
-                DefaultActions.UPDATE, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId)))) {
-            TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
-            TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
-            URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
-            URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-            Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
-            List<ImageDescriptor> eventImages = convertToImages(images);
-            List<VideoDescriptor> eventVideos = convertToVideos(videos);
-            getService().apply(new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint,
-                    venue.getName(), isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
-                    eventImages, eventVideos, windFinderReviewedSpotCollectionIds));
-            return getEventById(eventId, false);
+                DefaultActions.UPDATE, typeRelativeObjectIdentifier))) {
+            // it's fine; the subject has full UPDATE permission for the event
+        } else if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
+                EventActions.UPLOAD_MEDIA, typeRelativeObjectIdentifier))) {
+            final EventDTO currentEventState = getEventById(eventId, false);
+            if (!Util.equalsWithNull(startTimePoint, TimePoint.of(currentEventState.startDate))
+             || !Util.equalsWithNull(endTimePoint, TimePoint.of(currentEventState.endDate))
+             || !Util.equalsWithNull(officialWebsiteURLString, currentEventState.getOfficialWebsiteURL())
+             || !Util.equalsWithNull(baseURLAsString, currentEventState.getBaseURL())
+             || !Util.equalsWithNull(sailorsInfoWebsiteURLsByLocaleName, currentEventState.getSailorsInfoWebsiteURLs())
+             || !Util.equalsWithNull(venue.getName(), currentEventState.venue.getName())
+             || !Util.equalsWithNull(eventName, currentEventState.getName())
+             || !Util.equalsWithNull(windFinderReviewedSpotCollectionIds, currentEventState.getWindFinderReviewedSpotsCollectionIds())
+             || !Util.equalsWithNull(leaderboardGroupIds, currentEventState.getLeaderboardGroupIds())
+             || !Util.equalsWithNull(isPublic, currentEventState.isPublic)
+             || !Util.isOnlyAdding(images, currentEventState.getImages(), (a, b)->a.compareTo(b) == 0)
+             || !Util.isOnlyAdding(videos, currentEventState.getVideos(), (a, b)->a.compareTo(b) == 0)) {
+                throw new UnauthorizedException("You are not permitted to edit event " + eventId + " other than by adding images and videos");
+            } else {
+                final Set<String> sourceRefsOfImagesAdded = new HashSet<>();
+                Util.addAll(Util.map(images, ImageDTO::getSourceRef), sourceRefsOfImagesAdded);
+                Util.removeAll(Util.map(currentEventState.getImages(), ImageDTO::getSourceRef), sourceRefsOfImagesAdded);
+                final Set<String> sourceRefsOfVideosAdded = new HashSet<>();
+                Util.addAll(Util.map(videos, VideoDTO::getSourceRef), sourceRefsOfVideosAdded);
+                Util.removeAll(Util.map(currentEventState.getVideos(), VideoDTO::getSourceRef), sourceRefsOfVideosAdded);
+                logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" is adding the following media to event "+currentEventState.getName()+
+                        " with ID "+currentEventState.getId()+": images: "+sourceRefsOfVideosAdded+", videos: "+sourceRefsOfVideosAdded);
+            }
+        } else {
+            throw new UnauthorizedException("You are not permitted to edit event " + eventId);
         }
-        throw new UnauthorizedException("You are not permitted to edit event " + eventId);
+        getService().apply(new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint,
+                venue.getName(), isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
+                eventImages, eventVideos, windFinderReviewedSpotCollectionIds));
+        return getEventById(eventId, false);
     }
 
     @Override
@@ -1601,15 +1631,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, List<UUID> courseAreaUuids, 
+    public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, List<UUID> courseAreaUuids,
             RegattaConfigurationDTO configurationDTO, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, String registrationLinkSecret, CompetitorRegistrationType registrationType) {
         Regatta regatta = getService().getRegatta(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
-        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
-        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
         getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint, courseAreaUuids,
                 convertToRegattaConfiguration(configurationDTO), buoyZoneRadiusInHullLengths, useStartTimeInference,
                 controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange, registrationLinkSecret, registrationType));
@@ -1632,19 +1662,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         }
         return result;
     }
-    
+
     @Override
     public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne, List<FleetDTO> fleets) {
+            boolean hasCrossFleetMergedRanking,Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne, List<FleetDTO> fleets) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, isFleetsCanRunInParallel, resultDiscardingThresholds,
-                        startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
+                        startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, hasCrossFleetMergedRanking,
                         maximumNumberOfDiscards, oneAlwaysStaysOne, fleets));
     }
 
@@ -2213,7 +2243,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
      * {@code competitorsToRegister} to avoid registering them again and then returns those competitors that need to be
      * de-registered. Those to de-register includes those registered but to a different boat, and those will be left in
      * the {@code competitorToBoatMappingsToRegister} map.
-     * 
+     *
      * @param competitorToBoatMappingsToRegister
      *            will be modified by removing all competitors in {@code competitorsRegistered}
      * @param competitorToBoatMappingsRegistered
@@ -2521,7 +2551,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     private <EventT extends AbstractLogEvent<VisitorT>, VisitorT> boolean revokeEvent(boolean eventRevoked, Serializable idToRevoke, final AbstractLog<EventT, VisitorT> abstractLog)
             throws NotRevokableException {
-        final EventT event; 
+        final EventT event;
         abstractLog.lockForRead();
         try {
             event = abstractLog.getEventById(idToRevoke);
@@ -2529,12 +2559,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             abstractLog.unlockAfterRead();
         }
         if (event != null) {
-            abstractLog.revokeEvent(getService().getServerAuthor(), event, "revoke triggered by GWT user action"); 
+            abstractLog.revokeEvent(getService().getServerAuthor(), event, "revoke triggered by GWT user action");
             eventRevoked = true;
         }
         return eventRevoked;
     }
-    
+
     private void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, final boolean trackWind, final boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception {
         // no permission checks needed here, since they already exist in PermissionAwareRaceTrackingHandler
@@ -2544,7 +2574,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination,
                 getService().getPermissionAwareRaceTrackingHandler());
     }
-    
+
     @Override
     public void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
             final boolean trackWind, final boolean correctWindByDeclination)
@@ -2608,7 +2638,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     new MillisecondsTimePoint(dateOfMarkPassing), indexOfWaypoint));
         }
     }
-    
+
     @Override
     public void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) throws NotFoundException {
@@ -2955,7 +2985,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             hasFinishingTime = false;
             hasFinishedTime = false;
         }
-        
+
         // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
         final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
                 timeRange);
@@ -2972,7 +3002,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getStartTimeDifference(), event.getNextStatus(), event.getCourseAreaId()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogStartTimeEvent event) {
                         if (!dependentStartTime && isLatestPass(event)) {
@@ -2981,32 +3011,32 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getNextStatus(), event.getCourseAreaId()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogRegisterCompetitorEvent event) {
                         raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getCreatedAt(),
                                 event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getCompetitor(), event.getBoat()));
                     }
-    
+
                     @Override
                     public void visit(RaceLogWindFixEvent event) {
                         windFixEvents.addEvent(event);
                     }
-                    
+
                     @Override
                     public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
                         raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(event.getCreatedAt(), event.getAuthor(),
                                 event.getLogicalTimePoint(), UUID.randomUUID(), raceLog.getCurrentPassId()));
                     }
-                    
+
                     @Override
                     public void visit(RaceLogCourseDesignChangedEvent event) {
                         raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
                                 event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
                                 raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
                     }
-                    
+
                     @Override
                     public void visit(RaceLogFlagEvent event) {
                         if (hasStartTime && isLatestPass(event) && !event.getLogicalTimePoint().after(sliceTo)) {
@@ -3015,7 +3045,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getLowerFlag(), event.isDisplayed()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogStartProcedureChangedEvent event) {
                         if (hasStartTime && isLatestPass(event)) {
@@ -3024,7 +3054,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getStartProcedureType()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogFinishPositioningConfirmedEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
@@ -3033,7 +3063,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogFinishPositioningListChangedEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
@@ -3042,7 +3072,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogFixedMarkPassingEvent event) {
                         if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getTimePointOfFixedPassing())) {
@@ -3052,7 +3082,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getTimePointOfFixedPassing(), event.getZeroBasedIndexOfPassedWaypoint()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogSuppressedMarkPassingsEvent event) {
                         if (hasStartTime && isLatestPass(event) && timeRange.includes(event.getLogicalTimePoint())) {
@@ -3062,7 +3092,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getZeroBasedIndexOfFirstSuppressedWaypoint()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogProtestStartTimeEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
@@ -3071,7 +3101,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getProtestTime()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogAdditionalScoringInformationEvent event) {
                         if (hasFinishedTime && isLatestPass(event)) {
@@ -3080,7 +3110,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     raceLog.getCurrentPassId(), event.getType()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogPathfinderEvent event) {
                         if (hasStartTime && isLatestPass(event)) {
@@ -3089,7 +3119,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getPathfinderId()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogGateLineOpeningTimeEvent event) {
                         if (hasStartTime && isLatestPass(event)) {
@@ -3099,7 +3129,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                     event.getGateLineOpeningTimes().getGolfDownTime()));
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogRaceStatusEvent event) {
                         if (isLatestPass(event) && !(event instanceof RaceLogDependentStartTimeEvent)
@@ -3114,7 +3144,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                             }
                         }
                     }
-                    
+
                     @Override
                     public void visit(RaceLogORCImpliedWindSourceEvent event) {
                         raceLog.add(new RaceLogORCImpliedWindSourceEventImpl(event.getCreatedAt(),
@@ -3159,7 +3189,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true,
                     getService().getPermissionAwareRaceTrackingHandler());
-            
+
             // wait for the RaceDefinition to be created
             raceHandle.getRace();
 
@@ -3180,7 +3210,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     }
                 }
             }
-            
+
             final Iterable<MediaTrack> mediaTracksForOriginalRace = getService().getMediaTracksForRace(raceIdentifier);
             for (MediaTrack mediaTrack : mediaTracksForOriginalRace) {
                 if (mediaTrack.overlapsWith(sliceFrom, sliceTo)) {
@@ -3246,9 +3276,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     /**
      * Stores a list of BufferedImages and returns a list of URLs as Strings under which the BufferedImages are stored
-     * 
+     *
      * @author Robin Fleige (D067799)
-     * 
+     *
      * @param resizedImages
      *            the BufferedImages that will be stored
      * @param fileType
@@ -3266,7 +3296,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
                         metadata, fileType);
                 sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
-                        .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
+                        .storeFile(fileStorageStream, "." + fileType, Long.valueOf(fileStorageStream.available()))
                         .toString());
             }
         } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
@@ -3629,7 +3659,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                                 convertDtoToCommonMarkProperties(markTemplate.getCommonMarkProperties())));
         return convertToMarkTemplateDTO(mTemplate);
     }
-    
+
     private boolean existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl)
             throws Exception, UnauthorizedException {
         boolean found = false;
@@ -3642,7 +3672,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         }
         return found;
     }
-    
+
     private boolean existsYellowBrickConfigurationForCurrentUser(String raceUrl) {
         boolean found = false;
         final String currentUserName = getSecurityService().getCurrentUser().getName();
@@ -3709,22 +3739,22 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         configuration.setPriority(dto.priority);
         return configuration;
     }
-    
+
 
     @Override
     public Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto)
             throws NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
         final MillisecondsTimePoint finishingTimePoint = dto.finishingTime==null?null:new MillisecondsTimePoint(dto.finishingTime);
-        TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName, 
+        TimePoint newFinsihingTime = getService().setFinishingTime(dto.leaderboardName, dto.raceColumnName,
                 dto.fleetName, dto.authorName, dto.authorPriority,
                 dto.passId, finishingTimePoint);
-        
+
         final TimePoint finishTimePoint = dto.finishTime==null?null:new MillisecondsTimePoint(dto.finishTime);
-        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName, 
+        TimePoint newEndTime = getService().setEndTime(dto.leaderboardName, dto.raceColumnName,
                 dto.fleetName, dto.authorName, dto.authorPriority,
                 dto.passId, finishTimePoint);
-        
+
         return new Pair<Boolean, Boolean>(Util.equalsWithNull(finishingTimePoint, newFinsihingTime),
                 Util.equalsWithNull(finishTimePoint, newEndTime));
     }
@@ -3732,7 +3762,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto) throws NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
-        TimePoint newStartTime = getService().setStartTimeAndProcedure(dto.leaderboardName, dto.raceColumnName, 
+        TimePoint newStartTime = getService().setStartTimeAndProcedure(dto.leaderboardName, dto.raceColumnName,
                 dto.fleetName, dto.authorName, dto.authorPriority,
                 dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.startTime),
                 dto.racingProcedure, dto.courseAreaId);
@@ -3846,7 +3876,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             lastFix = null;
         }
         String deviceId = serializeDeviceIdentifier(mapping.getDevice());
-        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ? 
+        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ?
                 null : mapping.getTimeRange().from().asDate();
         Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
                 null : mapping.getTimeRange().to().asDate();
@@ -3898,7 +3928,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         return getDeviceMappings(regattaLog);
     }
-    
+
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);

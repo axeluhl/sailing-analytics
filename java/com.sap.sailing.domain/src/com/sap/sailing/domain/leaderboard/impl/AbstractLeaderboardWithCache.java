@@ -487,7 +487,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         trackedRace.getRace().getCourse().lockForRead();
                         try {
                             for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache));
+                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache)); // TODO bug5147: leg ranks may also need to be merged across equal-weighted fleets if RaceColumn.hasCrossFleetMergedRanking() is true
                             }
                         } finally {
                             trackedRace.getRace().getCourse().unlockAfterRead();
@@ -496,7 +496,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
-        final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
+        final ConcurrentMap<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new ConcurrentHashMap<>();
         final ConcurrentMap<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> futuresForCompetitorAndColumnName = new ConcurrentHashMap<>();
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
@@ -1184,7 +1184,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     @Override
     public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) {
-        return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+        return Util.indexOf(getCompetitorsFromBestToWorst(timePoint), competitor) + 1;
     }
 
     protected void regattaLogEventAdded(RegattaLogEvent event) {

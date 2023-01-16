@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Úspora baterie"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"vyberte interval odesílání aktualizace polohy GPS"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Podle situace vyberte takovou hodnotu, abyste maximálně šetřili baterii, ale současně zaručili smysluplný přehled o své aktuální poloze."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"Aktualizace GPS se budou odesílat na server %1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"každých"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"okamžitě"</item>
+    	<item>"5 sekund"</item>
+    	<item>"10 sekund"</item>
+    	<item>"20 sekund"</item>
+    	<item>"60 sekund"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Zap."</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Vyp."</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Zobrazit: magnetický"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Zobrazit: skutečný"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Kurz"</string>
+</resources>

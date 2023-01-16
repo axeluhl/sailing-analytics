@@ -8,7 +8,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.interface,
- com.google.gwt.dev;bundle-version="2.10.0";resolution:=optional,
  com.google.gwt.user;bundle-version="2.10.0";resolution:=optional,
  com.google.gwt.servlet;bundle-version="2.10.0",
  com.sap.sse.common,

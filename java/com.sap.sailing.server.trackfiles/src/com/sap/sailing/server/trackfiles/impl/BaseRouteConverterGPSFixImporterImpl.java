@@ -2,6 +2,7 @@ package com.sap.sailing.server.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +36,7 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         List<NavigationFormat> formats = new ArrayList<NavigationFormat>();
         for (Class<? extends NavigationFormat> formatClass : supportedFormats) {
             try {
-                NavigationFormat format = formatClass.newInstance();
+                NavigationFormat format = formatClass.getDeclaredConstructor().newInstance();
                 if (restrictToWritableFormats && format.isSupportsWriting() ||
                         !restrictToWritableFormats && format.isSupportsReading())
                     formats.add(format);
@@ -53,8 +54,8 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
-            String sourceName)
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback,
+            boolean inferSpeedAndBearing, String sourceName)
             throws IOException, FormatNotSupportedException {
         NavigationFormatParser parser = new NavigationFormatParser();
         List<BaseRoute> routes;

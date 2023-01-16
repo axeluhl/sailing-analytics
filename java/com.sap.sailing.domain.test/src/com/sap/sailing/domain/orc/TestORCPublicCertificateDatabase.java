@@ -152,10 +152,10 @@ public class TestORCPublicCertificateDatabase {
 
     @FailIfNoValidOrcCertificates
     @Test
-    public void testGetCertificate() throws Exception {        
+    public void testGetCertificate() throws Exception {
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
         final ORCCertificate cert = certificates.stream().findFirst().get();
-        Iterable<CertificateHandle> certHandles = db.search(null, LocalDate.now().getYear(), null, cert.getBoatName(),
+        Iterable<CertificateHandle> certHandles = db.search(/* country */ null, LocalDate.now().getYear(), /* referenceNumber */ null, cert.getBoatName(),
                 cert.getSailNumber(), /*
                                        * boat class name; could be set to cert.getBoatClassName() but there are
                                        * deviations in ORC DBs and query API, so leaving null:
@@ -163,6 +163,22 @@ public class TestORCPublicCertificateDatabase {
         if (Util.isEmpty(certHandles)) {
             // there were certs; get one from the previous year
             certHandles = db.search(null, LocalDate.now().getYear()-1, null, cert.getBoatName(),
+                    cert.getSailNumber(), /*
+                                           * boat class name; could be set to cert.getBoatClassName() but there are
+                                           * deviations in ORC DBs and query API, so leaving null:
+                                           */ null, /* includeInvalid */ false);
+        }
+        if (Util.isEmpty(certHandles)) {
+            // there were certs; try searching by reference number
+            certHandles = db.search(null, LocalDate.now().getYear(), cert.getReferenceNumber(), /* boat name may have deviated due to special characters */ null,
+                    cert.getSailNumber(), /*
+                                           * boat class name; could be set to cert.getBoatClassName() but there are
+                                           * deviations in ORC DBs and query API, so leaving null:
+                                           */ null, /* includeInvalid */ false);
+        }
+        if (Util.isEmpty(certHandles)) {
+            // still nothing? Then try by reference number in previous year:
+            certHandles = db.search(null, LocalDate.now().getYear()-1, cert.getReferenceNumber(), /* boat name may have deviated due to special characters */ null,
                     cert.getSailNumber(), /*
                                            * boat class name; could be set to cert.getBoatClassName() but there are
                                            * deviations in ORC DBs and query API, so leaving null:

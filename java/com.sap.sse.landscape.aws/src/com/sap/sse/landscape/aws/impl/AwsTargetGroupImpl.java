@@ -11,6 +11,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
 public class AwsTargetGroupImpl<ShardingKey>
@@ -43,6 +44,10 @@ extends NamedImpl implements TargetGroup<ShardingKey> {
     
     private software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup() {
         return landscape.getAwsTargetGroupByArn(getRegion(), getTargetGroupArn());
+    }
+    
+    public Iterable<TagDescription> getTagDescriptions() {
+        return landscape.getTargetGroupTags(arn, region);
     }
 
     public Region getRegion() {

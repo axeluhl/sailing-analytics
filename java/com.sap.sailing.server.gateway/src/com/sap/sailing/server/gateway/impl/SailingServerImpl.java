@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.server.gateway.deserialization.impl.CompareServersResultJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DataImportProgressJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MasterDataImportResultJsonDeserializer;
@@ -35,6 +38,7 @@ import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sailing.server.gateway.jaxrs.api.CompareServersResource;
 import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
+import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.MasterDataImportResource;
 import com.sap.sailing.server.gateway.jaxrs.api.RemoteServerReferenceResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
@@ -56,11 +60,42 @@ public class SailingServerImpl extends SecuredServerImpl implements SailingServe
     @Override
     public Iterable<UUID> getLeaderboardGroupIds() throws ClientProtocolException, IOException, ParseException {
         final URL leaderboardGroupsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+LeaderboardGroupsResource.V1_LEADERBOARDGROUPS+LeaderboardGroupsResource.IDENTIFIABLE);
-        final HttpGet getLeaderboards = new HttpGet(leaderboardGroupsUrl.toString());
-        final JSONArray jsonResponse = (JSONArray) getJsonParsedResponse(getLeaderboards).getA();
+        final HttpGet getLeaderboardGroups = new HttpGet(leaderboardGroupsUrl.toString());
+        final JSONArray jsonResponse = (JSONArray) getJsonParsedResponse(getLeaderboardGroups).getA();
         return Util.map(jsonResponse, o->UUID.fromString(((JSONObject) o).get(LeaderboardGroupConstants.ID).toString()));
     }
 
+    @Override
+    public Iterable<String> getLeaderboardNames() throws Exception {
+        final URL leaderboardsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+LeaderboardsResource.V1_LEADERBOARDS);
+        final HttpGet getLeaderboards = new HttpGet(leaderboardsUrl.toString());
+        final Pair<Object, Integer> jsonParsedResponse = getJsonParsedResponse(getLeaderboards);
+        final JSONArray jsonResponse = (JSONArray) jsonParsedResponse.getA();
+        if (jsonResponse == null) {
+            throw new IllegalAccessError("Error accessing leaderboard names; response status "+jsonParsedResponse.getB());
+        }
+        return Util.map(jsonResponse, o->o.toString());
+    }
+
+    @Override
+    public String getLeaderboardShardingKey(String leaderboardName) throws Exception {
+        // We could try to acquire this from the "leaderboards" REST API endpoint, field shardingLeaderboardName,
+        // but we can as well shortcut it by replicating the implementation here:
+        return ShardingType.LEADERBOARDNAME.encodeShardingInfo(leaderboardName);
+    }
+    
+    /**
+     * Establishes a map with all leaderboardnames and their keys and takes the value for the according shardingkey.
+     */
+    @Override
+    public String getLeaderboardFromShardingKey(String shardingKey) throws Exception {
+        Map<String, String> mapping = new HashMap<>();
+        for (String leaderboard : getLeaderboardNames()) {
+            mapping.put(getLeaderboardFromShardingKey(leaderboard), leaderboard);
+        }
+        return mapping.get(shardingKey);
+    }
+    
     @Override
     public Iterable<UUID> getEventIds() throws ClientProtocolException, IOException, ParseException {
         final URL eventsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+EventsResource.V1_EVENTS);

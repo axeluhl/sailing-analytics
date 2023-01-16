@@ -6,18 +6,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A leaderboard has a scoring scheme that decides how race ranks map to scores, how penalties are to be scored,
@@ -101,7 +106,7 @@ public interface ScoringScheme extends Serializable {
      */
     int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2,
             List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
-            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor);
+            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -120,8 +125,6 @@ public interface ScoringScheme extends Serializable {
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
      * race. Any remaining ties shall be broken by using the tied boats' scores in the next-to-last race and so on until
      * all ties are broken. These scores shall be used even if some of them are excluded scores."</em>
-     * @param timePoint TODO
-     * @param cache TODO
      */
     int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
@@ -172,14 +175,6 @@ public interface ScoringScheme extends Serializable {
     }
 
     /**
-     * If {@link #isMedalWinAmountCriteria()} returns {@code true}, this will be the amount of races that must be won,
-     * in order to win the medal series instantly
-     */
-    default int getTargetAmountOfMedalRaceWins() {
-        throw new IllegalStateException("This call is not valid for this scoringSheme");
-    }
-
-    /**
      * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
      * medal race column it usually counts double. Under certain circumstances, columns may also count with factors
      * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee
@@ -214,5 +209,144 @@ public interface ScoringScheme extends Serializable {
      */
     default double getOriginalScoreFromScoreScaledByFactor(RaceColumn raceColumn, double scaledScore) {
         return ScoringSchemeType.getUnscaledScore(getScoreFactor(raceColumn), scaledScore, raceColumn.isOneAlwaysStaysOne());
+    }
+    
+    /**
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint.
+     * If the competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top
+     * for that column, considering any score corrections and penalties, too.
+     * @param totalPointsSupplier provides the 
+     */
+    default boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+        final Iterable<Competitor> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint, totalPointsSupplier, cache);
+        for (final Competitor betterCompetitor : competitorsFromBestToWorstInColumn) {
+            if (betterCompetitor != competitor && raceColumn.getFleetOfCompetitor(betterCompetitor) == fleetOfCompetitor) {
+                // found a better competitor in same fleet; competitor obviously did not score a win
+                return false;
+            } else if (betterCompetitor == competitor) {
+                return true;
+            }
+        }
+        return false; // it is a bit strange that we're asked for a competitor that we didn't find in the column, but that's certainly not a win
+    }
+
+    /**
+     * Computes the score sum to be displayed in the "sum" column in the leaderboard when considering only the
+     * {@code raceColumnsToConsider}.
+     * <p>
+     * 
+     * This default implementation starts with the {@link Leaderboard#getCarriedPoints(Competitor) carried points} for
+     * the {@code leaderboard}, then enumerates the {@code raceColumnsToConsider}, and for each of them computes the net
+     * points the {@code competitor} has been awarded in that column, unless the leaderboard's
+     * {@link Leaderboard#getResultDiscardingRule() discarding rule} has decided to exclude that column's score. The
+     * scores are added up, unless a race column is found that has {@link RaceColumn#isStartsWithZeroScore()} set and
+     * the competitor scores in that or any of the following columns in which case the score sum so far is reset to
+     * zero.
+     * 
+     * @param raceColumnsToConsider
+     *            a sequence of {@link RaceColumn}s, expected to be a prefix of or the same as
+     *            {@code leaderboard.}{@link Leaderboard#getRaceColumns() getRaceColumns()}.
+     */
+    default double getNetPoints(AbstractSimpleLeaderboardImpl leaderboard, Competitor competitor,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race
+        // from there on
+        boolean needToResetScoreUponNextNonEmptyEntry = false;
+        double result = leaderboard.getCarriedPoints(competitor);
+        final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard,
+                raceColumnsToConsider, timePoint, this);
+        for (RaceColumn raceColumn : raceColumnsToConsider) {
+            if (raceColumn.isStartsWithZeroScore()) {
+                needToResetScoreUponNextNonEmptyEntry = true;
+            }
+            if (isValidInNetScore(leaderboard, raceColumn, competitor, timePoint)) {
+                final Double netPoints = getNetPointsForScoreSum(leaderboard, competitor, raceColumn, timePoint, discardedRaceColumns);
+                if (netPoints != null) {
+                    if (needToResetScoreUponNextNonEmptyEntry) {
+                        result = 0;
+                        needToResetScoreUponNextNonEmptyEntry = false;
+                    }
+                    result += netPoints;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * By default, the scores to use for the net points sum are what
+     * {@link Leaderboard#getNetPoints(Competitor, RaceColumn, TimePoint, Set)} delivers. Specialized scoring
+     * schemes may change this, e.g., to counting wins in the medal series.
+     */
+    default Double getNetPointsForScoreSum(AbstractSimpleLeaderboardImpl leaderboard, Competitor competitor,
+            RaceColumn raceColumn, TimePoint timePoint, final Set<RaceColumn> discardedRaceColumns) {
+        return leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
+    }
+    
+    default Pair<Integer, Boolean> getNewNumberOfMedalRacesWon(int numberOfMedalRacesWonSoFar,
+            boolean clearNumberOfMedalRacesWonUponNextValidMedalRaceScore,
+            Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
+            TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Double totalPoints = totalPointsSupplier.apply(competitor);
+        final int winCount = getWinCount(leaderboard, competitor, raceColumn, totalPoints, timePoint, totalPointsSupplier, cache);
+        final int newNumberOfMedalRacesWonSoFar;
+        final boolean newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore;
+        if (raceColumn.isStartsWithZeroScore()) {
+            if (totalPoints != null) {
+                newNumberOfMedalRacesWonSoFar = winCount;
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = false;
+            } else {
+                newNumberOfMedalRacesWonSoFar = numberOfMedalRacesWonSoFar;
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = true;
+            }
+        } else {
+            if (totalPoints != null) {
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = false;
+                if (clearNumberOfMedalRacesWonUponNextValidMedalRaceScore) {
+                    newNumberOfMedalRacesWonSoFar = winCount;
+                } else {
+                    newNumberOfMedalRacesWonSoFar = numberOfMedalRacesWonSoFar + winCount;
+                }
+            } else {
+                newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore = clearNumberOfMedalRacesWonUponNextValidMedalRaceScore;
+                newNumberOfMedalRacesWonSoFar = numberOfMedalRacesWonSoFar;
+            }
+        }
+        return new Pair<>(newNumberOfMedalRacesWonSoFar, newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore);
+    }
+
+    default int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
+            final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return totalPoints == null ? 0 : isWin(leaderboard, competitor, raceColumn, timePoint, totalPointsSupplier, cache) ? 1 : 0;
+    }
+    
+    /**
+     * Compares by the number of races won in the medal series. This default implementation simply compares the two numbers, and
+     * the competitor with the greater number is scored better ("less").
+     */
+    default int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        return Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
+    }
+
+    default int compareByScoreSum(double o1ScoreSum, double o2ScoreSum, boolean nullScoresAreBetter, boolean haveValidMedalRaceScores) {
+        return getScoreComparator(nullScoresAreBetter).compare(o1ScoreSum, o2ScoreSum);
+    }
+
+    /**
+     * Precondition: either both scored in medal race or both didn't. If both scored, the better score wins.
+     * This is to be applied only if the net score of both competitors are equal to each other.
+     */
+    default int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore, boolean nullScoresAreBetter) {
+        assert o1MedalRaceScore != null || o2MedalRaceScore == null;
+        final int result;
+        if (o1MedalRaceScore != null) {
+            result = getScoreComparator(nullScoresAreBetter).compare(o1MedalRaceScore, o2MedalRaceScore);
+        } else {
+            result = 0;
+        }
+        return result;
     }
 }

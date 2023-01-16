@@ -196,13 +196,14 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(UserDTO t) {
-                List<String> string = new ArrayList<String>();
-                string.add(t.getName());
-                string.add(t.getFullName());
-                string.add(t.getEmail());
-                string.add(t.getCompany());
-                Util.addAll(Util.map(t.getUserGroups(), StrippedUserGroupDTO::getName), string);
-                return string;
+                List<String> strings = new ArrayList<>();
+                strings.add(t.getName());
+                strings.add(t.getFullName());
+                strings.add(t.getEmail());
+                strings.add(t.getCompany());
+                Util.addAll(Util.map(t.getRoles(), RoleWithSecurityDTO::getName), strings);
+                Util.addAll(Util.map(t.getUserGroups(), StrippedUserGroupDTO::getName), strings);
+                return strings;
             }
 
             @Override

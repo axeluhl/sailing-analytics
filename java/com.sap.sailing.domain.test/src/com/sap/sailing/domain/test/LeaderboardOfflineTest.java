@@ -222,24 +222,24 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         TimePoint now = MillisecondsTimePoint.now();
         MockedTrackedRaceWithFixedRankAndManyCompetitors testRace = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
                 competitorWithBoat, /* rank */ 1, /* started */true);
-        testRace.addCompetitorWithBoat(c2);
-        testRace.addCompetitorWithBoat(c3); // this makes maxPoints==4
+        testRace.addCompetitorWithBoat(c2); // rank 2
+        testRace.addCompetitorWithBoat(c3); // rank 3; this makes maxPoints==4
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
         leaderboard.addRace(testRace, "R1", /* medalRace */false);
         assertEquals(1., leaderboard.getNetPoints(competitorWithBoat, now), 0.00000001);
-        assertEquals(1., leaderboard.getNetPoints(c2, now), 0.00000001);
-        assertEquals(1., leaderboard.getNetPoints(c3, now), 0.00000001);
+        assertEquals(2., leaderboard.getNetPoints(c2, now), 0.00000001);
+        assertEquals(3., leaderboard.getNetPoints(c3, now), 0.00000001);
         leaderboard.setCarriedPoints(competitorWithBoat, 100);
         leaderboard.setCarriedPoints(c2, 50);
         leaderboard.setCarriedPoints(c3, 25);
         assertEquals(101., leaderboard.getNetPoints(competitorWithBoat, now), 0.00000001);
-        assertEquals(51., leaderboard.getNetPoints(c2, now), 0.00000001);
-        assertEquals(26., leaderboard.getNetPoints(c3, now), 0.00000001);
-        List<Competitor> sortedCompetitors = leaderboard.getCompetitorsFromBestToWorst(now);
-        assertSame(c3, sortedCompetitors.get(0));
-        assertSame(c2, sortedCompetitors.get(1));
-        assertSame(competitorWithBoat, sortedCompetitors.get(2));
+        assertEquals(52., leaderboard.getNetPoints(c2, now), 0.00000001);
+        assertEquals(28., leaderboard.getNetPoints(c3, now), 0.00000001);
+        Iterable<Competitor> sortedCompetitors = leaderboard.getCompetitorsFromBestToWorst(now);
+        assertSame(c3, Util.get(sortedCompetitors, 0));
+        assertSame(c2, Util.get(sortedCompetitors, 1));
+        assertSame(competitorWithBoat, Util.get(sortedCompetitors, 2));
     }
 
     @Test

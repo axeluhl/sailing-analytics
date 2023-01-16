@@ -11,7 +11,7 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -185,8 +185,8 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(trackedRace.getTrackedLeg(course.getFirstLeg())).thenReturn(trackedLeg);
         when(trackedRace.getApproximatePosition(startWaypoint, now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(windwardWaypoint, now)).thenCallRealMethod();
-        when(trackedRace.getApproximatePosition(Matchers.eq(startWaypoint), Matchers.eq(now), Matchers.any(MarkPositionAtTimePointCache.class))).thenCallRealMethod();
-        when(trackedRace.getApproximatePosition(Matchers.eq(windwardWaypoint), Matchers.eq(now), Matchers.any(MarkPositionAtTimePointCache.class))).thenCallRealMethod();
+        when(trackedRace.getApproximatePosition(ArgumentMatchers.eq(startWaypoint), ArgumentMatchers.eq(now), ArgumentMatchers.any(MarkPositionAtTimePointCache.class))).thenCallRealMethod();
+        when(trackedRace.getApproximatePosition(ArgumentMatchers.eq(windwardWaypoint), ArgumentMatchers.eq(now), ArgumentMatchers.any(MarkPositionAtTimePointCache.class))).thenCallRealMethod();
         return trackedRace;
     }
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.coursetemplate.impl.MarkRolePairImpl;
@@ -24,7 +24,7 @@ public interface MarkRolePair extends ControlPointTemplate {
      * the cache, it is returned. Otherwise, a new pair is created, entered into the cache and then returned.
      */
     public class MarkRolePairFactory {
-        private final Map<MarkRolePair, MarkRolePair> markPairs = new HashMap<>();
+        private final ConcurrentMap<MarkRolePair, MarkRolePair> markPairs = new ConcurrentHashMap<>();
 
         public MarkRolePair create(String name, String shortName, MarkRole left, MarkRole right) {
             // use name as short name if none is provided

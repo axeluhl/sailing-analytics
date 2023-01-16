@@ -10,11 +10,13 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -272,6 +274,36 @@ public class Util {
                 result = counter;
             } else {
                 result = -1;
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * The list returned is "live" connected to {@code ts} only if {@code ts} was instance of a class
+     * that implements {@link List}.
+     */
+    public static <T> List<T> subList(Iterable<T> ts, int from, int toExclusive) {
+        final List<T> result;
+        if (from < 0 || from > toExclusive) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (ts instanceof List<?>) {
+            result = ((List<T>) ts).subList(from, toExclusive);
+        } else {
+            result = new LinkedList<>();
+            int i=0;
+            for (final T t : ts) {
+                if (i >= from && i<toExclusive) {
+                    result.add(t);
+                }
+                i++;
+                if (i >= toExclusive) {
+                    break;
+                }
+            }
+            if (i < toExclusive) {
+                throw new IndexOutOfBoundsException("to-index "+toExclusive+" greater than collection size "+Util.size(ts));
             }
         }
         return result;
@@ -754,10 +786,20 @@ public class Util {
         }
         return result;
     }
-
+    
+    /**
+     * 
+     * @param <T>
+     *          Type of {@code iterable}
+     * @param iterable
+     *          Input Iterable
+     * @return
+     *          returns List<T> if {@code iterable} is an instance of List<?> and if it is an instance Serializable. If not,
+     *          an ArrayList<T> gets constructed and filled with all items of {@code iterable}   
+     */
     public static <T> List<T> asList(Iterable<T> iterable) {
         final List<T> list;
-        if (iterable instanceof List<?>) {
+        if (iterable instanceof List<?> && iterable instanceof Serializable) {
             list = (List<T>) iterable;
         } else {
             list = new ArrayList<>();
@@ -1030,4 +1072,37 @@ public class Util {
     public static <K, V> MapBuilder<K, V> mapBuilder() {
         return new MapBuilderImpl<>();
     }
+
+    /**
+     * @return {@code true} if {@code newSequence} contains at least all elements of {@code oldSequence} in the same order
+     *         in which they appear in {@code oldSequence}. The "contains" check is made based on the {@link Object#equals(Object)}
+     *         method for the objects in the lists.
+     */
+    public static <T> boolean isOnlyAdding(final Iterable<T> newSequence, final Iterable<T> oldSequence) {
+        return isOnlyAdding(newSequence, oldSequence, (a, b)->Util.equalsWithNull(a,  b));
+    }
+    
+    /**
+     * Like {@link #isOnlyAdding(Iterable, Iterable)}, but with a configurable equivalence relation
+     * 
+     * @return {@code true} if {@code newSequence} contains at least all elements of {@code oldSequence} in the same
+     *         order in which they appear in {@code oldSequence}. The "contains" check is based on the
+     *         {@code equivalenceRelation}.
+     */
+    public static <T> boolean isOnlyAdding(final Iterable<T> newSequence, final Iterable<T> oldSequence, BiFunction<T, T, Boolean> equivalenceRelation) {
+        final Iterator<T> nIter = newSequence.iterator();
+        final Iterator<T> oIter = oldSequence.iterator();
+        boolean result = true;
+        while (result && oIter.hasNext()) {
+            final T nextFromOld = oIter.next();
+            result = false;
+            while (!result && nIter.hasNext()) {
+                if (equivalenceRelation.apply(nIter.next(), nextFromOld)) {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
 }

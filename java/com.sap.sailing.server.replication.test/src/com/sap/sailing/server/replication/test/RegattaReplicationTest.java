@@ -87,9 +87,9 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 /* course area ID */ (Serializable) null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
-        
+
         Thread.sleep(1000);
-        
+
         Regatta replicatedRegatta1 = replica.getRegatta(new RegattaName(masterRegatta1.getName()));
         assertNotNull(replicatedRegatta1);
         assertEquals(replicatedRegatta1.canBoatsOfCompetitorsChangePerRace(), canBoatsOfCompetitorsChangePerRaceRegatta1);
@@ -118,7 +118,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         // Test for 'null'
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
                 currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
@@ -127,7 +127,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
         // Test for 'alpha'
         currentCourseAreaId = alphaCourseAreaId;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
                 currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
@@ -155,7 +155,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
     }
-    
+
     public void testUpdateSpecificRegattaReplicationForProcedureAndCourseDesignerAndConfig() throws InterruptedException {
         Regatta replicatedRegatta;
         final UUID alphaCourseAreaId = UUID.randomUUID();
@@ -203,17 +203,17 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
     }
-    
+
     @Test
     public void testSpecificRegattaReplicationWithTwoEmptySeries() throws InterruptedException {
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
+        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1), new FleetImpl("Silver", 2) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Series medal = new SeriesImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, 
+        Series medal = new SeriesImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -247,13 +247,13 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedMedal.getFleetByName("Medal"));
         assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
     }
-    
+
     @Test
     public void testRegattaUpdateSeriesWithNewSeries() throws InterruptedException {
         final String baseEventName = "Extreme Sailing Series 2020";
         final String boatClassName = "Extreme40";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -272,13 +272,13 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Qualification", replicatedQualification.getName());
         assertEquals(2, Util.size(replicatedQualification.getFleets()));
         assertFalse(seriesIter.hasNext());
-        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
+        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         FleetDTO finalsGoldFleet = new FleetDTO("Gold", 1, Color.GRAY);
         master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(), finals.isFleetsCanRunInParallel(),
                 new int[] {},
-                finals.isStartsWithZeroScore(), finals.isFirstColumnIsNonDiscardableCarryForward(),
-                finals.hasSplitFleetContiguousScoring(), finals.getMaximumNumberOfDiscards(), finals.isOneAlwaysStaysOne(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
+                finals.isStartsWithZeroScore(), finals.isFirstColumnNonDiscardableCarryForward(),
+                finals.hasSplitFleetContiguousScoring(), finals.hasCrossFleetMergedRanking(), finals.getMaximumNumberOfDiscards(), finals.isOneAlwaysStaysOne(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -295,13 +295,13 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedFinals.getFleetByName("Gold"));
         assertEquals(1, replicatedFinals.getFleetByName("Gold").getOrdering());
     }
-    
+
     @Test
     public void testSeriesNameChangeReplicationTest() throws InterruptedException {
         final String baseEventName = "Extreme Sailing Series 2021";
         final String boatClassName = "Extreme40";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -317,11 +317,11 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Iterator<? extends Series> seriesIter = replicatedRegatta.getSeries().iterator();
         Series replicatedQualification = seriesIter.next();
         assertEquals("Qualification", replicatedQualification.getName());
-        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), qualification.getName(), "Simons Quali", 
+        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), qualification.getName(), "Simons Quali",
                 qualification.isMedal(), qualification.isFleetsCanRunInParallel(),
                 new int[] {},
-                qualification.isStartsWithZeroScore(), qualification.isFirstColumnIsNonDiscardableCarryForward(),
-                qualification.hasSplitFleetContiguousScoring(), qualification.getMaximumNumberOfDiscards(),
+                qualification.isStartsWithZeroScore(), qualification.isFirstColumnNonDiscardableCarryForward(),
+                qualification.hasSplitFleetContiguousScoring(), qualification.hasCrossFleetMergedRanking(), qualification.getMaximumNumberOfDiscards(),
                 qualification.isOneAlwaysStaysOne(), Arrays.asList(new FleetDTO[] {  })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
@@ -330,7 +330,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         replicatedQualification = seriesIter.next();
         assertEquals("Simons Quali", replicatedQualification.getName());
     }
-    
+
     @Test
     public void testSpecificRegattaReplicationWithCourseArea() throws InterruptedException {
         final String eventName = "ESS Singapur";
@@ -343,12 +343,11 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()})[0];
-        
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(eventName, boatClassName),
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(), series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                masterCourseArea.getId(), /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                masterCourseArea.getId(), /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());

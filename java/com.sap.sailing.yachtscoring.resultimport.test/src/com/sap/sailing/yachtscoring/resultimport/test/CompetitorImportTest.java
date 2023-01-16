@@ -22,7 +22,6 @@ import com.sap.sailing.yachtscoring.resultimport.YachtScoringCompetitorProvider;
 import com.sap.sse.common.Util;
 
 public class CompetitorImportTest extends AbstractCharlstonRaceWeek2015Test {
-    
     @Test
     public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);

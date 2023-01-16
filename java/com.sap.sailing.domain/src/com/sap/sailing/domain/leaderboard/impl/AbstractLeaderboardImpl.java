@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -28,6 +30,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -42,7 +45,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * one. All events received this way are forwarded to all {@link RaceColumnListener}s subscribed. This can be used to
  * subscribe a concrete leaderboard implementation to the data structure providing the actual race columns in order to
  * be notified whenever the set of {@link TrackedRace}s attached to the leaderboard changes.
- * 
+ *
  * @author Axel Uhl (D043530)
  *
  */
@@ -138,52 +141,117 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? 0
-                : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
-                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : 0;
+        final int trackedRank;
+        if (trackedRace == null || !trackedRace.hasStarted(timePoint)) {
+            // return 0 if the race has not started or no tracked race is available
+            trackedRank = 0;
+        } else {
+            // if the race has no CrossFleetMergedRanking we can use the ranks of each race to compute the scores.
+            // if on the other hand the flag is set, we first need to order the competitors after their rankComparables.
+            // After that we can assign scores.
+            if (race.hasCrossFleetMergedRanking()) {
+                // get Fleets that are of the same order as the fleet of the competitor
+                List<Fleet> fleetsOfSameOrderAsCompetitorsFleet = new ArrayList<>();
+                int rankOfCompetitorsFleet = race.getFleetOfCompetitor(competitor).getOrdering();
+                for (Fleet fleet : race.getFleets()) {
+                    if (fleet.getOrdering() == rankOfCompetitorsFleet) {
+                        fleetsOfSameOrderAsCompetitorsFleet.add(fleet);
+                    }
+                }
+                if (fleetsOfSameOrderAsCompetitorsFleet.size() > 1) {
+                    Integer originalRank = null;
+                    // more than one fleet of the same rank -> need to merge these fleets
+                    final List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<>();
+                    for (Fleet fleet : fleetsOfSameOrderAsCompetitorsFleet) {
+                        for (final java.util.Map.Entry<Competitor, RankAndRankComparable> e : race.getTrackedRace(fleet).getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache).entrySet()) {
+                            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(e.getKey(), e.getValue().getRankComparable()));
+                            if (e.getKey() == competitor) {
+                                originalRank = e.getValue().getRank();
+                            }
+                        }
+                    }
+                    // A merge sort might be faster because the Lists in competitorsFromBestToWorstAndRankComparable are
+                    // already ordered
+                    Collections.sort(competitorsFromBestToWorstAndRankComparable);
+                    Iterator<Competitor> competitorsIterator = competitorsFromBestToWorstAndRankComparable.stream()
+                            .map(v -> v.getCompetitor()).iterator();
+                    trackedRank = getRankImprovedByDisqualificationsOfBetterRankedCompetitors(competitor, race,
+                            timePoint, originalRank, competitorsIterator);
+                } else {
+                    final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankAndRankComparable =
+                            trackedRace.getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache);
+                    // just one fleet for the given rank -> no merge needed just use the normal behavior
+                    trackedRank = getRankImprovedByDisqualificationsOfBetterRankedCompetitors(competitor, race,
+                            timePoint, competitorsFromBestToWorstAndRankAndRankComparable.get(competitor).getRank(),
+                            competitorsFromBestToWorstAndRankAndRankComparable.keySet().iterator());
+                }
+            } else {
+                final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankAndRankComparable =
+                        trackedRace.getCompetitorsFromBestToWorstAndRankAndRankComparable(timePoint, cache);
+                // just one fleet for the given rank -> no merge needed just use the normal behavior
+                trackedRank = getRankImprovedByDisqualificationsOfBetterRankedCompetitors(competitor, race,
+                        timePoint, competitorsFromBestToWorstAndRankAndRankComparable.get(competitor).getRank(),
+                        competitorsFromBestToWorstAndRankAndRankComparable.keySet().iterator());
+            }
+        }
+        return trackedRank;
     }
 
     /**
      * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
      * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
-     * competitors ranked worse by the tracking system need to have their rank corrected by one.
-     * 
-     * @param trackedRace
-     *            the race to which the rank refers; look for disqualifications / max points reasons in this column
+     * competitors ranked worse by the tracking system need to have their rank corrected by one. The
+     * {@link RankComparable} must also consider the {@link MaxPointsReason} so that the behavior remains consistent.
+     *
+     * @param competitor
+     *            the competitor whose rank is to be improved
+     * @param race
+     *            raceColumn that is used to check if a competitor is disqualified
      * @param timePoint
      *            time point at which to consider disqualifications (not used yet because currently we don't remember
      *            <em>when</em> a competitor was disqualified)
-     * @param rank
-     *            a competitors rank according to the tracking system
-     * 
-     * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for
-     *         <code>race</code>, or otherwise a rank improved (lowered) by the number of disqualifications of
-     *         competitors whose tracked rank is better (lower) than <code>rank</code>.
+     * @param originalRank
+     *            the rank that the {@link TrackedRace} assigned to the {@code competitor}; 0 means no rank known; note
+     *            that for cross-fleet merged ranking a non-0 {@code originalRank} will not correspond to the result
+     *            immediately but must be determined based on the ordering in {@code competitorsFromBestToWorst}
+     * @param competitorsFromBestToWorst
+     *            An iterator that contains all competitors through which the rank of the given competitor can be
+     *            improved.
+     * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked
+     *         competitors exist for <code>race</code>, or otherwise a
+     *         <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of
+     *         disqualifications of competitors whose tracked rank is better (lower) than <code>rank</code> while the
+     *         {@link RankComparable} is consistent with the new Rank.
      */
-    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
-            TimePoint timePoint, int rank) {
-        int correctedRank = rank;
-        List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
-        int betterCompetitorRank = 1;
-        Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
-        while (betterCompetitorRank < rank && ci.hasNext()) {
-            final Competitor betterTrackedCompetitor = ci.next();
-            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
-                    betterTrackedCompetitor, raceColumn, timePoint);
-            if (isSuppressed(betterTrackedCompetitor) ||
-                    (maxPointsReasonForBetterCompetitor != null
-                    && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
-                    && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
-                correctedRank--;
+    private int getRankImprovedByDisqualificationsOfBetterRankedCompetitors(Competitor competitor, RaceColumn race,
+            TimePoint timePoint, Integer originalRank, Iterator<Competitor> competitorsFromBestToWorst) {
+        final int result;
+        if (originalRank == null || originalRank == 0) {
+            result = 0;
+        } else {
+            int rank = 1;
+            int numberOfDisqualificationsOfBetterRankedCompetitors = 0;
+            while (competitorsFromBestToWorst.hasNext()) {
+                Competitor currentCompetitor = competitorsFromBestToWorst.next();
+                if (competitor.equals(currentCompetitor)) {
+                    break;
+                }
+                MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection()
+                        .getMaxPointsReason(currentCompetitor, race, timePoint);
+                if (isSuppressed(currentCompetitor) || (maxPointsReasonForBetterCompetitor != null
+                        && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
+                        && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
+                    numberOfDisqualificationsOfBetterRankedCompetitors++;
+                }
+                rank++;
             }
-            betterCompetitorRank++;
+            result = rank - numberOfDisqualificationsOfBetterRankedCompetitors;
         }
-        return correctedRank;
+        return result;
     }
-
-    // Note: no need to redefine isMedalRaceChanged because that doesn't affect the competitorsCache
 
     @Override
     public Long getDelayToLiveInMillis() {
@@ -218,17 +286,17 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                 regattaLog);
         return analyzer.analyze();
     }
-    
+
     @Override
     public void registerCompetitor(Competitor competitor) {
         registerCompetitors(Collections.singletonList(competitor));
     }
-    
+
     @Override
     public void registerCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
-        
+
         for (Competitor competitor: competitors) {
             regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
                     UUID.randomUUID(), competitor));
@@ -239,14 +307,14 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public void deregisterCompetitor(Competitor competitor) {
         deregisterCompetitors(Collections.singleton(competitor));
     }
-    
+
     @Override
     public void deregisterCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForAbstractLeaderboard);
         deregisterer.deregister(deregisterer.analyze());
     }
-    
+
     // boat functions
     @Override
     public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
@@ -260,23 +328,23 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public void registerBoat(Boat boat) {
         registerBoats(Collections.singleton(boat));
     }
-    
+
     @Override
     public void registerBoats(Iterable<Boat> boats) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
-        
+
         for (Boat boat : boats) {
             regattaLog.add(new RegattaLogRegisterBoatEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
                     UUID.randomUUID(), boat));
         }
     }
-    
+
     @Override
     public void deregisterBoat(Boat boat) {
         deregisterBoats(Collections.singleton(boat));
     }
-    
+
     @Override
     public void deregisterBoats(Iterable<Boat> boats) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();

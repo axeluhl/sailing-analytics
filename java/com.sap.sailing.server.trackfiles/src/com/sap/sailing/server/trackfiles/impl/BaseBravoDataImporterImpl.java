@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,8 +67,8 @@ public class BaseBravoDataImporterImpl extends AbstractDoubleVectorFixImporter {
      *            if {@code true}, fixes will be down-sampled to a 1Hz frequency before being emitted to the
      *            {@code callback}. Otherwise, all fixes read will be forwarded straight to the {@link Callback}.
      */
-    public boolean importFixes(InputStream inputStream, Callback callback, final String filename, String sourceName,
-            boolean downsample) throws FormatNotSupportedException, IOException {
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback, final String filename,
+            String sourceName, boolean downsample) throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
         LOG.fine("Import CSV from " + filename);

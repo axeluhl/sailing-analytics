@@ -116,12 +116,12 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 
     @Override
     public boolean isDiscardable() {
-        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnIsNonDiscardableCarryForward());
+        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnNonDiscardableCarryForward());
     }
 
     @Override
     public boolean isCarryForward() {
-        return isFirstColumnInSeries() && getSeries().isFirstColumnIsNonDiscardableCarryForward();
+        return isFirstColumnInSeries() && getSeries().isFirstColumnNonDiscardableCarryForward();
     }
 
     /**
@@ -130,6 +130,14 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     @Override
     public boolean hasSplitFleetContiguousScoring() {
         return getSeries().hasSplitFleetContiguousScoring();
+    }
+
+    /**
+     * Delegates to {@link Series#hasCrossFleetMergedRanking()}.
+     */
+    @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return getSeries().hasCrossFleetMergedRanking();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.ui.client.presentation;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -452,7 +453,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                     @Override
                     public String format(DataLabelsData dataLabelsData) {
                         String dataLabel = String.valueOf(BigDecimal.valueOf(dataLabelsData.getYAsDouble())
-                                .setScale(decimalsListBox.getValue(), BigDecimal.ROUND_HALF_UP).doubleValue());
+                                .setScale(decimalsListBox.getValue(), RoundingMode.HALF_UP).doubleValue());
                         return showDataLabelsCheckBox.getValue() ? dataLabel : null;
                     }
                 })).setSeriesClickEventHandler(new SeriesClickHandler()));
