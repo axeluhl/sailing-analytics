@@ -36,7 +36,7 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     @Override
     public TabView.State getState() {
         return currentPresenter.hasMedia() || currentPresenter.getUserService()
-                .hasPermission(currentPresenter.getEventDTO(), HasPermissions.DefaultActions.UPDATE)
+                .hasPermission(currentPresenter.getEventDTO(), HasPermissions.DefaultActions.UPDATE) // bug5799: this is redundant to RegattaMediaTabView and the general permission check
                         ? TabView.State.VISIBLE
                         : TabView.State.INVISIBLE;
     }

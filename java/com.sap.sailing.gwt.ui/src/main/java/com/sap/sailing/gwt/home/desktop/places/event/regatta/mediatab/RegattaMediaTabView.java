@@ -30,7 +30,7 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE; // bug5799: should this be made visible always if user has update permission?
     }
 
     @Override
