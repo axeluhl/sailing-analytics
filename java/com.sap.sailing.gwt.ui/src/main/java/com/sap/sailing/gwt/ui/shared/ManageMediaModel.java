@@ -169,7 +169,7 @@ public class ManageMediaModel {
     }
 
     /**
-     * Check permission on default object (eventViewDTO from init).
+     * Check media update permission on default object (eventViewDTO from init).
      */
     public boolean hasPermissions() {
         final boolean hasPermission;
