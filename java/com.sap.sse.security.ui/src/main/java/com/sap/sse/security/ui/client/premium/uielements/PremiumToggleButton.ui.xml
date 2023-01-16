@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="i18n" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
     <ui:with field="local_res"
-        type="com.sap.sse.security.ui.client.premium.PremiumToogleButtonResource" />
+        type="com.sap.sse.security.ui.client.premium.uielements.PremiumToogleButtonResource" />
     <g:FocusPanel ui:field="container">
         <g:FlowPanel addStyleNames="{local_res.css.premiumContainer}">
             <g:Button ui:field="button" addStyleNames="{local_res.css.premiumButton}"/>

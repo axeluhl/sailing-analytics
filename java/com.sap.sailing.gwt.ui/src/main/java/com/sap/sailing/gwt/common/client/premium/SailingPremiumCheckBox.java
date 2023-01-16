@@ -5,15 +5,13 @@ import static com.sap.sailing.gwt.common.client.premium.SailingPremiumIconRessou
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.dto.SecuredDTO;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
-import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
+import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
+import com.sap.sse.security.ui.client.premium.uielements.PremiumCheckBox;
 
 public class SailingPremiumCheckBox extends PremiumCheckBox {
 
-    public SailingPremiumCheckBox(final String label, final Action action, final PaywallResolverImpl paywallResolver, SecuredDTO contextDTO) {
-        super(label, action, paywallResolver, contextDTO);
+    public SailingPremiumCheckBox(final String label, SecuredBooleanSetting setting) {
+        super(label, setting);
     }
 
     @Override

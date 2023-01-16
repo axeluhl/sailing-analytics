@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.premium;
+package com.sap.sse.security.ui.client.premium.uielements;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,11 +18,10 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
-import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
 
-public abstract class PremiumCheckBox extends PremiumUiElement implements HasValue<Boolean>, HasAllKeyHandlers {
+public abstract class PremiumCheckBox extends PremiumUiElement<Boolean> implements HasValue<Boolean>, HasAllKeyHandlers {
 
     private static PremiumCheckBoxUiBinder uiBinder = GWT.create(PremiumCheckBoxUiBinder.class);
 
@@ -60,14 +59,14 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
      * enabled is a premium feature if the user does not have the permission.
      */
-    protected PremiumCheckBox(final String label, final Action action, final PaywallResolverImpl paywallResolver, final SecuredDTO contextDTO) {
-        super(action, paywallResolver, contextDTO);
+    protected PremiumCheckBox(final String label, SecuredBooleanSetting setting) {
+        super(setting);
         this.image = createPremiumIcon();
         this.checkBox = new CheckBox(label);
         initWidget(uiBinder.createAndBindUi(this));
         this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
                 i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),
-                () -> paywallResolver.getUnlockingSubscriptionPlans(action, contextDTO, this::onSubscribeDialogConfirmation));
+                () -> setting.getUnlockingSubscriptionPlans(this::onSubscribeDialogConfirmation));
         updateUserPermission();
     }
 

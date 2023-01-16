@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.premium;
+package com.sap.sse.security.ui.client.premium.uielements;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,11 +12,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
 
-public abstract class PremiumToggleButton extends PremiumUiElement implements HasClickHandlers {
+public abstract class PremiumToggleButton extends PremiumUiElement<Boolean> implements HasClickHandlers {
 
     private static PremiumToggleButtonUiBinder uiBinder = GWT.create(PremiumToggleButtonUiBinder.class);
 
@@ -30,7 +29,6 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
     protected final Button button;
     
     private final ConfirmationDialog subscribeDialog;
-    protected final Action action;
     private final Component<?> associatedComponent;
     private Runnable evaluateAndRenderSplitterWithButtons;
 
@@ -38,17 +36,16 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
      * enabled is a premium feature if the user does not have the permission.
      */
-    protected PremiumToggleButton(final String label, final Action action, final PaywallResolverImpl paywallResolver,
-            Component<?> associatedComponent, SecuredDTO dtoContext) {
-        super(action, paywallResolver, dtoContext);
+    protected PremiumToggleButton(final String label,
+            Component<?> associatedComponent, SecuredBooleanSetting setting) {
+        super(setting);
         PremiumToogleButtonResource.INSTANCE.css().ensureInjected();
-        this.action = action;
         this.associatedComponent = associatedComponent;
         this.button = new Button(label);
         initWidget(uiBinder.createAndBindUi(this));
         this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
-                i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(), () -> paywallResolver
-                        .getUnlockingSubscriptionPlans(action, dtoContext, this::onSubscribeDialogConfirmation));
+                i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(), () -> setting
+                        .getUnlockingSubscriptionPlans(this::onSubscribeDialogConfirmation));
         updateUserPermission();
     }
 
@@ -74,7 +71,7 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
     @Override
     protected void onUserPermissionUpdate(final boolean isPermitted) {
         boolean visible = associatedComponent.isVisible();
-        if(action != null) {
+        if(setting != null) {
             this.addStyleName(PremiumToogleButtonResource.INSTANCE.css().premiumActive());
             button.setStyleName(PremiumToogleButtonResource.INSTANCE.css().premiumPermitted(), isPermitted);
             button.setStyleName(PremiumToogleButtonResource.INSTANCE.css().notPremiumPermitted(), !isPermitted);

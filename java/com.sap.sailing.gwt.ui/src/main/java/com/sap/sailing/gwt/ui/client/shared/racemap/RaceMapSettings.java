@@ -19,9 +19,9 @@ import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
-import com.sap.sse.security.paywall.PaywallResolver;
-import com.sap.sse.security.paywall.SecuredDTOProxy;
-import com.sap.sse.security.paywall.settings.SecuredBooleanSetting;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
+import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
 
 public class RaceMapSettings extends AbstractGenericSerializableSettings {
 
@@ -77,7 +77,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     private SecuredBooleanSetting showWindStreamletOverlay;
 
-    private BooleanSetting showSimulationOverlay;
+    private SecuredBooleanSetting showSimulationOverlay;
     
     private BooleanSetting showMapControls;
     
@@ -116,7 +116,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         buoyZoneRadius = new DistanceSetting(PARAM_BUOY_ZONE_RADIUS_IN_METERS, this, DEFAULT_BUOY_ZONE_RADIUS);
         showWindStreamletOverlay = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false, paywallResolver, TrackedRaceActions.VIEWSTREAMLETS, getSecuredDTO());
         showWindStreamletColors = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false, paywallResolver, TrackedRaceActions.VIEWSTREAMLETS, getSecuredDTO());
-        showSimulationOverlay = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
+        showSimulationOverlay = new SecuredBooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false, paywallResolver, TrackedRaceActions.SIMULATOR, getSecuredDTO());
         showWindLadder = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
         zoomSettings = new RaceMapZoomSettings(ZOOM_SETTINGS, this);
         transparentHoverlines = new BooleanSetting(TRANSPARENT_HOVERLINES, this, false);
@@ -203,6 +203,14 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     public boolean isShowWindStreamletOverlay() {
         return showWindStreamletOverlay.getValue();
+    }
+    
+    public SecuredBooleanSetting getShowWindStreamletOverlaySetting() {
+        return this.showWindStreamletOverlay;
+    }
+    
+    public SecuredBooleanSetting getShowSimulatorOverlaySetting() {
+        return this.showSimulationOverlay;
     }
 
     public boolean isShowWindStreamletColors() {

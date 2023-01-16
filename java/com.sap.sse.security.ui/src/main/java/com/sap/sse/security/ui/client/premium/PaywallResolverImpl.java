@@ -14,7 +14,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.paywall.PaywallResolver;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
@@ -78,13 +77,7 @@ public class PaywallResolverImpl implements PaywallResolver {
         return premiumPermissions;
     }
 
-    /**
-     * It is possible to register an event handler to get the user status change event and react on this.
-     * 
-     * @param handler
-     *            an implementation of the {@link UserStatusEventHandler}.
-     * @return the registration object.
-     */
+    @Override
     public HandlerRegistration registerUserStatusEventHandler(final UserStatusEventHandler handler) {
         userService.addUserStatusEventHandler(handler);
         return () -> userService.removeUserStatusEventHandler(handler);

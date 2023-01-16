@@ -68,10 +68,10 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
-import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
     
@@ -261,7 +261,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
     }
 
     private void createRaceBoardInOneScreenMode(final RaceMap raceMap, final WindChart windChart, PaywallResolverImpl paywallResolver, SecuredDTO dtoContext) {
-        final TouchSplitLayoutPanel panel = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /* vertical splitter height */ 25, paywallResolver, dtoContext);
+        final TouchSplitLayoutPanel panel = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /* vertical splitter height */ 25);
         if (windChart != null) {
             panel.insert(windChart.getEntryWidget(), windChart, Direction.SOUTH, DEFAULT_WIND_CHART_HEIGHT);
         }
