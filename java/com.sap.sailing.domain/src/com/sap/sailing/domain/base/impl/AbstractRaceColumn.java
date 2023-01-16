@@ -183,7 +183,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public TrackedRace getTrackedRace(Competitor competitor) {
         for (TrackedRace trackedRace : trackedRaces.values()) {
-            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+            if (trackedRace.getRace().hasCompetitor(competitor)) {
                 return trackedRace;
             }
         }
