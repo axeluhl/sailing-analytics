@@ -40,7 +40,6 @@ public interface RaceTrackingConnectivityParameters extends Serializable {
      *            implementations, and there is no exact specification what must have happened before
      *            this timeout in order for tracking to continue. So, consider this as a "hint" to the
      *            tracker.
-     * @param markPassingRaceFingerprintRegistry TODO
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
@@ -56,7 +55,6 @@ public interface RaceTrackingConnectivityParameters extends Serializable {
      * stopped (if any), the {@link RaceDefinition} will be removed from the default regatta, and the
      * {@link TrackedRace} will be removed from the {@link TrackedRegatta}. All this happens by means of calling
      * {@link TrackedRegattaRegistry#removeRace(Regatta, com.sap.sailing.domain.base.RaceDefinition)}.
-     * @param markPassingRaceFingerprintRegistry TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
