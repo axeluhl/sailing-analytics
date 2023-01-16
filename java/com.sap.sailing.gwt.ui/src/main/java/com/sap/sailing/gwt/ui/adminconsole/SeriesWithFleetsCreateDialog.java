@@ -139,6 +139,8 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
         hasCrossFleetMergedRankingCheckbox = createCheckbox(stringMessages.hasCrossFleetMergedRanking());
         hasCrossFleetMergedRankingCheckbox.ensureDebugId("HasCrossFleetMergedRankingCheckbox");
+        // TODO bug 5147: enable when cross-fleet merged ranking is really working
+        hasCrossFleetMergedRankingCheckbox.setVisible(false);
 
         maximumNumberOfDiscardsBox = createIntegerBox(null, /* visibleLength */ 3);
         maximumNumberOfDiscardsBox.ensureDebugId("maximumNumberOfDiscardsBox");
@@ -206,7 +208,8 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         formGrid.setWidget(row++, 1, fleetsCanRunInParallelCheckbox);
         formGrid.setWidget(row++, 1, startsWithZeroScoreCheckbox);
         formGrid.setWidget(row++, 1, hasSplitFleetContiguousScoringCheckbox);
-        formGrid.setWidget(row++, 1, hasCrossFleetMergedRankingCheckbox);
+        // TODO bug 5147: enable when cross-fleet merged ranking is really working
+        // formGrid.setWidget(row++, 1, hasCrossFleetMergedRankingCheckbox);
         formGrid.setWidget(row++, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
         formGrid.setWidget(row++, 1, oneAlwaysStaysOneCheckbox);
         formGrid.setWidget(row, 0, new Label(stringMessages.maximumNumberOfDiscards()));
