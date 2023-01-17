@@ -391,16 +391,15 @@ public class Util {
      */
     public static <T> Iterable<T> concat(final Iterable<Iterable<T>> iterables) {
         return new Iterable<T>() {
-            final Iterator<Iterable<T>> iterableIter = iterables.iterator();
-            Iterable<T> iterable = null;
-            Iterator<T> iter; // loops over the "iterable"; when iterable is not null, iter is not null
-            boolean nextValid;
-            T next;
-            
             @Override
             public Iterator<T> iterator() {
-                advance();
                 return new Iterator<T>() {
+                    final Iterator<Iterable<T>> iterableIter = iterables.iterator();
+                    Iterable<T> iterable = null;
+                    Iterator<T> iter; // loops over the "iterable"; when iterable is not null, iter is not null
+                    boolean nextValid;
+                    T next;
+                    
                     @Override
                     public boolean hasNext() {
                         return nextValid;
@@ -412,21 +411,22 @@ public class Util {
                         advance();
                         return result;
                     }
-                };
-            }
-
-            private void advance() {
-                // first ensure we have a valid iterable with a next element if possible:
-                while ((iterable == null || !iter.hasNext()) && iterableIter.hasNext()) {
-                    iterable = iterableIter.next();
-                    if (iterable != null) {
-                        iter = iterable.iterator();
+                    
+                    private Iterator<T> advance() {
+                        // first ensure we have a valid iterable with a next element if possible:
+                        while ((iterable == null || !iter.hasNext()) && iterableIter.hasNext()) {
+                            iterable = iterableIter.next();
+                            if (iterable != null) {
+                                iter = iterable.iterator();
+                            }
+                        }
+                        nextValid = iter != null && iter.hasNext();
+                        if (nextValid) {
+                            next = iter.next();
+                        }
+                        return this;
                     }
-                }
-                nextValid = iter != null && iter.hasNext();
-                if (nextValid) {
-                    next = iter.next();
-                }
+                }.advance();
             }
         };
     }
