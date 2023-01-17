@@ -24,7 +24,7 @@ import com.sap.sse.common.Util;
 public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final String LEADERBOARD = "BMW Cup - J80";
     
-    private static final String BMW_CUP_JSON_URL = "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
+    private static final String BMW_CUP_JSON_URL = "http://event2.tractrac.com/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     private static final String BMW_CUP_RACE_8 = "BMW Cup Race 8";
     private static final String BMW_CUP_REGATTA = "BMW Cup";
     private static final String BMW_CUP_BOAT_CLASS = "J/80";
