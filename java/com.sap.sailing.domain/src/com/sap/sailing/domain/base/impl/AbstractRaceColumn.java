@@ -139,8 +139,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public synchronized void releaseTrackedRace(Fleet fleet) {
-        TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
-        this.trackedRaces.remove(fleet);
+        final TrackedRace previouslyLinkedRace = this.trackedRaces.remove(fleet);
         if (previouslyLinkedRace != null && regattaLikeParent != null) {
             RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
@@ -182,12 +181,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public TrackedRace getTrackedRace(Competitor competitor) {
-        for (TrackedRace trackedRace : trackedRaces.values()) {
-            if (trackedRace.getRace().hasCompetitor(competitor)) {
-                return trackedRace;
-            }
-        }
-        return null;
+        return trackedRaces.get(competitor);
     }
 
     @Override

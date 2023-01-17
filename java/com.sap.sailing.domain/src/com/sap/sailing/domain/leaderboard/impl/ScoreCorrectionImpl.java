@@ -479,7 +479,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;
-        if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor)) {
+        if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor, cache)) {
             result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme,
                     numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
         } else {
