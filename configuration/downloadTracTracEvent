@@ -1,0 +1,19 @@
+#!/bin/bash
+EVENT_JSON_URL="${1}"
+TARGET_DIR="${2}"
+if [ ! -d "${TARGET_DIR}" ]; then
+  echo "${TARGET_DIR} does not exist; making it..."
+  mkdir "${TARGET_DIR}"
+fi
+pushd "${TARGET_DIR}"
+EVENT_DB="$( basename $( dirname ${EVENT_JSON_URL} ) )"
+for params_url in `wget -O - "${EVENT_JSON_URL}" | tee "${EVENT_DB}.json" | jq -r '.races[].params_url'`; do
+  echo ${params_url}
+  wget "${params_url}"
+  FILE="`basename ${params_url}`"
+  STORED_URI_PART=`grep -i ^stored-uri: "${FILE}" | head -1 | sed -e 's/^stored-uri://'`
+  STORED_URI="`dirname ${EVENT_JSON_URL}`/${STORED_URI_PART}"
+  echo "stored-uri: ${STORED_URI}"
+  wget "${STORED_URI}"
+done
+popd
