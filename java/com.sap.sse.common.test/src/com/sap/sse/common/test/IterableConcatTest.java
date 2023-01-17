@@ -77,4 +77,15 @@ public class IterableConcatTest {
         Util.addAll(list1, expectedResult);
         assertTrue(Util.equals(expectedResult, Util.concat(Arrays.asList(list1, list1))));
     }
+
+    @Test
+    public void testIteratingTwice() {
+        final Iterable<Integer> list1 = Arrays.asList(1, 2, 3, 4);
+        final List<Integer> expectedResult = new ArrayList<>();
+        Util.addAll(list1, expectedResult);
+        Util.addAll(list1, expectedResult);
+        final Iterable<Integer> concat = Util.concat(Arrays.asList(list1, list1));
+        assertTrue(Util.equals(expectedResult, concat));
+        assertTrue(Util.equals(expectedResult, concat));
+    }
 }
