@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -241,7 +241,7 @@ public class RegattaService {
     
     private void createDefaultRacesIfDefaultSeriesIsPresent(final EventDTO event, final RegattaDTO newRegatta, AsyncCallback<RegattaDTO> callback) {
         for (final SeriesDTO series: newRegatta.series) {
-            if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()) {
+            if (series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME) && !series.getRaceColumns().isEmpty()) {
                 final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
                 for (RaceColumnDTO newRaceColumn : series.getRaceColumns()) {
                     // We could use an index counter here because we're assuming that we're creating

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -19,7 +18,7 @@ public abstract class SeriesWithRacesFactory {
 
     public static SeriesDTO createSeriesWithRaces(final String regattaName, final int numberOfRaces, boolean oneAlwaysStaysOne) {
         final SeriesDTO series = new SeriesDTO();
-        series.setName(Series.DEFAULT_NAME);
+        series.setName(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
         series.setMedal(false);
         series.setStartsWithZeroScore(false);
         series.setSplitFleetContiguousScoring(false);
@@ -38,7 +37,8 @@ public abstract class SeriesWithRacesFactory {
         final SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                 seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                 seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
-                seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards(), seriesDTO.isOneAlwaysStaysOne());
+                seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.hasCrossFleetMergedRanking(),
+                seriesDTO.getMaximumNumberOfDiscards(), seriesDTO.isOneAlwaysStaysOne());
         seriesStructure.put(seriesDTO.getName(), seriesPair);
         return seriesStructure;
     }
