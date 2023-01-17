@@ -260,10 +260,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public boolean hasMedia() {
-        if (showRegattaMetadata()) {
-            return false;
-        }
-        return eventDTO.isHasMedia();
+        return !showRegattaMetadata() && eventDTO.isHasMedia();
     }
     
     @Override
