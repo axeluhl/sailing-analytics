@@ -17,13 +17,17 @@ if [ ! -d "${TARGET_DIR}" ]; then
   mkdir -p "${TARGET_DIR}"
 fi
 pushd "${TARGET_DIR}"
-for params_url in `wget -O - "${EVENT_JSON_URL}" | tee "${EVENT_DB}.json" | jq -r '.races[].params_url'`; do
+# create a patched version of the .json file that uses only relative params_url values:
+wget -O - "${EVENT_JSON_URL}" | sed -e 's/"params_url":"[^"]*\/\([^"/]*\.txt\)"/"params_url":"\1"/g' >"${EVENT_DB}.json"
+for params_url in `wget -O - "${EVENT_JSON_URL}" | jq -r '.races[].params_url'`; do
   echo ${params_url}
   wget "${params_url}"
   FILE="`basename ${params_url}`"
   STORED_URI_PART=`grep -i ^stored-uri: "${FILE}" | head -1 | sed -e 's/^stored-uri://'`
   STORED_URI="`dirname ${EVENT_JSON_URL}`/${STORED_URI_PART}"
   echo "stored-uri: ${STORED_URI}"
-  wget "${STORED_URI}"
+  # presumably the dirname of the stored URI is something like "datafiles"
+  mkdir -p `dirname ${STORED_URI_PART}`
+  wget -O "${STORED_URI_PART}" "${STORED_URI}"
 done
 popd
