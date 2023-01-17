@@ -3,7 +3,7 @@ package com.sap.sse.common.media;
 public enum MimeType {
 
     mp4(MediaType.video, MediaSubType.mp4, "mp4"),
-    ogv(MediaType.video, MediaSubType.ogg, "ogv"),
+    ogv(MediaType.video, MediaSubType.ogv, "ogv"),
     qt(MediaType.video, MediaSubType.quicktime, "qt|qtvr|qti|qtif"),
     mp3(MediaType.audio, MediaSubType.mpeg, "mp3"),
     ogg(MediaType.audio, MediaSubType.ogg, "ogg|oga|spx"),
@@ -37,6 +37,14 @@ public enum MimeType {
 
     public String getEndingPattern() {
         return endingPattern;
+    }
+
+    public boolean isImage() {
+        return mediaType == MediaType.image;
+    }
+
+    public boolean isVideo() {
+        return mediaType == MediaType.video;
     }
 
     public MediaSubType getMediaSubType() {

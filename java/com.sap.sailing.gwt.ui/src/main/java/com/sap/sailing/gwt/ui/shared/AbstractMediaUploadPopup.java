@@ -11,7 +11,6 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -225,7 +224,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         final ListBox mimeTypeListBox = new ListBox();
         mimeTypeListBox.addItem(MimeType.unknown.name());
         for (MimeType mimeType : MimeType.values()) {
-            if (mimeType != MimeType.unknown) {
+            if (mimeType.isVideo() || mimeType.isImage()) {
                 mimeTypeListBox.addItem(mimeType.name());
             }
         }
@@ -403,20 +402,25 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 final MimeType mimeType = mediaObjectEntry.getValue().mimeType;
                 hide();
                 if (mimeType.mediaType == MediaType.image) {
-                    GWT.log("add image " + url);
                     imageList.add(createImage(url));
-                } else if (mimeType.mediaType == MediaType.video || mimeType.mediaType == MediaType.audio) {
-                    GWT.log("add video " + url);
+                    Notification.notify(i18n.imageAdded(), NotificationType.SUCCESS);
+                } else if (mimeType.mediaType == MediaType.video) {
                     videoList.add(createVideo(url, null, mimeType));
+                    Notification.notify(i18n.videoAdded(), NotificationType.SUCCESS);
                 } else {
-                    logger.warning("No image nor video detected. Nothing will be saved.");
-                    Notification.notify(i18n.noImageOrVideoDetected(), NotificationType.WARNING);
+                    logger.warning("Detected MimeType is not of type video or image. File will be skipped. Found MimeType: " + mimeType);
+                    Notification.notify(i18n.fileWithDetectedMimeTypeNotSupported(mimeType.toString()), NotificationType.WARNING);
                 }
             } else {
                 Notification.notify(i18n.invalidURL(), NotificationType.ERROR);
             }
         }
-        updateImagesAndVideos.accept(imageList, videoList);
+        if (!imageList.isEmpty() || !videoList.isEmpty()) {
+            updateImagesAndVideos.accept(imageList, videoList);
+        } else {
+            logger.warning("No image nor video detected. Nothing will be saved.");
+            Notification.notify(i18n.noImageOrVideoDetected(), NotificationType.WARNING);
+        }
     }
 
     private ImageDTO createImage(String url) {

@@ -175,7 +175,6 @@ public class ManageMediaModel {
                 public void onSuccess(EventDTO eventDto) {
                     setEventDto(eventDto);
                     callback.accept(eventDto);
-                    Notification.notify(i18n.updateEventSuccessfully(), NotificationType.SUCCESS);
                 }
 
                 @Override

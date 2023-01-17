@@ -104,10 +104,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             }
             return errorMessage;
         }
-
-        private boolean isMediaTypeSupported(String url) {
-            return MimeType.byExtension(url) != MimeType.unknown;
-        }
     }
 
     protected final StringMessages stringMessages;
