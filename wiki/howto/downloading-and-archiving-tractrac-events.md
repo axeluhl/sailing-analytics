@@ -57,9 +57,16 @@ For example, within the production landscape of sapsailing.com, you could try th
 
 ## Automation
 
-For `wiki@sapsailing.com` the process of updating the `configuration/tractrac-json-urls` file from the ARCHIVE server is automated by means of a cron job as specified in `wiki@sapsailing.com:crontab`. Every day the job calls the `wiki@sapsailing.com:update-tractrac-urls-to-archive.sh` script which fetches those URLs from the `mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive` database and if changed commits it to the Git repository.
+For `wiki@sapsailing.com` the process of updating the `configuration/tractrac-json-urls` file from the ARCHIVE server is automated by means of two cron jobs as specified in `wiki@sapsailing.com:crontab`:
 
-This does not yet automate the process of then finding new events and automatically downloading their content.
+```
+10 12 * * * /home/wiki/gitwiki/configuration/update-tractrac-urls-to-archive.sh >/home/wiki/update-tractrac-urls-to-archive.out 2>/home/wiki/update-tractrac-urls-to-archive.err
+15 12 * * * /home/wiki/gitwiki/configuration/downloadNewArchivedTracTracEvents.sh /home/trac/static/TracTracTracks >/home/wiki/downloadNewArchivedTracTracEvents.out 2>/home/wiki/downloadNewArchivedTracTracEvents.err
+```
+
+Every day the first job calls the `configuration/update-tractrac-urls-to-archive.sh` script which fetches those URLs from the `mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive` database and if changed commits it to the Git repository. The second job calls `configuration/downloadNewArchivedTracTracEvents.sh` which fetches only those events that do not have a representation yet in `/home/trac/static/TracTracTracks`.
+
+With this, `/home/trac/static/TracTracTracks` will always have a representation of all archived events as a backup copy from which we may be able to load the data if the TracTrac content becomes unavailable for whatever reason.
 
 ## Background, Details
 
