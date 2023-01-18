@@ -101,7 +101,7 @@ public class RaceRecord {
                 paramURL = new URL(baseJsonURL + "/clientparams.php?event="
                         + technicalEventName + "&race=" + ID);
             } else {
-                paramURL = new URL(paramURLAsString);
+                paramURL = new URL(jsonURL, paramURLAsString); // handle relative to JSON URL if not absolute
             }
         } catch (Exception e) {
             logger.info("Couldn't parse TracTrac paramURL " + paramURLAsString + " for race record " + getName());
