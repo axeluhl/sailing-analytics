@@ -56,6 +56,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
 
     private boolean autoplay;
     private boolean panorama;
+    private boolean controls = true;
 
     public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay) {
         this.autoplay = autoplay;
@@ -104,6 +105,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         String type = null;
         if (mimeType.mediaSubType == MediaSubType.youtube) {
             type = "video/youtube";
+            controls = false;
         } else if (mimeType.mediaSubType == MediaSubType.vimeo) {
             type = "video/vimeo";
         } else if (mimeType.mediaSubType == MediaSubType.mp4) {
@@ -147,7 +149,11 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             "customControlsOnMobile" : true,
             youtube: {
                 enablePrivacyEnhancedMode: true,
-                customVars: { rel: 0, modestbranding: 1 }
+                customVars: { 
+                    rel: 0, 
+                    modestbranding: 0,
+                    controls: 1,
+                    fs: 1 }
                 },
             vimeo: {
                 "dnt": 1,
@@ -191,6 +197,20 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         var canvas = player.getChild('Canvas');
         if (canvas) {
             canvas.handleResize();
+        }
+    }-*/;
+
+    /**
+     * Set the visibility of video.js controls. E.g. for YouTube player the video.js controls have to be deactivated so
+     * that the native YouTube controls can be used.
+     * 
+     * @param controls
+     *            if video.js controls are visible or not
+     */
+    private native void setControls(boolean controls) /*-{
+        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
+        if (player) {
+            player.controls(controls);
         }
     }-*/;
 
@@ -273,6 +293,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             autoplay = true;
         } else {
             nativePlay();
+            setControls(controls);
         }
     }
 
@@ -348,7 +369,8 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     public void setPlaybackRate(double newPlaySpeedFactor) {
     }
 
-    public void setControllsVisible(boolean isVisible) {
+    public void setControlsVisible(boolean isVisible) {
+        setControls(isVisible);
     }
 
     @Override

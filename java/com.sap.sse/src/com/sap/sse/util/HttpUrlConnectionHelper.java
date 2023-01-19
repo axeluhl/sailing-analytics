@@ -173,7 +173,8 @@ public class HttpUrlConnectionHelper {
     public static Charset getCharsetFromConnectionOrDefault(URLConnection connection, String defaultCharsetName) {
         Charset cs;
         try {
-            final Charset charsetFromConnection = org.apache.http.entity.ContentType.parse(connection.getContentType()).getCharset();
+            final String contentType = connection.getContentType();
+            final Charset charsetFromConnection = contentType == null ? null : org.apache.http.entity.ContentType.parse(contentType).getCharset();
             cs = charsetFromConnection == null ? Charset.forName(defaultCharsetName) : charsetFromConnection;
         } catch (org.apache.http.ParseException | UnsupportedCharsetException e) {
             cs = Charset.forName(defaultCharsetName);

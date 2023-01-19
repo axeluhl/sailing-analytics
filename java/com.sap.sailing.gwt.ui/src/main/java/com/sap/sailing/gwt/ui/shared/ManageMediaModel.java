@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.security.SecuredDomainType.EventActions;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
@@ -151,7 +152,6 @@ public class ManageMediaModel {
     private void updateEventDto(EventDTO eventDto, Consumer<EventDTO> callback) {
         if (hasPermissions()) {
             sailingServiceWrite.updateEvent(eventDto, new AsyncCallback<EventDTO>() {
-
                 @Override
                 public void onSuccess(EventDTO eventDto) {
                     setEventDto(eventDto);
@@ -169,11 +169,11 @@ public class ManageMediaModel {
     }
 
     /**
-     * Check permisison on default object (eventViewDTO from init).
+     * Check media update permission on default object (eventViewDTO from init).
      */
     public boolean hasPermissions() {
         final boolean hasPermission;
-        if (userService.hasPermission(eventViewDto, HasPermissions.DefaultActions.UPDATE)) {
+        if (userService.hasPermission(eventViewDto, HasPermissions.DefaultActions.UPDATE) || userService.hasPermission(eventViewDto, EventActions.UPLOAD_MEDIA)) {
             hasPermission = true;
         } else {
             hasPermission = false;
@@ -186,7 +186,7 @@ public class ManageMediaModel {
      */
     public boolean hasPermissions(EventDTO eventDto) {
         final boolean hasPermission;
-        if (userService.hasPermission(eventDto, HasPermissions.DefaultActions.UPDATE)) {
+        if (userService.hasPermission(eventDto, HasPermissions.DefaultActions.UPDATE) || userService.hasPermission(eventViewDto, EventActions.UPLOAD_MEDIA)) {
             hasPermission = true;
         } else {
             hasPermission = false;

@@ -84,7 +84,7 @@ Check:
 
 Checkpoints are the same as in 1.1.  
 ESS 2016 – Hamburg  
-http://skitrac.traclive.dk/events/event_20160727_ESSHamburg/jsonservice.php
+http://event2.tractrac.com/events/event_20160727_ESSHamburg/jsonservice.php
 
 ### 3.3. Tracking of existing sailing event without changing boats
 

@@ -108,7 +108,6 @@ public interface RaceLogTrackingAdapter {
     /**
      * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
      * 
-     * @param appUrl
      * @throws MailException
      */
     void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, Regatta regatta,
@@ -119,7 +118,6 @@ public interface RaceLogTrackingAdapter {
     /**
      * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}
      * race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated.
-     * @param copyMarkDeviceMappings TODO
      */
     void copyCourse(RaceLog fromRaceLog, LeaderboardThatHasRegattaLike fromLeaderboard, Set<RaceLog> toRaceLogs,
             LeaderboardThatHasRegattaLike toLeaderboard, boolean copyMarkDeviceMappings, SharedDomainFactory<?> baseDomainFactory, RacingEventService service, int priority);

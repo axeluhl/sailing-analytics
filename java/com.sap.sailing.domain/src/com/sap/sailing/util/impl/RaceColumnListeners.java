@@ -20,7 +20,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 /**
  * Manages a set of {@link RaceColumnListener}s with the usual add/remove and notification logic. It is {@link Serializable}
  * and serializes only those listeners that are not {@link RaceColumnListener#isTransient() transient}.
- * 
+ *
  * @author Axel Uhl (d043530)
  *
  */
@@ -31,12 +31,12 @@ public class RaceColumnListeners implements Serializable {
     public RaceColumnListeners() {
         raceColumnListeners = new HashSet<>();
     }
-    
+
     @SuppressWarnings("unchecked") // need to cast to a typed generic
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         raceColumnListeners = (Set<RaceColumnListener>) ois.readObject();
     }
-    
+
     private void writeObject(ObjectOutputStream oos) throws IOException {
         final Set<RaceColumnListener> setToWrite;
         synchronized (raceColumnListeners) {
@@ -49,7 +49,7 @@ public class RaceColumnListeners implements Serializable {
         }
         oos.writeObject(setToWrite);
     }
-    
+
     public void addRaceColumnListener(RaceColumnListener listener) {
         synchronized (raceColumnListeners) {
             raceColumnListeners.add(listener);
@@ -61,7 +61,7 @@ public class RaceColumnListeners implements Serializable {
             raceColumnListeners.remove(listener);
         }
     }
-    
+
     public void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
@@ -101,6 +101,12 @@ public class RaceColumnListeners implements Serializable {
     public void notifyListenersAboutHasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.hasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+        }
+    }
+
+    public void notifyListenersAboutHasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.hasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
         }
     }
 

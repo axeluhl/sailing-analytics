@@ -27,7 +27,7 @@ import com.sap.sse.common.impl.RenamableImpl;
 
 /**
  * A series listens on its columns; however, a veto for column addition isn't done here but in a {@link RegattaLeaderboard}.
- * 
+ *
  * @see #addRaceColumn(String, TrackedRegattaRegistry)
  */
 public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListener {
@@ -51,28 +51,37 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
      * qualification races.
      */
     private Integer maximumNumberOfDiscards;
-    
+
     /**
      * If set, the series doesn't take over the scores from any previous series but starts with zero scores for all its
      * competitors
      */
     private boolean startsWithZeroScore;
-    
+
     /**
      * If set, the first race column is not discardable. This is usually very helpful if the series starts with a
      * carry-forward score from a previous series.
      */
     private boolean firstColumnIsNonDiscardableCarryForward;
-    
+
     /**
-     * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
-     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
-     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
-     * in the column as many times as there are fleets in the column. For the latter case, this field is <code>false</code> which is
-     * also the default.
+     * When a column has more than one fleet there are two different options for scoring it when the fleets have different ranks.
+     * Either the scoring scheme is applied to the sequence of competitors one gets when first ordering the competitors by fleets
+     * and then within each fleet by their rank in the fleet's race; or the scoring scheme is applied to each fleet separately,
+     * leading to the best score being awarded in the column as many times as there are fleets in the column.
+     * For the latter case, this field is <code>false</code> which is also the default.
      */
     private boolean hasSplitFleetContiguousScoring;
-    
+
+    /**
+     * When a column has more than one fleet there are two different options for scoring it when the fleets are of the
+     * same rank. Either the scoring scheme is applied to all fleets of the same rank at the same time and competitors
+     * compete across the fleets; or the scoring scheme is applied to each fleet separately, leading to the best score
+     * being awarded  as many times as there are fleets of the same rank. For the latter case, this field is
+     * <code>false</code> which is also the default.
+     */
+    private boolean hasCrossFleetMergedRanking;
+
     /**
      * @param fleets
      *            must be non-empty
@@ -98,7 +107,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         Collections.sort(fleetsInAscendingOrder);
         this.raceColumns = new ArrayList<RaceColumnInSeries>();
         this.isMedal = isMedal;
-        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel; 
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
@@ -114,7 +123,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     public void removeRaceColumnListener(RaceColumnListener listener) {
         raceColumnListeners.removeRaceColumnListener(listener);
     }
-    
+
     @Override
     public Regatta getRegatta() {
         return regatta;
@@ -159,7 +168,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         return addRaceColumn(raceColumns.size(), raceColumnName, trackedRegattaRegistry);
     }
-    
+
     @Override
     public RaceColumnInSeries addRaceColumn(int insertIndex, String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
@@ -183,11 +192,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
      */
     private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         return new RaceColumnInSeriesImpl(
-                raceColumnName, 
-                this, 
+                raceColumnName,
+                this,
                 trackedRegattaRegistry);
     }
-    
+
     private void attachRaceExecutionOrderProviderToTrackedRacesInRaceColumns() {
         for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
             for (Fleet fleet : raceColumnInSeries.getFleets()) {
@@ -198,7 +207,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
             }
         }
     }
-    
+
     private void detachRaceExecutionOrderProviderFromTrackedRacesInRaceColumns() {
         for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
             for (Fleet fleet : raceColumnInSeries.getFleets()) {
@@ -289,6 +298,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+    }
+
+    @Override
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
     }
 
     @Override
@@ -401,7 +415,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         }
         return result;
     }
-    
+
     @Override
     public void setStartsWithZeroScore(boolean startsWithZeroScore) {
         boolean oldStartsWithZeroScore = this.startsWithZeroScore;
@@ -420,6 +434,16 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
             this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
             for (RaceColumn raceColumn : getRaceColumns()) {
                 raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+            }
+        }
+    }
+
+    @Override
+    public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+        if (hasCrossFleetMergedRanking != this.hasCrossFleetMergedRanking) {
+            this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
             }
         }
     }
@@ -445,6 +469,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
+    }
+
+    @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
     }
 
     @Override

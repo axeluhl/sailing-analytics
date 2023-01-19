@@ -167,7 +167,7 @@ public class SearchServiceTest {
         seriesCreationParams.put("Default",
                 new SeriesCreationParametersDTO(Collections.singletonList(new FleetDTO("Default", /* order */-1, Color.RED)),
                 /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
-                /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false));
+                /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false, /* hasCrossFleetMergedRanking */ false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false));
         pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"),
                 "29er", /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
@@ -280,7 +280,7 @@ public class SearchServiceTest {
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         aalRegattaLeaderboard.getRaceColumnByName("R2").setTrackedRace(aalRegattaLeaderboard.getRaceColumnByName("R2").getFleetByName("Default"), aalOrcTrackedR2);
     }
-    
+
     @Test
     public void testSetup() {
         assertNotNull(pfingstbusch29er);
@@ -293,7 +293,7 @@ public class SearchServiceTest {
         assertNotNull(aalOrcTrackedR1);
         assertNotNull(aalOrcTrackedR2);
     }
-    
+
     @Test
     public void testSimpleSearchByCompetitorName() {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Tobi" })));
