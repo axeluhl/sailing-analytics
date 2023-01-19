@@ -804,8 +804,12 @@ public class RaceBoardPanel
             final Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
             regattaAndRaceTimeInformationHeader.clear();
-            regattaAndRaceTimeInformationHeader.add(new HelpButton(HelpButtonResources.INSTANCE,
-                    stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview"));
+            final FlowPanel helpButtonPanel = new FlowPanel();
+            final HelpButton helpButton = new HelpButton(HelpButtonResources.INSTANCE,
+                    stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview");
+            helpButtonPanel.add(helpButton);
+            helpButtonPanel.setStyleName("HelpButton");
+            regattaAndRaceTimeInformationHeader.add(helpButtonPanel);
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
             final DataByLogo dataByLogo = new DataByLogo();

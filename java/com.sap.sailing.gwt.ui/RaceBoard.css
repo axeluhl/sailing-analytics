@@ -723,8 +723,14 @@ img.openColumn {
 }
 
 .RegattaAndRaceTime-Header .RaceTime-Label {
-	font-size: 15px;
-	margin-top: 5px;
+    font-size: 15px;
+    margin-top: 5px;
+}
+
+.RegattaAndRaceTime-Header .HelpButton {
+    position: absolute;
+    left: -25px;
+    top: 0px;
 }
 
 .compactHeader .RegattaAndRaceTime-Header>* {
