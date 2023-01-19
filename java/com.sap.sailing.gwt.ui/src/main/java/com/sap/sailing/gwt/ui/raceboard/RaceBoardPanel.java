@@ -49,6 +49,8 @@ import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.common.client.NavigatorUtil;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
@@ -800,6 +802,8 @@ public class RaceBoardPanel
             final Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
             regattaAndRaceTimeInformationHeader.clear();
+            regattaAndRaceTimeInformationHeader.add(new HelpButton(HelpButtonResources.INSTANCE,
+                    stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview"));
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
             final DataByLogo dataByLogo = new DataByLogo();
@@ -945,5 +949,6 @@ public class RaceBoardPanel
     public String getId() {
         return RaceBoardPerspectiveLifecycle.ID;
     }
+
 }
 
