@@ -269,8 +269,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     @Override
     public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint,
-            Set<RaceColumn> discardedRaceColumns) throws NoWindException {
-        return getDelegateLeaderboard().getEntry(competitor, race, timePoint, discardedRaceColumns);
+            Set<RaceColumn> discardedRaceColumns, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getDelegateLeaderboard().getEntry(competitor, race, timePoint, discardedRaceColumns, cache);
     }
 
     @Override

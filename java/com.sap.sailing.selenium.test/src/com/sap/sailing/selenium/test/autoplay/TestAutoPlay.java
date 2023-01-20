@@ -35,7 +35,7 @@ import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestAutoPlay extends AbstractSeleniumTest {
-    private static final String BMW_CUP_JSON_URL = "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
+    private static final String BMW_CUP_JSON_URL = "http://event2.tractrac.com/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     private static final String BMW_CUP_EVENT = "BMW Cup";
     private static final String BMW_CUP_BOAT_CLASS = "J80";
     private static final String BMW_CUP_REGATTA = "BMW Cup (J80)"; //$NON-NLS-1$

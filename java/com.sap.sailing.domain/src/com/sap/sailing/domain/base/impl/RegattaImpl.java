@@ -964,11 +964,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public Iterable<? extends RaceColumn> getRaceColumns() {
-        final List<RaceColumnInSeries> result = new ArrayList<>();
-        for (final Series series : getSeries()) {
-            for (final RaceColumnInSeries rc : series.getRaceColumns()) {
-                result.add(rc);
-            }
+        // special handling of no series and single series case to avoid somewhat expensive mapping iterables
+        final Iterable<? extends RaceColumn> result;
+        if (series.isEmpty()) {
+            result = Collections.emptySet();
+        } else if (series.size() == 1) {
+            result = series.get(0).getRaceColumns();
+        } else {
+            result = Util.concat(Util.map(getSeries(), series->Util.map(series.getRaceColumns(), rc->(RaceColumn) rc)));
         }
         return result;
     }

@@ -370,17 +370,11 @@ public class Util {
         return result;
     }
     
-    public static interface Mapper<S, T> { T map(S s); }
-    public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
-        return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
-            @Override
-            public T map(S s) {
-                return mapper.map(s);
-            }
-        });
+    public static <S, T> Iterable<T> map(final Iterable<S> iterable, final MappingIterator.MapFunction<S, T> mapper) {
+        return new MappingIterable<>(iterable, mapper);
     }
 
-    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final MappingIterator.MapFunction<S, T> mapper) {
         final ArrayList<T> result = new ArrayList<>();
         addAll(map(iterable, mapper), result);
         return result;
@@ -388,6 +382,53 @@ public class Util {
 
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
         return ()->StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate).iterator();
+    }
+    
+    /**
+     * Concatenates the iterables and returns a single iterable that enumerates the elements in the
+     * iterables in the sequence of the iterables. {@code null} iterables are ignored; {@code null}
+     * values enumerated by one of the iterables are propagated into the resulting iterable.
+     */
+    public static <T> Iterable<T> concat(final Iterable<Iterable<T>> iterables) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>() {
+                    final Iterator<Iterable<T>> iterableIter = iterables.iterator();
+                    Iterable<T> iterable = null;
+                    Iterator<T> iter; // loops over the "iterable"; when iterable is not null, iter is not null
+                    boolean nextValid;
+                    T next;
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return nextValid;
+                    }
+
+                    @Override
+                    public T next() {
+                        final T result = next;
+                        advance();
+                        return result;
+                    }
+                    
+                    private Iterator<T> advance() {
+                        // first ensure we have a valid iterable with a next element if possible:
+                        while ((iterable == null || !iter.hasNext()) && iterableIter.hasNext()) {
+                            iterable = iterableIter.next();
+                            if (iterable != null) {
+                                iter = iterable.iterator();
+                            }
+                        }
+                        nextValid = iter != null && iter.hasNext();
+                        if (nextValid) {
+                            next = iter.next();
+                        }
+                        return this;
+                    }
+                }.advance();
+            }
+        };
     }
     
     /**
