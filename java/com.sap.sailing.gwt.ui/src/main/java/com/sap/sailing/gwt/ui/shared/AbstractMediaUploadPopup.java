@@ -49,6 +49,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
 
 public abstract class AbstractMediaUploadPopup extends DialogBox {
@@ -92,17 +93,20 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     public AbstractMediaUploadPopup(BiConsumer<List<ImageDTO>, List<VideoDTO>> updateImagesAndVideos) {
         this.updateImagesAndVideos = updateImagesAndVideos;
         sharedHomeResources.sharedHomeCss().ensureInjected();
-        addStyleName(sharedHomeResources.sharedHomeCss().popup());
-        setTitle(i18n.upload());
-        setText(i18n.upload());
-        setGlassEnabled(true);
-        setAnimationEnabled(true);
+        this.addStyleName(sharedHomeResources.sharedHomeCss().popup());
+        this.setTitle(i18n.upload());
+        Label headerLabel = new Label(i18n.upload());
+        HorizontalFlowPanel hFlow = new HorizontalFlowPanel();
+        hFlow.add(headerLabel);
+        this.setHTML(hFlow.getElement().getInnerHTML());
+        this.setGlassEnabled(true);
+        this.setAnimationEnabled(true);
+        this.setModal(true);
         upload = new FileUpload();
         upload.getElement().setAttribute("accept", "image/*;capture=camera");
         upload.getElement().setAttribute("multiple", "multiple");
         upload.setVisible(false);
         upload.setName("file");
-        this.setModal(false);
         content = new FlowPanel();
         fileNameInput = new TextBox();
         urlInput = new TextBox();
@@ -175,10 +179,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         // Add a 'submit' button.
         final Button cancelButton = new Button(i18n.cancel(), new ClickHandler() {
             public void onClick(ClickEvent event) {
-                event.stopPropagation();
-                fileNameInput.setValue("");
-                cleanupTempFileUpload();
-                hide();
+                closePopup(event);
             }
         });
         buttonGroup.add(cancelButton);
@@ -214,8 +215,22 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         progressSpinner.addStyleName(sharedHomeResources.sharedHomeCss().progressSpinner());
         progressOverlay.add(progressSpinner);
         progressOverlay.setVisible(false);
+        Button headerCancelButton = new Button("X", new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                closePopup(event);
+            }
+        });
+        headerCancelButton.addStyleName(SharedHomeResources.INSTANCE.sharedHomeCss().headerButton());
+        content.add(headerCancelButton);
         content.add(progressOverlay);
-        add(content);
+        this.add(content);
+    }
+
+    private void closePopup(ClickEvent event) {
+        event.stopPropagation();
+        fileNameInput.setValue("");
+        cleanupTempFileUpload();
+        hide();
     }
 
     abstract protected String getTitleFromFileName(String fileName);
