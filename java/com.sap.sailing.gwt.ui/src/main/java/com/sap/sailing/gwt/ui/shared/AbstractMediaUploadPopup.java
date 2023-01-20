@@ -103,7 +103,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         this.setAnimationEnabled(true);
         this.setModal(true);
         upload = new FileUpload();
-        upload.getElement().setAttribute("accept", "image/*;capture=camera");
+        upload.getElement().setAttribute("accept", "image/*,video/ogg,video/mp4,video/quicktime,video/webm");
+        upload.getElement().setAttribute("capture", "camera");
         upload.getElement().setAttribute("multiple", "multiple");
         upload.setVisible(false);
         upload.setName("file");
@@ -313,13 +314,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // this opportunity to perform validation.
             progressOverlay.setVisible(true);
             fileNameInput.setValue(i18n.loading());
-            if (getMimeType(upload.getFilename()) == MimeType.unknown) {
-                logger.log(Level.SEVERE, "File type is not supported.");
-                progressOverlay.setVisible(false);
-                fileNameInput.setValue(i18n.fileTypeNotSupported());
-                Notification.notify(i18n.fileTypeNotSupported(), NotificationType.WARNING);
-                event.cancel();
-            }
         }
 
     }
@@ -332,10 +326,11 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // we can get the result text here (see the FormPanel documentation for
             // further explanation).
             progressOverlay.setVisible(false);
-            fileNameInput.setValue("");
             String result = event.getResults().trim();
             JSONValue resultJsonValue = parseAfterReplacingSurroundingPreElement(result);
             JSONArray resultJson = resultJsonValue.isArray();
+            boolean uploadSuccessful = false;
+            boolean fileSkipped = false;
             if (resultJson != null) {
                 for (int i=0; i<resultJson.size(); i++) {
                     if (resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI) != null) {
@@ -346,8 +341,16 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                                 .stringValue();
                         String contentType = resultJson.get(i).isObject().get(FileUploadConstants.CONTENT_TYPE).isString()
                                 .stringValue();
-                        addUri(uri, fileName, MimeType.byContentType(contentType));
-                        fileNameInput.setValue(i18n.uploadSuccessful());
+                        MimeType mimeType = MimeType.byContentType(contentType);
+                        if (!fileName.isEmpty()) {
+                            if (mimeType == MimeType.unknown) {
+                                fileSkipped = true;
+                                logger.log(Level.WARNING, "An unsupported file (" + fileName + " - " + contentType + ") detected. File has been skipped.");
+                            } else {
+                                uploadSuccessful = true;
+                                addUri(uri, fileName, mimeType);
+                            }
+                        }
                     } else {
                         String status = resultJson.get(i).isObject().get(FileUploadConstants.STATUS).isString()
                                 .stringValue();
@@ -358,6 +361,13 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                     }
                 }
             }
+            String resultMessage = "";
+            if (fileSkipped) {
+                resultMessage = i18n.notSupportedFileTypesDetected();
+            } else if (uploadSuccessful) {
+                resultMessage = i18n.uploadSuccessful();
+            }
+            fileNameInput.setValue(resultMessage);
         }
 
     }

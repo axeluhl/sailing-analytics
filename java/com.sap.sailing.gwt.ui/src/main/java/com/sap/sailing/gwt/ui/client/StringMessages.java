@@ -2396,6 +2396,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noMediaSelected();
     String fileTypeNotSupported();
     String fileWithDetectedMimeTypeNotSupported(String mimeType);
+    String notSupportedFileTypesDetected();
     String videoAdded();
     String imageAdded();
     String noImageOrVideoDetected();
