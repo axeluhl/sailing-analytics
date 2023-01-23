@@ -104,7 +104,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         this.setModal(true);
         upload = new FileUpload();
         upload.getElement().setAttribute("accept", "image/*,video/ogg,video/mp4,video/quicktime,video/webm");
-        upload.getElement().setAttribute("capture", "camera");
+        // deactivated camera first feature, because on some devices the file picker option will not be available any more.
+        //upload.getElement().setAttribute("capture", "camera");
         upload.getElement().setAttribute("multiple", "multiple");
         upload.setVisible(false);
         upload.setName("file");
