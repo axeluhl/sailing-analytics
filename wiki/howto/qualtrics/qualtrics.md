@@ -1,5 +1,7 @@
 # Including Qualtrics Survey in Web Application
 
+This article is deprecated. With bug 5802 we have removed the Qualtrics feedback facility from the solution again.
+
 ## Qualtrics Configuration
 
 The Qualtrics configuration should be visible under [https://sapdemo.eu.qualtrics.com/Q/MyProjectsSection](https://sapdemo.eu.qualtrics.com/Q/MyProjectsSection), but sometimes it's not. Sometimes, only the survey itself with its evaluation reports can be seen there. The special link [https://sapdemo.eu.qualtrics.com/siui/#/projects/ZN_7WmsxxHQyCeUivX/creatives/list-view](https://sapdemo.eu.qualtrics.com/siui/#/projects/ZN_7WmsxxHQyCeUivX/creatives/list-view) may help to get to the relevant configuration content. Get in touch with thomas.esser@sap.com for questions around getting an account. See [here](https://www.qualtrics.com/support/website-app-feedback/common-use-cases/single-page-application/) for documentation.

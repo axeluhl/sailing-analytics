@@ -15,10 +15,6 @@
                     <a ui:field="imprintAnchorLink"> 
                         <ui:text from='{i18n.footerLegal}' />
                     </a>
-<!--                     <a href="http://www.sap.com/about/legal/impressum.html?campaigncode=CRM-XH21-OSP-Sailing" -->
-<!--                         title="{i18n.footerLegal}"> -->
-<!--                         <ui:text from='{i18n.footerLegal}' /> -->
-<!--                     </a> -->
                     |
                     <a href="https://www.sap.com/about/legal/privacy.html?campaigncode=CRM-XH21-OSP-Sailing"
                         title="{i18n.footerPrivacy}">
@@ -28,10 +24,6 @@
                     <a ui:field="supportAnchor" href="https://support.sapsailing.com"
                         title="{i18n.footerSupport}">
                         <ui:text from='{i18n.footerSupport}' />
-                    </a>
-                    |
-                    <a ui:field="feedbackAnchor" href="" title="{i18n.footerFeedback}">
-                        <ui:text from='{i18n.footerFeedback}' />
                     </a>
                     |
                     <a ui:field="desktopUi" href="HomeDesktop.html" title="Desktop">
