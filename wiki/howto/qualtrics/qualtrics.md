@@ -1,6 +1,6 @@
 # Including Qualtrics Survey in Web Application
 
-This article is deprecated. With bug 5802 we have removed the Qualtrics feedback facility from the solution again.
+This article is deprecated. With bug 5802 we have removed the Qualtrics feedback facility from the solution again. See commit 37059256688f27de85711394d0a3bc4b4e9cc72a.
 
 ## Qualtrics Configuration
 
