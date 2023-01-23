@@ -133,7 +133,7 @@ public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>>
                     setFieldsEnabled(true);
                     videoTmpData.uri = upload.getKey();
                     videoTmpData.fileName = upload.getValue();
-                    videoTmpData.mimeType = MimeType.byExtension(videoTmpData.fileName);
+                    videoTmpData.mimeType = MimeType.extractFromUrl(videoTmpData.uri);
                     final String title;
                     if (videoTmpData.fileName.contains(".")) {
                         title = videoTmpData.fileName.substring(0, videoTmpData.fileName.lastIndexOf('.'));

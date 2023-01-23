@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -25,8 +26,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -61,8 +60,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final static String STATUS_OK = "OK";
     private final static String STATUS_NOT_OK = "NOK";
     private final static String EMPTY_MESSAGE = "-";
-    private final static String YOUTUBE_REGEX = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be "
-            + "\\/)([\\w\\-\\_]*)(&(amp;)?‌​[\\w\\?‌​=]*)?";
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
 
@@ -80,10 +77,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final Map<String, MediaObject> mediaObjectMap = new LinkedHashMap<>();
     
     private static class MediaObject {
-//        String originalFileName;
-//        String size;
-//        String heigth;
-//        String width;
         String title;
         String subTitle;
         String copyright;
@@ -162,6 +155,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         urlInput.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
+                files.clear();
+                mediaObjectMap.clear();
+                addUri(urlInput.getValue(), "", getMimeType(urlInput.getValue()));
                 checkSaveButton();
             }
         });
@@ -266,46 +262,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else {
             url = urlParam.trim();
         }
-        final MimeType mimeType;
-        if (matches(url, YOUTUBE_REGEX)) {
-            mimeType = MimeType.youtube;
-        } else if (isVimeoUrl(url)) {
-            mimeType = MimeType.vimeo;
-        } else {
-            mimeType = detectMimeTypeFromUrl(url);
-        }
-        return mimeType;
-    }
-
-    private MimeType detectMimeTypeFromUrl(String url) {
-        MimeType result = MimeType.unknown;
-        if (url != null) {
-            for (MimeType mimeType : MimeType.values()) {
-                if (mimeType.endingPattern.length() > 0) {
-                    String regex = "[a-z\\-_0-9\\/\\:\\.]*\\.(" + mimeType.getEndingPattern() + ")";
-                    if (matches(url, regex)) {
-                        result = mimeType;
-                        break;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    private boolean matches(String matcher, String pattern) {
-        return RegExp.compile(pattern, "i").test(matcher);
-    }
-
-    private boolean isVimeoUrl(String url) {
-        try {
-            RegExp urlPattern = RegExp.compile("^(.*:)//([A-Za-z0-9\\-\\.]+)(:[0-9]+)?(.*)$");
-            MatchResult matchResult = urlPattern.exec(url);
-            String host = matchResult.getGroup(2);
-            return host.contains("vimeo.com");
-        } catch (Exception e) {
-            return false;
-        }
+        return MimeType.extractFromUrl(url);
     }
 
     protected class SubmitHandler implements FormPanel.SubmitHandler {
@@ -474,7 +431,10 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
 
     private void cleanupTempFileUpload() {
         for (String uri: mediaObjectMap.keySet()) {
-            if (uri != null) {
+            MediaObject mediaObject = mediaObjectMap.get(uri);
+            if (uri != null 
+                    && mediaObject != null 
+                    && !Arrays.asList(MimeType.unknown, MimeType.youtube, MimeType.vimeo).contains(mediaObject.mimeType)) {
                 String url = DELETE_URL + uri;
                 RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.DELETE, url);
                 requestBuilder.setCallback(new RequestCallback() {
@@ -642,7 +602,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         fileExistingPanel.setVisible(false);
         saveButton.setEnabled(true);
         // fileNameInput.setEnabled(true);
-        urlInput.setEnabled(false);
+        urlInput.setEnabled(mimeType == MimeType.vimeo || mimeType == MimeType.youtube || mimeType == MimeType.unknown);
         checkSaveButton();
     }
 

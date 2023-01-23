@@ -16,6 +16,9 @@ public enum MimeType {
     mp4panorama(MediaType.video, MediaSubType.mp4, "mp4"),
     mp4panoramaflip(MediaType.video, MediaSubType.mp4, "mp4"),
     mov(MediaType.video, MediaSubType.mp4, "mov|quicktime");
+    
+    private final static String YOUTUBE_REGEX = "((http(s)?:\\/\\/)?)(www\\.)?((youtube\\.com\\/)|(youtu.be\\/))[\\S]+";
+    public final static String VIMEO_REGEX = "(?:http|https)?:?\\/?\\/?(?:www\\.)?(?:player\\.)?vimeo\\.com\\/(?:channels\\/(?:\\w+\\/)?|groups\\/(?:[^\\/]*)\\/videos\\/|video\\/|)(\\d+)(?:|\\/\\?)";
 
     public final MediaType mediaType;
     public final MediaSubType mediaSubType;
@@ -81,26 +84,44 @@ public enum MimeType {
      */
     public static MimeType byExtension(String fileName) {
         final MimeType result;
-        int dotPos = fileName.lastIndexOf('.');
-        if (dotPos >= 0) {
-            String fileEnding = fileName.substring(dotPos + 1).toLowerCase();
-            MimeType bestMatch = unknown;
-            if (fileEnding != null) {
-                for (MimeType mimeType : MimeType.values()) {
-                    if (!mimeType.getEndingPattern().isEmpty()) {
-                        boolean matchFound = fileEnding.toLowerCase().matches(mimeType.endingPattern);
-                        if (matchFound) {
-                            bestMatch = mimeType;
-                            break;
+        if (fileName == null) {
+            result = unknown;
+        } else {
+            int dotPos = fileName.trim().lastIndexOf('.');
+            if (dotPos >= 0) {
+                String fileEnding = fileName.trim().substring(dotPos + 1).toLowerCase();
+                MimeType bestMatch = unknown;
+                if (fileEnding != null) {
+                    for (MimeType mimeType : MimeType.values()) {
+                        if (!mimeType.getEndingPattern().isEmpty()) {
+                            boolean matchFound = fileEnding.toLowerCase().matches(mimeType.endingPattern);
+                            if (matchFound) {
+                                bestMatch = mimeType;
+                                break;
+                            }
                         }
                     }
                 }
+                result = bestMatch;
+            } else {
+                result = unknown;
             }
-            result = bestMatch;
-        } else {
-            result = unknown;
         }
         return result;
+    }
+    
+    public static MimeType extractFromUrl(String url) {
+        final MimeType mimeType;
+        if (url == null) {
+            mimeType = MimeType.unknown;
+        } else if (url.trim().matches(YOUTUBE_REGEX)) {
+            mimeType = MimeType.youtube;
+        } else if (url.trim().matches(VIMEO_REGEX)) {
+            mimeType = MimeType.vimeo;
+        } else {
+            mimeType = byExtension(url);
+        }
+        return mimeType;
     }
 
     /**
