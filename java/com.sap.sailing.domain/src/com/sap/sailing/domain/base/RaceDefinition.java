@@ -43,4 +43,7 @@ public interface RaceDefinition extends NamedWithID {
      */
     byte[] getCompetitorMD5();
 
+    default boolean hasCompetitor(Competitor competitor) {
+        return getBoatOfCompetitor(competitor) != null;
+    }
 }

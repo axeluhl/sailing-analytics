@@ -122,6 +122,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 * [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
 * [[Whitelabelling|wiki/howto/whitelabelling]]
+* [[Downloading and Archiving TracTrac Events|wiki/howto/downloading-and-archiving-tractrac-events]]
 
 ### For Event Managers
 

@@ -667,10 +667,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint,
-            Set<RaceColumn> discardedRaceColumns) throws NoWindException {
-        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint);
+            Set<RaceColumn> discardedRaceColumns, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint, cache);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
-                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
+                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme(), cache);
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
         final Double correctedScoreScaledByColumnFactor = correctedScore == null ? null

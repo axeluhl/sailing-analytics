@@ -217,7 +217,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
-    Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+    default Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) {
+        return getEntry(competitor, race, timePoint, discardedRaceColumns, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Like {@link #getEntry(Competitor, RaceColumn, TimePoint, Set)}, but with the option to specify a re-usable cache
+     */
+    Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes the competitor's ranks as they were or would have been after each race column (from left to right)
