@@ -9,6 +9,7 @@
 }
 
 .help-popup {
+	background-color: white;
     box-shadow: 0 0 10px SHADOW_COLOR;
     border: 0 none;
 }
