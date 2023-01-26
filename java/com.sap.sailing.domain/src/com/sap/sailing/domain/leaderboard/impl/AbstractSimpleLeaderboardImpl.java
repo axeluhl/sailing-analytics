@@ -57,7 +57,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * received to all {@link RaceColumnListener} subscribed with this leaderboard. To which objects this leaderboard
  * subscribes as {@link RaceColumnListener} is left to the concrete subclasses to implement, but the race columns seem
  * like useful candidates.
- * 
+ *
  * @author Axel Uhl (d043530)
  *
  */
@@ -93,7 +93,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
-     * 
+     *
      * @author Axel Uhl (d043530)
      *
      */
@@ -177,7 +177,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * would be cached, but that is again difficult because we would have to monitor all changes in all dependent
      * leaderboards and columns and tracked races properly.
      * <p>
-     * 
+     *
      * As it turns out, one of the most frequent uses of the {@link AbstractSimpleLeaderboardImpl#getCompetitors}
      * competitors list is to determine their number which in turn is only required for high-point scoring systems and
      * for computing the default score for penalties. Again, the most frequently used low-point family of scoring
@@ -185,9 +185,9 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * that need it. Instead of computing it for each call, this interface lets us defer the actual calculation until
      * the point when it's really needed. Once asked, this object will cache the result. Therefore, a new one should be
      * constructed each time the number shall be computed.
-     * 
+     *
      * @author Axel Uhl (D043530)
-     * 
+     *
      */
     public class NumberOfCompetitorsFetcherImpl implements NumberOfCompetitorsInLeaderboardFetcher {
         private int numberOfCompetitors = -1;
@@ -271,6 +271,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
         getRaceColumnListeners().notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+    }
+
+    @Override
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        getRaceColumnListeners().notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
     }
 
     @Override
@@ -438,7 +443,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * be specified which is useful when net points are to be computed for more than one column for the same competitor
      * because then the calculation of discards (which requires looking at all columns) only needs to be done once and
      * not again for each column (which would lead to quadratic effort).
-     * 
+     *
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
      *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
@@ -468,7 +473,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * columns can be specified which is useful when net points are to be computed for more than one column for the same
      * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
      * once and not again for each column (which would lead to quadratic effort).
-     * 
+     *
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
      *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
@@ -479,7 +484,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             Set<RaceColumn> discardedRaceColumns) {
         return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns, ()->getTotalPoints(competitor, raceColumn, timePoint));
     }
-    
+
     @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider) {
@@ -662,10 +667,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint,
-            Set<RaceColumn> discardedRaceColumns) throws NoWindException {
-        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint);
+            Set<RaceColumn> discardedRaceColumns, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint, cache);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
-                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
+                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme(), cache);
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
         final Double correctedScoreScaledByColumnFactor = correctedScore == null ? null
@@ -778,7 +783,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * leaderboard, <code>null</code> is returned. The time point computed this way is a good choice for normalizing
      * queries for later time points in an attempt to achieve more cache hits.
      * <p>
-     * 
+     *
      * Note, however, that the result does not tell about structural changes to the leaderboard and therefore cannot be
      * used to determine the need for cache invalidation. For example, if a column is added to a leaderboard after the
      * time point returned by this method but that column's attached tracked race has finished before the time point
@@ -786,7 +791,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * change by a change in column structure. A different means to determine the possibility of changes that happened
      * to this leaderboard must be used for cache management. Such a facility has to listen for score correction
      * changes, tracked races being attached or detached and the column structure changing.
-     * 
+     *
      * @see TrackedRace#getTimePointOfNewestEvent()
      * @see SettableScoreCorrection#getTimePointOfLastCorrectionsValidity()
      */
@@ -942,7 +947,4 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return Util.getDominantObject(StreamSupport.stream(allBoats.spliterator(), /* parallel */ false)
                 .map(b -> b.getBoatClass()).collect(Collectors.toList()));
     }
-    
-    
-
 }
