@@ -57,6 +57,7 @@ import com.google.gwt.maps.client.overlays.PolygonOptions;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -1106,6 +1107,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         rootPanel.add(panelForRightHeaderLabels);
         panelForRightHeaderLabels.getElement().getStyle().setProperty("zIndex", "1");
         panelForRightHeaderLabels.getElement().getStyle().setProperty("overflow", "visible");
+        panelForRightHeaderLabels.getElement().getStyle().setProperty("pointerEvents", "none");
         // need to initialize size before css kicks in to make sure
         // that controls get positioned right
         headerPanel.getElement().getStyle().setHeight(60, Unit.PX);
@@ -3347,7 +3349,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
         getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
         getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
-        
         // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
         if (topLeftControlsWrapperPanel.getParent() != null) {
             this.adjustLeftControlsIndent();
