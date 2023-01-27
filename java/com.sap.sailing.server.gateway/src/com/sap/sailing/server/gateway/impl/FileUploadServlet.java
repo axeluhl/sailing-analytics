@@ -50,6 +50,9 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             final JSONObject result = new JSONObject();
             final String fileExtension;
             final String fileName = Paths.get(fileItem.getName()).getFileName().toString();
+            // special handling of double underscore in JSON. Double underscores will be encoded with hex representation.
+            // In some cases the JSON parser of Apples Safari on mobile devices cannot parse JSON with __. See also bug5127
+            String fileNameUnderscoreEncoded = fileName.replace("__", "%5f%5f");
             final String fileType = fileItem.getContentType();
             if (fileType.equals("image/jpeg")) {
                 fileExtension = ".jpg";
@@ -76,7 +79,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                 } else {
                     final URI fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
                             .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
-                    result.put(FileUploadConstants.FILE_NAME, fileName);
+                    result.put(FileUploadConstants.FILE_NAME, fileNameUnderscoreEncoded);
                     result.put(FileUploadConstants.FILE_URI, fileUri.toString());
                     result.put(FileUploadConstants.CONTENT_TYPE, fileItem.getContentType());
                     result.put(FileUploadConstants.FILE_SIZE, fileItem.getSize());

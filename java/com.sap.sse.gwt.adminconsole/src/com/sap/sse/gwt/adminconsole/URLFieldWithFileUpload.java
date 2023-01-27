@@ -196,7 +196,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
                         if (resultJson.get(i).isObject() != null) {
                             if (resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI) != null) {
                                 String uri = resultJson.get(i).isObject().get(FileUploadConstants.FILE_URI).isString().stringValue();
-                                String fileName = resultJson.get(i).isObject().get(FileUploadConstants.FILE_NAME).isString().stringValue();
+                                // special handling of double underscore in JSON. Double underscores were encoded with hex representation.
+                                // In some cases the JSON parser of Apples Safari on mobile devices cannot parse JSON with __. See also bug5127
+                                String fileNameUnderscoreEncoded = resultJson.get(i).isObject().get(FileUploadConstants.FILE_NAME).isString().stringValue();
+                                String fileName = fileNameUnderscoreEncoded.replace("%5f%5f", "__");
                                 uris.put(uri, fileName);
                                 titleStrings.add(fileName);
                                 if (showUrlAfterUpload) {
