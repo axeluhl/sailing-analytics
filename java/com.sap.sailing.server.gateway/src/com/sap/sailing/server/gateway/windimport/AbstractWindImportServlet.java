@@ -56,7 +56,7 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
             logger.log(Level.SEVERE, "Error ocurred trying to import wind fixes", e);
             windImportResult.error = e.toString();
         }
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
         windImportResult.json().writeJSONString(response.getWriter());
     }
 
