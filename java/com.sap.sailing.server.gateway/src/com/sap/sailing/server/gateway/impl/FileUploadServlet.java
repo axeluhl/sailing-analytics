@@ -52,7 +52,9 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             final String fileName = Paths.get(fileItem.getName()).getFileName().toString();
             // special handling of double underscore in JSON. Double underscores will be encoded with hex representation.
             // In some cases the JSON parser of Apples Safari on mobile devices cannot parse JSON with __. See also bug5127
-            String fileNameUnderscoreEncoded = fileName.replace("__", "%5f%5f");
+            // Disabled for testing the real reason of error: 
+            //    String fileNameUnderscoreEncoded = fileName.replace("__", "%5f%5f");
+            String fileNameUnderscoreEncoded = fileName;
             final String fileType = fileItem.getContentType();
             if (fileType.equals("image/jpeg")) {
                 fileExtension = ".jpg";
