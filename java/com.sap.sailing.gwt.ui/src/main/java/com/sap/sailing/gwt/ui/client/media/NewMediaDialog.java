@@ -155,8 +155,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         this.assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         this.assignedRaces.add(raceIdentifier);
         this.mediaService = mediaService;
-
-        urlBox = new URLFieldWithFileUpload(stringMessages, false, true, false, "audio/*,video/*");
+        urlBox = new URLFieldWithFileUpload(stringMessages, /* multi */ false, /* initiallyEnabled */ true, /* showUrlAfterUpload */ false, "audio/*,video/*");
         urlBox.addValueChangeHandler(new ValueChangeHandler<Map<String, String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Map<String, String>> event) {
@@ -166,7 +165,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             }
         });
         getCancelButton().addClickHandler(clickEvent-> urlBox.deleteCurrentFile());
-        
         nameBox = createTextBox(null);
         nameBox.addStyleName(RESOURCES.css().nameBoxClass());
         nameBox.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -275,12 +273,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 remoteMp4WasStarted = false;
                 remoteMp4WasFinished = false;
                 manuallyEditedStartTime = false;
-
                 if (mediaTrack.startTime == null) {
                     mediaTrack.startTime = defaultStartTime;
                 }
-
-                
                 boolean isVimeoUrl = isVimeoUrl(url);
                 String youtubeId = YoutubeApi.getIdByUrl(url);
                 if (youtubeId != null) {
@@ -441,7 +436,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     }
     
     private void requestProgressPercentage(final Timer t, final Label counter) {
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, PROGRESS_STATUS_URL);
+        final RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, PROGRESS_STATUS_URL);
         builder.setHeader(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA(), HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB());
         try {
             builder.sendRequest(null, new RequestCallback() {
