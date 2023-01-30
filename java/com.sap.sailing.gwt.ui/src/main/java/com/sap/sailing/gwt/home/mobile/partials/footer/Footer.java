@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
-import com.sap.sse.gwt.qualtrics.Qualtrics;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
 /**
@@ -35,7 +34,6 @@ public class Footer extends Composite {
     
     @UiField Anchor whatsNewLinkUi;
     @UiField AnchorElement supportAnchor;
-    @UiField AnchorElement feedbackAnchor;
     @UiField LanguageSelector languageSelector;
     @UiField DivElement copyrightDiv;
     @UiField AnchorElement imprintAnchorLink;
@@ -58,19 +56,10 @@ public class Footer extends Composite {
                 }
             }
         });
-        Event.sinkEvents(feedbackAnchor, Event.ONCLICK);
-        Event.setEventListener(feedbackAnchor, event->{
-            if (Event.ONCLICK == event.getTypeInt()) {
-                event.preventDefault();
-                event.stopPropagation();
-                Qualtrics.setExplicitTrigger(true);
-            }
-        });
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             copyrightDiv.getStyle().setDisplay(NONE);
             languageSelector.setLabelText(StringMessages.INSTANCE.whitelabelFooterLanguage());
             supportAnchor.getStyle().setDisplay(Display.NONE);
-            feedbackAnchor.getStyle().setDisplay(Display.NONE);
             whatsNewLinkUi.getElement().getStyle().setDisplay(Display.NONE);
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
         }

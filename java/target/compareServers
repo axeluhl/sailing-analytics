@@ -1,13 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 
 # Given the base URLs of two SAP Sailing servers, obtains their /sailingserver/api/v1/leaderboardgroups
 # service output, sorts it, compares them, and if equal, obtains all corresponding leaderboardgroups/*
 # documents and compares those in turn.
+#
+# When used with -a (use REST API) then optionally -b can be used to provide a bearer token to
+# authenticate a subject. Furthermore, in -a mode the exit status, if not 0 for OK will be the
+# API's HTTP response status code modulo 256, e.g., 153 in case the response status cod ewas 409.
+# See https://www.sapsailing.com/sailingserver/webservices/api/v1/compareServers.html for details
+# about possible API response codes.
+#
+# The -c ("continue"), -e ("exit on error"), and -l ("list") options will be ignored when
+# the -a option ("use REST API") is used.
 
-options='cevl'
+options='ab:cevl'
 while getopts $options option
 do
     case $option in
+        a) useRestApi="1";;
+        b) BEARER_TOKEN="${OPTARG}";;
         c) continue="1";;
 	e) exitOnError="1";;
 	v) verbose="1";;
@@ -33,54 +44,73 @@ NEWGROUPS=leaderboardgroups.new.sed
 OLDGROUPS_FOR_CONTINUE=${OLDGROUPS}.continue
 NEWGROUPS_FOR_CONTINUE=${NEWGROUPS}.continue
 
-# If we continue, don't download again
-if [ "$continue" != "1" ]; then
-  wget --no-cache $WGET_QUIET -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' -e 's/\//%2F/g' | grep -v "^$" | sort >$OLDGROUPS
-  wget --no-cache $WGET_QUIET -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' -e 's/\//%2F/g' | grep -v "^$" | sort >$NEWGROUPS
-fi
+if [ "${useRestApi}" = "1" ]; then
+  if [ -n "${BEARER_TOKEN}" ]; then
+    AUTH="-H \"Authorization: Bearer ${BEARER_TOKEN}\""
+  else
+    AUTH=""
+  fi
+  HEADERS=$( mktemp )
+  CURL_OUTPUT=$( curl -sL --dump-header "${HEADERS}" "${NEWSERVER}/sailingserver/api/v1/compareservers" -d "server2=${OLDSERVER}" ${AUTH} 2>${WGET_ERR} )
+  echo "${CURL_OUTPUT}" | jq
+  HTTP_STATUS=$( cat "${HEADERS}" | grep "^HTTP\/[0-9.]* [0-9]\{3\}" | tail -1 | sed -e 's/^HTTP\/[0-9.]* \([0-9]\{3\}\).*$/\1/' )
+  rm -f "${HEADERS}"
+  MESSAGE_SUFFIX=". HTTP_STATUS was ${HTTP_STATUS}."
+  if [[ "${HTTP_STATUS}" =~ 2.. ]]; then
+    echo "Success${MESSAGE_SUFFIX}"
+    exit 0
+  else
+    echo "Failed${MESSAGE_SUFFIX}"
+    exit ${HTTP_STATUS}
+  fi
+else
+  # If we continue, don't download again
+  if [ "$continue" != "1" ]; then
+    wget --no-cache $WGET_QUIET -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' -e 's/\//%2F/g' | grep -v "^$" | sort >$OLDGROUPS
+    wget --no-cache $WGET_QUIET -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' -e 's/\//%2F/g' | grep -v "^$" | sort >$NEWGROUPS
+  fi
 
-download_and_fix_boatclasses () {
-    wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" |  jq 'del(.displayName)' | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
-    #wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | python -m json.tool | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
-}
+  download_and_fix_boatclasses () {
+      wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" |  jq 'del(.displayName)' | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
+      #wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | python -m json.tool | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
+  }
 
-diff leaderboardgroups.old.sed leaderboardgroups.new.sed
-if [ "$?" = "0" ]; then
-  cp "$OLDGROUPS" "$OLDGROUPS_FOR_CONTINUE"
-  cp "$NEWGROUPS" "$NEWGROUPS_FOR_CONTINUE"
-  exec 3<> $OLDGROUPS
-  exec 4<> $NEWGROUPS
-  read OLD_LB <&3
-  read NEW_LB <&4
-  while [ "$OLD_LB" != "" ]; do
-    if [ "$list" = "1" ]; then
-      echo " * $OLD_LB"
-    fi
-    download_and_fix_boatclasses "${OLDSERVER}" "${OLD_LB}.old.json"
-    download_and_fix_boatclasses "${NEWSERVER}" "${NEW_LB}.new.json"
-    diff -b -i -B "${OLD_LB}.old.json" "${NEW_LB}.new.json"
-    DIFFRESULT=$?
-    if [ "$DIFFRESULT" != "0" ]; then
-      echo "Difference detected in leaderboard group $OLD_LB vs. $NEW_LB"
-      if [ "$exitOnError" = "1" ]; then
-	cp "$OLDGROUPS_FOR_CONTINUE" "$OLDGROUPS"
-	cp "$NEWGROUPS_FOR_CONTINUE" "$NEWGROUPS"
-        echo "Exiting..."
-        exit $DIFFRESULT
-      fi
-    else
-      # no diff; remove the leaderboards successfully compared from both leaderboardgroups lists in case a later -c invocation occurs
-      sed -i -e '1d' $OLDGROUPS_FOR_CONTINUE
-      sed -i -e '1d' $NEWGROUPS_FOR_CONTINUE
-    fi
+  diff leaderboardgroups.old.sed leaderboardgroups.new.sed
+  if [ "$?" = "0" ]; then
+    cp "$OLDGROUPS" "$OLDGROUPS_FOR_CONTINUE"
+    cp "$NEWGROUPS" "$NEWGROUPS_FOR_CONTINUE"
+    exec 3<> $OLDGROUPS
+    exec 4<> $NEWGROUPS
     read OLD_LB <&3
     read NEW_LB <&4
-  done
-  cp "$OLDGROUPS_FOR_CONTINUE" "$OLDGROUPS"
-  cp "$NEWGROUPS_FOR_CONTINUE" "$NEWGROUPS"
-else
-  # pass on diff result to caller
-  exit $?
+    while [ "$OLD_LB" != "" ]; do
+      if [ "$list" = "1" ]; then
+        echo " * $OLD_LB"
+      fi
+      download_and_fix_boatclasses "${OLDSERVER}" "${OLD_LB}.old.json"
+      download_and_fix_boatclasses "${NEWSERVER}" "${NEW_LB}.new.json"
+      diff -b -i -B "${OLD_LB}.old.json" "${NEW_LB}.new.json"
+      DIFFRESULT=$?
+      if [ "$DIFFRESULT" != "0" ]; then
+        echo "Difference detected in leaderboard group $OLD_LB vs. $NEW_LB"
+        if [ "$exitOnError" = "1" ]; then
+          cp "$OLDGROUPS_FOR_CONTINUE" "$OLDGROUPS"
+          cp "$NEWGROUPS_FOR_CONTINUE" "$NEWGROUPS"
+          echo "Exiting..."
+          exit $DIFFRESULT
+        fi
+      else
+        # no diff; remove the leaderboards successfully compared from both leaderboardgroups lists in case a later -c invocation occurs
+        sed -i -e '1d' $OLDGROUPS_FOR_CONTINUE
+        sed -i -e '1d' $NEWGROUPS_FOR_CONTINUE
+      fi
+      read OLD_LB <&3
+      read NEW_LB <&4
+    done
+    cp "$OLDGROUPS_FOR_CONTINUE" "$OLDGROUPS"
+    cp "$NEWGROUPS_FOR_CONTINUE" "$NEWGROUPS"
+  else
+    # pass on diff result to caller
+    exit $?
+  fi
 fi
-
-

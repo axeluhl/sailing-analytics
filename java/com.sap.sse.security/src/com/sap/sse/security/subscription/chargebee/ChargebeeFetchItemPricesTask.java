@@ -38,6 +38,9 @@ public class ChargebeeFetchItemPricesTask implements ChargebeeItemPriceListReque
         if(this.itemPrices == null) {
             this.itemPrices = new HashMap<>();
         }
+        if(itemPrices != null) {
+            this.itemPrices.putAll(itemPrices);
+        }
         this.itemPrices.putAll(itemPrices);
         if (nextOffset == null || nextOffset.isEmpty()) {
             onDone();
