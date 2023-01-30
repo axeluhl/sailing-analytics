@@ -41,19 +41,24 @@ public class PaywallResolverImpl implements PaywallResolver {
         final WildcardPermission permission = dtoContext == null
                 ? WildcardPermission.builder().withActions(action).build()
                 : dtoContext.getIdentifier().getPermission(action);
-        getSubscriptionWriteService().getUnlockingSubscriptionplans(permission, new AsyncCallback<ArrayList<String>>() {
+        final SubscriptionWriteServiceAsync<?, ?, ?> subscriptionWriteService = getSubscriptionWriteService();
+        if(subscriptionWriteService != null) {
+            subscriptionWriteService.getUnlockingSubscriptionplans(permission, new AsyncCallback<ArrayList<String>>() {
+                @Override
+                public void onSuccess(final ArrayList<String> result) {
+                    callback.accept(result);
+                }
+                @Override
+                public void onFailure(final Throwable caught) {
+                    LOG.warning("Unable to determine subscription plans unlocking action " + action.name());
+                    callback.accept(Collections.emptyList());
+                }
+            });
+        }else {
+            LOG.warning("Unable to determine subscription plans unlocking action " + action.name()
+                    + ". No SubscriptionWriteService found.");
+        }
 
-            @Override
-            public void onSuccess(final ArrayList<String> result) {
-                callback.accept(result);
-            }
-
-            @Override
-            public void onFailure(final Throwable caught) {
-                LOG.warning("Unable to determine subscription plans unlocking action " + action.name());
-                callback.accept(Collections.emptyList());
-            }
-        });
     }
 
     /**
@@ -61,10 +66,14 @@ public class PaywallResolverImpl implements PaywallResolver {
      */
     @Override
     public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
-        if (action != null) {
-            return userService.hasPermission(dtoContext, action);
-        } else {
-            return userService.hasPermission(dtoContext, DefaultActions.READ);
+        if(userService != null) {
+            if (action != null) {
+                return userService.hasPermission(dtoContext, action);
+            } else {
+                return userService.hasPermission(dtoContext, DefaultActions.READ);
+            }
+        }else {
+            return false;
         }
     }
 
@@ -79,8 +88,14 @@ public class PaywallResolverImpl implements PaywallResolver {
 
     @Override
     public HandlerRegistration registerUserStatusEventHandler(final UserStatusEventHandler handler) {
-        userService.addUserStatusEventHandler(handler);
-        return () -> userService.removeUserStatusEventHandler(handler);
+        if(userService != null) {
+            userService.addUserStatusEventHandler(handler);
+            return () -> userService.removeUserStatusEventHandler(handler);
+        }else {
+            LOG.log(Level.SEVERE,
+                    "No Userservice set. Could not add UserStatusEventHandler");
+            return null;
+        }
     }
     
     /**
@@ -95,6 +110,11 @@ public class PaywallResolverImpl implements PaywallResolver {
         } catch (final InvalidSubscriptionProviderException e) {
             LOG.log(Level.SEVERE,
                     "An invalid subscription provider exception occured while getting the SubscriptionWriteSerivce.",
+                    e);
+            return null;
+        } catch (final Exception e) {
+            LOG.log(Level.SEVERE,
+                    "No SubscriptionServiceFactory set.",
                     e);
             return null;
         }
