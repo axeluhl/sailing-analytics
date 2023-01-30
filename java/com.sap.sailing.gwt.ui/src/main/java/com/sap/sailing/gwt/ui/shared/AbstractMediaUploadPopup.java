@@ -12,7 +12,6 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -501,13 +500,13 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
      * succeed.
      */
     private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
-        GWT.log("parse incomming request and remove optional <pre> elements. JSON-String: " + jsonString);
+        logger.info("parse incomming request and remove optional <pre> elements. JSON-String: " + jsonString);
         String jsonCleaned = jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1");
         try {
-            GWT.log("Start parsing JSON String. JSON-String: " + jsonCleaned);
+            logger.info("Start parsing JSON String. JSON-String: " + jsonCleaned);
             return JSONParser.parseStrict(jsonCleaned);
         } catch (Exception e) {
-            GWT.log("An unexpected error occured while parsing JSON String.", e);
+            logger.log(Level.SEVERE, "An unexpected error occured while parsing JSON String.", e);
             Notification.notify(i18n.error(), NotificationType.ERROR);
             throw new RuntimeException("An unexpexted error occured while parsing file upload data.", e);
         }
