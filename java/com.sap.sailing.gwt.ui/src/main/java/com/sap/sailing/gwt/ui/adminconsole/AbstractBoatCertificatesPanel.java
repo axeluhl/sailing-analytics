@@ -58,6 +58,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
+import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -254,7 +255,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
 
     private void formSubmitComplete(SubmitCompleteEvent e) {
         try {
-            final JSONObject json = (JSONObject) JSONParser.parseStrict(e.getResults());
+            final JSONObject json = (JSONObject) JSONParser.parseStrict(FileUploadUtil.removeSurroundingPreElement(e.getResults()));
             if (json.get(ORCCertificateUploadConstants.CERTIFICATES) != null) {
                 sailingServiceWrite.getORCCertificates(e.getResults(), new AsyncCallback<Collection<ORCCertificate>>() {
                     @Override

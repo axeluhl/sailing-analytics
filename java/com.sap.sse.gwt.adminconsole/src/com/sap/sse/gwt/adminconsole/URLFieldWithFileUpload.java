@@ -24,7 +24,6 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -41,6 +40,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 
 /**
  * A {@link TextBox} together with an upload button that can use the file storage service to
@@ -133,7 +133,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
         selectUploadButton.addStyleName("btn-primary");
         imageUrlPanel.add(selectUploadButton);
         imageUrlPanel.add(removePanel);
-
         // the upload panel
         uploadFormPanel = new FormPanel();
         uploadPanel = new FlowPanel();
@@ -159,7 +158,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
         final SubmitButton submitButton = new SubmitButton(stringMessages.send());
         submitButton.setVisible(false);
         submitButton.setEnabled(false);
-
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -186,8 +184,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
                 }
                 selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
                 endUploadEvent.endUpload();
-                String result = event.getResults();
-                JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
+                JSONArray resultJson = JSONParser.parseStrict(FileUploadUtil.removeSurroundingPreElement(event.getResults())).isArray();
                 if (resultJson != null) {
                     Map<String, String> uris = new HashMap<>(resultJson.size());
                     List<String> titleStrings = new ArrayList<>(resultJson.size());
@@ -354,16 +351,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
         this.endUploadEvent = endUploadEvent;
     }
 
-    /**
-     * See https://github.com/twilson63/ngUpload/issues/43 and
-     * https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string. The JSON response of the file
-     * upload is wrapped by a &lt;pre&gt; element which needs to be stripped off if present to allow the JSON parser to
-     * succeed.
-     */
-    private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
-        return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
-    }
-    
     public void setUploadEnabled(boolean uploadEnabled) {
         uploadFormPanel.remove(uploadPanel);
         if (uploadEnabled) {

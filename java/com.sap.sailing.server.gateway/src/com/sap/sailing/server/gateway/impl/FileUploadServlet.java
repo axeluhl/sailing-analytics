@@ -105,12 +105,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             }
             resultList.add(result);
         }
-        // surprise, surprise: see https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string
-        // When sending a JSON response for a file upload, don't use application/json as the content type. It would lead
-        // to wrapping the content by a <pre> tag. Use text/html instead which should deliver the content to the app running
-        // in the browser unchanged.
-        resp.setContentType("text/html");
-        resp.setCharacterEncoding("UTF-8");
+
         resultList.writeJSONString(resp.getWriter());
     }
 }

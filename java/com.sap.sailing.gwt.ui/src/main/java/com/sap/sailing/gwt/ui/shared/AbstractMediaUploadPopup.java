@@ -46,6 +46,7 @@ import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
@@ -273,7 +274,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             progressOverlay.setVisible(true);
             fileNameInput.setValue(i18n.loading());
         }
-
     }
 
     private class SubmitCompleteHandler implements FormPanel.SubmitCompleteHandler {
@@ -441,7 +441,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 String url = DELETE_URL + uri;
                 RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.DELETE, url);
                 requestBuilder.setCallback(new RequestCallback() {
-    
                     @Override
                     public void onResponseReceived(Request request, Response response) {
                         String status = STATUS_NOT_OK;
@@ -500,8 +499,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
      * succeed.
      */
     private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
-        logger.info("parse incomming request and remove optional <pre> elements. JSON-String: " + jsonString);
-        String jsonCleaned = jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1");
+        logger.info("parse incoming request and remove optional <pre> elements. JSON-String: " + jsonString);
+        String jsonCleaned = FileUploadUtil.removeSurroundingPreElement(jsonString);
         try {
             logger.info("Start parsing JSON String. JSON-String: " + jsonCleaned);
             return JSONParser.parseStrict(jsonCleaned);

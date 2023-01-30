@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 
 public abstract class AbstractFileImportWidget extends Composite {
 
@@ -88,7 +89,7 @@ public abstract class AbstractFileImportWidget extends Composite {
     
     @UiHandler("formPanelUi")
     void onFileImportComplete(SubmitCompleteEvent event) {
-        SensorDataImportResponse importResponse = SensorDataImportResponse.parse(event.getResults());
+        SensorDataImportResponse importResponse = SensorDataImportResponse.parse(FileUploadUtil.removeSurroundingPreElement(event.getResults()));
         if (importResponse == null) {
             Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
         } else {
