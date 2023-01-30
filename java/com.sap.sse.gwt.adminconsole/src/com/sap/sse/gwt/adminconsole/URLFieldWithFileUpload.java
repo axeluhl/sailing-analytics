@@ -184,7 +184,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
                 }
                 selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
                 endUploadEvent.endUpload();
-                JSONArray resultJson = JSONParser.parseStrict(FileUploadUtil.removeSurroundingPreElement(event.getResults())).isArray();
+                JSONArray resultJson = JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContent(event)).isArray();
                 if (resultJson != null) {
                     Map<String, String> uris = new HashMap<>(resultJson.size());
                     List<String> titleStrings = new ArrayList<>(resultJson.size());

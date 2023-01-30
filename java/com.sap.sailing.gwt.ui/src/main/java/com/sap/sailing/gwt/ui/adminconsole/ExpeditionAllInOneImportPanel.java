@@ -150,7 +150,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         formPanel.addSubmitCompleteHandler(event -> {
             validation.run();
             busyIndicator.setBusy(false);
-            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(FileUploadUtil.removeSurroundingPreElement(event.getResults()));
+            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(FileUploadUtil.getApplicationJsonContent(event));
             if (response == null) {
                 Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {

@@ -284,8 +284,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // we can get the result text here (see the FormPanel documentation for
             // further explanation).
             progressOverlay.setVisible(false);
-            String result = event.getResults().trim();
-            JSONValue resultJsonValue = parseAfterReplacingSurroundingPreElement(result);
+            JSONValue resultJsonValue = JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContent(event));
             JSONArray resultJson = resultJsonValue.isArray();
             boolean uploadSuccessful = false;
             boolean fileSkipped = false;
@@ -445,7 +444,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                     public void onResponseReceived(Request request, Response response) {
                         String status = STATUS_NOT_OK;
                         String message = EMPTY_MESSAGE;
-                        JSONValue jsonValue = parseAfterReplacingSurroundingPreElement(response.getText());
+                        JSONValue jsonValue = JSONParser.parseStrict(response.getText());
                         JSONArray resultJson = jsonValue.isArray();
                         if (resultJson != null) {
                             if (resultJson.get(0).isObject().get(FileUploadConstants.STATUS) != null) {
@@ -492,25 +491,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         mediaObjectMap.clear();
     }
 
-    /**
-     * See https://github.com/twilson63/ngUpload/issues/43 and
-     * https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string. The JSON response of the file
-     * upload is wrapped by a &lt;pre&gt; element which needs to be stripped off if present to allow the JSON parser to
-     * succeed.
-     */
-    private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
-        logger.info("parse incoming request and remove optional <pre> elements. JSON-String: " + jsonString);
-        String jsonCleaned = FileUploadUtil.removeSurroundingPreElement(jsonString);
-        try {
-            logger.info("Start parsing JSON String. JSON-String: " + jsonCleaned);
-            return JSONParser.parseStrict(jsonCleaned);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "An unexpected error occured while parsing JSON String.", e);
-            Notification.notify(i18n.error(), NotificationType.ERROR);
-            throw new RuntimeException("An unexpexted error occured while parsing file upload data.", e);
-        }
-    }
-    
     private void resetInput() {
         fileExistingPanel.setVisible(true);
         files.clear();

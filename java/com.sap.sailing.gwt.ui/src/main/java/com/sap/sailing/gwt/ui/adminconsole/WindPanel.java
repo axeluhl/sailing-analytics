@@ -477,7 +477,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 importResultPanel.clear();
-                String windImportResultJson = FileUploadUtil.removeSurroundingPreElement(event.getResults());
+                String windImportResultJson = FileUploadUtil.getApplicationJsonContent(event);
                 try {
                     WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
                     JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();

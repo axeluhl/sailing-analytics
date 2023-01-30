@@ -89,7 +89,7 @@ public abstract class AbstractFileImportWidget extends Composite {
     
     @UiHandler("formPanelUi")
     void onFileImportComplete(SubmitCompleteEvent event) {
-        SensorDataImportResponse importResponse = SensorDataImportResponse.parse(FileUploadUtil.removeSurroundingPreElement(event.getResults()));
+        SensorDataImportResponse importResponse = SensorDataImportResponse.parse(FileUploadUtil.getApplicationJsonContent(event));
         if (importResponse == null) {
             Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
         } else {
