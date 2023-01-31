@@ -164,6 +164,9 @@ public class CourseImpl extends RenamableImpl implements Course {
                 lastWaypoint = waypointToAdd;
             }
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
+            // note: we're still holding the course's write lock, so if any listener should synchronize on any object
+            // then all other code also synchronizing on those objects and requiring a lock on this course must make sure to obtain
+            // this course's lock *before* the synchronized block. See also bug 5803.
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', after notifying listeners");
             assert waypoints.size() == waypointIndexes.size();
