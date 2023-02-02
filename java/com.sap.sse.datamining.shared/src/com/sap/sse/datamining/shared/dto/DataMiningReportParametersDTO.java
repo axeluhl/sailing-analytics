@@ -17,5 +17,4 @@ public interface DataMiningReportParametersDTO extends Serializable {
     boolean hasUsages();
     boolean hasUsages(Integer key);
     boolean isUsed(FilterDimensionParameter parameter);
-    
 }
