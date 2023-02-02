@@ -2,36 +2,30 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.util.UUID;
 
+import com.sap.sse.common.impl.RenamableImpl;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
 
-public class StoredDataMiningReportDTOImpl implements StoredDataMiningReportDTO {
+public class StoredDataMiningReportDTOImpl extends RenamableImpl implements StoredDataMiningReportDTO {
     private static final long serialVersionUID = 9218620680326470175L;
     
     private UUID id;
-    private String name;
     private DataMiningReportDTO report;
 
-    public StoredDataMiningReportDTOImpl() { }
+    @Deprecated // for GWT serialization only
+    StoredDataMiningReportDTOImpl() {
+        super(null);
+    }
 
     public StoredDataMiningReportDTOImpl(UUID id, String name, DataMiningReportDTO report) {
+        super(name);
         this.id = id;
-        this.name = name;
         this.report = report;
     }
 
     @Override
     public UUID getId() {
         return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override

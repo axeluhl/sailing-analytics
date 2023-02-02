@@ -94,7 +94,6 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
         removeUrlParameter();
-        ;
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), paywallResolver,
@@ -103,7 +102,6 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                 genericSailingAuthentication);
         authorizedContentDecorator.setPermissionToCheck(serverInfo, ServerActions.DATA_MINING);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
-
             private SimpleQueryRunner queryRunner;
             private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
                     getStringMessages());
@@ -125,11 +123,9 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
                     }
                 });
-
                 queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
                         queryDefinition -> queryRunner.run(queryDefinition));
-
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
@@ -137,13 +133,11 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     StoredDataMiningQueryDataProvider queryProvider = new StoredDataMiningQueryDataProvider(
                             queryDefinitionProvider, dataMiningService, dataMiningWriteService, getStringMessages());
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(queryProvider));
-
                     StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(
                             dataMiningService, dataMiningWriteService);
                     queryDefinitionProvider.addControl(new DataMiningReportStoreControls(DataMiningEntryPoint.this,
                             session, dataMiningService, reportsProvider, mainPanel, queryDefinitionProvider.getRetrieverChainProvider(), resultsPresenter));
                 }
-
                 Anchor orientationAnchor = new Anchor(
                         AbstractImagePrototype.create(dataMiningResources.orientationIcon()).getSafeHtml());
                 orientationAnchor.addStyleName("orientationAnchor");
@@ -192,11 +186,9 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                         }
                     });
                 }
-                
                 return mainPanel;
             }
         });
-
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
         panel.addNorth(header, 75);

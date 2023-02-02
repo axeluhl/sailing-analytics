@@ -1,12 +1,10 @@
 package com.sap.sse.datamining.shared.dto;
 
-import java.io.Serializable;
 import java.util.UUID;
 
-public interface StoredDataMiningReportDTO extends Serializable {
+import com.sap.sse.common.Named;
 
-    String getName();
+public interface StoredDataMiningReportDTO extends Named {
     UUID getId();
     DataMiningReportDTO getReport();
-
 }

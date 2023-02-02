@@ -34,5 +34,4 @@ public class DataMiningWriteServiceImpl extends DataMiningServiceImpl implements
         checkDataMiningPermission();
         return storedDataMiningReportPersistor.removeStoredReport(report);
     }
-
 }
