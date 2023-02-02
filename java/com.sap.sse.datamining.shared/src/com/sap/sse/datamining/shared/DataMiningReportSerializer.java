@@ -5,12 +5,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Base64Utils;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
-import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.shared.classloading.JoinedClassLoader;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 /** Static class to (de)serialize {@link DataMiningReportDTO} from/to base64 strings. */
@@ -44,7 +45,8 @@ public final class DataMiningReportSerializer {
         final ClassLoader oldThreadContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try (final ObjectInputStream in = new ObjectInputStreamResolvingAgainstCache<Object>(
-                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null) {}) {
+                new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null,
+                /* classLoaderCache */ new HashMap<>()) {}) {
             Object object = in.readObject();
             if (object instanceof DataMiningReportDTO) {
                 return (DataMiningReportDTO) object;

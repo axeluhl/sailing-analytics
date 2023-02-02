@@ -21,7 +21,7 @@ import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.shared.classloading.JoinedClassLoader;
 
 public class StoredDataMiningReportPersisterImpl implements StoredDataMiningReportPersister {
 
@@ -98,23 +98,26 @@ public class StoredDataMiningReportPersisterImpl implements StoredDataMiningRepo
 
     /** Converts a {@link StoredDataMiningQueryPreference} to a {@link StoredDataMiningQueryDTO}. */
     private StoredDataMiningReportDTOImpl transform(StoredDataMiningReportPreference pref) {
-        JoinedClassLoader joinedClassLoader = dataMiningServerTracker.getService().getJoinedClassLoader();
-        DataMiningReportDTO report = DataMiningReportSerializer.reportFromBase64(pref.getSerializedReport(), joinedClassLoader);
+        final JoinedClassLoader joinedClassLoader = dataMiningServerTracker.getService().getJoinedClassLoader();
+        final DataMiningReportDTO report = DataMiningReportSerializer.reportFromBase64(pref.getSerializedReport(), joinedClassLoader);
         return new StoredDataMiningReportDTOImpl(pref.getId(), pref.getName(), report);
     }
 
     /** Converts a {@link StoredDataMiningQueryDTO} to a {@link StoredDataMiningQueryPreference}. */
     private StoredDataMiningReportPreference transform(StoredDataMiningReportDTOImpl dto) {
-        String serializedQuery = DataMiningReportSerializer.reportToBase64(dto.getReport());
+        final String serializedQuery = DataMiningReportSerializer.reportToBase64(dto.getReport());
         return new StoredDataMiningReportPreference(dto.getName(), dto.getId(), serializedQuery);
     }
 
     private StoredDataMiningReportPreferences getUserPreferences() {
-        User currentUser = securityService.getCurrentUser();
+        final User currentUser = securityService.getCurrentUser();
+        final StoredDataMiningReportPreferences result;
         if (currentUser != null) {
-            return securityService.getPreferenceObject(currentUser.getName(),
+            result = securityService.getPreferenceObject(currentUser.getName(),
                     SailingPreferences.STORED_DATAMINING_REPORT_PREFERENCES);
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 }
