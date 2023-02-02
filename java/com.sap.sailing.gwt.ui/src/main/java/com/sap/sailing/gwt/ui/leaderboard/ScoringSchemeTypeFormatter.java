@@ -48,6 +48,10 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointWithAutomaticRdg();
         case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
             return stringMessages.scoringSchemeLowPointSystemFirstTwoWins();
+        case LOW_POINT_FIRST_TO_WIN_THREE_RACES:
+            return stringMessages.scoringSchemeLowPointSystemFirstThreeWins();
+        case HIGH_POINT_BY_WINS_TIES_LASTLY_BROKEN_BY_OTHER_LEADERBOARD:
+            return stringMessages.scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboard();
         }
         return null;
     }
@@ -76,6 +80,10 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnlyDescription();
         case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
             return stringMessages.scoringSchemeLowPointSystemFirstTwoWinsDescription();
+        case LOW_POINT_FIRST_TO_WIN_THREE_RACES:
+            return stringMessages.scoringSchemeLowPointSystemFirstThreeWinsDescription();
+        case HIGH_POINT_BY_WINS_TIES_LASTLY_BROKEN_BY_OTHER_LEADERBOARD:
+            return stringMessages.scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboardDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

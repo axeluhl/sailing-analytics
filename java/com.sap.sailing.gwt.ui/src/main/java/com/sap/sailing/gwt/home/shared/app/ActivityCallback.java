@@ -25,9 +25,8 @@ public abstract class ActivityCallback<T> implements AsyncCallback<T> {
     }
 
     @Override
-    public final void onFailure(Throwable caught) {
+    public void onFailure(Throwable caught) {
         logger.log(Level.SEVERE, "Error while loading data!", caught);
         contentPanel.setWidget(clientFactory.createErrorView("Error while loading data!", caught));
     }
-
 }

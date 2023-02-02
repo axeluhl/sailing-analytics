@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardCo
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -34,6 +34,7 @@ import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -44,6 +45,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     
     private String leaderboardName;
     private EditableLeaderboardContextDefinition editableLeaderboardContextDefinition;
+    private SAPSailingHeaderWithAuthentication header;
     
     @Override
     protected void doOnModuleLoad() {
@@ -83,8 +85,9 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
         @Override
         public void onSuccess(Iterable<DetailType> result) {
             SAPHeaderWithAuthentication header = initHeader();
+            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
             GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
-                    header.getAuthenticationMenuView());
+                    paywallResolver, header.getAuthenticationMenuView());
             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                     genericSailingAuthentication);
             getSailingService().getLeaderboardWithSecurity(leaderboardName,
@@ -93,7 +96,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
 
     }
     
-    private class GetLeaderboardWithSecurityCallback implements AsyncCallback<StrippedLeaderboardDTOWithSecurity> {
+    private class GetLeaderboardWithSecurityCallback implements AsyncCallback<StrippedLeaderboardDTO> {
         private final AuthorizedContentDecorator authorizedContentDecorator;
         private final Iterable<DetailType> getAvailableDetailTypesForLeaderboardResult;
         private final SAPHeaderWithAuthentication header;
@@ -114,19 +117,21 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
 
         @Override
         public void onSuccess(
-                StrippedLeaderboardDTOWithSecurity leaderboardWithSecurity) {
+                StrippedLeaderboardDTO leaderboardWithSecurity) {
+            if (leaderboardWithSecurity != null && leaderboardWithSecurity.getDisplayName() != null) {
+                header.setHeaderTitle(getHeaderTitle(leaderboardWithSecurity.getDisplayName()));
+            }
             final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                     .createStoredSettingsLocatorForEditableLeaderboard(editableLeaderboardContextDefinition);
+            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
             EditableLeaderboardLifecycle rootComponentLifeCycle = 
                     new EditableLeaderboardLifecycle(StringMessages.INSTANCE, leaderboardWithSecurity, 
-                            getAvailableDetailTypesForLeaderboardResult);
+                            getAvailableDetailTypesForLeaderboardResult, paywallResolver);
             ComponentContext<EditableLeaderboardSettings> context = 
                     new ComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle, getUserService(), storageDefinition);
-            
             authorizedContentDecorator.setPermissionToCheck(
                     leaderboardWithSecurity, DefaultActions.UPDATE);
-            
             context.getInitialSettings(new OnSettingsLoadedCallback<EditableLeaderboardSettings>() {
                 @Override
                 public void onSuccess(EditableLeaderboardSettings settings) {
@@ -137,7 +142,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
                             EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(
                                     context, getSailingService(), new AsyncActionsExecutor(), leaderboardName, 
                                     /* leaderboardGroupName */ null, LeaderboardEditPage.this, getStringMessages(), 
-                                    userAgent, getAvailableDetailTypesForLeaderboardResult, settings);
+                                    userAgent, getAvailableDetailTypesForLeaderboardResult, settings, LeaderboardEditPage.this);
                             leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                             return leaderboardPanel;
                         }
@@ -160,8 +165,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     }
 
     private SAPHeaderWithAuthentication initHeader() {
-        SAPSailingHeaderWithAuthentication header = 
-                new SAPSailingHeaderWithAuthentication(getStringMessages().editScores());
+        header = new SAPSailingHeaderWithAuthentication(getHeaderTitle(leaderboardName));
         header.getElement().getStyle().setWidth(100, Unit.PCT);
         return header;
     }
@@ -169,6 +173,10 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     @Override
     public String getLeaderboardName() {
         return leaderboardName;
+    }
+
+    private String getHeaderTitle(String leaderboardDisplayName) {
+        return leaderboardDisplayName + ": " + getStringMessages().editScores();
     }
 
 }

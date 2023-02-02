@@ -6,6 +6,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,6 +63,7 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
     protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter) throws MailException {
         if (canSendMail()) {
             if (toAddress != null) {
+                final String[] toAddresses = toAddress.split(",");
                 Session session = Session.getInstance(mailProperties, new SMTPAuthenticator());
                 MimeMessage msg = new MimeMessage(session);
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
@@ -71,7 +74,9 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
                     } catch (UnsupportedEncodingException e) {
                         msg.setSubject(subject);
                     }
-                    msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
+                    for (final String singleToAddress : toAddresses) {
+                        msg.addRecipient(RecipientType.TO, new InternetAddress(singleToAddress.trim()));
+                    }
                     // this fixes the DCH MIME type error 
                     // see http://tanyamadurapperuma.blogspot.de/2014/01/struggling-with-nosuchproviderexception.html
                     Thread.currentThread().setContextClassLoader(javax.mail.Session.class.getClassLoader());
@@ -82,9 +87,9 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
                     ts.connect();
                     ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
                     ts.close();
-                    logger.info("mail sent to " + toAddress + " with subject " + subject);
+                    logger.info("mail sent to " + Arrays.toString(toAddresses) + " with subject " + subject);
                 } catch (MessagingException e) {
-                    logger.log(Level.SEVERE, "Error trying to send mail to " + toAddress, e);
+                    logger.log(Level.SEVERE, "Error trying to send mail to " + Arrays.toString(toAddresses), e);
                     throw new MailException(e.getMessage(), e);
                 } finally {
                     Thread.currentThread().setContextClassLoader(oldClassLoader);
@@ -136,8 +141,8 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver, null) {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver, null, classLoaderCache) {
         };
     }
 

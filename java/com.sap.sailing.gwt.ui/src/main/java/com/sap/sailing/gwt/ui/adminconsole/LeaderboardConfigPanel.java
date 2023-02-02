@@ -65,6 +65,8 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
@@ -84,7 +86,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
@@ -108,9 +109,10 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
-        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>,
+        implements SelectedLeaderboardProvider<StrippedLeaderboardDTO>,
         TrackedRaceChangedListener {
     private static final Logger logger = Logger.getLogger(LeaderboardConfigPanel.class.getName());
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
@@ -161,26 +163,32 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 stringMessages.createRegattaLeaderboardWithEliminations() + " ...",
                 leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithEliminations);
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
+        final Button createRegattaLeaderboardWithOtherTieBreakingLeaderboardBtn = buttonPanel.addAction(
+                stringMessages.createRegattaLeaderboardWithOtherTieBreakingLeaderboard() + " ...",
+                leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithOtherTieBreakingLeaderboard);
+        createRegattaLeaderboardWithOtherTieBreakingLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardWithOtherTieBreakingLeaderboardButton");
 
         leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), leaderboardSelectionModel, true,
                 () -> removeLeaderboards(leaderboardSelectionModel.getSelectedSet()));
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
+        buttonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
+                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4"));
     }
 
     @Override
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(final UserService userService,
-            final FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
+            final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
             AdminConsoleTableResources tableResources,
-            ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider) {
-        ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTOWithSecurity>(
+            ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
+        ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 filteredLeaderboardList.getList());
-        SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
                 leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
         AnchorCell anchorCell = new AnchorCell();
-        Column<StrippedLeaderboardDTOWithSecurity, SafeHtml> linkColumn = new Column<StrippedLeaderboardDTOWithSecurity, SafeHtml>(
+        Column<StrippedLeaderboardDTO, SafeHtml> linkColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
                 anchorCell) {
             @Override
-            public SafeHtml getValue(StrippedLeaderboardDTOWithSecurity object) {
+            public SafeHtml getValue(StrippedLeaderboardDTO object) {
                 final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
                         new LeaderboardContextDefinition(object.getName(), object.displayName),
                         new LeaderboardPerspectiveOwnSettings(showRaceDetails));
@@ -189,9 +197,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
         };
         linkColumn.setSortable(true);
-        leaderboardColumnListHandler.setComparator(linkColumn, new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+        leaderboardColumnListHandler.setComparator(linkColumn, new Comparator<StrippedLeaderboardDTO>() {
             @Override
-            public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 boolean ascending = isSortedAscending();
                 if (o1.getName().equals(o2.getName())) {
                     return 0;
@@ -208,24 +216,24 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 return sortList.size() > 0 & sortList.get(0).isAscending();
             }
         });
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
         leaderboardDisplayNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn,
-                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+                new Comparator<StrippedLeaderboardDTO>() {
                     @Override
-                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                         return new NaturalComparator().compare(o1.getDisplayName(), o2.getDisplayName());
                     }
                 });
 
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
             }
         };
@@ -233,9 +241,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn,
                 (l1, l2) -> Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace)
                         .compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
-        TextColumn<StrippedLeaderboardDTOWithSecurity> discardingOptionsColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> discardingOptionsColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 String result = "";
                 if (leaderboard.discardThresholds != null) {
                     for (int discardThreshold : leaderboard.discardThresholds) {
@@ -261,17 +269,17 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             }
             return new NaturalComparator().compare(s1, s2);
         });
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardTypeColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardTypeColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.type.toString();
             }
         };
         leaderboardTypeColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardTypeColumn, (o1, o2) -> o1.type.compareTo(o2.type));
-        TextColumn<StrippedLeaderboardDTOWithSecurity> scoringSystemColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> scoringSystemColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.scoringScheme == null ? ""
                         : ScoringSchemeTypeFormatter.format(leaderboard.scoringScheme, stringMessages);
             }
@@ -282,9 +290,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             String s2 = o2.scoringScheme == null ? null : o2.scoringScheme.toString();
             return new NaturalComparator().compare(s1, s2);
         });
-        TextColumn<StrippedLeaderboardDTOWithSecurity> courseAreasColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> courseAreasColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return Util.joinStrings(", ", Util.map(leaderboard.courseAreas, CourseAreaDTO::getName));
             }
         };
@@ -294,7 +302,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         Util.joinStrings(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
-        final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = create(
+        final AccessControlledActionsColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = create(
                 new LeaderboardConfigImagesBarCell(stringMessages), userService);
 
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editLeaderboard);
@@ -351,23 +359,23 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 this::createPairingListTemplate);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, READ,
                 this::openPairingListEntryPoint);
-        final DialogConfig<StrippedLeaderboardDTOWithSecurity> config = EditOwnershipDialog.create(
+        final DialogConfig<StrippedLeaderboardDTO> config = EditOwnershipDialog.create(
                 userService.getUserManagementWriteService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                new Consumer<StrippedLeaderboardDTOWithSecurity>() {
+                new Consumer<StrippedLeaderboardDTO>() {
                     @Override
-                    public void accept(StrippedLeaderboardDTOWithSecurity t) {
+                    public void accept(StrippedLeaderboardDTO t) {
                         config.openOwnershipDialog(t);
                     }
         });
-        final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
+        final EditACLDialog.DialogConfig<StrippedLeaderboardDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                new Consumer<StrippedLeaderboardDTOWithSecurity>() {
+                new Consumer<StrippedLeaderboardDTO>() {
                     @Override
-                    public void accept(StrippedLeaderboardDTOWithSecurity t) {
+                    public void accept(StrippedLeaderboardDTO t) {
                         configACL.openDialog(t);
                     }
         });
@@ -398,7 +406,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             AbstractLeaderboardDialog<?> dialog;
             switch (leaderboardDTO.type) {
             case RegattaLeaderboard:
-                dialog = new RegattaLeaderboardEditDialog(Collections.unmodifiableCollection(otherExistingLeaderboard),
+                dialog = new RegattaLeaderboardEditDialog<>(Collections.unmodifiableCollection(otherExistingLeaderboard),
                         Collections.unmodifiableCollection(allRegattas),
                         createLeaderboardDescriptor(leaderboardDTO,
                                 /* scoring scheme is provided by regatta, not leaderboard */ null),
@@ -409,6 +417,25 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
                             @Override
                             public void ok(LeaderboardDescriptor result) {
+                                updateLeaderboard(oldLeaderboardName, result);
+                            }
+                        });
+                dialog.show();
+                break;
+            case RegattaLeaderboardWithOtherTieBreakingLeaderboard:
+                dialog = new RegattaLeaderboardWithOtherTieBreakingLeaderboardEditDialog(Collections.unmodifiableCollection(otherExistingLeaderboard),
+                        Collections.unmodifiableCollection(allRegattas),
+                        new LeaderboardDescriptorWithOtherTieBreakingLeaderboard(
+                                leaderboardDTO.getName(), leaderboardDTO.displayName, /* scoringScheme is provided by regatta, not leaderboard */ null,
+                                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, Util.mapToArrayList(leaderboardDTO.courseAreas, CourseAreaDTO::getId),
+                                leaderboardDTO.getOtherTieBreakingLeaderboardName()),
+                        stringMessages, errorReporter, new DialogCallback<LeaderboardDescriptorWithOtherTieBreakingLeaderboard>() {
+                            @Override
+                            public void cancel() {
+                            }
+
+                            @Override
+                            public void ok(LeaderboardDescriptorWithOtherTieBreakingLeaderboard result) {
                                 updateLeaderboard(oldLeaderboardName, result);
                             }
                         });
@@ -608,11 +635,13 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
      */
     private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard,
             Iterable<DetailType> availableDetailType) {
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
         if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, paywallResolver);
         } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
+            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, paywallResolver);
         }
         final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(
                 leaderboard.getName(), leaderboard.getDisplayName());
@@ -622,6 +651,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 linkWithSettingsGenerator, lifeCycle, stringMessages);
         dialog.ensureDebugId("LeaderboardPageUrlConfigurationDialog");
         dialog.show();
+        
     }
 
     private void editCompetitorToBoatMappings(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
@@ -836,9 +866,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     @Override
     protected void leaderboardSelectionChanged() {
-        Set<StrippedLeaderboardDTOWithSecurity> selectedLeaderboards = leaderboardSelectionModel.getSelectedSet();
+        Set<StrippedLeaderboardDTO> selectedLeaderboards = leaderboardSelectionModel.getSelectedSet();
         boolean canDeleteAllSelected = true;
-        for (StrippedLeaderboardDTOWithSecurity leaderboard : selectedLeaderboards) {
+        for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
             if (!userService.hasPermission(leaderboard, DefaultActions.DELETE)) {
                 canDeleteAllSelected = false;
             }
@@ -846,7 +876,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
         leaderboardRemoveButton.setEnabled(!selectedLeaderboards.isEmpty() && canDeleteAllSelected);
 
-        final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
+        final StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
@@ -902,8 +932,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         sailingServiceWrite.createFlexibleLeaderboard(newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                                 newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaIds(),
-                                new MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity>(
-                                        new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                                new MarkedAsyncCallback<StrippedLeaderboardDTO>(
+                                        new AsyncCallback<StrippedLeaderboardDTO>() {
                                             @Override
                                             public void onFailure(Throwable t) {
                                                 errorReporter.reportError(
@@ -912,7 +942,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                                             }
 
                                             @Override
-                                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                                            public void onSuccess(StrippedLeaderboardDTO result) {
                                                 addLeaderboard(result);
                                             }
                                         }));
@@ -923,10 +953,10 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void createRegattaLeaderboard() {
-        RegattaLeaderboardCreateDialog dialog = new RegattaLeaderboardCreateDialog(
+        RegattaLeaderboardCreateDialog<LeaderboardDescriptor> dialog = new RegattaLeaderboardCreateDialog<LeaderboardDescriptor>(
                 Collections.unmodifiableCollection(availableLeaderboardList),
-                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(allRegattas), new LeaderboardDescriptor(), stringMessages,
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }
@@ -936,7 +966,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         RegattaName regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
                         sailingServiceWrite.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.getDisplayName(),
                                 newLeaderboard.getDiscardThresholds(),
-                                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
                                     @Override
                                     public void onFailure(Throwable t) {
                                         errorReporter.reportError("Error trying to create the new regatta leaderboard "
@@ -944,7 +974,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                                     }
 
                                     @Override
-                                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                                    public void onSuccess(StrippedLeaderboardDTO result) {
                                         addLeaderboard(result);
                                     }
                                 });
@@ -967,7 +997,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     public void ok(final LeaderboardDescriptorWithEliminations newLeaderboard) {
                         sailingServiceWrite.createRegattaLeaderboardWithEliminations(newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(), newLeaderboard.getRegattaName(),
-                                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
                                     @Override
                                     public void onFailure(Throwable t) {
                                         errorReporter.reportError("Error trying to create the new regatta leaderboard "
@@ -975,7 +1005,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                                     }
 
                                     @Override
-                                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                                    public void onSuccess(StrippedLeaderboardDTO result) {
                                         addLeaderboard(result);
                                         sailingServiceWrite.setEliminatedCompetitors(newLeaderboard.getName(),
                                                 newLeaderboard.getEliminatedCompetitors(), new AsyncCallback<Void>() {
@@ -1001,7 +1031,40 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         dialog.show();
     }
 
-    private void addLeaderboard(StrippedLeaderboardDTOWithSecurity result) {
+    private void createRegattaLeaderboardWithOtherTieBreakingLeaderboard() {
+        RegattaLeaderboardWithOtherTieBreakingLeaderboardCreateDialog dialog = new RegattaLeaderboardWithOtherTieBreakingLeaderboardCreateDialog(
+                Collections.unmodifiableCollection(availableLeaderboardList),
+                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter,
+                new DialogCallback<LeaderboardDescriptorWithOtherTieBreakingLeaderboard>() {
+                    @Override
+                    public void cancel() {
+                    }
+
+                    @Override
+                    public void ok(final LeaderboardDescriptorWithOtherTieBreakingLeaderboard newLeaderboard) {
+                        final RegattaName regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
+                        sailingServiceWrite.createRegattaLeaderboardWithOtherTieBreakingLeaderboard(
+                                regattaIdentifier, newLeaderboard.getDisplayName(),
+                                newLeaderboard.getDiscardThresholds(), newLeaderboard.getOtherTieBreakingLeaderboardName(),
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError("Error trying to create the new regatta leaderboard "
+                                                + newLeaderboard.getName() + ": " + t.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(StrippedLeaderboardDTO result) {
+                                        addLeaderboard(result);
+                                    }
+                                });
+                    }
+                });
+        dialog.ensureDebugId("RegattaLeaderboardWithOtherTieBreakingLeaderboardCreateDialog");
+        dialog.show();
+    }
+
+    private void addLeaderboard(StrippedLeaderboardDTO result) {
         filteredLeaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
         presenter.getLeaderboardsRefresher().add(result);
@@ -1013,7 +1076,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void updateLeaderboard(final String leaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
         sailingServiceWrite.updateLeaderboard(leaderboardName, leaderboardToUpdate.getDisplayName(),
                 leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIds(),
-                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(
@@ -1021,7 +1084,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     }
 
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTOWithSecurity updatedLeaderboard) {
+                    public void onSuccess(StrippedLeaderboardDTO updatedLeaderboard) {
                         refreshLeaderboardInTable(leaderboardName, updatedLeaderboard);
                     }
                 });
@@ -1029,9 +1092,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     private void reloadLeaderboardForTable(final String leaderboardName) {
         sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
-                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                    public void onSuccess(StrippedLeaderboardDTO result) {
                         refreshLeaderboardInTable(leaderboardName, result);
                     }
 
@@ -1044,7 +1107,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void refreshLeaderboardInTable(final String oldLeaderboardName,
-            StrippedLeaderboardDTOWithSecurity updatedLeaderboard) {
+            StrippedLeaderboardDTO updatedLeaderboard) {
         int indexOfLeaderboard = 0;
         for (int i = 0; i < availableLeaderboardList.size(); i++) {
             StrippedLeaderboardDTO dao = availableLeaderboardList.get(i);
@@ -1057,7 +1120,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         filterLeaderboardPanel.updateAll(availableLeaderboardList);
     }
 
-    private void removeLeaderboards(final Collection<StrippedLeaderboardDTOWithSecurity> leaderboards) {
+    private void removeLeaderboards(final Collection<StrippedLeaderboardDTO> leaderboards) {
         if (!leaderboards.isEmpty()) {
             Set<String> leaderboardNames = new HashSet<String>();
             for (StrippedLeaderboardDTO leaderboard : leaderboards) {
@@ -1071,7 +1134,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
                 @Override
                 public void onSuccess(Void result) {
-                    for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboards) {
+                    for (StrippedLeaderboardDTO leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
                         getLeaderboardsRefresher().remove(leaderboard);
                     }
@@ -1081,7 +1144,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         }
     }
 
-    private void removeLeaderboard(final StrippedLeaderboardDTOWithSecurity leaderBoard) {
+    private void removeLeaderboard(final StrippedLeaderboardDTO leaderBoard) {
         sailingServiceWrite.removeLeaderboard(leaderBoard.getName(),
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
@@ -1099,13 +1162,13 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 }));
     }
 
-    private void removeLeaderboardFromTable(final StrippedLeaderboardDTOWithSecurity leaderBoard) {
+    private void removeLeaderboardFromTable(final StrippedLeaderboardDTO leaderBoard) {
         filteredLeaderboardList.getList().remove(leaderBoard);
         availableLeaderboardList.remove(leaderBoard);
         leaderboardSelectionModel.setSelected(leaderBoard, false);
     }
 
-    private void createPairingListTemplate(final StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
+    private void createPairingListTemplate(final StrippedLeaderboardDTO leaderboardDTO) {
         final PairingListCreationSetupDialog dialog = new PairingListCreationSetupDialog(leaderboardDTO,
                 this.stringMessages, new DialogCallback<PairingListTemplateDTO>() {
 
@@ -1140,14 +1203,14 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         dialog.show();
     }
 
-    private void openPairingListCreationDialog(StrippedLeaderboardDTOWithSecurity leaderboardDTO,
+    private void openPairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO,
             PairingListTemplateDTO template) {
         PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template,
                 sailingServiceWrite, errorReporter);
         dialog.show();
     }
 
-    private void openPairingListEntryPoint(StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
+    private void openPairingListEntryPoint(StrippedLeaderboardDTO leaderboardDTO) {
         Map<String, String> result = new HashMap<>();
         result.put("leaderboardName", leaderboardDTO.getName());
         String link = EntryPointLinkFactory.createPairingListLink(result);

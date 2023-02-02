@@ -225,6 +225,7 @@ public class ImportMasterDataOperation extends
                                 sync.notifyAll();
                             }
                         }
+                        trackedRace.removeListener(this);
                     }
                 }
             });
@@ -551,7 +552,6 @@ public class ImportMasterDataOperation extends
             fixesToAddAsBatch.clear();
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.severe("Failed to store race log tracking fixes while importing.");
-            e.printStackTrace();
         }
     }
 

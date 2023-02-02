@@ -30,6 +30,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -41,6 +42,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
+import com.sap.sse.security.ui.shared.EssentialSecuredDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -172,7 +174,7 @@ public class UserService {
                 // ignore update events coming from this object itself
                 if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && event.getNewValue() != null
                         && !event.getNewValue().isEmpty() && !event.getNewValue().equals(id.toString())) {
-                    updateUser(/* Don't play endless ping-ping between instances! */ false);
+                    updateUser(/* Don't play endless ping-pong between instances! */ false);
                 }
             }
         });
@@ -201,7 +203,7 @@ public class UserService {
         userManagementService.getCurrentUser(
                 new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
-                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
+            public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, notifyOtherInstances);
             }
 
@@ -246,7 +248,7 @@ public class UserService {
             }
 
             @Override
-                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
+            public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, /* notifyOtherInstances */ true);
                         logger.info(authProviderName + " user '" + result.getA().getName() + "' is verified!\n");
                         callback.onSuccess(result.getA());
@@ -318,7 +320,7 @@ public class UserService {
                 consumer.accept(getServerInfo());
                 removeUserStatusEventHandler(this);
             }
-        }, true);
+        }, /* fireIfUserIsAlreadyAvailable */ true);
     }
 
     public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
@@ -450,11 +452,44 @@ public class UserService {
      * Checks whether the user has the permission to the given action for the given object.
      */
     public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        final boolean result;
         if (securedDTO == null) {
-            return false;
-        }
-        return PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
+            result = false;
+        } else {
+            result = PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
                 anonymousUser, securedDTO.getOwnership(), securedDTO.getAccessControlList());
+        }
+        return result;
+    }
+    
+    /**
+     * From a {@link HasPermissions} permission type, an object name and the type-relative object identifier parts this
+     * method constructs a full-fledged {@link SecuredDTO} and asks the server to fill in the corresponding security
+     * information, in particular the ownership and ACL data. The {@link SecuredDTO} that the server has augmented this
+     * way is sent to the {@code callback}'s {@link AsyncCallback#onSuccess(Object) onSuccess} method where it can,
+     * e.g., be used for a permission check as in {@link #hasPermission(SecuredDTO, Action)}.
+     * <p>
+     * 
+     * This is useful in case a full-fledged {@link SecuredDTO} is not available on the client for some entity, but all
+     * information about its type and ID are available. Imagine, for example, a situation where an identifier for a race
+     * is available on the client, and a permission check needs to be performed for the race identified this way.
+     * Instead of implementing a service that returns the full {@code RaceDTO} with large amounts of data attached that
+     * is not needed for the security check, this method can be used to obtain a proxy that is sufficient to check
+     * whether the current user has the permission to execute a specific action.
+     */
+    public void createEssentialSecuredDTOByIdAndType(HasPermissions permissionType, String name, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, final AsyncCallback<SecuredDTO> callback) {
+        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(permissionType, name, typeRelativeObjectIdentifier);
+        userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<SecuredDTO>() {
+            @Override
+            public void onSuccess(SecuredDTO result) {
+                callback.onSuccess(secureDTO);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+        });
     }
 
     /**

@@ -139,8 +139,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public synchronized void releaseTrackedRace(Fleet fleet) {
-        TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
-        this.trackedRaces.remove(fleet);
+        final TrackedRace previouslyLinkedRace = this.trackedRaces.remove(fleet);
         if (previouslyLinkedRace != null && regattaLikeParent != null) {
             RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
@@ -182,12 +181,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public TrackedRace getTrackedRace(Competitor competitor) {
-        for (TrackedRace trackedRace : trackedRaces.values()) {
-            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
-                return trackedRace;
-            }
-        }
-        return null;
+        return trackedRaces.get(competitor);
     }
 
     @Override
@@ -282,7 +276,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private Pair<RaceDefinition, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered(final Fleet fleet) {
         final Iterable<Competitor> competitors;
         final RaceDefinition raceDefinition;
-        TrackedRace trackedRace = getTrackedRace(fleet);
+        final TrackedRace trackedRace = getTrackedRace(fleet);
         if (trackedRace != null) {
             raceDefinition = trackedRace.getRace();
             competitors = raceDefinition.getCompetitors();
@@ -293,7 +287,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             // race exists, its competitors set takes precedence over what's in the race log. Usually,
             // the tracked race will have the same competitors as those in the race log, or more because
             // those from the regatta log are added to the tracked race as well.
-            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
+            final Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
             competitors = viaRaceLog;
         }
         return new Pair<>(raceDefinition, competitors);

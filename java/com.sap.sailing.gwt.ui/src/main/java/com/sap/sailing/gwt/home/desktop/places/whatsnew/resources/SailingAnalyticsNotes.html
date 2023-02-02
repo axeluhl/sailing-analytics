@@ -4,6 +4,87 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">January 2023</h5>
+         <ul class="bulletList">
+           <li>Allow dragging the time slider, scrubbing the time line, on touch devices.</li>
+         </ul>
+         <h5 class="articleSubheadline">December 2022</h5>
+         <ul class="bulletList">
+           <li>Added Czech language support</li>
+         </ul>
+         <h5 class="articleSubheadline">November 2022</h5>
+         <ul class="bulletList">
+           <li>Added flag and country code for South Sudan.</li>
+           <li>Fixed bug in data mining module: elements from section "Race Results" (Absolute Rank,
+               Number of Podium Finishes, Number of Wins, and Relative Score (0 best; 1 worst))
+               have erroneously been "multiplied" by the race columns in the leaderboard. For example,
+               when summing up wins in a regatta with four races, the results were a factor of four
+               too great.</li>
+         </ul>
+         <h5 class="articleSubheadline">October 2022</h5>
+         <ul class="bulletList">
+           <li>The Race Map now has a "wind ladder" that can be activated through the map settings.
+               It displays a transparent texture on top of the map that is oriented perpendicularly
+               to the current leg's wind direction, parallel to the advantage line. It moves with
+               the leading boat. It scales such that one spoke is a power of ten meters (10m, 100m, 1000m, ...).
+               When panning and zooming you may notice a slight jitter, depending on your browser and
+               platform; nothing to worry about ;-). The feature is still experimental and will be improved
+               over the next few weeks. Among other things we are aware of the long loading time and
+               a sometimes unproportional scaling of light and dark areas of the ladder. Furthermore, the
+               ladder only appears / disappears according to changes in the settings when the time point
+               is changed, e.g., in playing state.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2022</h5>
+         <ul class="bulletList">
+           <li>Paypal is now available as payment method for subscriptions.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2022</h5>
+         <ul class="bulletList">
+           <li>Bug fix: in the REST API's leaderboard-related end points the leaderboard object was not properly
+               used for premium permission checks. Therefore, a premium role qualified, e.g., with a user group
+               did not properly grant its permissions to requests.</li>
+           <li>Fixed a regression regarding the availability of <tt>/sailingserver/api/v1/regattas/{regatta-name}/datamining/...</tt>
+               requests; a refactoring attempt accidentally introduced this problem which has now been resolved.</li>
+           <li>Fixed an issue with column factors other than 1 in combination with excluding worst scores; previously,
+               the points before multiplication by the column factor were compared for discarding.
+               With this, the display of those discards has also been fixed such that the scaled number is displayed
+               with a strike-through.</li>
+         </ul>
+         <h5 class="articleSubheadline">May 2022</h5>
+         <ul class="bulletList">
+           <li>Bug fix: when the "Boats" column is expanded for a race in which not all entries of the leaderboard
+               compete, the race won't expand properly. Now it does.</li>
+         </ul>
+         <h5 class="articleSubheadline">April 2022</h5>
+         <ul class="bulletList">
+           <li>Fixed a regression regarding the secondary metric in the "Competitor Charts." As we had
+               introduced mechanisms that avoid redundant data requests by the chart component, a bug crept
+               in which caused problems when users selected a secondary metric to be displayed in the Competitor
+               Charts view. This has now been fixed.</li>
+           <li>Not an April Fools' joke: We are introducing a subscription model for the SAP Sailing Analytics
+               with the beginning of April 2022. You now have the chance to support the project, going forward,
+               by subscribing to the "Premium" plan which grants you continued access to the advanced features
+               of the solution. All your payments will be used to support, maintain, operate and further develop
+               the solution. You can submit your thoughts and requests and follow our progress at
+               <a href="https://bugzilla.sapsailing.com/">bugzilla.sapsailing.com</a>. Thank you for your
+               continued support and understanding!.</li>
+           <li>Minor bug fix: the tool tips on the time slider markers in the race player are now properly updated
+               when, e.g., the start time changes.</li>
+           <li>Aborted and postponed races with dependent start times now have their status field correctly filled
+               in the "Regatta Overview" page.</li>
+           <li>The search results page now shows a progress indicator until all search results from all servers
+               queried have been received.</li>
+           <li>Added a low-point scoring scheme variant that requires three wins in the medal series, including any
+               wins from an optional carry-forward column in the medal series. This is a variant of the low-point
+               scoring scheme that requires two wins in the medal series.</li>
+           <li><a href="/gwt/DataMining.html">Data mining</a> has become a subscribable option now. You can find it
+               in the top-level menu bar. Its two plans ("all" including live events, or "archive" which excludes
+               current live events) can also be tried for a short time for free.</li>
+           <li>Simulator and Data Mining are now always part of the top-level menu bar and can easily be subscribed
+               to from there.</li>
+           <li>"Sailing Loves Photography" images and videos for the Home.html landing page are now collected across
+               ten years of events, not only one year.</li>
+         </ul>
          <h5 class="articleSubheadline">December 2021</h5>
          <ul class="bulletList">
            <li>The strategy simulator (see <a href="https://sapsailing.com/gwt/Simulator.html">https://sapsailing.com/gwt/Simulator.html</a>)

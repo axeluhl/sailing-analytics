@@ -12,4 +12,8 @@ public interface PersistenceFactory {
     
     DomainObjectFactory getDefaultDomainObjectFactory();
     MongoObjectFactory getDefaultMongoObjectFactory();
+
+    DomainObjectFactory getDefaultMajorityDomainObjectFactory();
+
+    MongoObjectFactory getDefaultMajorityMongoObjectFactory();
 }

@@ -54,8 +54,6 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
     public TimePoint startTime;
     public Duration duration;
     public MimeType mimeType;
-    @Deprecated
-    public Status status = Status.UNDEFINED;
     public Set<RegattaAndRaceIdentifier> assignedRaces;
 
     public MediaTrack() {
@@ -82,7 +80,7 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
     }
 
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + " - " + assignedRaces + " - " + startTime + " [" + duration + status + ']'; 
+        return title + " - " + url + " [" + typeToString() + ']' + " - " + assignedRaces + " - " + startTime + " [" + duration + ']'; 
     }
 
     public TimePoint deriveEndTime() {

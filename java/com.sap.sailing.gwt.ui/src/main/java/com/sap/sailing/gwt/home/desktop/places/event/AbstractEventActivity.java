@@ -53,6 +53,8 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 /**
  * Base Activity for all desktop event pages. This includes the event page itself for multi-regatta events as well as
@@ -240,6 +242,16 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public PlaceNavigation<RegattaLeaderboardPlace> getRegattaLeaderboardNavigation(String regattaId) {
         return homePlacesNavigator.getEventNavigation(getPlaceForRegattaLeaderboard(regattaId), null, false);
     }
+    
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return clientFactory.getSubscriptionServiceFactory();
+    }
 
     @Override
     public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
@@ -248,10 +260,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public boolean hasMedia() {
-        if (showRegattaMetadata()) {
-            return false;
-        }
-        return eventDTO.isHasMedia();
+        return !showRegattaMetadata() && eventDTO.isHasMedia();
     }
     
     @Override

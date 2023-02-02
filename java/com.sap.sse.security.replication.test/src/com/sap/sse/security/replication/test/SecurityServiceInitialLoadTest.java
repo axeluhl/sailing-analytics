@@ -16,6 +16,7 @@ import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -41,7 +42,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
                         PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(null, userStore, accessControlStore,
-                        SecuredSecurityTypes::getAllInstances);
+                        SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
                 newMaster.createSimpleUser(username, email, password, fullName, company,
                         /* validationBaseURL */ Locale.ENGLISH, null, null);
                 accessToken = newMaster.createAccessToken(username);

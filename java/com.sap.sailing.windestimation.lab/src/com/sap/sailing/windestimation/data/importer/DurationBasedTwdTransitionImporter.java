@@ -20,6 +20,10 @@ public class DurationBasedTwdTransitionImporter {
     private static final NextThresholdCalculator THRESHOLD_CALCULATOR = new AnnealingNextThresholdCalculator(1, 1.5);
 
     public static void main(String[] args) throws UnknownHostException {
+        new DurationBasedTwdTransitionImporter().importDurationBasedTwdTransition();
+    }
+    
+    public void importDurationBasedTwdTransition() throws UnknownHostException {
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import started");
         WindSourcesPersistenceManager windSourcesPersistenceManager = new WindSourcesPersistenceManager();
         SingleDimensionBasedTwdTransitionPersistenceManager durationBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(

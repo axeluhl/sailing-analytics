@@ -37,6 +37,8 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
     private final ListBox[] legTypeBoxes;
     private final Label totalDistanceInNauticalMilesLabel;
     private final DoubleBox[] distanceInNauticalMilesBoxes;
+    private final DoubleBox[] twdBoxes;
+    private final DoubleBox[] legDirectionBoxes;
     private final DoubleBox[] twaBoxes;
     private final StringMessages stringMessages;
     private final ListDataProvider<WaypointDTO> waypointList;
@@ -63,6 +65,8 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
         desiredTotalCourseDistanceInNauticalMilesBox = createDoubleBox(/* visibleLength */ 5);
         totalDistanceInNauticalMilesLabel = new Label();
         legTypeBoxes = new ListBox[waypointList.getList().size()-1];
+        twdBoxes = new DoubleBox[waypointList.getList().size()-1];
+        legDirectionBoxes = new DoubleBox[waypointList.getList().size()-1];
         twaBoxes = new DoubleBox[waypointList.getList().size()-1];
         distanceInNauticalMilesBoxes = new DoubleBox[waypointList.getList().size()-1];
         trackedTwaInDegreesLabels = new Label[waypointList.getList().size()-1];
@@ -72,7 +76,11 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
             legTypeBoxes[i] = createLegTypeBox(orcLegParametersSoFar[i]);
             distanceInNauticalMilesBoxes[i] = createDoubleBox(/* visibleLength */ 5);
             distanceInNauticalMilesBoxes[i].addChangeHandler(e->updateTotalDistanceLabel());
+            twdBoxes[i] = createDoubleBox(/* visibleLength */ 5);
+            legDirectionBoxes[i] = createDoubleBox(/* visibleLength */ 5);
             twaBoxes[i] = createDoubleBox(/* visibleLength */ 5);
+            twdBoxes[i].addValueChangeHandler(e->updateTwaBoxFromTwdAndLegDirection(twdBoxes[zeroBasedLegNumber], legDirectionBoxes[zeroBasedLegNumber], twaBoxes[zeroBasedLegNumber]));
+            legDirectionBoxes[i].addValueChangeHandler(e->updateTwaBoxFromTwdAndLegDirection(twdBoxes[zeroBasedLegNumber], legDirectionBoxes[zeroBasedLegNumber], twaBoxes[zeroBasedLegNumber]));
             if (orcLegParametersSoFar != null && orcLegParametersSoFar[i] != null) {
                 distanceInNauticalMilesBoxes[i].setValue(orcLegParametersSoFar[i].getLength().getNauticalMiles());
                 twaBoxes[i].setValue(orcLegParametersSoFar[i].getTwa() == null ? null : orcLegParametersSoFar[i].getTwa().getDegrees());
@@ -183,7 +191,7 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
     
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(waypointList.getList().size()+1, 7);
+        final Grid result = new Grid(waypointList.getList().size()+1, 9);
         int row = 0;
         result.setWidget(row, 0, new Label(stringMessages.setAllLegsToType()));
         result.setWidget(row, 1, commonLegTypeBox);
@@ -196,18 +204,22 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
         // column headers:
         result.setWidget(row, 1, new Label(stringMessages.legType()));
         result.setWidget(row, 2, new Label(stringMessages.distanceInNauticalMiles()));
-        result.setWidget(row, 3, new Label(stringMessages.legTwaInDegrees()));
-        result.setWidget(row, 4, new Label(stringMessages.trackedDistanceInNauticalMiles()));
-        result.setWidget(row, 5, new Label(stringMessages.trackedTwaInDegrees()));
+        result.setWidget(row, 3, new Label(stringMessages.twdInDegrees()));
+        result.setWidget(row, 4, new Label(stringMessages.legDirectionInDegrees()));
+        result.setWidget(row, 5, new Label(stringMessages.legTwaInDegrees()));
+        result.setWidget(row, 6, new Label(stringMessages.trackedDistanceInNauticalMiles()));
+        result.setWidget(row, 7, new Label(stringMessages.trackedTwaInDegrees()));
         row++;
         for (int i=0; i<waypointList.getList().size()-1; i++) {
             final int index = i;
             result.setWidget(row, 0, new Label(waypointList.getList().get(i).getName()+" - "+waypointList.getList().get(i+1).getName()));
             result.setWidget(row, 1, legTypeBoxes[i]);
             result.setWidget(row, 2, distanceInNauticalMilesBoxes[i]);
-            result.setWidget(row, 3, twaBoxes[i]);
-            result.setWidget(row, 4, trackedDistanceInNauticalMilesLabels[i]);
-            result.setWidget(row, 5, trackedTwaInDegreesLabels[i]);
+            result.setWidget(row, 3, twdBoxes[i]);
+            result.setWidget(row, 4, legDirectionBoxes[i]);
+            result.setWidget(row, 5, twaBoxes[i]);
+            result.setWidget(row, 6, trackedDistanceInNauticalMilesLabels[i]);
+            result.setWidget(row, 7, trackedTwaInDegreesLabels[i]);
             final Button useTrackedDataButton = new Button(stringMessages.useTrackedData());
             useTrackedDataButton.addClickHandler(e->{
                 twaBoxes[index].setValue(
@@ -218,7 +230,7 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
                                 : trackingBasedCourseGeometry[index].getLength().getNauticalMiles());
                 validateAndUpdate();
             });
-            result.setWidget(row, 6, useTrackedDataButton);
+            result.setWidget(row, 8, useTrackedDataButton);
             row++;
         }
         return result;

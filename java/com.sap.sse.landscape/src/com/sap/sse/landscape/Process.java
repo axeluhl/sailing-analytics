@@ -1,6 +1,7 @@
 package com.sap.sse.landscape;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.util.Optional;
@@ -48,8 +49,15 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
     default boolean isAlive(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         Socket socket = null;
         try {
-            socket = new Socket(getHost().getPublicAddress(optionalTimeout), getPort());
-            return socket.isConnected();
+            final boolean result;
+            final InetAddress publicAddress = getHost().getPublicAddress(optionalTimeout);
+            if (publicAddress != null) {
+                socket = new Socket(publicAddress, getPort());
+                result = socket.isConnected();
+            } else {
+                result = false;
+            }
+            return result;
         } finally {
             if (socket != null) {
                 socket.close();

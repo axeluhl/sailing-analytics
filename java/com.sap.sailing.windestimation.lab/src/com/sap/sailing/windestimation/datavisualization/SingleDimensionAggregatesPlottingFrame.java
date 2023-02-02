@@ -176,7 +176,8 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         dataset.addSeries(q3Series);
         dataset.addSeries(p1Series);
         dataset.addSeries(p99Series);
-        dataset.addSeries(stdSeries);
+        // Uncomment the following to see the standard deviation; it overlaps the zeroMeanStdSeries, so usually we don't want to see it
+        // dataset.addSeries(stdSeries);
         dataset.addSeries(zeroMeanStdSeries);
         return dataset;
     }

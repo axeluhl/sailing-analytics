@@ -77,8 +77,10 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -147,8 +149,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager,
+public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, MarkPassingRaceFingerprintRegistry,
+        RaceFetcher, LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager,
         Searchable<LeaderboardSearchResult, KeywordQueryWithOptionalEventQualification>,
         ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogAndTrackedRaceResolver,
         SensorFixStoreSupplier, WindFinderReviewedSpotsCollectionIdProvider {
@@ -240,9 +242,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
 
+    RegattaLeaderboardWithOtherTieBreakingLeaderboard addRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaIdentifier regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, RegattaLeaderboard otherTieBreakingLeaderboard);
+
     /**
      * Removes the leaderboard specified by {@code leaderboardName} as well as all delegating leaderboards that reference it,
-     * in particular those {@link DelegatingRegattaLeaderboardWithCompetitorElimination} which which the leaderboard specified
+     * in particular those {@link DelegatingRegattaLeaderboardWithCompetitorElimination} for which the leaderboard specified
      * by {@code leaderboardName} was their underlying regatta leaderboard. If no leaderboard named as specified by the
      * {@code leaderboardName} parameter exists, this method has no effect.
      */
@@ -797,8 +802,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return {@code null} if no service can be found in the OSGi registry
      */
     FileStorageManagementService getFileStorageManagementService();
-
-    ClassLoader getCombinedMasterDataClassLoader();
 
     /**
      * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}

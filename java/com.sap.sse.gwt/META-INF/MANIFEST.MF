@@ -6,9 +6,8 @@ Automatic-Module-Name: com.sap.sse.gwt
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: com.google.gwt.user;bundle-version="2.9.0";resolution:=optional,
- com.google.gwt.dev;bundle-version="2.9.0";resolution:=optional,
- com.google.gwt.servlet;bundle-version="2.9.0",
+Require-Bundle: com.google.gwt.user;bundle-version="2.10.0";resolution:=optional,
+ com.google.gwt.servlet;bundle-version="2.10.0",
  com.sap.sse.common,
  com.sap.sse.filestorage,
  com.sap.sse.security.common,
@@ -70,7 +69,6 @@ Export-Package: com.google.gwt.user.client.rpc.core.java.util,
  com.sap.sse.gwt.dispatch.shared.commands,
  com.sap.sse.gwt.dispatch.shared.exceptions,
  com.sap.sse.gwt.linker,
- com.sap.sse.gwt.qualtrics,
  com.sap.sse.gwt.resources,
  com.sap.sse.gwt.server,
  com.sap.sse.gwt.server.filestorage,

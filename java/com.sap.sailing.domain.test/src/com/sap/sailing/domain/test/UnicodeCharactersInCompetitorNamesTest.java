@@ -74,7 +74,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                                 /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                                                 /* useOfficialEventsToUpdateRaceLog */ false),
                                                 RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                                                new DefaultRaceTrackingHandler());
+                                                new DefaultRaceTrackingHandler(), /* markPassingRaceFingerprintRegistry */ null);
 
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {

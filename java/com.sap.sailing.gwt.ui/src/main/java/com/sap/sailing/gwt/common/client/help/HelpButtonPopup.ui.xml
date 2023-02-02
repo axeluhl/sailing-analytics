@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    
+    <ui:with field="local_res" type="com.sap.sailing.gwt.common.client.help.HelpButtonResources"/>
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    
+    <g:HTMLPanel addStyleNames="{local_res.style.content}">
+        <div ui:field="textUi" class="{local_res.style.text}" />
+        <a ui:field="linkUi" class="{local_res.style.link}" target="_blank">
+            <ui:text from="{i18n.openInNewTab}"/>
+        </a>
+    </g:HTMLPanel>
+</ui:UiBinder>

@@ -68,4 +68,8 @@ public interface RaceMapResources extends ClientBundle {
 
     @Source("RaceMap.css")
     RaceMapStyle raceMapStyle();
+    
+    @Source("com/sap/sailing/gwt/common/client/premium/icon_premium.svg")
+    @MimeType("image/svg+xml")
+    DataResource premiumIcon();
 }

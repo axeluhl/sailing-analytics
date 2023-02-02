@@ -11,19 +11,25 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.resources.Highcharts;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
 
@@ -55,7 +61,7 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
         checkUrlParameters();
-        createSimulatorPanel();
+        getUserService().executeWithServerInfo(serverInfo->createSimulatorPanel(serverInfo));
     }
 
     private void checkUrlParameters() {
@@ -77,12 +83,10 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
         } else {
             this.border = Integer.parseInt(border);
         }
-        
         streamletPars.macroWeather = false;
         streamletPars.motionScale = 1.0;
         streamletPars.swarmScale = 1.0;
         streamletPars.detailZoom = 15;
-
         String tmpStr = Window.Location.getParameter("motionScale");
         if (tmpStr == null || tmpStr.isEmpty()) {
            logger.config("Using default motionScale.");
@@ -113,7 +117,6 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
         } else {
             this.streamletPars.detailZoom = Integer.parseInt(tmpStr);
         }
-        
         String autoUpdateStr = Window.Location.getParameter("autoUpdate");
         if (autoUpdateStr == null || autoUpdateStr.isEmpty()) {
             logger.config("Using default auto update " + autoUpdate);
@@ -188,11 +191,14 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
         }
     }
 
-    private void createSimulatorPanel() {
+    private void createSimulatorPanel(ServerInfoDTO serverInfo) {
         SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(getStringMessages().strategySimulatorTitle());
-        
-        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
+        final String serverName = serverInfo.getName();
+        authorizedContentDecorator.setPermissionToCheck(NamedSecuredObjectDTO.create(serverName,
+                SecuredDomainType.SIMULATOR, new TypeRelativeObjectIdentifier(serverName)), DefaultActions.READ);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             @Override
             public Widget get() {
@@ -201,7 +207,6 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
                 return simulatorPanel;
             }
         });
-        
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
         panel.addNorth(header, 75);
@@ -209,5 +214,4 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
         panel.addStyleName("dockLayoutPanel");
         rootPanel.add(panel);
     }
-    
 }

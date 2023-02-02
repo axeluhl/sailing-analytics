@@ -51,6 +51,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -173,6 +174,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             }
         });
         resetNameButton = new Button();
+        resetNameButton.addStyleName("btn-primary");
         resetNameButton.addStyleName(RESOURCES.css().resetNameButtonClass());
         resetNameButton.addClickHandler(new ClickHandler() {
             @Override
@@ -194,6 +196,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         });
         
         defaultTimeButton = new Button();
+        defaultTimeButton.addStyleName("btn-primary");
         defaultTimeButton.setTitle(StringMessages.INSTANCE.resetStartTimeToDefault());
         defaultTimeButton.addStyleName(RESOURCES.css().resetButtonClass());
         defaultTimeButton.addClickHandler(new ClickHandler() {
@@ -419,7 +422,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         progressOverlay.add(progressSpinner);
         progressOverlay.add(counter);
         progressOverlay.setVisible(false);
-        final Timer t = new Timer(){
+        final Timer t = new Timer() {
             public void run() {
                 requestProgressPercentage(this, counter);
             }
@@ -444,6 +447,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     
     private void requestProgressPercentage(final Timer t, final Label counter) {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, PROGRESS_STATUS_URL);
+        builder.setHeader(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA(), HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB());
         try {
             builder.sendRequest(null, new RequestCallback() {
                 @Override

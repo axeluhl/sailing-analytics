@@ -3,7 +3,7 @@ package com.sap.sailing.selenium.test.home;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -106,7 +106,6 @@ public class WhitelabelTest extends AbstractSeleniumTest {
         validateIsDisplayed(homePage.getImprintLink(), false);
         validateIsDisplayed(homePage.getPrivacyLink(), false);
         validateIsDisplayed(homePage.getSupportLink(), false);
-        validateIsDisplayed(homePage.getFeedbackLink(), false);
         validateIsDisplayed(homePage.getNewsLink(), false);
         validateIsDisplayed(homePage.getLanguageSelectionLabel(), true);
         assertThat(homePage.getLanguageSelectionLabel().getText(), not(containsString("SAP")));

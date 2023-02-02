@@ -2,12 +2,30 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>root</artifactId>
-    <groupId>com.sap.sailing</groupId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>com.amazon.aws.aws-java-api</artifactId>
-  <version>2.17.124</version>
-  <packaging>eclipse-plugin</packaging>
+    <!-- Do not set parent: this would also inherit the tycho target platform 
+        configuration. By building this artifact, we create the local p2 repo that 
+        can then be referenced by the race-analysis-p2-local.target definition. So 
+        we can't recursively use the local repo as target platform for building the 
+        local repo - and apart from that don't need it. Skipping the tycho-maven-plugin 
+        and target-platform-configuration plugins via <skip> parameter in the build 
+        config does not skip resolving the target definition defined in the parent 
+        pom. Therefore, the parent was not set here - which means we have to define 
+        $tycho-version again. -->
+    <properties>
+      <tycho-version>1.7.0</tycho-version>
+    </properties>       
+    <groupId>com.amazon.aws</groupId>
+    <artifactId>com.amazon.aws.aws-java-api</artifactId>
+    <version>2.18.8</version>
+    <packaging>eclipse-plugin</packaging>
+        <build>
+        <plugins>
+	  <plugin>
+	    <groupId>org.eclipse.tycho</groupId>
+	    <artifactId>tycho-maven-plugin</artifactId>
+	    <version>${tycho-version}</version>
+	    <extensions>true</extensions>
+	  </plugin>
+      </plugins>
+    </build>
 </project>

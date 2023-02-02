@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.List;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
@@ -22,7 +24,7 @@ public interface SwissTimingReplayService {
 
     List<SwissTimingReplayRace> listReplayRaces(String swissTimingUrlText);
 
-    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream) throws IOException,
+    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream, Charset charset) throws IOException,
             org.json.simple.parser.ParseException;
 
     DateFormat getStartTimeFormat();
@@ -48,7 +50,7 @@ public interface SwissTimingReplayService {
     void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String swissTimingUrl, String raceName,
             String raceID, String boatClassName, TrackerManager trackerManager,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

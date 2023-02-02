@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.gwt.core.client.GWT;
+import java.util.logging.Logger;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -21,6 +20,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author c5163874, Simon Marcel Pamies
  */
 public class AsyncActionsExecutor {
+    private final static Logger logger = Logger.getLogger(AsyncActionsExecutor.class.getName());
+    
     private class ExecutionJob<T> implements AsyncCallback<T> {
         private final AsyncAction<T> action;
         private final String category;
@@ -56,7 +57,7 @@ public class AsyncActionsExecutor {
         @Override
         public void onFailure(Throwable caught) {
             try {
-                GWT.log("Execution failure for action of type " + getType() + ", category "+getCategory());
+                logger.warning("Execution failure for action of type " + getType() + ", category "+getCategory());
                 this.callback.onFailure(caught);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);
@@ -175,7 +176,7 @@ public class AsyncActionsExecutor {
                 }
                 numActionsOfType = 0;
             } else {
-                GWT.log("Dropping action of type " + job.getType() + ", category "+job.getCategory());
+                logger.info("Dropping action of type " + job.getType() + ", category "+job.getCategory());
                 /* don't put the call into the execution queue, but save it as the last one of each type
                  * after each successful execution of a job checkForEmptyCallQueue will check if there
                  * are other jobs of that type that need execution and execute the last one thus
@@ -215,7 +216,7 @@ public class AsyncActionsExecutor {
         Integer numActionsPerType = actionsPerTypeCounter.get(type);
         if (numActionsPerType != null && numActionsPerType < maxPendingCallsPerType && lastRequestedActionsNotBeingSentOut.containsKey(type)) {
             ExecutionJob<?> lastRequestedAction = lastRequestedActionsNotBeingSentOut.remove(type);
-            GWT.log("Executing last queued action of type: " + lastRequestedAction.getType());
+            logger.info("Executing last queued action of type: " + lastRequestedAction.getType());
             execute(lastRequestedAction);
         }
     }

@@ -2,13 +2,12 @@ package com.sap.sailing.server.trackfiles.test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
 
-import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
@@ -16,6 +15,7 @@ import com.sap.sailing.server.trackfiles.impl.BaseBravoDataImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.BravoDataImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DownsamplerTo1HzProcessor;
 import com.sap.sailing.server.trackfiles.impl.doublefix.LearningBatchProcessor;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractBravoDataImportTest {
     
@@ -23,7 +23,6 @@ public abstract class AbstractBravoDataImportTest {
 
     protected BaseBravoDataImporterImpl bravoDataImporter;
     private int callbackCallCount = 0;
-    private double sumRideHeightInMeters = 0.0;
     
     protected abstract int getTrackColumnCount();
     
@@ -38,7 +37,6 @@ public abstract class AbstractBravoDataImportTest {
     @Before
     public void setUp() {
         this.callbackCallCount = 0;
-        this.sumRideHeightInMeters = 0.0;
         bravoDataImporter = new BaseBravoDataImporterImpl(getColumnData(), BravoDataImporterImpl.BRAVO_TYPE) {
             protected com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor createDownsamplingProcessor(
                     DoubleVectorFixImporter.Callback callback,
@@ -52,11 +50,8 @@ public abstract class AbstractBravoDataImportTest {
     
     protected void testImport(ImportDataDefinition importData) throws FormatNotSupportedException, IOException {
         try (final InputStream is = importData.getInputStream()) {
-            bravoDataImporter.importFixes(is, (fixes, device) -> {
-                for (DoubleVectorFix fix : fixes) {
-                    callbackCallCount++;
-                    sumRideHeightInMeters += new BravoFixImpl(fix).getRideHeight().getMeters();
-                }
+            bravoDataImporter.importFixes(is, Charset.defaultCharset(), (fixes, device) -> {
+                callbackCallCount+=Util.size(fixes);
             }, "filename", "source", /* downsample */ true);
             Assert.assertEquals(importData.getExpectedFixesCount(), downsampler.getCountSourceTtl());
             Assert.assertEquals(importData.getExpectedFixesConsolidated(), downsampler.getCountImportedTtl());

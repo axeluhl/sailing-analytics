@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,8 +35,8 @@ import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.replication.ReplicationServletActions.Action;
-import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -291,13 +292,13 @@ public class ReplicationServlet extends AbstractHttpServlet {
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
         final O operation;
         try {
-            operation = replicable.readOperation(is);
+            operation = replicable.readOperation(is, /* classLoaderCache */ new HashMap<>());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error trying to de-serialize an operation for replicable "+replicable.getId(), e);
             throw e;
         }
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-        logger.info("Applying operation of type " + operation.getClass().getName()
+        logger.info("Applying operation of type " + operation.getClassForLogging().getName()
                 + " received from replica to replicable " + replicable.toString());
         try {
             replicable.apply(operation);

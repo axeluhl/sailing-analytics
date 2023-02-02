@@ -40,6 +40,7 @@ import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -282,6 +283,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
+    public SecuredDTO addSecurityInformation(SecuredDTO securedDTO) {
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDTO);
+        return securedDTO;
+    }
+
+    @Override
     public SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions) {
         return null;
     }
@@ -395,6 +402,4 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private HttpSession getHttpSession() {
         return getThreadLocalRequest().getSession();
     }
-
-
 }

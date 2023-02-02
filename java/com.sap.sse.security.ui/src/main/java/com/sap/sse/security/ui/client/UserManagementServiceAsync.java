@@ -15,6 +15,7 @@ import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -86,10 +87,18 @@ public interface UserManagementServiceAsync {
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 
-
     void login(String username, String password, AsyncCallback<SuccessInfo> callback);
 
     void logout(AsyncCallback<SuccessInfo> callback);
 
     void getAllHasPermissions(AsyncCallback<ArrayList<HasPermissions>> callback);
+
+    /**
+     * Adds security information (ownership, ACLs) to the {@link SecuredDTO} passed as parameter, in place. See
+     * {@link SecuredDTO#setOwnership(com.sap.sse.security.shared.dto.OwnershipDTO)} and
+     * {@link SecuredDTO#setAccessControlList(AccessControlListDTO)}. The DTO augmented this way is returned by the
+     * method, hence the security information added will be serialized to the client which can then receive it
+     * in the {@code callback} passed.
+     */
+    void addSecurityInformation(SecuredDTO securedDTO, AsyncCallback<SecuredDTO> callback);
 }

@@ -41,9 +41,6 @@ public class HomePage extends HostPageWithAuthentication {
     @FindBy(how=BySeleniumId.class, using = "supportAnchor")
     private WebElement sapSupportAnchor;
 
-    @FindBy(how = BySeleniumId.class, using = "feedbackAnchor")
-    private WebElement feedbackAnchor;
-    
     @FindBy(how= BySeleniumId.class, using = "whatsNewAnchor")
     private WebElement whatsNewAnchor;
     
@@ -114,10 +111,6 @@ public class HomePage extends HostPageWithAuthentication {
     
     public WebElement getSupportLink() {
         return sapSupportAnchor;
-    }
-    
-    public WebElement getFeedbackLink() {
-        return feedbackAnchor;
     }
     
     public WebElement getNewsLink() {

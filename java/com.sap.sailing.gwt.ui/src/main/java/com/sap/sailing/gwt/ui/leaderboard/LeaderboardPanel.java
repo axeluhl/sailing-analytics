@@ -126,7 +126,13 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -233,6 +239,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     protected LeaderboardDTO leaderboard;
+    final Map<Action, Boolean> premiumLeaderboardPermissions = new HashMap<>();
 
     private final TotalRankColumn totalRankColumn;
     
@@ -334,6 +341,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private HandlerRegistration leaderboardAsTableSelectionModelRegistration;
 
     private final FlowPanel contentPanel = new FlowPanel();
+    protected final PaywallResolver paywallResolver;
 
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -356,6 +364,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private final AsyncActionsExecutor asyncActionsExecutor;
 
+    
     /**
      * See also {@link #getDefaultSortColumn()}. If no other column is explicitly selected for sorting and this
      * attribute holds a non-<code>null</code> string identifying a valid race by name that is represented in this
@@ -411,16 +420,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,
-            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider,
-                leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
+                leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes, sailingCF);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 new Timer(
                         // perform the first request as "live" but don't by default auto-play
@@ -430,7 +439,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false, style, flagImageResolver, availableDetailTypes);
+                /* enableSyncScroller */ false, style, flagImageResolver, availableDetailTypes, sailingCF);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
@@ -440,7 +449,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, 
+            Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         super(parent, context);
         this.style = style;
         this.showSelectionCheckbox = showSelectionCheckbox;
@@ -468,9 +478,21 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         LEG_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
-
+        this.paywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory());
+        // Now register a user status event handler that notices changes in user sign-in/out or premium status change.
+        // Leaderboard columns can depend on permissions, and currently (and we should change that!) the filtering
+        // happens in the LeaderboardSettingsComponentDialog. Therefore, in order to filter the current settings
+        // based on the user permissions it is currently required to instantiate (but not show) a settings dialog
+        // that is initialized with the current settings, then retrieving the filtered settings using getResult() and
+        // updating those using updateSettings(...).
+        sailingCF.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                final LS adjustedSettingsAfterUserChange = new SettingsDialog<LS>(LeaderboardPanel.this, stringMessages).getResult();
+                updateSettings(adjustedSettingsAfterUserChange);
+            }
+        });
         overallDetailColumnMap = createOverallDetailColumnMap();
-
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
         }
@@ -571,13 +593,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected void initialize(LS settings) {
         setDefaultRaceColumnSelection(settings);
-
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
         updateSettings(settings);
         style.afterConstructorHook(this);
-        
         //ensure proper margin styling
         contentPanel.add(new Label());
     }
@@ -684,10 +704,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.isShowCompetitorNationality = isShowCompetitorNationality;
     }
 
+    @Override
     public void updateSettings(final LS newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
-
         if (newSettings.getOverallDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), DetailType.getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
@@ -726,7 +746,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     removeBusyTask();
                 }
             }
-
         };
         boolean newShallAddOverallDetails = shallAddOverallDetails();
         if (oldShallAddOverallDetails == newShallAddOverallDetails || oldShallAddOverallDetails
@@ -924,7 +943,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             BoatDTO boat = boatFetcher.getBoat(object);
-            sb.appendEscaped(getShortInfo(boat));
+            if (boat != null) {
+                sb.appendEscaped(getShortInfo(boat));
+            }
         }
         
         private String getShortInfo(BoatDTO boat) {
@@ -1487,12 +1508,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren() {
+        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren(boolean filterByPermissions) {
             List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new ArrayList<>();
-            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
+            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren(filterByPermissions)) {
                 result.add(column);
             }
-
             if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {
                 if (boatInfoColumn == null) {
                     BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> getLeaderboard()
@@ -1501,7 +1521,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
                 result.add(boatInfoColumn);
             }
-
             if (isExpanded() && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
@@ -1978,10 +1997,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * @author Axel Uhl (D043530)
      * 
      */
-    private class TotalNetPointssColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
+    private class TotalNetPointsColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
         private final String columnStyle;
 
-        protected TotalNetPointssColumn(String columnStyle) {
+        protected TotalNetPointsColumn(String columnStyle) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.columnStyle = columnStyle;
             setHorizontalAlignment(ALIGN_CENTER);
@@ -2269,8 +2288,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_TRAVELED,
                         e -> e.totalDistanceTraveledInMeters, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                        new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+            new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                    new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
                 new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
@@ -2464,6 +2483,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         addColumnStyles(/* startColumn */columnIndex);
     }
 
+    /**
+     * Looks up the column {@code c} in the {@link #getLeaderboardTable() leaderboard table} and if found,
+     * removes it. If not found, nothing happens.
+     */
     protected void removeColumn(Column<LeaderboardRowDTO, ?> c) {
         int columnIndex = getLeaderboardTable().getColumnIndex(c);
         if (columnIndex != -1) {
@@ -2568,6 +2591,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * values on the columns.
      */
     public void updateLeaderboard(LeaderboardDTO leaderboard) {
+        if (leaderboard != null) {
+            // check premium leaderboard permissions only on total set of actions defined on DetailType (should be less)
+            // instead of call hasPermission on each single DetailType and collect result in premiumLeaderboardPermissions map.
+            Set<Action> premiumLeaderboardActions = DetailType
+                    .getAllPremiumActionsFromSubset(overallDetailColumnMap.keySet());
+            premiumLeaderboardPermissions.clear();
+            premiumLeaderboardPermissions.putAll(paywallResolver
+                    .getHasPermissionMap(premiumLeaderboardActions, leaderboard));
+        }
         if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
                     leaderboard);
@@ -2861,7 +2893,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         // getAvailableOverallDetailColumnTypes()
         for (DetailType overallDetailType : DetailType.getAvailableOverallDetailColumnTypes()) {
             if (selectedOverallDetailColumns.contains(overallDetailType)
-                    && overallDetailColumnMap.containsKey(overallDetailType)) {
+                    && overallDetailColumnMap.containsKey(overallDetailType)
+                    && (overallDetailType.getPremiumAction() == null
+                            || premiumLeaderboardPermissions.get(overallDetailType.getPremiumAction()))) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
             }
         }
@@ -3085,7 +3119,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     private void addRaceColumn(RaceColumn<?> raceColumn) {
         if (getLeaderboardTable().getColumn(
-                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn) {
+                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointsColumn) {
             removeColumn(getLeaderboardTable().getColumnCount() - 1);
         }
         addColumn(raceColumn);
@@ -3217,8 +3251,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private void ensureTotalsColumn() {
         // add a totals column on the right
         if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable().getColumn(
-                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn)) {
-            addColumn(new TotalNetPointssColumn(TOTAL_COLUMN_STYLE));
+                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointsColumn)) {
+            addColumn(new TotalNetPointsColumn(TOTAL_COLUMN_STYLE));
         }
     }
 
@@ -3629,4 +3663,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         sb.appendHtmlConstant("</div>");
     }
 
+    public PaywallResolver getPaywallResolver() {
+        return this.paywallResolver;
+    }
 }

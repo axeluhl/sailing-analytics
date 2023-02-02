@@ -10,9 +10,9 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -24,6 +24,7 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClientFactory {
 
@@ -123,6 +124,11 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
                         });
             }
         });
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return securityProvider.getSubscriptionServiceFactory();
     }
 
 }

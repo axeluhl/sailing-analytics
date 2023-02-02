@@ -96,7 +96,7 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                     final QuickRankDTO quickRank = new QuickRankDTO(c, /* oneBasedRank */ 0,
                             /* leg number ignored */ 0);
                     QuickRankDTO oldQuickRank = quickRanks.put(c.getIdAsString(), quickRank);
-                    if (Util.equalsWithNull(oldQuickRank, quickRank)) {
+                    if (!Util.equalsWithNull(oldQuickRank, quickRank)) {
                         notifyListenersRankChanged(c.getIdAsString(), oldQuickRank, quickRank);
                     }
                 }

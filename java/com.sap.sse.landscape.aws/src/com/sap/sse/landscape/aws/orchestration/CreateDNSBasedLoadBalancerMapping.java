@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import com.jcraft.jsch.JSchException;
@@ -37,9 +36,6 @@ public class CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT extends App
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>
 implements Procedure<ShardingKey> {
-    private static final String DNS_MAPPED_ALB_NAME_PREFIX = "DNSMapped-";
-    private static final Pattern ALB_NAME_PATTERN = Pattern.compile(DNS_MAPPED_ALB_NAME_PREFIX+"(.*)$");
-    
     public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
     T extends CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
@@ -87,7 +83,7 @@ implements Procedure<ShardingKey> {
             ApplicationLoadBalancer<ShardingKey> result = null;
             final Set<String> loadBalancerNames = new HashSet<>();
             for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : landscape.getLoadBalancers(region)) {
-                if (ALB_NAME_PATTERN.matcher(loadBalancer.getName()).matches()) {
+                if (ApplicationLoadBalancer.ALB_NAME_PATTERN.matcher(loadBalancer.getName()).matches()) {
                     loadBalancerNames.add(loadBalancer.getName());
                     if (Util.size(loadBalancer.getRules()) <= MAX_RULES_PER_ALB - NUMBER_OF_RULES_PER_REPLICA_SET) {
                         result = loadBalancer;
@@ -105,18 +101,18 @@ implements Procedure<ShardingKey> {
         }
 
         /**
-         * Picks a new load balancer name following the pattern {@link #DNS_MAPPED_ALB_NAME_PREFIX}{@code [0-9]+} that is not
+         * Picks a new load balancer name following the pattern {@link #ApplicationLoadBalancer.DNS_MAPPED_ALB_NAME_PREFIX}{@code [0-9]+} that is not
          * part of {@code loadBalancerNames} and has the least number.
          */
         private String getAvailableDNSMappedAlbName(Set<String> loadBalancerNames) {
             final Set<Integer> numbersTaken = new HashSet<>();
             for (final String loadBalancerName : loadBalancerNames) {
-                final Matcher matcher = ALB_NAME_PATTERN.matcher(loadBalancerName);
+                final Matcher matcher = ApplicationLoadBalancer.ALB_NAME_PATTERN.matcher(loadBalancerName);
                 if (matcher.find()) {
                     numbersTaken.add(Integer.parseInt(matcher.group(1)));
                 }
             }
-            return DNS_MAPPED_ALB_NAME_PREFIX + IntStream.range(0, MAX_ALBS_PER_REGION).filter(i->!numbersTaken.contains(i)).min().getAsInt();
+            return ApplicationLoadBalancer.DNS_MAPPED_ALB_NAME_PREFIX + IntStream.range(0, ApplicationLoadBalancer.MAX_ALBS_PER_REGION).filter(i->!numbersTaken.contains(i)).min().getAsInt();
         }
 
         @Override

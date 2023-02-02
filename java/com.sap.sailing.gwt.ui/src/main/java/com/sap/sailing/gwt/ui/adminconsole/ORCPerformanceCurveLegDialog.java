@@ -36,6 +36,8 @@ public class ORCPerformanceCurveLegDialog extends AbstractORCPerformanceCurveLeg
     private final Button fetchTrackingBasedDistanceAndTwaButton;
     private final ListBox legTypeBox;
     private final DoubleBox distanceInNauticalMilesBox;
+    private final DoubleBox twdBox;
+    private final DoubleBox legDirectionBox;
     private final DoubleBox twaBox;
     private final StringMessages stringMessages;
     private final ListDataProvider<WaypointDTO> waypointList;
@@ -57,7 +59,11 @@ public class ORCPerformanceCurveLegDialog extends AbstractORCPerformanceCurveLeg
         fetchTrackingBasedDistanceAndTwaButton.addClickHandler(e->fetchTrackingBasedDistanceAndTwa());
         legTypeBox = createLegTypeBox(orcLegParametersSoFar);
         distanceInNauticalMilesBox = createDoubleBox(/* visibleLength */ 5);
+        twdBox = createDoubleBox(/* visibleLength */ 5);
+        legDirectionBox = createDoubleBox(/* visibleLength */ 5);
         twaBox = createDoubleBox(/* visibleLength */ 5);
+        twdBox.addValueChangeHandler(e->updateTwaBoxFromTwdAndLegDirection(twdBox, legDirectionBox, twaBox));
+        legDirectionBox.addValueChangeHandler(e->updateTwaBoxFromTwdAndLegDirection(twdBox, legDirectionBox, twaBox));
         if (orcLegParametersSoFar != null) {
             distanceInNauticalMilesBox.setValue(orcLegParametersSoFar.getLength().getNauticalMiles());
             if (orcLegParametersSoFar.getTwa() != null) {
@@ -99,14 +105,19 @@ public class ORCPerformanceCurveLegDialog extends AbstractORCPerformanceCurveLeg
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(4, 2);
-        result.setWidget(0, 0, new Label(stringMessages.legType()));
-        result.setWidget(0, 1, legTypeBox);
-        result.setWidget(1, 0, new Label(stringMessages.distanceInNauticalMiles()));
-        result.setWidget(1, 1, distanceInNauticalMilesBox);
-        result.setWidget(2, 0, new Label(stringMessages.legTwaInDegrees()));
-        result.setWidget(2, 1, twaBox);
-        result.setWidget(3, 0, fetchTrackingBasedDistanceAndTwaButton);
+        final Grid result = new Grid(6, 2);
+        int row = 0;
+        result.setWidget(row, 0, new Label(stringMessages.legType()));
+        result.setWidget(row++, 1, legTypeBox);
+        result.setWidget(row, 0, new Label(stringMessages.distanceInNauticalMiles()));
+        result.setWidget(row++, 1, distanceInNauticalMilesBox);
+        result.setWidget(row, 0, new Label(stringMessages.twdInDegrees()));
+        result.setWidget(row++, 1, twdBox);
+        result.setWidget(row, 0, new Label(stringMessages.legDirectionInDegrees()));
+        result.setWidget(row++, 1, legDirectionBox);
+        result.setWidget(row, 0, new Label(stringMessages.legTwaInDegrees()));
+        result.setWidget(row++, 1, twaBox);
+        result.setWidget(row, 0, fetchTrackingBasedDistanceAndTwaButton);
         return result;
     }
 

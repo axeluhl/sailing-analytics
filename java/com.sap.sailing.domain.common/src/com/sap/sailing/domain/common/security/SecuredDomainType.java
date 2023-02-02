@@ -39,24 +39,36 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions FILE_STORAGE = new SecuredDomainType("FILE_STORAGE");
     
     // AdminConsole permissions
-    public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
+    public static final HasPermissions EVENT = new SecuredDomainType("EVENT", DefaultActions
+            .plus(EventActions.UPLOAD_MEDIA));
 
     public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA");
 
-    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD");
+    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD", DefaultActions
+            .plus(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION));
 
     public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP");
 
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE",
             TrackedRaceActions.ALL_ACTIONS);
     
+    public static enum EventActions implements Action {
+        UPLOAD_MEDIA
+    }
+    
+    public static enum LeaderboardActions implements Action {
+        PREMIUM_LEADERBOARD_INFORMATION
+    }
+    
     public static enum TrackedRaceActions implements Action {
         CAN_REPLAY_DURING_LIVE_RACES,
         DETAIL_TIMER,
-        EXPORT;
+        EXPORT,
+        SIMULATOR,
+        VIEWSTREAMLETS,
+        VIEWANALYSISCHARTS;
 
-        private static final Action[] ALL_ACTIONS = DefaultActions.plus(CAN_REPLAY_DURING_LIVE_RACES, DETAIL_TIMER,
-                EXPORT);
+        private static final Action[] ALL_ACTIONS = DefaultActions.plus(TrackedRaceActions.values());
 
         public static final Action[] MUTATION_ACTIONS = new Action[] { EXPORT, DefaultActions.DELETE,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,

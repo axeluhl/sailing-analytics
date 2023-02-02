@@ -17,7 +17,8 @@ Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sse.replication.interfaces,
- com.sap.sse.security
+ com.sap.sse.security,
+ com.sap.sse.shared.android
 Export-Package: com.sap.sailing.domain.swisstimingreplayadapter,
  com.sap.sailing.domain.swisstimingreplayadapter.impl;x-friends:="com.sap.sailing.mongodb.test"
 Import-Package: com.sap.sse.security,

@@ -35,7 +35,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.SPLASH_BLUE, BoatClassMasterdata.SPLASH_RED, BoatClassMasterdata.SPLASH_GREEN,
                 BoatClassMasterdata.STAR, BoatClassMasterdata.TECHNO_293, BoatClassMasterdata.TECHNO_293_PLUS);
         BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX,
-                BoatClassMasterdata._29ER, BoatClassMasterdata._18Footer);
+                BoatClassMasterdata._29ER, BoatClassMasterdata._18Footer, BoatClassMasterdata.WASZP);
         BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40,
                 BoatClassMasterdata.D_35, BoatClassMasterdata.SKUD_18, BoatClassMasterdata.MOCRA, BoatClassMasterdata.WETA);
         BoatClassVectorGraphics gc32 = new GC32VectorGraphics(BoatClassMasterdata.GC_32, BoatClassMasterdata.M32);
@@ -49,8 +49,11 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.IRC, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
                 BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS_TERA, BoatClassMasterdata.RS100, BoatClassMasterdata.RS21, BoatClassMasterdata.TP52,
                 BoatClassMasterdata.CLUB_SWAN_50, BoatClassMasterdata.BAVARIA_CRUISER_41S, BoatClassMasterdata.BAVARIA_CRUISER_45,
-                BoatClassMasterdata.BAVARIA_CRUISER_46, BoatClassMasterdata.SPAEKHUGGER, BoatClassMasterdata.SCAN_KAP_99,
-                BoatClassMasterdata.BB10M, BoatClassMasterdata.WAYFARER, BoatClassMasterdata.X_332);
+                BoatClassMasterdata.BAVARIA_CRUISER_46, BoatClassMasterdata.BENETEAU_FIRST_35, BoatClassMasterdata.BENETEAU_FIRST_45,
+                BoatClassMasterdata.SPAEKHUGGER, BoatClassMasterdata.SCAN_KAP_99,
+                BoatClassMasterdata.BB10M, BoatClassMasterdata.WAYFARER, BoatClassMasterdata.X_332,
+                BoatClassMasterdata.BRASSFAHRT_I, BoatClassMasterdata.BRASSFAHRT_II, BoatClassMasterdata.BRASSFAHRT_III,
+                BoatClassMasterdata.BRASSFAHRT_IV, BoatClassMasterdata.BRASSFAHRT_V);
         BoatClassVectorGraphics dinghyWithSpinnaker = new DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata._420,
                 BoatClassMasterdata._470, BoatClassMasterdata._5O5, BoatClassMasterdata.CADET, BoatClassMasterdata.FLYING_DUTCHMAN,
                 BoatClassMasterdata.FOLKBOAT, BoatClassMasterdata.DYAS, BoatClassMasterdata.DRAGON_INT,

@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -134,6 +135,7 @@ import com.sap.sse.security.operations.SetOwnershipOperation;
 import com.sap.sse.security.operations.SetPreferenceOperation;
 import com.sap.sse.security.operations.SetSettingOperation;
 import com.sap.sse.security.operations.UnsetPreferenceOperation;
+import com.sap.sse.security.operations.UpdateItemPriceOperation;
 import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
@@ -156,6 +158,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SecurityAccessControlList;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -174,7 +177,9 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.util.RemoteServerUtil;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -216,6 +221,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final static Environment shiroEnvironment;
 
     private final HasPermissionsProvider hasPermissionsProvider;
+    private final SubscriptionPlanProvider subscriptionPlanProvider;
 
     private String sharedAcrossSubdomainsOf;
     
@@ -226,6 +232,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final AclResolver<AccessControlList, Ownership> aclResolver;
     
     private final PermissionChangeListeners permissionChangeListeners;
+    
+    private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
     
     static {
         shiroConfiguration = new Ini();
@@ -246,8 +254,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      *            replication.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider) {
-        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider) {
+        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, subscriptionPlanProvider,
                 /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
@@ -258,14 +266,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * be shared as well.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+        initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
         }
         logger.info("Initializing Security Service with user store " + userStore);
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
+        this.subscriptionPlanProvider = subscriptionPlanProvider;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
         this.store = userStore;
         this.accessControlStore = accessControlStore;
@@ -292,6 +302,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         aclResolver = new SecurityServiceAclResolver(accessControlStore);
     }
     
+    @Override
+    public ClassLoader getDeserializationClassLoader() {
+        return initialLoadClassLoaderRegistry.getCombinedMasterDataClassLoader();
+    }
+
+    @Override
+    public ClassLoaderRegistry getInitialLoadClassLoaderRegistry() {
+        return initialLoadClassLoaderRegistry;
+    }
+
     private ReplicatingCacheManager loadReplicationCacheManagerContents() {
         logger.info("Loading session cache manager contents");
         int count = 0;
@@ -312,7 +332,31 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public Iterable<? extends HasPermissions> getAllHasPermissions() {
         return hasPermissionsProvider.getAllHasPermissions();
     }
-
+    
+    @Override
+    public Map<Serializable, SubscriptionPlan> getAllSubscriptionPlans() {
+        return subscriptionPlanProvider.getAllSubscriptionPlans();
+    }
+    
+    @Override
+    public SubscriptionPlan getSubscriptionPlanById(String planId) {
+        return subscriptionPlanProvider.getAllSubscriptionPlans().get(planId);
+    }
+    
+    @Override
+    public SubscriptionPlan getSubscriptionPlanByItemPriceId(String itemPriceId) {
+        SubscriptionPlan result = null;
+        final Map<Serializable, SubscriptionPlan> allSubscriptionPlans = getAllSubscriptionPlans();
+        for (SubscriptionPlan plan : allSubscriptionPlans.values()) {
+            for(SubscriptionPrice price : plan.getPrices()) {
+                if(itemPriceId.equals(price.getPriceId())) {
+                    result = plan;
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     public void initialize() {
         initEmptyStore();
@@ -518,6 +562,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
+    }
+    
+    public AccessControlListAnnotation getOrCreateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        return accessControlStore.getOrCreateAcl(idOfAccessControlledObjectAsString);
     }
 
     /**
@@ -2077,15 +2125,30 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
+    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype, boolean makeReadableForAll) {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
             result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
                     rolePrototype.getPermissions());
             setOwnership(result.getIdentifier(), null, getServerGroup());
+        } else if (rolePrototype.getPermissions() != null
+                && !rolePrototype.getPermissions().equals(potentiallyExistingRoleDefinition.getPermissions())) {
+            store.setRoleDefinitionPermissions(potentiallyExistingRoleDefinition.getId(),
+                    rolePrototype.getPermissions());
+            RoleDefinition roleDefinition = store.getRoleDefinition(rolePrototype.getId());
+            result = roleDefinition;
         } else {
             result = potentiallyExistingRoleDefinition;
+        }
+        if (makeReadableForAll) {
+            AccessControlListAnnotation acl = getOrCreateAccessControlList(result.getIdentifier());
+            final Set<String> allowedActions = acl.getAnnotation().getAllowedActions(null);
+            if (!allowedActions.contains(DefaultActions.READ.name())) {
+                // make role publicly readable
+                addToAccessControlList(result.getIdentifier(), 
+                        /* for all users */ null, DefaultActions.READ.name());
+            }
         }
         return result;
     }
@@ -2103,8 +2166,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null);
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null, classLoaderCache);
     }
 
     @Override
@@ -2299,33 +2362,41 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
-        return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
+        return object == null ? true
+                : SecurityUtils.getSubject().isPermitted(
+                        object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
     public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
-        return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+        return object == null ? true
+                : SecurityUtils.getSubject().isPermitted(
+                        object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
     @Override
     public boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
-        return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
+        return object == null ? true
+                : SecurityUtils.getSubject().isPermitted(
+                        object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
     }
 
-    public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    @Override
+    public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
         boolean isPermitted = true;
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object));
+                isPermitted &= SecurityUtils.getSubject()
+                        .isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
         return isPermitted;
     }
 
-    public boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    @Override
+    public boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
         boolean result = object == null;
         if (object != null) {
             for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
@@ -2341,21 +2412,24 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
+            SecurityUtils.getSubject().checkPermission(
+                    object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
         }
     }
 
     @Override
     public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+            SecurityUtils.getSubject().checkPermission(
+                    object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
         }
     }
 
     @Override
     public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
+            SecurityUtils.getSubject().checkPermission(
+                    object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
         }
     }
 
@@ -2367,10 +2441,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(actions[i], object));
+                SecurityUtils.getSubject()
+                        .checkPermission(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
     }
@@ -2546,6 +2622,20 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                         + (currentSubscription != null ? currentSubscription.toString() : "null"));
                 logger.info(() -> "New plan subscription: "
                         + (newSubscription != null ? newSubscription.toString() : "null"));
+                // In some cases there is no invoice or transaction information. E.g. if the subscription has
+                // been cancelled.
+                // To ensure information about previous payments is preserved, the subscription is patched.
+                if (currentSubscription != null && newSubscription != null
+                        && newSubscription.getSubscriptionId() != null
+                        && newSubscription.getSubscriptionId().equals(currentSubscription.getSubscriptionId())) {
+                    if (currentSubscription.getTransactionStatus() != null
+                            && newSubscription.getTransactionStatus() == null) {
+                        newSubscription.patchTransactionData(currentSubscription);
+                    }
+                    if (currentSubscription.getInvoiceId() != null && newSubscription.getInvoiceId() == null) {
+                        newSubscription.patchInvoiceData(currentSubscription);
+                    }
+                }
                 if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
                     updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
                 }
@@ -2573,7 +2663,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             // New subscription doesn't have plan id, that means it's an empty subscription model which is used for
             // clearing all user subscriptions
             shouldProcess = true;
-        } else if (SubscriptionPlan.getPlan(newSubscription.getPlanId()) != null) {
+        } else if (subscriptionPlanProvider.getAllSubscriptionPlans().get(newSubscription.getPlanId()) != null) {
             if (currentSubscription == null) {
                 // New subscription plan is valid, but current subscription of the plan is empty
                 shouldProcess = true;
@@ -2636,7 +2726,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         return newUserSubscriptions;
     }
-
+    
     /**
      * Add or remove subscription plan's roles for user
      */
@@ -2646,8 +2736,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         // in case new subscription has no planId, it means the subscription is an empty one with just meta data for
         // update times, and user doesn't subscribe to any plans, so all plan's roles assigned to the user must be
         // removed, but only if no other plan that the user still is subscribed to implies an equal role:
+        Map<Serializable, SubscriptionPlan> allSubscriptionPlans = subscriptionPlanProvider.getAllSubscriptionPlans();
         if (newSubscription != null && !newSubscription.hasPlan()) {
-            SubscriptionPlan[] plans = SubscriptionPlan.values();
+            Iterable<SubscriptionPlan> plans = allSubscriptionPlans.values();
             for (SubscriptionPlan plan : plans) {
                 removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
             }
@@ -2657,11 +2748,11 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             if (currentSubscription != null && currentSubscription.hasPlan()
                     && currentSubscription.isActiveSubscription() && newSubscription != null
                     && !newSubscription.isActiveSubscription()) {
-                SubscriptionPlan currentPlan = SubscriptionPlan.getPlan(currentSubscription.getPlanId());
+                SubscriptionPlan currentPlan = allSubscriptionPlans.get(currentSubscription.getPlanId());
                 removeUserPlanRoles(user, currentPlan, /* checkOverlappingRoles */ true);
             }
             if (newSubscription != null && newSubscription.hasPlan() && newSubscription.isActiveSubscription()) {
-                SubscriptionPlan newPlan = SubscriptionPlan.getPlan(newSubscription.getPlanId());
+                SubscriptionPlan newPlan = allSubscriptionPlans.get(newSubscription.getPlanId());
                 addUserPlanRoles(user, newPlan);
             }
         }
@@ -2677,7 +2768,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private void removeUserPlanRoles(User user, SubscriptionPlan plan, boolean checkOverlappingRoles)
             throws UserManagementException {
         if (plan != null) {
-            logger.info(() -> "Remove user roles of subscription plan " + plan.getName());
+            logger.info(() -> "Remove user roles of subscription plan " + plan.getId());
             final Role[] rolesToRemove;
             if (checkOverlappingRoles) {
                 rolesToRemove = getSubscriptionPlanUserRolesWithoutOverlapping(user, plan);
@@ -2692,15 +2783,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
-            logger.info(() -> "Add user roles for subscription plan " + plan.getName());
+            logger.info(() -> "Add user roles for subscription plan " + plan.getId());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
-                store.addRoleForUser(user.getName(), role);
+                addRoleForUserAndSetUserAsOwner(user, role);
             }
         }
     }
 
-    private Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
+    @Override
+    public Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
         final List<Role> roles = new ArrayList<Role>();
         for (SubscriptionPlanRole planRole : plan.getRoles()) {
             roles.add(getSubscriptionPlanUserRole(user, planRole));
@@ -2716,7 +2808,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         Iterable<Subscription> subscriptions = user.getSubscriptions();
         for (Subscription subscription : subscriptions) {
             if (subscription.isActiveSubscription() && !subscription.getPlanId().equals(plan.getId())) {
-                SubscriptionPlan otherPlan = SubscriptionPlan.getPlan(subscription.getPlanId());
+                SubscriptionPlan otherPlan = subscriptionPlanProvider.getAllSubscriptionPlans().get(subscription.getPlanId());
                 for (SubscriptionPlanRole planRole : otherPlan.getRoles()) {
                     otherPlanRoles.add(getSubscriptionPlanUserRole(user, planRole));
                 }
@@ -2734,7 +2826,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     /**
      * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}.
-     * These roles are non transitive, hence they can not be 
+     * These roles are non transitive, hence they can not be granted to other users.
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
@@ -2826,18 +2918,39 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final boolean result;
         if (currentSubscription == null && newSubscription == null) {
             result = false;
-        } else if (currentSubscription == null) {
-            // A case when there's no current subscription for a plan, if the plan's new subscription is active then
-            // user roles need to be updated with granted new roles, otherwise if currently user has active subscription
-            // then premium roles need to be removed
-            result = newSubscription.isActiveSubscription() || user.hasActiveSubscription();
         } else if (newSubscription == null) {
             // In case new subscription is null, user's subscriptions won't be changed
             result = false;
+        } else if (!newSubscription.hasPlan()) {
+            // New subscription doesn't have plan id, that means it's an empty subscription model which is used for
+            // clearing all user subscriptions
+            boolean isUserInPossessionOfRoles = false;
+            for (SubscriptionPlan subscriptionPlan : getAllSubscriptionPlans().values()) {
+                isUserInPossessionOfRoles = subscriptionPlan.isUserInPossessionOfRoles(user);
+                if(isUserInPossessionOfRoles) {
+                    break;
+                }
+            }
+            result = isUserInPossessionOfRoles;
+        } else if (currentSubscription == null || currentSubscription.getPlanId() == null) {
+            // A case when there's no current subscription for a plan, if the plan's new subscription is active then
+            // user roles need to be updated with granted new roles. Further, if the user is 
+            // somehow in possession of roles he should not posess, the roles must be removed
+            final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
+            if(subscriptionPlanById == null) {
+                result = false;
+            }else {
+                result = newSubscription.isActiveSubscription() || subscriptionPlanById.isUserInPossessionOfRoles(user);
+            }
         } else {
             assert currentSubscription.getPlanId().equals(newSubscription.getPlanId());
             // in this case user roles will be needed to update only when subscription active status is changed
-            result = newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
+            if (newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription()) {
+                result = true;
+            } else {
+                final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
+                result = !subscriptionPlanById.isUserInPossessionOfRoles(user);
+            }
         }
         return result;
     }
@@ -2851,4 +2964,25 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
         permissionChangeListeners.removePermissionChangeListener(permission, listener);
     }
+
+    @Override
+    public void updateSubscriptionPlanPrices(Map<String, BigDecimal> itemPrices) {
+        apply(new UpdateItemPriceOperation(itemPrices));
+    }
+    
+    @Override
+    public Void internalUpdateSubscriptionPlanPrices(Map<String, BigDecimal> updatedItemPrices) {
+        final Map<Serializable, SubscriptionPlan> allSubscriptionPlans = getAllSubscriptionPlans();
+        for (SubscriptionPlan subscriptionPlan : allSubscriptionPlans.values()) {
+            for (SubscriptionPrice subscriptionPrice : subscriptionPlan.getPrices()) {
+                final BigDecimal updatedPrice = updatedItemPrices.get(subscriptionPrice.getPriceId());
+                if(updatedPrice != null) {
+                    logger.log(Level.INFO, "Setting ItemPrice for SubscriptionPrice " + subscriptionPrice.getPriceId());
+                    subscriptionPrice.setPrice(updatedPrice);
+                }
+            }
+        }
+        return null;
+    }
+
 }

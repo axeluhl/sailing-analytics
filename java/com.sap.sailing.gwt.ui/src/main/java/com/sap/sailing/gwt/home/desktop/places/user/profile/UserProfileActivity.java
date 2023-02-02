@@ -25,31 +25,32 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class UserProfileActivity extends AbstractActivity implements UserProfileView.Presenter {
 
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
-    
+
     protected final AbstractUserProfilePlace currentPlace;
     protected final UserProfileClientFactory clientFactory;
     protected final DesktopPlacesNavigator homePlacesNavigator;
 
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
-    
-    private UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView;
 
-    public UserProfileActivity(AbstractUserProfilePlace place, UserProfileClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay, FlagImageResolver flagImageResolver) {
+    private final UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView;
+
+    public UserProfileActivity(final AbstractUserProfilePlace place, final UserProfileClientFactory clientFactory,
+            final DesktopPlacesNavigator homePlacesNavigator, final NavigationPathDisplay navigationPathDisplay,
+            final FlagImageResolver flagImageResolver) {
         this.currentPlace = place;
         this.clientFactory = clientFactory;
         this.homePlacesNavigator = homePlacesNavigator;
-        currentView = new TabletAndDesktopUserProfileView(flagImageResolver);
+        this.currentView = new TabletAndDesktopUserProfileView(homePlacesNavigator, flagImageResolver);
 
         initNavigationPath(navigationPathDisplay);
     }
-    
-    private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
-        com.sap.sailing.gwt.ui.client.StringMessages i18n = com.sap.sailing.gwt.ui.client.StringMessages.INSTANCE;
+
+    private void initNavigationPath(final NavigationPathDisplay navigationPathDisplay) {
+        final com.sap.sailing.gwt.ui.client.StringMessages i18n = com.sap.sailing.gwt.ui.client.StringMessages.INSTANCE;
         navigationPathDisplay.showNavigationPath(new NavigationItem(i18n.home(), getHomeNavigation()),
                 new NavigationItem(i18n_sec.userDetails(), getUserProfileNavigation()));
     }
-    
+
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         currentView.registerPresenter(this);
@@ -57,30 +58,27 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
         currentView.navigateTabsTo(currentPlace);
         currentView.setAuthenticationContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
 
-        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
-            @Override
-            public void onUserChangeEvent(AuthenticationContextEvent event) {
-                currentView.setAuthenticationContext(event.getCtx());
-            }
-        });
+        eventBus.addHandler(AuthenticationContextEvent.TYPE,
+                event -> currentView.setAuthenticationContext(event.getCtx()));
     }
-    
+
     @Override
-    public void handleTabPlaceSelection(TabView<?, ? extends UserProfileView.Presenter> selectedActivity) {
-        Place tabPlaceToGo = selectedActivity.placeToFire();
+    public void handleTabPlaceSelection(final TabView<?, ? extends UserProfileView.Presenter> selectedActivity) {
+        final Place tabPlaceToGo = selectedActivity.placeToFire();
         clientFactory.getPlaceController().goTo(tabPlaceToGo);
     }
-    
-    public void navigateTo(Place place) {
+
+    @Override
+    public void navigateTo(final Place place) {
         clientFactory.getPlaceController().goTo(place);
     }
-    
+
     @Override
-    public SafeUri getUrl(AbstractSeriesPlace place) {
-        String token = historyMapper.getToken(place);
+    public SafeUri getUrl(final AbstractSeriesPlace place) {
+        final String token = historyMapper.getToken(place);
         return UriUtils.fromString("#" + token);
     }
-    
+
     @Override
     public PlaceNavigation<StartPlace> getHomeNavigation() {
         return homePlacesNavigator.getHomeNavigation();
@@ -89,23 +87,21 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
         return homePlacesNavigator.getUserProfileNavigation();
-
     }
-    
+
     @Override
     public void doTriggerLoginForm() {
         clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent(AuthenticationPlaces.SIGN_IN));
     }
-    
+
     @Override
     public UserProfileClientFactory getClientFactory() {
         return clientFactory;
     }
-    
+
     @Override
     public String getMailVerifiedUrl() {
-        return homePlacesNavigator
-                .getMailVerifiedConfirmationNavigation().getTargetUrl();
+        return homePlacesNavigator.getMailVerifiedConfirmationNavigation().getTargetUrl();
     }
-    
+
 }

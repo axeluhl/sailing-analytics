@@ -14,6 +14,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 
 /**
@@ -33,11 +34,16 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         SubscriptionWebHookEvent event = null;
         try {
             event = (SubscriptionWebHookEvent) request.getAttribute("event");
+            logger.log(Level.INFO, "Handling Webhook Event of type:" + event.getEventType());
             final User user = getUser(event.getCustomerId());
-            if (user != null && !isOutdatedEvent(event, user)) {
-                processEvent(event, user);
+            if (user != null) {
+                if (!isOutdatedEvent(event, user)) {
+                    processEvent(event, user);
+                }
+                sendSuccess(response);
+            } else {
+                logger.warning("User "+event.getCustomerId()+" not found. Ignoring Chargebee webhook callback for that user.");
             }
-            sendSuccess(response);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to proccess Chargebee subscription webhook event "
                     + (event != null ? event.getEventType().getName() : ""), e);
@@ -55,10 +61,10 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
      */
     private boolean isOutdatedEvent(SubscriptionWebHookEvent event, User user) {
         final TimePoint occuredAt = event.getEventOccurredAt();
-        final String planId = event.getPlanId();
+        final String subscriptionId = event.getSubscriptionId();
         boolean isOutdated = false;
-        if (StringUtils.isNotEmpty(planId)) {
-            Subscription subscription = user.getSubscriptionByPlan(planId);
+        if (StringUtils.isNotEmpty(subscriptionId)) {
+            Subscription subscription = user.getSubscriptionById(subscriptionId);
             if (subscription != null) {
                 isOutdated = isOutdatedEventTime(occuredAt, subscription);
             } else {
@@ -84,7 +90,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             }
         }
         if (isOutdated) {
-            logger.info(() -> "Webhook event is outdated and won't be processed");
+            logger.info(() -> "Webhook event " + event.getEventType() + " is outdated and won't be processed");
         }
         return isOutdated;
     }
@@ -134,6 +140,10 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                     updateSubscriptionInvoice(user, userSubscription, event);
                 }
                 break;
+            default:
+                logger.warning(
+                        () -> "Webhook event type was unknown and will not be processed ");
+                break;
             }
             logger.info(() -> "Webhook event \"" + eventType.getName() + "\" has been processed for user "
                     + user.getName());
@@ -149,12 +159,24 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         }
         return userSubscription;
     }
+    
+    private String getPlanIdFromEvent(SubscriptionWebHookEvent event) {
+        String planId = event.getPlanId();
+        if(planId == null) {
+            final String itemPriceId = event.getItemPriceId();
+            final SubscriptionPlan plan = context.getSecurityService().getSubscriptionPlanByItemPriceId(itemPriceId);
+            if(plan != null) {
+                planId = plan.getId();
+            }
+        }
+        return planId;
+    }
 
     private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         return ChargebeeSubscription.createEmptySubscription(event.getPlanId(), event.getEventOccurredAt(),
                 currentSubscription != null ? currentSubscription.getManualUpdatedAt() : Subscription.emptyTime());
     }
-
+    
     /**
      * Build new {@code Subscription} instance from current user subscription and webhook event
      * {@code SubscriptionWebHookEvent}
@@ -184,10 +206,12 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                 paymentStatus = currentSubscription.getPaymentStatus();
             }
         }
-        return new ChargebeeSubscription(event.getSubscriptionId(), event.getPlanId(), event.getCustomerId(),
+        return new ChargebeeSubscription(event.getSubscriptionId(), getPlanIdFromEvent(event), event.getCustomerId(),
                 event.getSubscriptionTrialStart(), event.getSubscriptionTrialEnd(), subscriptionStatus, paymentStatus,
-                transactionType, transactionStatus, invoiceId, invoiceStatus, event.getSubscriptionCreatedAt(),
-                event.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),
+                transactionType, transactionStatus, invoiceId, invoiceStatus, event.getReocurringPaymentValue(),
+                event.getCurrencyCode(), event.getSubscriptionCreatedAt(), event.getSubscriptionUpdatedAt(),
+                event.getActivatedAt(), event.getBillingAt(), event.getCurrentTermEnd(), event.getCancelledAt(),
+                event.getEventOccurredAt(),
                 currentSubscription != null ? currentSubscription.getManualUpdatedAt() : Subscription.emptyTime());
     }
 
@@ -210,8 +234,11 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                     currentSubscription.getTrialStart(), currentSubscription.getTrialEnd(),
                     currentSubscription.getSubscriptionStatus(), paymentStatus,
                     currentSubscription.getTransactionType(), currentSubscription.getTransactionStatus(), invoiceId,
-                    invoiceStatus, currentSubscription.getSubscriptionCreatedAt(),
-                    currentSubscription.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),
+                    invoiceStatus, currentSubscription.getReoccuringPaymentValue(),
+                    currentSubscription.getCurrencyCode(), currentSubscription.getSubscriptionCreatedAt(),
+                    currentSubscription.getSubscriptionUpdatedAt(), currentSubscription.getSubscriptionActivatedAt(),
+                    currentSubscription.getNextBillingAt(), currentSubscription.getCurrentTermEnd(),
+                    currentSubscription.getCancelledAt(), event.getEventOccurredAt(),
                     currentSubscription.getManualUpdatedAt());
             updateUserSubscription(user, newSubscription);
         }

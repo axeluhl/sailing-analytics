@@ -157,9 +157,11 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
+     * 
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * 
+     * @return {@code null} in case the connection attempt timed out
      * @see #createSshChannel(String, Optional, byte[])
      */
     @Override
@@ -178,14 +180,19 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
      * 
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * @return {@code null} in case the connection attempt timed out
      */
     @Override
     public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout,
-                optionalKeyName, privateKeyEncryptionPassphrase));
+        final ChannelExec channelExec = (ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout,
+                        optionalKeyName, privateKeyEncryptionPassphrase);
+        return channelExec == null ? null : new SshCommandChannelImpl(channelExec);
     }
     
+    /**
+     * @return {@code null} in case the connection attempt timed out
+     */
     private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         logger.info(
@@ -268,14 +275,25 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     }
 
     @Override
-    public boolean isManagedByAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup) {
-        return getInstance().tags().stream().filter(tag -> autoScalingGroup != null
-                && tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName()))
+    public boolean isManagedByAutoScalingGroup(Iterable<AwsAutoScalingGroup> autoScalingGroups) {
+        return getInstance().tags().stream().filter(tag -> tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG)
+                && Util.stream(autoScalingGroups).filter(autoScalingGroup -> autoScalingGroup.getName().equals(tag.value())).findAny().isPresent())
                 .findAny().isPresent();
     }
 
     @Override
     public String toString() {
         return getInstanceId();
+    }
+
+    @Override
+    public boolean verifySshKey( Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
+        final String keyName = optionalKeyName.orElseGet(()->getInstance().keyName()); // the SSH key pair name that can be used to log on
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
+        if (keyPair == null) {
+            return false;
+        }
+        final JSch jsch = new JSch();
+        return keyPair.checkPassphrase(jsch, privateKeyEncryptionPassphrase);
     }
 }

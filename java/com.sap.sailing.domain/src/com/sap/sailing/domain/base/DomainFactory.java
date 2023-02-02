@@ -77,7 +77,7 @@ public interface DomainFactory extends SharedDomainFactory<RaceLogAndTrackedRace
      * </pre>
      */
     ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
-            InputStream inputStream, ResolveListener resolver) throws IOException;
+            InputStream inputStream, ResolveListener resolver, Map<String, Class<?>> classLoaderCache) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 

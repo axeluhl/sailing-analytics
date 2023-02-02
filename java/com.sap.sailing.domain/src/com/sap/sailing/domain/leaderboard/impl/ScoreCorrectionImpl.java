@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -19,6 +20,7 @@ import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetche
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -256,11 +258,21 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * earlier races.
      */
     private boolean isCertainlyBeforeRaceFinish(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
+        return isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    /**
+     * Same as {@link #isCertainlyBeforeRaceFinish(TimePoint, RaceColumn, Competitor)}, but with the possibility to
+     * specify a re-use cache, introduced particularly for speeding up the {@link Course#getLastWaypoint()} lookup which
+     * is expected to yield the same result for the entire leaderboard calculation round-trip, however upon each
+     * invocation requires locking.
+     */
+    private boolean isCertainlyBeforeRaceFinish(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final boolean result;
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-        final TimePoint endOfRace;
+        final TimePoint endOfRace = trackedRace == null ? null : trackedRace.getFinishedTime() == null ? trackedRace.getEndOfRace() : trackedRace.getFinishedTime();
         // endOfRace != null means we at least will have a fallback result even if there are no mark passings for the competitor
-        if (trackedRace != null && (endOfRace = trackedRace.getEndOfRace()) != null) {
+        if (endOfRace != null) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
             final MarkPassing lastMarkPassing;
             // count race as finished for the competitor if the finish mark passing exists or the time is after the end of race
@@ -454,7 +466,6 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <code>competitor</code>'s key, it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
      * @param scoringScheme
      *            used to transform the tracked rank into a score if there is no score correction applied
-     * @param cache TODO
      * 
      * @return <code>null</code> in case the <code>competitor</code> has no score assigned in that race which is the
      *         case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code>
@@ -468,7 +479,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;
-        if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor)) {
+        if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor, cache)) {
             result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme,
                     numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
         } else {

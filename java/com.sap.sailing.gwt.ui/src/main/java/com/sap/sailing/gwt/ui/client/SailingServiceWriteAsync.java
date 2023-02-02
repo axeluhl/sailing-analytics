@@ -38,6 +38,8 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.EventActions;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.adminconsole.RemoteSailingServerEventsSelectionDialog;
@@ -58,7 +60,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -85,6 +87,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.pairinglist.PairingList;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface SailingServiceWriteAsync extends FileStorageManagementGwtServiceAsync, SailingServiceAsync {
@@ -126,13 +129,13 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag, AsyncCallback<List<CompetitorWithBoatDTO>> callback)
             throws UnauthorizedException;
-    
+
     void addColumnsToLeaderboard(String leaderboardName, List<Util.Pair<String, Boolean>> columnsToAdd, AsyncCallback<Void> callback)
             throws UnauthorizedException;
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace, AsyncCallback<Void> callback)
             throws UnauthorizedException;
-    
+
     void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto, AsyncCallback<Void> callback)
     /*throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException,
             NotFoundException*/;
@@ -140,11 +143,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto, AsyncCallback<Void> callback)
             /*throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException*/;
 
-    
+
     void allowBoatResetToDefaults(List<BoatDTO> boats, AsyncCallback<Void> callback) throws UnauthorizedException;
-    
+
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback);
-    
+
     /**
      * Copies one race's competitor set to other races.
      * @param fromTriple
@@ -159,7 +162,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority, AsyncCallback<Void> callback);
 
-    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, 
+    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO, AsyncCallback<Void> callback);
 
     void disableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName,
@@ -167,7 +170,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void enableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> asyncCallback);
-                        
+
                             void setBoatRegistrationsInRegattaLog(String leaderboardName, Set<BoatDTO> boats,
             AsyncCallback<Void> callback);
 
@@ -180,10 +183,10 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors, AsyncCallback<Void> callback);
 
     void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration, AsyncCallback<Void> asyncCallback);
-        
+
             /**
      * Registers all competitors of a {@link PairingList} in the respective {@link RaceColumn}s and {@link Fleet}s.
-     * 
+     *
      * @param leaderboardName
      *            the name of the leaderboard
      * @param flightMultiplier
@@ -237,7 +240,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     /**
      * Remove course templates by UUIDs
-     * 
+     *
      * @param courseTemplatesUuids
      *            the {@link Collection} of course templates' UUIDs which will be remove
      * @param asyncCallback
@@ -266,7 +269,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     /**
      * Remove mark properties by UUIDs
-     * 
+     *
      * @param markPropertiesUuids
      *            the {@link Collection} of mark properties' UUIDs which will be remove
      * @param asyncCallback
@@ -275,7 +278,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void removeMarkProperties(Collection<UUID> markPropertiesUuids, AsyncCallback<Void> asyncCallback);
 
     void createMarkRole(MarkRoleDTO markRole, AsyncCallback<MarkRoleDTO> asyncCallback);
-        
+
     /**
      * @param regattaToAddTo
      *            if <code>null</code>, the regatta into which the race has previously been loaded will be looked up; if
@@ -303,7 +306,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
-            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, 
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
             boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
             String tracTracPassword, AsyncCallback<Void> callback);
 
@@ -332,7 +335,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     /**
      * Untracks the race and removes it from the regatta. It will also be removed in all leaderboards
-     * 
+     *
      * @param regattaNamesAndRaceNames
      *            The identifier for the regatta name, and the race name to remove
      */
@@ -344,20 +347,23 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds,
-            List<UUID> newCourseAreaIds, AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
+            List<UUID> newCourseAreaIds, AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,
             ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds,
-            AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName,
-            int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
+            int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboardWithEliminations(String name, String displayName,
-            String regattaName,
-            AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
+            String regattaName, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+
+    void createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName,
+            AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
@@ -455,8 +461,21 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             List<VideoDTO> videos, List<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
 
+    /**
+     * Extracts all fields from {@code eventDTO}, then delegates to
+     * {@link #updateEvent(UUID, String, String, Date, Date, VenueDTO, boolean, List, String, String, Map, List, List, List, AsyncCallback)}.
+     */
     void updateEvent(EventDTO eventDTO, AsyncCallback<EventDTO> callback);
 
+    /**
+     * Updates the {@link Event} identified by {@code eventId}. This generally requires the
+     * {@link SecuredDomainType#EVENT EVENT}{@code :}{@link DefaultActions#UPDATE UPDATE} permission for the event
+     * identified by {@code eventId}; however, if the calling subject has at least the {@link SecuredDomainType#EVENT
+     * EVENT}{@code :}{@link EventActions#UPLOAD_MEDIA UPLOAD_MEDIA} permission then changes to the {@code images} and
+     * {@code videos} are permitted; if the user only has the {@link EventActions#UPLOAD_MEDIA UPLOAD_MEDIA} but not the
+     * more general {@link DefaultActions#UPDATE UPDATE} permission, changes other than for {@code images} and
+     * {@code videos} will cause a {@link UnauthorizedException} to be thrown.
+     */
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURL,
             String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
@@ -479,8 +498,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
-            List<FleetDTO> fleets, AsyncCallback<Void> callback);
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards,
+            boolean oneAlwaysStaysOne, List<FleetDTO> fleets, AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
@@ -538,7 +557,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
             final boolean trackWind, final boolean correctWindByDeclination, AsyncCallback<Void> callback);
-    
+
     /**
      * Set the competitor (with contained boats) registrations in the racelog. Unregisters formerly registered competitors that are not listed
      * in {@code competitors}.
@@ -603,7 +622,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     /**
      * Sets the a new start time.
-     * 
+     *
      * @param dto
      *            {@link RaceLogSetStartTimeAndProcedureDTO} identifying the race to set the start time on and the new
      *            start time.
@@ -612,13 +631,13 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     /**
      * Sets the a new finishing and end time.
-     * 
+     *
      * @param dto
      *            {@link RaceLogSetFinishingAndFinishTimeDTO} identifying the race and the new finishing and
      *            end time.
      */
     void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
-    
+
 
     void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
             ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
@@ -626,7 +645,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void getTrackFileImportDeviceIds(List<String> uuids,
             AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
 
-    void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
+    void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
             AsyncCallback<MarkTrackDTO> callback);
 
     void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> callback);

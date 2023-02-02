@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -13,32 +14,31 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  * all start in one race, the qualification series can be split into two {@link Fleet}s, "Yellow" and "Blue," each
  * getting their separate races. Fleet assignment may or may not vary. This usually depends on the series'
  * characteristics of having ordered or unordered fleets.<p>
- * 
+ *
  * A series may define its result discarding scheme. If it does, a regatta leaderboard for the containing regatta
  * has to adhere to this and may not define its own cross-cutting result discarding scheme. If one or more series
  * in the regatta choose to define their own result discarding scheme, discards are determined per series and not
  * per leaderboard.<p>
- * 
+ *
  * To receive notifications when {@link TrackedRace tracked races} are linked to or unlinked from any of this series'
  * columns, {@link RaceColumnListener}s can be added / removed.
- * 
+ *
  * @author Axel Uhl (D043530)
- * 
+ *
  */
 public interface Series extends SeriesBase {
-    
-    static public final String DEFAULT_NAME = "Default";
-    
     /**
      * A series consists of one or more "race columns." Some people would just say "race," but we use the term "race" for
      * something that has a single start time and start line; so if each fleet in a series gets their own start for
      * something called "R2", those are as many "races" as we have fleets; therefore, we use "race column" instead to
      * describe all "races" named, e.g., "R3" in a series.
+     * 
+     * @return a non-live snapshot copy of the race columns at the time point of the call
      */
     Iterable<? extends RaceColumnInSeries> getRaceColumns();
-    
+
     RaceColumnInSeries getRaceColumnByName(String columnName);
-    
+
     void setIsMedal(boolean isMedal);
 
     void setIsFleetsCanRunInParallel(boolean isFleetsCanRunInParallel);
@@ -54,19 +54,19 @@ public interface Series extends SeriesBase {
      *            carried out.
      */
     RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry);
-    
+
     RaceColumnInSeries addRaceColumn(int insertIndex, String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry);
 
     void removeRaceColumn(String raceColumnName);
-    
+
     /**
      * If not <code>null</code>, a containing regatta's leaderboard must obey this rule and in particular cannot define
      * a "cross-cutting" result discarding rule where discards may be arbitrarily distributed across series.
      */
     ThresholdBasedResultDiscardingRule getResultDiscardingRule();
-    
+
     void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule);
-    
+
     /**
      * If not {@code null}, defines an upper inclusive limit for the number of races that may be discarded from
      * this series. For example, when setting this to {@code 1} for a final series in a regatta that has a
@@ -76,18 +76,18 @@ public interface Series extends SeriesBase {
      * qualification races.
      */
     Integer getMaximumNumberOfDiscards();
-    
+
     void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards);
 
     Regatta getRegatta();
-    
+
     /**
      * Sets this series' regatta.
      */
     void setRegatta(Regatta regatta);
-    
+
     void addRaceColumnListener(RaceColumnListener listener);
-    
+
     void removeRaceColumnListener(RaceColumnListener listener);
 
     /**
@@ -96,7 +96,7 @@ public interface Series extends SeriesBase {
      *         discards local to each series rather than spreading them across the entire leaderboard.
      */
     boolean definesSeriesDiscardThresholds();
-    
+
     /**
      * By default, a competitor's total score is computed by summing up the non-discarded total points of each race
      * across the leaderboard, considering the {@link RaceColumn#getFactor() column factors}. Some series, however, are
@@ -105,26 +105,60 @@ public interface Series extends SeriesBase {
      * logically, therefore also being discardable. If this method returns <code>true</code>, this series advises the
      * leaderboard and scoring scheme to start counting the total points at this series with zero.
      * <p>
-     * 
+     *
      * This condition propagates to the first race column of the series which is then used by the leaderboard and
      * scoring scheme.
      */
     boolean isStartsWithZeroScore();
-    
+
+    /**
+     * @see #isStartsWithZeroScore()
+     */
     void setStartsWithZeroScore(boolean startsWithZeroScore);
 
-    boolean isFirstColumnIsNonDiscardableCarryForward();
+    boolean isFirstColumnNonDiscardableCarryForward();
 
     void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward);
 
     /**
-     * When a series has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
+     * When a series has more than one fleet there are two different options for scoring it. Either the scoring scheme is applied
      * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
      * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
      * in the column as many times as there are fleets in the column. For the former case, this method returns <code>true</code>.
      */
     boolean hasSplitFleetContiguousScoring();
 
+    /**
+     * @see #hasSplitFleetContiguousScoring()
+     */
     void setSplitFleetContiguousScoring(boolean hasSplitFleetScore);
 
+    /**
+     * When a column has more than one fleet there are two different options for scoring it when the fleets are of the
+     * same rank. Either the scoring scheme is applied to all fleets of the same rank at the same time and competitors
+     * compete across the fleets; or the scoring scheme is applied to each fleet separately, leading to the best score
+     * being awarded as many times as there are fleets of the same rank. For the latter case, this field is
+     * <code>false</code> which is also the default.
+     */
+    boolean hasCrossFleetMergedRanking();
+
+    /**
+     * @see #hasCrossFleetMergedRanking()
+     */
+    void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking);
+
+    /**
+     * When scores in this series are scaled by some factor, either based on an {@link RaceColumn#getExplicitFactor()
+     * explicit column factor}, or implicitly, e.g., because the {@link ScoringScheme} mandates the
+     * doubling of medal race scores and this series {@link #isMedal() represents a medal series}, then some
+     * configurations still want the 1.0 score still to be 1.0. For example, with a column factor of 2.0 scores 1, 2, 3
+     * would end up as 1, 3, 5; or with a column factor of 3.0 scores 1, 2, 3 would end up as 1, 4, 7. This method tells
+     * whether this column shall apply such a scheme.
+     */
+    boolean isOneAlwaysStaysOne();
+
+    /**
+     * @see #isOneAlwaysStaysOne()
+     */
+    void setOneAlwaysStaysOne(boolean oneAlwaysStaysOne);
 }

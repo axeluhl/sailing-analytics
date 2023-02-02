@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
@@ -47,7 +47,6 @@ public class CubicRegressionPerCourseProcessor implements
 
     @Override
     public boolean canProcessElements() {
-        // TODO Auto-generated method stub
         return true;
     }
 

@@ -4,13 +4,16 @@
 
 ## Quickstart
 
-Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London).
+Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding.
 
-### Important Servers, Hostnames
+## Important Servers, Hostnames
 
-- Web Server: reachable through SSH to sapsailing.com:22
+- Web Server / Central Reverse Proxy: reachable through SSH to sapsailing.com:22
 - Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
 - RabbitMQ Server: rabbit.internal.sapsailing.com
+- MySQL DB (mainly for Bugzilla): mysql.internal.sapsailing.com (currently co-deployed on the same old instance that also runs RabbitMQ, hence currently mysql.internal.sapsailing.com and rabbit.internal.sapsailing.com refer to the same instance)
+- Hudson Build Server: called "Build/Test/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
+- Additional "Build Slaves" launched by the Hudson Build Server: Named ``Hudson Ubuntu Slave``, used to run individual build jobs
 
 ## Landscape Overview
 
@@ -21,9 +24,13 @@ In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can ma
 * accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com`` target group
 * optionally, this NLB could be extended by UDP port mappings in case we see a use case for UDP-based data streams that need forwarding to specific applications, such as the Expedition data typically sent on ports 2010 and following
 
-### Webserver
+Additionally, we have created a CNAME record for ``*.sapsailing.com`` pointing at a default application load balancer (ALB) (currently ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com``) in our default region (eu-west-1). Thie default ALB is also called our "dynamic ALB" because it doesn't depend on DNS rules other than the default one for ``*.sapsailing.com``, so other than changes to the DNS which can take minutes to hours to propagate through the world-wide DNS, changes to the default ALB's rule set take effect immediately. Like all ALBs, this one also has a default rule that refers all traffic not matched by other rules to a target group that forwards traffic to an (in the future probably multiple) Apache httpd webserver. All these ALBs handle SSL termination by means of an ACM-managed certificate that AWS automatically renews before it expires. The traffic routed to the target groups is always HTTP only.
 
-The web server currently exists only as one instance but could now be replicated to other availabililty zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will described further below, to the ``CentralWebServerHTTP*`` target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
+Further ALBs may exist in addition to the default ALB and the NLB for ``sapsailing.com``. Those will then have to have one or more DNS record(s) pointing to them for which matching rules based on the hostname exist in the ALB listener's rule set. This set-up is specifically appropriate for "longer-lived" content where during archiving or dismantling a DNS lag is not a significant problem.
+
+### Apache httpd Webserver and Reverse Proxy
+
+The web server currently exists only as one instance but could now be replicated to other availability zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will be described further below, to the ``CentralWebServerHTTP*`` (for the "dynamic" ALB in eu-west-1) or ``{ALB-name}-HTTP`` (for all DNS-mapped ALBs) target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
 
 * hudson.sapsailing.com - a Hudson installation on dev.internal.sapsailing.com
 * bugzilla.sapsailing.com - a Bugzilla installation under /usr/lib/bugzilla
@@ -36,8 +43,11 @@ The web server currently exists only as one instance but could now be replicated
 * gitlist.sapsailing.com - for our git at /home/trac/git
 * git.sapsailing.com - for git cloning for dedicated users, used among other things for replication into git.wdf.sap.corp
 
-Furthermore, it host aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Reload the configuration using
-
+Furthermore, it hosts aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Before reloading the configuration, make sure the syntax is correct, or else you may end up killing the web server, leading to downtime. Check by running
+```
+        apachectl configtest
+```
+If you see ``Syntax OK`` then reload the configuration using
 ```
         service httpd reload
 ```
@@ -47,10 +57,10 @@ The webserver is registered as target in various locations:
 * As DNS record with its internal IP address (e.g., 172.31.19.129) for the two DNS entries ``logfiles.internal.sapsailing.com`` used by various NFS mounts, and ``smtp.internal.sapsailing.com`` for e-mail traffic sent within the landscape and not requiring the AWS SES
 * as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
 * as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com`` target group, accepting the SSH traffic for ``sapsailing.com``
-* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on
+* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively.
 * as target of the elastic IP address ``54.229.94.254``
 
-Furthermore, it is important to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:
+Furthermore, it is helpful to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:
 
 ```
 ## SERVER STATUS
@@ -61,13 +71,280 @@ Use Status 127.0.0.1 internal-server-status
 
 The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
 
-### DNS and ALBs
+### DNS and Application Load Balancers (ALBs)
 
-We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (Sailing-DNSMapped-eu-west-1-604165534.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects.
+We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (DNSMapped-0-1286577811.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects for non-archived ALB-mapped content.
 
-Shorter-running events may not require a DNS record. The ALB ``Sailing-eu-west-1-135628335.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target groups again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
+   <img src="/wiki/info/landscape/images/ALBsAndDNS.png"/>
 
-The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server which sends it to the archive server.
+Shorter-running events may not require a DNS record. The ALB ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target group again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
+
+The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server / reverse proxy which sends it to the archive server.
+
+In addition to a default re-direct for the "/" path, the following four ALB listener rules for a single application replica set are defined, all requiring the "Host" to match the hostname:
+- if the HTTP header ``X-SAPSSE-Forward-Request-To`` is ``master`` then forward to the master target group
+- if the HTTP header ``X-SAPSSE-Forward-Request-To`` is ``replica`` then forward to the public target group
+- if the request method is ``GET`` then forward to the public target group
+- forward all other request for the hostname to the master target group
+
+### MongoDB Replica Sets
+
+There are currently three MongoDB replica sets:
+
+   <img src="/wiki/info/landscape/images/MongoDBReplicaSets.png"/>
+
+- ``live``: Used by default for any new event or club server. The replica set consists of three nodes, two of which running on instances with fast but ephemeral NVMe storage for high write throughput, thus eligible as primary nodes; and a hidden replica with a slower EBS gp2 SSD volume that has a backup plan. The two NVMe-backed nodes have DNS names pointing to their internal IP addresses: ``mongo0.internal.sapsailing.com`` and ``mongo1.internal.sapsailing.com``. Their MongoDB processes run on the default port 27017 each. They run in different availability zones. The hidden replica runs on ``dbserver.internal.sapsailing.com:10203``.
+- ``archive``: Used by the ARCHIVE servers (production and failover). It host a DB called ``winddb`` (for historical reasons). Its primary and by default only node is found on ``dbserver.internal.sapsailing.com:10201``. If an ARCHIVE server is launched it is a good idea to scale this ``archive`` replica set by adding one or two secondary nodes that are reasonably sized, such as ``i3.2xlarge``. Note that the ARCHIVE server configuration prefers reading from secondary MongoDB instances, thus will prefer any newly launched node over the primary.
+- ``slow``: Used as target for archiving / backing up content from the ``live`` replica set once it is no longer needed for regular operations. The default node for this replica set can be found at ``dbserver.internal.sapsailing.com:10202`` and has a large (currently 4TB) yet slow and inexpensive sc1 disk attached. One great benefit of this replica set is that in case you want to resurrect an application replica set after it has been archived, you can do so with little effort, simply by launching an instance with a DB configuration pointing at the ``slow`` replica set.
+
+Furthermore, every application server instance hosts a local MongoDB process, configured as a primary of a replica set called ``replica``. It is intended to be used by application replica processes running on the instance, scaling with the number of replicas required, starting clean and empty and getting deleted as the instance is terminated. Yet, being configured as a MongoDB replica set there are powerful options available for attaching more MongoDB instances as needed, or upgrading to a new MongoDB release while remaining fully available, should this ever become an issue for longer-running replicas.
+
+### Shared Security and Application Data Across ``sapsailing.com``
+
+Staying logged in and having a common underlying security infrastructure as users roam around the sapsailing.com landscape is an important feature of this architecture. This is achieved by using the same replication scheme that is applied when an application replica set replicates its entire content between its master and all its replicas, with a small modification: the replication between an application replica set's master and a "singleton" security environment is only partial in the sense that not all replicables available are actually replicated. Instead, replication from the central security service is restricted currently to three replicables:
+
+- ``com.sap.sse.security.impl.SecurityServiceImpl``
+- ``com.sap.sailing.shared.server.impl.SharedSailingDataImpl``
+- ``com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl``
+
+The central security service is provided by a small application replica set reachable under the domain name ``security-service.sapsailing.com``. It currently employs only a single master process running on a small dedicated instance. It launches into ready state within just a few seconds, and hence even upgrades may be performed in-place. The replication infrastructure is built such that when the securit-service master comes up again it knows which replicables were replicating it recently. Furthermore, replicas will buffer operations that are to be sent to the master as long as the master is not available. They will re-send them once the master has become available again.
+
+This default replication relationship for any regular application replica set and ARCHIVE servers is encoded currently in the environment [https://releases.sapsailing.com/environments/live-master-server](https://releases.sapsailing.com/environments/live-master-server) and [https://releases.sapsailing.com/environments/archive-server](https://releases.sapsailing.com/environments/archive-server).
+
+### Standard Application Replica Set with Target Groups, Auto-Scaling Group and Launch Configuration
+
+With the exception of legacy, test and archive instances, regular application replica sets are created with the following elements:
+- an application load balancer (ALB) is identified or created if needed
+- a "master" target group, named like the replica set with a "-m" suffix appended
+- a "public" target group, named after the replica set
+- five rules for the replica set are created in the load balancer's HTTPS listener, forwarding traffic as needed to the "master" and the "public" target groups
+- for a DNS-mapped set-up (not using the default "dynamic" load balancer) a Route53 DNS CNAME record pointing to the ALB is created for the replica set's host name
+- an auto-scaling group, named after the replica set with the suffix "-replicas" appended
+- a launch configuration used by the auto-scaling group, named after the replica set with the release name appended, separated by a dash (-), e.g., "abc-build-202202142355"
+- a master process, registered in both, the "master" and the "public" target groups
+- a replica process, registered in the "public" target group
+There are different standard deployment choices for the master and the replica process that will be described in the following sections.
+
+### Dedicated Application Replica Set
+
+For an event that expects more than a few hundred concurrent viewers the standard set-up includes dedicated instances for master and replica processes. Each application process (a Java VM) can consume most of the physical RAM for its heap size. No memory contention with other application processes will occur, and Java garbage collection will not run into memory swapping issues. All replicas in this set-up are managed by the auto-scaling group. Their instances will be named as "SL {replicaset-name} (Auto-Replica)". The master will be named "SL {replicaset-name} (Master)". The ``sailing-analytics-server`` tag on the instance will reflect the replica set's name in its value.
+
+   <img src="/wiki/info/landscape/images/DedicatedApplicationReplicaSet.png"/>
+
+As replicas may get added as the load increases, we would like to avoid them putting additional stress on the MongoDB replica set used by the master process. Therefore, each instance runs its own small MongoDB installation, configured as a replica set ``replica``. The DB content on a replica is said to be "undefined" and it is not intended to be used to read anything reasonable from it. Yet, we're trying to make the launch of a replica robust against reading from such a replica DB with undefined content before the actual initial load is received from the master process.
+
+### Application Replica Set Using Shared Instances
+
+When an event is expected to produce less than hundreds of concurrent viewers and when the number of competitors to managed in a single leaderboard is less than approximately 50, master and replica processes of the corresponding application replica set may be deployed on instances shared with other application replica sets. This becomes even more attractive if the application replica sets sharing instances are not expected to produce high workload at the same time. The highest load is to be expected when races are live. For most non-long-distance races the times are constrained to a part of the daylight time in the time zone where the races are happening. Should there be multiple such events in different time zones then those would be good candidates for sharing instances as their load patterns are complementary.
+
+Likewise, if an application replica set is set up for a multi-day event and after the last race is over still has some read load to carry that would be more than would be good for an archive server, yet less than what dedicated instances are required for, leaving the event on an application replica set sharing instances with others may be a good idea. Similarly, event series such as a sailing league's season, are usually configured on an application replica set, and in the times between the events of the series the much lower workload makes the application replica set eligible for moving to shared instances.
+
+In principle, every application instance can host more than one application process. It is, however, essential that their file system directories and port assignments don't overlap. Also, a load balancing target group always routes traffic to the same port on all instances registered. Therefore, the master process and all replica processes of a single application replica set must use the same HTTP port. The default port range for the HTTP ports used by application replica sets starts at ``8888``. Telnet ports start at ``14888``, and UDP Expedition ports at ``2010``.
+
+All replica processes running on the same instance share the instance's local MongoDB (the single-node ``replica`` replica set), and for each replica a database named ``{replicaset-name}-replica`` will end up on the local MongoDB. The master processes are expected to use a non-local MongoDB replica set, such as the ``live`` replica set.
+
+   <img src="/wiki/info/landscape/images/ApplicationReplicaSetsOnSharedInstances.png"/>
+
+By means of several automation procedures it is possible with a few clicks or a single REST API call to move master and replica processes from one instance to another and to launch instances for dedicated and for shared use. With this, a reasonable degree of elasticity is provided that allows operators to move from shared to dedicated set-ups as an event is expected to generate more CPU load soon, and moving things back to a shared set-up when the load pressure decreases.
+
+Shared instances are usually named "SL Multi-Server" and have the value "___multi___" for the ``sailing-analytics-server`` tag.
+
+### Archive Server Set-Up
+
+The set-up for the "ARCHIVE" server differs from the set-up of regular application replica sets. While for the latter we assume that a single sub-domain (such as ``vsaw.sapsailing.com``) will reasonably identify the content of the application replica set, the archive needs to fulfill at least two roles:
+
+- keep content available under the original URL before archiving
+- make all content browsable under the landing page ``https://sapsailing.com``
+
+Furthermore, being the landing page for the entire web site, a concept for availability is required, given that an archive server restart can take up to 24 hours until all content is fully available again. Also, with a growing amount of content archived, more and more hostnames will need to be mapped to specific archived content. While ALBs incur cost and the number of ALBs and the size of their listeners' rule sets are limited, an HTTP reverse proxy such as the Apache httpd server is not limited in the number of rewrite rules it has configured. Archived events are usually not under high access load. The bandwidth required for all typical access to archived events is easily served by a single instance and can easily pass through a single reverse proxy.
+
+For now, we're using the following set-up:
+
+   <img src="/wiki/info/landscape/images/ArchiveServerSetup.png"/>
+
+A failover instance is kept ready to switch to in case the primary production archive process is failing. The switching happens in the reverse proxy's configuration, in particular the ``/etc/httpd/conf.d/000-macros.conf`` file and its ``ArchiveRewrite`` macro telling the IP address of the current production archive server. In case of a failure, change the IP address to the internal IP address of the failover archive server and re-load the httpd configuration:
+
+```
+        service httpd reload
+```
+
+### Important Amazon Machine Images (AMIs)
+
+In our default region ``eu-west-1`` there are four Amazon Machine Image (AMI) types that are relevant for the operation of the landscape. They all have a base name to which, separated by a space character, a version number consisting of a major and minor version, separated by a dot, is appended. Each of these AMIs has a tag ``image-type`` whose value reflects the type of the image.
+- SAP Sailing Analytics, ``image-type`` is ``sailing-analytics-server``
+- MongoDB Live Replica Set NVMe, ``image-type`` is ``mongodb-server``
+- Hudson Ubuntu Slave, ``image-type`` is ``hudson-slave``
+- Webserver, ``image-type`` is ``webserver``
+
+The SAP Sailing Analytics image is used to launch new instances, shared or dedicated, that host one or more Sailing Analytics application processes. The image contains an installation of the SAP JVM 8 under /opt/sapjvm_8, an Apache httpd service that is not currently used by default for reverse proxying / rewriting / logging activities, an initially empty directory ``/home/sailing/servers`` used to host default application process configurations, and an initialization script under ``/etc/init.d/sailing`` that handles the instance's initialization with a default application process from the EC2 instance's user data. Instructions for setting up such an image from scratch can be found [here](/wiki/info/landscape/creating-ec2-image-from-scratch).
+
+The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date from the Git ``configuration/crontab`` file. If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also [Upgrading AMIs](#amazon-ec2-for-sap-sailing-analytics_automated-procedures_upgrading-amis) for procedures that automate much of this upgrade process.
+
+The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing MongoDB replica sets. It also reads the EC2 instance's user data during start-up and can be parameterized by the following variables: ``REPLICA_SET_NAME``, ``REPLICA_SET_PRIMARY``, ``REPLICA_SET_PRIORITY``, and ``REPLICA_SET_VOTES``. An example configuration could look like this:
+```
+    REPLICA_SET_NAME="live"
+    REPLICA_SET_PRIMARY="172.31.28.93:27017"
+    REPLICA_SET_PRIORITY="0"
+    REPLICA_SET_VOTES="0"
+```
+Like the SAP Sailing Analytics image, the MongoDB image understands the ``image-upgrade`` and the ``no-shutdown`` directives in the user data.
+
+The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Like the two other images discussed so far, the image understands the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data which will pull the Git repository's latest master to ``/home/sailing/code`` which is also from where the boot scripts are taken; furthermore, the SAP JVM 8 is brought to the latest release.
+
+The Webserver image can be used to launch a new web server / reverse proxy in a region. It is mainly a small Linux installation with the following elements
+- an Apache httpd and the default macros defined under ``/etc/httpd/conf`` and ``/etc/httpd/conf.d``
+- the Git repository under ``/home/trac/git``
+- the folder serving ``releases.sapsailing.com`` under ``/home/trac/releases``
+- the p2 OSGi repositories under ``/home/trac/p2-repositories`` exposed as ``p2.sapsailing.com/p2``
+- the Gollum Wiki set-up under ``/home/wiki`` with a checked-out Git workspace under ``/home/wiki/gitwiki``
+- the Bugzilla installation under ``/var/lib/bugzilla`` and ``/usr/share/bugzilla`` with a matching Perl installation
+The process of setting this up from scratch is explained [here](/wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch).
+
+### AWS Tags
+
+The landscape is designed to be self-describing so that no additional database is required for managing it. We assign tags to various AWS resources to identify their intended or actual use, function, or type in a way that is more formal than only relying on naming conventions based on the ``Name`` default tag.
+
+The AMIs are tagged using the ``image-type`` tag key. As explained in the previous section, there are currently the types ``sailing-analytics-server``, ``hudson-slave``, ``mongodb-server``, and ``webserver``.
+
+EC2 instances hosting application processes are tagged using the ``sailing-analytics-server`` tag key. For dedicated instances running only a single application process for a single application replica set, the replica set's name is used as the tag's value. For shared instances, the special value ``___multi___`` is used.
+
+MongoDB instances are tagged with the tag key ``mongo-replica-sets``. The value encodes information about the MongoDB processes running on that instance. Put as a regular expression, the syntax is
+
+```
+    [a-zA-Z-]*(:[0-9][0-9]*)(,[a-zA-Z-]*(:[0-9][0-9]*))*
+```
+
+or less formally, a comma-separated list of replica set names, optionally extended with the port number in case it is not the default port 27017, where the port number is separated from the replica set name by a colon (:). Example: ``live:10203,archive:10201,slow:10202``
+
+An instance running a RabbitMQ process shall announce this by defining a tag with key ``RabbitMQEndpoint`` where the value is the port number on which RabbitMQ is exposed. The value must also be specified for the default port 5672.
+
+If an instance hosts the region's reverse proxy server that in particular is used to dispatch requests to archived events, it shall expose a tag with key ``CentralReverseProxy`` and value ``true`` (although the value is currently ignored). When an application replica set is archived, the archiving procedure talks to the reverse proxy found via this tag in order to establish re-write rules for the content archived.
+
+## Automated Procedures
+
+In order to reduce manual efforts for managing the system landscape and to make errors less likely, various automation procedures have been implemented that are intended to help operators in their daily job. The procedures are made available through two channels: an AdminConsole panel found in the "Advanced" category called "Landscape" (see [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:)) and a set of REST APIs (see [https://sapsailing.com/sailinglandscape/webservices/api/index.html](https://sapsailing.com/sailinglandscape/webservices/api/index.html)).
+
+The procedures manage application replica sets, MongoDB replica sets, and the Amazon Machine Images (AMIs) used to run them. They aim at reasonably high availability, at least for read access, while keeping cost low and utilization high. All application replica sets will be created with at least one master and one replica running almost at all times. Managed application replica sets will always have an auto-scaling group for their replicas that will scale the set of replicas elastically, based on the number of requests received per target. The procedures support managing replica processes not launched by the auto-scaling group which is helpful especially when the replica is meant to improve availability and not so much handle excessive load and hence can be launched on a shared instance.
+
+During upgrades and scaling operations the procedures will try to keep approximately as many processes available in the application replica set as there were when the operation started. For example, during a version upgrade first the existing replicas will be detached from their master, the master will be upgraded, then a new set of replicas of the same size as the set of old replicas will be launched on the new version before the old replicas will be replaced by the new ones. This way, the count of processes available to handle user requests will be reduced by one in the worst case, e.g., for temporary master unavailability or while upgrading a single replica in place.
+
+### Credentials and SSH Key
+
+All of these operations required a valid AWS IAM account that has the necessary privileges, with multi-factor authentication (MFA) enabled and an MFA token generator at hand. Furthermore, a user account for sapsailing.com is required that has the permission ``LANDSCAPE:MANAGE:AWS``. When going for REST, create valid session credentials from your AWS access key ID and secret plus a current MFA token code using [https://www.sapsailing.com/sailinglandscape/webservices/api/createsessioncredentials.html](https://www.sapsailing.com/sailinglandscape/webservices/api/createsessioncredentials.html). The session credentials, valid for about twelve hours, will be stored in your user account and will be used for every subsequent request to the AWS API carried out on behalf of your sapsailing.com user account. Likewise, if you're using the AdminConsole's Landscape panel, there is an "AWS Credentials" box where you can do the same.
+
+In addition to AWS credentials it is essential to create or upload an SSH key pair to use for connecting to and configuring the instances. Currently there is no REST API for this step yet (see also [https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5680](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5680)), so this step needs to be carried out in the Landscape panel of the AdminConsole. Upload an existing key pair or generate one and download public and private key so you can also connect from your local command line if you want. The public key of the key pair generated or uploaded is automatically installed in the AWS region you have selected. If you continue working from the AdminConsole, keep it selected and enter the passphrase to unlock it into the password field below the table listing all your keys. When using the REST API, simply pass the key name as argument of the request with the private key's passphrase in another parameter. See the REST API documentation for details on these parameters.
+
+In all of the following sub-sections the text will assume that you have provided valid AWS credentials, that you have selected a region in which you want to operate, and that you have an SSH key selected, with the passphrase to unlock the private key provided in the passphrase field below the SSH keys table.
+
+In several of the scenarios, both, AdminConsole and REST API, you will have the option to provide security bearer tokens that are used to authenticate requests to processes running the SAP Sailing Analytics. If you omit those, the credentials of the session used to authenticate your sailing user will be used. (Note, that for local test set-ups disconnected from the standard security realm used by all of the sapsailing.com-deployed processes, these credentials may not be accepted by the processes you're trying to control. In this case, please provide explicit bearer tokens instead.) We distinguish between the credentials required to replicate the information shared across the landscape, usually from ``security-service.sapsailing.com``, and those used by a replica in one of your application replica sets to authenticate for credentials to replicate the application replica set's master.
+
+### Creating a New Application Replica Set
+
+In the Application Replica Sets table click the "Add" button and provide the replica set name. You may already now press the OK button and will receive a new application replica set with a master process running on a new dedicated host, and a single replica process running on a new instance launched by the application replica set's auto-scaling group.
+
+The dialog allows you to change several aspects of the application replica set creation process:
+- You can pick a different release. Should you, for any reason, not want the latest master build, use the "Release" field which provides suggestions based on the releases found at ``releases.sapsailing.com``. The release you pick will be used for all master and replica processes for this application replica set until upgraded.
+- You can choose to create a shared instead of a dedicated instance to deploy the master process to. In this case, a new "SL Multi-Server" instance tagged with the "___multi___" tag value for the "sailing-analytics-server" tag key will be created, and the new application replica set's master process will be deployed as the first process.
+- You can choose to deploy the first replica on a shared instance instead of having the auto-scaling group provide a dedicated instance for it. If you do so, an eligible instance based on the port number (default 8888) that lives in an availability zone different from that of the instance hosting the master process will be selected or launched if necessary.
+- You can choose the types of instances to launch for shared and for dedicated instances. If an eligible instance for a replica on a shared instance is found, the instance type will not be considered for the replica.
+- If deploying to the default region ``eu-west-1`` you are given the option to use the dynamic load balancer instead of a DNS-mapped one. This way, no DNS record needs to be created, and when archiving the application replica set at a later point in time, no DNS propagation lag needs to be considered.
+- You may choose a domain different from the default sapsailing.com as long as Route53 has a hosted zone for it.
+- You may specify non-standard memory options for the processes launched. By default, all processes launched will obtain a Java VM heap size occupying 75% of the instance's total physical RAM reduced by 1.5GB to leave space for the VM itself, the operating system and the MongoDB process running on the instance (relevant for replicas only). The minimum size alloted to a VM's heap is 2GB currently. While this set-up gives good results for dedicated instances, it may not be ideal for an archive server or a shared instance. For an archive, for example, you may want to use one of the ``i3.*`` instance types where ample fast swap space is available and may be used for large amounts of archived content. In this case you wouldn't want to restrict your Java VM heap size to only the physical RAM or less but rather you would want to exceed this by several factors. For an archive server running on an ``i3.2xlarge``-type instance with 61GB of RAM and 2TB of swap you may want to provide 300GB of heap space to the VM instead of the 50 or so GB it would be getting assigned by default. For this, use the "Memory (MB)" field. Alternatively, for example in case you want to configure a non-standard memory layout for a shared instance, you may rather want to think in terms of how many of your application process VMs would fit into the instance's physical RAM at the same time. This is what the "Memory as factor to total memory" text field allows you to choose. Enter, e.g., "4" there, and the space allocated to the process will be chosen such that approximately four similarly-equipped processes will fit into the instance's physical memory at the same time. Note: an absolute memory specification takes precedence over the relative specification which is why the field for the relative specification is disabled as soon as you enter a valid value into the absolute field.
+
+### Moving Application Replica Set from Shared to Dedicated Infrastructure
+
+When an application replica set has been launched such that it uses a replica on a shared instance, with an auto-scaling group minimum size of 0, this can be changed such that the replica on the shared instance is replaced by one running on a dedicated instance provided by the auto-scaling group. For this, the Application Replica Sets area in the Landscape panel of the AdminConsole has an action icon (tooltip text "Switch to auto-scaling replicas only") as well as an action button capable of handling multi-selections: "Switch to auto-scaling replicas only". When this action is triggered for one or more application replica sets, the auto-scaling group is asked to set its minimum size to 1 in case it was 0 at the time. As soon as an auto-scaling replica is ready, the replica process on the shared instance is stopped, and if it was the last on that instance, the instance is terminated as well.
+
+Furthermore, in a separate action, a master process running on a shared instance can be moved to a dedicated instance by using the action icon with tooltip "Move master process to other instance". The pop-up dialog displayed allows you to choose between a shared and a dedicated instance, so here you want to go with the default and leave the "Use a shared instance for master process" checkbox unticked. The type for the new instance can be selected, as can the memory configuration (see above).
+
+This action can be useful if an event moves from a "dormant" low-workload scenario to a "hot/live" setting, e.g., a few hours before live action is assumed to start. The processes on shared instances may not be able to handle high CPU workloads, and the dedicated instances can even be scaled up or down dynamically as needed which would not be possible on a shared instance.
+
+### Moving Application Replica Set from Dedicated to Shared Infrastructure
+
+For the master process, use again the "Move master process to other instance" action and tick the "Use a shared instance for master process" checkbox. An eligible instance will be found or created, based on the instance type specification if needed. The existing replicas will be detached from the current master which will then be stopped. The new master spins up, and one by one all existing replicas will be re-started so they re-sync to the new master. Target group assignments are managed accordingly.
+
+For the replicas, use the "Switch to replica on shared instance" action or button. It brings up a dialog where you can select the type of shared instance to launch if no eligible one can be found. When the shared instance has been identified or launched, a replica process will be started on it, replicating the master. When ready, the new replica will be added to the public target group while the auto-scaling group's minimum size is set to 0, leading to all auto-scaling replicas to get stopped and terminated over time.
+
+This way, as an event starts to "cool down" and load decreases, the more expensive dedicated set-up can be reverted to a less expensive shared set-up while remaining available in at least two availability zones.
+
+### Scaling Replica Instances Up/Down
+
+When an application replica set's replica processes are provided by the auto-scaling group, the corresponding launch configuration specifies the instance type used for the dedicated instances used to host the replica processes. If this instance type turns out to be inadequate for the situation, e.g., because the event hosted in the application replica set produces more CPU load than expected or produces more tracking data than assumed, the instance type can be changed for the launch configuration, with a rolling update being performed for all replica instances managed by the auto-scaling group.
+
+Click on the "Scale auto-scaling replicas up/down" action icon or the corresponding button in the button bar and select the new instance type.
+
+### Scaling Master Up/Down
+
+With the same "Move master to other instance" that can be used to change from shared to dedicated master instances and back you can also change a master's instance type, especially if you opt against a shared master instance. You can then select the new instance type and process memory configuration. All replicas will be detached from the current master, and the current master process will be removed from both target groups. Then the master process will be stopped, terminating the instance if it was the last application process, and a new master instance with the type selected will be launched, deploying the new master process to it. When ready, the master process is registered with both target groups, and all existing replicas are re-started in place one by one, re-synchronizing on the new master.
+
+### Upgrading Application Replica Set
+
+When a different (not even necessarily newer) release is to be deployed to an application replica set, an important aspect during the upgrade process is that at no point processes with different releases should be available to clients if possible. Although the target groups are configured for session stickiness, in particular master and replicas should really be of the same version. To a lesser degree this would also apply for an application replica set's master process and the security-service.sapsailing.com replica set from which the master replicates the security service and a few other things; however, these core replicable usually don't change incompatibly, and if they do, an entire and consistent landscape upgrade will be required anyway.
+
+Use the action icon entitled "Upgrade" or the corresponding multi-selection-enabled button and select the release to which to change. When you confirm the action, all replicas will be detached from the master process, the master will be removed from both target groups, and an in-place upgrade of the master process is performed. Then, the master is re-started. When the master process is ready again, a new set of temporary replica processes of the same size of the previous set of replicas is launched on dedicated instances, using the new release and replicating the master by its IP address because it is not yet registered with the master target group. Only when they are all ready, the old set of replicas is removed from the public target group, the temporary upgraded replicas are added to it, and the master is added to both target groups. Then, the previous auto-scaling replica processes are stopped, whereas replicas not managed by the auto-scaling group are upgraded in place. As the auto-scaling group reacts to the termination of the old replicas, it launches new ones until it has reached its desired capacity again. When those are available, the temporary upgrade replicas are de-registered from the public target group and are stopped and terminated. With this, the upgrade of the application replica set is complete.
+
+### Archiving Application Replica Set
+
+When the event or season or whatever you chose to assign an application replica set to has come to the end of its live workload with races and other updates no longer taking place, the application replica set is up for archiving. This will help save cost due to better resource utilization. The auto-scaling group, its launch configuration, its DNS record (unless the "dynamic" load balancing scenario in the default region eu-west-1 was used), its target groups and its load balancer listener rules can all be removed which frees up capacity for new or other live events. Furthermore, the processes can be stopped, freeing up memory and disk space on the instances they ran on, or even allowing for the termination of entire instances. Lastly, storage space in the ``live`` MongoDB replica set is more expensive than in the ``slow`` replica set that can be used for backup and archiving of DB content.
+
+To archive an application replica set, decide whether you want to move the MongoDB content away from the current (usually ``live``) replica set to free up space there. To do so, select any MongoDB endpoint from the "MongoDB Endpoints" table that you'd like to move the application replica set's database content to. If you want to keep it in the ``live`` environment, de-select all MongoDB endpoints in the table.
+
+Then use the action icon entitled "Archive". If your current user account with which you start the archiving process is not entitled to create content in the archive server (having the ``SERVER:CAN_IMPORT_MASTERDATA:ARCHIVE`` permission), you need to provide a bearer token authenticating a user that does. Usually, you will want to remove the archived application replica set if the archiving procedure succeeded. You have to confirm this by ticking the corresponding check-box in the pop-up dialog.
+
+When confirmed, the archiving procedure will start by identifying the ``ARCHIVE`` server in the region you're using, based on the ``sailing-analytics-server`` tag value on the instances in the region. If multiple such instances are found, the one that hosts the application process with the latest start time is selected, assuming it is the production server. The archive process identified this way is then asked to run a "master data import" from the application replica set to archive, importing all leaderboard groups found there. Only leaderboard groups ``READ``able by your logged-in user will be considered. The progress of the import process is tracked, and when complete, after a waiting period you can adjust in the archiving pop-up dialog a content comparison for the leaderboard groups imported is attempted, comparing the content in the ``ARCHIVE`` server with those in the application replica set being archived. If differences are found, the procedure assumes that no all calculations that take place after the races have been loaded in the archive server have completed yet. For example, maneuver calculations and wind estimations may influence whether a race is said to have valid wind fixes; not having valid wind fixes for races in the archive while the same race in the original application replica set does have wind fixes would be reported as a difference during the comparison. Hence, the comparison will be repeated a configurable number of times after waiting again for the same configured duration as before the first comparison attempt. If after the configured number of comparison attempts there are still differences found, the archiving process is considered failed and no further steps will be carried out. In particular, no database archiving and no removal of the application replica set will take place. You will need to inspect manually in which state the archived content is and what the differences are in detail. (Future versions should do better here; see [bug 5681](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5681).)
+
+After successful import and comparison, if you selected a MongoDB endpoint from the table then the MongoDB database used by the application replica set being archived will be copied to the MongoDB endpoint selected. After copying, the original and the copy will be compared by hashing their contents and comparing the hashes. Only if the two hashes are equal, the original database will be removed, freeing up the space in what usually would be the ``live`` MongoDB replica set.
+
+Finally, if you ticked the "Remove archive replica set after successful verification", the application replica set will be completely removed by stopping its master and replica processes, removing all its load balancer rules, removing its two target groups, removing the auto-scaling group and the corresponding launch configuration and, if a DNS-based load balancer was used, removing its DNS record.
+
+### Removing Application Replica Set
+
+This action is really only useful for application replica sets that were created for development, testing or debugging purposes. While its MongoDB database is left untouched, all other resources pertinent to the application replica set will be removed, including its load balancing rules, target groups, auto-scaling group, launch configuration, application processes and potentially the instances they ran on in case the processes were the last on their instance, and the optional DNS record.
+
+Note that due to the database remaining in place, re-surrecting an application replica set removed this way is usually easy. If you use the "Add" button or the "+" action icon in case you'd like a shared master instance set-up, the application replica set launched will use the same database if it is launched with exactly the same name (case-sensitive).
+
+### Upgrading AMIs
+
+Currently the three AMI types ``sailing-analytics-server``, ``mongodb-server`` and ``hudson-slave`` can be upgraded automatically. Upgrading an AMI for which this is supported is as simple as clicking the "Upgrade"-entitled action icon for an AMI shown in the "Amazon Machine Images (AMIs)" table at the bottom of the "Landscape" panel in the AdminConsole. As a result, a new AMI will be created based on the old one. An instance will be launched based on the old AMI, using the ``image-upgrade`` user data line which asks the instance to run various upgrading steps at the end of the start-up sequence. The steps can include pulling latest content from the Git repository, updating all operating system packages including the kernel itself, cleaning up old logs and caches, and marking the images a "first-time boot."
+
+Then, a shutdown is triggered automatically, and when complete, a new AMI is created, the AMI is tagged with the same ``image-type`` tag that the original image has, and the minor version number is increased by one. All volume snapshots are labeled accordingly, using the new version number.
+
+You can then start testing or using the new image. It is recommended to keep the old image around for a while until the new image has been proven to work properly.
+
+#### Upgrading the Sailing Analytics Application AMI
+
+When upgrading the ``sailing-analytics-server`` AMI there is a good chance that the AMI you start with is used by one or more launch configurations that belong to auto-scaling groups and are used to launch new instances. Unfortunately, AWS doesn't keep you from removing old AMIs despite the fact that they are still referenced by one or more launch configurations that are in active use by their respective auto-scaling groups. So at some point you would want to upgrade those auto-scaling groups to use updated launch configurations which refer to the new AMI that results from the upgrade.
+
+After the AMI upgrade succeeds, you will see a pop-up dialog prompting you with a choice of whether you would like to update launch configurations for application replica sets that you selected in the table before upgrading the AMI, or in case you didn't pick any application replica sets suggesting all of them that currently use the AMI you just upgraded in their launch configuration. If you choose "OK" then all those auto-scaling groups will be updated so they point to new launch configurations copied from the previous ones, referencing the new AMI. The old launch configurations will be deleted. The names for the new launch configurations is constructed from the replica set name with the ID of the AMI appended to it. Note that running replicas are not affected by this.
+
+You can also manually trigger the upgrade of the AMI used by an auto-scaling group by using the "Update machine image for auto-scaling replicas" button or the action icon entitled correspondingly. It will use the lastest ``sailing-analytics-server``-tagged image available.
+
+### Removing an AMI and its Snapshots
+
+In the "Amazon Machine Images (AMIs)" table each row offers an action icon for removing the image. Use this with great care. After confirming the pop-up dialog shown, the AMI as well as its volume snapshots will be removed unrecoverably.
+
+## Automated SSH Key Management
+
+AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
+
+We decided early 2021 to change this so that things would be based on our own user and security sub-system (see [here](/wiki/info/security/security.md)). We introduced `LANDSCAPE` as a secured object type, with a special permission `MANAGE` and a special object identifier `AWS` such that the permission `LANDSCAPE:MANAGE:AWS` would permit users to manage all aspects of the AWS landscape, given they can present a valid AWS access key/secret. To keep the EC2 instances' SSH public key infrastructure in line, we made the instances poll the SSH public keys of those users with permissions, once per minute, updating the default user's `.ssh/authorized_keys` file accordingly.
+
+The REST end point `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` has been implemented which is based on state managed in the `com.sap.sse.landscape.aws` bundle's Activator. This activator registers SSH key pair listeners on any AwsLandscape object created by any of the AwsLandscape.obtain methods and uses those to update the time stamp returned by `get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` each time SSH keys are added or removed. Furthermore, the activator listens for changes regarding the `LANDSCAPE:MANAGE:AWS` permission using the new `PermissionChangeListener` observer pattern offered by SecurityService. The activator tracks the SecurityService, and the listener registration would be renewed even if the SecurityService was replaced in the OSGi registry. The actual mapping of changes to SecurityService to listener notifications is implemented by the new class PermissionChangeListeners.
+
+With this, the three REST API end points `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers`, `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS`, and `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=...` allow clients to efficiently find out whether the set of users with AWS landscape management permission and/or their set of SSH key pairs may have changed, and if so, poll the actual changes which requires a bit more computational effort.
+
+Two new scripts and a crontab file are provided under the configuration/ folder:
+- `update_authorized_keys_for_landscape_managers_if_changed`
+- `update_authorized_keys_for_landscape_managers`
+- `crontab`
+
+The first makes a call to `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` (currently coded to `https://security-service.sapsailing.com` in the crontab file). If no previous time stamp for the last change exists under `/var/run/last_change_aws_landscape_managers_ssh_keys` or the time stamp received in the response is newer, the `update_authorized_keys_for_landscape_managers` script is invoked using the bearer token provided in `/root/ssh-key-reader.token` as argument, granting the script READ access to the user list and their SSH key pairs. That script first asks for `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS` and then uses `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=..`. to obtain the actual SSH public key information for the landscape managers. The original `/root/.ssh/authorized_keys` file is copied to `/root/.ssh/authorized_keys.org` once and then used to insert the single public SSH key inserted by AWS, then appending all public keys received for the landscape-managing users.
+
+The `crontab` file which is used during image-upgrade (see `configuration/imageupdate.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
+
+## Legacy Documentation for Manual Operations
+
+Most of the things that follow should be obsolete by now because the [automated procedures](#amazon-ec2-for-sap-sailing-analytics_automated-procedures) should avoid the need for manual steps. Yet, should automatic procedures fail or should a deeper understanding of the things that have been automated become necessary, the following documentation may still be of value.
 
 #### Starting an instance
 
@@ -287,10 +564,6 @@ This will automatically start replication from your master which is assumed to b
 * terminate all existing replicas running the old release; the Auto-Scaling Group will launch as many replicas as you configured after a minute or two and will automatically assign them to the public target group
 * don't forget to terminate the MongoDB replicas again that you spun up before specifically for this process
 
-#### Setting up a new image (AMI) from scratch (more or less)
-
-See [here](/wiki/creating-ec2-image-from-scratch)
-
 #### Receiving wind from Expedition
 
 - To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/servers/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.
@@ -462,29 +735,6 @@ You should now be able to reach your multi instance with the dns name "ssv.sapsa
 ### S3 Storage, `media.sapsailing.com` and CloudFront
 
 In order to serve content from media.sapsailing.com publicly through HTTPS connections with an Amazon-provided SSL certificate, we created a CloudFront distribution ``E2YEQ22MXCKC5R``. See also [https://console.aws.amazon.com/cloudfront/home?region=us-east-1#distribution-settings:E2YEQ22MXCKC5R](https://console.aws.amazon.com/cloudfront/home?region=us-east-1#distribution-settings:E2YEQ22MXCKC5R). CloudFront distributions can use AWS-provided certificates only from region us-east-1, so we created a certificate for ``*.sapsailing.com`` with additional name ``sapsailing.com`` there ([https://console.aws.amazon.com/acm/home?region=us-east-1#/?id=arn:aws:acm:us-east-1:017363970217:certificate%2Fb05e7e2b-a5ad-45e7-91c7-e9cc13e5ed4a](https://console.aws.amazon.com/acm/home?region=us-east-1#/?id=arn:aws:acm:us-east-1:017363970217:certificate%2Fb05e7e2b-a5ad-45e7-91c7-e9cc13e5ed4a)). A CloudFront distribution has a DNS name; this one has ``dieqc457smgus.cloudfront.net``. We made ``media.sapsailing.com`` an "Alias" DNS record in Route53 to point to this CloudFront distribution's DNS name, as an A-record with "Simple" routing policy. Logging for the CloudFront distribution has been enabled and set to the S3 bucket ``sapsailing-access-logs.s3.amazonaws.com``, prefix ``media-sapsailing-com``. As CloudFront distribution origin domain name we set ``media.sapsailing.com.s3.amazonaws.com`` with Origin Type set to ``S3 Origin``. We activated HTTP to HTTPS redirection.
-
-## SSH Key Management
-
-AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
-
-We decided early 2021 to change this so that things would be based on our own user and security sub-system (see [here](/wiki/info/security/security.md)). We introduced `LANDSCAPE` as a secured object type, with a special permission `MANAGE` and a special object identifier `AWS` such that the permission `LANDSCAPE:MANAGE:AWS` would permit users to manage all aspects of the AWS landscape, given they can present a valid AWS access key/secret. To keep the EC2 instances' SSH public key infrastructure in line, we made the instances poll the SSH public keys of those users with permissions, once per minute, updating the default user's `.ssh/authorized_keys` file accordingly.
-
-The REST end point `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` has been implemented which is based on state managed in the `com.sap.sse.landscape.aws` bundle's Activator. This activator registers SSH key pair listeners on any AwsLandscape object created by any of the AwsLandscape.obtain methods and uses those to update the time stamp returned by `get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` each time SSH keys are added or removed. Furthermore, the activator listens for changes regarding the `LANDSCAPE:MANAGE:AWS` permission using the new `PermissionChangeListener` observer pattern offered by SecurityService. The activator tracks the SecurityService, and the listener registration would be renewed even if the SecurityService was replaced in the OSGi registry. The actual mapping of changes to SecurityService to listener notifications is implemented by the new class PermissionChangeListeners.
-
-With this, the three REST API end points `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers`, `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS`, and `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=...` allow clients to efficiently find out whether the set of users with AWS landscape management permission and/or their set of SSH key pairs may have changed, and if so, poll the actual changes which requires a bit more computational effort.
-
-Two new scripts and a crontab file are provided under the configuration/ folder:
-- `update_authorized_keys_for_landscape_managers_if_changed`
-- `update_authorized_keys_for_landscape_managers`
-- `crontab`
-
-The first makes a call to `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` (currently coded to `https://security-service.sapsailing.com` in the crontab file). If no previous time stamp for the last change exists under `/var/run/last_change_aws_landscape_managers_ssh_keys` or the time stamp received in the response is newer, the `update_authorized_keys_for_landscape_managers` script is invoked using the bearer token provided in `/root/ssh-key-reader.token` as argument, granting the script READ access to the user list and their SSH key pairs. That script first asks for `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS` and then uses `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=..`. to obtain the actual SSH public key information for the landscape managers. The original `/root/.ssh/authorized_keys` file is copied to `/root/.ssh/authorized_keys.org` once and then used to insert the single public SSH key inserted by AWS, then appending all public keys received for the landscape-managing users.
-
-The `crontab` file which is used during image-upgrade (see `configuration/imageupdate.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
-
-#### Setting up a Dedicated Instance
-[...]
-
 
 ## Costs per month
 
@@ -834,37 +1084,6 @@ cp -rf ~/servers/server/logs/* /var/log/old/<event-name>/<instance-public-ipv4>/
 The script ``java/target/compareServers`` helps comparing server content after master data import. Run with two server URLs you want to compare, ideally in an empty directory where file downloads can be stored. Run initially with the ``-elv`` option to get verbose output. Make sure you have your ``http_proxy`` and ``https_proxy`` environment variables set or unset, depending on your network environment. Should the initial comparison fail, analyze the differences and continue by using ``-cel`` as command line arguments, telling the script to continue where it left off, exiting when hitting a difference and listing the leaderboard groups currently being compared. Repeat until done.
 
 Should you want to compare servers of which you know they have different sets of leaderboard groups, start with ``compareServers -elv`` and then manually adjust the ``leaderboardgroups.new.sed`` and ``leaderboardgroups.old.sed`` files according to your needs, then continue with the ``-cel`` switches to restrict comparisons to what you left in the ``leaderboardgroups.*.sed`` files.
-
-## Migration Checklist
-
-### Before switching sapsailing.com to the EC2 webserver
-- fire up archive server and load it (DONE)
-- configure 001-events.conf starting with a copy from old sapsailing.com, using test URLs (rombalur.de) (DONE)
-- clone entire MongoDB content (DONE)
-- migrate MySQL for Bugzilla
-- ensure that all users have access; either solicit their public keys and enter to ~trac/.ssh/authorized_keys or migrate /etc/passwd and /etc/group settings for access to trac group (DONE)
-- run test build and deploy (DONE)
-- fire up a live server and test it (DONE)
-- fire up a replica and check that it works correctly (ERROR!)
-- check that UDP mirror is working (DONE)
-- check that SwissTiming StoreAndForward is working
-- check that we can fire up a live2 / archive2 server and switch transparently
-
-### Just before the migration on Sunday evening
-- check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf and /opt/piwik-scripts and all of /etc - also have a look at piwik and bugzilla configuration (DONE)
-- disable bugzilla on old.sapsailing.com because Nameserver switch can take up to 48 hours for everyone (DONE)
-- copy /home/trac/releases to webserver (DONE)
-- import bugzilla to mysql (DONE)
-- git fetch --all on webserver (DONE)
-- tell SAP hostmaster to point old.sapsailing.com to 195.227.10.246
-
-### Immediately after switching the sapsailing.com domain to the EC2 webserver on Sunday evening
-- check that old.sapsailing.com points to 195.227.10.246
-- check that EC2 web server is responding to sapsailing.com now
-- fetch all git branches from what is now old.sapsailing.com; also sync gollum wiki git
-- ask people (including internal Git team) to update their known_hosts files according to the new web server's key
-- check if build server can access new sapsailing.com
-- check why swisstiminglistener doesn't receive connections and fix
 
 ## Glossary
 

@@ -66,7 +66,6 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
     }
 
     public void add(String regattaName, String raceName, JSONObject raceWithWindSourcesJson) {
-
         JSONArray windSourcesJson = (JSONArray) raceWithWindSourcesJson.get(RaceWindJsonSerializer.WIND_SOURCES);
         List<Document> dbWindSources = new ArrayList<>(windSourcesJson.size());
         for (Object windSourceObj : windSourcesJson) {
@@ -75,6 +74,7 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
         }
         MongoCollection<Document> windSourcesCollection = windSourcesPersistenceManager.getCollection();
         windSourcesCollection.insertMany(dbWindSources);
+        // TODO bug5695 insert individual fixes into a flat wind fix collection with an index on time point
         BasicDBList dbWindSourceIds = new BasicDBList();
         for (Document dbWindSource : dbWindSources) {
             ObjectId dbId = (ObjectId) dbWindSource.get(FIELD_DB_ID);
@@ -87,5 +87,4 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
         MongoCollection<Document> races = getDb().getCollection(getCollectionName());
         races.insertOne(dbObject);
     }
-
 }

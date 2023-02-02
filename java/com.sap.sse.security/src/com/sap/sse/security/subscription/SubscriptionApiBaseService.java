@@ -1,6 +1,7 @@
 package com.sap.sse.security.subscription;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 
 /**
  * Service interface for provider API requests
@@ -27,4 +28,6 @@ public interface SubscriptionApiBaseService {
      * The delay after which to re-schedule a request that failed for having exceeded the service's rate limit
      */
     Duration getLimitReachedResumeDelay();
+    
+    SubscriptionPlanProvider getSubscriptionPlanProvider();
 }

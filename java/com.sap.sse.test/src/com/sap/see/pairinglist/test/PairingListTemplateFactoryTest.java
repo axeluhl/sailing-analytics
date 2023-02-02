@@ -145,7 +145,7 @@ public class PairingListTemplateFactoryTest {
             for (int j = 0; j < groups; j++) {
                 for (int k = 0; k < competitors / groups; k++) {
                     if (availableCompetitors.contains(copy[i * groups + j][k])) {
-                        availableCompetitors.remove(new Integer(copy[i * groups + j][k]));
+                        availableCompetitors.remove(Integer.valueOf(copy[i * groups + j][k]));
                     }
                 }
             }

@@ -46,6 +46,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.common.client.NavigatorUtil;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
@@ -100,7 +101,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Distance;
@@ -127,11 +128,14 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
@@ -224,15 +228,17 @@ public class RaceBoardPanel
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
             RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, SailingServiceAsync sailingService,
-            MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite, UserService userService,
+            MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
-            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
-            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
-            Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO, TrackingConnectorInfoDTO trackingConnectorInfo,
-            SailingServiceWriteAsync sailingServiceWrite, RaceboardContextDefinition raceboardContextDefinition) {
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, ErrorReporter errorReporter,
+            final StringMessages stringMessages, UserAgentDetails userAgent,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean showChartMarkEditMediaButtonsAndVideo,
+            boolean showHeaderPanel, Iterable<DetailType> availableDetailTypes,
+            StrippedLeaderboardDTO leaderboardDTO, final RaceWithCompetitorsAndBoatsDTO raceDTO,
+            TrackingConnectorInfoDTO trackingConnectorInfo, SailingServiceWriteAsync sailingServiceWrite,
+            RaceboardContextDefinition raceboardContextDefinition,
+            WithSecurity withSecurity) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.sailingServiceWrite = sailingServiceWrite;
@@ -257,38 +263,43 @@ public class RaceBoardPanel
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
+        regattaAndRaceTimeInformationHeader.getElement().getStyle().setProperty("pointerEvents", "auto");
         Runnable shareLinkAction = null;
-        if(raceboardContextDefinition != null) {
+        if (raceboardContextDefinition != null) {
             final RaceboardContextDefinition strippedRaceBoardContextDefinition = new RaceboardContextDefinition(
                     raceboardContextDefinition.getRegattaName(), raceboardContextDefinition.getRaceName(),
                     raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                     raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
             final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(RACEBOARD_PATH, strippedRaceBoardContextDefinition);
-            if(showChartMarkEditMediaButtonsAndVideo) {
+            if (showChartMarkEditMediaButtonsAndVideo) {
                 shareLinkAction = () -> {
                     final ShareLinkDialog shareLinkDialog = new ShareLinkDialog(RACEBOARD_PATH, lifecycle,
                             getSettings(), sailingService, stringMessages, linkWithSettingsGenerator);
                     shareLinkDialog.initLinkAndShow();
                 };
-            }else {
-                if(NavigatorUtil.clientHasNavigatorShareSupport()) {
+            } else {
+                if (NavigatorUtil.clientHasNavigatorShareSupport()) {
                     shareLinkAction = () -> {
                         NavigatorUtil.shareUrl(linkWithSettingsGenerator.createUrl(getSettings()), null);
                     };
-                }else if(NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
+                } else if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
                     shareLinkAction = () ->{
                         NavigatorUtil.copyToClipboard(linkWithSettingsGenerator.createUrl(getSettings()));
                     };
                 }
             }
         }
-        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
+        
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(),
+                mainCss.usermanagement_open(), mainCss.user_menu_premium());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
+        this.userManagementMenuView.asWidget().getElement().getStyle().setProperty("pointerEvents", "auto");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
         raceMapResources.raceMapStyle().ensureInjected();
-        RaceMapLifecycle raceMapLifecycle = lifecycle.getRaceMapLifecycle();
+        final PaywallResolver paywallResolverRace = new PaywallResolver(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
+        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolverRace, raceDTO);
         RaceMapSettings defaultRaceMapSettings = settings.findSettingsByComponentId(raceMapLifecycle.getComponentId());
         RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
         RaceTimePanelSettings raceTimePanelSettings = settings
@@ -299,7 +310,7 @@ public class RaceBoardPanel
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
                 raceMapResources, /* showHeaderPanel */ true, quickFlagDataProvider, this::showInWindChart,
-                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction) {
+                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction, paywallResolverRace) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -325,7 +336,7 @@ public class RaceBoardPanel
                     return INDENT_SMALL_CONTROL_STYLE;
                 }
                 return super.getLeftControlsIndentStyle();
-            }   
+            }
         };
         // now that the raceMap field has been initialized, check whether the buoy zone radius shall be looked up from
         // the regatta model on the server:
@@ -352,7 +363,7 @@ public class RaceBoardPanel
                     public LeaderboardDTO getLeaderboard() {
                         return leaderboardPanel.getLeaderboard();
                     }
-                }, selectedRaceIdentifier, userService.getStorage());
+                }, selectedRaceIdentifier, withSecurity.getUserService().getStorage());
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
@@ -374,7 +385,7 @@ public class RaceBoardPanel
                 }
             }
         }
-        taggingComponent = new TaggingComponent(parent, componentContext, stringMessages, sailingService, userService, timer,
+        taggingComponent = new TaggingComponent(parent, componentContext, stringMessages, sailingService, withSecurity.getUserService(), timer,
                 raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO, sailingServiceWrite);
         addChildComponent(taggingComponent);
         taggingComponent.setVisible(showTaggingComponent);
@@ -382,7 +393,7 @@ public class RaceBoardPanel
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, leaderboardName, leaderboardGroupName,
-                competitorSearchTextBox, availableDetailTypes);
+                competitorSearchTextBox, availableDetailTypes, withSecurity);
         addChildComponent(leaderboardPanel);
         leaderboardPanel.addVisibilityListener(visible->{
             quickFlagDataProvider.setLeaderboardNotCurrentlyUpdating(!visible);
@@ -392,7 +403,7 @@ public class RaceBoardPanel
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         createOneScreenView(lifecycle, settings, leaderboardName, leaderboardGroupName, leaderboardGroupId, eventId, mainPanel,
                 isScreenLargeEnoughToInitiallyDisplayLeaderboard,
-                raceMap, userService, showChartMarkEditMediaButtonsAndVideo, leaderboardDTO, raceDTO); // initializes the raceMap field
+                raceMap, withSecurity.getUserService(), showChartMarkEditMediaButtonsAndVideo, leaderboardDTO, raceDTO, paywallResolverRace); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         raceMap.addMediaPlayerManagerComponent(mediaPlayerManagerComponent);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
@@ -405,7 +416,7 @@ public class RaceBoardPanel
                 }
             }
         }
-        racetimePanel = new RaceTimePanel(this, componentContext, raceTimePanelLifecycle, userService, timer,
+        racetimePanel = new RaceTimePanel(this, componentContext, raceTimePanelLifecycle, withSecurity.getUserService(), timer,
                 timeRangeWithZoomModel,
                 stringMessages, raceTimesInfoProvider, parsedPerspectiveOwnSettings.isCanReplayDuringLiveRaces(),
                 showChartMarkEditMediaButtonsAndVideo, selectedRaceIdentifier,
@@ -451,24 +462,26 @@ public class RaceBoardPanel
      */
     private void createOneScreenView(RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
-            String leaderboardGroupName, UUID leaderboardGroupId, UUID event,
-            FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
-            UserService userService, boolean showChartMarkEditMediaButtonsAndVideo,
-            StrippedLeaderboardDTOWithSecurity leaderboard, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            String leaderboardGroupName, UUID leaderboardGroupId, UUID event, FlowPanel mainPanel,
+            boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService,
+            boolean showChartMarkEditMediaButtonsAndVideo, StrippedLeaderboardDTO leaderboard,
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, PaywallResolver paywallResolver) {
         MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
         MediaPlayerSettings mediaPlayerSettings = settings
                 .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
         WindChartLifecycle windChartLifecycle = getPerspectiveLifecycle().getWindChartLifecycle();
         WindChartSettings windChartSettings = settings.findSettingsByComponentId(windChartLifecycle.getComponentId());
         ManeuverTableLifecycle maneuverTableLifecycle = getPerspectiveLifecycle().getManeuverTable();
-        ManeuverTableSettings maneuverTableSettings = settings.findSettingsByComponentId(maneuverTableLifecycle.getComponentId());
-        MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
+        ManeuverTableSettings maneuverTableSettings = settings
+                .findSettingsByComponentId(maneuverTableLifecycle.getComponentId());
+        MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = getPerspectiveLifecycle()
+                .getMultiCompetitorRaceChartLifecycle();
         MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settings
                 .findSettingsByComponentId(multiCompetitorRaceChartLifecycle.getComponentId());
         // create the default leaderboard and select the right race
         final RaceBoardPerspectiveOwnSettings initialPerspectiveOwnSettings = settings.getPerspectiveOwnSettings();
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
-        List<Component<?>> componentsForSideBySideViewer = new ArrayList<Component<?>>();
+        List<Pair<Component<?>, Action>> componentsForSideBySideViewer = new ArrayList<>();
         if (showChartMarkEditMediaButtonsAndVideo) {
             competitorChart = new MultiCompetitorRaceChart(this, getComponentContext(),
                     multiCompetitorRaceChartLifecycle,
@@ -480,21 +493,21 @@ public class RaceBoardPanel
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
             new SliceRaceHandler(sailingServiceWrite, sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
                     leaderboardGroupName, leaderboardGroupId, leaderboardName, event, leaderboard, raceDTO, stringMessages);
-            componentsForSideBySideViewer.add(competitorChart);
+            componentsForSideBySideViewer.add(new Pair<Component<?>, Action>(competitorChart, TrackedRaceActions.VIEWANALYSISCHARTS));
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,
                     selectedRaceIdentifier, timer,
                     timeRangeWithZoomModel,
                     windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
                     true);
             windChart.setVisible(false);
-            componentsForSideBySideViewer.add(windChart);
+            componentsForSideBySideViewer.add(new Pair<Component<?>, Action>(windChart, TrackedRaceActions.VIEWANALYSISCHARTS));
         }
         maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 selectedRaceIdentifier, stringMessages, competitorSelectionProvider, errorReporter, timer,
                 maneuverTableSettings, timeRangeWithZoomModel, new ClassicLeaderboardStyle(), userService, raceDTO);
         maneuverTablePanel.getEntryWidget().setTitle(stringMessages.maneuverTable());
         if (showChartMarkEditMediaButtonsAndVideo) {
-            componentsForSideBySideViewer.add(maneuverTablePanel);
+            componentsForSideBySideViewer.add(new Pair<Component<?>, Action>(maneuverTablePanel, TrackedRaceActions.VIEWANALYSISCHARTS));
         }
         editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,
                 sailingServiceWrite,
@@ -503,7 +516,7 @@ public class RaceBoardPanel
         if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
-            componentsForSideBySideViewer.add(editMarkPassingPanel);
+            componentsForSideBySideViewer.add(new Pair<Component<?>, Action>(editMarkPassingPanel, null));
         }
         editMarkPositionPanel = new EditMarkPositionPanel(this, getComponentContext(), raceMap, leaderboardPanel,
                 selectedRaceIdentifier,
@@ -511,7 +524,7 @@ public class RaceBoardPanel
                 asyncActionsExecutor, errorReporter, sailingServiceWrite);
         if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
-            componentsForSideBySideViewer.add(editMarkPositionPanel);
+            componentsForSideBySideViewer.add(new Pair<Component<?>, Action>(editMarkPositionPanel, null));
         }
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
                 sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService,
@@ -519,9 +532,9 @@ public class RaceBoardPanel
                 raceDTO);
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
-            public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTOWithSecurity> consumer) {
+            public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTO> consumer) {
                 sailingService.getLeaderboardWithSecurity(leaderboardName,
-                        new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(
@@ -529,7 +542,7 @@ public class RaceBoardPanel
                             }
 
                             @Override
-                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                            public void onSuccess(StrippedLeaderboardDTO result) {
                                 consumer.accept(result);
                             }
                         });
@@ -537,7 +550,7 @@ public class RaceBoardPanel
         };
         mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingComponent,
                 mediaPlayerManagerComponent, componentsForSideBySideViewer, stringMessages, userService,
-                editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel, asyncFetcher);
+                editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel, asyncFetcher, paywallResolver, raceDTO);
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             @Override
             public void notifyStateChange() {
@@ -545,19 +558,23 @@ public class RaceBoardPanel
             }
         });
         addChildComponent(mediaPlayerManagerComponent);
-        for (Component<? extends Settings> component : componentsForSideBySideViewer) {
-            addChildComponent(component);
+        for (Pair<Component<?>, Action> componentAndAction : componentsForSideBySideViewer) {
+            addChildComponent(componentAndAction.getA());
         }
-        this.setupUserManagementControlPanel(userService);
+        this.setupUserManagementControlPanel(userService, paywallResolver);
         mainPanel.add(mapViewer.getViewerWidget());
-        boolean showLeaderboard = initialPerspectiveOwnSettings.isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
+        boolean showLeaderboard = initialPerspectiveOwnSettings.isShowLeaderboard()
+                && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
         leaderboardPanel.setAutoExpandPreSelected(initialPerspectiveOwnSettings.isAutoExpandPreSelectedRace());
         if (showChartMarkEditMediaButtonsAndVideo) {
-            setWindChartVisible(initialPerspectiveOwnSettings.isShowWindChart());
-            setCompetitorChartVisible(initialPerspectiveOwnSettings.isShowCompetitorsChart());
+            // TODO bug5672 Shift to Settings based handling of these permission checks, instead of manually checking
+            final boolean hasAnalasysChartPermission = paywallResolver
+                    .hasPermission(TrackedRaceActions.VIEWANALYSISCHARTS, raceDTO);
+            setWindChartVisible(hasAnalasysChartPermission && initialPerspectiveOwnSettings.isShowWindChart());
+            setCompetitorChartVisible(hasAnalasysChartPermission && initialPerspectiveOwnSettings.isShowCompetitorsChart());
+            setManeuverTableVisible(hasAnalasysChartPermission && initialPerspectiveOwnSettings.isShowManeuver());
             setTagPanelVisible(initialPerspectiveOwnSettings.isShowTags());
-            setManeuverTableVisible(initialPerspectiveOwnSettings.isShowManeuver());
         }
         // make sure to load leaderboard data for filtering to work
         if (!showLeaderboard) {
@@ -581,10 +598,10 @@ public class RaceBoardPanel
         racetimePanel.setBarOverlays(overlays);
     }
 
-    private void setupUserManagementControlPanel(UserService userService) {
+    private void setupUserManagementControlPanel(UserService userService, PaywallResolver paywallResolver) {
         mainCss.ensureInjected();
         final FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, userManagementMenuView, display, 
+        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, paywallResolver, userManagementMenuView, display, 
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
         new RaceBoardLoginHintPopup(genericAuthentication.getAuthenticationManager());
     }
@@ -603,7 +620,7 @@ public class RaceBoardPanel
     private SingleRaceLeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName, CompetitorFilterPanel competitorSearchTextBox,
-            Iterable<DetailType> availableDetailTypes) {
+            Iterable<DetailType> availableDetailTypes, WithSecurity withSecurity) {
         SingleRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
         SingleRaceLeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
@@ -614,7 +631,7 @@ public class RaceBoardPanel
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,
-                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get(), availableDetailTypes);
+                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get(), availableDetailTypes, withSecurity);
     }
 
     private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {

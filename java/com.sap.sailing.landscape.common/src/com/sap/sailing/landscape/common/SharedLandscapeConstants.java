@@ -9,6 +9,18 @@ public interface SharedLandscapeConstants {
     String DEFAULT_DOMAIN_NAME = "sapsailing.com";
     
     /**
+     * If a shared security realm is to be used for a domain then this constant tells the name of the application
+     * replica set that by default manages the shared security information. Other replicables that are to be shared
+     * through the same realm, such as landscape management data or shared sailing data such as course templates or mark
+     * properties inventories, can be shared from the same application replica set.
+     * <p>
+     * 
+     * To obtain the full host name used by the application replica set, append "." and the
+     * {@link #DEFAULT_DOMAIN_NAME}.
+     */
+    String DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME = "security-service";
+    
+    /**
      * This is the region of the load balancer handling the default traffic for {@code *.sapsailing.com}. It is also
      * called the "dynamic" load balancer because adding, removing or changing any hostname-based rule in its HTTPS
      * listener's rule set takes effect immediately and is hence suited well for short-lived events that will be
@@ -40,10 +52,10 @@ public interface SharedLandscapeConstants {
      */
     String SAILING_ANALYTICS_APPLICATION_HOST_TAG = "sailing-analytics-server";
 
-    String ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE = "ARCHIVE";
+    String ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME = "ARCHIVE";
 
     /**
-     * Value of the {@link #SAILSAILING_ANALYTICS_APPLICATION_HOST_TAGING_ANALYTICS_APPLICATION_HOST_TAG} tag
+     * Value of the {@link #SAILING_ANALYTICS_APPLICATION_HOST_TAG} tag
      * for hosts expected to run more than one dedicated application process.
      */
     String MULTI_PROCESS_INSTANCE_TAG_VALUE = "___multi___";

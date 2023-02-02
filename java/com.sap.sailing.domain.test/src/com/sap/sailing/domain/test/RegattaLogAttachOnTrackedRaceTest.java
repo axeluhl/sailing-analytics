@@ -2,6 +2,8 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -62,6 +65,13 @@ public class RegattaLogAttachOnTrackedRaceTest {
         @Override
         public Iterable<RegattaLog> getAttachedRegattaLogs() {
             return Collections.singletonList(regattaLog);
+        }
+        
+        @Override
+        public RaceDefinition getRace() {
+            final RaceDefinition result = mock(RaceDefinition.class);
+            when(result.getCompetitors()).thenReturn(Collections.emptySet());
+            return result;
         }
     }
     

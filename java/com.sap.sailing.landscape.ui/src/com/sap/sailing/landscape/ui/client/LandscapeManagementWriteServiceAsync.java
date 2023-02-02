@@ -1,12 +1,16 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
+import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
+import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
+import com.sap.sailing.landscape.ui.shared.LeaderboardNameDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
@@ -15,6 +19,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
@@ -42,6 +47,12 @@ public interface LandscapeManagementWriteServiceAsync {
      * {@link CREATE_OBJECT} permission on the server on which this is called.
      */
     void generateSshKeyPair(String regionId, String keyName, String privateKeyEncryptionPassphrase, AsyncCallback<SSHKeyPairDTO> callback);
+    
+    /**
+     * Verifies a passphrase for an SSH private key. Returns {@code true} if the passphrase can decipher the private key
+     * and {@code false} if this does not work or the key is invalid, or the key is {@code null}.
+     */
+    void verifyPassphrase(String regionId, SSHKeyPairDTO key, String privateKeyEncryptionPassphrase, AsyncCallback<Boolean> callback);
 
     /**
      * The calling subject must have {@code CREATE} permission for the key requested as well as the
@@ -96,8 +107,8 @@ public interface LandscapeManagementWriteServiceAsync {
             Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
-    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
-            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
+    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO, AwsShardDTO shardDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO, LeaderboardNameDTO leaderboard,
             AsyncCallback<SerializationDummyDTO> callback);
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
@@ -119,77 +130,12 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void getReleases(AsyncCallback<ArrayList<ReleaseDTO>> asyncCallback);
 
-    /**
-     * Moves the content hosted by a replica set into an archive server. This should usually happen when the content
-     * hosted so far by the {@code applicationReplicaSetToArchive} is no longer live. At this point the workload usually
-     * changes: instead of high ingestion load combined with much read access for live content, content is no longer
-     * actively updated, maybe except for smaller corrections, and read access decreases as the content ages. An archive
-     * server environment provides less CPU and has a memory architecture that provides for a reasonable working set and
-     * lots of fast swap space, allowing for large heap space while taking some initial time to swap in a working set as
-     * a user starts accessing specific content.
-     * <p>
-     * 
-     * During the archiving process, the following steps are performed:
-     * <ul>
-     * <li>A master data import (MDI) fetches all content from the {@code applicationReplicaSetToArchive} into the
-     * {@code archiveReplicaSet}.</li>
-     * <li>The content is compared; the {@code durationToWaitBeforeCompareServers} and
-     * {@code maxNumberOfCompareServerAttempts} parameters control the process.</li>
-     * <li>Only when a comparison has completed successfully, the following steps take place:
-     * <ul>
-     * <li>The central reverse proxy in the region identified by {@code regionId} will be updated with a rule that
-     * reflects the {@code applicationReplicaSetToArchive}'s default redirect for its base URL so that when after
-     * removing the replica set the base URL is handled by the central reverse proxy, it redirects to the same content
-     * that the ALB default redirect rule targeted before.</li>
-     * <li>any remote server reference on the {@code archiveReplicaSet} pointing to the
-     * {@code applicationReplicaSetToArchive} will be removed</li>
-     * <li>if the {@code removeApplicationReplicaSet} parameter is {@code true}, the
-     * {@code applicationReplicaSetToArchive} will be
-     * {@link #removeApplicationReplicaSet(String, SailingApplicationReplicaSetDTO, String, byte[], AsyncCallback)
-     * removed}</li>
-     * <li>if a non-{@code null} {@code moveDatabaseHere} is provided and the {@code removeApplicationReplicaSet} was
-     * {@code true}, the {@code applicationReplicaSetToArchive}'s master database will be moved to the database endpoint
-     * specified by {@code moveDatabaseHere} and if hashed equal to the original database, the original database will be
-     * removed, together with the replicas' database(s).</li>
-     * </ul>
-     * </li>
-     * </ul>
-     * 
-     * @param maxNumberOfCompareServerAttempts
-     *            if 0, no comparison is tried but then <em>none</em> of the follow-up steps such as removing the
-     *            replica set, moving the database, removing a remote reference from the archive to the replica set and
-     *            updating the central reverse proxy will be performed.
-     * @param bearerTokenOrNullForApplicationReplicaSetToArchive
-     *            used to authentication towards the {@code applicationReplicaSetToArchive}; if {@code null}, the
-     *            current user's bearer token will be tried for authentication towards the
-     *            {@code applicationReplicaSetToArchive}, assuming this server and the {@code applicationReplicaSetToArchive}
-     *            share a common security service.
-     * @param bearerTokenOrNullForArchive
-     *            used to authentication towards the {@code archiveReplicaSet}; if {@code null}, the
-     *            current user's bearer token will be tried for authentication towards the
-     *            {@code archiveReplicaSet}, assuming this server and the {@code archiveReplicaSet}
-     *            share a common security service.
-     * @param moveDatabaseHere
-     *            a DB endpoint; if {@code null}, the replica set's database will be left untouched. Otherwise, after
-     *            successful comparison of content archived with the original content and if the
-     *            {@code removeApplicationReplicaSet} parameter was {@code true} and hence the replica set has been
-     *            removed, the replica set's master database will be copied to the database specified by this parameter,
-     *            and if the copy is considered equal to the original, the original and all replica databases are
-     *            removed.
-     * @param callback
-     *            returns a UUID immediately that the client can use to query the progress of this long-running
-     *            operation, as for the MDI architecture, by invoking
-     *            {@code RacingEventService.getDataImportLock().getProgress(id)}. The resulting
-     *            {@code DataImportProgress} object will then tell about progress and a possible error message for the
-     *            operation.
-     */
     void archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
-            String bearerTokenOrNullForApplicationReplicaSetToArchive,
-            String bearerTokenOrNullForArchive,
-            Duration durationToWaitBeforeCompareServers,
-            int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,
-            MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption,
-            AsyncCallback<UUID> callback);
+            String bearerTokenOrNullForApplicationReplicaSetToArchive, String bearerTokenOrNullForArchive,
+            Duration durationToWaitBeforeCompareServers, int maxNumberOfCompareServerAttempts,
+            boolean removeApplicationReplicaSet, MongoEndpointDTO moveDatabaseHere, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDecryption,
+            AsyncCallback<Pair<DataImportProgress, CompareServersResultDTO>> callback);
 
     void deployApplicationToExistingHost(String replicaSetName, AwsInstanceDTO hostToDeployTo,
             String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
@@ -250,4 +196,84 @@ public interface LandscapeManagementWriteServiceAsync {
     void changeAutoScalingReplicasInstanceType(SailingApplicationReplicaSetDTO<String> replicaSet,
             String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            AsyncCallback<ArrayList<LeaderboardNameDTO>> names);
+
+    void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoards,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, String region,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+
+    /**
+     * @param callback
+     *            returns the shards as keys and the sharding keys (escaped / mangled leaderboard names) as values.
+     *            Those sharding keys are what you get when mangling the {@link AwsShardDTO#getLeaderboardNames()
+     *            leaderboard names} of the shard.
+     */
+    void getShards(SailingApplicationReplicaSetDTO<String> replicaset, String region, String bearerToken,
+            AsyncCallback<Map<AwsShardDTO, Iterable<String>>> callback);
+
+    /**
+     * Removes {@code shard} from the replica set. This deletes the load balancer listener rules, and the auto scaling
+     * group and the target group.
+     * 
+     * @param shard
+     *            the shard to remove
+     * @param replicaSet
+     *            the replica set which contains the shard.
+     * @param region
+     *            replica set's region
+     * @param passphrase
+     *            passphrase for the private key decription.
+     * @param callback
+     * 
+     */
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region,
+            byte[] passphrase, AsyncCallback<Void> callback);
+
+    /**
+     * Appends sharding keys for each leader board in {@code selectedLeaderboards} to the shard, identified by
+     * {@code shardName}, from the {@code replicaset}. This function inserts rules to the replica set's load balancer
+     * for each {@selectedLeaderboards}'s sharding key. It the replica set's load balancer does not have enough rules
+     * left, a new one gets created. For inserting the rules, first every existing rule of this shard get's checked for
+     * space left and if there is, it gets filled with a sharding key and after that new rules are created. Throws an
+     * Exception if: - the shard is not found. - shards cannot be retrived - sharding rules cannot be inserted - the is
+     * no free load balancer or the process of moving the replica set to another load balancer failed.
+     * 
+     * @param selectedLeaderBoards
+     *            list of selected leaderboards. These are the names and not sharding keys.
+     * @param region
+     *            landscape region
+     * @param shardName
+     *            shard's name where the keys are supposed to be appended
+     * @param replicaSet
+     *            shard's replica set
+     * @param bearerToken
+     * @param passphraseForPrivateKeyDecryption
+     * @param callback
+     */
+    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+
+    /**
+     * Removes the shardingkeys for {@selectedLeaderBoards} from a shard, identified by {@code shardName} from
+     * {@code replicaset}. Throws Exception if: - no shard is found - replicaset is not found - shards from replica set
+     * cannot be retrieved. - sharding rules cannot be updated
+     * 
+     * @param selectedLeaderBoards
+     *            Sharding keys for all selected leader boards.
+     * @param region
+     *            shard's regio
+     * @param shardName
+     *            Shard's name where the keys should be removed from
+     * @param replicaSet
+     *            replica set which contains the shard
+     * @param bearerToken
+     * @param passphraseForPrivateKeyDecryption
+     * @param callback
+     */
+    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
+            SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 }

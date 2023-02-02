@@ -11,8 +11,10 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -34,6 +36,7 @@ import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetche
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -48,15 +51,13 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
  * received to all {@link RaceColumnListener} subscribed with this leaderboard. To which objects this leaderboard
  * subscribes as {@link RaceColumnListener} is left to the concrete subclasses to implement, but the race columns seem
  * like useful candidates.
- * 
+ *
  * @author Axel Uhl (d043530)
  *
  */
@@ -64,7 +65,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         implements RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
-    static final Double DOUBLE_0 = new Double(0);
+    static final Double DOUBLE_0 = Double.valueOf(0);
 
     private final SettableScoreCorrection scoreCorrection;
 
@@ -84,17 +85,15 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     private final Map<Competitor, Double> carriedPoints;
 
     /**
-     * A set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}. Access is
-     * controlled by the {@link #suppressedCompetitorsLock} lock.
+     * A set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
      */
-    private final Set<Competitor> suppressedCompetitors;
-    private final NamedReentrantReadWriteLock suppressedCompetitorsLock;
+    private final ConcurrentHashMap<Competitor, Competitor> suppressedCompetitors;
 
     private final RaceColumnListeners raceColumnListeners;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
-     * 
+     *
      * @author Axel Uhl (d043530)
      *
      */
@@ -178,7 +177,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * would be cached, but that is again difficult because we would have to monitor all changes in all dependent
      * leaderboards and columns and tracked races properly.
      * <p>
-     * 
+     *
      * As it turns out, one of the most frequent uses of the {@link AbstractSimpleLeaderboardImpl#getCompetitors}
      * competitors list is to determine their number which in turn is only required for high-point scoring systems and
      * for computing the default score for penalties. Again, the most frequently used low-point family of scoring
@@ -186,9 +185,9 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * that need it. Instead of computing it for each call, this interface lets us defer the actual calculation until
      * the point when it's really needed. Once asked, this object will cache the result. Therefore, a new one should be
      * constructed each time the number shall be computed.
-     * 
+     *
      * @author Axel Uhl (D043530)
-     * 
+     *
      */
     public class NumberOfCompetitorsFetcherImpl implements NumberOfCompetitorsInLeaderboardFetcher {
         private int numberOfCompetitors = -1;
@@ -222,8 +221,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         this.scoreCorrection = createScoreCorrection();
         this.displayNames = new HashMap<Competitor, String>();
         this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
-        this.suppressedCompetitors = new HashSet<Competitor>();
-        this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
+        this.suppressedCompetitors = new ConcurrentHashMap<>();
     }
 
     protected RaceColumnListeners getRaceColumnListeners() {
@@ -271,6 +269,16 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        getRaceColumnListeners().notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+    }
+
+    @Override
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        getRaceColumnListeners().notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+    }
+
+    @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
     }
@@ -305,6 +313,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
             ResultDiscardingRule newDiscardingRule) {
         getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+    }
+
+    @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        getRaceColumnListeners().notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
     }
 
     @Override
@@ -421,7 +434,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
-                raceColumnsToConsider, timePoint);
+                raceColumnsToConsider, timePoint, getScoringScheme());
         return isDiscarded(competitor, raceColumn, timePoint, discardedRaceColumns);
     }
 
@@ -430,10 +443,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * be specified which is useful when net points are to be computed for more than one column for the same competitor
      * because then the calculation of discards (which requires looking at all columns) only needs to be done once and
      * not again for each column (which would lead to quadratic effort).
-     * 
+     *
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
-     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
@@ -451,7 +464,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider,
             TimePoint timePoint) {
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
-                raceColumnsToConsider, timePoint);
+                raceColumnsToConsider, timePoint, getScoringScheme());
         return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
     }
 
@@ -460,10 +473,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * columns can be specified which is useful when net points are to be computed for more than one column for the same
      * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
      * once and not again for each column (which would lead to quadratic effort).
-     * 
+     *
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
-     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     @Override
@@ -471,7 +484,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             Set<RaceColumn> discardedRaceColumns) {
         return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns, ()->getTotalPoints(competitor, raceColumn, timePoint));
     }
-    
+
     @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider) {
@@ -484,7 +497,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             if (totalPoints == null) {
                 result = null;
             } else {
-                result = getScoringScheme().getScoreFactor(raceColumn) * totalPoints;
+                result = getScoringScheme().getScoreScaledByFactor(raceColumn, totalPoints);
             }
         }
         return result;
@@ -496,30 +509,21 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Double getNetPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
-            TimePoint timePoint) {
-        // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race
-        // from there on
-        boolean needToResetScoreUponNextNonEmptyEntry = false;
-        double result = getCarriedPoints(competitor);
-        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
-                raceColumnsToConsider, timePoint);
-        for (RaceColumn raceColumn : raceColumnsToConsider) {
-            if (raceColumn.isStartsWithZeroScore()) {
-                needToResetScoreUponNextNonEmptyEntry = true;
-            }
-            if (getScoringScheme().isValidInNetScore(this, raceColumn, competitor, timePoint)) {
-                final Double netPoints = getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
-                if (netPoints != null) {
-                    if (needToResetScoreUponNextNonEmptyEntry) {
-                        result = 0;
-                        needToResetScoreUponNextNonEmptyEntry = false;
-                    }
-                    result += netPoints;
-                }
-            }
-        }
-        return result;
+    public Double getNetPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        return getScoringScheme().getNetPoints(this, competitor, raceColumnsToConsider, timePoint);
+    }
+
+    /**
+     * Like {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)},
+     * but here callers can provide the total points as a {@link Function} that maps {@link Competitor}s to their
+     * total points at {@code timePoint} for {@code raceColumn}. The default for computing this would be
+     * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
+     */
+    @Override
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint,
+                competitor->getTotalPoints(competitor, raceColumn, timePoint, cache), cache);
     }
 
     /**
@@ -528,8 +532,8 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * points.
      */
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> totalPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
             Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, cache);
@@ -657,22 +661,23 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint)
             throws NoWindException {
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
-                getRaceColumns(), timePoint);
+                getRaceColumns(), timePoint, getScoringScheme());
         return getEntry(competitor, race, timePoint, discardedRaceColumns);
     }
 
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint,
-            Set<RaceColumn> discardedRaceColumns) throws NoWindException {
-        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint);
+            Set<RaceColumn> discardedRaceColumns, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint, cache);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
-                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
+                this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme(), cache);
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
-        return new EntryImpl(trackedRankProvider, correctedScore, () -> correctedResults.getUncorrectedScore(),
+        final Double correctedScoreScaledByColumnFactor = correctedScore == null ? null
+                : Double.valueOf(getScoringScheme().getScoreScaledByFactor(race, correctedScore));
+        return new EntryImpl(trackedRankProvider, correctedScoreScaledByColumnFactor, () -> correctedResults.getUncorrectedScore(),
                 correctedResults.isCorrected(),
-                discarded ? DOUBLE_0
-                        : correctedScore == null ? null : Double.valueOf(correctedScore * getScoringScheme().getScoreFactor(race)),
+                discarded ? DOUBLE_0 : correctedScoreScaledByColumnFactor,
                 correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
 
@@ -738,16 +743,16 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
-                            getRaceColumns(), timePoint);
+                            getRaceColumns(), timePoint, getScoringScheme());
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 final Double correctedScore = correctedResults.getCorrectedScore();
-                Entry entry = new EntryImpl(trackedRankProvider, correctedScore,
+                final Double correctedScoreScaledByColumnFactor = correctedScore == null ? null
+                        : Double.valueOf(getScoringScheme().getScoreScaledByFactor(raceColumn, correctedScore));
+                Entry entry = new EntryImpl(trackedRankProvider, correctedScoreScaledByColumnFactor,
                         () -> correctedResults.getUncorrectedScore(), correctedResults.isCorrected(),
-                        discarded ? DOUBLE_0
-                                : (correctedScore == null ? null
-                                        : Double.valueOf((correctedScore * getScoringScheme().getScoreFactor(raceColumn)))),
+                        discarded ? DOUBLE_0 : correctedScoreScaledByColumnFactor,
                         correctedResults.getMaxPointsReason(), discarded, raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
@@ -778,7 +783,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * leaderboard, <code>null</code> is returned. The time point computed this way is a good choice for normalizing
      * queries for later time points in an attempt to achieve more cache hits.
      * <p>
-     * 
+     *
      * Note, however, that the result does not tell about structural changes to the leaderboard and therefore cannot be
      * used to determine the need for cache invalidation. For example, if a column is added to a leaderboard after the
      * time point returned by this method but that column's attached tracked race has finished before the time point
@@ -786,7 +791,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * change by a change in column structure. A different means to determine the possibility of changes that happened
      * to this leaderboard must be used for cache management. Such a facility has to listen for score correction
      * changes, tracked races being attached or detached and the column structure changing.
-     * 
+     *
      * @see TrackedRace#getTimePointOfNewestEvent()
      * @see SettableScoreCorrection#getTimePointOfLastCorrectionsValidity()
      */
@@ -880,22 +885,12 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public Iterable<Competitor> getSuppressedCompetitors() {
-        LockUtil.lockForRead(suppressedCompetitorsLock);
-        try {
-            return new HashSet<Competitor>(suppressedCompetitors);
-        } finally {
-            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
-        }
+        return new HashSet<>(suppressedCompetitors.keySet());
     }
 
     @Override
     public boolean isSuppressed(Competitor competitor) {
-        LockUtil.lockForRead(suppressedCompetitorsLock);
-        try {
-            return suppressedCompetitors.contains(competitor);
-        } finally {
-            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
-        }
+        return suppressedCompetitors.containsKey(competitor);
     }
 
     @Override
@@ -903,15 +898,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         if (competitor == null) {
             throw new IllegalArgumentException("Cannot change suppression for a null competitor");
         }
-        LockUtil.lockForWrite(suppressedCompetitorsLock);
-        try {
-            if (suppressed) {
-                suppressedCompetitors.add(competitor);
-            } else {
-                suppressedCompetitors.remove(competitor);
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(suppressedCompetitorsLock);
+        if (suppressed) {
+            suppressedCompetitors.put(competitor, competitor);
+        } else {
+            suppressedCompetitors.remove(competitor);
         }
         getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
     }
@@ -957,7 +947,4 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return Util.getDominantObject(StreamSupport.stream(allBoats.spliterator(), /* parallel */ false)
                 .map(b -> b.getBoatClass()).collect(Collectors.toList()));
     }
-    
-    
-
 }

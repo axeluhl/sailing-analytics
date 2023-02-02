@@ -1,6 +1,5 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -34,7 +33,7 @@ public class UpdateLeaderboardScoreCorrectionMetadata extends AbstractLeaderboar
     }
 
     @Override
-    public Void internalApplyTo(RacingEventService toState) throws NoWindException {
+    public Void internalApplyTo(RacingEventService toState) {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
             SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();

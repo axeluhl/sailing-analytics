@@ -25,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -81,7 +81,7 @@ import com.sap.sse.security.SecurityService;
 
 /**
  * See also bug 5219 (https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5219).
- * 
+ *
  * @author Axel Uhl (D043530)
  *
  */
@@ -101,7 +101,7 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
     @Before
     public void setUp() throws Exception {
         final BundleContext contextMock = mock(BundleContext.class);
-        when(contextMock.createFilter(Matchers.anyObject())).thenReturn(null);
+        when(contextMock.createFilter(ArgumentMatchers.any())).thenReturn(null);
         mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.getDB().drop();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
@@ -139,7 +139,7 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         final String seriesName = "Default";
         service.apply(new UpdateSeries(regattaIdentifier, seriesName, seriesName, /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
-                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
+                /* hasSplitFleetContiguousScoring */ false, /* hasCrossFleetMergedRanking */ false, /* maximumNumberOfDiscards */ null, /* oneAlwaysStaysOne */ false,
                 Arrays.asList(new FleetDTO(RED_FLEET_NAME, 0, Color.RED), new FleetDTO(GREEN_FLEET_NAME, 0, Color.GREEN), new FleetDTO(BLUE_FLEET_NAME, 0, Color.BLUE))));
         service.apply(new CreateRegattaLeaderboard(regattaIdentifier, /* leaderboardDisplayName */ null, new int[0]));
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, FIRST_RACE_COLUMN_NAME));
@@ -194,7 +194,7 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
         assertNotSame(race, newRace);
         racesHandle = newHandle; // ensure that tearDown tears down the correct tracker
     }
-    
+
     @Test
     public void testStartRaceLogTrackingAndAddCompetitor() throws NotDenotedForRaceLogTrackingException, Exception {
         final RaceLog raceLog = service.getRaceLog(regattaIdentifier.getRegattaName(), FIRST_RACE_COLUMN_NAME, RED_FLEET_NAME);

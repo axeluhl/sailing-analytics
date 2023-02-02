@@ -17,6 +17,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -26,6 +28,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -40,13 +43,13 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithComplete
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForDataAnalysisPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.WindByTimePersistenceManager;
 import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.LabeledManeuverForEstimationJsonSerializer;
 import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysisJsonSerializer;
 import com.sap.sailing.windestimation.data.transformer.CompetitorTrackTransformer;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer;
-import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonSerializer;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
@@ -57,6 +60,7 @@ import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
  *
  */
 public class ManeuverAndWindImporter {
+    private static final Logger logger = Logger.getLogger(ManeuverAndWindImporter.class.getName());
 
     private static final int CONNECTION_TIMEOUT_MILLIS = 60000 * 5;
     public static final String REST_API_BASE_URL = "https://www.sapsailing.com/sailingserver/api/v1";
@@ -70,6 +74,7 @@ public class ManeuverAndWindImporter {
     private final RaceWithManeuverForDataAnalysisPersistenceManager maneuverForDataAnalysisPersistenceManager;
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;
     private final RaceWithWindSourcesPersistenceManager raceWithWindSourcesPersistenceManager;
+    private final WindByTimePersistenceManager windByTimePersistenceManager;
     private final CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
     private final CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
@@ -80,6 +85,7 @@ public class ManeuverAndWindImporter {
 
     public ManeuverAndWindImporter() throws UnknownHostException {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
+        this.windByTimePersistenceManager = new WindByTimePersistenceManager();
         this.maneuverForDataAnalysisPersistenceManager = new RaceWithManeuverForDataAnalysisPersistenceManager();
         this.maneuverForEstimationPersistenceManager = new RaceWithManeuverForEstimationPersistenceManager();
         this.raceWithWindSourcesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
@@ -113,39 +119,46 @@ public class ManeuverAndWindImporter {
         return client;
     }
 
+    /**
+     * @param args
+     *            {@code args[0]} is expected to hold a bearer token that authenticates a user with {@code EXPORT}
+     *            access on all {@code TRACKED_RACE} objects. Races not readable / exportable will not have their data
+     *            considered.
+     */
     public static void main(String[] args) throws Exception {
         ManeuverAndWindImporter importer = new ManeuverAndWindImporter();
-        importer.importAllRegattas();
+        importer.importAllRegattas(args.length > 0 ? /* bearerToken */ args[0] : null);
     }
 
-    public void importAllRegattas() throws IllegalStateException, ClientProtocolException, IOException, ParseException,
+    public void importAllRegattas(String bearerToken) throws IllegalStateException, ClientProtocolException, IOException, ParseException,
             URISyntaxException, InterruptedException {
         skipRace = startFromRegattaName != null;
-        LoggingUtil.logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
-        LoggingUtil.logInfo("Dropping old database");
+        logger.info("Importer for CompleteManeuverCurveWithEstimationData just started");
+        logger.info("Dropping old database");
         if (!skipRace) {
             completeManeuverCurvePersistanceManager.dropCollection();
             maneuverForDataAnalysisPersistenceManager.dropCollection();
             maneuverForEstimationPersistenceManager.dropCollection();
             raceWithWindSourcesPersistenceManager.dropCollection();
+            windByTimePersistenceManager.dropCollection();
         }
-        LoggingUtil.logInfo("Fetching all existing regatta names");
+        logger.info("Fetching all existing regatta names");
         ImportStatistics importStatistics = new ImportStatistics();
         HttpGet getAllRegattas = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH);
         JSONArray regattasJson = (JSONArray) getJsonFromResponse(createNewHttpClient().execute(getAllRegattas));
         int numberOfRegattas = regattasJson.size();
-        LoggingUtil.logInfo(numberOfRegattas + " regatta names have been fetched");
+        logger.info(numberOfRegattas + " regatta names have been fetched");
         int i = 0;
         for (Object regattaJson : regattasJson) {
             String regattaName = (String) ((JSONObject) regattaJson).get("name");
-            LoggingUtil.logInfo("Processing regatta nr. " + ++i + "/" + numberOfRegattas + " ("
+            logger.info("Processing regatta nr. " + ++i + "/" + numberOfRegattas + " ("
                     + Math.round(100.0 * i / numberOfRegattas) + "%): \"" + regattaName + "\"");
-            importRegatta(regattaName, importStatistics);
+            importRegatta(regattaName, importStatistics, bearerToken);
         }
         executorService.shutdown();
         boolean success = executorService.awaitTermination(2, TimeUnit.HOURS);
         if (success) {
-            LoggingUtil.logInfo("Import finished");
+            logger.info("Import finished");
             synchronized (importStatistics) {
                 importStatistics.regattasCount = regattasJson.size();
                 logImportStatistics(importStatistics);
@@ -157,7 +170,7 @@ public class ManeuverAndWindImporter {
 
     private void logImportStatistics(ImportStatistics importStatistics) {
         Duration duration = Duration.between(importStatistics.startTime, LocalDateTime.now());
-        LoggingUtil.logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " regattas\n\t"
+        logger.info("Import statistics: \n\t" + importStatistics.regattasCount + " regattas\n\t"
                 + importStatistics.racesCount + " races\n\t" + importStatistics.competitorTracksCount
                 + " competitor tracks\n\t" + importStatistics.maneuversCount
                 + " complete maneuver curves with estimation data\n\t" + importStatistics.racesWithHighQualityWindData
@@ -168,7 +181,7 @@ public class ManeuverAndWindImporter {
                 + (duration.get(ChronoUnit.SECONDS) % 60) + "s");
     }
 
-    private void importRegatta(String regattaName, ImportStatistics importStatistics)
+    private void importRegatta(String regattaName, ImportStatistics importStatistics, String bearerToken)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         HttpGet getRegatta = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName);
@@ -179,7 +192,7 @@ public class ManeuverAndWindImporter {
             synchronized (importStatistics) {
                 importStatistics.ignoredRegattas++;
             }
-            LoggingUtil.logInfo("Error while processing regatta: " + regattaName + "\r\n" + getRegatta);
+            logger.info("Error while processing regatta: " + regattaName + "\r\n" + getRegatta);
             return;
         }
         for (Object seriesJson : (JSONArray) regattaJson.get("series")) {
@@ -187,7 +200,7 @@ public class ManeuverAndWindImporter {
             JSONArray fleets = (JSONArray) trackedRaces.get("fleets");
             for (Object fleetJson : fleets) {
                 JSONArray racesJson = (JSONArray) ((JSONObject) fleetJson).get("races");
-                LoggingUtil.logInfo("Regatta contains " + racesJson.size() + " races");
+                logger.info("Regatta contains " + racesJson.size() + " races");
                 int i = 0;
                 for (Object raceJson : racesJson) {
                     JSONObject race = (JSONObject) raceJson;
@@ -196,10 +209,11 @@ public class ManeuverAndWindImporter {
                         String trackedRaceName = (String) race.get("trackedRaceName");
                         i++;
                         final int raceNumber = i;
-                        LoggingUtil.logInfo("Processing race nr. " + raceNumber + ": \"" + trackedRaceName + "\"");
+                        logger.info("Processing race nr. " + raceNumber + ": \"" + trackedRaceName + "\"");
+                        // no Subject association required for runnable here
                         executorService.execute(() -> {
                             try {
-                                importRace(regattaName, trackedRaceName, importStatistics);
+                                importRace(regattaName, trackedRaceName, importStatistics, bearerToken);
                             } catch (Exception e) {
                                 synchronized (importStatistics) {
                                     importStatistics.ingoredRaces += 1;
@@ -208,7 +222,7 @@ public class ManeuverAndWindImporter {
                                 if (e instanceof HttpClientException) {
                                     extraLog = "\r\n" + ((HttpClientException) e).getRequest();
                                 }
-                                LoggingUtil.logInfo("Error while processing race nr. " + raceNumber + ": \""
+                                logger.info("Error while processing race nr. " + raceNumber + ": \""
                                         + trackedRaceName + "\"" + extraLog);
                             }
                         });
@@ -228,7 +242,7 @@ public class ManeuverAndWindImporter {
         return encodedUrlPathPart;
     }
 
-    private void importRace(String regattaName, String trackedRaceName, ImportStatistics importStatistics)
+    private void importRace(String regattaName, String trackedRaceName, ImportStatistics importStatistics, String bearerToken)
             throws Exception {
         if (skipRace) {
             if (regattaName.equals(startFromRegattaName)
@@ -244,6 +258,9 @@ public class ManeuverAndWindImporter {
                 + "/" + encodedRaceName;
         HttpGet getEstimationData = new HttpGet(urlPath + REST_API_ESTIMATION_DATA_PATH);
         HttpGet getWindData = new HttpGet(urlPath + REST_API_WIND_DATA_PATH);
+        if (bearerToken != null) {
+            getWindData.addHeader(new BasicHeader("Authorization", "Bearer " + bearerToken));
+        }
         JSONObject resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getEstimationData);
         parseManeuverData(regattaName, trackedRaceName, importStatistics, resultJson);
         resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getWindData);
@@ -251,22 +268,23 @@ public class ManeuverAndWindImporter {
     }
 
     private void parseWindData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,
-            JSONObject resultJson) {
+            JSONObject resultJson) throws JsonDeserializationException {
         JSONArray windSourcesJson = (JSONArray) resultJson.get(RaceWindJsonSerializer.WIND_SOURCES);
         if (windSourcesJson != null) {
             raceWithWindSourcesPersistenceManager.add(regattaName, trackedRaceName, resultJson);
+            windByTimePersistenceManager.add(windSourcesJson);
             long windFixesCount = 0;
             for (Object windSourceObj : windSourcesJson) {
                 JSONArray windFixesJson = (JSONArray) ((JSONObject) windSourceObj).get(RaceWindJsonSerializer.FIXES);
                 windFixesCount += windFixesJson.size();
             }
-            LoggingUtil.logInfo("Imported " + windFixesCount + " wind fixes from " + windSourcesJson.size()
+            logger.info("Imported " + windFixesCount + " wind fixes from " + windSourcesJson.size()
                     + " wind sources in race \"" + trackedRaceName + "\" of regatta \"" + regattaName + "\"");
             synchronized (importStatistics) {
                 importStatistics.racesWithHighQualityWindData++;
             }
         } else {
-            LoggingUtil.logInfo("No high quality wind fixes contained in race \"" + trackedRaceName + "\" of regatta \""
+            logger.info("No high quality wind fixes contained in race \"" + trackedRaceName + "\" of regatta \""
                     + regattaName + "\"");
         }
     }
@@ -302,7 +320,7 @@ public class ManeuverAndWindImporter {
             completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, windQuality,
                     competitorTracks);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to add a race's maneuvers: "+regattaName+"/"+trackedRaceName, e);
         }
         addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
                 maneuverForDataAnalysisTransformer, maneuverForDataAnalysisJsonSerializer);
@@ -310,7 +328,7 @@ public class ManeuverAndWindImporter {
             maneuverForDataAnalysisPersistenceManager.addRace(regattaName, trackedRaceName, windQuality,
                     competitorTracks);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to add a race's maneuvers: "+regattaName+"/"+trackedRaceName, e);
         }
         addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
                 maneuverForEstimationTransformer, maneuverForEstimationJsonSerializer);
@@ -318,9 +336,9 @@ public class ManeuverAndWindImporter {
             maneuverForEstimationPersistenceManager.addRace(regattaName, trackedRaceName, windQuality,
                     competitorTracks);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to add a race's maneuvers: "+regattaName+"/"+trackedRaceName, e);
         }
-        LoggingUtil.logInfo("Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount
+        logger.info("Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount
                 + " maneuvers in race \"" + trackedRaceName + "\" of regatta \"" + regattaName + "\"");
         synchronized (importStatistics) {
             importStatistics.competitorTracksCount += competitorTracks.size();
@@ -330,9 +348,10 @@ public class ManeuverAndWindImporter {
 
     private JSONObject getHttpResponseAsJson(String trackedRegattaName, String trackedRaceName,
             HttpGet getEstimationData) throws InterruptedException, Exception {
-        HttpResponse httpResponse = null;
+        final int NUMBER_OF_ATTEMPTS = 10;
         Exception lastException = null;
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= NUMBER_OF_ATTEMPTS; i++) {
+            HttpResponse httpResponse = null;
             try {
                 httpResponse = createNewHttpClient().execute(getEstimationData);
                 JSONObject resultJson = (JSONObject) getJsonFromResponse(httpResponse);
@@ -341,11 +360,13 @@ public class ManeuverAndWindImporter {
                 Thread.sleep(10000);
                 lastException = e;
                 if (trackedRaceName == null) {
-                    LoggingUtil.logInfo("Connection error (" + i + "/10) while querying races of regatta \""
-                            + trackedRegattaName + "\", retrying...");
+                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+
+                            ", response code: "+(httpResponse==null?"null":httpResponse.getStatusLine())+" while querying races of regatta \""
+                            + trackedRegattaName + "\"; request was "+getEstimationData+(i<NUMBER_OF_ATTEMPTS?", retrying...":", FAILED"));
                 } else {
-                    LoggingUtil.logInfo("Connection error (" + i + "/10) while processing race \"" + trackedRaceName
-                            + "\" of regatta \"" + trackedRegattaName + "\", retrying...");
+                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+
+                            ", response code: "+(httpResponse==null?"null":httpResponse.getStatusLine())+" while processing race \"" + trackedRaceName
+                            + "\" of regatta \"" + trackedRegattaName + "\"; request was "+getEstimationData+(i<NUMBER_OF_ATTEMPTS?", retrying...":", FAILED"));
                 }
             }
         }
@@ -399,7 +420,6 @@ public class ManeuverAndWindImporter {
     }
 
     private static class HttpClientException extends Exception {
-
         private static final long serialVersionUID = 4948532287832868768L;
         private final String request;
 
@@ -411,7 +431,5 @@ public class ManeuverAndWindImporter {
         public String getRequest() {
             return request;
         }
-
     }
-
 }

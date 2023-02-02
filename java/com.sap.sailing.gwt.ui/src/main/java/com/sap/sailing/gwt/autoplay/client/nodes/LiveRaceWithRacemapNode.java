@@ -36,39 +36,38 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
 
     public void onStart() {
         place = new LiveRaceWithRacemapAndLeaderBoardPlace();
-        AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(),
-                cf.getAutoPlayCtxSignalError().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtxSignalError().getLiveRace(),
-                new AsyncCallback<RVWrapper>() {
-
+        AutoplayHelper.create(cf.getSailingService(), cf.getUserService(), cf.getErrorReporter(),
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(),
+                cf.getAutoPlayCtxSignalError().getEvent(), cf.getEventBus(), cf.getDispatch(),
+                cf.getAutoPlayCtxSignalError().getLiveRace(), new AsyncCallback<RVWrapper>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         LiveRaceWithRacemapAndLeaderBoardPlace place = new LiveRaceWithRacemapAndLeaderBoardPlace();
                         place.setError(caught);
                         setPlaceToGo(place);
-                        firePlaceChangeAndStartTimer();                       
+                        firePlaceChangeAndStartTimer();
                         getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
                     }
 
                     @Override
                     public void onSuccess(RVWrapper result) {
-                        place.setRaceMap(result.raceboardPerspective, result.csel,result.raceboardTimer,result.creationTimeProvider);
+                        place.setRaceMap(result.raceboardPerspective, result.csel, result.raceboardTimer,
+                                result.creationTimeProvider);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName(),
-                                cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName()));
+                        getBus().fireEvent(
+                                new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName(),
+                                        cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName()));
                     }
-                });
-        
-      
-        
-        updateTimer = new Timer(){
-
+                }, cf.getSubscriptionServiceFactory());
+        updateTimer = new Timer() {
             @Override
             public void run() {
-                cf.getDispatch().execute(new GetSixtyInchStatisticAction(cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName(), cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName()),
+                cf.getDispatch().execute(
+                        new GetSixtyInchStatisticAction(cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName(),
+                                cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName()),
                         new AsyncCallback<GetSixtyInchStatisticDTO>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 LOGGER.log(Level.WARNING, "error getting statistics", caught);
@@ -80,7 +79,6 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                             }
                         });
             }
-            
         };
         updateTimer.scheduleRepeating(2000);
     };

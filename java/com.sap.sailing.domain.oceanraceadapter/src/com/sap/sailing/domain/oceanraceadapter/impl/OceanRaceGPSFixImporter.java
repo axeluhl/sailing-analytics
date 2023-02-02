@@ -3,6 +3,7 @@ package com.sap.sailing.domain.oceanraceadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,8 +45,8 @@ public class OceanRaceGPSFixImporter implements GPSFixImporter {
     private final Map<Pair<String, String>, TrackFileImportDeviceIdentifier> deviceIdentifiersBySerialAndSourceName = new HashMap<>();
     
     @Override
-    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
-            String sourceName) throws FormatNotSupportedException, IOException, ParseException {
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback,
+            boolean inferSpeedAndBearing, String sourceName) throws FormatNotSupportedException, IOException, ParseException {
         final JSONParser jsonParser = new JSONParser();
         final JSONArray boatsArray = (JSONArray) jsonParser.parse(new InputStreamReader(inputStream));
         for (final Object objectForBoat : boatsArray) {

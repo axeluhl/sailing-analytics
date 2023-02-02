@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.async;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.debug.client.DebugInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -19,6 +21,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  *   D049941
  */
 public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
+    private final static Logger logger = Logger.getLogger(MarkedAsyncCallback.class.getName());
+    
     /**
      * <p>The key for the category of global requests. The key for the global category is just an empty string.</p>
      */
@@ -51,8 +55,18 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
     public MarkedAsyncCallback(AsyncCallback<T> callback, String category) {
         this.callback = callback;
         this.category = category;
-        if (DebugInfo.isDebugIdEnabled()) {
-            PendingAjaxCallMarker.incrementPendingAjaxCalls(this.category);
+        try {
+            if (DebugInfo.isDebugIdEnabled()) {
+                PendingAjaxCallMarker.incrementPendingAjaxCalls(this.category);
+            }
+        } catch (Throwable e) {
+            if (e.getClass().getSimpleName().equals("ExceptionInInitializerError")
+                    || e.getClass().getSimpleName().equals("NoClassDefFoundError")) {
+                // we're not in a GWT but probably in a test environment
+                logger.info("If this occurs outside of tests, please be alarmed!");
+            } else {
+                throw e;
+            }
         }
     }
     
@@ -69,8 +83,18 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
         try {
             this.callback.onFailure(cause);
         } finally {
-            if (DebugInfo.isDebugIdEnabled()) {
-                PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
+            try {
+                if (DebugInfo.isDebugIdEnabled()) {
+                    PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
+                }
+            } catch (Throwable e) {
+                if (e.getClass().getSimpleName().equals("ExceptionInInitializerError")
+                        || e.getClass().getSimpleName().equals("NoClassDefFoundError")) {
+                    // we're not in a GWT but probably in a test environment
+                    logger.info("If this occurs outside of tests, please be alarmed!");
+                } else {
+                    throw e;
+                }
             }
         }
     }
@@ -88,8 +112,18 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
         try {
             this.callback.onSuccess(result);
         } finally {
-            if (DebugInfo.isDebugIdEnabled()) {
-                PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
+            try {
+                if (DebugInfo.isDebugIdEnabled()) {
+                    PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
+                }
+            } catch (Throwable e) {
+                if (e.getClass().getSimpleName().equals("ExceptionInInitializerError")
+                        || e.getClass().getSimpleName().equals("NoClassDefFoundError")) {
+                    // we're not in a GWT but probably in a test environment
+                    logger.info("If this occurs outside of tests, please be alarmed!");
+                } else {
+                    throw e;
+                }
             }
         }
     }

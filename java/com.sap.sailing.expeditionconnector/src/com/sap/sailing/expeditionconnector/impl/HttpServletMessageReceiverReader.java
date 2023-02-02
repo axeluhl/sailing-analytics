@@ -5,11 +5,13 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
 import com.sap.sailing.expeditionconnector.impl.HttpServletMessageReceiver.Receiver;
 import com.sap.sse.common.Base64Utils;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class HttpServletMessageReceiverReader implements Runnable {
     private static final Logger logger = Logger.getLogger(HttpServletMessageReceiverReader.class.getName());
@@ -105,6 +107,7 @@ public class HttpServletMessageReceiverReader implements Runnable {
      */
     private void establishConnection() throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        reader = new InputStreamReader(connection.getInputStream());
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        reader = new InputStreamReader(connection.getInputStream(), charset);
     }
 }

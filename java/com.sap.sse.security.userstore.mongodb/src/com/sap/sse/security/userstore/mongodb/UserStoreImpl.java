@@ -303,24 +303,33 @@ public class UserStoreImpl implements UserStore {
         getOrCreateRoleDefinitionByPrototype(AdminRole.getInstance());
         getOrCreateRoleDefinitionByPrototype(UserRole.getInstance());
         for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
-            if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
+            final UUID id = otherPredefinedRole.getId();
+            final RoleDefinition potentiallyExistingRoleDefinition = getRoleDefinition(id);
+            final Set<WildcardPermission> targetPermissions = new HashSet<>();
+            for (final String stringPermission : otherPredefinedRole.getPermissions()) {
+                targetPermissions.add(new WildcardPermission(stringPermission));
+            }
+            if (potentiallyExistingRoleDefinition == null) {
                 logger.info("Predefined role definition " + otherPredefinedRole + " not found; creating");
-                final Set<WildcardPermission> permissions = new HashSet<>();
-                for (final String stringPermission : otherPredefinedRole.getPermissions()) {
-                    permissions.add(new WildcardPermission(stringPermission));
-                }
-                createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
+                createRoleDefinition(id, otherPredefinedRole.name(), targetPermissions);
+            } else if (!targetPermissions.equals(potentiallyExistingRoleDefinition.getPermissions())) {
+                setRoleDefinitionPermissions(id, targetPermissions);
             }
         }
     }
     
     private RoleDefinition getOrCreateRoleDefinitionByPrototype(RolePrototype rolePrototype) {
-        RoleDefinition roleDefinition = getRoleDefinition(rolePrototype.getId());
+        final UUID id = rolePrototype.getId();
+        RoleDefinition roleDefinition = getRoleDefinition(id);
         if (roleDefinition == null) {
             logger.info("No " + rolePrototype.getName() + " role found. Creating default role \""
                     + rolePrototype.getName() + "\" with permission \"" + rolePrototype.getPermissions() + "\"");
-            roleDefinition = createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
+            roleDefinition = createRoleDefinition(id, rolePrototype.getName(),
                     rolePrototype.getPermissions());
+        } else if(roleDefinition.getPermissions() != null
+                && !roleDefinition.getPermissions().equals(rolePrototype.getPermissions())){
+            setRoleDefinitionPermissions(id, rolePrototype.getPermissions());
+            roleDefinition = getRoleDefinition(id);
         }
         return roleDefinition;
     }
@@ -540,9 +549,10 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void setRoleDefinitionPermissions(UUID roleDefinitionId, Set<WildcardPermission> permissions) {
-        RoleDefinition roleDefinition = roleDefinitions.get(roleDefinitionId);
-        roleDefinition = new RoleDefinitionImpl(roleDefinitionId, roleDefinition.getName(), permissions);
-        mongoObjectFactory.storeRoleDefinition(roleDefinition);
+        final RoleDefinition roleDefinition = roleDefinitions.get(roleDefinitionId);
+        final RoleDefinition newRoleDefinition = new RoleDefinitionImpl(roleDefinitionId, roleDefinition.getName(), permissions);
+        mongoObjectFactory.storeRoleDefinition(newRoleDefinition);
+        roleDefinition.setPermissions(permissions);
     }
 
     @Override
@@ -1193,7 +1203,7 @@ public class UserStoreImpl implements UserStore {
             }
             userMap.put(key, value);
         }
-        if (mongoObjectFactory != null) {
+        if (store && mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, userMap);
         }
     }

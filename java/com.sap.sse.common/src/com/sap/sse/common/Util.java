@@ -10,11 +10,13 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -24,7 +26,6 @@ import java.util.stream.StreamSupport;
 import com.sap.sse.common.util.MappingIterable;
 import com.sap.sse.common.util.MappingIterator;
 import com.sap.sse.common.util.NaturalComparator;
-
 
 public class Util {
     public static class Pair<A, B> implements Serializable {
@@ -277,6 +278,36 @@ public class Util {
         }
         return result;
     }
+    
+    /**
+     * The list returned is "live" connected to {@code ts} only if {@code ts} was instance of a class
+     * that implements {@link List}.
+     */
+    public static <T> List<T> subList(Iterable<T> ts, int from, int toExclusive) {
+        final List<T> result;
+        if (from < 0 || from > toExclusive) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (ts instanceof List<?>) {
+            result = ((List<T>) ts).subList(from, toExclusive);
+        } else {
+            result = new LinkedList<>();
+            int i=0;
+            for (final T t : ts) {
+                if (i >= from && i<toExclusive) {
+                    result.add(t);
+                }
+                i++;
+                if (i >= toExclusive) {
+                    break;
+                }
+            }
+            if (i < toExclusive) {
+                throw new IndexOutOfBoundsException("to-index "+toExclusive+" greater than collection size "+Util.size(ts));
+            }
+        }
+        return result;
+    }
 
     public static <T> boolean equals(Iterable<? extends T> a, Iterable<? extends T> b) {
         if (a == null) {
@@ -339,17 +370,11 @@ public class Util {
         return result;
     }
     
-    public static interface Mapper<S, T> { T map(S s); }
-    public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
-        return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
-            @Override
-            public T map(S s) {
-                return mapper.map(s);
-            }
-        });
+    public static <S, T> Iterable<T> map(final Iterable<S> iterable, final MappingIterator.MapFunction<S, T> mapper) {
+        return new MappingIterable<>(iterable, mapper);
     }
 
-    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+    public static <S, T> ArrayList<T> mapToArrayList(final Iterable<S> iterable, final MappingIterator.MapFunction<S, T> mapper) {
         final ArrayList<T> result = new ArrayList<>();
         addAll(map(iterable, mapper), result);
         return result;
@@ -357,6 +382,53 @@ public class Util {
 
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
         return ()->StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate).iterator();
+    }
+    
+    /**
+     * Concatenates the iterables and returns a single iterable that enumerates the elements in the
+     * iterables in the sequence of the iterables. {@code null} iterables are ignored; {@code null}
+     * values enumerated by one of the iterables are propagated into the resulting iterable.
+     */
+    public static <T> Iterable<T> concat(final Iterable<Iterable<T>> iterables) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>() {
+                    final Iterator<Iterable<T>> iterableIter = iterables.iterator();
+                    Iterable<T> iterable = null;
+                    Iterator<T> iter; // loops over the "iterable"; when iterable is not null, iter is not null
+                    boolean nextValid;
+                    T next;
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return nextValid;
+                    }
+
+                    @Override
+                    public T next() {
+                        final T result = next;
+                        advance();
+                        return result;
+                    }
+                    
+                    private Iterator<T> advance() {
+                        // first ensure we have a valid iterable with a next element if possible:
+                        while ((iterable == null || !iter.hasNext()) && iterableIter.hasNext()) {
+                            iterable = iterableIter.next();
+                            if (iterable != null) {
+                                iter = iterable.iterator();
+                            }
+                        }
+                        nextValid = iter != null && iter.hasNext();
+                        if (nextValid) {
+                            next = iter.next();
+                        }
+                        return this;
+                    }
+                }.advance();
+            }
+        };
     }
     
     /**
@@ -755,10 +827,20 @@ public class Util {
         }
         return result;
     }
-
+    
+    /**
+     * 
+     * @param <T>
+     *          Type of {@code iterable}
+     * @param iterable
+     *          Input Iterable
+     * @return
+     *          returns List<T> if {@code iterable} is an instance of List<?> and if it is an instance Serializable. If not,
+     *          an ArrayList<T> gets constructed and filled with all items of {@code iterable}   
+     */
     public static <T> List<T> asList(Iterable<T> iterable) {
         final List<T> list;
-        if (iterable instanceof List<?>) {
+        if (iterable instanceof List<?> && iterable instanceof Serializable) {
             list = (List<T>) iterable;
         } else {
             list = new ArrayList<>();
@@ -1031,4 +1113,37 @@ public class Util {
     public static <K, V> MapBuilder<K, V> mapBuilder() {
         return new MapBuilderImpl<>();
     }
+
+    /**
+     * @return {@code true} if {@code newSequence} contains at least all elements of {@code oldSequence} in the same order
+     *         in which they appear in {@code oldSequence}. The "contains" check is made based on the {@link Object#equals(Object)}
+     *         method for the objects in the lists.
+     */
+    public static <T> boolean isOnlyAdding(final Iterable<T> newSequence, final Iterable<T> oldSequence) {
+        return isOnlyAdding(newSequence, oldSequence, (a, b)->Util.equalsWithNull(a,  b));
+    }
+    
+    /**
+     * Like {@link #isOnlyAdding(Iterable, Iterable)}, but with a configurable equivalence relation
+     * 
+     * @return {@code true} if {@code newSequence} contains at least all elements of {@code oldSequence} in the same
+     *         order in which they appear in {@code oldSequence}. The "contains" check is based on the
+     *         {@code equivalenceRelation}.
+     */
+    public static <T> boolean isOnlyAdding(final Iterable<T> newSequence, final Iterable<T> oldSequence, BiFunction<T, T, Boolean> equivalenceRelation) {
+        final Iterator<T> nIter = newSequence.iterator();
+        final Iterator<T> oIter = oldSequence.iterator();
+        boolean result = true;
+        while (result && oIter.hasNext()) {
+            final T nextFromOld = oIter.next();
+            result = false;
+            while (!result && nIter.hasNext()) {
+                if (equivalenceRelation.apply(nIter.next(), nextFromOld)) {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
 }

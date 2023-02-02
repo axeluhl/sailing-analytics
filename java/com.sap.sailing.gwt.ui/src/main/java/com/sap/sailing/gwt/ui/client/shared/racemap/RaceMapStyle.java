@@ -34,4 +34,6 @@ public interface RaceMapStyle extends CssResource {
     public String advancedFunctionsPopup();
     public String underHeaderPosition();
     public String topLeftControlsWrapperPanel();
+    public String premiumReady();
+    public String premiumActive();
 }

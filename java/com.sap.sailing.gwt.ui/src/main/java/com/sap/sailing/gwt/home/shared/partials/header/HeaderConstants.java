@@ -19,7 +19,23 @@ public interface HeaderConstants {
     String DATA_MINING_PATH = "/gwt/DataMining.html";
 
     /**
-     * The name of the tab/window to open the administration UI in
+     * The name of the tab/window to open the data mining UI in
      */
     String DATA_MINING_WINDOW = "dataMiningWindow";
+    
+    /**
+     * The default URL path pointing to the strategy simulator page; starts with a slash (/) and
+     * can be appended to a base URL.
+     */
+    String STRATEGY_SIMULATOR_PATH = "/gwt/Simulator.html";
+
+    /**
+     * The name of the tab/window to open the strategy simulator UI in
+     */
+    String STRATEGY_SIMULATOR_WINDOW = "strategyDimulatorWindow";
+    
+    /**
+     * Default self target if not specified different.
+     */
+    String SELF = "_self";
 }

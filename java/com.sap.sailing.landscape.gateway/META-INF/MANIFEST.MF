@@ -33,4 +33,5 @@ Require-Bundle: com.sap.sailing.landscape,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sse.shared.android,
  com.sap.sse.landscape.common,
- com.amazon.aws.aws-java-api
+ com.amazon.aws.aws-java-api,
+ com.sap.sailing.domain.common

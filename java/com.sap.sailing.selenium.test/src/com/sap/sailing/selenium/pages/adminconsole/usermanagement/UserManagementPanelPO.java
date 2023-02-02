@@ -87,7 +87,7 @@ public class UserManagementPanelPO extends PageArea {
         return new CreateUserDialogPO(this.driver, dialog);
     }
     
-    public void createUserWithEualUsernameAndPassword(String usernameAndPassword) {
+    public void createUserWithEqualUsernameAndPassword(String usernameAndPassword) {
         final CreateUserDialogPO createUserDialog = getCreateUserDialog();
         createUserDialog.setValues(usernameAndPassword, "", usernameAndPassword, usernameAndPassword);
         createUserDialog.clickOkButtonOrThrow();

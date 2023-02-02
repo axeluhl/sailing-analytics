@@ -93,6 +93,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Prionet related information|wiki/info/misc/prionet-related-information]]
 * [[TracTrac Workshop 2013|wiki/info/misc/tractracworkshop2013]]
 
+* [[Subscriptions|wiki/info/misc/subscriptions]]
+
 ## HowTo
 
 * [[Onboarding|wiki/howto/onboarding]]
@@ -102,6 +104,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
 * [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
 * [[Chargebee Payment Integration|wiki/howto/chargebee]]
+* [[Building and Using a Forked GWT Version|wiki/howto/development/gwt-fork]]
 
 ### Development
 
@@ -119,6 +122,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 * [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
 * [[Whitelabelling|wiki/howto/whitelabelling]]
+* [[Downloading and Archiving TracTrac Events|wiki/howto/downloading-and-archiving-tractrac-events]]
 
 ### For Event Managers
 

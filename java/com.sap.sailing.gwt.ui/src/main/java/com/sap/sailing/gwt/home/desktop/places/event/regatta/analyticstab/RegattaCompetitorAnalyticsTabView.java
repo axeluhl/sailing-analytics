@@ -104,7 +104,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
                             @Override
                             public void onSuccess(Iterable<DetailType> result) {
                                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
-                                        currentPresenter.getUserService(), null, panel -> callback.run(), result);
+                                        currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(), null, panel -> callback.run(), result);
                             }
 
                             @Override

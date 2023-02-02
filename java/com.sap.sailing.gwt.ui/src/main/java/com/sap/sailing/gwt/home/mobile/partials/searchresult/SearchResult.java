@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.partials.searchresult.AbstractSearchResult;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 
 public class SearchResult extends AbstractSearchResult {
 
@@ -25,6 +26,7 @@ public class SearchResult extends AbstractSearchResult {
     @UiField Button searchButtonUi;
     @UiField DivElement searchResultAmountUi;
     @UiField FlowPanel searchResultContainerUi;
+    @UiField BusyIndicator busyIndicatorUi;
     
     private final MobilePlacesNavigator navigator;
     
@@ -57,6 +59,11 @@ public class SearchResult extends AbstractSearchResult {
     @Override
     protected void addSearchResultItem(SearchResultDTO searchResult) {
         searchResultContainerUi.add(new SearchResultItem(navigator, searchResult));
+    }
+
+    @Override
+    protected BusyIndicator getBusyIndicatorUi() {
+        return busyIndicatorUi;
     }
 
 }

@@ -16,6 +16,7 @@ import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -31,8 +32,8 @@ public class SecurityServiceAndHasPermissionsProviderTest {
 
     @Before
     public void setup() throws UserStoreManagementException {
-        userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), TEST_DEFAULT_TENANT);
+        userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultMajorityDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), TEST_DEFAULT_TENANT);
         userStore.ensureDefaultRolesExist();
         userStore.loadAndMigrateUsers();
         accessControlStore = new AccessControlStoreImpl(userStore);
@@ -45,14 +46,15 @@ public class SecurityServiceAndHasPermissionsProviderTest {
     }
 
     private SecurityService createSecurityServiceWithoutHasPermissionsProvider() {
-        SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore, /* HasPermissionsProvider */ null);
+        SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore,
+                accessControlStore, /* HasPermissionsProvider */ null, SSESubscriptionPlan::getAllInstances);
         securityService.initialize();
         return securityService;
     }
 
     private SecurityService createSecurityServiceWithHasPermissionsProvider() {
-        final SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore,
-                SecuredSecurityTypes::getAllInstances);
+        final SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore,
+                accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         securityService.initialize();
         return securityService;
     }

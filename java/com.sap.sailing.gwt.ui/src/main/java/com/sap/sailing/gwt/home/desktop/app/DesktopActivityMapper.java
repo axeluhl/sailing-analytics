@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.start.StartActivity;
+import com.sap.sailing.gwt.home.desktop.places.subscription.SubscriptionActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
@@ -33,6 +34,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetActivityProxy;
@@ -44,14 +46,14 @@ public class DesktopActivityMapper implements ActivityMapper {
     private final DesktopClientFactory clientFactory;
     private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 
-    public DesktopActivityMapper(DesktopClientFactory clientFactory) {
+    public DesktopActivityMapper(final DesktopClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }
 
     @Override
-    public Activity getActivity(Place rawPlace) {
-        Place place = placeUpdater.getRealPlace(rawPlace);
+    public Activity getActivity(final Place rawPlace) {
+        final Place place = placeUpdater.getRealPlace(rawPlace);
         if (DeviceDetector.isMobile() //
                 && !SwitchingEntryPoint.viewIsLockedToDesktop()
                 && SwitchingEntryPoint.hasMobileVersion(place)) {
@@ -67,7 +69,7 @@ public class DesktopActivityMapper implements ActivityMapper {
         } else if (place instanceof QRCodePlace) {
             return new QRCodeActivityProxy((QRCodePlace) place, clientFactory);
         } else if (place instanceof AbstractEventPlace) {
-            AbstractEventPlace eventPlace = (AbstractEventPlace) place;
+            final AbstractEventPlace eventPlace = (AbstractEventPlace) place;
             return new EventActivityProxy(eventPlace, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof AbstractSeriesPlace) {
             return new com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
@@ -81,6 +83,8 @@ public class DesktopActivityMapper implements ActivityMapper {
             return new SponsoringActivityProxy((SponsoringPlace) place, clientFactory);
         } else if (place instanceof SolutionsPlace) {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
+        } else if (place instanceof SubscriptionPlace) {
+            return new SubscriptionActivityProxy((SubscriptionPlace) place, clientFactory);
         } else if (place instanceof WhatsNewPlace) {
             return new WhatsNewActivityProxy((WhatsNewPlace) place, clientFactory);
         } else if (place instanceof SearchResultPlace) {

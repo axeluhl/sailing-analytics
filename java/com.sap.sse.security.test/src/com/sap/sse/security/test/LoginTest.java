@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -18,7 +19,6 @@ import java.util.UUID;
 
 import org.apache.shiro.SecurityUtils;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,6 +52,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -78,8 +79,10 @@ public class LoginTest {
         userStore.ensureServerGroupExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         Activator.setTestStores(userStore, accessControlStore);
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
+        // enables shiro to find classes from com.sap.sse.security
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore,
+                SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         Activator.setSecurityService(securityService);
     }
 
@@ -145,8 +148,8 @@ public class LoginTest {
         AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
-        Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
-        Assert.assertThat(result.get(null), Matchers.contains("UPDATE"));
+        assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
+        assertThat(result.get(null), Matchers.contains("UPDATE"));
     }
     
     @Test
@@ -173,14 +176,14 @@ public class LoginTest {
         final String username = "TheNewUser";
         final String password = "Humba";
         final User admin = securityService.getUserByName("admin");
-        final RoleDefinition adminRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance());
+        final RoleDefinition adminRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance(), /* makeReadableForAll */ true);
         final UserGroup adminTenant = securityService.getUserGroupByName(admin.getName()+SecurityService.TENANT_SUFFIX);
         securityService.createSimpleUser(username, "u@a.b", password, username, /* company */ null,
                 /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
         final QualifiedObjectIdentifier myId = my.getIdentifier();
         // grant admin role to user unqualified, implying READ on all objects including the "my" SERVER
-        securityService.addRoleForUser(username, new Role(securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance()), true));
+        securityService.addRoleForUser(username, new Role(adminRoleDefinition, true));
         securityService.login(username, password);
         securityService.setOwnership(myId, admin, adminTenant);
         // check explicit permission:

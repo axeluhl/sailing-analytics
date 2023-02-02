@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.evaluation;
 
 import java.lang.reflect.Field;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -11,9 +12,9 @@ import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAc
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
-import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorEvaluationRunner {
+    private static final Logger logger = Logger.getLogger(WindEstimatorEvaluationRunner.class.getName());
 
     private static final Integer MAX_RACES = null;
     private static final Integer FIXED_NUMBER_OF_MANEUVERS = 10;
@@ -32,11 +33,11 @@ public class WindEstimatorEvaluationRunner {
                 MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_PERCENT, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE,
                 EVALUATE_PER_COMPETITOR_TRACK, FIXED_NUMBER_OF_MANEUVERS == null ? 1 : FIXED_NUMBER_OF_MANEUVERS,
                 RANDOM_CLIPPING_OF_COMPETITOR_TRACKS, FIXED_NUMBER_OF_MANEUVERS);
-        LoggingUtil.logInfo("Connecting to MongoDB");
+        logger.info("Connecting to MongoDB");
         RaceWithCompleteManeuverCurvePersistenceManager persistenceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
-        LoggingUtil.logInfo("Loading polar data");
+        logger.info("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
-        LoggingUtil.logInfo("Wind estimator evaluation started...");
+        logger.info("Wind estimator evaluation started...");
         ModelStore classifierModelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
         PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator = persistenceManager
                 .getIterator(persistenceManager.getFilterQueryForYear(2018, false));
@@ -50,10 +51,8 @@ public class WindEstimatorEvaluationRunner {
                 estimatorFactories.get(WIND_ESTIMATION_IMPLEMENTATION),
                 new TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor(), racesIterator,
                 racesIterator.getNumberOfElements());
-
-        LoggingUtil.logInfo("Wind estimator evaluation finished with the following provided arguments:\r\n"
+        logger.info("Wind estimator evaluation finished with the following provided arguments:\r\n"
                 + buildConfigurationString() + "\r\n");
-
         evaluationResult.printEvaluationStatistics(true);
     }
 

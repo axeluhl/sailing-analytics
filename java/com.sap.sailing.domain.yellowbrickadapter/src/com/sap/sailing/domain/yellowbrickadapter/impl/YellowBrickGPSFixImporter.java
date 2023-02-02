@@ -3,10 +3,11 @@ package com.sap.sailing.domain.yellowbrickadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.json.simple.parser.ParseException;
 
@@ -19,11 +20,11 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class YellowBrickGPSFixImporter implements GPSFixImporter {
-    private final Map<Pair<Number, String>, TrackFileImportDeviceIdentifier> deviceIdentifiersBySerialAndSourceName = new HashMap<>();
+    private final ConcurrentMap<Pair<Number, String>, TrackFileImportDeviceIdentifier> deviceIdentifiersBySerialAndSourceName = new ConcurrentHashMap<>();
     
     @Override
-    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
-            String sourceName) throws FormatNotSupportedException, IOException, ParseException {
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback,
+            boolean inferSpeedAndBearing, String sourceName) throws FormatNotSupportedException, IOException, ParseException {
         final GetPositionsParser parser = new GetPositionsParser();
         final PositionsDocument positionsDocument = parser.parse(new InputStreamReader(inputStream, "UTF-8"), inferSpeedAndBearing);
         final String raceName = positionsDocument.getRaceUrl();

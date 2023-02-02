@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInfo
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
@@ -25,6 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPla
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserProfileSubscriptionsPlace;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -47,6 +49,10 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
         return createLocalPlaceNavigation(new SolutionsPlace(navigationTab));
+    }
+    
+    public PlaceNavigation<SubscriptionPlace> getSubscriptionsNavigation() {
+        return createLocalPlaceNavigation(new SubscriptionPlace());
     }
 
     public PlaceNavigation<WhatsNewPlace> getWhatsNewNavigation(WhatsNewNavigationTabs navigationTab) {
@@ -119,6 +125,10 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<? extends AbstractUserProfilePlace> getSailorProfilesNavigation() {
         return createLocalPlaceNavigation(new SailorProfilePlace());
+    }
+
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSubscriptionsNavigation() {
+        return createLocalPlaceNavigation(new UserProfileSubscriptionsPlace());
     }
 
 }

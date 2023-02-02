@@ -296,7 +296,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                 try {
                     final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
                     final boolean addOverallDetails = getOverallDetails(timePoint);
-                    LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
+                    final LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
                             /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, newCacheValue);

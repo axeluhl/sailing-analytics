@@ -70,7 +70,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     
     public void setEntryClickedHandler(EntryHandler handler) {
         entryClickedHandler = handler;
-        if(regattaRaceStatesComponent != null) {
+        if (regattaRaceStatesComponent != null) {
             regattaRaceStatesComponent.setEntryClickedHandler(handler);
         }
     }
@@ -166,16 +166,13 @@ public class RegattaOverviewPanel extends SimplePanel {
                         raceGroupDTOs.addAll(result);
                         continueInitAfterRaceGroupsRetrieved();
                     }
-                    
                 }));
     }
 
     private void continueInitAfterRaceGroupsRetrieved() {
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForRegattaOverview(regattaOverviewContextDefinition);
         final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle(eventDTO == null ? null : eventDTO.venue.getCourseAreas(), raceGroupDTOs);
-        componentContext = new ComponentContextWithSettingsStorage<>(
-                lifecycle, userService, storageDefinition);
-        
+        componentContext = new ComponentContextWithSettingsStorage<>(lifecycle, userService, storageDefinition);
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<RegattaRaceStatesSettings>() {
             @Override
             public void onSuccess(RegattaRaceStatesSettings defaultSettings) {

@@ -75,6 +75,10 @@ public abstract class AbstractMediaDTO implements IsSerializable, Comparable<Abs
         this.mimeType = mimeType;
     }
 
+    /**
+     * @return a live collection of this media object's tags; callers can add to and/or remove from the list returned to
+     *         affect the set of tags, but of course not while iterating over this list at the same time
+     */
     public List<String> getTags() {
         return tags;
     }
@@ -105,17 +109,21 @@ public abstract class AbstractMediaDTO implements IsSerializable, Comparable<Abs
         this.locale = locale;
     }
     
-    @Override
-    public int compareTo(AbstractMediaDTO o) {
-        if(createdAtDate == o.createdAtDate) {
+    protected int compareToByCreatedAtDate(AbstractMediaDTO o) {
+        if (getCreatedAtDate() == o.getCreatedAtDate()) {
             return 0;
         }
-        if(createdAtDate == null) {
+        if (getCreatedAtDate() == null) {
             return 1;
         }
-        if(o.createdAtDate == null) {
+        if (o.getCreatedAtDate() == null) {
             return -1;
         }
-        return -createdAtDate.compareTo(o.createdAtDate);
+        return -getCreatedAtDate().compareTo(o.getCreatedAtDate());
+    }
+
+    @Override
+    public int compareTo(AbstractMediaDTO o) {
+        return compareToByCreatedAtDate(o);
     }
 }

@@ -2,8 +2,8 @@ package com.sap.sailing.selenium.test.adminconsole;
 
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
 
 import org.junit.Before;
 
@@ -19,7 +19,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
  */
 public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     private static final String BMW_CUP_JSON_URL =
-            "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
+            "http://event2.tractrac.com/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     
     @Override
     @Before

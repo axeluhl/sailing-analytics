@@ -1,11 +1,15 @@
 package com.sap.sailing.windestimation.model.classifier.maneuver;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.json.simple.parser.ParseException;
@@ -19,6 +23,8 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.TransformedManeu
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
@@ -27,6 +33,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class ManeuverClassifierTrainer {
+    private static final Logger logger = Logger.getLogger(ManeuverClassifierTrainer.class.getName());
+
     private static final int MIN_MANEUVERS_COUNT = 500;
 
     private final TransformedManeuversPersistenceManager<LabeledManeuverForEstimation> persistenceManager;
@@ -44,45 +52,41 @@ public class ManeuverClassifierTrainer {
 
     public void trainClassifier(
             TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel,
-            LabelExtraction<LabeledManeuverForEstimation> labelExtraction) throws Exception {
+            LabelExtraction<LabeledManeuverForEstimation> labelExtraction, int percentForTraining, int percentForTesting) throws Exception {
         ManeuverClassifierModelContext modelContext = classifierModel.getModelContext();
         List<LabeledManeuverForEstimation> maneuvers = getSuitableManeuvers(modelContext);
-        LoggingUtil.logInfo("Using " + maneuvers.size() + " maneuvers");
+        logger.info("Using " + maneuvers.size() + " maneuvers");
         if (maneuvers.size() < MIN_MANEUVERS_COUNT) {
-            LoggingUtil.logInfo("Not enough maneuver data for training. Training aborted!");
+            logger.info("Not enough maneuver data for training. Training aborted!");
         } else {
-            LoggingUtil.logInfo("Splitting training and test data...");
+            logger.info("Splitting training and test data...");
+            Collections.sort(maneuvers, (m1, m2)->m1.getManeuverTimePoint().compareTo(m2.getManeuverTimePoint()));
             List<LabeledManeuverForEstimation> trainManeuvers = new ArrayList<>();
             List<LabeledManeuverForEstimation> testManeuvers = new ArrayList<>();
-            for (LabeledManeuverForEstimation maneuver : maneuvers) {
-                if (maneuver.getRegattaName().contains("2018")) {
-                    testManeuvers.add(maneuver);
-                } else {
-                    trainManeuvers.add(maneuver);
-                }
-            }
+            trainManeuvers.addAll(maneuvers.subList(0, maneuvers.size()/100*percentForTraining));
+            testManeuvers.addAll(maneuvers.subList(maneuvers.size()-maneuvers.size()/100*percentForTesting, maneuvers.size()));
             if (testManeuvers.size() < MIN_MANEUVERS_COUNT * 0.2 || trainManeuvers.size() < MIN_MANEUVERS_COUNT * 0.8) {
-                LoggingUtil.logInfo("Not enough maneuver data for training. Training aborted!");
+                logger.info("Not enough maneuver data for training. Training aborted!");
             } else {
-                LoggingUtil.logInfo("Training with  " + trainManeuvers.size() + " maneuvers...");
+                logger.info("Training with  " + trainManeuvers.size() + " maneuvers...");
                 double[][] x = modelContext.getXMatrix(maneuvers);
                 int[] y = labelExtraction.getYVector(maneuvers);
                 classifierModel.train(x, y);
-                LoggingUtil.logInfo("Training finished. Validating on train dataset...");
+                logger.info("Training finished. Validating on train dataset...");
                 ManeuverClassifierScoring classifierScoring = new ManeuverClassifierScoring(classifierModel);
                 String printScoring = classifierScoring.printScoring(trainManeuvers, labelExtraction);
-                LoggingUtil.logInfo("Training score:\n" + printScoring);
+                logger.info("Training score:\n" + printScoring);
                 double trainScore = classifierScoring.getLastAvgF1Score();
                 int numberOfTrainingInstances = trainManeuvers.size();
 
-                LoggingUtil.logInfo("Validating on test dataset with " + testManeuvers.size() + " maneuvers...");
+                logger.info("Validating on test dataset with " + testManeuvers.size() + " maneuvers...");
                 printScoring = classifierScoring.printScoring(testManeuvers, labelExtraction);
-                LoggingUtil.logInfo("Test score:\n" + printScoring);
+                logger.info("Test score:\n" + printScoring);
                 double testScore = classifierScoring.getLastAvgF1Score();
-                LoggingUtil.logInfo("Persisting trained classifier...");
+                logger.info("Persisting trained classifier...");
                 classifierModel.setStatsAfterSuccessfulTraining(trainScore, testScore, numberOfTrainingInstances);
                 classifierModelStore.persistModel(classifierModel);
-                LoggingUtil.logInfo("Classifier persisted successfully. Finished!");
+                logger.info("Classifier persisted successfully. Finished!");
             }
         }
     }
@@ -95,9 +99,9 @@ public class ManeuverClassifierTrainer {
         List<LabeledManeuverForEstimation> maneuvers = maneuversPerBoatClass.get(key);
         if (maneuvers == null) {
             if (allManeuvers == null) {
-                LoggingUtil.logInfo("Connecting to MongoDB");
+                logger.info("Connecting to MongoDB");
                 persistenceManager.createIfNotExistsCollectionWithTransformedManeuvers();
-                LoggingUtil.logInfo("Querying dataset...");
+                logger.info("Querying dataset...");
                 allManeuvers = persistenceManager.getAllElements();
             }
             LoggingUtil
@@ -109,40 +113,76 @@ public class ManeuverClassifierTrainer {
         return maneuvers;
     }
 
+    /**
+     * @param args
+     *            [0] denotes percentage of maneuvers to use for training; [1] denotes percentage of maneuvers for
+     *            testing; [2] is an optional path to use for a file system-based model persistence; if not provided,
+     *            the models will end up in the configured MongoDB connection.
+     */
     public static void main(String[] args) throws Exception {
+        final RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
+        final int percentForTraining;
+        final int percentForTesting;
+        final ModelStore modelStore;
+        if (args.length > 0) {
+            percentForTraining = Integer.valueOf(args[0]);
+        } else {
+            percentForTraining = 80;
+        }
+        if (args.length > 1) {
+            percentForTesting = Integer.valueOf(args[1]);
+        } else {
+            percentForTesting = 20;
+        }
+        if (args.length > 2) {
+            final String modelStoragePath = args[2];
+            modelStore = new FileSystemModelStoreImpl(modelStoragePath);
+        } else {
+            modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
+        }
+        train(percentForTraining, percentForTesting, persistenceManager, modelStore);
+    }
+    
+    public static void train(final int percentForTraining, final int percentForTesting,
+            ModelStore modelStore)
+            throws MalformedURLException, IOException, InterruptedException, ClassNotFoundException,
+            UnknownHostException, ModelPersistenceException, Exception {
+        final RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
+        train(percentForTraining, percentForTesting, persistenceManager, modelStore);
+    }
+
+    public static void train(final int percentForTraining, final int percentForTesting,
+            RegularManeuversForEstimationPersistenceManager persistenceManager, ModelStore modelStore)
+            throws MalformedURLException, IOException, InterruptedException, ClassNotFoundException,
+            UnknownHostException, ModelPersistenceException, Exception {
+        logger.info("Using "+percentForTraining+"% of maneuvers for training, "+percentForTesting+"% for testing");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
-        RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
-        ModelStore classifierModelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
-        classifierModelStore.deleteAll(ModelDomainType.MANEUVER_CLASSIFIER);
-        ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager,
-                classifierModelStore);
+        modelStore.deleteAll(ModelDomainType.MANEUVER_CLASSIFIER);
+        ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager, modelStore);
         ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory();
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-            LoggingUtil.logInfo(
+            logger.info(
                     "### Training classifier for all boat classes with maneuver features: " + maneuverFeatures);
             ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures, null,
                     ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
             TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel = classifierModelFactory
                     .getNewModel(modelContext);
-            LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
-            classifierTrainer.trainClassifier(classifierModel, labelExtraction);
+            logger.info("## Classifier: " + classifierModel.getClass().getName());
+            classifierTrainer.trainClassifier(classifierModel, labelExtraction, percentForTraining, percentForTesting);
         }
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
-
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
             for (BoatClass boatClass : allBoatClasses) {
-                LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: "
-                        + maneuverFeatures);
+                logger.info("### Training classifier for boat class " + boatClass + " with maneuver features: " + maneuverFeatures);
                 ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures,
                         boatClass.getName(), ManeuverClassifierModelFactory.orderedSupportedTargetValues);
                 ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
                 TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel = classifierModelFactory
                         .getNewModel(modelContext);
-                LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
-                classifierTrainer.trainClassifier(classifierModel, labelExtraction);
+                logger.info("## Classifier: " + classifierModel.getClass().getName());
+                classifierTrainer.trainClassifier(classifierModel, labelExtraction, percentForTraining, percentForTesting);
             }
         }
     }
-
 }

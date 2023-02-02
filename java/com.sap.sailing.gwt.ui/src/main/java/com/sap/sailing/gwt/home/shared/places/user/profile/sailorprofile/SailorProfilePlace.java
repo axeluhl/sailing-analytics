@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.place.shared.Prefix;
+import com.sap.sailing.gwt.common.client.navigation.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 
 public class SailorProfilePlace extends AbstractUserProfilePlace implements HasMobileVersion {

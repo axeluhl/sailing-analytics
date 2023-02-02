@@ -82,12 +82,13 @@ button.primary {
 .buttonGroup.right {
     text-align: right;
 }
-.uploadButton {
+button.uploadButton {
     outline: none;
     width: 4em;
     position: relative;
+    background-color: #efaa00;
 }
-.uploadButton:after {
+button.uploadButton:after {
     background-image: resourceUrl("folderWhite");
     content: "";
     position: absolute;

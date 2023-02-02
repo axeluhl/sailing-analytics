@@ -12,6 +12,7 @@ import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -39,7 +40,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(null, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances);
+                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             return result;
         }
 
@@ -50,7 +51,8 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            return new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
+            return new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore,
+                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         }
     }
 }

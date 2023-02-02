@@ -3,8 +3,6 @@ package com.sap.sailing.domain.orc.impl;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ForkJoinTask;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +19,6 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformance
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.concurrent.LockUtil;
 
 /**
  * As opposed to before 2015 when implied wind was the only ranking criterion at all times, in 2015 it was decided to
@@ -81,33 +78,20 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
     public Comparator<TrackedLegOfCompetitor> getLegRankingComparator(TrackedLeg trackedLeg, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Duration> relativeCorrectedTimeByCompetitor = new HashMap<>();
-        final Map<Competitor, ForkJoinTask<Duration>> futures = new HashMap<>();
-        final Thread executingThread = Thread.currentThread();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-            futures.put(competitor, ForkJoinTask.adapt(()->{
-                Duration relativeCorrectedTime;
-                // "inherit" the course read lock from the "calling" thread into the thread pool executor thread; see also bug5554
-                LockUtil.propagateLockSetFrom(executingThread);
-                try {
-                    if (trackedLeg.getTrackedLeg(competitor).hasFinishedLeg(timePoint)) {
-                        // dedicated time point at leg end; cannot use implied wind from cache
-                        relativeCorrectedTime = cache.getRelativeCorrectedTime(competitor, getTrackedRace(),
-                                trackedLeg.getTrackedLeg(competitor).getFinishTime(),
-                                (c, t)->getRelativeCorrectedTime(c, t, cache));
-                    } else {
-                        // can use cache; we shall compute for the cache's timePoint:
-                        relativeCorrectedTime = cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
-                                (c, t)->getRelativeCorrectedTime(c, t, cache));
-                    }
-                    return relativeCorrectedTime;
-                } finally {
-                    LockUtil.unpropagateLockSetFrom(executingThread);
-                }
-            }).fork());
-        }
-        for (final Entry<Competitor, ForkJoinTask<Duration>> e : futures.entrySet()) {
-            relativeCorrectedTimeByCompetitor.put(e.getKey(), e.getValue().join());
-        }
+            Duration relativeCorrectedTime;
+            if (trackedLeg.getTrackedLeg(competitor).hasFinishedLeg(timePoint)) {
+                // dedicated time point at leg end; cannot use implied wind from cache
+                relativeCorrectedTime = cache.getRelativeCorrectedTime(competitor, getTrackedRace(),
+                        trackedLeg.getTrackedLeg(competitor).getFinishTime(),
+                        (c, t)->getRelativeCorrectedTime(c, t, cache));
+            } else {
+                // can use cache; we shall compute for the cache's timePoint:
+                relativeCorrectedTime = cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
+                        (c, t)->getRelativeCorrectedTime(c, t, cache));
+            }
+            relativeCorrectedTimeByCompetitor.put(competitor, relativeCorrectedTime);
+        };
         return (tloc1, tloc2)->{
             final int result;
             final boolean hasStarted1 = tloc1.hasStartedLeg(timePoint);
@@ -140,13 +124,9 @@ public class ORCPerformanceCurveRankingMetric extends ORCPerformanceCurveByImpli
 
     private Map<Competitor, Duration> getRelativeCorrectedTimesByCompetitor(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Map<Competitor, Duration> relativeCorrectedTimesByCompetitor = new HashMap<>();
-        final Map<Competitor, ForkJoinTask<Duration>> futures = new HashMap<>();
         for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-            futures.put(competitor, ForkJoinTask.adapt(()->cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
-                    (c, t)->getRelativeCorrectedTime(c, t, cache))).fork());
-        }
-        for (final Entry<Competitor, ForkJoinTask<Duration>> entry : futures.entrySet()) {
-            relativeCorrectedTimesByCompetitor.put(entry.getKey(), entry.getValue().join());
+            relativeCorrectedTimesByCompetitor.put(competitor, cache.getRelativeCorrectedTime(competitor, getTrackedRace(), timePoint,
+                    (c, t)->getRelativeCorrectedTime(c, t, cache)));
         }
         return relativeCorrectedTimesByCompetitor;
     }

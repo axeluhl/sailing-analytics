@@ -11,6 +11,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sse.security.util.SecuredServer;
 import com.sap.sse.shared.json.JsonDeserializationException;
 
 /**
@@ -31,13 +32,19 @@ import com.sap.sse.shared.json.JsonDeserializationException;
  * 
  * @author Axel Uhl (d043530)
  */
-public interface SailingServer {
+public interface SailingServer extends SecuredServer {
     /**
      * The server's base URL, ending with a slash "/" character
      */
     URL getBaseUrl();
     
     Iterable<UUID> getLeaderboardGroupIds() throws Exception;
+    
+    Iterable<String> getLeaderboardNames() throws Exception;
+    
+    String getLeaderboardShardingKey(String leaderboardName) throws Exception;
+    
+    String getLeaderboardFromShardingKey(String shardingKey) throws Exception;
 
     Iterable<UUID> getEventIds() throws Exception;
 

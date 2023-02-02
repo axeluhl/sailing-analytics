@@ -1,6 +1,5 @@
 package com.sap.sse.util.impl;
 
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -28,7 +27,7 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     private final Object delegate; // either a Callable or a Runnable whose type may or may not conform to the KnowsExecutor interface
     
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Callable<V> callable) {
-        super(callable);
+        super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(callable));
         delegate = callable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = callable;
@@ -39,7 +38,7 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     }
 
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Runnable runnable, V result) {
-        super(runnable, result);
+        super(ThreadPoolUtil.INSTANCE.associateWithSubjectIfAny(runnable), result);
         delegate = runnable;
         if (logger.isLoggable(Level.FINE)) {
             callableOrRunnableIfLoggingFine = runnable;
@@ -51,13 +50,7 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     
     @Override
     public void run() {
-        getHelper.setInheritableThreadLocalValues();
-        try {
-            super.run();
-        } finally {
-            getHelper.removeInheritableThreadLocalValues();
-            getHelper.removeThreadLocalValues();
-        }
+        super.run();
     }
     
     @Override
@@ -66,11 +59,6 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
             ((KnowsExecutor) delegate).setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
         }
         this.getHelper.setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
-    }
-
-    @Override
-    public Map<ThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
-        return getHelper.getThreadLocalValuesToInherit();
     }
 
     @Override

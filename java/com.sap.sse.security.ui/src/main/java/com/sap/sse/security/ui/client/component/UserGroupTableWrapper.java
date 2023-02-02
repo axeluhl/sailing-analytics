@@ -106,6 +106,7 @@ public class UserGroupTableWrapper extends
             public Iterable<String> getSearchableStrings(UserGroupDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
+                string.add(t.getId().toString());
                 return string;
             }
 

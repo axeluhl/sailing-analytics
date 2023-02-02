@@ -1,12 +1,17 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
@@ -28,6 +33,8 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
      * <li>If no {@link #setExpeditionPort(int) expedition UDP port} is provided, the {@link #DEFAULT_EXPEDITION_PORT} is used (2010).</li>
      * <li>If no {@link #setServerDirectory(String) server directory} is specified, it defaults to {@link ApplicationProcessHost#DEFAULT_SERVER_PATH}.</li>
      * <li>If no {@link #setRelease(Release) release} is specified, it defaults to {@link SailingReleaseRepository#getLatestMasterRelease()}.</li>
+     * <li>The {@link DefaultProcessConfigurationVariables#ADDITIONAL_JAVA_ARGS} variable is extended by system properties that configure
+     *     security, landscape data, and basic sailing master data to be shared across the {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME} domain.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -152,7 +159,25 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
             addUserDataForPort(result, DefaultProcessConfigurationVariables.SERVER_PORT, getPort());
             addUserDataForPort(result, DefaultProcessConfigurationVariables.TELNET_PORT, getTelnetPort());
             addUserDataForPort(result, SailingProcessConfigurationVariables.EXPEDITION_PORT, getExpeditionPort());
+            final List<String> newAdditionalJavaArgsVariableValue = new ArrayList<>();
+            newAdditionalJavaArgsVariableValue.add("${"+DefaultProcessConfigurationVariables.ADDITIONAL_JAVA_ARGS.name()+"}");
+            Util.addAll(getAdditionalJavaArgs(), newAdditionalJavaArgsVariableValue);
+            result.put(DefaultProcessConfigurationVariables.ADDITIONAL_JAVA_ARGS, Util.joinStrings(" ", newAdditionalJavaArgsVariableValue));
             return result;
+        }
+        
+        /**
+         * Subclasses may re-define but should by default call this implementation to start with and return a new,
+         * extended sequence of strings.
+         * 
+         * @return the additional strings to append, separated by spaced, to the
+         *         {@link DefaultProcessConfigurationVariables#ADDITIONAL_JAVA_ARGS ${ADDITIONAL_JAVA_ARGS}} variable.
+         *         An example string in the resulting sequence could be {@code "-Da=b"}. This implementation returns the
+         *         system properties required to configure security shared across the
+         *         {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME} domain.
+         */
+        protected Iterable<String> getAdditionalJavaArgs() {
+            return getAdditionalJavaArgsForSharedSecurity(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, SharedLandscapeConstants.DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME);
         }
 
         protected void addUserDataForPort(final Map<ProcessConfigurationVariable, String> result, ProcessConfigurationVariable variable, Integer port) {
@@ -166,6 +191,25 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
             @SuppressWarnings("unchecked")
             final T result = (T) new SailingAnalyticsApplicationConfiguration<ShardingKey>(this);
             return result;
+        }
+        
+        protected String getDefaultSecurityServiceReplicaSetHostname(final String defaultDomainName, final String defaultSecurityServiceReplicaSetName) {
+            return defaultSecurityServiceReplicaSetName+"."+defaultDomainName;
+        }
+
+        protected Iterable<String> getAdditionalJavaArgsForSharedSecurity(final String defaultDomainName, final String defaultSecurityServiceReplicaSetName) {
+            return Arrays.asList(
+                    "-Dsecurity.sharedAcrossSubdomainsOf="+defaultDomainName,
+                    "-Dsecurity.baseUrlForCrossDomainStorage=https://"+getDefaultSecurityServiceReplicaSetHostname(defaultDomainName, defaultSecurityServiceReplicaSetName),
+                    "-Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\\.)?"+(defaultDomainName.replaceAll("\\.", "\\\\."))+"(:[0-9]*)?$");
+        }
+
+        protected String getAdditionalJavaArgForWindEstimation(final String defaultDomainName) {
+            return "-Dwindestimation.source.url=https://"+defaultDomainName;
+        }
+
+        protected String getAdditionalJavaArgForPolarData(final String defaultDomainName) {
+            return "-Dpolardata.source.url=https://"+defaultDomainName;
         }
     }
 

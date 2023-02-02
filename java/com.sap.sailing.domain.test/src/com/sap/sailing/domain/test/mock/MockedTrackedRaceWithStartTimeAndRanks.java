@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -38,10 +39,13 @@ import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorAndRankComparable;
+import com.sap.sailing.domain.leaderboard.impl.RankAndRankComparable;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -83,7 +87,7 @@ import com.sap.sse.common.Util.Pair;
  * Simple mock for {@link TrackedRace} for leaderboard testing; the leaderboard only requests {@link #hasStarted(TimePoint)} and
  * {@link #getRank(Competitor)} and {@link #getRank(Competitor, TimePoint)}. Additionally, a mocked {@link RaceDefinition} is produced
  * from the competitor list.
- * 
+ *
  * @author Axel Uhl (D043530)
  *
  */
@@ -103,12 +107,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst) {
         this(startTime, competitorsFromBestToWorst, null);
     }
-    
+
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst, Regatta regatta) {
         this.regatta = regatta;
         this.startTime = startTime;
         // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
-        this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
+        this.competitorsFromBestToWorst = new ArrayList<>(competitorsFromBestToWorst);
         BoatClass boatClass = new BoatClassImpl("49er", /* upwind start */ true);
         competitorsAndBoats = new HashMap<>();
         int i = 1;
@@ -221,7 +225,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
+    public int getRank(Competitor competitor) {
         return competitorsFromBestToWorst.indexOf(competitor) + 1;
     }
 
@@ -338,7 +342,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Tack getTack(Competitor competitor, TimePoint timePoint) {
         return null;
     }
-    
+
     @Override
     public Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint) {
         return null;
@@ -363,7 +367,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
-    
+
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
@@ -454,8 +458,28 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return competitorsFromBestToWorst;
+    }
+
+    @Override
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint) {
+        final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<>();
+        for (int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.put(competitor, new RankAndRankComparable(getRank(competitor), new RankComparableRank(getRank(competitor))));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
+    }
+    
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
+        final List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<>();
+        for (int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitor, new RankComparableRank(getRank(competitor))));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
     }
 
     @Override
@@ -564,7 +588,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         return null;
     }
-    
+
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
     }
 
@@ -726,8 +750,28 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return null;
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return competitorsFromBestToWorst;
+    }
+
+    @Override
+    public LinkedHashMap<Competitor, RankAndRankComparable> getCompetitorsFromBestToWorstAndRankAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final LinkedHashMap<Competitor, RankAndRankComparable> competitorsFromBestToWorstAndRankComparable = new LinkedHashMap<Competitor, RankAndRankComparable>();
+        for (int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.put(competitor, new RankAndRankComparable(getRank(competitor), new RankComparableRank(getRank(competitor))));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
+    }
+    
+    @Override
+    public List<CompetitorAndRankComparable> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        List<CompetitorAndRankComparable> competitorsFromBestToWorstAndRankComparable = new ArrayList<CompetitorAndRankComparable>();
+        for(int i = 1; i <= competitorsFromBestToWorst.size(); i++) {
+            final Competitor competitor = competitorsFromBestToWorst.get(i-1);
+            competitorsFromBestToWorstAndRankComparable.add(new CompetitorAndRankComparable(competitor, new RankComparableRank(getRank(competitor))));
+        }
+        return competitorsFromBestToWorstAndRankComparable;
     }
 
     @Override
@@ -759,9 +803,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) { 
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
     }
-    
+
     @Override
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
             Competitor competitor, String trackName) {
@@ -782,7 +826,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
         return null;
     }
-    
+
     @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
@@ -792,7 +836,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return competitorsAndBoats.get(competitor);
     }
-    
+
     @Override
     public Competitor getCompetitorOfBoat(Boat boat) {
         if (boat == null) {
@@ -844,7 +888,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public void removeWind(Wind wind, WindSource windSource) {
-        
+
     }
 
     @Override

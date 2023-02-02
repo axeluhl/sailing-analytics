@@ -15,7 +15,6 @@ import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
  */
 public class KMeansClusterer<ValueType, AveragesTo, T extends ScalableValueWithDistance<ValueType, AveragesTo>> extends
         KMeansMappingClusterer<T, ValueType, AveragesTo, T> {
-
     protected KMeansClusterer(int numberOfClusters, Iterable<T> elements, Iterator<AveragesTo> seeds) {
         super(numberOfClusters, elements, (e) -> e, seeds);
     }

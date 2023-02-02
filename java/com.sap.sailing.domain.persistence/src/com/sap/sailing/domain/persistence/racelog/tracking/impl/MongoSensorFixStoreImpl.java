@@ -19,14 +19,16 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.lang.Nullable;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
@@ -60,6 +62,12 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
     private final MongoObjectFactoryImpl mongoOF;
     
     /**
+     * Allows for causally-consistent access to the store; helpful, e.g., during test cases. May be {@code null}.
+     */
+    @Nullable
+    private final ClientSession clientSession;
+    
+    /**
      * The write concern to use for updating the fixes and metadata collections. Tests can use this, e.g., to work with
      * {@link WriteConcern#MAJORITY} in order to ensure they can read their own writes.
      */
@@ -73,17 +81,20 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, ReadConcern.DEFAULT, WriteConcern.UNACKNOWLEDGED);
+        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, ReadConcern.DEFAULT,
+                WriteConcern.UNACKNOWLEDGED, /* clientSession */ null, /* metadataCollectionClientSession */ null);
     }
     
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
-            TypeBasedServiceFinderFactory serviceFinderFactory, ReadConcern readConcern, WriteConcern writeConcern) {
+            TypeBasedServiceFinderFactory serviceFinderFactory, ReadConcern readConcern, WriteConcern writeConcern,
+            ClientSession clientSession, ClientSession metadataCollectionClientSession) {
         super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
               serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
-        fixesCollection = mongoOF.getGPSFixCollection();
-        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern);
+        fixesCollection = mongoOF.getGPSFixCollection(clientSession);
+        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern, metadataCollectionClientSession);
         this.writeConcern = writeConcern;
+        this.clientSession = clientSession;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -136,7 +147,7 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
             filters.add(Filters.lt(FieldNames.TIME_AS_MILLIS.name(), loadFixesTo.asMillis()));
         }
         Bson query = Filters.and(filters);
-        FindIterable<Document> result = fixesCollection.find(query);
+        FindIterable<Document> result = clientSession == null ? fixesCollection.find(query) : fixesCollection.find(clientSession, query);
         result.batchSize(100000).sort(new Document(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
         if (onlyOneResult) {
             result.limit(1);
@@ -208,7 +219,12 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
                     final TimeRangeImpl fixTimeRange = new TimeRangeImpl(fixTP, fixTP, /* toIsInclusive */ true);
                     newTimeRange = newTimeRange == null ? fixTimeRange : newTimeRange.extend(fixTimeRange);
                 }
-                fixesCollection.withWriteConcern(writeConcern).insertMany(dbFixes);
+                final MongoCollection<Document> fixesCollectionWithWriteConcern = fixesCollection.withWriteConcern(writeConcern);
+                if (clientSession == null) {
+                    fixesCollectionWithWriteConcern.insertMany(dbFixes);
+                } else {
+                    fixesCollectionWithWriteConcern.insertMany(clientSession, dbFixes);
+                }
                 metadataCollection.enqueueMetadataUpdate(device, dbDeviceId, nrOfTotalFixes, newTimeRange, latestFix);
             } catch (TransformationException e) {
                 logger.log(Level.WARNING, "Could not store fix in MongoDB", e);

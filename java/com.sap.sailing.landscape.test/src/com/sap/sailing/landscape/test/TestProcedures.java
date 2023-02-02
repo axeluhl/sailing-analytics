@@ -27,6 +27,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
@@ -70,7 +71,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
  * successfully it is necessary to have valid AWS credentials for region {@code EU_WEST_2} that allow the
  * AWS user account to create keys and launch instances, etc. These are to be provided as explained
- * in the documentation of {@link AwsLandscape#obtain()}.
+ * in the documentation of {@link AwsLandscape#obtain(String)}.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -94,7 +95,7 @@ public class TestProcedures {
     @Before
     public void setUp() {
         privateKeyEncryptionPassphrase = ("awptyf87l"+"097384sf;,57").getBytes();
-        landscape = AwsLandscape.obtain();
+        landscape = AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey);
         region = new AwsRegion(Region.EU_WEST_2, landscape);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
         mailSmtpPassword = System.getProperty(MAIL_SMTP_PASSWORD);
@@ -253,10 +254,15 @@ public class TestProcedures {
         do {
             try {
                 final SshCommandChannel sshChannel = mongoProcess.getHost().createSshChannel("ec2-user", optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
-                final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
-                        "i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done",
-                        "stderr while trying to fetch replica set members", Level.WARNING);
-                fine = stdout.contains("PRIMARY") && stdout.contains("SECONDARY");
+                if (sshChannel == null) {
+                    logger.info("Timeout trying to connect to "+mongoProcess.getHost());
+                    fine = false;
+                } else {
+                    final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                            "i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done",
+                            "stderr while trying to fetch replica set members", Level.WARNING);
+                    fine = stdout.contains("PRIMARY") && stdout.contains("SECONDARY");
+                }
             } catch (Exception e) {
                 logger.info("No success (yet) finding replica set "+mongoDefaultReplicaSetName);
                 fine = false;

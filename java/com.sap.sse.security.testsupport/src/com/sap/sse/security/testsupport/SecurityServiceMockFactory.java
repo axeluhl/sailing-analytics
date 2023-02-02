@@ -22,7 +22,7 @@ public class SecurityServiceMockFactory {
         Mockito.doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(4, Callable.class).call();
+                return invocation.getArgument(4, Callable.class).call();
             }
         }).when(result).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(Action.class));
@@ -41,7 +41,7 @@ public class SecurityServiceMockFactory {
                 Mockito.any(), Mockito.any(), Mockito.any(Callable.class));
         Mockito.doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                invocation.getArgumentAt(1, Action.class).run();
+                invocation.getArgument(1, Action.class).run();
                 return null;
             }
         }).when(result).checkPermissionAndDeleteOwnershipForObjectRemoval(Mockito.any(QualifiedObjectIdentifier.class), Mockito.any(Action.class));

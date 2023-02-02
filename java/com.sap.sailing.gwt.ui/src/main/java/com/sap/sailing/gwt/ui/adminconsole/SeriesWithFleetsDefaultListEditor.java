@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * As opposed to the regular {@link SeriesWithFleetsListEditor}, this variant offers an "Edit Series"
  * button for each series in the list, allowing the user not only to add and remove series but also to
  * edit an existing series in-place.
- * 
+ *
  * @author Axel Uhl (D043530)
  *
  */
@@ -88,7 +88,6 @@ public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEdito
                                         int oldIndex = seriesList.indexOf(seriesDTO);
                                         seriesList.set(oldIndex, newVersionOfEditedSeries);
                                         update(newVersionOfEditedSeries);
-                                        
                                     }
                                 });
                         dialog.ensureDebugId("SeriesEditDialog");
@@ -98,7 +97,7 @@ public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEdito
                 return editSeriesButton;
             }
         }
-        
+
         @Override
         protected Widget createValueWidget(int rowIndex, SeriesDTO seriesDTO) {
             return new CompactSeriesPanel(seriesDTO);

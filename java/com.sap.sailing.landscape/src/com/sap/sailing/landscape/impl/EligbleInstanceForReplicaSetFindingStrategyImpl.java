@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -121,7 +123,8 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
         return optionalPreferredInstanceToDeployTo.map(host->{
             logger.info("Checking preferred instance "+host+" for eligibility");
             try {
-                return replicaSet.isEligibleForDeployment(host, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)
+                return landscapeService.isEligibleForDeployment(host, replicaSet.getServerName(), replicaSet.getPort(), Landscape.WAIT_FOR_PROCESS_TIMEOUT,
+                        optionalKeyName, privateKeyEncryptionPassphrase)
                     && isAcceptableAvailabilityZone(host.getAvailabilityZone(), replicaSet) ? host : null;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -175,7 +178,7 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
      * <p>
      * 
      * Next, the comparator considers the number of application processes already running on the hosts. The host with
-     * less processes is considered better. For performance reasons, the number of
+     * fewer processes is considered better. For performance reasons, the number of
      * {@link ApplicationProcessHost#getApplicationProcesses(Optional, Optional, byte[]) processes}
      * is cached by the comparator.
      */
@@ -199,7 +202,7 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
     
     private int getNumberOfProcesses(SailingAnalyticsHost<String> host) {
         try {
-            return Util.size(host.getApplicationProcesses(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+            return Util.size(host.getApplicationProcesses(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
         } catch (Exception e) {
             logger.log(Level.WARNING, "Exception trying to obtain number of processes on host "+host, e);
             return Integer.MAX_VALUE; // probably not a good idea to deploy to this host, so make it look full
@@ -211,27 +214,45 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
         return !mustBeDifferentAvailabilityZone || isAcceptableAvailabilityZoneIfStrict(availabilityZone, replicaSet);
     }
     
+    /**
+     * For a replica it is acceptable to be deployed to any AZ other than the master's. For a master, an
+     * AZ is acceptable either if no replica exists at all, or no auto-scaling group-managed replicas exist at all and at least
+     * one unmanaged replica is in a different AZ, or at least one of the managed replicas is in a different AZ.
+     */
     private boolean isAcceptableAvailabilityZoneIfStrict(AvailabilityZone availabilityZone,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws InterruptedException, ExecutionException {
-        return (master && !onlyUnmanagedReplicasInSameAvailabilityZone(availabilityZone, replicaSet)) ||
+        return (master && isAcceptableAvailabilityZoneForMaster(availabilityZone, replicaSet)) ||
                (!master && !replicaSet.getMaster().getHost().getAvailabilityZone().equals(availabilityZone));
     }
 
-    private boolean onlyUnmanagedReplicasInSameAvailabilityZone(AvailabilityZone availabilityZone,
+    /**
+     * For a master, an AZ is acceptable either if no replica exists at all, or no auto-scaling group-managed replicas
+     * exist at all and at least one unmanaged replica is in a different AZ, or at least one of the managed replicas is
+     * in a different AZ.
+     */
+    private boolean isAcceptableAvailabilityZoneForMaster(AvailabilityZone availabilityZone,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws InterruptedException, ExecutionException {
-        boolean onlyUnmanagedReplicasInSameAvailabilityZone = true;
-        for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
-            if (replica.getHost().isManagedByAutoScalingGroup(replicaSet.getAutoScalingGroup())
-                    || !replica.getHost().getAvailabilityZone().equals(availabilityZone)) {
-                onlyUnmanagedReplicasInSameAvailabilityZone = false;
-                break;
+        final boolean result;
+        if (Util.isEmpty(replicaSet.getReplicas())) {
+            result = true;
+        } else {
+            boolean hasManagedReplicas = false;
+            boolean hasManagedReplicaInDifferentAZ = false;
+            boolean hasUnmanagedReplicaInDifferentAZ = false;
+            for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
+                final boolean isManaged = replica.getHost().isManagedByAutoScalingGroup(Collections.singleton(replicaSet.getAutoScalingGroup()));
+                final boolean isInDifferentAZ = !replica.getHost().getAvailabilityZone().equals(availabilityZone);
+                hasManagedReplicas = hasManagedReplicas || isManaged;
+                hasManagedReplicaInDifferentAZ = hasManagedReplicaInDifferentAZ || (isManaged && isInDifferentAZ);
+                hasUnmanagedReplicaInDifferentAZ = hasUnmanagedReplicaInDifferentAZ || (!isManaged && isInDifferentAZ);
             }
+            result = hasManagedReplicaInDifferentAZ || (!hasManagedReplicas && hasUnmanagedReplicaInDifferentAZ);
         }
-        return onlyUnmanagedReplicasInSameAvailabilityZone;
+        return result;
     }
 
     private boolean isArchiveServer(SailingAnalyticsHost<String> host) {
         return host.getInstance().tags().stream().filter(tag->tag.key().equals(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG)
-                && tag.value().equals(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE)).findAny().isPresent();
+                && tag.value().equals(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME)).findAny().isPresent();
     }
 }

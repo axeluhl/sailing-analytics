@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsolePresenter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -32,7 +32,7 @@ public interface AdminConsoleView extends IsWidget {
         MediaServiceWriteAsync getMediaServiceWrite();
         PlaceController getPlaceController();
         // Refresher
-        Refresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher();
+        Refresher<StrippedLeaderboardDTO> getLeaderboardsRefresher();
         Refresher<LeaderboardGroupDTO> getLeaderboardGroupsRefresher();
         Refresher<RegattaDTO> getRegattasRefresher();
         Refresher<EventDTO> getEventsRefresher();

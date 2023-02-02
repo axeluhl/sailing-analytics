@@ -115,7 +115,9 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
 
     Iterable<Subscription> getSubscriptions();
     
-    boolean hasActiveSubscription();
+    boolean hasActiveSubscription(String planId);
+    
+    boolean hasAnySubscription(String planId);
     
     void setSubscriptions(Subscription[] subscriptions);
     

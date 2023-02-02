@@ -36,16 +36,33 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
-@Path("/restsecurity")
+@Path(SecurityResource.RESTSECURITY)
 public class SecurityResource extends AbstractSecurityResource {
+    private static final Logger logger = Logger.getLogger(SecurityResource.class.getName());
+    
+    public static final String USERS_WITH_PERMISSION_METHOD = "/users_with_permission";
+    public static final String HELLO_METHOD = "/hello";
+    public static final String CHANGE_PASSWORD_METHOD = "/change_password";
+    public static final String FORGOT_PASSWORD_METHOD = "/forgot_password";
+    public static final String CREATE_USER_METHOD = "/create_user";
+    public static final String USER_METHOD = "/user";
+    public static final String HAS_PERMISSION_METHOD = "/has_permission";
+    public static final String REMOVE_ACCESS_TOKEN_METHOD = "/remove_access_token";
+    public static final String LOGOUT_METHOD = "/logout";
+    /**
+     * The path to put behind the application's prefix {@code /security/api} to reach this resource
+     */
+    public static final String RESTSECURITY = "/restsecurity";
     public static final String COMPANY = "company";
     public static final String FULL_NAME = "fullName";
     public static final String EMAIL = "email";
-    private static final Logger logger = Logger.getLogger(SecurityResource.class.getName());
     private static final String SECURITY_UI_URL_PATH = "/security/ui/";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String ACCESS_TOKEN = "access_token";
+    public static final String PERMISSION = "permission";
+    public static final String GRANTED = "granted";
+    public static final String ACCESS_TOKEN_METHOD = "/"+ACCESS_TOKEN;
 
     /**
      * Can be used to figure out the current subject. Accepts the GET method. If the subject is
@@ -53,16 +70,16 @@ public class SecurityResource extends AbstractSecurityResource {
      * with a generic "Hello!".
      */
     @GET
-    @Path("/hello")
+    @Path(HELLO_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response sayHello() {
         return doSayHello();
     }
     
     @GET
-    @Path("/users_with_permission")
+    @Path(USERS_WITH_PERMISSION_METHOD)
     @Produces("text/plain;charset=UTF-8")
-    public Response getUsersWithPermission(@QueryParam("permission") String permission) {
+    public Response getUsersWithPermission(@QueryParam(PERMISSION) String permission) {
         final TimePoint start = TimePoint.now();
         try {
             final WildcardPermission wildcardPermission = new WildcardPermission(permission);
@@ -95,14 +112,14 @@ public class SecurityResource extends AbstractSecurityResource {
      * with a generic "Hello!".
      */
     @POST
-    @Path("/hello")
+    @Path(HELLO_METHOD)
     @Produces("text/plain;charset=UTF-8")
     public Response sayHelloPost() {
         return doSayHello();
     }
     
     @POST
-    @Path("/change_password")
+    @Path(CHANGE_PASSWORD_METHOD)
     @Produces("text/plain;charset=UTF-8")
     public Response changePassword(@FormParam(USERNAME) String username, @FormParam(PASSWORD) String password) {
         if (!getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
@@ -118,7 +135,7 @@ public class SecurityResource extends AbstractSecurityResource {
     }
 
     @POST
-    @Path("/forgot_password")
+    @Path(FORGOT_PASSWORD_METHOD)
     @Produces("text/plain;charset=UTF-8")
     public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam(USERNAME) String username,
             @QueryParam(EMAIL) String email, @QueryParam("application") String application) {
@@ -143,7 +160,7 @@ public class SecurityResource extends AbstractSecurityResource {
     }
 
     @POST
-    @Path("/create_user")
+    @Path(CREATE_USER_METHOD)
     @Produces("text/plain;charset=UTF-8")
     public Response createUser(@Context UriInfo uriInfo,
             @QueryParam(USERNAME) String queryUsername, @FormParam(USERNAME) String formUsername,
@@ -202,7 +219,7 @@ public class SecurityResource extends AbstractSecurityResource {
     }
 
     @GET
-    @Path("/user")
+    @Path(USER_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response getUser(@QueryParam(USERNAME) String username) {
         final Subject subject = SecurityUtils.getSubject();
@@ -225,7 +242,7 @@ public class SecurityResource extends AbstractSecurityResource {
     }
     
     @DELETE
-    @Path("/user")
+    @Path(USER_METHOD)
     @Produces("text/plain;charset=UTF-8")
     public Response deleteUser(@QueryParam(USERNAME) String username) {
         User user = getService().getUserByName(username);
@@ -244,7 +261,7 @@ public class SecurityResource extends AbstractSecurityResource {
     }
     
     @PUT
-    @Path("/user")
+    @Path(USER_METHOD)
     @Produces("text/plain;charset=UTF-8")
     public Response updateUser(@Context UriInfo uriInfo, @QueryParam(USERNAME) String username,
             @QueryParam(EMAIL) String email, @QueryParam(FULL_NAME) String fullName,
@@ -270,28 +287,28 @@ public class SecurityResource extends AbstractSecurityResource {
     }
     
     @GET
-    @Path("/access_token")
+    @Path(ACCESS_TOKEN_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response accessToken() {
         return respondWithAccessTokenForAuthenticatedSubject();
     }
 
     @POST
-    @Path("/access_token")
+    @Path(ACCESS_TOKEN_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response accessTokenPost() {
         return respondWithAccessTokenForAuthenticatedSubject();
     }
     
     @GET
-    @Path("/logout")
+    @Path(LOGOUT_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response logout() {
         return logoutPost();
     }
 
     @POST
-    @Path("/logout")
+    @Path(LOGOUT_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response logoutPost() {
         getService().logout();
@@ -299,14 +316,14 @@ public class SecurityResource extends AbstractSecurityResource {
     }
 
     @GET
-    @Path("/remove_access_token")
+    @Path(REMOVE_ACCESS_TOKEN_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response removeAccessToken() {
         return removeAccessTokenPost();
     }
 
     @POST
-    @Path("/remove_access_token")
+    @Path(REMOVE_ACCESS_TOKEN_METHOD)
     @Produces("application/json;charset=UTF-8")
     public Response removeAccessTokenPost() {
         final Response result;
@@ -321,15 +338,15 @@ public class SecurityResource extends AbstractSecurityResource {
     }
     
     @GET
-    @Path("/has_permission")
+    @Path(HAS_PERMISSION_METHOD)
     @Produces("application/json;charset=UTF-8")
-    public Response getPermission(@QueryParam("permission") final List<String> permissionsAsStrings) {
+    public Response getPermission(@QueryParam(PERMISSION) final List<String> permissionsAsStrings) {
         final JSONArray result = new JSONArray();
         for (final String permissionAsString : permissionsAsStrings) {
             final JSONObject entry = new JSONObject();
             result.add(entry);
-            entry.put("permission", permissionAsString);
-            entry.put("granted", SecurityUtils.getSubject().isPermitted(permissionAsString));
+            entry.put(PERMISSION, permissionAsString);
+            entry.put(GRANTED, SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
         return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
     }

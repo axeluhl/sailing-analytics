@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.TimePanelCssResources.TimePanelCss;
-import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -42,6 +41,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
@@ -89,7 +89,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     private final FlowPanel playControlPanel;
     private final FlowPanel timePanelInnerWrapper;
 
-    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+    private final SecuredDTO raceDTO;
 
     /** 
      * the minimum time the slider extends its time when the end of the slider is reached
@@ -113,7 +113,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
             TimeRangeWithZoomProvider timeRangeProvider,
             StringMessages stringMessages,
             boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            final SecuredDTO raceDTO) {
         super(parent, context);
         this.raceDTO = raceDTO;
         this.userService = userService;
@@ -167,23 +167,17 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
                 }
             }
         });
-        
         timePanelInnerWrapper.add(timePanelSliderFlowWrapper);
         timePanelSlider.add(timeSlider);
-
         controlsPanel = new FlowPanel();
-        
         controlsPanel.setStyleName("timePanel-controls");
         timePanelInnerWrapper.add(controlsPanel);
-        
         // play button control
         playControlPanel = new FlowPanel();
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
-        
         toggleAdvancedModeButton = createToggleAdvancedModeButton();
         playControlPanel.add(toggleAdvancedModeButton);
-        
         playPauseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -200,7 +194,6 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         playPauseButton.setTitle(stringMessages.startStopPlaying());
         playPauseButton.setStyleName("playPauseButton");
         playControlPanel.add(playPauseButton);
-
         backToLivePlayButton = new Button(stringMessages.raceIsInLiveTimePanelMode());
         backToLivePlayButton.addClickHandler(new ClickHandler() {
             @Override
@@ -220,32 +213,25 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         timeLabel = new Label();
         timeControlPanel.add(dateLabel);
         timeControlPanel.add(timeLabel);
-        
         dateLabel.getElement().setClassName("dateLabel");
         timeLabel.getElement().setClassName("timeLabel");
-
         // time to start control
         timeToStartControlPanel = new FlowPanel();
         timeToStartControlPanel.setStyleName("timePanel-controls-timeToStart");
         timeToStartLabel = new Label();
         timeToStartControlPanel.add(timeToStartLabel);
         timeToStartLabel.getElement().setClassName("timeToStartLabel");
-        
         FlowPanel playModeControlPanel = new FlowPanel();
         playModeControlPanel.setStyleName("timePanel-controls-playmode");
         playModeControlPanel.add(playModeImage);
         playModeImage.getElement().getStyle().setFloat(Style.Float.LEFT);
-        
         playModeLabel = new Label();
         playModeControlPanel .add(playModeLabel);
-
         playModeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         playModeLabel.getElement().setClassName("playModeLabel");
-        
         // play speed controls
         FlowPanel playSpeedControlPanel = new FlowPanel();
         playSpeedControlPanel.setStyleName("timePanel-controls-playSpeed");
-        
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setValue((int)timer.getPlaySpeedFactor()); // Christopher: initialize play speed box according to play speed factor
@@ -257,11 +243,9 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
                 TimePanel.this.timer.setPlaySpeedFactor(newPlaySpeedFactor);
             }
         });
-        
         Image playSpeedImage = new Image(playSpeedImg);
         playSpeedControlPanel.add(playSpeedImage);
         playSpeedControlPanel.add(playSpeedBox);
-
         slowDownButton = new Button("-1");
         slowDownButton.addClickHandler(new ClickHandler() {
             @Override
@@ -273,7 +257,6 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         slowDownButton.setTitle(stringMessages.slowPlaySpeedDown());
         slowDownButton.addStyleName("timePanelButton-SlowDown");
         playSpeedControlPanel.add(slowDownButton);
-
         speedUpButton = new Button("+1");
         speedUpButton.addClickHandler(new ClickHandler() {
             @Override
@@ -285,38 +268,29 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         speedUpButton.setTitle(stringMessages.speedPlaySpeedUp());
         speedUpButton.addStyleName("timePanelButton-SpeedUp");
         playSpeedControlPanel.add(speedUpButton);
-
         playSpeedImage.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
         playSpeedImage.getElement().getStyle().setMarginRight(3, Style.Unit.PX);
-       
         playSpeedBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedBox.getElement().getStyle().setPadding(2, Style.Unit.PX);
-
         speedUpButton.addStyleName("timePanelButton");
         slowDownButton.addStyleName("timePanelButton");
-
         // time delay
         FlowPanel timeDelayPanel = new FlowPanel();
         timeDelayPanel.setStyleName("timePanel-controls-timeDelay");
-
         timeDelayLabel = new Label();
         timeDelayPanel.add(timeDelayLabel);
-        
         timeDelayLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         timeDelayLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-       
         timePanelCss.ensureInjected();
         controlsPanel.add(createSettingsButton());
         initWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
-        
         controlsPanel.add(playSpeedControlPanel);
         controlsPanel.add(playModeControlPanel );
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
-        
         resetZoomButton = new Button(stringMessages.resetZoom());
         resetZoomButton.setEnabled(false);
         resetZoomButton.addClickHandler(new ClickHandler() {
@@ -326,7 +300,6 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
             }
         });
         controlsPanel.add(resetZoomButton);
-        
         hideControlsPanel();
     }
     
@@ -372,7 +345,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (timeRangeProvider.isZoomed()) {
-            timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
+            timeSlider.setCurrentValue(Double.valueOf(newTime.getTime()), false);
         } else {
             if (getFromTime() == null || getToTime() == null) {
                 initializeTimeRange(oldTime, newTime);
@@ -395,7 +368,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
                         break;
                     }
                 }
-                timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
+                timeSlider.setCurrentValue(Double.valueOf(newTime.getTime()), false);
             }
         }
         dateLabel.setText(getDateLabelText(newTime));
@@ -463,7 +436,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
         final Optional<Pair<Double, Double>> changed =
-                timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
+                timeSlider.setMinAndMaxValue(Double.valueOf(min.getTime()), Double.valueOf(max.getTime()), fireEvent);
         if (changed.isPresent()) {
             final Double changedMin = changed.get().getA();
             final Double changedMax = changed.get().getB();

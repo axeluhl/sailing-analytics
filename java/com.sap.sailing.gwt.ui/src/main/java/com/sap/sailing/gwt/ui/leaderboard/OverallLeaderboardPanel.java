@@ -13,6 +13,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.WithSecurity;
 
 public class OverallLeaderboardPanel extends MultiRaceLeaderboardPanel {
     public OverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
@@ -23,12 +24,12 @@ public class OverallLeaderboardPanel extends MultiRaceLeaderboardPanel {
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean showCompetitorFilterStatus, boolean enableSyncScroller, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity withSecurity) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider, timer, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller,new ClassicLeaderboardStyle(), flagImageResolver, availableDetailTypes);
+                showCompetitorFilterStatus, enableSyncScroller,new ClassicLeaderboardStyle(), flagImageResolver, availableDetailTypes, withSecurity);
     }
 
     @Override

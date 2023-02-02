@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
 public class ResultImportUrlsListCompositeSupplier extends AdminConsolePanelSupplier<ResultImportUrlsListComposite> {
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
@@ -28,7 +27,6 @@ public class ResultImportUrlsListCompositeSupplier extends AdminConsolePanelSupp
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-
             @Override
             public void onSuccess() {
                 widget = init();
@@ -41,5 +39,4 @@ public class ResultImportUrlsListCompositeSupplier extends AdminConsolePanelSupp
             }
         });
     }
-
 }

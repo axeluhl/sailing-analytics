@@ -40,10 +40,10 @@ public class VideoDTO extends AbstractMediaDTO {
     
     @Override
     public int compareTo(AbstractMediaDTO o) {
-        if(o instanceof VideoDTO) {
+        if (o instanceof VideoDTO) {
             VideoDTO otherVideo = (VideoDTO) o;
             boolean featured = isFeatured();
-            if(otherVideo.isFeatured() != featured) {
+            if (otherVideo.isFeatured() != featured) {
                 return featured ? -1 : 1;
             }
         }

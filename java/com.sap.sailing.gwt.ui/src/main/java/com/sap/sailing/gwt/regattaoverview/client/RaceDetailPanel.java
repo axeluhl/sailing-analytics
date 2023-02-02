@@ -209,6 +209,7 @@ public class RaceDetailPanel extends SimplePanel {
             if (data.raceInfo.startProcedureDTO != null) {
                 switch (data.raceInfo.startProcedure) {
                 case RRS26:
+                case RRS26_3MIN:
                 case SWC:    
                     LineStartInfoDTO rrsInfo = (LineStartInfoDTO) data.raceInfo.startProcedureDTO;
                     if (rrsInfo != null) {

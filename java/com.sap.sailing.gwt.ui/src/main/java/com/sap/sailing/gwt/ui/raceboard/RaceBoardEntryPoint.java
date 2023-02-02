@@ -32,10 +32,10 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
+import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -120,9 +121,10 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
         }
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                 .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition, mode != null ? mode.name() : null);
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
         final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
                 raceboardData.getLeaderboard(), StringMessages.INSTANCE,
-                raceboardData.getDetailTypesForCompetitorChart(), getUserService(),
+                raceboardData.getDetailTypesForCompetitorChart(), getUserService(), paywallResolver,
                 raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardData.getRace());
         RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(),
                 storageDefinition);
@@ -134,12 +136,14 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                                 raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardContextDefinition);
                     }
                 });
+        
     }
 
     private void createErrorPage(String message) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         final SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication();
-        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
         RootLayoutPanel.get().add(vp);
         vp.addNorth(header, 100);
         final Label infoText = new Label(message);
@@ -162,7 +166,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 asyncActionsExecutor, this, Collections.singletonList(selectedRace.getRaceIdentifier()),
                 5000l /* requestInterval */);
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(/* parent */ null, context, raceLifeCycle, settings,
-                getSailingService(), mediaService, mediaServiceWrite, getUserService(), asyncActionsExecutor,
+                getSailingService(), mediaService, mediaServiceWrite, asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getLeaderboardGroupId(),
@@ -170,7 +174,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
                 raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(),
                 createSailingServiceWriteInstance() /* create write instance for later admin usage */,
-                raceboardContextDefinition);
+                raceboardContextDefinition, this);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         if (raceBoardMode != null) {
             raceBoardMode.getMode().applyTo(raceBoardPerspective);

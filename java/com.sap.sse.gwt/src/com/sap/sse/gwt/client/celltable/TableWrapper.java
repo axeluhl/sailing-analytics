@@ -203,6 +203,9 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         }
     }
     
+    /**
+     * Remove all items from this table's data model
+     */
     public void clear() {
         getDataProvider().getList().clear();
     }

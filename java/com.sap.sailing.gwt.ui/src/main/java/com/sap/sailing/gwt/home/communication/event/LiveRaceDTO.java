@@ -7,7 +7,8 @@ import com.sap.sailing.gwt.home.communication.race.RaceProgressDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.SimpleWindDTO;
 
 public class LiveRaceDTO extends RaceMetadataDTO<SimpleWindDTO> {
-    
+    private static final long serialVersionUID = -8488956421226134969L;
+
     private FlagStateDTO flagState;
     
     private RaceProgressDTO progress;

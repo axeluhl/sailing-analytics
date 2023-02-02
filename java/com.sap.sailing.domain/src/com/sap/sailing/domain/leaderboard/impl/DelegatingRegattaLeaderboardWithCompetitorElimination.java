@@ -2,16 +2,14 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -53,32 +51,21 @@ import com.sap.sse.common.Util.Pair;
  * regatta ("total") rank, and all competitors advance by as many ranks compared to the original leaderboard as there
  * are eliminated competitors ranking better in the original leaderboard.
  * <p>
- * 
+ *
  * This behavior is achieved by overriding any method returning a collection of {@link Competitor}s, such as
  * {@link #getCompetitors()}, such that the eliminated competitors are removed from the result which should let any
  * leaderboard panel displaying the contents of this leaderboard list only the non-eliminated competitors. This includes
  * {@link #getCompetitorsFromBestToWorst(TimePoint)} which also leads the implementation of
  * {@link #getTotalRankOfCompetitor(Competitor, TimePoint)} to calculate the ranks based on the competitor list without
  * those eliminated.
- * 
+ *
  * @author Axel Uhl (d043530)
  */
 public class DelegatingRegattaLeaderboardWithCompetitorElimination extends AbstractLeaderboardWithCache implements RegattaLeaderboardWithEliminations {
     private static final long serialVersionUID = 8331154893189722924L;
     private final String name;
-    private RegattaLeaderboard fullLeaderboard;
-    
-    private transient final Supplier<RegattaLeaderboard> fullLeaderboardSupplier;
-    
-    /**
-     * The particular use case for which this field is introduced is registering score correction
-     * listeners at a point in time when the full leaderboard hasn't been resolved yet. Instead of
-     * letting this listener registration attempt the resolution without success the request can
-     * be queued here, and each time the {@link #getFullLeaderboard()} successfully resolves a
-     * leaderboard, all consumers in this set will be triggered.
-     */
-    private final ConcurrentHashMap<Consumer<RegattaLeaderboard>, Boolean> triggerWhenFullLeaderboardIsResolved;
-    
+    private final DelegateLeaderboard fullLeaderboard;
+
     /**
      * Competitors eliminated from this leaderboard for regatta ranking; those competitors are not part of
      * {@link #getCompetitors()} but appear in {@link #getAllCompetitors()}. They may have an overlap with
@@ -93,12 +80,10 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     /**
      * The leaderboard wrapper starts out with an empty set of eliminated competitors
      */
-    public DelegatingRegattaLeaderboardWithCompetitorElimination(Supplier<RegattaLeaderboard> fullLeaderboardSupplier,
-            String name) {
+    public DelegatingRegattaLeaderboardWithCompetitorElimination(Supplier<RegattaLeaderboard> fullLeaderboardSupplier, String name) {
         this.name = name;
-        this.fullLeaderboardSupplier = fullLeaderboardSupplier;
         this.eliminatedCompetitors = new ConcurrentHashMap<>();
-        this.triggerWhenFullLeaderboardIsResolved = new ConcurrentHashMap<>();
+        fullLeaderboard = new DelegateLeaderboard(fullLeaderboardSupplier);
     }
 
     @Override
@@ -106,11 +91,15 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return name;
     }
 
+    private RegattaLeaderboard getDelegateLeaderboard() {
+        return fullLeaderboard.getDelegateLeaderboard();
+    }
+
     @Override
     public Iterable<Competitor> getCompetitors() {
-        return new ObscuringIterable<>(getFullLeaderboard().getCompetitors(), eliminatedCompetitors.keySet());
+        return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitors(), eliminatedCompetitors.keySet());
     }
-    
+
     @Override
     public void setEliminated(Competitor competitor, boolean eliminated) {
         if (eliminated) {
@@ -118,8 +107,9 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         } else {
             eliminatedCompetitors.remove(competitor);
         }
+        getLeaderboardDTOCache().invalidate(this);
     }
-    
+
     @Override
     public boolean isEliminated(Competitor competitor) {
         return eliminatedCompetitors.containsKey(competitor);
@@ -133,16 +123,17 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     @Override
     public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
-        Map<RaceColumn, List<Competitor>> preResult = getFullLeaderboard().getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint, cache);
+        Map<RaceColumn, List<Competitor>> preResult = getDelegateLeaderboard().getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint, cache);
         for (final List<Competitor> e : preResult.values()) {
             e.removeAll(eliminatedCompetitors.keySet());
         }
         return preResult;
     }
 
+    @Override
     public Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints() {
         final Map<Competitor, Double> result = new HashMap<>();
-        for (final java.util.Map.Entry<Competitor, Double> e : getFullLeaderboard().getCompetitorsForWhichThereAreCarriedPoints().entrySet()) {
+        for (final java.util.Map.Entry<Competitor, Double> e : getDelegateLeaderboard().getCompetitorsForWhichThereAreCarriedPoints().entrySet()) {
             if (!isEliminated(e.getKey())) {
                 result.put(e.getKey(), e.getValue());
             }
@@ -150,24 +141,29 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return result;
     }
 
+    @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
-        return new ObscuringIterable<>(getFullLeaderboard().getCompetitorsFromBestToWorst(raceColumn, timePoint, cache), eliminatedCompetitors.keySet());
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitorsFromBestToWorst(raceColumn, timePoint, cache), eliminatedCompetitors.keySet());
     }
 
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final List<Competitor> result = new ArrayList<>();
-        for (final Competitor c : getFullLeaderboard().getCompetitorsFromBestToWorst(timePoint, cache)) {
-            if (!isEliminated(c)) {
-                result.add(c);
-            }
-        }
-        return result;
+    @Override
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitorsFromBestToWorst(timePoint, cache), eliminatedCompetitors.keySet());
     }
 
+    @Override
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new ObscuringIterable<>(getDelegateLeaderboard().getCompetitorsFromBestToWorst(raceColumn, timePoint, totalPointsSupplier, cache),
+                eliminatedCompetitors.keySet());
+    }
+
+    @Override
     public Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException {
         final Map<Pair<Competitor, RaceColumn>, Entry> result = new HashMap<>();
-        for (final java.util.Map.Entry<Pair<Competitor, RaceColumn>, Entry> e : getFullLeaderboard().getContent(timePoint).entrySet()) {
+        for (final java.util.Map.Entry<Pair<Competitor, RaceColumn>, Entry> e : getDelegateLeaderboard().getContent(timePoint).entrySet()) {
             if (!isEliminated(e.getKey().getA())) {
                 result.put(e.getKey(), e.getValue());
             }
@@ -181,330 +177,360 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     }
 
     // --------------------- Delegate Pattern Implementation ----------------------
+    @Override
     public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
-        return getFullLeaderboard().getOrCreateCompetitorsProvider();
+        return getDelegateLeaderboard().getOrCreateCompetitorsProvider();
     }
 
+    @Override
     public Regatta getRegatta() {
-        return getFullLeaderboard().getRegatta();
+        return getDelegateLeaderboard().getRegatta();
     }
 
+    @Override
     public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
-        return getFullLeaderboard().getCompetitorsRegisteredInRegattaLog();
+        return getDelegateLeaderboard().getCompetitorsRegisteredInRegattaLog();
     }
 
+    @Override
     public IsRegattaLike getRegattaLike() {
-        return getFullLeaderboard().getRegattaLike();
+        return getDelegateLeaderboard().getRegattaLike();
     }
 
+    @Override
     public RaceLog getRacelog(String raceColumnName, String fleetName) {
-        return getFullLeaderboard().getRacelog(raceColumnName, fleetName);
+        return getDelegateLeaderboard().getRacelog(raceColumnName, fleetName);
     }
 
+    @Override
     public void registerCompetitor(Competitor competitor) {
-        getFullLeaderboard().registerCompetitor(competitor);
+        getDelegateLeaderboard().registerCompetitor(competitor);
     }
 
+    @Override
     public void registerCompetitors(Iterable<Competitor> competitors) {
-        getFullLeaderboard().registerCompetitors(competitors);
+        getDelegateLeaderboard().registerCompetitors(competitors);
     }
 
+    @Override
     public void deregisterCompetitor(Competitor competitor) {
-        getFullLeaderboard().deregisterCompetitor(competitor);
+        getDelegateLeaderboard().deregisterCompetitor(competitor);
     }
 
+    @Override
     public void deregisterCompetitors(Iterable<Competitor> competitor) {
-        getFullLeaderboard().deregisterCompetitors(competitor);
+        getDelegateLeaderboard().deregisterCompetitors(competitor);
     }
 
+    @Override
     public Iterable<Competitor> getAllCompetitors() {
-        return getFullLeaderboard().getAllCompetitors();
+        return getDelegateLeaderboard().getAllCompetitors();
     }
 
+    @Override
     public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
-        return getFullLeaderboard().getAllCompetitorsWithRaceDefinitionsConsidered();
+        return getDelegateLeaderboard().getAllCompetitorsWithRaceDefinitionsConsidered();
     }
 
+    @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
-        return getFullLeaderboard().getAllCompetitors(raceColumn, fleet);
+        return getDelegateLeaderboard().getAllCompetitors(raceColumn, fleet);
     }
 
+    @Override
     public Iterable<Competitor> getCompetitors(RaceColumn raceColumn, Fleet fleet) {
-        return getFullLeaderboard().getCompetitors(raceColumn, fleet);
+        return getDelegateLeaderboard().getCompetitors(raceColumn, fleet);
     }
 
+    @Override
     public Iterable<Competitor> getSuppressedCompetitors() {
-        return getFullLeaderboard().getSuppressedCompetitors();
+        return getDelegateLeaderboard().getSuppressedCompetitors();
     }
 
+    @Override
     public boolean isSuppressed(Competitor competitor) {
-        return getFullLeaderboard().isSuppressed(competitor);
+        return getDelegateLeaderboard().isSuppressed(competitor);
     }
 
+    @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
-        getFullLeaderboard().setSuppressed(competitor, suppressed);
+        getDelegateLeaderboard().setSuppressed(competitor, suppressed);
     }
 
+    @Override
     public Fleet getFleet(String fleetName) {
-        return getFullLeaderboard().getFleet(fleetName);
+        return getDelegateLeaderboard().getFleet(fleetName);
     }
 
+    @Override
     public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
-        return getFullLeaderboard().getEntry(competitor, race, timePoint);
+        return getDelegateLeaderboard().getEntry(competitor, race, timePoint);
     }
 
+    @Override
     public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint,
-            Set<RaceColumn> discardedRaceColumns) throws NoWindException {
-        return getFullLeaderboard().getEntry(competitor, race, timePoint, discardedRaceColumns);
+            Set<RaceColumn> discardedRaceColumns, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getDelegateLeaderboard().getEntry(competitor, race, timePoint, discardedRaceColumns, cache);
     }
 
+    @Override
     public Map<RaceColumn, Map<Competitor, Double>> getNetPointsSumAfterRaceColumn(TimePoint timePoint)
             throws NoWindException {
-        return getFullLeaderboard().getNetPointsSumAfterRaceColumn(timePoint);
+        return getDelegateLeaderboard().getNetPointsSumAfterRaceColumn(timePoint);
     }
 
+    @Override
     public double getCarriedPoints(Competitor competitor) {
-        return getFullLeaderboard().getCarriedPoints(competitor);
+        return getDelegateLeaderboard().getCarriedPoints(competitor);
     }
 
+    @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getFullLeaderboard().getTrackedRank(competitor, race, timePoint, cache);
+        return getDelegateLeaderboard().getTrackedRank(competitor, race, timePoint, cache);
     }
 
+    @Override
     public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getFullLeaderboard().getTotalPoints(competitor, raceColumn, timePoint, cache);
+        return getDelegateLeaderboard().getTotalPoints(competitor, raceColumn, timePoint, cache);
     }
 
+    @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        return getFullLeaderboard().getMaxPointsReason(competitor, race, timePoint);
+        return getDelegateLeaderboard().getMaxPointsReason(competitor, race, timePoint);
     }
 
+    @Override
     public Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        return getFullLeaderboard().getNetPoints(competitor, race, timePoint);
+        return getDelegateLeaderboard().getNetPoints(competitor, race, timePoint);
     }
 
+    @Override
     public boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return getFullLeaderboard().isDiscarded(competitor, raceColumn, timePoint);
+        return getDelegateLeaderboard().isDiscarded(competitor, raceColumn, timePoint);
     }
 
+    @Override
     public Double getNetPoints(Competitor competitor, TimePoint timePoint) {
-        return getFullLeaderboard().getNetPoints(competitor, timePoint);
+        return getDelegateLeaderboard().getNetPoints(competitor, timePoint);
     }
 
+    @Override
     public Double getNetPoints(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint)
             throws NoWindException {
-        return getFullLeaderboard().getNetPoints(competitor, raceColumnsToConsider, timePoint);
+        return getDelegateLeaderboard().getNetPoints(competitor, raceColumnsToConsider, timePoint);
     }
 
+    @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        final RegattaLeaderboard theFullLeaderboard = getFullLeaderboard();
+        final RegattaLeaderboard theFullLeaderboard = getDelegateLeaderboard();
         return theFullLeaderboard == null ? Collections.emptySet() : theFullLeaderboard.getRaceColumns();
     }
 
+    @Override
     public RaceColumn getRaceColumnByName(String name) {
-        return getFullLeaderboard().getRaceColumnByName(name);
+        return getDelegateLeaderboard().getRaceColumnByName(name);
     }
 
+    @Override
     public void setCarriedPoints(Competitor competitor, double carriedPoints) {
-        getFullLeaderboard().setCarriedPoints(competitor, carriedPoints);
+        getDelegateLeaderboard().setCarriedPoints(competitor, carriedPoints);
     }
 
+    @Override
     public void unsetCarriedPoints(Competitor competitor) {
-        getFullLeaderboard().unsetCarriedPoints(competitor);
+        getDelegateLeaderboard().unsetCarriedPoints(competitor);
     }
 
+    @Override
     public boolean hasCarriedPoints() {
-        return getFullLeaderboard().hasCarriedPoints();
+        return getDelegateLeaderboard().hasCarriedPoints();
     }
 
+    @Override
     public boolean hasCarriedPoints(Competitor competitor) {
-        return getFullLeaderboard().hasCarriedPoints(competitor);
+        return getDelegateLeaderboard().hasCarriedPoints(competitor);
     }
 
+    @Override
     public SettableScoreCorrection getScoreCorrection() {
-        return getFullLeaderboard().getScoreCorrection();
+        return getDelegateLeaderboard().getScoreCorrection();
     }
 
     @Override
     public void addScoreCorrectionListener(ScoreCorrectionListener listener) {
-        if (getFullLeaderboard() != null) {
-            getFullLeaderboard().addScoreCorrectionListener(listener);
-        } else {
-            triggerWhenFullLeaderboardIsResolved.put(leaderboard->leaderboard.addScoreCorrectionListener(listener), true);
-        }
+        fullLeaderboard.runOrSchedule(leaderboard->leaderboard.addScoreCorrectionListener(listener));
     }
 
     @Override
     public void removeScoreCorrectionListener(ScoreCorrectionListener listener) {
-        if (getFullLeaderboard() != null) {
-            getFullLeaderboard().removeScoreCorrectionListener(listener);
-        } else {
-            triggerWhenFullLeaderboardIsResolved.put(leaderboard->leaderboard.removeScoreCorrectionListener(listener), true);
-        }
+        fullLeaderboard.runOrSchedule(leaderboard->leaderboard.removeScoreCorrectionListener(listener));
     }
 
+    @Override
     public Competitor getCompetitorByName(String competitorName) {
-        return getFullLeaderboard().getCompetitorByName(competitorName);
+        return getDelegateLeaderboard().getCompetitorByName(competitorName);
     }
 
     public void setDisplayName(Competitor competitor, String displayName) {
-        getFullLeaderboard().setDisplayName(competitor, displayName);
+        getDelegateLeaderboard().setDisplayName(competitor, displayName);
     }
 
+    @Override
     public String getDisplayName(Competitor competitor) {
-        return getFullLeaderboard().getDisplayName(competitor);
+        return getDelegateLeaderboard().getDisplayName(competitor);
     }
 
+    @Override
     public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn,
             TimePoint timePoint) {
-        return getFullLeaderboard().countRaceForComparisonWithDiscardingThresholds(competitor, raceColumn, timePoint);
+        return getDelegateLeaderboard().countRaceForComparisonWithDiscardingThresholds(competitor, raceColumn, timePoint);
     }
 
+    @Override
     public ResultDiscardingRule getResultDiscardingRule() {
-        return getFullLeaderboard().getResultDiscardingRule();
+        return getDelegateLeaderboard().getResultDiscardingRule();
     }
 
+    @Override
     public void setCrossLeaderboardResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
-        getFullLeaderboard().setCrossLeaderboardResultDiscardingRule(discardingRule);
+        getDelegateLeaderboard().setCrossLeaderboardResultDiscardingRule(discardingRule);
     }
 
+    @Override
     public Competitor getCompetitorByIdAsString(String idAsString) {
-        return getFullLeaderboard().getCompetitorByIdAsString(idAsString);
+        return getDelegateLeaderboard().getCompetitorByIdAsString(idAsString);
     }
 
+    @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        getFullLeaderboard().addRaceColumnListener(listener);
+        getDelegateLeaderboard().addRaceColumnListener(listener);
     }
 
+    @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        getFullLeaderboard().removeRaceColumnListener(listener);
+        getDelegateLeaderboard().removeRaceColumnListener(listener);
     }
 
+    @Override
     public Long getDelayToLiveInMillis() {
-        return getFullLeaderboard().getDelayToLiveInMillis();
+        return getDelegateLeaderboard().getDelayToLiveInMillis();
     }
 
+    @Override
     public Iterable<TrackedRace> getTrackedRaces() {
-        return getFullLeaderboard().getTrackedRaces();
+        return getDelegateLeaderboard().getTrackedRaces();
     }
 
+    @Override
     public ScoringScheme getScoringScheme() {
-        return getFullLeaderboard().getScoringScheme();
+        return getDelegateLeaderboard().getScoringScheme();
     }
 
+    @Override
     public TimePoint getTimePointOfLatestModification() {
-        return getFullLeaderboard().getTimePointOfLatestModification();
+        return getDelegateLeaderboard().getTimePointOfLatestModification();
     }
 
+    @Override
     public Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-        return getFullLeaderboard().getMaximumSpeedOverGround(competitor, timePoint);
+        return getDelegateLeaderboard().getMaximumSpeedOverGround(competitor, timePoint);
     }
 
+    @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-        return getFullLeaderboard().getAverageSpeedOverGround(competitor, timePoint);
+        return getDelegateLeaderboard().getAverageSpeedOverGround(competitor, timePoint);
     }
 
+    @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider,
             TimePoint timePoint) throws NoWindException {
-        return getFullLeaderboard().getNetPoints(competitor, raceColumn, raceColumnsToConsider, timePoint);
+        return getDelegateLeaderboard().getNetPoints(competitor, raceColumn, raceColumnsToConsider, timePoint);
     }
 
+    @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns) {
-        return getFullLeaderboard().getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
+        return getDelegateLeaderboard().getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
     }
 
+    @Override
     public TimePoint getNowMinusDelay() {
-        return getFullLeaderboard().getNowMinusDelay();
+        return getDelegateLeaderboard().getNowMinusDelay();
     }
 
+    @Override
     public Iterable<CourseArea> getCourseAreas() {
-        return getFullLeaderboard().getCourseAreas();
+        return getDelegateLeaderboard().getCourseAreas();
     }
 
+    @Override
     public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
-        return getFullLeaderboard().getNumberOfCompetitorsInLeaderboardFetcher();
+        return getDelegateLeaderboard().getNumberOfCompetitorsInLeaderboardFetcher();
     }
 
+    @Override
     public Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace) {
-        return getFullLeaderboard().getRaceColumnAndFleet(trackedRace);
+        return getDelegateLeaderboard().getRaceColumnAndFleet(trackedRace);
     }
 
+    @Override
     public BoatClass getBoatClass() {
-        return getFullLeaderboard().getBoatClass();
+        return getDelegateLeaderboard().getBoatClass();
     }
 
     @Override
     public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
-        return getFullLeaderboard().getBoatOfCompetitor(competitor, raceColumn, fleet);
+        return getDelegateLeaderboard().getBoatOfCompetitor(competitor, raceColumn, fleet);
     }
 
-    private RegattaLeaderboard getFullLeaderboard() {
-        if (fullLeaderboard == null) {
-            if (fullLeaderboardSupplier == null) {
-                throw new NullPointerException("Internal error: Regatta leaderboard supplier is null; this can only happen upon premature serialization");
-            }
-            fullLeaderboard = fullLeaderboardSupplier.get();
-            if (fullLeaderboard != null) {
-                for (Iterator<Consumer<RegattaLeaderboard>> i=triggerWhenFullLeaderboardIsResolved.keySet().iterator(); i.hasNext(); ) {
-                    final Consumer<RegattaLeaderboard> toTrigger = i.next();
-                    toTrigger.accept(fullLeaderboard);
-                    i.remove();
-                }
-            }
-        }
-        return fullLeaderboard;
-    }
-    
     /**
-     * Before being serialized, ensure that the leaderboard supplier has been used to tru
+     * Before being serialized, ensure that the leaderboard supplier has been used
      * to resolve the leaderboard.
-     * @throws IOException 
      */
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        getFullLeaderboard();
+        getDelegateLeaderboard();
         oos.defaultWriteObject();
     }
 
     @Override
     public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
-        return getFullLeaderboard().getBoatsRegisteredInRegattaLog();
+        return getDelegateLeaderboard().getBoatsRegisteredInRegattaLog();
     }
 
     @Override
     public Iterable<Boat> getAllBoats() {
-        return getFullLeaderboard().getAllBoats();
+        return getDelegateLeaderboard().getAllBoats();
     }
 
     @Override
     public void registerBoat(Boat boat) {
-        getFullLeaderboard().registerBoat(boat);
+        getDelegateLeaderboard().registerBoat(boat);
     }
 
     @Override
     public void registerBoats(Iterable<Boat> boats) {
-        getFullLeaderboard().registerBoats(boats);
+        getDelegateLeaderboard().registerBoats(boats);
     }
 
     @Override
     public void deregisterBoat(Boat boat) {
-        getFullLeaderboard().deregisterBoat(boat);
+        getDelegateLeaderboard().deregisterBoat(boat);
     }
 
     @Override
     public void deregisterBoats(Iterable<Boat> boats) {
-        getFullLeaderboard().deregisterBoats(boats);
+        getDelegateLeaderboard().deregisterBoats(boats);
     }
 
     @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider) {
-        return getFullLeaderboard().getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
+        return getDelegateLeaderboard().getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
                 totalPointsProvider);
     }
 
     @Override
     public boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
-        return getFullLeaderboard().isResultsAreOfficial(raceColumn, fleet);
+        return getDelegateLeaderboard().isResultsAreOfficial(raceColumn, fleet);
     }
 }

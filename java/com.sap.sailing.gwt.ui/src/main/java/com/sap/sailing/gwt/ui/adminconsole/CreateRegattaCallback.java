@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -42,7 +41,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         this.stringMessages = stringMessages;
         this.existingEvents = existingEvents;
     }
-    
+
     @Override
     public void ok(RegattaDTO newRegatta) {
         createNewRegatta(newRegatta, existingEvents);
@@ -58,7 +57,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                     seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                     seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
-                    seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
+                    seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.hasCrossFleetMergedRanking(), seriesDTO.getMaximumNumberOfDiscards(), seriesDTO.isOneAlwaysStaysOne());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingServiceWrite.createRegatta(newRegatta.getName(),
@@ -89,7 +88,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
     private void createDefaultRacesIfDefaultSeriesIsPresent(final RegattaDTO newRegatta) {
         for (final SeriesDTO series: newRegatta.series) {
-            if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()) {
+            if (series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME) && !series.getRaceColumns().isEmpty()) {
                 final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
                 for (RaceColumnDTO newRaceColumn : series.getRaceColumns()) {
                     // We could use an index counter here because we're assuming that we're creating
@@ -115,25 +114,25 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             }
         }
     }
-    
+
     private void reloadLeaderboards() {
         if (presenter.getLeaderboardsRefresher() != null) {
             presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
         }
     }
-    
+
     private void reloadRegattas() {
         if (presenter.getRegattasRefresher() != null){
             presenter.getRegattasRefresher().reloadAndCallFillAll();
         }
     }
-    
+
     private void fillEvents() {
         if (presenter.getEventsRefresher() != null) {
             presenter.getEventsRefresher().reloadAndCallFillAll();
         }
     }
-    
+
     private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta, final Iterable<EventDTO> existingEvents) {
         CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingServiceWrite,
                 stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaName>() {
@@ -141,7 +140,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     public void ok(RegattaName regattaIdentifier) {
                         sailingServiceWrite.createRegattaLeaderboard(regattaIdentifier,
                                 /* displayName */ null, new int[] {},
-                                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to create default regatta leaderboard for " + newRegatta.getName()
@@ -149,7 +148,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     }
 
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                    public void onSuccess(StrippedLeaderboardDTO result) {
                         if (!newRegatta.courseAreas.isEmpty()) {
                             // Show the event's leaderboard groups and allow the user to pick one to assign the regatta leaderboard to
                             final EventDTO event = getEventForCourseArea(existingEvents, newRegatta.courseAreas);
@@ -170,12 +169,12 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         dialog.ensureDebugId("CreateDefaultRegattaLeaderboardDialog");
         dialog.show();
     }
-    
-    
+
+
     /**
      * When a new regatta with a new regatta leaderboard has been created, the user will now be given the chance to link
      * the regatta leaderboard into a leaderboard group of the event out of which the regatta chose its default course area.
-     * 
+     *
      * @param newRegattaLeaderboard the new regatta leaderboard that the user may link now to a leaderboard group of an event
      * @param eventToLinkRegattaTo an event that has at least one {@link EventDTO#getLeaderboardGroups() leaderboard group}
      */

@@ -90,3 +90,15 @@ http:
 
 The Hudson build slave AWS image (AMI) has a set of valid credentials in the ``hudson`` user's account to
 push to the registry.
+
+## Garbage-Collecting Unused Content
+
+To run a garbage collection in the registry, try this:
+```
+  docker exec -it registry-registry-1 registry garbage-collect /etc/docker/registry/config.yml
+```
+
+If you want to delete an entire repository, e.g., because you pushed images under an incorrect repository tag, try this:
+```
+  docker exec -it registry-registry-1 rm -rf /var/lib/registry/docker/registry/v2/repositories/{your-repository-name}
+```

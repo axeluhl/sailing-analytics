@@ -1,9 +1,9 @@
 package com.sap.sailing.datamining.impl.components;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.stub;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +35,7 @@ public class TestLeaderboardGroupRetrievalProcessor {
     @Before
     public void initializeComponents() {
         service = mock(RacingEventService.class);
-        stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
+        when(service.getLeaderboardGroups()).thenReturn(getGroupsInService());
         retrievedGroups = new HashSet<>();
         Processor<HasLeaderboardGroupContext, Void> receiver = new NullProcessor<HasLeaderboardGroupContext, Void>(HasLeaderboardGroupContext.class, Void.class) {
             @Override

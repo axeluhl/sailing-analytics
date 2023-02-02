@@ -92,6 +92,10 @@ public interface SharedHomeResources extends CommonIcons {
     @MimeType("image/svg+xml")
     DataResource greenCheck();
 
+    @Source("icon-red-dash.svg")
+    @MimeType("image/svg+xml")
+    DataResource redDash();
+
     @Source("launch-loupe.svg")
     @MimeType("image/svg+xml")
     DataResource launchLoupe();

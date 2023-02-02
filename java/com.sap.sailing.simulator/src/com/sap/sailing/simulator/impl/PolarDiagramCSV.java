@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ public class PolarDiagramCSV extends PolarDiagramBase {
     public PolarDiagramCSV(String inputFile) throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
         InputStream csvFile = cl.getResourceAsStream(inputFile);
-        InputStreamReader isr = new InputStreamReader(csvFile);
+        InputStreamReader isr = new InputStreamReader(csvFile, Charset.forName("UTF-8"));
         BufferedReader bfr = new BufferedReader(isr);
 
         List<Speed> windSpeeds = new ArrayList<Speed>();
@@ -56,27 +57,27 @@ public class PolarDiagramCSV extends PolarDiagramBase {
             switch (elements[0]) {
             case "windspeed":
                 for (int i = 1; i < elements.length; i++) {
-                    windSpeeds.add(new KnotSpeedImpl(new Double(elements[i])));
+                    windSpeeds.add(new KnotSpeedImpl(Double.valueOf(elements[i])));
                 }
                 break;
             case "beatangles":
                 for (int i = 1; i < elements.length; i++) {
-                    beatAngles.add(new DegreeBearingImpl(new Double(elements[i])));
+                    beatAngles.add(new DegreeBearingImpl(Double.valueOf(elements[i])));
                 }
                 break;
             case "beatsog":
                 for (int i = 1; i < elements.length; i++) {
-                    beatSpeed.add(new KnotSpeedImpl(new Double(elements[i])));
+                    beatSpeed.add(new KnotSpeedImpl(Double.valueOf(elements[i])));
                 }
                 break;
             case "jibesog":
                 for (int i = 1; i < elements.length; i++) {
-                    jibeSpeed.add(new KnotSpeedImpl(new Double(elements[i])));
+                    jibeSpeed.add(new KnotSpeedImpl(Double.valueOf(elements[i])));
                 }
                 break;
             case "jibeangles":
                 for (int i = 1; i < elements.length; i++) {
-                    jibeAngles.add(new DegreeBearingImpl(new Double(elements[i])));
+                    jibeAngles.add(new DegreeBearingImpl(Double.valueOf(elements[i])));
                 }
                 break;
             default:
@@ -84,12 +85,12 @@ public class PolarDiagramCSV extends PolarDiagramBase {
 
                 for (int i = 1; i < elements.length; i++) {
                     if (elements[i].length() > 0) {
-                        sp.add(new KnotSpeedImpl(new Double(elements[i])));
+                        sp.add(new KnotSpeedImpl(Double.valueOf(elements[i])));
                     } else {
                         sp.add(Speed.NULL);
                     }
                 }
-                speeds.put(new DegreeBearingImpl(new Double(elements[0])), sp);
+                speeds.put(new DegreeBearingImpl(Double.valueOf(elements[0])), sp);
                 break;
 
             }

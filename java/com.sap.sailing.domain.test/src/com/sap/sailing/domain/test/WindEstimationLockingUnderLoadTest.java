@@ -108,7 +108,7 @@ public class WindEstimationLockingUnderLoadTest {
                 /* sidelines */ Collections.emptySet(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 10000,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 15000,
                 /* useInternalMarkPassingAlgorithm */ false, regatta.getRankingMetricConstructor(), /* raceLogResolver */ null,
-                /* trackingConnectorInfo */ null) {
+                /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null) {
                     private static final long serialVersionUID = 1L;
 
                     @Override

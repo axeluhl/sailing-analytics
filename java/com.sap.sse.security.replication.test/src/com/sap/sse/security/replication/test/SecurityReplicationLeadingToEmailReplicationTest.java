@@ -26,6 +26,7 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -63,7 +64,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances);
+                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             result.initialize();
             return result;
         }
@@ -77,7 +78,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances);
+                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             userStore.ensureDefaultRolesExist();
             userStore.ensureServerGroupExists();
             result.initialize();

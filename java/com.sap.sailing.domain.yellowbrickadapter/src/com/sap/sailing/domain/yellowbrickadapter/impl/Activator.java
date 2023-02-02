@@ -5,12 +5,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.competitorimport.CompetitorProvider;
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapterFactory;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.ResultUrlRegistryServiceTrackerCustomizer;
 import com.sap.sailing.server.trackfiles.common.GPSFixImporterRegistration;
-import com.sap.sse.MasterDataImportClassLoaderService;
 
 public class Activator implements BundleActivator {
     private static BundleContext context;

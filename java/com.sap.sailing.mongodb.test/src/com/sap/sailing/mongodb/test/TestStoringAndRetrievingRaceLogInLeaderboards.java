@@ -14,7 +14,7 @@ import java.util.UUID;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.MongoException;
@@ -74,8 +74,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.TripleSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -174,7 +174,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         RacingEventServiceImpl service = mock(RacingEventServiceImpl.class);
         when(service.getMongoObjectFactory()).thenReturn(mongoObjectFactory);
         when(service.getLeaderboardByName(leaderboardName)).thenReturn(leaderboard);
-        doCallRealMethod().when(service).renameLeaderboardColumn(Matchers.anyString(), Matchers.anyString(), Matchers.anyString());
+        doCallRealMethod().when(service).renameLeaderboardColumn(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         TimePoint now = MillisecondsTimePoint.now();
         TimeRange protestTime = new TimeRangeImpl(now, now.plus(Duration.ONE_MINUTE.times(90)));
         RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, protestTime);

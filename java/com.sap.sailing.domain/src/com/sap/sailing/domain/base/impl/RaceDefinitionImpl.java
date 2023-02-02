@@ -36,7 +36,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         this(name, course, boatClass, competitorsAndTheirBoats, /* use name as default ID */ name);
     }
 
-    public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id) {
+    public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Map<? extends Competitor, ? extends Boat> competitorsAndTheirBoats, Serializable id) {
         super(name);
         assert name != null;
         this.boatClass = boatClass;
@@ -48,7 +48,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         this.competitorsByCompetitorId = new HashMap<>();
         this.boatsByCompetitorId = new HashMap<>();
         
-        for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
+        for (Entry<? extends Competitor, ? extends Boat> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
             Competitor competitor = competitorAndBoat.getKey();            
             Competitor competitorWithEqualID = competitorsByCompetitorId.put(competitor.getId(), competitor);
             boatsByCompetitorId.put(competitor.getId(), competitorAndBoat.getValue());

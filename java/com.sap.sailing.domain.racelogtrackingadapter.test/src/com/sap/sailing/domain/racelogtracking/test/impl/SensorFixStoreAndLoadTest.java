@@ -154,7 +154,8 @@ public class SensorFixStoreAndLoadTest {
         raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(END_OF_TRACKING), author, 0));
         regattaLog = new RegattaLogImpl("regattalog");
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
+                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author,
                 new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author,
@@ -173,7 +174,7 @@ public class SensorFixStoreAndLoadTest {
         regatta.getRegatta().setControlTrackingFromStartAndFinishTimes(true);
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null);
     }
 
     private void dropPersistedData() {
@@ -447,7 +448,7 @@ public class SensorFixStoreAndLoadTest {
                 }
                 throw new IllegalArgumentException("Unknown event type");
             }
-        });
+        }, /* removeOutliersFromCompetitorTracks */ false);
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {

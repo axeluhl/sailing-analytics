@@ -186,7 +186,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
+                AccessControlListAnnotation acl = getOrCreateAclInternal(idOfAccessControlledObject);
                 acl.getAnnotation().setPermissions(userGroup, actions);
                 mongoObjectFactory.storeAccessControlList(acl);
                 internalMapUserGroupToACL(userGroup, acl);
@@ -194,11 +194,19 @@ public class AccessControlStoreImpl implements AccessControlStore {
         });
     }
 
-    private AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
+    private AccessControlListAnnotation getOrCreateAclInternal(QualifiedObjectIdentifier idOfAccessControlledObject) {
         assert lockForManagementMappings.isWriteLockedByCurrentThread();
         return accessControlLists.computeIfAbsent(idOfAccessControlledObject,
                 id->new AccessControlListAnnotation(new AccessControlList(), id, /* display name */ null));
     }
+    
+    @Override
+    public AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        return LockUtil.executeWithWriteLockAndResult(lockForManagementMappings, () -> {
+            return getOrCreateAclInternal(idOfAccessControlledObject);
+        });
+    }
+    
 
     @Override
     public void addAclPermission(final QualifiedObjectIdentifier idOfAccessControlledObject, final UserGroup userGroup,
@@ -206,7 +214,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
+                AccessControlListAnnotation acl = getOrCreateAclInternal(idOfAccessControlledObject);
                 acl.getAnnotation().addPermission(userGroup, action);
                 internalMapUserGroupToACL(userGroup, acl);
                 mongoObjectFactory.storeAccessControlList(acl);
@@ -220,7 +228,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+                AccessControlListAnnotation acl = getOrCreateAclInternal(idOfAccessControlledObjectAsString);
                 if (acl.getAnnotation().removePermission(userGroup, action)) {
                     internalRemoveUserGroupToACLMapping(userGroup, acl);
                     mongoObjectFactory.storeAccessControlList(acl);

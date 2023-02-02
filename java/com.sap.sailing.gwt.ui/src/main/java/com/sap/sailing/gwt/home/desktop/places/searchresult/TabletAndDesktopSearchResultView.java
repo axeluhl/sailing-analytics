@@ -35,4 +35,8 @@ public class TabletAndDesktopSearchResultView extends Composite implements Searc
         searchResult.updateSearchResult(searchText, searchResultItems);
     }
 
+    @Override
+    public void setBusy(boolean busy) {
+        searchResult.setBusy(busy);
+    }
 }

@@ -61,6 +61,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         deleteFilterSetButtons = new ArrayList<Button>();
         filterSets = new ArrayList<>();
         addFilterSetButton = new Button(stringMessages.actionAddFilter());
+        addFilterSetButton.addStyleName("btn-secondary");
         availableCompetitorFilterNames = new ArrayList<String>();
         availableCompetitorFilterNames.add(CompetitorTotalRankFilter.FILTER_NAME);
         availableCompetitorFilterNames.add(CompetitorRaceRankFilter.FILTER_NAME);
@@ -136,6 +137,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         final Button editFilterSetBtn = new Button(stringMessages.edit());
         final String filterSetToEditName = filterSetToEdit.getName();
         editFilterSetBtn.addStyleName("inlineButton");
+        editFilterSetBtn.addStyleName("btn-secondary");
         editFilterSetBtn.setVisible(filterSetToEdit.isEditable());
         editFilterSetButtons.add(editFilterSetBtn);
         editFilterSetBtn.addClickHandler(new ClickHandler() {
@@ -187,6 +189,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
     private Button createDeleteFilterSetButton(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet) {
         final Button deleteFilterSetBtn = new Button(stringMessages.delete()); 
         deleteFilterSetBtn.addStyleName("inlineButton");
+        deleteFilterSetBtn.addStyleName("btn-secondary");
         deleteFilterSetBtn.setVisible(filterSet.isEditable());
         deleteFilterSetButtons.add(deleteFilterSetBtn);
         deleteFilterSetBtn.addClickHandler(new ClickHandler() {

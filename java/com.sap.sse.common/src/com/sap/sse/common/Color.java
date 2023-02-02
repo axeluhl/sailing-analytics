@@ -5,301 +5,305 @@ import java.io.Serializable;
 import com.sap.sse.common.impl.RGBColor;
 
 public interface Color extends Serializable {
-    final Color ALICE_BLUE = new RGBColor("#F0F8FF");
-
-    final Color ANTIQUE_WHITE = new RGBColor("#FAEBD7");
+    static Color ofRgb(String rgb) {
+        return new RGBColor(rgb);
+    }
     
-    final Color AQUA = new RGBColor("#00FFFF");
+    final Color ALICE_BLUE = ofRgb("#F0F8FF");
 
-    final Color AQUAMARINE = new RGBColor("#7FFFD4");
-
-    final Color AZURE = new RGBColor("#F0FFFF");
+    final Color ANTIQUE_WHITE = ofRgb("#FAEBD7");
     
-    final Color BEIGE = new RGBColor("#F5F5DC");
+    final Color AQUA = ofRgb("#00FFFF");
 
-    final Color BISQUE = new RGBColor("#FFE4C4");
+    final Color AQUAMARINE = ofRgb("#7FFFD4");
 
-    final Color BLACK = new RGBColor("#000000");
+    final Color AZURE = ofRgb("#F0FFFF");
     
-    final Color BLANCHED_ALMOND = new RGBColor("#FFEBCD");
+    final Color BEIGE = ofRgb("#F5F5DC");
 
-    final Color BLUE = new RGBColor("#0000FF");
+    final Color BISQUE = ofRgb("#FFE4C4");
 
-    final Color BLUE_VIOLET = new RGBColor("#8A2BE2");
+    final Color BLACK = ofRgb("#000000");
     
-    final Color BROWN = new RGBColor("#A52A2A");
+    final Color BLANCHED_ALMOND = ofRgb("#FFEBCD");
 
-    final Color BURLY_WOOD = new RGBColor("#DEB887");
+    final Color BLUE = ofRgb("#0000FF");
 
-    final Color CADET_BLUE = new RGBColor("#5F9EA0");
+    final Color BLUE_VIOLET = ofRgb("#8A2BE2");
     
-    final Color CHARTREUSE = new RGBColor("#7FFF00");
+    final Color BROWN = ofRgb("#A52A2A");
 
-    final Color CHOCOLATE = new RGBColor("#D2691E");
+    final Color BURLY_WOOD = ofRgb("#DEB887");
 
-    final Color CORAL = new RGBColor("#FF7F50");
+    final Color CADET_BLUE = ofRgb("#5F9EA0");
     
-    final Color CORNFLOWER_BLUE = new RGBColor("#6495ED");
+    final Color CHARTREUSE = ofRgb("#7FFF00");
 
-    final Color CORNSILK = new RGBColor("#FFF8DC");
+    final Color CHOCOLATE = ofRgb("#D2691E");
 
-    final Color CRIMSON = new RGBColor("#DC143C");
+    final Color CORAL = ofRgb("#FF7F50");
     
-    final Color CYAN = new RGBColor("#00FFFF");
+    final Color CORNFLOWER_BLUE = ofRgb("#6495ED");
 
-    final Color DARK_BLUE = new RGBColor("#00008B");
+    final Color CORNSILK = ofRgb("#FFF8DC");
 
-    final Color DARK_CYAN = new RGBColor("#008B8B");
+    final Color CRIMSON = ofRgb("#DC143C");
     
-    final Color DARK_GOLDEN_ROD = new RGBColor("#B8860B");
+    final Color CYAN = ofRgb("#00FFFF");
 
-    final Color DARK_GRAY = new RGBColor("#A9A9A9");
+    final Color DARK_BLUE = ofRgb("#00008B");
 
-    final Color DARK_GREY = new RGBColor("#A9A9A9");
+    final Color DARK_CYAN = ofRgb("#008B8B");
     
-    final Color DARK_GREEN = new RGBColor("#006400");
+    final Color DARK_GOLDEN_ROD = ofRgb("#B8860B");
 
-    final Color DARK_KHAKI = new RGBColor("#BDB76B");
+    final Color DARK_GRAY = ofRgb("#A9A9A9");
 
-    final Color DARK_MAGENTA = new RGBColor("#8B008B");
+    final Color DARK_GREY = ofRgb("#A9A9A9");
     
-    final Color DARK_OLIVE_GREEN = new RGBColor("#556B2F");
+    final Color DARK_GREEN = ofRgb("#006400");
 
-    final Color DARK_ORANGE = new RGBColor("#FF8C00");
+    final Color DARK_KHAKI = ofRgb("#BDB76B");
 
-    final Color DARK_ORCHID = new RGBColor("#9932CC");
+    final Color DARK_MAGENTA = ofRgb("#8B008B");
     
-    final Color DARK_RED = new RGBColor("#8B0000");
+    final Color DARK_OLIVE_GREEN = ofRgb("#556B2F");
 
-    final Color DARK_SALMON = new RGBColor("#E9967A");
+    final Color DARK_ORANGE = ofRgb("#FF8C00");
 
-    final Color DARK_SEA_GREEN = new RGBColor("#8FBC8F");
+    final Color DARK_ORCHID = ofRgb("#9932CC");
     
-    final Color DARK_SLATE_BLUE = new RGBColor("#483D8B");
+    final Color DARK_RED = ofRgb("#8B0000");
 
-    final Color DARK_SLATE_GRAY = new RGBColor("#2F4F4F");
+    final Color DARK_SALMON = ofRgb("#E9967A");
 
-    final Color DARK_SLATE_GREY = new RGBColor("#2F4F4F");
+    final Color DARK_SEA_GREEN = ofRgb("#8FBC8F");
     
-    final Color DARK_TURQUOISE = new RGBColor("#00CED1");
+    final Color DARK_SLATE_BLUE = ofRgb("#483D8B");
 
-    final Color DARK_VIOLET = new RGBColor("#9400D3");
+    final Color DARK_SLATE_GRAY = ofRgb("#2F4F4F");
 
-    final Color DEEP_PINK = new RGBColor("#FF1493");
+    final Color DARK_SLATE_GREY = ofRgb("#2F4F4F");
     
-    final Color DEEP_SKY_BLUE = new RGBColor("#00BFFF");
+    final Color DARK_TURQUOISE = ofRgb("#00CED1");
 
-    final Color DIM_GRAY = new RGBColor("#696969");
+    final Color DARK_VIOLET = ofRgb("#9400D3");
 
-    final Color DIM_GREY = new RGBColor("#696969");
+    final Color DEEP_PINK = ofRgb("#FF1493");
     
-    final Color DODGER_BLUE = new RGBColor("#1E90FF");
+    final Color DEEP_SKY_BLUE = ofRgb("#00BFFF");
 
-    final Color FIRE_BRICK = new RGBColor("#B22222");
+    final Color DIM_GRAY = ofRgb("#696969");
 
-    final Color FLORAL_WHITE = new RGBColor("#FFFAF0");
+    final Color DIM_GREY = ofRgb("#696969");
     
-    final Color FOREST_GREEN = new RGBColor("#228B22");
+    final Color DODGER_BLUE = ofRgb("#1E90FF");
 
-    final Color FUCHSIA = new RGBColor("#FF00FF");
+    final Color FIRE_BRICK = ofRgb("#B22222");
 
-    final Color GAINSBORO = new RGBColor("#DCDCDC");
+    final Color FLORAL_WHITE = ofRgb("#FFFAF0");
     
-    final Color GHOST_WHITE = new RGBColor("#F8F8FF");
+    final Color FOREST_GREEN = ofRgb("#228B22");
 
-    final Color GOLD = new RGBColor("#FFD700");
+    final Color FUCHSIA = ofRgb("#FF00FF");
 
-    final Color GOLDEN_ROD = new RGBColor("#DAA520");
+    final Color GAINSBORO = ofRgb("#DCDCDC");
     
-    final Color GRAY = new RGBColor("#808080");
+    final Color GHOST_WHITE = ofRgb("#F8F8FF");
 
-    final Color GREY = new RGBColor("#808080");
+    final Color GOLD = ofRgb("#FFD700");
 
-    final Color GREEN = new RGBColor("#008000");
+    final Color GOLDEN_ROD = ofRgb("#DAA520");
     
-    final Color GREEN_YELLOW = new RGBColor("#ADFF2F");
+    final Color GRAY = ofRgb("#808080");
 
-    final Color HONEY_DEW = new RGBColor("#F0FFF0");
+    final Color GREY = ofRgb("#808080");
 
-    final Color HOT_PINK = new RGBColor("#FF69B4");
+    final Color GREEN = ofRgb("#008000");
     
-    final Color INDIAN_RED = new RGBColor("#CD5C5C");
+    final Color GREEN_YELLOW = ofRgb("#ADFF2F");
 
-    final Color INDIGO = new RGBColor("#4B0082");
+    final Color HONEY_DEW = ofRgb("#F0FFF0");
 
-    final Color IVORY = new RGBColor("#FFFFF0");
+    final Color HOT_PINK = ofRgb("#FF69B4");
     
-    final Color KHAKI = new RGBColor("#F0E68C");
+    final Color INDIAN_RED = ofRgb("#CD5C5C");
 
-    final Color LAVENDER = new RGBColor("#E6E6FA");
+    final Color INDIGO = ofRgb("#4B0082");
 
-    final Color LAVENDER_BLUSH = new RGBColor("#FFF0F5");
+    final Color IVORY = ofRgb("#FFFFF0");
     
-    final Color LAWN_GREEN = new RGBColor("#7CFC00");
+    final Color KHAKI = ofRgb("#F0E68C");
 
-    final Color LEMON_CHIFFON = new RGBColor("#FFFACD");
+    final Color LAVENDER = ofRgb("#E6E6FA");
 
-    final Color LIGHT_BLUE = new RGBColor("#ADD8E6");
+    final Color LAVENDER_BLUSH = ofRgb("#FFF0F5");
     
-    final Color LIGHT_CORAL = new RGBColor("#F08080");
+    final Color LAWN_GREEN = ofRgb("#7CFC00");
 
-    final Color LIGHT_CYAN = new RGBColor("#E0FFFF");
+    final Color LEMON_CHIFFON = ofRgb("#FFFACD");
 
-    final Color LIGHT_GOLDEN_ROD_YELLOW = new RGBColor("#FAFAD2");
+    final Color LIGHT_BLUE = ofRgb("#ADD8E6");
     
-    final Color LIGHT_GRAY = new RGBColor("#D3D3D3");
+    final Color LIGHT_CORAL = ofRgb("#F08080");
 
-    final Color LIGHT_GREY = new RGBColor("#D3D3D3");
+    final Color LIGHT_CYAN = ofRgb("#E0FFFF");
 
-    final Color LIGHT_GREEN = new RGBColor("#90EE90");
+    final Color LIGHT_GOLDEN_ROD_YELLOW = ofRgb("#FAFAD2");
     
-    final Color LIGHT_PINK = new RGBColor("#FFB6C1");
+    final Color LIGHT_GRAY = ofRgb("#D3D3D3");
 
-    final Color LIGHT_SALMON = new RGBColor("#FFA07A");
+    final Color LIGHT_GREY = ofRgb("#D3D3D3");
 
-    final Color LIGHT_SEA_GREEN = new RGBColor("#20B2AA");
+    final Color LIGHT_GREEN = ofRgb("#90EE90");
     
-    final Color LIGHT_SKY_BLUE = new RGBColor("#87CEFA");
+    final Color LIGHT_PINK = ofRgb("#FFB6C1");
 
-    final Color LIGHT_SLATE_GRAY = new RGBColor("#778899");
+    final Color LIGHT_SALMON = ofRgb("#FFA07A");
+
+    final Color LIGHT_SEA_GREEN = ofRgb("#20B2AA");
     
-    final Color LIGHT_SLATE_GREY = new RGBColor("#778899");
+    final Color LIGHT_SKY_BLUE = ofRgb("#87CEFA");
 
-    final Color LIGHT_STEEL_BLUE = new RGBColor("#B0C4DE");
-
-    final Color LIGHT_YELLOW = new RGBColor("#FFFFE0");
+    final Color LIGHT_SLATE_GRAY = ofRgb("#778899");
     
-    final Color LIME = new RGBColor("#00FF00");
+    final Color LIGHT_SLATE_GREY = ofRgb("#778899");
 
-    final Color LIME_GREEN = new RGBColor("#32CD32");
+    final Color LIGHT_STEEL_BLUE = ofRgb("#B0C4DE");
 
-    final Color LINEN = new RGBColor("#FAF0E6");
+    final Color LIGHT_YELLOW = ofRgb("#FFFFE0");
     
-    final Color MAGENTA = new RGBColor("#FF00FF");
+    final Color LIME = ofRgb("#00FF00");
 
-    final Color MAROON = new RGBColor("#800000");
+    final Color LIME_GREEN = ofRgb("#32CD32");
+
+    final Color LINEN = ofRgb("#FAF0E6");
     
-    final Color MEDIUM_AQUA_MARINE = new RGBColor("#66CDAA");
+    final Color MAGENTA = ofRgb("#FF00FF");
 
-    final Color MEDIUM_BLUE = new RGBColor("#0000CD");
-
-    final Color MEDIUM_ORCHID = new RGBColor("#BA55D3");
+    final Color MAROON = ofRgb("#800000");
     
-    final Color MEDIUM_PURPLE = new RGBColor("#9370DB");
+    final Color MEDIUM_AQUA_MARINE = ofRgb("#66CDAA");
 
-    final Color MEDIUM_SEA_GREEN = new RGBColor("#3CB371");
+    final Color MEDIUM_BLUE = ofRgb("#0000CD");
 
-    final Color MEDIUM_SLATE_BLUE = new RGBColor("#7B68EE");
+    final Color MEDIUM_ORCHID = ofRgb("#BA55D3");
     
-    final Color MEDIUM_SPRING_GREEN = new RGBColor("#00FA9A");
+    final Color MEDIUM_PURPLE = ofRgb("#9370DB");
 
-    final Color MEDIUM_TURQUOISE = new RGBColor("#48D1CC");
+    final Color MEDIUM_SEA_GREEN = ofRgb("#3CB371");
+
+    final Color MEDIUM_SLATE_BLUE = ofRgb("#7B68EE");
     
-    final Color MEDIUM_VIOLET_RED = new RGBColor("#C71585");
+    final Color MEDIUM_SPRING_GREEN = ofRgb("#00FA9A");
 
-    final Color MIDNIGHT_BLUE = new RGBColor("#191970");
-
-    final Color MINT_CREAM = new RGBColor("#F5FFFA");
+    final Color MEDIUM_TURQUOISE = ofRgb("#48D1CC");
     
-    final Color MISTY_ROSE = new RGBColor("#FFE4E1");
+    final Color MEDIUM_VIOLET_RED = ofRgb("#C71585");
 
-    final Color MOCCASIN = new RGBColor("#FFE4B5");
+    final Color MIDNIGHT_BLUE = ofRgb("#191970");
 
-    final Color NAVAJO_WHITE = new RGBColor("#FFDEAD");
+    final Color MINT_CREAM = ofRgb("#F5FFFA");
     
-    final Color NAVY = new RGBColor("#000080");
+    final Color MISTY_ROSE = ofRgb("#FFE4E1");
 
-    final Color OLD_LACE = new RGBColor("#FDF5E6");
+    final Color MOCCASIN = ofRgb("#FFE4B5");
+
+    final Color NAVAJO_WHITE = ofRgb("#FFDEAD");
     
-    final Color OLIVE = new RGBColor("#808000");
+    final Color NAVY = ofRgb("#000080");
 
-    final Color OLIVE_DRAB = new RGBColor("#6B8E23");
-
-    final Color ORANGE = new RGBColor("#FFA500");
+    final Color OLD_LACE = ofRgb("#FDF5E6");
     
-    final Color ORANGE_RED = new RGBColor("#FF4500");
+    final Color OLIVE = ofRgb("#808000");
 
-    final Color ORCHID = new RGBColor("#DA70D6");
+    final Color OLIVE_DRAB = ofRgb("#6B8E23");
 
-    final Color PALE_GOLDEN_ROD = new RGBColor("#EEE8AA");
+    final Color ORANGE = ofRgb("#FFA500");
     
-    final Color PALE_GREEN = new RGBColor("#98FB98");
+    final Color ORANGE_RED = ofRgb("#FF4500");
 
-    final Color PALE_TURQUOISE = new RGBColor("#AFEEEE");
+    final Color ORCHID = ofRgb("#DA70D6");
 
-    final Color PALE_VIOLET_RED = new RGBColor("#DB7093");
+    final Color PALE_GOLDEN_ROD = ofRgb("#EEE8AA");
     
-    final Color PAPAYA_WHIP = new RGBColor("#FFEFD5");
+    final Color PALE_GREEN = ofRgb("#98FB98");
 
-    final Color PEACH_PUFF = new RGBColor("#FFDAB9");
+    final Color PALE_TURQUOISE = ofRgb("#AFEEEE");
 
-    final Color PERU = new RGBColor("#CD853F");
+    final Color PALE_VIOLET_RED = ofRgb("#DB7093");
     
-    final Color PINK = new RGBColor("#FFC0CB");
+    final Color PAPAYA_WHIP = ofRgb("#FFEFD5");
 
-    final Color PLUM = new RGBColor("#DDA0DD");
+    final Color PEACH_PUFF = ofRgb("#FFDAB9");
 
-    final Color POWDER_BLUE = new RGBColor("#B0E0E6");
+    final Color PERU = ofRgb("#CD853F");
     
-    final Color PURPLE = new RGBColor("#800080");
+    final Color PINK = ofRgb("#FFC0CB");
 
-    final Color REBECCA_PURPLE = new RGBColor("#663399");
+    final Color PLUM = ofRgb("#DDA0DD");
 
-    final Color RED = new RGBColor("#FF0000");
+    final Color POWDER_BLUE = ofRgb("#B0E0E6");
     
-    final Color ROSY_BROWN = new RGBColor("#BC8F8F");
+    final Color PURPLE = ofRgb("#800080");
 
-    final Color ROYAL_BLUE = new RGBColor("#4169E1");
+    final Color REBECCA_PURPLE = ofRgb("#663399");
 
-    final Color SADDLER_BROWN = new RGBColor("#8B4513");
+    final Color RED = ofRgb("#FF0000");
     
-    final Color SALMON = new RGBColor("#FA8072");
+    final Color ROSY_BROWN = ofRgb("#BC8F8F");
 
-    final Color SANDY_BROWN = new RGBColor("#F4A460");
+    final Color ROYAL_BLUE = ofRgb("#4169E1");
 
-    final Color SEA_GREEN = new RGBColor("#2E8B57");
+    final Color SADDLER_BROWN = ofRgb("#8B4513");
     
-    final Color SEA_SHELL = new RGBColor("#FFF5EE");
+    final Color SALMON = ofRgb("#FA8072");
 
-    final Color SIENNA = new RGBColor("#A0522D");
+    final Color SANDY_BROWN = ofRgb("#F4A460");
 
-    final Color SILVER = new RGBColor("#C0C0C0");
+    final Color SEA_GREEN = ofRgb("#2E8B57");
     
-    final Color SKY_BLUE = new RGBColor("#87CEEB");
+    final Color SEA_SHELL = ofRgb("#FFF5EE");
 
-    final Color SLATE_BLUE = new RGBColor("#6A5ACD");
+    final Color SIENNA = ofRgb("#A0522D");
 
-    final Color SLATE_GRAY = new RGBColor("#708090");
+    final Color SILVER = ofRgb("#C0C0C0");
     
-    final Color SLATE_GREY = new RGBColor("#708090");
+    final Color SKY_BLUE = ofRgb("#87CEEB");
 
-    final Color SNOW = new RGBColor("#FFFAFA");
+    final Color SLATE_BLUE = ofRgb("#6A5ACD");
 
-    final Color SPRING_GREEN = new RGBColor("#00FF7F");
+    final Color SLATE_GRAY = ofRgb("#708090");
     
-    final Color STEEL_BLUE = new RGBColor("#4682B4");
+    final Color SLATE_GREY = ofRgb("#708090");
 
-    final Color TAN = new RGBColor("#D2B48C");
+    final Color SNOW = ofRgb("#FFFAFA");
 
-    final Color TEAL = new RGBColor("#008080");
+    final Color SPRING_GREEN = ofRgb("#00FF7F");
     
-    final Color THISTLE = new RGBColor("#D8BFD8");
+    final Color STEEL_BLUE = ofRgb("#4682B4");
 
-    final Color TOMATO = new RGBColor("#FF6347");
+    final Color TAN = ofRgb("#D2B48C");
 
-    final Color TURQUOISE = new RGBColor("#40E0D0");
+    final Color TEAL = ofRgb("#008080");
     
-    final Color VIOLET = new RGBColor("#EE82EE");
+    final Color THISTLE = ofRgb("#D8BFD8");
 
-    final Color WHEAT = new RGBColor("#F5DEB3");
+    final Color TOMATO = ofRgb("#FF6347");
 
-    final Color WHITE = new RGBColor("#FFFFFF");
+    final Color TURQUOISE = ofRgb("#40E0D0");
     
-    final Color WHITE_SMOKE = new RGBColor("#F5F5F5");
+    final Color VIOLET = ofRgb("#EE82EE");
 
-    final Color YELLOW = new RGBColor("#FFFF00");
+    final Color WHEAT = ofRgb("#F5DEB3");
 
-    final Color YELLOW_GREEN = new RGBColor("#9ACD32");
+    final Color WHITE = ofRgb("#FFFFFF");
+    
+    final Color WHITE_SMOKE = ofRgb("#F5F5F5");
+
+    final Color YELLOW = ofRgb("#FFFF00");
+
+    final Color YELLOW_GREEN = ofRgb("#9ACD32");
     
     com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB();
 

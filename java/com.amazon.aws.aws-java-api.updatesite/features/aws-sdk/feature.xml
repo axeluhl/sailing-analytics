@@ -2,21 +2,21 @@
 <feature
       id="com.amazon.aws.aws-java-api"
       label="AWS API"
-      version="2.17.124"
+      version="2.18.8"
       provider-name="Amazon">
 
    <plugin
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
-         version="2.17.124"
+         version="2.18.8"
          unpack="false"/>
 
    <plugin
          id="com.amazon.aws.aws-java-api.source"
          download-size="0"
          install-size="0"
-         version="2.17.124"
+         version="2.18.8"
          unpack="false"/>
 
 </feature>

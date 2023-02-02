@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
+    <string name="options_menu_live">"Informace o připojení"</string>
+    <string name="remove">"Odebrat"</string>
+    <string name="enter_new_item">"Zadat novou položku"</string>
+    <string name="add">"Přidat"</string>
+    <string name="there_are_no_items_yet_">"Dosud nejsou žádné položky."</string>
+
+    <!-- SystemInformationActivity -->
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- Generic -->
+    <string name="generic_error">"Chyba"</string>
+    <string name="about">"Informace"</string>
+
+    <!-- Signal quality -->
+    <string name="signal_accuracy_indicator_view_description">"Přesnost GPS"</string>
+    <string name="poor">"nízká"</string>
+    <string name="good">"dobrá"</string>
+    <string name="great">"vysoká"</string>
+    <string name="no_signal">"není signál"</string>
+    <string name="ok">"OK"</string>
+
+    <!-- Regatta -->
+    <string name="your_regattas">"Vaše regaty:"</string>
+    <string name="options_refresh">"Aktualizovat"</string>
+
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">"Chyba: databázová operace selhala."</string>
+    <string name="no_qr_code_popup_title">"Nemáte QR kód?"</string>
+    <string name="no_qr_code_popup_message">"Pokud jste QR kód neobdrželi, obraťte se na vedení závodu."</string>
+    <string name="error_play_store_and_scanning_not_available">"PlayStore a skenování nejsou k dispozici."</string>
+    <string name="scanning_cancelled">"Skenování bylo zrušeno."</string>
+    <string name="error_scanning_qrcode">"Chyba při skenování QR kódu {result-code}"</string>
+    <string name="notify_user_api_call_failed">"Při kontaktování serveru došlo k chybě. Zkuste to znovu."</string>
+    <string name="please_wait">"Čekejte"</string>
+    <string name="error_invalid_qr_code">"Neplatný QR kód"</string>
+    
+    
+    
+
+    <!-- Eula -->
+    <string name="eula_title">"Licenční smlouva s koncovým uživatelem"</string>
+    <string name="eula_message">"Používáním této aplikace potvrzujete svůj souhlas s podmínkami licenční smlouvy s koncovým uživatelem SAP SE. Licenční smlouvu si přečtěte zde."</string>
+    <string name="eula_confirm">"Potvrdit"</string>
+    <string name="linked_eula_message_part">"zde"</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">"O této aplikaci"</string>
+    <string name="eula">"Licenční smlouva s koncovým uživatelem"</string>
+    <string name="license_information">"Licenční informace"</string>
+
+    <!-- HTTP Requests -->
+    
+    
+    
+    
+
+    <!-- Dialog -->
+    <string name="yes">"Ano"</string>
+    <string name="no">"Ne"</string>
+    <string name="warning">"Upozornění"</string>
+    <string name="enable_gps">"GPS je vypnuté. Pro tuto aplikaci jsou polohy podle GPS nezbytné. Chcete v nastavení polohy GPS zapnout?"</string>
+
+    <!-- Message Sending -->
+    <string name="connected_to_wp">"Připojeno k: %1$s\n%2$s\nVázaná služba:%3$s"</string>
+    <string name="sending_waiting">"Na odeslání momentálně čeká tento počet událostí: %1$d.\nPoslední úspěšné odeslání proběhlo v %2$s."</string>
+    <string name="sending_no_waiting">"Na odeslání momentálně nečeká žádná událost."</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">"Více informací na"</string>
+    <string name="footer_text_link">"https://www.sapsailing.com"</string>
+
+    <string name="yesterday">"Včera"</string>
+    <string name="today">"Dnes"</string>
+    <string name="tomorrow">"Zítra"</string>
+    
+    
+
+    
+</resources>

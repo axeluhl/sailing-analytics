@@ -194,7 +194,7 @@ ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Xms$MEMORY -Dorg.eclipse.jetty.LEVE
 
 # To enable the use of the shared SecurityService and SharedSailingData from security-service.sapsailing.com:
 ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
-REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl,com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl
 REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
 REPLICATE_MASTER_SERVLET_PORT=443
 REPLICATE_MASTER_EXCHANGE_NAME=security_service
@@ -211,7 +211,10 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=phoenix
 SERVER_NAME=phoenix
+REPLICATION_CHANNEL=phoenix
 SERVER_PORT=8931
-MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10202/phoenix"
+#MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10202/phoenix?replicaSet=slow&retryWrites=true&readPreference=nearest&connectTimeout=30&readTimeout=30"
+#MONGODB_URI="mongodb://172.31.5.90,dbserver.internal.sapsailing.com:10202/phoenix?replicaSet=slow&retryWrites=true&readPreference=nearest&connectTimeout=30&readTimeout=30"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/phoenix?replicaSet=live&retryWrites=true&readPreference=nearest&connectTimeout=30&readTimeout=30"
 EXPEDITION_PORT=2053
 TELNET_PORT=14931

@@ -67,24 +67,24 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
     
     public void replaceContentsFrom(ReplicatingCacheManager other) {
         for (Entry<String, ReplicatingCache<?, ?>> i : other.caches.entrySet()) {
-            replaceOrUpdate(i.getKey(), i.getValue());
+            replaceOrUpdateWithoutStorage(i.getKey(), i.getValue());
         }
     }
 
-    private <K, V> void replaceOrUpdate(String name, ReplicatingCache<K, V> otherCache) {
+    private <K, V> void replaceOrUpdateWithoutStorage(String name, ReplicatingCache<K, V> otherCache) {
         @SuppressWarnings("unchecked")
         ReplicatingCache<K, V> castCache = (ReplicatingCache<K, V>) this.caches.get(name);
         if (castCache == null) {
             this.caches.put(name, otherCache);
         } else {
-            putAll(otherCache, castCache);
+            putAllWithoutStorage(otherCache, castCache);
         }
     }
 
-    private <K, V> void putAll(ReplicatingCache<K, V> from, final ReplicatingCache<K, V> to) {
+    private <K, V> void putAllWithoutStorage(ReplicatingCache<K, V> from, final ReplicatingCache<K, V> to) {
         to.clear();
         for (K k : from.keys()) {
-            to.put(k, from.get(k));
+            to.put(k, from.get(k), /* store */ false);
         }
     }
     

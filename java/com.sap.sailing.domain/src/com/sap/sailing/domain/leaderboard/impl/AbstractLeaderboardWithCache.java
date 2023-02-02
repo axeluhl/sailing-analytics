@@ -419,7 +419,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                    isMetaLeaderboardColumn);
+                    isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
                 calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
             }
@@ -438,7 +438,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), getScoringScheme().getScoreFactor(raceColumn),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
+                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             }
             Future<List<CompetitorDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(
@@ -487,7 +487,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         trackedRace.getRace().getCourse().lockForRead();
                         try {
                             for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache));
+                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache)); // TODO bug5147: leg ranks may also need to be merged across equal-weighted fleets if RaceColumn.hasCrossFleetMergedRanking() is true
                             }
                         } finally {
                             trackedRace.getRace().getCourse().unlockAfterRead();
@@ -496,7 +496,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
             }
         }
-        final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
+        final ConcurrentMap<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new ConcurrentHashMap<>();
         final ConcurrentMap<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> futuresForCompetitorAndColumnName = new ConcurrentHashMap<>();
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
@@ -509,7 +509,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
             result.competitors.add(competitorDTO);
-            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
+            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint, getScoringScheme());
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
                 // in case boats can't change set the also the boat on the row to simplify access
                 if (result.canBoatsOfCompetitorsChangePerRace == false && row.boat == null) {
@@ -527,7 +527,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                 final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
                                 return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                             }) : null;
-                    Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
+                    Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns, cache);
                     return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
                             rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
                             fillTotalPointsUncorrected, cache);
@@ -845,7 +845,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         row.totalDurationFoiledInSeconds = totalDurationFoiled==null?null:totalDurationFoiled.asSeconds();
     }
 
-    private LeaderboardDTOCache getLeaderboardDTOCache() {
+    protected LeaderboardDTOCache getLeaderboardDTOCache() {
         LeaderboardDTOCache result = this.leaderboardDTOCache;
         if (result == null) {
             synchronized (this) {
@@ -1183,8 +1183,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     @Override
-    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) {
+        return Util.indexOf(getCompetitorsFromBestToWorst(timePoint), competitor) + 1;
     }
 
     protected void regattaLogEventAdded(RegattaLogEvent event) {

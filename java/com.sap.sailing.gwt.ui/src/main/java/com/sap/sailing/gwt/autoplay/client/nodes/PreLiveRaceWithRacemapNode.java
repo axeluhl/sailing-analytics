@@ -19,12 +19,11 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
     }
 
     public void onStart() {
-        AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
+        AutoplayHelper.create(cf.getSailingService(), cf.getUserService(), cf.getErrorReporter(),
                 cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
-                cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(), cf.getAutoPlayCtxSignalError().getEvent(),
-                cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtxSignalError().getPreLiveRace(),
-                new AsyncCallback<RVWrapper>() {
-
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(),
+                cf.getAutoPlayCtxSignalError().getEvent(), cf.getEventBus(), cf.getDispatch(),
+                cf.getAutoPlayCtxSignalError().getPreLiveRace(), new AsyncCallback<RVWrapper>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         LiveRaceWithRacemapAndLeaderBoardPlace place = new LiveRaceWithRacemapAndLeaderBoardPlace();
@@ -33,7 +32,6 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
                         firePlaceChangeAndStartTimer();
                         getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
                     }
-
                     @Override
                     public void onSuccess(RVWrapper result) {
                         PreRaceRacemapPlace place = new PreRaceRacemapPlace();
@@ -42,11 +40,11 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
                         // add later with settings here
                         place.setURL(cf.getAutoPlayCtxSignalError().getEvent().getOfficialWebsiteURL());
                         setPlaceToGo(place);
-                        getBus().fireEvent(
-                                new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getPreLiveRace().getRegattaName(),
-                                        cf.getAutoPlayCtxSignalError().getPreLiveRace().getRaceName()));
+                        getBus().fireEvent(new AutoPlayHeaderEvent(
+                                cf.getAutoPlayCtxSignalError().getPreLiveRace().getRegattaName(),
+                                cf.getAutoPlayCtxSignalError().getPreLiveRace().getRaceName()));
                         firePlaceChangeAndStartTimer();
                     }
-                });
+                }, cf.getSubscriptionServiceFactory());
     }
 }

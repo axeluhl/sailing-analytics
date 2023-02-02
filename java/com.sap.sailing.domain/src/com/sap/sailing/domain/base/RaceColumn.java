@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
@@ -31,60 +32,60 @@ import com.sap.sse.common.Util.Pair;
  * The {@link TrackedRace}s represent the data of a race. Over the life time of this object it can be assigned one or more
  * {@link TrackedRace}s which then act(s) as data provider to this column. If no tracked race has been assigned, the
  * scores reported by this column will all default to zero.<p>
- * 
+ *
  * A {@link RaceColumnListener} can be {@link #addRaceColumnListener added} to receive notifications about tracked races
  * being {@link #setTrackedRace(Fleet, TrackedRace) linked} to this column or unlinked from this column.
- * 
+ *
  * @author Axel Uhl (D043530)
- * 
+ *
  */
 public interface RaceColumn extends Named {
     /**
      * Sets the information object used to access the race column's race logs.
      */
     void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent);
-    
+
     /**
      * Gets the race column's race log associated to the passed fleet. Note that the result may be <code>null</code>
      * particularly for columns in a {@link MetaLeaderboard}.
-     * 
+     *
      * @param fleet
      * @return the race log or <code>null</code> in case this column belongs to a {@link MetaLeaderboard}
      */
     RaceLog getRaceLog(Fleet fleet);
-    
+
     /**
      * Gets the regatta log associated with the regatta-like structure (either a regatta if this is a
      * {@link RaceColumnInSeries} or a flexible leaderboard). Note that the result may be <code>null</code> particularly
      * for columns in a {@link MetaLeaderboard}.
-     * 
+     *
      * @return the regatta log or <code>null</code> in case this column belongs to a {@link MetaLeaderboard}
      */
     RegattaLog getRegattaLog();
-    
+
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first
      */
     Iterable<? extends Fleet> getFleets();
-    
+
     Fleet getFleetByName(String fleetName);
-    
+
     /**
      * By looking at the tracked races linked to this race column, identify the {@link Fleet} in which <code>competitor</code>
      * races in this column. If the competitor is not found, caused by no tracked races being associated with this race column
      * in which <code>competitor</code> competes, <code>null</code> is returned.
      */
     Fleet getFleetOfCompetitor(Competitor competitor);
-    
+
     /**
      * This does also update the {@link #getRaceIdentifier(Fleet) race identifier} by setting it to <code>null</code> if <code>race</code>
      * is <code>null</code>, and <code>race.getRaceIdentifier()</code> otherwise.
-     * 
+     *
      * @param fleet the fleet within this column with which to associate <code>race</code>
      */
     void setTrackedRace(Fleet fleet, TrackedRace race);
-    
+
     /**
      * Tells if at least one {@link TrackedRace} is associated with this race column. Short for
      * {@link Util#isEmpty(Iterable) isEmpty(}{@link #getFleets() getFleets())}.
@@ -94,13 +95,13 @@ public interface RaceColumn extends Named {
     /**
      * @param fleet
      *            the fleet whose associated tracked race to obtain
-     * 
+     *
      * @return <code>null</code> if this column does not currently have a tracked race associated for <code>fleet</code>
      *         ; otherwise the tracked race for <code>fleet</code> from where all information relevant to this column
      *         can be obtained. See also {@link #getRaceIdentifier(Fleet)}.
      */
     TrackedRace getTrackedRace(Fleet fleet);
-    
+
     /**
      * Finds the {@link Fleet} from {@link #getFleets()} such that {@link #getTrackedRace(Fleet)} returns {@code trackedRace}
      * for that fleet and returns it. If no such fleet can be found in this race column, {@code null} is returned.
@@ -113,13 +114,13 @@ public interface RaceColumn extends Named {
         }
         return null;
     }
-    
+
     /**
      * If a race is associated with this column for the <code>fleet</code>, the respective {@link RaceDefinition} is returned.
      * Otherwise, <code>null</code> is returned.
      */
     RaceDefinition getRaceDefinition(Fleet fleet);
-    
+
     /**
      * Tries to find a tracked race whose {@link RaceDefinition#getCompetitors() competitors} contain <code>competitor</code>. If
      * no such {@link TrackedRace} is currently associated with this race column, <code>null</code> is returned. No two
@@ -127,33 +128,33 @@ public interface RaceColumn extends Named {
      * twice in a single {@link RaceColumn}.
      */
     TrackedRace getTrackedRace(Competitor competitor);
-    
+
     /**
      * If this column ever was assigned to a tracked race, that race's identifier can be obtained using this method;
      * otherwise, <code>null</code> is returned.
-     * 
+     *
      * @param fleet
      *            the fleet for which to obtain the race identifier
      */
     RaceIdentifier getRaceIdentifier(Fleet fleet);
-    
+
     /**
      * Records that this leaderboard column is to be associated with the race identified by <code>raceIdentifier</code>.
      * This does not automatically load the tracked race, but the information may be used to re-associate a tracked race
      * with this column based on its {@link TrackedRace#getRaceIdentifier() race identifier}.
-     * 
+     *
      * @param fleet
      *            the fleet for which to associate a race by its identifier
      * @param raceIdentifier
      *            the race that should be associated with this column+fleet. It should never be null.
      */
     void setRaceIdentifier(Fleet fleet, RaceIdentifier raceIdentifier);
-    
+
     /**
      * A "medal race" cannot be discarded. It's score is doubled during score aggregation.
      */
     boolean isMedalRace();
-    
+
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
@@ -169,12 +170,12 @@ public interface RaceColumn extends Named {
      * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(Fleet, TrackedRace)} but leaves the
      * {@link #getRaceIdentifier(Fleet) race identifier} untouched(!). Therefore, the {@link TrackedRace} may be garbage
      * collected but may be re-resolved for this column using the race identifier at a later time.
-     * 
+     *
      * @param fleet
      *            the fleet for which to release its tracked race
      */
     void releaseTrackedRace(Fleet fleet);
-    
+
     /**
      * By default, a competitor's total score is computed by summing up the non-discarded total points of each race
      * across the leaderboard, considering the {@link RaceColumn#getFactor() column factors}. Some race columns,
@@ -183,9 +184,9 @@ public interface RaceColumn extends Named {
      * the total points at this column with zero.
      */
     boolean isStartsWithZeroScore();
-    
+
     boolean isDiscardable();
-    
+
     boolean isCarryForward();
 
     /**
@@ -195,10 +196,20 @@ public interface RaceColumn extends Named {
     void setFactor(Double factor);
 
     /**
-     * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
-     * medal races. Otherwise, the explicit factor is used.
+     * {@link ScoringScheme}s shall prefer this explicit factor, if not <code>null</code>, and otherwise determine a default
+     * based on the rules of the scoring scheme, e.g., defaulting to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
+     * medal races, or similar.
      */
     Double getExplicitFactor();
+
+    /**
+     * When scores in this column are scaled by some factor, either based on the {@link #getExplicitFactor() explicit factor}
+     * set for this column, or implicitly, e.g., because the {@link ScoringScheme} mandates the doubling of medal race scores
+     * and this column {@link #isMedalRace() represents a medal race}, then some configurations still want the 1.0 score still
+     * to be 1.0. For example, with a column factor of 2.0 scores 1, 2, 3 would end up as 1, 3, 5; or with a column factor of
+     * 3.0 scores 1, 2, 3 would end up as 1, 4, 7. This method tells whether this column shall apply such a scheme.
+     */
+    boolean isOneAlwaysStaysOne();
 
     /**
      * Returns the race log identifier associated with this fleet and race log
@@ -214,7 +225,7 @@ public interface RaceColumn extends Named {
      * Remove the association between a race and a column. This is different from
      * {@link RaceColumn#releaseTrackedRace(Fleet)} because it will also remove the
      * association from database.
-     * 
+     *
      * @param fleet
      */
     void removeRaceIdentifier(Fleet fleet);
@@ -222,7 +233,7 @@ public interface RaceColumn extends Named {
     /**
      * While set to true, any serialization in the current thread will not include the tracked races. Make sure to set
      * back to false, after serialization. (in finally block)
-     * 
+     *
      * @param flagValue
      *            set to false for default behavior, set to true to exclude tracked races
      */
@@ -239,17 +250,27 @@ public interface RaceColumn extends Named {
     boolean isTotalOrderDefinedByFleet();
 
     /**
-     * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
-     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
-     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
-     * in the column as many times as there are fleets in the column. For the latter case, this method returns <code>true</code>.
+     * When a column has more than one fleet, there are two different options for scoring it when the fleets have different ranks.
+     * Either the scoring scheme is applied to the sequence of competitors one gets when first ordering the competitors by fleets
+     * and then within each fleet by their rank in the fleet's race; or the scoring scheme is applied to each fleet separately,
+     * leading to the best score being awarded in the column as many times as there are fleets in the column. For the latter case,
+     * this method returns <code>true</code>.
      */
     boolean hasSplitFleetContiguousScoring();
 
+    /**
+     * When a column has more than one fleet there are two different options for scoring it when the fleets are of the
+     * same rank. Either the scoring scheme is applied to all fleets of the same rank at the same time and competitors
+     * compete across the fleets; or the scoring scheme is applied to each fleet separately, leading to the best score
+     * being awarded  as many times as there are fleets of the same rank. For the latter case, this field is
+     * <code>false</code> which is also the default.
+     */
+    boolean hasCrossFleetMergedRanking();
+
     boolean hasSplitFleets();
-    
+
     RaceExecutionOrderProvider getRaceExecutionOrderProvider();
-    
+
     /**
      * Provides the combined set of competitors from all {@link #getTrackedRace(Fleet) tracked races attached to this
      * column} or, in case a fleet does not have a tracked race attached, the competitors registered through the
@@ -285,14 +306,14 @@ public interface RaceColumn extends Named {
      */
     Map<Competitor, Boat> getAllCompetitorsAndTheirBoats(Fleet fleet);
 
-    
+
     /**
      * Provides the combined set of marks from the courses of all {@link #getTrackedRace(Fleet) tracked races attached
      * to this column} or, in case a fleet does not have a tracked race attached, the marks registered through the
      * {@link #getRegattaLog() regatta log} for the regatta-like object to which this column belongs (flexible
      * leaderboard or regatta) and used in a {@link RaceLogCourseDesignChangedEvent}.
      * <p>
-     * 
+     *
      * See also {@link #getAvailableMarks()}.
      */
     Iterable<Mark> getCourseMarks();
@@ -303,7 +324,7 @@ public interface RaceColumn extends Named {
      * {@link TrackedRace#getRace() race's} {@link RaceDefinition#getCourse() course}.
      */
     Iterable<Mark> getCourseMarks(Fleet fleet);
-    
+
     /**
      * Provides the set of marks available for use in course designs for races in this column. This includes, in
      * particular, those marks defined on the {@link RegattaLog} using {@link RegattaLogDefineMarkEvent} objects.
@@ -324,7 +345,7 @@ public interface RaceColumn extends Named {
      * Returns the competitor and their boats registered in the race column's race log associated to the passed fleet. If competitor
      * registration in RaceLog is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled} or in case of a
      * MetaLeaderboardColumn an empty set is returned.
-     * 
+     *
      * @return competitors and boats in RaceLog if registration {@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabled} or
      *         empty set in case registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled} or this
      *         column belongs to a {@link MetaLeaderboard}
@@ -333,24 +354,24 @@ public interface RaceColumn extends Named {
 
     /**
      * Checks whether competitor registration on RaceLog is enabled.
-     * 
+     *
      * @return boolean if competitor and boat registration on the RaceLog is enabled, false in case this column belongs to a
      *         {@link MetaLeaderboard}
-     *         
+     *
      * @see #enableCompetitorRegistrationOnRaceLog(Fleet)
      * @see #disableCompetitorRegistrationOnRaceLog(Fleet)
      */
     boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
-    
+
     /**
      * Activates competitor registration on the race column's race log associated to the passed fleet. As a result,
      * competitor registrations that were added to the race log before this was disabled by
      * {@link #disableCompetitorRegistrationOnRaceLog(Fleet)} will again be honored.<p>
-     * 
+     *
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
      */
     void enableCompetitorRegistrationOnRaceLog(Fleet fleet);
-    
+
     /**
      * Disables competitor registration on the race column's race log associated to the passed fleet. Performs nothing
      * in case this column belongs to a {@link MetaLeaderboard}. If there are already competitor and boat registrations on the
@@ -358,14 +379,14 @@ public interface RaceColumn extends Named {
      * registrations will be used instead. Re-{@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabling} competitor
      * registrations in the race log will cause such existing registrations to be honored again.
      * <p>
-     * 
+     *
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
      */
     void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
 
     /**
      * Registers a competitor and his boat on the the race column's race log associated to the passed fleet.
-     * 
+     *
      * @throws CompetitorRegistrationOnRaceLogDisabledException
      *             thrown if competitor registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled}
      *             on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
@@ -374,17 +395,17 @@ public interface RaceColumn extends Named {
 
     /**
      * Registers competitors including their boats on the the race column's race log associated to the passed fleet.
-     * 
+     *
      * @throws CompetitorRegistrationOnRaceLogDisabledException
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}
      */
     void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 
-    
+
     /**
      * Registers a competitor and his boat on the the race column's race log associated to the passed fleet.
-     * 
+     *
      * @throws CompetitorRegistrationOnRaceLogDisabledException
      *             thrown if competitor registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled}
      *             on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
@@ -393,7 +414,7 @@ public interface RaceColumn extends Named {
 
     /**
      * Registers competitors including their boats on the the race column's race log associated to the passed fleet.
-     * 
+     *
      * @throws CompetitorRegistrationOnRaceLogDisabledException
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}
@@ -402,7 +423,7 @@ public interface RaceColumn extends Named {
 
     /**
      * Deregisters a competitor on the the race column's race log associated to the passed fleet.
-     * 
+     *
      * @throws CompetitorRegistrationOnRaceLogDisabledException
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}
@@ -411,7 +432,7 @@ public interface RaceColumn extends Named {
 
     /**
      * Deregisters competitors on the the race column's race log associated to the passed fleet.
-     * 
+     *
      * @throws CompetitorRegistrationOnRaceLogDisabledException
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}

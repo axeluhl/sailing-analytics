@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Boat;
@@ -52,21 +53,21 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
  * scores and can aggregate them, e.g., to show the overall regatta standings. In addition to the races, a "carry"
  * column may be used to carry results of races not displayed in the leaderboard into the calculations.
  * <p>
- * 
+ *
  * While a single {@link TrackedRace} can tell about the ranks in which according to the tracking information the
  * competitors crossed the finish line, the leaderboard may overlay this information with disqualifications, changes in
  * results because the finish-line tracking was inaccurate, jury penalties and discarded results (depending on the
  * regatta rules, the worst zero, one or more races of each competitor are discarded from the aggregated points).
  * <p>
- * 
+ *
  * @author Axel Uhl (d043530)
- * 
+ *
  */
 public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
      * then this interface defines the structure of the "cells."
-     * 
+     *
      * @author Axel Uhl (d043530)
      *
      */
@@ -81,14 +82,49 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
          * Tells if the total points have been corrected by a {@link ScoreCorrection}
          */
         boolean isTotalPointsCorrected();
-        
+
         /**
          * @return <code>null</code>, if the competitor's fleet in the race column cannot be determined, the
          *         {@link Fleet} otherwise
          */
         Fleet getFleet();
     }
-    
+
+    /**
+     * This class is a default RankComparable that uses the ranks as Comparable.
+     * This class is only used as a placeholder while the new RankingSystem is under development.
+     *
+     * @author I518097
+     *
+     */
+    public class RankComparableRank implements RankComparable {
+        private final Integer rank;
+
+        public RankComparableRank(Integer rank) {
+            assert rank != null;
+            if (rank == null) {
+                throw new NullPointerException("rank must not be null");
+            }
+            this.rank = rank;
+        }
+        @Override
+        public int compareTo(RankComparable o) {
+            RankComparableRank otherRankComparableRank = (RankComparableRank) o; 
+            final int result; 
+            if (rank == 0) {
+                result = 1; // the other RankComparable is better because this RankComparable has not started
+            } else {
+                if (otherRankComparableRank.rank == 0) {
+                    result =-1; // this RankComparable is better (lower rank) than the other one because the other one
+                               // has not started
+                } else {
+                    result = rank - otherRankComparableRank.rank; // normal integer compare
+                }
+            }
+            return result;
+        }
+    }
+
     LeaderboardDTO computeDTO(final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
@@ -100,14 +136,14 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * the suppressed competitors.
      */
     Iterable<Competitor> getCompetitors();
-    
+
     /**
      * A leaderboard may suppress particular competitors which are then not assigned a score and shall not be displayed
      * in a regular view of the leaderboard. Editors for leaderboards shall, though, also display the suppressed competitors
      * together with a visual indication showing which competitors are currently suppressed. The "suppressed-state" of a
      * competitor can change over the life cycle of a leaderboard. A typical use case for suppressing a competitor is
      * removing one-time entries from a series (meta-)leaderboard or suppressing a camera boat in scoring.<p>
-     * 
+     *
      * @return all competitors in this leaderboard, including the suppressed ones.
      */
     Iterable<Competitor> getAllCompetitors();
@@ -136,14 +172,14 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * removed
      */
     Iterable<Competitor> getCompetitors(RaceColumn raceColumn, Fleet fleet);
-    
+
     /**
      * Convenience method which returns the difference between {@link #getAllCompetitors()} and {@link #getCompetitors()}.
      * The collection is a copy that can safely be held and modified, but it is not "live" in the sense that it does not
      * reflect changes that occur to the set of suppressed competitors after calling this method, nor vice-versa.
      */
     Iterable<Competitor> getSuppressedCompetitors();
-    
+
     /**
      * Tells whether {@code competitor} is among those {@link #getSuppressedCompetitors() suppressed}
      */
@@ -169,34 +205,42 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * a default fleet if it has one, or <code>null</code> otherwise.
      */
     Fleet getFleet(String fleetName);
-    
+
     Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
 
     /**
      * Same as {@link #getEntry}, but the discards for the competitor across the leaderboard can be provided for better performance
      * in case the entries for several columns shall be computed by multiple calls to this method.
-     * 
+     *
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
-     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
-    Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+    default Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) {
+        return getEntry(competitor, race, timePoint, discardedRaceColumns, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Like {@link #getEntry(Competitor, RaceColumn, TimePoint, Set)}, but with the option to specify a re-usable cache
+     */
+    Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes the competitor's ranks as they were or would have been after each race column (from left to right)
      * was completed.<p>
-     * 
+     *
      * A leaderboard fills up over time, usually "from left to right" with one race after another finishing.
      * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
      * starts with those races. In this case there isn't even any point in time at which all fleets have finished
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
-     * 
+     *
      * When computing the ranks after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
-     * 
+     *
      * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
      * as {@link #getRaceColumns()}.
      */
@@ -205,47 +249,46 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         return getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint,
                 new LeaderboardDTOCalculationReuseCache(timePoint));
     }
-    
+
     /**
      * Computes the competitor's ranks as they were or would have been after each race column (from left to right)
      * was completed.<p>
-     * 
+     *
      * A leaderboard fills up over time, usually "from left to right" with one race after another finishing.
      * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
      * starts with those races. In this case there isn't even any point in time at which all fleets have finished
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
-     * 
+     *
      * When computing the ranks after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
-     * 
+     *
      * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
      * as {@link #getRaceColumns()}.
      */
     Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
-    
+
     /**
      * Computes the competitor's net points sum as they were or would have been after each race column (from left to right)
      * was completed.<p>
-     * 
+     *
      * A leaderboard fills up over time, usually "from left to right" with one race after another finishing.
      * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
      * starts with those races. In this case there isn't even any point in time at which all fleets have finished
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
-     * When computing the ne
-     * t points sum after all columns up to and including the race column that is the key of the resulting
+     * When computing the net points sum after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
-     * 
+     *
      * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
      * as {@link #getRaceColumns()}.
      */
     Map<RaceColumn, Map<Competitor, Double>> getNetPointsSumAfterRaceColumn(TimePoint timePoint) throws NoWindException;
-    
+
     /**
      * Tells the number of points carried over from previous races not tracked by this leaderboard for
      * the <code>competitor</code>. Returns <code>0</code> if there is no carried points definition for
@@ -254,7 +297,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     double getCarriedPoints(Competitor competitor);
 
     /**
-     * 
+     *
      * @return an unmodifiable map of competitors and their carried points. The key set can be a true super set of what
      *         {@link #getAllCompetitors()} returns.
      */
@@ -266,11 +309,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked race
      * for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
      * <p>
-     * 
+     *
      * For each competitor tracking-wise ranking better than <code>competitor</code> but with a
      * {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint) disqualification reason} given,
      * <code>competitor</code>'s rank is improved by one.
-     * 
+     *
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
@@ -287,11 +330,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked race
      * for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
      * <p>
-     * 
+     *
      * For each competitor tracking-wise ranking better than <code>competitor</code> but with a
      * {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint) disqualification reason} given,
      * <code>competitor</code>'s rank is improved by one.
-     * 
+     *
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
@@ -304,7 +347,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
      * {@link #getTrackedRank(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls by
      * the jury for the particular race that differ from the tracking results.
-     * 
+     *
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param raceColumn
@@ -320,7 +363,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
      * {@link #getTrackedRank(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls by
      * the jury for the particular race that differ from the tracking results.
-     * 
+     *
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param raceColumn
@@ -343,7 +386,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * race scores. Defaults to the result of calling {@link #getTotalPoints(Competitor, TrackedRace, TimePoint)} but
      * may be corrected by the regatta rules for discarding results. If
      * {@link #isDiscarded(Competitor, RaceColumn, TimePoint) discarded}, the points returned will be 0.
-     * 
+     *
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
@@ -369,7 +412,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * across all races tracked by this leaderboard, respecting the {@link RaceColumn#isStartsWithZeroScore()} property.
      */
     Double getNetPoints(Competitor competitor, TimePoint timePoint);
-    
+
     /**
      * Sums up the {@link #getNetPoints(Competitor, RaceColumn, TimePoint) net points} of <code>competitor</code>
      * across all race columns listed in <code>raceColumnsToconsider</code>, respecting the
@@ -383,7 +426,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * are added to the result list. This excludes competitors whose fleet hasn't raced for the <code>raceColumn</code>
      * yet, and those where no tracked rank is known and no manual score correction was performed.
      * <p>
-     * 
+     *
      * The sorting order considers this leaderboard's scoring scheme including the semantics of
      * {@link Fleet#compareTo(Fleet) ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
      * does not consider result discarding because when sorting for a race column it is of interest how the competitor
@@ -394,13 +437,13 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     default Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return getCompetitorsFromBestToWorst(raceColumn, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
-    
+
     /**
      * Sorts the competitors according to their ranking in the race column specified. Only competitors who have a score
      * are added to the result list. This excludes competitors whose fleet hasn't raced for the <code>raceColumn</code>
      * yet, and those where no tracked rank is known and no manual score correction was performed.
      * <p>
-     * 
+     *
      * The sorting order considers this leaderboard's scoring scheme including the semantics of
      * {@link Fleet#compareTo(Fleet) ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
      * does not consider result discarding because when sorting for a race column it is of interest how the competitor
@@ -409,37 +452,40 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
      */
     Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
+    Iterable<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
      * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections. A new list is
      * created per call, so the caller may freely manipulate the result.
-     * @throws NoWindException 
+     * @throws NoWindException
      */
-    default List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    default Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
-    
+
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
      * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections. A new list is
      * created per call, so the caller may freely manipulate the result.
-     * @throws NoWindException 
+     * @throws NoWindException
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
-    
+    Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
     /**
      * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
      * the {@code competitor} in this leaderboard.
      */
-    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint);
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
      * computational effort compared to fetching all entries separately, particularly because all
      * {@link #isDiscarded(Competitor, RaceColumn, TimePoint) discarded races} of a competitor are computed in one
-     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)} only once.
+     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)} only once.
      * Note that in order to get the {@link #getNetPoints(Competitor, TimePoint) total points} for a competitor
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
@@ -450,13 +496,13 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link #addRaceColumn(String, boolean)}.
      */
     Iterable<RaceColumn> getRaceColumns();
-    
+
     /**
      * Retrieves a {@link RaceColumn race column} by the name used in calls to either {@link #addRaceColumn} or
      * {@link #addRace}. If no race column by the requested <code>name</code> exists, <code>null</code> is returned.
      */
     RaceColumn getRaceColumnByName(String name);
-    
+
     /**
      * A leaderboard can carry over points from races that are not tracked by this leaderboard in detail,
      * so for which no {@link RaceColumn} column is present in this leaderboard. These scores are
@@ -464,31 +510,31 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * method.
      */
     void setCarriedPoints(Competitor competitor, double carriedPoints);
-    
+
     /**
      * Reverses the effect of {@link #setCarriedPoints(Competitor, int)}, i.e., afterwards, asking {@link #getCarriedPoints(Competitor)}
      * will return <code>0</code>. Furthermore, other than invoking {@link #setCarriedPoints(Competitor, int) setCarriedPoints(c, 0)},
      * this will, when executed for all competitors of this leaderboard, have {@link #hasCarriedPoints} return <code>false</code>.
      */
     void unsetCarriedPoints(Competitor competitor);
-    
+
     /**
      * Tells if a carry-column shall be displayed. If the result is <code>false</code>, then no
      * {@link #setCarriedPoints(Competitor, int) scores are carried} into this leaderboard, and
      * only the race columns will be accumulated by the board.
      */
     boolean hasCarriedPoints();
-    
+
     boolean hasCarriedPoints(Competitor competitor);
 
     SettableScoreCorrection getScoreCorrection();
-    
+
     void addScoreCorrectionListener(ScoreCorrectionListener listener);
 
     void removeScoreCorrectionListener(ScoreCorrectionListener listener);
 
     Competitor getCompetitorByName(String competitorName);
-    
+
     void setDisplayName(Competitor competitor, String displayName);
 
     void setDisplayName(String displayName);
@@ -511,7 +557,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link ScoringScheme#isValidInNetScore(Leaderboard, RaceColumn, Competitor, TimePoint)}).
      */
     boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
-    
+
     /**
      * Returns the result discarding rule for this leaderboard. This may be an explicit rule set for the entire leaderboard,
      * or it may be an implicit rule that relies on other data such as a regatta's series-specific result discarding rules.
@@ -527,17 +573,17 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     public void setCrossLeaderboardResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 
     Competitor getCompetitorByIdAsString(String idAsString);
-    
+
     void addRaceColumnListener(RaceColumnListener listener);
-    
+
     void removeRaceColumnListener(RaceColumnListener listener);
-    
+
     /**
      * For this leaderboard computes the delay to live of the {@link TrackedRace} linked to any of the leaderboard's
      * columns that has the latest start date. If no tracked race is linked to the leaderboard, <code>null</code> is returned.
      */
     Long getDelayToLiveInMillis();
-    
+
     /**
      * Obtains all {@link TrackedRace}s currently attached to any of the columns of this leaderboard
      */
@@ -559,7 +605,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * races attached to this leaderboard; the fix where the maximum speed was achieved, and the speed value
      */
     Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
-    
+
     /**
      * @return the {@link #getTotalDistanceTraveled(Competitor, TimePoint) total distance} the competitor has traveled
      *         up to {@code timePoint}, divided by the {@link #getTotalTimeSailed(Competitor, TimePoint) total time
@@ -578,18 +624,18 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
 
     /**
      * Starts counting when the gun goes off, not when the competitor passed the line.
-     * 
+     *
      * @return <code>null</code> if no tracked race is available for <code>competitor</code> in this leaderboard
      * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard
      */
     Duration getTotalTimeSailed(Competitor competitor, TimePoint timePoint);
-    
+
     /**
      * Computes the distance the <code>competitor</code> has sailed in the tracked races in this leaderboard, starting
      * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
      * end of the last race, whichever is first.
-     * 
+     *
      * @return <code>null</code> if the <code>competitor</code> hasn't sailed any distance in any tracked race in this
      *         leaderboard
      */
@@ -599,22 +645,22 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * Computes the distance the <code>competitor</code> has been foiling in the tracked races in this leaderboard, starting
      * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
      * end of the last race, whichever is first.
-     * 
+     *
      * @return <code>null</code> if the <code>competitor</code> hasn't foiled any distance in any tracked race in this
      *         leaderboard
      */
     Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint);
-    
+
     /**
      * Computes the duration the <code>competitor</code> has foiled in the tracked races in this leaderboard, starting
      * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
      * end of the last race, whichever is first.
-     * 
+     *
      * @return <code>null</code> if the <code>competitor</code> hasn't foiled at any time in any tracked race in this
      *         leaderboard
      */
     Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint);
-    
+
     /**
      * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded
      * results only <code>raceColumnsToConsider</code> are considered.
@@ -627,10 +673,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * be specified which is useful when total points are to be computed for more than one column for the same
      * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
      * once and not again for each column (which would lead to quadratic effort).
-     * 
+     *
      * @param discardedRaceColumns
      *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
-     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
@@ -646,11 +692,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
             Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider);
 
     TimePoint getNowMinusDelay();
-    
+
     /**
      * Gets the course areas that the races of this leaderboard are expected to be run on. This can, e.g., be used to
      * implement a filter when retrieving leaderboards from an event.
-     * 
+     *
      * @return the {@link CourseArea} objects on which races of this leaderboard may run; always valid, never
      *         {@code null}, but may be empty
      */
@@ -674,12 +720,12 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * <code>namesOfRaceColumnsForWhichToLoadLegDetails</code>. The leaderboard is evaluated at <code>timePoint</code>,
      * or, if <code>timePoint</code> is <code>null</code>, for the "live" time point (now - delay).
      * <p>
-     * 
+     *
      * The implementation uses different approaches for caching the results. For "live" requests, a
      * {@link LiveLeaderboardUpdater} is used to keep refreshing the cached results. Other queries are managed by a
      * {@link LeaderboardDTOCache} which remembers a number of results before it starts evicting the least frequently
      * used ones.
-     * 
+     *
      * @param timePoint
      *            <code>null</code> for "live" results for the time point "now" - delay; otherwise, the explicit time
      *            point at which to evaluate the leaderboard status
@@ -689,6 +735,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            used to determine which of the races are still being tracked and which ones are not
      * @param baseDomainFactory
      *            required as factory and cache for various DTO types
+     * @return a leaderboard DTO with no defined security info (ownership, ACL) set; note that the DTO may originate
+     *         from a cache, e.g., the {@link LiveLeaderboardUpdater} or the {@link LeaderboardDTOCache}. A caller may
+     *         augment the DTO by adding security information that needs to be transmitted to a client. If such
+     *         information happens to be found on the object returned from this method it shall be considered "stale"
+     *         and has to be updated before sending it to a client. See {@code SecurityDTOUtil.addSecurityInformation(...)}.
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
@@ -703,7 +754,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * the boat class will be determined based on the most frequently occurring boat class when iterating across the competitors.
      */
     BoatClass getBoatClass();
-    
+
     LeaderboardType getLeaderboardType();
 
     /**
@@ -713,21 +764,18 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     boolean hasScores(Competitor competitor, TimePoint timePoint);
 
     /**
-     * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, false is returned 
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint. If the
+     * competitor is not scored for this race, {@code false} is returned. See
+     * {@link ScoringScheme#isWin(Leaderboard, Competitor, RaceColumn, TimePoint)}.
      */
     default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        final Double points = getTotalPoints(competitor, raceColumn, timePoint);
-        final boolean result;
-        if (points == null) {
-            result = false;
-        } else if (getScoringScheme().isHigherBetter()) {
-            double competitorCount = Util.size(getCompetitors());
-            result = points >= (competitorCount - 0.05);
-        } else {
-            result = points <= 1.05;
-        }
-        return result;
+        final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+        return isWin(competitor, raceColumn, timePoint, cache);
+    }
+
+    default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getScoringScheme().isWin(this, competitor, raceColumn, timePoint, c->getTotalPoints(c, raceColumn, timePoint, cache), cache);
     }
 
     @Override
@@ -751,7 +799,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     default HasPermissions getPermissionType() {
         return SecuredDomainType.LEADERBOARD;
     }
-    
+
     default boolean isPartOfEvent(EventBase event) {
         return Util.containsAny(event.getVenue().getCourseAreas(), getCourseAreas());
     }
@@ -762,7 +810,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         given as the key, and as the second pair component the number of computations in that time period.
      */
     Map<Duration, Pair<Duration, Integer>> getComputationTimeStatistics();
-    
+
     /**
      * Matches the results in {@code regattaScoreCorrections} to the {@link RaceColumn}s and {@link Competitor}s in this
      * leaderboard. The race columns are identified in {@code regattaScoreCorrections} by the
@@ -775,7 +823,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link Competitor#getShortName() short name} if the boats can change in this leaderboard, or to the
      * {@link Boat#getSailID()} result of the competitor's boat, overruled by the explicit mappings in
      * {@code sailIdToCompetitorMap}.
-     * 
+     *
      * @param allowRaceDefaultsByOrder
      *            if {@code true}, an attempt will be made to map the race names/numbers from the
      *            {@link RegattaScoreCorrections} to the leaderboard's {@link RaceColumn}s by their ordering, one by

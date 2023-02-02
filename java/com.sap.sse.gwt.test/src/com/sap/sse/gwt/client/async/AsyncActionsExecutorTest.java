@@ -1,8 +1,10 @@
 package com.sap.sse.gwt.client.async;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 
-import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -13,8 +15,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *  
  * @author Simon Marcel Pamies
  */
-public class AsyncActionsExecutorTest extends GWTTestCase {
-    
+public class AsyncActionsExecutorTest {
     private class AsyncActionWithExecutionCounter implements AsyncAction<Void> {
         private int executionCounter = 0;
         
@@ -53,15 +54,6 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
     }; 
     
     private AsyncActionsExecutor executor;
-
-    /**
-     * Delegate to super; this has the effect of putting this class on the stack frame before the module loading takes place.
-     * Therefore, this class's class loader will be consulted for resolving the GWT module definition.
-     */
-    @Override
-    public void runTest() {
-        super.run();
-    }
 
     @Test
     public void testThatANonTriggeringActionLeadsToPendingCall() {
@@ -120,10 +112,4 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
         assertEquals(1, executor.getNumberOfPendingActions());
         assertEquals(1, executor.getNumberOfPendingActionsPerType(nonTriggeringAction.getClass().getName()));
     }
-
-    @Override
-    public String getModuleName() {
-        return "com.sap.sse.gwt.test.TestSSE";
-    }
-
 }

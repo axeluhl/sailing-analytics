@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
@@ -66,8 +67,12 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
         };
     }
     
+    /**
+     * Uses as rank the maximum rank so far plus one.
+     */
     public void addCompetitorWithBoat(CompetitorWithBoat competitorWithBoat) {
         competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        ranks.put(competitorWithBoat, ranks.isEmpty() ? 1 : Collections.max(ranks.values())+1);
     }
 
     @Override

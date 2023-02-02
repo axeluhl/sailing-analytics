@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,7 +101,7 @@ public class RaceRecord {
                 paramURL = new URL(baseJsonURL + "/clientparams.php?event="
                         + technicalEventName + "&race=" + ID);
             } else {
-                paramURL = new URL(paramURLAsString);
+                paramURL = new URL(jsonURL, paramURLAsString); // handle relative to JSON URL if not absolute
             }
         } catch (Exception e) {
             logger.info("Couldn't parse TracTrac paramURL " + paramURLAsString + " for race record " + getName());
@@ -142,8 +144,9 @@ public class RaceRecord {
     private Map<String, String> parseParams(URL paramURL) throws IOException {
         Map<String, String> result = new HashMap<String, String>();
         Pattern pattern = Pattern.compile("^([^:]*):(.*)$");
-        BufferedReader r = new BufferedReader(new InputStreamReader(
-                HttpUrlConnectionHelper.redirectConnection(paramURL).getInputStream()));
+        final URLConnection connection = HttpUrlConnectionHelper.redirectConnection(paramURL);
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        BufferedReader r = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset));
         String line;
         while ((line = r.readLine()) != null) {
             Matcher matcher = pattern.matcher(line);

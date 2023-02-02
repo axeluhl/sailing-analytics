@@ -1,8 +1,8 @@
 package com.sap.sse.datamining.impl.components.management;
 
-import static org.hamcrest.Matchers.is;
+import org.hamcrest.Matchers;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
@@ -52,12 +52,12 @@ public class TestAggregationProcessorManagement {
         Date beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
         server.registerAggregationProcessor(anyDataAggregatorDefinition);
-        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(true));
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), Matchers.is(true));
         
         beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
         server.registerAggregationProcessor(anyDataAggregatorDefinition);
-        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), Matchers.is(false));
     }
 
     @Test
@@ -68,12 +68,12 @@ public class TestAggregationProcessorManagement {
         Date beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
         server.unregisterAggregationProcessor(anyDataAggregatorDefinition);
-        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(true));
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), Matchers.is(true));
         
         beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
         server.unregisterAggregationProcessor(anyDataAggregatorDefinition);
-        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
+        assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), Matchers.is(false));
     }
     
     @Test
@@ -88,16 +88,16 @@ public class TestAggregationProcessorManagement {
         expectedDefinitions.add(anyDataAggregatorDefinition);
         expectedDefinitions.add(namedAggregatorDefinition);
         expectedDefinitions.add(raceAggregatorDefinition);
-        assertThat(server.getAggregationProcessorDefinitions(Test_Race.class), is(expectedDefinitions));
+        assertThat(server.getAggregationProcessorDefinitions(Test_Race.class), Matchers.is(expectedDefinitions));
         
         expectedDefinitions = new HashSet<>();
         expectedDefinitions.add(anyDataAggregatorDefinition);
         expectedDefinitions.add(namedAggregatorDefinition);
-        assertThat(server.getAggregationProcessorDefinitions(Test_Named.class), is(expectedDefinitions));
+        assertThat(server.getAggregationProcessorDefinitions(Test_Named.class), Matchers.is(expectedDefinitions));
         
         expectedDefinitions = new HashSet<>();
         expectedDefinitions.add(anyDataAggregatorDefinition);
-        assertThat(server.getAggregationProcessorDefinitions(Object.class), is(expectedDefinitions));
+        assertThat(server.getAggregationProcessorDefinitions(Object.class), Matchers.is(expectedDefinitions));
     }
     
     @Test
@@ -108,8 +108,8 @@ public class TestAggregationProcessorManagement {
         server.registerAggregationProcessor(raceAggregatorDefinition);
         server.registerAggregationProcessor(competitorAggregatorDefinition);
 
-        assertThat(server.getAggregationProcessorDefinition(Test_Race.class, "RaceAggregator"), is(raceAggregatorDefinition));
-        assertThat(server.getAggregationProcessorDefinition(Test_Competitor.class, "CompetitorAggregator"), is(competitorAggregatorDefinition));
+        assertThat(server.getAggregationProcessorDefinition(Test_Race.class, "RaceAggregator"), Matchers.is(raceAggregatorDefinition));
+        assertThat(server.getAggregationProcessorDefinition(Test_Competitor.class, "CompetitorAggregator"), Matchers.is(competitorAggregatorDefinition));
     }
     
     @Test
@@ -120,10 +120,10 @@ public class TestAggregationProcessorManagement {
         server.registerAggregationProcessor(raceAggregatorDefinition);
         
         AggregationProcessorDefinitionDTO anyDataAggregatorDefinitionDTO = TestsUtil.getDTOFactory().createAggregationProcessorDefinitionDTO(anyDataAggregatorDefinition);
-        assertThat(server.getAggregationProcessorDefinitionForDTO(anyDataAggregatorDefinitionDTO), is(anyDataAggregatorDefinition));
+        assertThat(server.getAggregationProcessorDefinitionForDTO(anyDataAggregatorDefinitionDTO), Matchers.is(anyDataAggregatorDefinition));
         
         AggregationProcessorDefinitionDTO namedDataAggregatorDefinitionDTO = TestsUtil.getDTOFactory().createAggregationProcessorDefinitionDTO(namedAggregatorDefinition);
-        assertThat(server.getAggregationProcessorDefinitionForDTO(namedDataAggregatorDefinitionDTO), is(namedAggregatorDefinition));
+        assertThat(server.getAggregationProcessorDefinitionForDTO(namedDataAggregatorDefinitionDTO), Matchers.is(namedAggregatorDefinition));
         
         AggregationProcessorDefinitionDTO competitorAggregatorDefinitionDTO = TestsUtil.getDTOFactory().createAggregationProcessorDefinitionDTO(competitorAggregatorDefinition);
         assertThat(server.getAggregationProcessorDefinitionForDTO(competitorAggregatorDefinitionDTO), nullValue());

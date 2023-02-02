@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -50,28 +50,28 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class RaceSlotSelectionPanel extends HorizontalPanel {
-    private final FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable;
+    private final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable;
 
     private final RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
     
-    private final ListDataProvider<StrippedLeaderboardDTOWithSecurity> filteredLeaderboardList;
+    private final ListDataProvider<StrippedLeaderboardDTO> filteredLeaderboardList;
     
-    private final RefreshableSingleSelectionModel<StrippedLeaderboardDTOWithSecurity> leaderboardSelectionModel;
+    private final RefreshableSingleSelectionModel<StrippedLeaderboardDTO> leaderboardSelectionModel;
 
     public RaceSlotSelectionPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final boolean multiSelection,
-            Iterable<StrippedLeaderboardDTOWithSecurity> availableLeaderboards, RaceColumnDTOAndFleetDTOWithNameBasedEquality preselected) {
+            Iterable<StrippedLeaderboardDTO> availableLeaderboards, RaceColumnDTOAndFleetDTOWithNameBasedEquality preselected) {
         final Resources tableRes = GWT.create(AdminConsoleTableResources.class);
-        leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTOWithSecurity>(/* pageSize */10000, tableRes);
-        filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTOWithSecurity>();
-        leaderboardSelectionModel = new RefreshableSingleSelectionModel<StrippedLeaderboardDTOWithSecurity>(
+        leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
+        filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
+        leaderboardSelectionModel = new RefreshableSingleSelectionModel<StrippedLeaderboardDTO>(
                 new NameBasedStrippedLeaderboardDTOEntityIdentityComparator(), filteredLeaderboardList);
         leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         final Label leaderboardFilterLabel = new Label(stringMessages.filterByLeaderboard());
-        LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity> filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity>(
+        LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(
                 leaderboardFilterLabel, availableLeaderboards, filteredLeaderboardList, stringMessages) {
             @Override
-            public List<String> getSearchableStrings(StrippedLeaderboardDTOWithSecurity t) {
+            public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.displayName);
@@ -79,22 +79,22 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
             }
 
             @Override
-            public AbstractCellTable<StrippedLeaderboardDTOWithSecurity> getCellTable() {
+            public AbstractCellTable<StrippedLeaderboardDTO> getCellTable() {
                 return leaderboardTable;
             }
         };
-        ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTOWithSecurity>(
+        ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 filteredLeaderboardList.getList());
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getName() != null ? leaderboard.getName() : "";
             }
         };
         leaderboardNameColumn.setSortable(true);
-        leaderboardColumnListHandler.setComparator(leaderboardNameColumn, new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+        leaderboardColumnListHandler.setComparator(leaderboardNameColumn, new Comparator<StrippedLeaderboardDTO>() {
             @Override
-            public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 boolean ascending = isSortedAscending();
                 if (o1.getName().equals(o2.getName())) {
                     return 0;
@@ -111,17 +111,17 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
                 return sortList.size() > 0 & sortList.get(0).isAscending();
             }
         });
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
         leaderboardDisplayNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn,
-                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+                new Comparator<StrippedLeaderboardDTO>() {
                     @Override
-                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                         return new NaturalComparator().compare(o1.getDisplayName(), o2.getDisplayName());
                     }
                 });
@@ -155,7 +155,7 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
     }
 
     private void updateRaceColumnTableAfterLeaderboardSelectionChange() {
-        final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
+        final StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (selectedLeaderboard != null) {
             List<Triple<String, String, String>> raceColumnsAndFleets = new ArrayList<Triple<String, String, String>>();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
@@ -176,7 +176,7 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
         }
     }
 
-    private StrippedLeaderboardDTOWithSecurity getSelectedLeaderboard() {
+    private StrippedLeaderboardDTO getSelectedLeaderboard() {
         return leaderboardSelectionModel.getSelectedObject();
     }
 

@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -29,7 +28,7 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    
+
     protected static class RegattaParameterValidator extends AbstractRegattaParameterValidator {
         private ArrayList<RegattaDTO> existingRegattas;
 
@@ -116,7 +115,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
         buoyZoneRadiusInHullLengthsDoubleBox.setValue(Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS);
         SeriesDTO series = new SeriesDTO();
-        series.setName(Series.DEFAULT_NAME);
+        series.setName(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
         series.setMedal(false);
         series.setStartsWithZeroScore(false);
         series.setSplitFleetContiguousScoring(false);
@@ -152,10 +151,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         List<SeriesDTO> seriesList = getSeriesEditor().getValue();
         for (SeriesDTO series : seriesList) {
             // generate 3 Default Races if default series is still present
-            if (series.getName().equals(Series.DEFAULT_NAME)) {
+            if (series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
                 List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
                 for (int i = 1; i <= 3; i++) {
-                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO("R"+i, series.getName(), dto.getName());
+                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO("R"+i, series.getName(), dto.getName(), series.isOneAlwaysStaysOne());
                     races.add(raceColumnDTO);
                 }
                 series.setRaceColumns(races);

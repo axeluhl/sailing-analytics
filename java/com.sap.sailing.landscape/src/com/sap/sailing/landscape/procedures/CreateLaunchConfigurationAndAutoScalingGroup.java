@@ -8,6 +8,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsApplicationProcess;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
@@ -18,14 +19,15 @@ import com.sap.sse.landscape.orchestration.Procedure;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
- * For an {@link ApplicationReplicaSet} and a {@link TargetGroup} that represents the application replica set's
- * public target group creates an AWS EC2 Launch Configuration and a corresponding Auto-Scaling Group which by
- * default produces a minimum of one replica, a maximum of 30 replicas, scaling based on the number of requests
- * per target which are supposed to not exceed 30,000. An {@link AwsApplicationConfiguration} for the replica's
- * config must be provided and is expected to use the same {@link Release} as the master.<p>
+ * For an {@link ApplicationReplicaSet} and a {@link TargetGroup} that represents the application replica set's public
+ * target group creates an AWS EC2 Launch Configuration and a corresponding Auto-Scaling Group which by default produces
+ * a minimum of one replica, a maximum of 30 replicas, scaling based on the number of requests per target which are
+ * supposed to not exceed 15,000 per minute. An {@link AwsApplicationConfiguration} for the replica's config must be
+ * provided and is expected to use the same {@link Release} as the master.
+ * <p>
  * 
- * The builder for the procedure requires the bearer token for replication permissions and the target group. Other properties
- * are optional.
+ * The builder for the procedure requires the bearer token for replication permissions and the target group. Other
+ * properties are optional.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -36,7 +38,6 @@ extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
     private static final int DEFAULT_MIN_REPLICAS = 1;
     private static final int DEFAULT_MAX_REPLICAS = 30;
-    private static final int DEFAULT_MAX_REQUESTS_PER_TARGET = 30000;
     
     /**
      * 
@@ -65,8 +66,8 @@ implements Procedure<ShardingKey> {
         BuilderT setMaxReplicas(int maxReplicas);
 
         /**
-         * Defines the scaling threshold based on the number of requests per target per minute. Defaults to 30,000 (see
-         * {@link CreateLaunchConfigurationAndAutoScalingGroup#DEFAULT_MAX_REQUESTS_PER_TARGET}).
+         * Defines the scaling threshold based on the number of requests per target per minute. Defaults to 15,000 (see
+         * {@link AwsAutoScalingGroup#DEFAULT_MAX_REQUESTS_PER_TARGET}).
          */
         BuilderT setMaxRequestsPerTarget(int maxRequestsPerTarget);
     }
@@ -84,7 +85,7 @@ implements Procedure<ShardingKey> {
         private Optional<Tags> tags;
         private int minReplicas = DEFAULT_MIN_REPLICAS;
         private int maxReplicas = DEFAULT_MAX_REPLICAS;
-        private int maxRequestsPerTarget = DEFAULT_MAX_REQUESTS_PER_TARGET;
+        private int maxRequestsPerTarget = AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET;
 
         public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, String replicaSetName,
                 TargetGroup<ShardingKey> targetGroup) {

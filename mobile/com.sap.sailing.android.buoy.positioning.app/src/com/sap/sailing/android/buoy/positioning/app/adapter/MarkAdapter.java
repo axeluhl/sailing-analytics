@@ -25,8 +25,8 @@ public class MarkAdapter extends ResourceCursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         final TextView markName = (TextView) view.findViewById(R.id.mark_name);
         final TextView markSet = (TextView) view.findViewById(R.id.mark_set);
-        final String name = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_NAME));
-        final String markID = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_ID));
+        final String name = cursor.getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Mark.MARK_NAME));
+        final String markID = cursor.getString(cursor.getColumnIndexOrThrow(AnalyticsContract.Mark.MARK_ID));
         final List<MarkPingInfo> markPings = DatabaseHelper.getInstance().getMarkPings(context, markID);
         final String setText;
         if (markPings.isEmpty()) {

@@ -333,8 +333,6 @@ public class SecurityDTOFactory {
     /**
      * prunes the {@link AccessControlList} for the given {@link SecurityUser filterForUser} by removing all user groups
      * the user is not in from the resulting ACL.
-     * @param fromOriginalToStrippedDownUser 
-     * @param fromOriginalToStrippedDownUserGroup 
      */
     public AccessControlListDTO pruneAccessControlListForUser(AccessControlListDTO acl, Iterable<StrippedUserGroupDTO> groupsOfUser,
             Iterable<StrippedUserGroupDTO> allUserGroups) {

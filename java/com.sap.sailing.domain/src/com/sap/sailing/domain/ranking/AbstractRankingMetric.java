@@ -251,11 +251,15 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return trackedRace;
     }
 
+    /**
+     * Uses a sequential spliterator across the competitors.
+     */
     protected Competitor getCompetitorFarthestAhead(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
         Optional<Competitor> competitorFarthestAhead = StreamSupport
-                .stream(getCompetitors().spliterator(), /* parallel */true).
-                sorted(oneDesignComparator).findFirst();
+                .stream(getCompetitors().spliterator(),
+                        /* parallel */ /* bug 5720/5756: deadlock to be avoided by not using ForkJoinPool */ false)
+                .sorted(oneDesignComparator).findFirst();
         return competitorFarthestAhead.orElse(null);
     }
     
@@ -390,7 +394,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
         }
         if (whenToPassedFromWaypoint.getTimePoint().after(timePointOfTosPosition)) {
-            throw new IllegalArgumentException("Competitor was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
+            throw new IllegalArgumentException("Competitor "+to+" was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
                     " but did pass it at "+whenToPassedFromWaypoint.getTimePoint());
         }
     }

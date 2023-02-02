@@ -517,7 +517,7 @@ public class SimulationServiceImpl implements SimulationService {
             course.add(startPosition);
             course.add(endPosition);
             BoatClass boatClass = trackedRace.getRace().getBoatClass();
-            PolarDataService polarDataService = racingEventService.getPolarDataService();
+            PolarDataService polarDataService = getPolarDataService();
             PolarDiagram polarDiagram;
             try {
                 polarDiagram = new PolarDiagramGPS(boatClass, polarDataService);
@@ -539,6 +539,10 @@ public class SimulationServiceImpl implements SimulationService {
                     endPosition, paths, null, TimePoint.now());
         }
         return result;
+    }
+
+    private PolarDataService getPolarDataService() {
+        return racingEventService.getPolarDataService();
     }
 
     public Map<PathType, Path> getAllPaths(SimulationParameters simulationParameters) throws InterruptedException,

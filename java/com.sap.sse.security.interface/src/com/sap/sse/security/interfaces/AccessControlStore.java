@@ -21,6 +21,12 @@ public interface AccessControlStore extends Named {
     AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
     
     /**
+     * Looks up an ACL for the object identified by the {@code idOfAccessControlledObject}. If no
+     * ACL is found for that object, a newly created is returned.
+     */
+    AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject);
+    
+    /**
      * @param idOfAccessControlledObject ID of the object the ACL is attached to
      * @param displayNameOfAccessControlledObject the display name of the object the ACL is attached to
      */

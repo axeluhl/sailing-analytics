@@ -1,5 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:ccb="urn:import:com.sap.sse.gwt.client.controls.busyindicator">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.searchresult.SearchResultResources" />
@@ -28,6 +29,7 @@
 	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 		    <g:FlowPanel ui:field="searchResultContainerUi" />
 	      </div>
+          <ccb:SimpleBusyIndicator ui:field="busyIndicatorUi" />
 	    </div>
 	  </div>
 	  <!-- 

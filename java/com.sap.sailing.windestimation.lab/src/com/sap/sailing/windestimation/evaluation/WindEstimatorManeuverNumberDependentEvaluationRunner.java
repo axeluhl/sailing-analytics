@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -14,9 +15,10 @@ import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAc
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
-import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorManeuverNumberDependentEvaluationRunner {
+    private static final Logger logger = Logger
+            .getLogger(WindEstimatorManeuverNumberDependentEvaluationRunner.class.getName());
 
     private static final Integer MAX_RACES = null;
     private static final int MAX_MANEUVERS = 10;
@@ -33,11 +35,11 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
             "maneuverNumberDependentEvaluation" + WIND_ESTIMATION_IMPLEMENTATION + ".csv");
 
     public static void main(String[] args) throws Exception {
-        LoggingUtil.logInfo("Connecting to MongoDB");
+        logger.info("Connecting to MongoDB");
         RaceWithCompleteManeuverCurvePersistenceManager persistenceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
-        LoggingUtil.logInfo("Loading polar data");
+        logger.info("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
-        LoggingUtil.logInfo("Wind estimator evaluation started...");
+        logger.info("Wind estimator evaluation started...");
         ModelStore modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
         WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService,
                 new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION), modelStore);
@@ -49,7 +51,7 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
         double[] accuracyCorrectManeuversPerManeuverCount = new double[MAX_MANEUVERS];
         double[] emptyEstimationsPercentagePerManeuverCount = new double[MAX_MANEUVERS];
         for (int fixedNumberOfManeuvers = 1; fixedNumberOfManeuvers <= MAX_MANEUVERS; fixedNumberOfManeuvers++) {
-            LoggingUtil.logInfo("Running evaluation with " + fixedNumberOfManeuvers + " maneuvers");
+            logger.info("Running evaluation with " + fixedNumberOfManeuvers + " maneuvers");
             WindEstimationEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
                     MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_PERCENT, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE,
                     EVALUATE_PER_COMPETITOR_TRACK, MAX_MANEUVERS, true, fixedNumberOfManeuvers);
@@ -77,7 +79,7 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
             emptyEstimationsPercentagePerManeuverCount[i] = evaluationResult
                     .getPercentageOfEmptyWindDirectionEstimations();
         }
-        LoggingUtil.logInfo("Wind estimator evaluation finished with the following provided arguments:\r\n"
+        logger.info("Wind estimator evaluation finished with the following provided arguments:\r\n"
                 + buildConfigurationString() + "\r\n");
         toCsv(avgErrorDegreesPerManeuverCount, avgConfidencePerManeuverCount,
                 avgConfidenceOfCorrectEstimationsPerManeuverCount, avgConfidenceOfIncorrectEstimationsPerManeuverCount,
@@ -116,7 +118,7 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
                 out.write(line);
             }
         }
-        LoggingUtil.logInfo("CSV with evaluation results have been stored in: " + csvFile.getAbsolutePath());
+        logger.info("CSV with evaluation results have been stored in: " + csvFile.getAbsolutePath());
     }
 
 }

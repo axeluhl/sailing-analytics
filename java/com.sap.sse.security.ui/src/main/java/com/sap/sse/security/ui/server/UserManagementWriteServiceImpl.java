@@ -227,6 +227,8 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
                         new Ownership(null, userGroup))) {
                     throw new UnauthorizedException("Not permitted to add role definition to group");
                 }
+                logger.info(SecurityUtils.getSubject().getPrincipal().toString()+" added role "+roleDefinition.getName()+
+                        " to user group "+userGroup.getName());
                 getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinition, forAll);
             }
         } else {
@@ -247,6 +249,8 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
                         new Ownership(null, userGroup))) {
                     throw new UnauthorizedException("Not permitted to remove role definition from group");
                 }
+                logger.info(SecurityUtils.getSubject().getPrincipal().toString()+" removed role "+roleDefinition.getName()+
+                        " from user group "+userGroup.getName());
                 getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
             }
         } else {
@@ -447,7 +451,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             final Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
                     userQualifierName, transitive);
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
-            final String message = "added role " + role.getName() + " for user " + username;
+            final String message = "User "+SecurityUtils.getSubject().getPrincipal()+" added role " + role.getName() + " for user " + username;
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
@@ -486,7 +490,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             UserGroup tenant = getOrThrowTenant(tenantQualifierName);
             Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
                     userQualifierName, isTransitive);
-            final String message = "removed role " + role.getName() + " for user " + username;
+            final String message = SecurityUtils.getSubject().getPrincipal().toString()+" removed role " + role.getName() + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
@@ -525,7 +529,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             }
             // grant permission
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
-            final String message = "Added permission " + permission + " for user " + username;
+            final String message = "User "+SecurityUtils.getSubject().getPrincipal()+" added permission " + permission + " for user " + username;
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
@@ -543,7 +547,8 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             successInfo = new SuccessInfo(true, message, /* redirectURL */null,
                     new Triple<>(userDTO, getAllUser(), getServerInfo()));
         } catch (UserManagementException | UnauthorizedException e) {
-            successInfo = new SuccessInfo(false, "Not permitted to grant permission " + permission + " for user "
+            successInfo = new SuccessInfo(false, "User "+SecurityUtils.getSubject().getPrincipal()+
+                    " is not permitted to grant permission " + permission + " to user "
                     + username + " or the user or permission did not exist.", /* redirectURL */null, null);
         }
         return successInfo;
@@ -562,7 +567,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
                         "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
             }
             // revoke permission
-            final String message = "Revoked permission " + permission + " for user " + username;
+            final String message = "User "+SecurityUtils.getSubject().getPrincipal()+" revoked permission " + permission + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
                     user);
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
@@ -704,5 +709,4 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             throw new UnauthorizedException("Not permitted to update the ACL for a user");
         }
     }
-
 }

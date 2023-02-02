@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -209,7 +210,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                                     officialCorrectionEntry.getMaxPointsReason());
                             if (officialCorrectionEntry.getScore() != null) {
                                 double officialTotalPointsWithFactorApplied = officialCorrectionEntry.getScore().doubleValue();
-                                double officialTotalPoints = officialTotalPointsWithFactorApplied / raceColumn.getEffectiveFactor();
+                                double officialTotalPoints = ScoringSchemeType.getUnscaledScore(raceColumn.getEffectiveFactor(), officialTotalPointsWithFactorApplied, raceColumn.isOneAlwaysStaysOne());
                                 result.addScoreUpdate(competitor, raceColumn, officialTotalPoints);
                             }
                         }
@@ -264,18 +265,18 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
                     final Double officialTotalPointsWithFactorApplied = officialCorrectionEntry == null ? null :
-                        officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
+                        officialCorrectionEntry.isDiscarded() ? Double.valueOf(0) : officialCorrectionEntry.getScore();
                     final Double officialTotalPoints = officialCorrectionEntry == null ? null :
                         officialCorrectionEntry.getScore() == null ? null :
-                        officialCorrectionEntry.getScore() / raceColumn.getEffectiveFactor();
+                        ScoringSchemeType.getUnscaledScore(raceColumn.getEffectiveFactor(), officialCorrectionEntry.getScore(), raceColumn.isOneAlwaysStaysOne());
                     final MaxPointsReason officialMaxPointsReason = officialCorrectionEntry == null ? null :
                         officialCorrectionEntry.getMaxPointsReason();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();
                     // entries not considered "different' in case we haven't got an entry for the competitor/race at all;
                     // those non-existing "entries" will be ignored by getResults anyhow
                     boolean entriesDiffer = officialCorrectionEntry != null &&
-                           (((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !new Double(entry.totalPoints).equals(officialTotalPoints)))) ||
-                            ((officialTotalPointsWithFactorApplied == null && entry.netPoints != null) || (officialTotalPointsWithFactorApplied != null && (entry.netPoints == null || !new Double(entry.netPoints).equals(officialTotalPointsWithFactorApplied)))) ||
+                           (((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !Double.valueOf(entry.totalPoints).equals(officialTotalPoints)))) ||
+                            ((officialTotalPointsWithFactorApplied == null && entry.netPoints != null) || (officialTotalPointsWithFactorApplied != null && (entry.netPoints == null || !Double.valueOf(entry.netPoints).equals(officialTotalPointsWithFactorApplied)))) ||
                             ((officialMaxPointsReason == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
                                     officialMaxPointsReason != null && officialMaxPointsReason != entry.reasonForMaxPoints));
                     if (entriesDiffer) {

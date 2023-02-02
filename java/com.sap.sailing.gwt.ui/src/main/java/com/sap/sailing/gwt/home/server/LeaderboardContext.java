@@ -96,7 +96,7 @@ public class LeaderboardContext {
     public ResultWithTTL<GetMiniLeaderboardDTO> calculateMiniLeaderboard(RacingEventService service, int limit) {
         GetMiniLeaderboardDTO result = new GetMiniLeaderboardDTO();
         try {
-            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
+            final LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
                     service, service.getBaseDomainFactory(), false);
             
             result.setScoreCorrectionText(leaderboardDTO.getComment());

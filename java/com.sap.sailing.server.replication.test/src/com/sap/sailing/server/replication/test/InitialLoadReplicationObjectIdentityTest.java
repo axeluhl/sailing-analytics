@@ -4,7 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
@@ -121,7 +121,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final SecurityService securityService = SecurityServiceMockFactory.mockSecurityService();
         Mockito.when(securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
                 Mockito.any(), Mockito.any(), Mockito.any(Callable.class)))
-                .thenAnswer(i -> i.getArgumentAt(3, Callable.class).call());
+                .thenAnswer(i -> i.getArgument(3, Callable.class).call());
         this.master = new RacingEventServiceWithSecurityService(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
                         .getMongoObjectFactory(testSetUp.mongoDBService),
                 MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE,

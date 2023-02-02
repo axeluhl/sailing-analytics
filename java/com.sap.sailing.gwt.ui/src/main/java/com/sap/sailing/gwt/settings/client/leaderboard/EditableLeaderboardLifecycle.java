@@ -6,18 +6,19 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
-public class EditableLeaderboardLifecycle extends  AbstractMultiRaceLeaderboardPanelLifecycle<EditableLeaderboardSettings> {
+public class EditableLeaderboardLifecycle extends AbstractMultiRaceLeaderboardPanelLifecycle<EditableLeaderboardSettings> {
 
     public EditableLeaderboardLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard,
-            Iterable<DetailType> availableDetailTypes) {
-        super(leaderboard, stringMessages, availableDetailTypes);
+            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+        super(leaderboard, stringMessages, availableDetailTypes, paywallResolver);
     }
 
     public SettingsDialogComponent<EditableLeaderboardSettings> getPerspectiveOwnSettingsDialogComponent(
             EditableLeaderboardSettings settings) {
         return new EditableLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages,
-                availableDetailTypes, canBoatInfoBeShown);
+                availableDetailTypes, canBoatInfoBeShown, paywallResolver, leaderboardDTO);
     }
 
     @Override
@@ -36,7 +37,7 @@ public class EditableLeaderboardLifecycle extends  AbstractMultiRaceLeaderboardP
     public SettingsDialogComponent<EditableLeaderboardSettings> getSettingsDialogComponent(
             EditableLeaderboardSettings settings) {
         return new EditableLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages,
-                availableDetailTypes, canBoatInfoBeShown);
+                availableDetailTypes, canBoatInfoBeShown, paywallResolver, leaderboardDTO);
     }
 
     @Override

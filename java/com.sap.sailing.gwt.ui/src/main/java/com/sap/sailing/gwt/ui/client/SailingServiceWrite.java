@@ -73,7 +73,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -139,9 +139,9 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      * {@link ImageResizingTaskDTO} create a resize. Since no {@link MediaTagConstants} have the same defined bounds,
      * there will be no merge of these {@Link ImageDTO}. Uses the {@link FileStorageService} to store the resized
      * images. If an error occurs during resize or storing process, it will be tried to restore the previous state.
-     * 
+     *
      * @author Robin Fleige (D067799)
-     * 
+     *
      * @param imageResizingTask
      *            is an {@link ImageResizingTaskDTO} with the information on how the image saved in the {@Link ImageDTO}
      *            should be resized. The resizingTask attribute should not be null or empty at this point
@@ -270,8 +270,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
-            List<FleetDTO> fleets) throws UnauthorizedException;
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards,
+            boolean oneAlwaysStaysOne, List<FleetDTO> fleets) throws UnauthorizedException;
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, List<UUID> courseAreaUuids,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
@@ -371,17 +371,20 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeLeaderboards(Collection<String> leaderboardNames) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
+    StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, List<UUID> newCourseAreaIds)
             throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name, String displayName,
+    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
             String regattaName) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
+    StrippedLeaderboardDTO createRegattaLeaderboardWithOtherTieBreakingLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds, String otherTieBreakingLeaderboardName);
+
+    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
+    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds, ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds)
             throws UnauthorizedException;
 
@@ -452,7 +455,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     /**
      * Removes course templates list
-     * 
+     *
      * @param courseTemplateDTOs
      *            list of course templates to remove
      */
@@ -460,7 +463,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     /**
      * Removes mark properties list
-     * 
+     *
      * @param markPropertiesDTOS
      *            list of mark properties to remove
      */
@@ -480,11 +483,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     /**
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints from
      * the previous course definition in the racelog.
-     * 
-     * @param priority
-     *            TODO
-     * @throws UnauthorizedException,
-     *             NotFoundException
      */
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority)
@@ -520,7 +518,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     /**
      * Adds public tag as {@link RaceLogTagEvent} to {@link RaceLog} and private tag to
      * {@link com.sap.sse.security.interfaces.UserStore UserStore}.
-     * 
+     *
      * @param leaderboardName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @param raceColumnName
@@ -563,7 +561,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      * {@link #getORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier)} will return a map equal to the one passed,
      * except for {@code null} values which then would be missing from the results, where here they mean to explicitly
      * revoke any previous setting for that leg.
-     * 
+     *
      * @throws NotFoundException
      *             in case the race log cannot be found by the leaderboard, race column and fleet names provided
      */
@@ -579,7 +577,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     /**
      * Slices a new race from the race specified by the given {@link RegattaAndRaceIdentifier} using the given time
      * range. A new {@link RaceColumn} with the given name is added to the {@link RegattaLeaderboard}.
-     * 
+     *
      * @throws ServiceException
      */
     RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
@@ -598,7 +596,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      * <code>imageURL</code> and <code>visibleForPublic</code>. Tags are not really updated, instead public tags are
      * revoked/private tags removed first and then the new tags gets saved depending on the new value
      * <code>visibleForPublic</code>.
-     * 
+     *
      * @param leaderboardName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @param raceColumnName
@@ -642,35 +640,35 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
             throws UnauthorizedException, NotFoundException;
-    
+
     /**
      * Adds a fix to the {@link SensorFixStore}, and creates a mapping with a virtual device for exactly the current
      * timepoint.
-     * 
+     *
      * @param timePoint
      *            the time point for the fix; if {@code null}, the current time is used
-     * 
+     *
      * @throws DoesNotHaveRegattaLogException
      * @throws NotFoundException
      */
     void pingMark(String leaderboardName, MarkDTO mark, TimePoint timePoint, Position position)
             throws UnauthorizedException, DoesNotHaveRegattaLogException, NotFoundException;
-    
+
     /**
      * Revoke the {@link RaceLogDenoteForTrackingEvent}. This does not affect an existing {@code RaceLogRaceTracker} or
      * {@link TrackedRace} for this {@code RaceLog}.
-     * 
+     *
      * @throws UnauthorizedException,
      *             NotFoundException
-     * 
+     *
      * @see RaceLogTrackingAdapter#removeDenotationForRaceLogTracking
      */
     void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
             throws UnauthorizedException, NotFoundException;
-    
+
     /**
      * Removes public {@link TagDTO tag} from {@link RaceLog} and private {@link TagDTO tag} from {@link UserStore}.
-     * 
+     *
      * @param leaderboardName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @param raceColumnName

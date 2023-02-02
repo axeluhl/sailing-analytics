@@ -20,7 +20,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     protected Label persistentAlertLabel;
     
     public DefaultErrorReporter(S stringMessages) {
-        this(stringMessages, true);
+        this(stringMessages, false);
     }
     
     public DefaultErrorReporter(S stringMessages, boolean showCommunicationErrorText) {
@@ -48,9 +48,9 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
 
     @Override
     public void reportError(String message) {
-        errorDialogBox.setText(message);
+        errorDialogBox.setText(stringMessages.serverError());
         serverResponseLabel.addStyleName("serverResponseLabelError"); //$NON-NLS-1$
-        serverResponseLabel.setHTML(stringMessages.serverError());
+        serverResponseLabel.setHTML(SafeHtmlUtils.fromString(message));
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
@@ -87,6 +87,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         dialogCloseButton.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialogCloseButton"); //$NON-NLS-1$
         final Label textToServerLabel = new Label();
         serverResponseLabel = new HTML();
+        serverResponseLabel.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialogServerResponse");
         VerticalPanel dialogVPanel = new VerticalPanel();
         if (showCommunicationErrorText) {
             dialogVPanel.add(new HTML("<b>" + stringMessages.errorCommunicatingWithServer() + "</b>")); //$NON-NLS-1$

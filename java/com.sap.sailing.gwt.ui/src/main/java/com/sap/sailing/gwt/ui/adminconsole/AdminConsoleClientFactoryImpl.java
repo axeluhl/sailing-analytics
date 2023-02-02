@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
+import static com.sap.sailing.landscape.common.RemoteServiceMappingConstants.mediaServiceRemotePath;
 import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
 import static com.sap.sse.gwt.client.EntryPointHelper.registerASyncService;
 
@@ -24,6 +24,7 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory {
 
@@ -95,5 +96,10 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     @Override
     public AcceptsOneWidget getContent() {
         return topLevelView.getContent();
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return securityProvider.getSubscriptionServiceFactory();
     }
 }

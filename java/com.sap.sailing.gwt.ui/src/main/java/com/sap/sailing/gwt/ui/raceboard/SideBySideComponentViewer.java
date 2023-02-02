@@ -35,10 +35,13 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * Component Viewer that uses a {@link TouchSplitLayoutPanel} to display its components.
@@ -49,8 +52,11 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
-    private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
-    private final int MIN_TAGGING_WIDTH = Math.min(440, Window.getClientWidth() - 80); // Account for Tags and Leaderboard toggle widths: 40px + 40px
+    private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works
+                                                                                           // well for 505 and ESS
+    private final int MIN_TAGGING_WIDTH = Math.min(440, Window.getClientWidth() - 80); // Account for Tags and
+                                                                                       // Leaderboard toggle widths:
+                                                                                       // 40px + 40px
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -70,7 +76,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     /* the race map */
     private final RaceMap centerComponent;
     private final Component<?> rightComponent;
-    private final List<Component<?>> components;
+    private final List<Pair<Component<?>, Action>> components;
     private final ScrollPanel leftScrollPanel;
     private final Panel rightPanel;
     private final StringMessages stringMessages;
@@ -88,9 +94,10 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     public SideBySideComponentViewer(final Component<?> leftComponentP, final RaceMap centerComponentP,
             final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent,
-            List<Component<?>> components, final StringMessages stringMessages, UserService userService,
+            List<Pair<Component<?>, Action>> components, final StringMessages stringMessages, UserService userService,
             EditMarkPassingsPanel markPassingsPanel, EditMarkPositionPanel markPositionPanel,
-            ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher) {
+            ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher,
+            PaywallResolver paywallResolver, SecuredDTO dtoContext) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -121,12 +128,14 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                         tooltip = stringMessages.mediaHideVideoTooltip();
                     } else {
                         caption = stringMessages.mediaShowVideoCaption();
-                        tooltip = stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title);
+                        tooltip = stringMessages.mediaShowVideoTooltip(
+                                mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title);
                     }
                     break;
                 default:
                     mediaSelectionButton.setVisible(true);
-                    caption = stringMessages.mediaSelectVideoCaption(mediaPlayerManagerComponent.getAssignedMediaTracks().size());
+                    caption = stringMessages
+                            .mediaSelectVideoCaption(mediaPlayerManagerComponent.getAssignedMediaTracks().size());
                     tooltip = stringMessages.mediaSelectVideoTooltip();
                     break;
                 }
@@ -153,25 +162,21 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, /* vertical splitter height */ 25);
+        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3,
+                /* vertical splitter height */ 25, paywallResolver, dtoContext);
         this.mainPanel.add(splitLayoutPanel);
-
         // initialize components - they need to be added before other widgets to get the right width
         initializeComponents();
-
         // initialize the leaderboard component
         splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, MIN_LEADERBOARD_WIDTH);
-        
         // initialize the tagging component
         rightPanel.getElement().setId("rightPanel-TAGS");
         rightComponent.getEntryWidget().getElement().setId("rightComponent-TAGS");
         splitLayoutPanel.insert(rightPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
-
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
         panelForMapAndHorizontalToggleButtons.add(centerComponent.getEntryWidget());
         splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, centerComponent, Direction.CENTER, 0);
-
         // add additional toggle buttons panel that currently only contains the video button
         List<Pair<Button, String>> additionalVerticalButtons = new ArrayList<Pair<Button, String>>();
         additionalVerticalButtons.add(new Pair<Button, String>(mediaSelectionButton,
@@ -247,8 +252,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     }
 
     private void initializeComponents() {
-        for (final Component<?> component : components) {
-            splitLayoutPanel.insert(component.getEntryWidget(), component, Direction.SOUTH, 200);
+        for (final Pair<Component<?>, Action> componentActionPair : components) {
+            splitLayoutPanel.insert(componentActionPair.getA().getEntryWidget(), componentActionPair.getA(), Direction.SOUTH, 200, componentActionPair.getB());
         }
     }
 
@@ -287,9 +292,9 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             splitLayoutPanel.setWidgetVisibility(rightPanel, rightComponent, /* hidden */false, MIN_TAGGING_WIDTH);
         } else if (!rightComponent.isVisible() && !centerComponent.isVisible()) {
         }
-        for (Component<?> component : components) {
-            final boolean isComponentVisible = component.isVisible();
-            splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible,
+        for (Pair<Component<?>, Action> component : components) {
+            final boolean isComponentVisible = component.getA().isVisible();
+            splitLayoutPanel.setWidgetVisibility(component.getA().getEntryWidget(), component.getA(), !isComponentVisible,
                     DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT);
         }
         splitLayoutPanel.forceLayout();
