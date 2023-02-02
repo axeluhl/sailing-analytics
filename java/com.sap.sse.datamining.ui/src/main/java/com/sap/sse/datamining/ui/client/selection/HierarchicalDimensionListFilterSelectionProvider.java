@@ -70,6 +70,19 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * A UI component that shows a list with dimensions, grouped by their retriever levels, from which the user can select
+ * those dimensions for which he/she wants to specify filter conditions. For each dimension selected from the list, a
+ * {@link DimensionFilterSelectionProvider} is added dynamically to a horizontally expanding sequence of those dimension
+ * filter controls.
+ * <p>
+ * 
+ * As the user adds filter conditions for dimensions, only dimension values that pass those filters are displayed in
+ * those dimension filter controls further to the right. For example, if the user starts out by filtering by boat class
+ * name and selects only the "6mR" boat class, then adds a dimension filter for regatta name, then only those regattas
+ * in the 6mR boat class are displayed in the dimension filter list to the right of the boat class dimension filter
+ * column.
+ */
 public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> implements FilterSelectionProvider {
     
     private static final String DimensionListSubheaderAttribute = "subheader";
@@ -99,6 +112,12 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     private final AbstractFilterablePanel<DimensionWithContext> filterFilterDimensionsPanel;
     private final MultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
+    
+    /**
+     * The list of dimensions from which the user can select for filtering by those dimensions selected;
+     * The grid is split into sections that correspond to retriever levels; each such retriever level
+     * section shows a corresponding heading.
+     */
     private final DataGrid<DimensionWithContext> filterDimensionsList;
     private final Column<DimensionWithContext, Boolean> checkboxColumn;
     
@@ -435,7 +454,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 removeDimensionFilterSelectionProvider(displayedDimension);
             }
         }
-        
         for (DimensionWithContext selectedDimension : filterDimensionSelectionModel.getSelectedSet()) {
             if (!dimensionFilterSelectionProviders.containsKey(selectedDimension)) {
                 addDimensionFilterSelectionProvider(selectedDimension);
@@ -443,12 +461,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         }
     }
     
-    private DimensionFilterSelectionProvider addDimensionFilterSelectionProvider(DimensionWithContext dimension) {
-        DimensionFilterSelectionProvider selectionProvider = new DimensionFilterSelectionProvider(this, getComponentContext(),
+    private DimensionFilterSelectionProvider addDimensionFilterSelectionProvider(final DimensionWithContext dimension) {
+        final DimensionFilterSelectionProvider selectionProvider = new DimensionFilterSelectionProvider(this, getComponentContext(),
                 dataMiningService, errorReporter, session, retrieverChainProvider, this, dimension.getRetrieverLevel(), dimension.getDimension());
         selectionProvider.addListener(() -> filterSelectionChanged(dimension));
         dimensionFilterSelectionProviders.put(dimension, selectionProvider);
-
         DimensionWithContext nextDimension = null;
         for (DimensionWithContext displayedDimension : dimensionFilterSelectionProviders.keySet()) {
             if (displayedDimension.compareTo(dimension) > 0 &&
@@ -458,7 +475,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         }
         Widget beforeWidget = nextDimension != null ? dimensionFilterSelectionProviders.get(nextDimension).getEntryWidget() : null;
         dimensionFilterSelectionProvidersPanel.insertWest(selectionProvider.getEntryWidget(), FilterSelectionTableWidth, beforeWidget);
-        
         return selectionProvider;
     }
 
@@ -676,6 +692,10 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         
     }
     
+    /**
+     * Responsible for grouping the dimensions by their retriever level and inserting headings for each
+     * such retriever level
+     */
     private class FilterDimensionsListBuilder extends BaseCellTableBuilder<DimensionWithContext> {
         
         private final String headerStyle;

@@ -77,7 +77,6 @@ public class ModifiableDataMiningReportParametersDTO implements DataMiningReport
         if (!parameters.contains(parameter)) {
             throw new IllegalArgumentException("Cannot add usage of parameter that is not conained");
         }
-        
         HashSet<FilterDimensionParameter> usages = this.usages.get(key);
         if (usages == null) {
             usages = new HashSet<>();
@@ -116,5 +115,4 @@ public class ModifiableDataMiningReportParametersDTO implements DataMiningReport
         }
         return copy;
     }
-
 }

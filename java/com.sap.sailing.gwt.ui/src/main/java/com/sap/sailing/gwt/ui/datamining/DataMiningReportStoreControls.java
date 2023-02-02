@@ -221,7 +221,6 @@ public class DataMiningReportStoreControls extends Composite {
         ArrayList<StatisticQueryDefinitionDTO> queryDefinitions = new ArrayList<>(StreamSupport
                 .stream(resultsPresenter.getPresenterIds().spliterator(), false)
                 .map(resultsPresenter::getQueryDefinition).filter(Objects::nonNull).collect(Collectors.toList()));
-        
         if (!queryDefinitions.isEmpty()) {
             for (int i = 0; i < queryDefinitions.size(); i++) {
                 DataRetrieverChainDefinitionDTO retrieverChain = queryDefinitions.get(i).getDataRetrieverChainDefinition();
@@ -230,9 +229,7 @@ public class DataMiningReportStoreControls extends Composite {
                     throw new IllegalStateException("The parameters retriever level is not contained by the associated queries data retriever definition");
                 }
             }
-            
             // TODO Check for unused parameters and ask if they should be removed
-            
             return new ModifiableDataMiningReportDTO(queryDefinitions, new ModifiableDataMiningReportParametersDTO(filterParameters));
         } else {
             return null;
@@ -244,12 +241,10 @@ public class DataMiningReportStoreControls extends Composite {
         DataMiningReportDTO report = storedReport.getReport();
         filterParameters = new ModifiableDataMiningReportParametersDTO(report.getParameters());
         ArrayList<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
-
         SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
         executor.run(results -> {
             resultsPresenter.showResults(results);
             DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, resultsPresenter.getCurrentPresenterIndex()));
-            
             showBusyIndicator(false);
             if (!executor.hasErrorOccurred()) {
                 Notification.notify(
@@ -276,17 +271,14 @@ public class DataMiningReportStoreControls extends Composite {
         oracle.clear();
         oracle.addAll(collection);
         oracle.setDefaultSuggestionsFromText(collection);
-
         loadReportButtonUi.setEnabled(!collection.isEmpty());
         removeReportButtonUi.setEnabled(!collection.isEmpty());
         updateSaveLoadButtons();
     }
 
     private class SequentialQueryExecutor {
-
         private final List<StatisticQueryDefinitionDTO> queryDefinitions;
         private final Collection<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> queriesWithResults = new ArrayList<>();
-
         private boolean errorOccurred = false;
         private Consumer<Collection<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>>> callback;
 
@@ -329,6 +321,5 @@ public class DataMiningReportStoreControls extends Composite {
         public boolean hasErrorOccurred() {
             return errorOccurred;
         }
-
     }
 }

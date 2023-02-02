@@ -72,6 +72,13 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * The UI component that allows the user to select filter values for a single dimension. The component
+ * consists of a label with the dimension's name, a search toggle button that shows/hides a search/filter
+ * text box, and a "data grid" with a check box column and the dimension values that pass all retriever
+ * levels and dimension filters up to the point where this dimension filter occurs in the left-to-right
+ * arrangement of several components of this type.
+ */
 public class DimensionFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> {
 
     private static final DataMiningResources Resources = GWT.create(DataMiningResources.class);
@@ -275,7 +282,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         }
         HashSet<FunctionDTO> dimensions = new HashSet<>();
         dimensions.add(dimension);
-        
         availableData.clear();
         counter.increase();
         contentContainer.remove(dataGrid);
@@ -285,25 +291,21 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                     @SuppressWarnings("unchecked")
                     @Override
                     protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {
-                        Map<GroupKey, HashSet<Object>> results = result.getResults();
-                        List<Serializable> sortedData = new ArrayList<>();
-                        
+                        final Map<GroupKey, HashSet<Object>> results = result.getResults();
+                        final List<Serializable> sortedData = new ArrayList<>();
                         if (!results.isEmpty()) {
                             GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
                             availableData.addAll((Collection<? extends Serializable>) results.get(contentKey));
                             sortedData.addAll(availableData);
                             sortedData.sort((o1, o2) -> NaturalComparator.compare(o1.toString(), o2.toString()));
                         }
-                        
                         busyIndicator.setBusy(false);
                         filterPanel.updateAll(sortedData);
                         contentContainer.add(dataGrid);
-                        
                         internalSetSelection(selectionToBeApplied != null ? selectionToBeApplied : selectionModel.getSelectedSet(),
                                              selectionCallback != null ? selectionCallback : m -> { });
                         selectionToBeApplied = null;
                         selectionCallback = null;
-                        
                         if (callback != null) {
                             callback.run();
                         }

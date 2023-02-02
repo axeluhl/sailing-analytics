@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public interface DataMiningReportParametersDTO extends Serializable {
-    
     boolean isEmpty();
     
     HashSet<FilterDimensionParameter> getAll();
