@@ -4,7 +4,7 @@ public enum MimeType {
 
     mp4(MediaType.video, MediaSubType.mp4, "mp4"),
     ogv(MediaType.video, MediaSubType.ogg, "ogv"),
-    qt(MediaType.video, MediaSubType.quicktime, "qt|qtvr|qti|qtif"),
+    qt(MediaType.video, MediaSubType.mp4, "qt|qtvr|qti|qtif"),
     mp3(MediaType.audio, MediaSubType.mpeg, "mp3"),
     ogg(MediaType.audio, MediaSubType.ogg, "ogg|oga|spx"),
     aac(MediaType.audio, MediaSubType.aac, "acc"),

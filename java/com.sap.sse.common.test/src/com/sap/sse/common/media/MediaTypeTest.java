@@ -12,7 +12,7 @@ public class MediaTypeTest {
         assertEquals(MimeType.mp4, MimeType.byContentType("video/mp4"));
         assertEquals(MimeType.ogv, MimeType.byContentType("video/ogg"));
         assertEquals(MimeType.ogg, MimeType.byContentType("audio/ogg"));
-        assertEquals(MimeType.qt, MimeType.byContentType("video/quicktime"));
+        assertEquals(MimeType.mov, MimeType.byContentType("video/quicktime"));
         assertEquals(MimeType.image, MimeType.byContentType("image/jpeg"));
         assertEquals(MimeType.image, MimeType.byContentType("image/gif"));
         assertEquals(MimeType.image, MimeType.byContentType("image/webp"));
