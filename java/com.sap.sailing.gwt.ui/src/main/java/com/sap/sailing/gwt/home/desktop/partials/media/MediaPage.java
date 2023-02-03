@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
 import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
+import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
@@ -135,11 +136,8 @@ public class MediaPage extends Composite {
     @UiHandler("mediaAddButton")
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
-        final DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(video -> {
-            manageMediaModel.addVideo(video, eventDto -> updateMedia());
-        }, image -> {
-            manageMediaModel.addImage(image, eventDto -> updateMedia());
-        });
+        final DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(
+                (images, videos) -> manageMediaModel.addImagesAndVideos(images, videos, eventDto -> updateMedia()));
         popupHolder.add(popup);
         popup.center();
     }
@@ -306,7 +304,17 @@ public class MediaPage extends Composite {
     private void putVideoOnDisplay(final VideoDTO video, boolean autoplay) {
         videoDisplayUi = new VideoWithLowerThird(true, autoplay);
         videoDisplayUi.setVideo(video);
-        videoDisplayHolderUi.setWidget(videoDisplayUi);
+        try {
+            videoDisplayHolderUi.setWidget(videoDisplayUi);
+        } catch (Exception e) {
+            final MimeType mimeType;
+            if (video != null) {
+                mimeType = video.getMimeType();
+            } else {
+                mimeType = MimeType.unknown;
+            }
+            GWT.log("Could not setup video player video with mime type: " + mimeType, e);
+        }
     }
 
     private void setMediaManaged(boolean managed) {

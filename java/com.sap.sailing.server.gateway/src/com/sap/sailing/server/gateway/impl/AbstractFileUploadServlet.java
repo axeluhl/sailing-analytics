@@ -45,6 +45,18 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
         try {
             @SuppressWarnings("unchecked")
             List<FileItem> items = (List<FileItem>) upload.parseRequest(req);
+            // The content type and character encoding are expected to be set by AbstractFileUploadServlet.doPost already
+            // before invoking this method. The hairy part about all this is that we trigger file uploads from <form>
+            // elements in HTML pages, and by default these expect to receive content of type text/html, or at best
+            // application/xml, but application/json does not belong to the expected content types of an HTML form.
+            // This leads to the strange effect that browser which expect to need to display the response to a user
+            // will wrap the application/json content in a <pre> tag even before delivering it to the onSubmitComplete handler.
+            // Therefore, all such handlers must ensure they check for a <pre>...</pre> enclosing and remove it before
+            // handling the content.
+            // Conversely, trying to use text/html as content encoding leads some browsers---especially on mobile devices---
+            // to do ugly things to the content returned, such as replacing digit sequences by a corresponding <a> element
+            // that allows the user to dial that number with the phone app...
+            setJsonResponseHeader(resp);
             process(items, req, resp);
         } catch (FileUploadException e) {
             throw new IOException("Could not parse request");

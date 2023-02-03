@@ -57,7 +57,6 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        resp.setContentType("text/html;charset=UTF-8");
         ImporterResult importerResult = null;
         try {
             String fileName = null;

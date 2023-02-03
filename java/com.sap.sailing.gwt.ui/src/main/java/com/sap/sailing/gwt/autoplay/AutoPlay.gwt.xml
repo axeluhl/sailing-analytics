@@ -19,7 +19,7 @@
     
     <!-- Specify the paths for translatable code -->
     <!-- module containing locale configuration -->
-    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesSinglePermutation' />
     
     <source path="client"/>
     

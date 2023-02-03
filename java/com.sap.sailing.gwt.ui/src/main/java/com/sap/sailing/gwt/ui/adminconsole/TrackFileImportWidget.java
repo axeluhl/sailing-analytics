@@ -34,5 +34,4 @@ public class TrackFileImportWidget extends AbstractFileImportWidget implements I
             }
         });
     }
-    
 }

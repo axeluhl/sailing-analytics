@@ -110,10 +110,6 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             type = "video/vimeo";
         } else if (mimeType.mediaSubType == MediaSubType.mp4) {
             type = "video/mp4";
-        } else if (mimeType == MimeType.qt) {
-            // TODO: this is a workaround because browsers are not supporting media type video/quicktime. For most cases this should work.
-            //  Else video upload from apple devices will not be possible.
-            type = "video/mp4";
         } else if (mimeType == MimeType.mp3) {
             type = "audio/mp3";
         }

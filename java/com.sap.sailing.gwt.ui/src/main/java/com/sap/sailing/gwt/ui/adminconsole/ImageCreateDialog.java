@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
 public class ImageCreateDialog extends ImageDialog {
 
-    public ImageCreateDialog(String initialTag, SailingServiceAsync sailingService, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<ImageResizingTaskDTO> dialogCallback) {
+    public ImageCreateDialog(String initialTag, SailingServiceAsync sailingService, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<ImageResizingTaskDTO>> dialogCallback) {
         super(new Date(), sailingService, stringMessages, storageServiceAvailable, dialogCallback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);
@@ -20,10 +20,6 @@ public class ImageCreateDialog extends ImageDialog {
         subtitleTextBox.setVisibleLength(40);
         copyrightTextBox = createTextBox(null);
         copyrightTextBox.setVisibleLength(40);
-        widthInPxBox = createIntegerBox(null, 10);
-        widthInPxBox.setEnabled(false);
-        heightInPxBox = createIntegerBox(null, 10);
-        heightInPxBox.setEnabled(false);
         List<String> tags = new ArrayList<>();
         if (initialTag != null && !initialTag.isEmpty()) {
             tags.add(initialTag);
