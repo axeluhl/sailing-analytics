@@ -13,6 +13,12 @@ public class ModifiableDataMiningReportParametersDTO implements DataMiningReport
     private static final long serialVersionUID = -1898369096479655505L;
     
     private HashSet<FilterDimensionParameter> parameters;
+    
+    /**
+     * Parameter usages, keyed by the zero-based index of the result presenter panel to which it belongs.
+     * Each result presenter panel constitutes a context for a query / report, and switching between them
+     * changes this context and activates the new context's query / report and parameters.
+     */
     private HashMap<Integer, HashSet<FilterDimensionParameter>> usages;
     
     public ModifiableDataMiningReportParametersDTO() {
@@ -73,6 +79,11 @@ public class ModifiableDataMiningReportParametersDTO implements DataMiningReport
         }
     }
     
+    /**
+     * @param key
+     *            the index of the result presenter panel to which the parameter belongs; see
+     *            {@code CompositeResultsPresenter.getCurrentPresenterIndex()}
+     */
     public boolean addUsage(Integer key, FilterDimensionParameter parameter) {
         if (!parameters.contains(parameter)) {
             throw new IllegalArgumentException("Cannot add usage of parameter that is not conained");

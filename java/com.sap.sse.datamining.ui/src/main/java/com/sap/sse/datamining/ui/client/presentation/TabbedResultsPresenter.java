@@ -34,10 +34,23 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         implements CompositeResultsPresenter<Settings> {
 
     protected static final DataMiningResources resources = GWT.create(DataMiningResources.class);
+    
+    /**
+     * Used as a prefix for the ID strings of the presenter tabs which are then used as keys in the
+     * {@link #tabsMappedById} map
+     */
     private static final String IdPrefix = "Tab";
     
+    /**
+     * Counts the presenter tabs and is used in the construction of presenter tab IDs which then become keys in
+     * {@link #tabsMappedById}.
+     */
     private final AtomicInteger idCounter;
     private final ScrolledTabLayoutPanel tabPanel;
+    
+    /**
+     * Presenter tabs, keyed by strings that are constructed from the {@link #IdPrefix} and the {@link #idCounter}
+     */
     private final Map<String, CloseablePresenterTab> tabsMappedById;
     private final DrillDownCallback drillDownCallback;
     private final Map<String, ResultsPresenterFactory<?>> registeredPresenterFactories;
@@ -148,18 +161,14 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     public void showResults(Iterable<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> results) {
         // FIXME Somehow a single tab remains
         new ArrayList<>(tabsMappedById.keySet()).stream().map(tabsMappedById::get).forEach(this::removeTab);
-        
         for (Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>> entry: results) {
             StatisticQueryDefinitionDTO queryDefinition = entry.getA();
             QueryResultDTO<?> result = entry.getB();
-            
             ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
             CloseablePresenterTab presenterTab = addTabAndFocus(factory.createPresenter());
-            
             presenterTab.setText(result.getResultSignifier());
             presenterTab.getPresenter().showResult(queryDefinition, result);
         }
-        
         // Needed to remove the remaining empty tab
         for (CloseablePresenterTab tab : tabsMappedById.values()) {
             if (tabPanel.getWidgetIndex(tab.getPresenter().getEntryWidget()) == 0) {
@@ -167,45 +176,34 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
                 break;
             }
         }
-        
         tabPanel.selectTab(0);
     }
     
-    native void consoleLog( String message) /*-{
-        console.log( "me:" + message );
-    }-*/;
-
     @Override
     public void showError(String presenterId, String error) {
         CloseablePresenterTab tab = getTab(presenterId);
-        if (tab == null) {
-            return;
+        if (tab != null) {
+            tab.setText(getDataMiningStringMessages().error());
+            tab.getPresenter().showError(error);
         }
-        
-        tab.setText(getDataMiningStringMessages().error());
-        tab.getPresenter().showError(error);
     }
 
     @Override
     public void showError(String presenterId, String mainError, Iterable<String> detailedErrors) {
         CloseablePresenterTab tab = getTab(presenterId);
-        if (tab == null) {
-            return;
+        if (tab != null) {
+            tab.setText(getDataMiningStringMessages().error());
+            tab.getPresenter().showError(mainError, detailedErrors);
         }
-        
-        tab.setText(getDataMiningStringMessages().error());
-        tab.getPresenter().showError(mainError, detailedErrors);
     }
 
     @Override
     public void showBusyIndicator(String presenterId) {
         CloseablePresenterTab tab = getTab(presenterId);
-        if (tab == null) {
-            return;
+        if (tab != null) {
+            tab.setText(getDataMiningStringMessages().runningQuery());
+            tab.getPresenter().showBusyIndicator();
         }
-        
-        tab.setText(getDataMiningStringMessages().runningQuery());
-        tab.getPresenter().showBusyIndicator();
     }
 
     @Override
@@ -265,7 +263,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         String tabId = IdPrefix + idCounter.getAndIncrement();
         CloseablePresenterTab presenterTab = new CloseablePresenterTab(tabId, presenter);
         tabsMappedById.put(tabId, presenterTab);
-
         tabPanel.insert(presenter.getEntryWidget(), presenterTab, tabPanel.getWidgetCount() - 1);
         int presenterIndex = tabPanel.getWidgetIndex(presenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);

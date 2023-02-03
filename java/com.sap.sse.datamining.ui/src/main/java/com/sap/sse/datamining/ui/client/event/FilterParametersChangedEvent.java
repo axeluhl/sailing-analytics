@@ -15,7 +15,7 @@ public class FilterParametersChangedEvent extends Event<FilterParametersChangedE
     
     @FunctionalInterface
     public interface Handler extends EventHandler {
-        void onFilterParameterChenge(FilterParametersChangedEvent event);
+        void onFilterParameterChange(FilterParametersChangedEvent event);
     }
     
     private final DataMiningReportParametersDTO parameters;
@@ -35,6 +35,9 @@ public class FilterParametersChangedEvent extends Event<FilterParametersChangedE
         return activeIndex;
     }
     
+    // FIXME I'm afraid the pair (retrieverLevel, dimension) is not always a unique key. Potential corner cases may occur when @Connector navigation is used.
+    // The FunctionDTOs are compared by function name and source type name but not by the path starting at the retriever level's type. If two paths exist to
+    // the same source type and then the same function is used through those two separate paths, those dimensions couldn't be discerned here.
     public FilterDimensionParameter getParameter(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension) {
         return parameters.getUsages(activeIndex).stream()
                 .filter(p -> p.getRetrieverLevel().equals(retrieverLevel) && p.getDimension().equals(dimension))
@@ -49,7 +52,7 @@ public class FilterParametersChangedEvent extends Event<FilterParametersChangedE
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onFilterParameterChenge(this);
+        handler.onFilterParameterChange(this);
     }
     
     public static HandlerRegistration register(EventBus eventBus, Handler handler) {

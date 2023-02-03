@@ -62,9 +62,7 @@ public class StoredDataMiningReportPersisterImpl implements StoredDataMiningRepo
     @Override
     public StoredDataMiningReportDTOImpl removeStoredReport(StoredDataMiningReportDTOImpl report) {
         StoredDataMiningReportPreferences reportPreferences = getUserPreferences();
-
         Collection<StoredDataMiningReportPreference> updatedReports = filterReport(report, reportPreferences);
-
         StoredDataMiningReportPreferences updatedPreferences = new StoredDataMiningReportPreferences();
         updatedPreferences.setStoredReports(updatedReports);
         setUserPreferences(updatedPreferences);
@@ -73,15 +71,16 @@ public class StoredDataMiningReportPersisterImpl implements StoredDataMiningRepo
 
     private Collection<StoredDataMiningReportPreference> filterReport(StoredDataMiningReportDTOImpl report,
             StoredDataMiningReportPreferences prefs) {
+        final Collection<StoredDataMiningReportPreference> result;
         if (prefs == null) {
-            return new ArrayList<>();
+            result = new ArrayList<>();
+        } else {
+            Stream<StoredDataMiningReportPreference> preferenceStream = StreamSupport
+                    .stream(prefs.getStoredReports().spliterator(), false);
+            result = new ArrayList<>(
+                    preferenceStream.filter(r -> !r.getId().equals(report.getId())).collect(Collectors.toList()));
         }
-
-        Stream<StoredDataMiningReportPreference> preferenceStream = StreamSupport
-                .stream(prefs.getStoredReports().spliterator(), false);
-        Collection<StoredDataMiningReportPreference> updatedEntries = new ArrayList<>(
-                preferenceStream.filter(r -> !r.getId().equals(report.getId())).collect(Collectors.toList()));
-        return updatedEntries;
+        return result;
     }
 
     private void setUserPreferences(StoredDataMiningReportPreferences preferences) {

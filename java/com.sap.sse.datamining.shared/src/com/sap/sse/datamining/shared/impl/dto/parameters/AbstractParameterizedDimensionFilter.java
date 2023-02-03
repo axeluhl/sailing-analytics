@@ -1,9 +1,5 @@
 package com.sap.sse.datamining.shared.impl.dto.parameters;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -31,17 +27,6 @@ public abstract class AbstractParameterizedDimensionFilter implements FilterDime
         return this.dimension;
     }
     
-    @Override
-    public Collection<? extends Serializable> getAvailableValues(Iterable<? extends Serializable> allValues) {
-        Collection<Serializable> values = new ArrayList<>();
-        for (Serializable value : allValues) {
-            if (value != null && matches(value)) {
-                values.add(value);
-            }
-        }
-        return values;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;

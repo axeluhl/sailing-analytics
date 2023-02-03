@@ -121,7 +121,6 @@ public class DataMiningReportStoreControls extends Composite {
         suggestBoxUi.getValueBox().addClickHandler(e -> suggestBoxUi.showSuggestionList());
         suggestBoxUi.getValueBox().addKeyUpHandler(e -> updateSaveLoadButtons());
         suggestBoxUi.getValueBox().addBlurHandler(e -> updateSaveLoadButtons());
-
         Widget glass = new SimplePanel();
         glass.addStyleName("whiteGlass");
         HTML labeledBusyIndicator = new HTML(SafeHtmlUtils.fromString(stringMessages.applyingReport()));
@@ -129,11 +128,9 @@ public class DataMiningReportStoreControls extends Composite {
         applyReportBusyIndicator = new LayoutPanel();
         applyReportBusyIndicator.add(glass);
         applyReportBusyIndicator.add(labeledBusyIndicator);
-
         configureQueryParametersDialog = new ConfigureQueryParametersDialog(dataMiningService, errorReporter, session, retrieverChainProvider, this::onDialogClose);
         DataMiningEventBus.addHandler(CreateFilterParameterEvent.TYPE, this::onCreateFilterParameter);
         DataMiningEventBus.addHandler(EditFilterParameterEvent.TYPE, this::onEditFilterParameter);
-        
         this.resultsPresenter.addPresenterRemovedListener((a, index, b) -> {
             filterParameters.removeUsagesAndShiftKeys(index);
         });
@@ -172,9 +169,9 @@ public class DataMiningReportStoreControls extends Composite {
         if (!storedReport.isPresent()) {
             Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportLoadedFailed(name),
                     NotificationType.ERROR);
-            return;
+        } else {
+            applyReport(storedReport.get());
         }
-        applyReport(storedReport.get());
     }
 
     @UiHandler("removeReportButtonUi")
@@ -217,6 +214,10 @@ public class DataMiningReportStoreControls extends Composite {
         DataMiningEventBus.fire(new FilterParametersDialogClosedEvent(filterParameters, activeIndex));
     }
 
+    /**
+     * Compiles a new {@link DataMiningReportDTO} report based on a the queries from all available tabs in the
+     * {@link #resultsPresenter}.
+     */
     private DataMiningReportDTO buildReport() {
         ArrayList<StatisticQueryDefinitionDTO> queryDefinitions = new ArrayList<>(StreamSupport
                 .stream(resultsPresenter.getPresenterIds().spliterator(), false)

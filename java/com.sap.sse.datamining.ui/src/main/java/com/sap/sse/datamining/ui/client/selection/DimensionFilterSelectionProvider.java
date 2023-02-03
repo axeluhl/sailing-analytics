@@ -40,7 +40,6 @@ import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -106,7 +105,19 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     private final MultiSelectionModel<Serializable> selectionModel;
     private final DataGrid<Serializable> dataGrid;
     private final Column<Serializable, Boolean> checkboxColumn;
-    
+     
+    /**
+     * May reference a parameter object if the filter value comes from the actual value of
+     * a parameter in the parameter model of a report. For example, if a report contains
+     * several queries that all have a dimension filter for "Regatta Name" and the user wants
+     * all those queries to be applied for the same regatta then all "Regatta Name" dimension
+     * filters in those queries would all be bound to the same {@link FilterDimensionParameter}
+     * object so that setting an actual value (a dimension filter, typically consisting of an
+     * explicit value list) will apply to all queries at the same time.<p>
+     * 
+     * May be {@code null}, meaning that the value for this dimension filter is not shared with
+     * any other filters / queries.
+     */
     private FilterDimensionParameter parameter;
     
     private String searchInputToApply;
@@ -147,25 +158,15 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                 return dataGrid;
             }
         };
-        filterPanel.addFilter(new Filter<Serializable>() {
-            @Override
-            public boolean matches(Serializable object) {
-                return parameter == null || parameter.matches(object);
-            }
-            @Override
-            public String getName() {
-                return "ParameterFilter";
-            }
-        });
         filterPanel.setWidth("100%");
         filterPanel.setSpacing(1);
         filterPanel.getTextBox().setWidth("100%");
         filteredData.addDataDisplay(dataGrid);
-        
+        // Selection Model:
         selectionModel = new MultiSelectionModel<>(this::elementAsString);
         selectionModel.addSelectionChangeHandler(this::selectionChanged);
         dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
-        
+        // Checkbox Column:
         checkboxColumn = new Column<Serializable, Boolean>(new CheckboxCell(true, false)) {
             @Override
             public Boolean getValue(Serializable object) {
@@ -181,39 +182,32 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         };
         contentColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         dataGrid.addColumn(contentColumn);
-        
         busyIndicator = new SimpleBusyIndicator(false, 0.85f);
         busyIndicator.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-        
         contentContainer = new LayoutPanel();
         contentContainer.add(busyIndicator);
         contentContainer.setWidgetTopBottom(busyIndicator, 10, Unit.PX, 10, Unit.PX);
         contentContainer.setWidgetLeftRight(busyIndicator, 10, Unit.PX, 10, Unit.PX);
-        
         mainPanel = new DockLayoutPanel(Unit.PX);
         mainPanel.addNorth(createHeaderPanel(), 40);
         mainPanel.addNorth(filterPanel, 35);
         mainPanel.setWidgetHidden(filterPanel, true);
         mainPanel.add(contentContainer);
-        
         DataMiningEventBus.addHandler(FilterParametersChangedEvent.TYPE, event -> {
            this.parameter = event.getParameter(this.retrieverLevel, this.dimension);
            this.filterPanel.filter();
-               
            if (this.parameter != null) {
                boolean selectionChanged = false;
-               for (Serializable value: selectionModel.getSelectedSet()) {
-                   if (!parameter.matches(value)) {
-                       selectionModel.setSelected(value, false);
-                       selectionChanged = true;
-                   }
+               for (final Serializable value : this.filterPanel.getAll()) {
+                   final boolean matchedByParameter = parameter.matches(value);
+                   selectionChanged = selectionChanged || selectionModel.isSelected(value) == matchedByParameter;
+                   selectionModel.setSelected(value, matchedByParameter);
                }
                if (!selectionChanged) {
                    this.selectionChanged(null);
                }
            }
         });
-        
         updateContent(null);
     }
 
@@ -238,6 +232,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         parameterSettingsButton.addClickHandler(e -> {
             if (this.parameter == null) {                
                 DataMiningEventBus.fire(
+                    // FIXME I think "create" is not necessarily right here; couldn't this also be "use existing" when the parameter model of the current report has one for that dimension already?
                     new CreateFilterParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
                 );
             } else {
@@ -252,6 +247,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);
 
         ToggleButton toggleFilterButton = new ToggleButton(new Image(Resources.searchIcon()));
+        toggleFilterButton.setTitle(getDataMiningStringMessages().filterDimensionValues());
         toggleFilterButton.addClickHandler(e -> {
             boolean enabled = toggleFilterButton.isDown();
             mainPanel.setWidgetHidden(filterPanel, !enabled);
@@ -327,21 +323,19 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         notifyListeners();
     }
 
+    /**
+     * @return a non-live snapshot copy of this dimension filter's current selection
+     */
     public HashSet<? extends Serializable> getSelection() {
-        Collection<? extends Serializable> selection = selectionModel.getSelectedSet();
-        if (selection.isEmpty() && parameter != null) {
-            selection = parameter.getAvailableValues(availableData);
-        }
-        return new HashSet<>(selection);
+        return new HashSet<>(selectionModel.getSelectedSet());
     }
     
     public void setSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
         selectionToBeApplied = selection;
         selectionCallback = callback;
-        
         if (!busyIndicator.isBusy()) {
             internalSetSelection(selectionToBeApplied, selectionCallback);
-            selectionToBeApplied = null;;
+            selectionToBeApplied = null;
             selectionCallback = null;
         }
     }

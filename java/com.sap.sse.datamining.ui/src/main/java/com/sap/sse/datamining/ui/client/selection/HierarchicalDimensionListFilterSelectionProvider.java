@@ -264,7 +264,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
             selectionToBeApplied = currentSelection;
             selectionCallback = EmptyApplyCallback;
         }
-        
         if (retrieverChain != null) {
             isUpdatingFilterDimensions = true;
             clearContent();
@@ -280,7 +279,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                     }
                     availableFilterDimensions.sort(null);
                     filterFilterDimensionsPanel.updateAll(availableFilterDimensions);
-    
                     updateControls();
                     if (selectionToBeApplied != null) {
                         ignoreSelectionChangedNotifications = true;

@@ -18,13 +18,9 @@ public class ValueListFilterParameter extends AbstractParameterizedDimensionFilt
         this.values = new HashSet<>(values);
     }
     
+    @Override
     public HashSet<? extends Serializable> getValues() {
         return new HashSet<>(values);
-    }
-
-    @Override
-    public boolean matches(Serializable value) {
-        return values.contains(value);
     }
 
     @Override
