@@ -124,4 +124,8 @@ public class HomePage extends HostPageWithAuthentication {
     public void clickOnEventsMenuItem() {
         driver.findElement(new BySeleniumId("eventsPage")).click();
     }
+    
+    public void clickOnEvent(String eventId) {
+        driver.findElement(new BySeleniumId("eventTeaser-" + eventId)).click();
+    }
 }

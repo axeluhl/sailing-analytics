@@ -12,6 +12,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.CompositeAction;
 
 import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.adminconsole.event.EventUpdateDialogPO;
 import com.sap.sailing.selenium.pages.common.AttributeHelper;
 
 public class DataEntryPO extends CellTableRowPO {
@@ -177,5 +178,10 @@ public class DataEntryPO extends CellTableRowPO {
 
     public void clickActionImage(String actionName) {
         this.context.findElement(By.xpath(".//td/div/div[@name=\"" + actionName + "\"]/img")).click();
+    }
+    
+    public EventUpdateDialogPO openUpdateEventDialog() {
+        this.clickActionImage("UPDATE");
+        return getPO(EventUpdateDialogPO::new, "eventDialog");
     }
 }

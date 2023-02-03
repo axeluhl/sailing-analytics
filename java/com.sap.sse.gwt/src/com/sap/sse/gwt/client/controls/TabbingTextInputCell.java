@@ -16,8 +16,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  */
 public class TabbingTextInputCell extends TextInputCell {
     interface Template extends SafeHtmlTemplates {
-        @Template("<input type=\"text\" value=\"{0}\"></input>")
-        SafeHtml input(String value);
+        @Template("<input type=\"text\" value=\"{0}\" selenium-id=\"{1}\"></input>")
+        SafeHtml input(String value, String seleniumId);
     }
 
     private static Template template;
@@ -44,7 +44,7 @@ public class TabbingTextInputCell extends TextInputCell {
 
         String s = (viewData != null) ? viewData.getCurrentValue() : value;
         if (s != null) {
-            sb.append(template.input(s));
+            sb.append(template.input(s, key.toString()));
         } else {
             sb.appendHtmlConstant("<input type=\"text\"></input>");
         }

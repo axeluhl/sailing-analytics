@@ -90,6 +90,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
             }
         };
         final VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.ensureDebugId("URLFieldWithFileUpload");
         final FlowPanel imageUrlPanel = new FlowPanel();
         imageUrlPanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
@@ -122,6 +123,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
         });
         removePanel.add(removeButton);
         urlTextBox = new TextBox();
+        urlTextBox.ensureDebugId("urlTextBox");
         urlTextBox.getElement().addClassName("url-textbox");
         urlTextBox.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().urlTextboxClass());
         urlTextBox.addValueChangeHandler(valueChangedEvent->{

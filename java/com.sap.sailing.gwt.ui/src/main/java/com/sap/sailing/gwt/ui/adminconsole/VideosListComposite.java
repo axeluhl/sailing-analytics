@@ -82,6 +82,7 @@ public class VideosListComposite extends Composite {
         panel.add(videosControlsPanel);
 
         Button createVideoBtn = new Button("Add gallery video");
+        createVideoBtn.ensureDebugId("addVideoBtn");
         createVideoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
