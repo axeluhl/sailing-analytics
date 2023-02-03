@@ -29,6 +29,7 @@ public class MediaPanelSupplier extends AdminConsolePanelSupplier<MediaPanel> {
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
+
             @Override
             public void onSuccess() {
                 widget = init();
