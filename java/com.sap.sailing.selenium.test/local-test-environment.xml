@@ -40,7 +40,7 @@
      -->
      <system-property>
         <name>webdriver.chrome.driver</name>
-        <value>/Users/udowessels/DEV/chromedrivers/chromedriver_mac_arm64_109/chromedriver</value>
+        <value>/usr/bin/chromedriver</value>
         <!-- value>~/Documents/chromedriver/chromedriver</value-->
      </system-property>
      <!--
