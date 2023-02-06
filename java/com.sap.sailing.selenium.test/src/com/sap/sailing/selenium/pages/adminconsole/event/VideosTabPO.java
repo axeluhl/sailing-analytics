@@ -19,6 +19,6 @@ public class VideosTabPO extends PageArea {
     public UploadVideosDialogPO clickAddVideoBtn() {
         this.waitForElement("addVideoBtn");
         addVideoBtn.click();
-        return getPO(UploadVideosDialogPO::new, "URLFieldWithFileUpload");
+        return getPO(UploadVideosDialogPO::new, "createVideoDialog");
     }
 }

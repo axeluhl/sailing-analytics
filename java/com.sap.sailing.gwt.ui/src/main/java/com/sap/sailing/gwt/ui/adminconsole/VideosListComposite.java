@@ -261,6 +261,7 @@ public class VideosListComposite extends Composite {
                         updateTableVisisbilty();
                     }
                 });
+        dialog.ensureDebugId("createVideoDialog");
         dialog.show();
     }
 
@@ -278,6 +279,7 @@ public class VideosListComposite extends Composite {
                         updateTableVisisbilty();
                     }
                 });
+        dialog.ensureDebugId("editVideoDialog");
         dialog.show();
     }
 
