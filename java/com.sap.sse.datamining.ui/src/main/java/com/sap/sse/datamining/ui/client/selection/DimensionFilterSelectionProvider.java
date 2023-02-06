@@ -135,16 +135,13 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         this.filterSelectionProvider = filterSelectionProvider;
         this.retrieverLevel = retrieverLevel;
         this.dimension = dimension;
-
         counter = new SimpleManagedDataMiningQueriesCounter();
         listeners = new HashSet<>();
-
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
         dataGrid = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
         dataGrid.setAutoHeaderRefreshDisabled(true);
         dataGrid.setAutoFooterRefreshDisabled(true);
         dataGrid.addStyleName("dataMiningBorderTop");
-        
         availableData = new HashSet<>();
         filteredData = new ListDataProvider<Serializable>(this::elementAsString);
         filterPanel = new AbstractFilterablePanel<Serializable>(null, filteredData, getDataMiningStringMessages()) {
@@ -212,20 +209,20 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     }
 
     private Widget createHeaderPanel() {
-        HorizontalPanel headerPanel = new HorizontalPanel();
+        final HorizontalPanel headerPanel = new HorizontalPanel();
         headerPanel.setSpacing(2);
         headerPanel.setWidth("100%");
         headerPanel.setHeight("100%");
         headerPanel.addStyleName("dimensionFilterSelectionHeader");
         headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        
-        Label headerLabel = new Label(dimension.getDisplayName());
+        // label with dimension's display name:
+        final Label headerLabel = new Label(dimension.getDisplayName());
         headerLabel.addStyleName("emphasizedLabel");
         headerPanel.add(headerLabel);
         headerPanel.setCellWidth(headerLabel, "100%");
         headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
-        
-        Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
+        // "P" parameter bind/unbind toggle button
+        final Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
         parameterIcon.setSize("16px", "16px");
         ToggleButton parameterSettingsButton = new ToggleButton(parameterIcon);
         parameterSettingsButton.addStyleName("query-parameter");
@@ -239,13 +236,14 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                 DataMiningEventBus.fire(new EditFilterParameterEvent(parameter));
             }
         });
+        // FIXME bug4789: this isn't enough; the "P" button must always correspond to the current report's parameter binding regarding this dimension filter so that switching tabs updates accordingly
         DataMiningEventBus.addHandler(FilterParametersDialogClosedEvent.TYPE, event -> {
             this.parameter = event.getParameter(this.retrieverLevel, this.dimension);
             parameterSettingsButton.setDown(parameter != null);
         });
         headerPanel.add(parameterSettingsButton);
         headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);
-
+        // toggle button to display the filter/search text field:
         ToggleButton toggleFilterButton = new ToggleButton(new Image(Resources.searchIcon()));
         toggleFilterButton.setTitle(getDataMiningStringMessages().filterDimensionValues());
         toggleFilterButton.addClickHandler(e -> {
@@ -266,7 +264,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         });
         headerPanel.add(toggleFilterButton);
         headerPanel.setCellHorizontalAlignment(toggleFilterButton, HasHorizontalAlignment.ALIGN_RIGHT);
-        
         return headerPanel;
     }
 

@@ -14,7 +14,7 @@ public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
 
     private final boolean isDimension;
     /**
-     * The functions name including its parameters in parenthesis or empty parenthesis, if this function doesn't have
+     * The function's name including its parameters in parenthesis or empty parenthesis, if this function doesn't have
      * parameters. Can consist of multiple concatenated function names, if the backend Function encapsulated multiple
      * data mining functions.
      */
