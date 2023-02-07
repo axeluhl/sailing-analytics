@@ -118,7 +118,7 @@ public class TagInputPanel extends FlowPanel {
         @Override
         protected TagDTO getResult() {
             return new TagDTO(getTagTextBox().getValue(), getCommentTextArea().getValue(),
-                    getImageUploadPanel().getURL(), null, getVisibleForPublicCheckBox().getValue(), null, null, null);
+                    getImageUploadPanel().getUri(), null, getVisibleForPublicCheckBox().getValue(), null, null, null);
         }
 
         @Override
@@ -228,7 +228,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     public String getImageURL() {
-        return tagEntryFields.getImageUploadPanel().getURL();
+        return tagEntryFields.getImageUploadPanel().getUri();
     }
 
     protected void setTag(String tag) {
@@ -240,7 +240,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     protected void setImageURL(String imageURL) {
-        getImageURLTextBox().setValue(imageURL);
+        getImageURLTextBox().setUri(imageURL);
     }
 
     protected void setVisibleForPublic(boolean visibleForPublic) {

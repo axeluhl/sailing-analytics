@@ -23,7 +23,7 @@ public class ProgressServlet extends HttpServlet {
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
+        response.setContentType("application/json");
         final HttpSession session = request.getSession(true);
         if (session == null) {
             logger.warning("Sorry, session is null"); // just to be safe

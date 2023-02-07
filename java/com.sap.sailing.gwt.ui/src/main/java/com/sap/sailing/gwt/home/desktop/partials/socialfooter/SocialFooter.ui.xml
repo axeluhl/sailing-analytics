@@ -14,7 +14,7 @@
           <ui:text from="{i18n.followSapSports}" />
         </h3>
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemleft} {res.mediaCss.small4} {res.mediaCss.columns}">
-          <a href="http://twitter.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrappertwitter}">
+          <a href="https://twitter.com/sap" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrappertwitter}">
             <img src="{shr.twitter.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
             <div class="{local_res.css.socialfooter_item_text}">
               <div class="{local_res.css.socialfooter_item_text_top}">
@@ -25,7 +25,7 @@
           </a>
         </div>
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemcenter} {res.mediaCss.small4} {res.mediaCss.columns}">
-          <a href="http://www.facebook.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrapperfacebook}">
+          <a href="https://www.facebook.com/SAP" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrapperfacebook}">
             <img src="{shr.facebook.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
             <div class="{local_res.css.socialfooter_item_text}">
               <div class="{local_res.css.socialfooter_item_text_top}">
@@ -36,7 +36,7 @@
           </a>
         </div>
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemright} {res.mediaCss.small4} {res.mediaCss.columns}">
-          <a href="https://www.instagram.com/sapsports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrapperinstagram}">
+          <a href="https://www.instagram.com/sap/" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrapperinstagram}">
             <img src="{shr.instagram.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
             <div class="{local_res.css.socialfooter_item_text} {local_res.css.socialfooter_item_text_inverse}">
               <div class="{local_res.css.socialfooter_item_text_top}">

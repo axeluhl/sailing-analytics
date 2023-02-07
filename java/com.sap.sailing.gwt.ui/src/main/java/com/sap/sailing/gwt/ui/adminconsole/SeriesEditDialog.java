@@ -198,8 +198,6 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         hasCrossFleetMergedRankingCheckbox.ensureDebugId("HasCrossFleetMergedRankingCheckbox");
         hasCrossFleetMergedRankingCheckbox.setValue(selectedSeries.hasCrossFleetMergedRanking());
         additionalWidgetPanel.add(hasCrossFleetMergedRankingCheckbox);
-        // TODO bug 5147: enable when cross-fleet merged ranking is really working
-        hasCrossFleetMergedRankingCheckbox.setVisible(false);
 
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
         firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
