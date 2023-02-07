@@ -121,6 +121,11 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     private FilterDimensionParameter parameter;
     
     private String searchInputToApply;
+    
+    /**
+     * Preserves user selection across model updates, e.g., due to changes in preceding filter level, leading to
+     * a different value set from which to select
+     */
     private Iterable<? extends Serializable> selectionToBeApplied;
     private Consumer<Iterable<String>> selectionCallback;
 

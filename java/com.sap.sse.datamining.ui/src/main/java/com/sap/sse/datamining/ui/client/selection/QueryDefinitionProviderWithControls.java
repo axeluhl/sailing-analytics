@@ -70,6 +70,13 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * Contains the widgets through which a {@link StatisticQueryDefinitionDTO} can be viewed and edited. This in particular
+ * includes a {@link StatisticProvider} which in turn manages the aggregation function selection widget and the
+ * statistic function selected; a {@link GroupingProvider} through which the user selects one or more dimensions by
+ * which to group results, and a {@link FilterSelectionProvider} used to show the dimensions by which the user can
+ * filter, grouped by the retriever levels of the retriever chain implied by the statistic selected by the user.
+ */
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings>
         implements WithControls {
 
@@ -110,7 +117,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         super(parent, context, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         mainPanel = new LayoutPanel();
-        
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("dataMiningMarginBase");
@@ -118,12 +124,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         // instead of pushing its content into the next line when there is not enough space.
         controlsPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
         controlsPanel.getElement().getStyle().setWhiteSpace(WhiteSpace.NOWRAP);
-        
         this.settingsControl = settingsControl;
         addControl(this.settingsControl.getEntryWidget());
         settings = new AdvancedDataMiningSettings();
         this.settingsControl.addSettingsComponent(this);
-
         queryDefinitionViewerToggleButton = new ToggleButton(getDataMiningStringMessages().viewQueryDefinition(),
                 new ClickHandler() {
                     @Override
@@ -151,30 +155,25 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             addControl(queryDefinitionViewerToggleButton);
             addControl(predefinedQueryRunner.getEntryWidget());
         }
-
         // Setting up the query component providers
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
                                                             errorReporter, settingsControl, settingsManager);
         Widget statisticProviderWidget = statisticProvider.getEntryWidget();
         statisticProviderWidget.addStyleName("dataMiningMarginBase");
         statisticProvider.addStatisticChangedListener(providerListener);
-        
         groupingProvider = new MultiDimensionalGroupingProvider(parent, context, dataMiningService,
                                                                 errorReporter, statisticProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
         groupingProvider.getEntryWidget().addStyleName("dataMiningMarginBase");
-
         filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(parent, context, session,
                 dataMiningService, errorReporter, statisticProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSelectionProvider.getEntryWidget().addStyleName("dataMiningBorderTop");
-        
         filterSplitPanel = new SplitLayoutPanel(SplitterSize);
         filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), FooterPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), InitialQueryDefinitionViewerWidth);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
-        
         Widget glass = new SimplePanel();
         glass.addStyleName("whiteGlass");
         HTML labeledBusyIndicator = new HTML(SafeHtmlUtils.fromString(getDataMiningStringMessages().applyingQuery()));
@@ -182,23 +181,19 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         applyQueryBusyIndicator = new LayoutPanel();
         applyQueryBusyIndicator.add(glass);
         applyQueryBusyIndicator.add(labeledBusyIndicator);
-
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(SplitterSize);
         headerPanel.addWest(statisticProviderWidget, InitialStatisticProviderWidth);
         headerPanel.add(controlsPanel);
-        
         DockLayoutPanel contentPanel = new DockLayoutPanel(Unit.PX);
         contentPanel.addNorth(headerPanel, HeaderPanelHeight);
         contentPanel.add(filterSplitPanel);
         mainPanel.add(contentPanel);
-
         // Storing the different component providers in a list
         providers = new ArrayList<>();
         providers.add(statisticProvider);
         providers.add(groupingProvider);
         providers.add(filterSelectionProvider);
         reloadComponents();
-        
         // Setting up dialogs and event handlers
         confirmChangeLossDialog = createConfirmChangeLossDialog();
     }
@@ -326,16 +321,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         for (FunctionDTO dimension : groupingProvider.getDimensionsToGroupBy()) {
             queryDTO.appendDimensionToGroupBy(dimension);
         }
-
         for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsEntry : statisticProvider.getRetrieverSettings().entrySet()) {
             queryDTO.setRetrieverSettings(retrieverSettingsEntry.getKey(), retrieverSettingsEntry.getValue());
         }
-
         for (Entry<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionEntry : filterSelectionProvider
                 .getSelection().entrySet()) {
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
-
         return queryDTO;
     }
 
@@ -345,9 +337,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
     
     /**
-     * Displays the given query definition, using the given {@link ChangeLossStrategy} to handle a possible loss of changes.
-     * @param queryDefinition The query to be displayed
-     * @param strategy The strategy to use if the current query definition has been changed
+     * Displays the given query definition, using the given {@link ChangeLossStrategy} to handle a possible loss of
+     * changes.
+     * 
+     * @param queryDefinition
+     *            The query to be displayed
+     * @param strategy
+     *            The strategy to use if the current query definition has been changed
      */
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, ChangeLossStrategy strategy) {
         if (queryDefinitionChanged) {
@@ -373,9 +369,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         Set<ApplyCallback> callbacks = new HashSet<>();
         Collection<String> errorMessages = new ArrayList<>();
         String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
-        
         setBlockChangeNotification(true);
-        
         ApplyCallback statisticCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
         callbacks.add(statisticCallback);
         statisticProvider.applyQueryDefinition(queryDefinition, statisticCallback);
@@ -390,7 +384,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             callbacks.add(filterCallback);
             filterSelectionProvider.applyQueryDefinition(queryDefinition, filterCallback);
         }
-        
         if (!callbacks.isEmpty()) {
             for (ApplyCallback callback : callbacks) {
                 callback.isArmed = true;
@@ -415,29 +408,23 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     private void showErrorWhileApplyingQueryDialog(Iterable<String> errorMessages, String retrieverChainName) {
         StringMessages stringMessages = getDataMiningStringMessages();
-        
         DialogBox dialog = new DialogBox(false, true);
         dialog.setText(stringMessages.anErrorOccurredWhileApplyingTheQuery());
         dialog.setAnimationEnabled(true);
         dialog.setGlassEnabled(true);
-        
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.add(new HTML(SafeHtmlUtils.fromString(stringMessages.queryBasedOnRetrieverChainCanNotBeApplied(retrieverChainName))));
-        
         HtmlUListBuilder messagesBuilder = HtmlBuilderFactory.get().createUListBuilder();
         for (String errorMessage : errorMessages) {
             messagesBuilder.startLI().text(errorMessage).end();
         }
         contentPanel.add(new HTML(messagesBuilder.asSafeHtml()));
-
         FlowPanel buttonPanel = new FlowPanel();
         buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
-        
         Button okButton = new Button(stringMessages.ok());
         okButton.addClickHandler(e -> dialog.hide());
         buttonPanel.add(okButton);
-
         dialog.setWidget(contentPanel);
         dialog.center();
     }
@@ -527,7 +514,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     private class ApplyCallback implements Consumer<Iterable<String>> {
-        
         private final Collection<String> allMessages;
         private final Set<ApplyCallback> callbacks;
         private final String retrieverChainName;
@@ -547,11 +533,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 applyQueryDefinitionCompleted(allMessages, retrieverChainName);
             }
         }
-        
     }
 
     private class ProviderListener implements StatisticChangedListener, FilterSelectionChangedListener, GroupingChangedListener {
-
         @Override
         public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
             if (providersAwaitingReload()) {
@@ -591,7 +575,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 notifyQueryDefinitionChanged();
             }
         }
-
     }
 
     private class FirstDimensionSelectionDialog extends DataEntryDialog<FunctionDTO> {

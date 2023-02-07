@@ -40,7 +40,6 @@ public class StoredDataMiningReportPersisterImpl implements StoredDataMiningRepo
         if (reportPreferences == null) {
             return new ArrayList<>();
         }
-
         Stream<StoredDataMiningReportPreference> preferenceStream = StreamSupport
                 .stream(reportPreferences.getStoredReports().spliterator(), false);
         return new ArrayList<>(preferenceStream.map(this::transform).collect(Collectors.toList()));
@@ -49,10 +48,8 @@ public class StoredDataMiningReportPersisterImpl implements StoredDataMiningRepo
     @Override
     public StoredDataMiningReportDTOImpl updateOrCreateStoredReport(StoredDataMiningReportDTOImpl report) {
         StoredDataMiningReportPreferences reportPreferences = getUserPreferences();
-
         Collection<StoredDataMiningReportPreference> updatedReports = filterReport(report, reportPreferences);
         updatedReports.add(transform(report));
-
         StoredDataMiningReportPreferences updatedPreferences = new StoredDataMiningReportPreferences();
         updatedPreferences.setStoredReports(updatedReports);
         setUserPreferences(updatedPreferences);

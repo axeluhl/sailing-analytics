@@ -1,8 +1,9 @@
 package com.sap.sse.datamining.shared.dto;
 
 import java.io.Serializable;
-import java.util.HashSet;
 
+import com.sap.sse.common.NamedWithUUID;
+import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
@@ -27,22 +28,23 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
  * a dimension filter that is bound to this parameter will update this parameter's {@link #getValues() values} and
  * then transitively the selected value set of all other dimension filters also bound to this parameter.
  */
-public interface FilterDimensionParameter extends Serializable {
-    default String getDisplayName() {
-        return getDimension().getDisplayName();
-    }
-    
-    DataRetrieverLevelDTO getRetrieverLevel();
-    
-    FunctionDTO getDimension();
+public interface FilterDimensionParameter extends NamedWithUUID {
+    /**
+     * Must match with the {@link FunctionDTO#getReturnTypeName()} of the dimension {@link FunctionDTO function} of
+     * the dimension filters to which this parameter is bound.<p>
+     * 
+     * In theory, type <em>conformance</em> would be sufficient, but as we're operating on type <em>names</em> only,
+     * we can only test for <em>equivalence</em>.
+     */
+    String getTypeName();
     
     /**
      * @return a non-live snapshot copy of the actual values currently set for this parameter; these values are to be
      *         applied simultaneously to all dimension filters that are bound to this parameter.
      */
-    HashSet<? extends Serializable> getValues();
+    Iterable<? extends Serializable> getValues();
     
     default boolean matches(Serializable value) {
-        return getValues().contains(value);
+        return Util.contains(getValues(), value);
     }
 }

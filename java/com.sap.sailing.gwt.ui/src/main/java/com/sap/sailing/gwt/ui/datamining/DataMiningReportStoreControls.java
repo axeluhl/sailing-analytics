@@ -49,14 +49,18 @@ import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.FilterParametersChangedEvent;
 import com.sap.sse.datamining.ui.client.event.FilterParametersDialogClosedEvent;
+import com.sap.sse.datamining.ui.client.presentation.MultiResultsPresenter;
+import com.sap.sse.datamining.ui.client.presentation.TabbedResultsPresenter;
 import com.sap.sse.datamining.ui.client.selection.ConfigureQueryParametersDialog;
+import com.sap.sse.datamining.ui.client.selection.HierarchicalDimensionListFilterSelectionProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * UI Panel with the three buttons to load, store and remove and the suggest box to select a stored data mining report by
- * name.
+ * name. A {@link StoredDataMiningReportsProvider} that is passed to the constructor acts as the local client-side
+ * repository of reports.
  */
 public class DataMiningReportStoreControls extends Composite {
 
@@ -86,7 +90,13 @@ public class DataMiningReportStoreControls extends Composite {
     private final MultiWordSuggestOracle oracle;
     private final Panel applyReportBusyIndicator;
 
-    private ModifiableDataMiningReportParametersDTO filterParameters;
+    /**
+     * When the user works with one or more queries in the scope of a
+     * {@link HierarchicalDimensionListFilterSelectionProvider} and a {@link TabbedResultsPresenter} (see
+     * {@link #resultsPresenter}) those queries as well as their parameter bindings are captured in this field which is
+     * modified as queries are added/removed/changed and parameter bindings and their values are changed.
+     */
+    private ModifiableDataMiningReportDTO currentReport;
 
     private final ConfigureQueryParametersDialog configureQueryParametersDialog;
 
@@ -96,12 +106,11 @@ public class DataMiningReportStoreControls extends Composite {
         this.errorReporter = errorReporter;
         this.session = session;
         this.dataMiningService = dataMiningService;
-        this.filterParameters = new ModifiableDataMiningReportParametersDTO();
+        this.currentReport = new ModifiableDataMiningReportDTO();
         this.reportsProvider = reportsProvider;
         this.reportsProvider.addReportsChangedListener(
                 reports -> updateOracle(reports.stream().map(r -> r.getName()).collect(Collectors.toList())));
         this.reportsProvider.reloadReports();
-        
         this.dataminingContentPanel = dataminingContentPanel;
         this.resultsPresenter = resultsPresenter;
         oracle = new MultiWordSuggestOracle();
@@ -131,8 +140,8 @@ public class DataMiningReportStoreControls extends Composite {
         configureQueryParametersDialog = new ConfigureQueryParametersDialog(dataMiningService, errorReporter, session, retrieverChainProvider, this::onDialogClose);
         DataMiningEventBus.addHandler(CreateFilterParameterEvent.TYPE, this::onCreateFilterParameter);
         DataMiningEventBus.addHandler(EditFilterParameterEvent.TYPE, this::onEditFilterParameter);
-        this.resultsPresenter.addPresenterRemovedListener((a, index, b) -> {
-            filterParameters.removeUsagesAndShiftKeys(index);
+        this.resultsPresenter.addPresenterRemovedListener((String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition) -> {
+            currentReport.removeQueryDefinition(queryDefinition);
         });
         this.resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
             DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, resultsPresenter.getCurrentPresenterIndex()));
@@ -148,8 +157,8 @@ public class DataMiningReportStoreControls extends Composite {
 
     @UiHandler("saveReportButtonUi")
     void onSaveClick(ClickEvent e) {
-        String name = suggestBoxUi.getValue().trim();
-        DataMiningReportDTO report = buildReport();
+        final String name = suggestBoxUi.getValue().trim();
+        final DataMiningReportDTO report = buildReport();
         if (report == null) {
             Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportNoQueriesWereFound(),
                     NotificationType.ERROR);
@@ -219,18 +228,19 @@ public class DataMiningReportStoreControls extends Composite {
      * {@link #resultsPresenter}.
      */
     private DataMiningReportDTO buildReport() {
-        ArrayList<StatisticQueryDefinitionDTO> queryDefinitions = new ArrayList<>(StreamSupport
+        final ArrayList<StatisticQueryDefinitionDTO> queryDefinitions = new ArrayList<>(StreamSupport
                 .stream(resultsPresenter.getPresenterIds().spliterator(), false)
                 .map(resultsPresenter::getQueryDefinition).filter(Objects::nonNull).collect(Collectors.toList()));
         if (!queryDefinitions.isEmpty()) {
             for (int i = 0; i < queryDefinitions.size(); i++) {
-                DataRetrieverChainDefinitionDTO retrieverChain = queryDefinitions.get(i).getDataRetrieverChainDefinition();
-                HashSet<FilterDimensionParameter> parameters = filterParameters.getUsages(i);
+                final DataRetrieverChainDefinitionDTO retrieverChain = queryDefinitions.get(i).getDataRetrieverChainDefinition();
+                final HashSet<FilterDimensionParameter> parameters = filterParameters.getUsages(i);
+                // TODO bug4789 / bug5804: at most check the parameter type for conformance; retriever levels / dimension functions should not restrict parameter applicability
                 if (parameters.stream().anyMatch(p -> !retrieverChain.getRetrieverLevel(p.getRetrieverLevel().getLevel()).equals(p.getRetrieverLevel()))) {
                     throw new IllegalStateException("The parameters retriever level is not contained by the associated queries data retriever definition");
                 }
             }
-            // TODO Check for unused parameters and ask if they should be removed
+            // TODO bug4789: Check for unused parameters and ask if they should be removed
             return new ModifiableDataMiningReportDTO(queryDefinitions, new ModifiableDataMiningReportParametersDTO(filterParameters));
         } else {
             return null;

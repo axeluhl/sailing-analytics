@@ -1,38 +1,45 @@
 package com.sap.sse.datamining.shared.impl.dto.parameters;
 
-import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
-import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import java.util.UUID;
 
-public abstract class AbstractParameterizedDimensionFilter implements FilterDimensionParameter {
+import com.sap.sse.common.impl.RenamableImpl;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
+
+/**
+ * Equality and hash code are based only on the {@link #getId()}, <em>not</em> on the parameter's name or value.
+ */
+public abstract class AbstractParameterizedDimensionFilter extends RenamableImpl implements FilterDimensionParameter {
     private static final long serialVersionUID = 3853015601496471357L;
     
-    private DataRetrieverLevelDTO retrieverLevel;
-    private FunctionDTO dimension;
+    private String typeName;
+    private UUID id;
 
-    public AbstractParameterizedDimensionFilter() { }
+    @Deprecated // GWT serialization only
+    AbstractParameterizedDimensionFilter() {
+        super(null);
+    }
     
-    public AbstractParameterizedDimensionFilter(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension) {
-        this.retrieverLevel = retrieverLevel;
-        this.dimension = dimension;
+    public AbstractParameterizedDimensionFilter(String name, String typeName) {
+        super(name);
+        this.id = UUID.randomUUID();
+        this.typeName = typeName;
     }
 
     @Override
-    public DataRetrieverLevelDTO getRetrieverLevel() {
-        return this.retrieverLevel;
+    public UUID getId() {
+        return id;
     }
 
     @Override
-    public FunctionDTO getDimension() {
-        return this.dimension;
+    public String getTypeName() {
+        return typeName;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((dimension == null) ? 0 : dimension.hashCode());
-        result = prime * result + ((retrieverLevel == null) ? 0 : retrieverLevel.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -45,17 +52,11 @@ public abstract class AbstractParameterizedDimensionFilter implements FilterDime
         if (getClass() != obj.getClass())
             return false;
         AbstractParameterizedDimensionFilter other = (AbstractParameterizedDimensionFilter) obj;
-        if (dimension == null) {
-            if (other.dimension != null)
+        if (id == null) {
+            if (other.id != null)
                 return false;
-        } else if (!dimension.equals(other.dimension))
-            return false;
-        if (retrieverLevel == null) {
-            if (other.retrieverLevel != null)
-                return false;
-        } else if (!retrieverLevel.equals(other.retrieverLevel))
+        } else if (!id.equals(other.id))
             return false;
         return true;
     }
-
 }

@@ -27,8 +27,19 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * The "Run" button with settings and the event handler for the "Run" button which triggers the
+ * {@link #run(StatisticQueryDefinitionDTO)} method where the query to run is obtained from the
+ * {@link QueryDefinitionProvider} passed to the constructor. Results received from successful query execution through
+ * the {@link DataMiningServiceAsync} are shown in the {@link CompositeResultsPresenter} that was passed to the
+ * constructor, in the currently active tab.<p>
+ * 
+ * When the result is displayed, the {@link CompositeResultsPresenter#showResult(String, StatisticQueryDefinitionDTO, QueryResultDTO)}
+ * method binds the query and result to the presenter ID managed by the composite results presenter.
+ * 
+ * @see QueryDefinitionProvider#getQueryDefinition()
+ */
 public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSettings> implements QueryRunner {
-
     /**
      * The delay before a query is sent to the {@link DataMiningService}.
      * 
@@ -63,11 +74,9 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         this.errorReporter = errorReporter;
         counter = new SimpleManagedDataMiningQueriesCounter();
         queryDefinitionProvider.addQueryDefinitionChangedListener(this);
-
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
-
         runButton = new Button(getDataMiningStringMessages().run());
         runButton.ensureDebugId("RunDataminingQueryButton");
         runButton.addClickHandler(new ClickHandler() {
@@ -76,21 +85,19 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
                 run(queryDefinitionProvider.getQueryDefinition());
             }
         });
-
         queryReleaseTimer = new Timer() {
             @Override
             public void run() {
                 SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
             }
         };
-        
         queryDefinitionChanged(queryDefinitionProvider.getQueryDefinition());
     }
 
     @Override
     public void run(StatisticQueryDefinitionDTO queryDefinition) {
-        Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
-        String presenterId = resultsPresenter.getCurrentPresenterId();
+        final Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
+        final String presenterId = resultsPresenter.getCurrentPresenterId();
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator(presenterId);

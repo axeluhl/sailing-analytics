@@ -12,6 +12,10 @@ import com.sap.sse.datamining.ui.client.presentation.ResultsChart.DrillDownCallb
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * A sailing-specific version of the {@link TabbedResultsPresenter}, registering sailing-specific individual result
+ * presenters such as the polar data presenter.
+ */
 public class TabbedSailingResultsPresenter extends TabbedResultsPresenter {
     public TabbedSailingResultsPresenter(Component<?> parent, ComponentContext<?> context,
             DrillDownCallback drillDownCallback, StringMessages stringMessages) {

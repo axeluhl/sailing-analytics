@@ -70,25 +70,28 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
                 () -> new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
         currentPresenterChangedListeners = new HashSet<>();
         presenterRemovedListeners = new HashSet<>();
-
-        addNewTabTab();
+        addNewTab();
         addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback));
-        
         tabPanel.addSelectionHandler(event -> {
-            String presenterId = ((CloseablePresenterTab) tabPanel.getTabWidget(event.getSelectedItem())).getId();
-            for (CurrentPresenterChangedListener listener : currentPresenterChangedListeners) {
+            final String presenterId = ((CloseablePresenterTab) tabPanel.getTabWidget(event.getSelectedItem())).getId();
+            for (final CurrentPresenterChangedListener listener : currentPresenterChangedListeners) {
                 listener.currentPresenterChanged(presenterId);
             }
         });
     }
 
-    private void addNewTabTab() {
-        Label widget = new Label("This should never be shown");
-        FlowPanel header = new FlowPanel();
+    /**
+     * Adds the virtual tab with the "+" symbol that allows a user to add a new panel to this tabbed results presenter.
+     * When "selected," the selecting event is cancelled and instead the {@link #addTabAndFocus(ResultsPresenter)}
+     * method is invoked, adding a "real" panel just before the virtual "+" panel.
+     */
+    private void addNewTab() {
+        final Label widget = new Label("This should never be shown");
+        final FlowPanel header = new FlowPanel();
         header.addStyleName("resultsPresenterTabHeader");
         header.add(new Image(resources.plusIcon()));
         tabPanel.add(widget, header);
-        // This is necessary to stop the selection of this pseudo tab
+        // This is necessary to stop the selection of this pseudo tabe 
         tabPanel.addBeforeSelectionHandler(event -> {
             if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                 event.cancel();
@@ -159,7 +162,7 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     
     @Override
     public void showResults(Iterable<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> results) {
-        // FIXME Somehow a single tab remains
+        // TODO bug4789: should we check for changes in the tabs before removing them?
         new ArrayList<>(tabsMappedById.keySet()).stream().map(tabsMappedById::get).forEach(this::removeTab);
         for (Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>> entry: results) {
             StatisticQueryDefinitionDTO queryDefinition = entry.getA();
@@ -352,7 +355,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     private class CloseablePresenterTab extends FlowPanel {
-
         private final String id;
         private final Label headerLabel;
         private final ResultsPresenter<?> presenter;
@@ -361,7 +363,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
             this.id = id;
             this.presenter = presenter;
             this.addStyleName("resultsPresenterTabHeader");
-            
             headerLabel = new Label(getDataMiningStringMessages().empty());
             this.add(headerLabel);
             Image closeImage = new Image(resources.closeIcon());

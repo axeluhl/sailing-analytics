@@ -199,7 +199,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     
     private DataGrid<Serializable> createFilterValuesGrid() {
         final StringMessages stringMessages = getDataMiningStringMessages();
-        
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
         DataGrid<Serializable> filterValues = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
         filterValues.setAutoHeaderRefreshDisabled(true);
@@ -207,7 +206,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         filterValues.addStyleName("dataMiningBorderTop");
         filterValues.setHeight(FilterValuesGridHeight);
         filterValues.setEmptyTableWidget(new Label(stringMessages.noMatchingValuesOrNoFilter()));
-        
         // TODO Replace with SelectionCheckboxColumn like in TracTracEventManagementPanel?
         Column<Serializable, ?> checkboxColumn = new Column<Serializable, Boolean>(new CheckboxCell(true, false)) {
             @Override

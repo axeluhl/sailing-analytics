@@ -19,12 +19,17 @@ public interface ResultsPresenter<SettingsType extends Settings> extends Compone
     StatisticQueryDefinitionDTO getCurrentQueryDefinition();
 
     /**
-     * Displays the given result for the given query definition. The given result may be
-     * <code>null</code> to clear the presenter. The given query definition may be <code>null</code>,
-     * but this is discouraged unless the result is also <code>null</code>.
+     * Displays the given result for the given query definition. The given result may be <code>null</code> to clear the
+     * presenter. The given query definition may be <code>null</code>, but this is discouraged unless the result is also
+     * <code>null</code>.
      * 
-     * @param queryDefinition The query definition of the results to display
-     * @param result The results to display
+     * @param queryDefinition
+     *            The query definition of the results to display; {@link #getCurrentQueryDefinition()} will return that
+     *            query definition until the next call to
+     *            {@link #showResult(StatisticQueryDefinitionDTO, QueryResultDTO)} is made.
+     * @param result
+     *            The results to display; {@link #getCurrentResult()} will return that result until the next call to
+     *            {@link #showResult(StatisticQueryDefinitionDTO, QueryResultDTO)} is made.
      */
     void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result);
     

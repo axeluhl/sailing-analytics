@@ -121,7 +121,6 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         if (levelFilterSelection == null) {
             throw new NullPointerException("The level filter selection mustn't be null");
         }
-        
         filterSelection.put(retrieverLevel, levelFilterSelection);
     }
 

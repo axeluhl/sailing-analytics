@@ -14,6 +14,7 @@ public interface Function<ReturnType> {
 
     public boolean isDimension();
     
+    // TODO bug4789 add useful Javadoc, especially for compound functions where the simple name is not so simple after all
     public String getSimpleName();
     
     /**

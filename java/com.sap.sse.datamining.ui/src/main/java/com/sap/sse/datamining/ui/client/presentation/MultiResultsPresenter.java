@@ -40,9 +40,7 @@ public class MultiResultsPresenter extends AbstractDataMiningComponent<Settings>
         availablePresenters.add(new ColumnChartDescriptor(drillDownCallback));
         availablePresenters.add(new ColumnChartDescriptorWithErrorBars(drillDownCallback));
         availablePresenters.add(new PlainDescriptor());
-
         presenterPanel = new DeckLayoutPanel();
-
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
         controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -62,20 +60,17 @@ public class MultiResultsPresenter extends AbstractDataMiningComponent<Settings>
         controlsPanel.add(presentersListBox);
         presentersListBox.setValue(availablePresenters.get(0), false);
         presentersListBox.setAcceptableValues(availablePresenters);
-
         setCurrentPresenter(availablePresenters.get(0).getPresenter());
     }
 
     private void setCurrentPresenter(AbstractResultsPresenter<?> presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
-
         if (presenter instanceof AbstractNumericResultsPresenter
                 && currentPresenter instanceof AbstractNumericResultsPresenter) {
             String dataKey = ((AbstractNumericResultsPresenter<?>) currentPresenter).getSelectedDataKey();
             ((AbstractNumericResultsPresenter<?>) presenter).setSelectedDataKey(dataKey);
         }
-
         currentPresenter = presenter;
         presenterPanel.setWidget(currentPresenter.getEntryWidget());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {

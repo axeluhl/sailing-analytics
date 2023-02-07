@@ -1,29 +1,42 @@
 package com.sap.sse.datamining.shared.impl.dto;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
 
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
-import com.sap.sse.datamining.shared.dto.DataMiningReportParametersDTO;
+import com.sap.sse.datamining.shared.dto.FilterDimensionIdentifier;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.parameters.ModifiableDataMiningReportParametersDTO;
 
 public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     private static final long serialVersionUID = -6512175470789118223L;
     
     private ArrayList<StatisticQueryDefinitionDTO> queryDefinitions;
-    private DataMiningReportParametersDTO parameters;
+    private HashSet<FilterDimensionParameter> parameters;
+    private HashMap<StatisticQueryDefinitionDTO, HashMap<FilterDimensionIdentifier, FilterDimensionParameter>> parameterUsages;
 
+    /**
+     * Creates an empty report with 
+     */
     public ModifiableDataMiningReportDTO() {
-        this(new ArrayList<>(), new ModifiableDataMiningReportParametersDTO());
+        this(Collections.emptySet(), Collections.emptySet());
     }
     
-    public ModifiableDataMiningReportDTO(ArrayList<StatisticQueryDefinitionDTO> queryDefinitions, ModifiableDataMiningReportParametersDTO parameters) {
-        this.queryDefinitions = queryDefinitions;
-        this.parameters = parameters;
+    public ModifiableDataMiningReportDTO(Iterable<StatisticQueryDefinitionDTO> queryDefinitions, Iterable<FilterDimensionParameter> parameters) {
+        this.queryDefinitions = new ArrayList<>();
+        Util.addAll(queryDefinitions, this.queryDefinitions);
+        this.parameters = new HashSet<>();
+        Util.addAll(parameters, this.parameters);
     }
 
     @Override
-    public ArrayList<StatisticQueryDefinitionDTO> getQueryDefinitions() {
+    public Iterable<StatisticQueryDefinitionDTO> getQueryDefinitions() {
         return queryDefinitions;
     }
     
@@ -31,13 +44,41 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
         queryDefinitions.add(queryDefinition);
     }
     
+    /**
+     * Removes the query definition from this reports and adjustes the {@link #parameterUsages} accordingly,
+     * removing all usages within the query removed.
+     */
     public boolean removeQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+        parameterUsages.remove(queryDefinition);
         return queryDefinitions.remove(queryDefinition);
     }
 
     @Override
-    public DataMiningReportParametersDTO getParameters() {
+    public Iterable<FilterDimensionParameter> getParameters() {
         return parameters;
+    }
+
+    @Override
+    public Iterable<Pair<StatisticQueryDefinitionDTO, FilterDimensionIdentifier>> getParameterUsages(FilterDimensionParameter parameter) {
+        final List<Pair<StatisticQueryDefinitionDTO, FilterDimensionIdentifier>> result = new ArrayList<>();
+        for (final Entry<StatisticQueryDefinitionDTO, HashMap<FilterDimensionIdentifier, FilterDimensionParameter>> e : parameterUsages.entrySet()) {
+            for (final FilterDimensionIdentifier f : e.getValue().keySet()) {
+                result.add(new Pair<>(e.getKey(), f));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public FilterDimensionParameter getParameter(StatisticQueryDefinitionDTO query, FilterDimensionIdentifier filterDimensionIdentifier) {
+        final FilterDimensionParameter result;
+        final HashMap<FilterDimensionIdentifier, FilterDimensionParameter> parameterUsagesInQuery = parameterUsages.get(query);
+        if (parameterUsagesInQuery != null) {
+            result = parameterUsagesInQuery.get(filterDimensionIdentifier);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
 }

@@ -132,10 +132,9 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
 
     @Override
     public Iterable<String> validateQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        Collection<String> errorMessages = new ArrayList<String>();
-
+        final Collection<String> errorMessages = new ArrayList<String>();
         if (queryDefinition != null) {
-            StringMessages stringMessages = getDataMiningStringMessages();
+            final StringMessages stringMessages = getDataMiningStringMessages();
             if (queryDefinition.getStatisticToCalculate() == null ||
                     queryDefinition.getDataRetrieverChainDefinition() == null) {
                 errorMessages.add(stringMessages.noStatisticSelectedError());
@@ -150,7 +149,6 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 }
             }
         }
-
         return errorMessages;
     }
 
