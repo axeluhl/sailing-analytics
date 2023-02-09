@@ -105,9 +105,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     private final Panel applyQueryBusyIndicator;
     
-    private final DialogBox confirmChangeLossDialog;
-    
-    private StatisticQueryDefinitionDTO queryDefinitionToBeApplied;
     private boolean queryDefinitionChanged;
 
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
@@ -195,34 +192,27 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         providers.add(filterSelectionProvider);
         reloadComponents();
         // Setting up dialogs and event handlers
-        confirmChangeLossDialog = createConfirmChangeLossDialog();
     }
 
-    private DialogBox createConfirmChangeLossDialog() {
+    private DialogBox createConfirmChangeLossDialog(StatisticQueryDefinitionDTO queryDefinition) {
         StringMessages stringMessages = getDataMiningStringMessages();
-        
         DialogBox dialog = new DialogBox(false, true);
         dialog.setAnimationEnabled(true);
         dialog.setText(stringMessages.changesWillBeLost());
         dialog.setGlassEnabled(true);
-
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setSpacing(5);
         contentPanel.add(new HTML(new SafeHtmlBuilder()
                 .appendEscapedLines(stringMessages.confirmQueryDefinitionChangeLoss()).toSafeHtml()));
-        
         CheckBox rememberDecisionCheckBox = new CheckBox(stringMessages.rememberDecisionCanBeChangedInSettings());
         contentPanel.add(rememberDecisionCheckBox);
-
         FlowPanel buttonPanel = new FlowPanel();
         buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
-        
         Button discardChanges = new Button(stringMessages.discardChanges());
         discardChanges.addClickHandler(e -> {
             dialog.hide();
-            setQueryDefinition(queryDefinitionToBeApplied);
-            queryDefinitionToBeApplied = null;
+            setQueryDefinition(queryDefinition);
             if (rememberDecisionCheckBox.getValue()) {
                 settings.setChangeLossStrategy(ChangeLossStrategy.DISCARD_CHANGES);
                 rememberDecisionCheckBox.setValue(false);
@@ -230,7 +220,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         });
         discardChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(discardChanges);
-        
         Button keepChanges = new Button(stringMessages.keepChanges());
         keepChanges.addClickHandler(e -> {
             dialog.hide();
@@ -241,7 +230,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         });
         keepChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(keepChanges);
-
         dialog.setWidget(contentPanel);
         return dialog;
     }
@@ -349,8 +337,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         if (queryDefinitionChanged) {
             switch (strategy) {
             case ASK:
-                queryDefinitionToBeApplied = queryDefinition;
-                confirmChangeLossDialog.center();
+                createConfirmChangeLossDialog(queryDefinition).center();
                 break;
             case DISCARD_CHANGES:
                 setQueryDefinition(queryDefinition);
@@ -365,27 +352,31 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         
     }
 
+    /**
+     * Contrary to the name, this method does not remember the entire {@link StatisticQueryDefinitionDTO} but only copies
+     * its constituents to the various elements of this UI widget. A new query definition will be produced from this
+     * editor UI in {@link #getQueryDefinition()}.
+     */
     private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        Set<ApplyCallback> callbacks = new HashSet<>();
-        Collection<String> errorMessages = new ArrayList<>();
-        String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
+        final Set<ApplyCallback> callbacks = new HashSet<>();
+        final Collection<String> errorMessages = new ArrayList<>();
+        final String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
         setBlockChangeNotification(true);
-        ApplyCallback statisticCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+        final ApplyCallback statisticCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
         callbacks.add(statisticCallback);
         statisticProvider.applyQueryDefinition(queryDefinition, statisticCallback);
         // The statistic wasn't available, if the callback was called immediately and an error occurred
         // Applying the query to the remaining component providers can be skipped
         if (!callbacks.isEmpty() || errorMessages.isEmpty()) {
-            ApplyCallback groupingCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+            final ApplyCallback groupingCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
             callbacks.add(groupingCallback);
             groupingProvider.applyQueryDefinition(queryDefinition, groupingCallback);
-            
-            ApplyCallback filterCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+            final ApplyCallback filterCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
             callbacks.add(filterCallback);
             filterSelectionProvider.applyQueryDefinition(queryDefinition, filterCallback);
         }
         if (!callbacks.isEmpty()) {
-            for (ApplyCallback callback : callbacks) {
+            for (final ApplyCallback callback : callbacks) {
                 callback.isArmed = true;
             }
             if (applyQueryBusyIndicator.getParent() == null) {

@@ -32,7 +32,7 @@ public interface StatisticQueryDefinitionDTO extends Serializable {
      * Strings or Enums, but can also be more complex data structures like {@link ClusterDTO}. The values of the value
      * maps hence must conform with the key dimension function's {@link FunctionDTO#getReturnTypeName() return type}.
      * 
-     * @return The values used to filter the data elements during the retrieval process.
+     * @return The values used to filter the data elements during the retrieval process as a non-live copy
      */
     HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection();
     

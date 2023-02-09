@@ -366,12 +366,12 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     public <ResultType extends Serializable> QueryResultDTO<ResultType> runQuery(DataMiningSession session,
             ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO) {
         checkDataMiningPermission();
-        DataMiningServer dataMiningServer = getDataMiningServer();
-        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer
+        final DataMiningServer dataMiningServer = getDataMiningServer();
+        final StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer
                 .getQueryDefinitionForDTO(queryDefinitionDTO);
-        Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
+        final Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
         logger.info("Handing query "+query+" to server for processing on behalf of user "+SessionUtils.getPrincipal());
-        QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+        final QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
         logger.info("Obtained result for query "+query+" from server on behalf of user "+SessionUtils.getPrincipal());
         return dtoFactory.createResultDTO(result);
     }

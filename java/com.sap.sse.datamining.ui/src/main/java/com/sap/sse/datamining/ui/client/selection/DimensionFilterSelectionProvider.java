@@ -76,7 +76,9 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * consists of a label with the dimension's name, a search toggle button that shows/hides a search/filter
  * text box, and a "data grid" with a check box column and the dimension values that pass all retriever
  * levels and dimension filters up to the point where this dimension filter occurs in the left-to-right
- * arrangement of several components of this type.
+ * arrangement of several components of this type.<p>
+ * 
+ * Items of this type are arranged by the {@link HierarchicalDimensionListFilterSelectionProvider}.
  */
 public class DimensionFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> {
 
@@ -196,7 +198,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         mainPanel.setWidgetHidden(filterPanel, true);
         mainPanel.add(contentContainer);
         DataMiningEventBus.addHandler(FilterParametersChangedEvent.TYPE, event -> {
-           this.parameter = event.getParameter(this.retrieverLevel, this.dimension);
+           this.parameter = event.getUsedParameter(this.retrieverLevel, this.dimension);
            this.filterPanel.filter();
            if (this.parameter != null) {
                boolean selectionChanged = false;
@@ -229,10 +231,10 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         // "P" parameter bind/unbind toggle button
         final Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
         parameterIcon.setSize("16px", "16px");
-        ToggleButton parameterSettingsButton = new ToggleButton(parameterIcon);
+        final ToggleButton parameterSettingsButton = new ToggleButton(parameterIcon);
         parameterSettingsButton.addStyleName("query-parameter");
         parameterSettingsButton.addClickHandler(e -> {
-            if (this.parameter == null) {                
+            if (this.parameter == null) {
                 DataMiningEventBus.fire(
                     // FIXME I think "create" is not necessarily right here; couldn't this also be "use existing" when the parameter model of the current report has one for that dimension already?
                     new CreateFilterParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
@@ -243,7 +245,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         });
         // FIXME bug4789: this isn't enough; the "P" button must always correspond to the current report's parameter binding regarding this dimension filter so that switching tabs updates accordingly
         DataMiningEventBus.addHandler(FilterParametersDialogClosedEvent.TYPE, event -> {
-            this.parameter = event.getParameter(this.retrieverLevel, this.dimension);
+            this.parameter = event.getUsedParameter(this.retrieverLevel, this.dimension);
             parameterSettingsButton.setDown(parameter != null);
         });
         headerPanel.add(parameterSettingsButton);

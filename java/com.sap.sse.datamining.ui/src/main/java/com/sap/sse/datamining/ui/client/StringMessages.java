@@ -95,7 +95,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String and();
     String followingStatisticsAreNotSupportedByAggregatorWarning();
     String configureQueryParametersDialog();
-    String parameterType();
+    String parameterType(String typeName);
     String allValues();
     String listOfValues();
     String containsText();
@@ -106,4 +106,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String apply();
     String noMatchingValuesOrNoFilter();
     String filterDimensionValues();
+    String pickOrCreateReportParameter();
+    String pickOrCreateReportParameterMessage();
+    String parameterNamesMustBeUniqueInReport(String name, String typeName);
+    String newParameterName();
+    String parameterNameMustNotBeEmpty();
 }

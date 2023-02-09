@@ -17,6 +17,7 @@ import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningWriteServiceAsync;
+import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 
@@ -42,7 +43,11 @@ public class StoredDataMiningQueryDataProvider {
         this.stringMessages = stringMessages;
     }
 
-    /** @return the query currently selected in the query definition provider. */
+    /**
+     * Constructs a new query object based on the aggregator, statistic, grouping and dimension filter specifications.
+     * 
+     * @see QueryDefinitionProvider#getQueryDefinition()
+     */
     public StatisticQueryDefinitionDTO getCurrentQuery() {
         return queryDefinitionProvider.getQueryDefinition();
     }

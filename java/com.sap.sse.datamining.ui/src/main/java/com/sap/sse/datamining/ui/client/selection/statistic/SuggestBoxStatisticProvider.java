@@ -465,7 +465,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
         Collection<String> errorMessages = new ArrayList<>();
-
         if (!initializationComplete) {
             // apply query definition as soon as initialization is complete
             initializationCompleteListeners.add(() -> applyQueryDefinition(queryDefinition, callback));
@@ -484,7 +483,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         if (aggregatorToSelect == null) {
             errorMessages.add(getDataMiningStringMessages().aggregatorNotAvailable(aggregator.getDisplayName()));
         }
-
         DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         FunctionDTO extractionFunction = queryDefinition.getStatisticToCalculate();
         boolean isIdentityFunction = identityFunction != null && identityFunction.equals(extractionFunction);
@@ -509,7 +507,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             errorMessages.add(getDataMiningStringMessages().statisticNotAvailable(
                     extractionFunction.getDisplayName()));
         }
-
         callback.accept(errorMessages);
     }
 

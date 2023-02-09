@@ -164,22 +164,22 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     public void showResults(Iterable<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> results) {
         // TODO bug4789: should we check for changes in the tabs before removing them?
         new ArrayList<>(tabsMappedById.keySet()).stream().map(tabsMappedById::get).forEach(this::removeTab);
-        for (Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>> entry: results) {
-            StatisticQueryDefinitionDTO queryDefinition = entry.getA();
-            QueryResultDTO<?> result = entry.getB();
-            ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
-            CloseablePresenterTab presenterTab = addTabAndFocus(factory.createPresenter());
+        for (final Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>> entry : results) {
+            final StatisticQueryDefinitionDTO queryDefinition = entry.getA();
+            final QueryResultDTO<?> result = entry.getB();
+            final ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
+            final CloseablePresenterTab presenterTab = addTabAndFocus(factory.createPresenter());
             presenterTab.setText(result.getResultSignifier());
             presenterTab.getPresenter().showResult(queryDefinition, result);
         }
         // Needed to remove the remaining empty tab
-        for (CloseablePresenterTab tab : tabsMappedById.values()) {
+        for (final CloseablePresenterTab tab : tabsMappedById.values()) {
             if (tabPanel.getWidgetIndex(tab.getPresenter().getEntryWidget()) == 0) {
                 removeTab(tab);
                 break;
             }
         }
-        tabPanel.selectTab(0);
+        tabPanel.selectTab(0); // this will also fire the selection event, so the query provider will update according to the query
     }
     
     @Override

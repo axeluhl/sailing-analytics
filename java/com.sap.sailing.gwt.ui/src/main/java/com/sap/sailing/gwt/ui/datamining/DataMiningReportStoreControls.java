@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -29,6 +28,7 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
@@ -43,15 +43,10 @@ import com.sap.sse.datamining.shared.impl.dto.parameters.ModifiableDataMiningRep
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
-import com.sap.sse.datamining.ui.client.event.CreateFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
-import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
-import com.sap.sse.datamining.ui.client.event.FilterParametersChangedEvent;
-import com.sap.sse.datamining.ui.client.event.FilterParametersDialogClosedEvent;
-import com.sap.sse.datamining.ui.client.presentation.MultiResultsPresenter;
 import com.sap.sse.datamining.ui.client.presentation.TabbedResultsPresenter;
-import com.sap.sse.datamining.ui.client.selection.ConfigureQueryParametersDialog;
 import com.sap.sse.datamining.ui.client.selection.HierarchicalDimensionListFilterSelectionProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -89,24 +84,15 @@ public class DataMiningReportStoreControls extends Composite {
     private final CompositeResultsPresenter<?> resultsPresenter;
     private final MultiWordSuggestOracle oracle;
     private final Panel applyReportBusyIndicator;
-
-    /**
-     * When the user works with one or more queries in the scope of a
-     * {@link HierarchicalDimensionListFilterSelectionProvider} and a {@link TabbedResultsPresenter} (see
-     * {@link #resultsPresenter}) those queries as well as their parameter bindings are captured in this field which is
-     * modified as queries are added/removed/changed and parameter bindings and their values are changed.
-     */
-    private ModifiableDataMiningReportDTO currentReport;
-
-    private final ConfigureQueryParametersDialog configureQueryParametersDialog;
+    private final ReportProvider reportProvider;
 
     public DataMiningReportStoreControls(ErrorReporter errorReporter, DataMiningSession session, DataMiningServiceAsync dataMiningService,
             StoredDataMiningReportsProvider reportsProvider, Panel dataminingContentPanel, DataRetrieverChainDefinitionProvider retrieverChainProvider,
-            CompositeResultsPresenter<?> resultsPresenter) {
+            CompositeResultsPresenter<?> resultsPresenter, ReportProvider reportProvider) {
+        this.reportProvider = reportProvider;
         this.errorReporter = errorReporter;
         this.session = session;
         this.dataMiningService = dataMiningService;
-        this.currentReport = new ModifiableDataMiningReportDTO();
         this.reportsProvider = reportsProvider;
         this.reportsProvider.addReportsChangedListener(
                 reports -> updateOracle(reports.stream().map(r -> r.getName()).collect(Collectors.toList())));
@@ -137,15 +123,6 @@ public class DataMiningReportStoreControls extends Composite {
         applyReportBusyIndicator = new LayoutPanel();
         applyReportBusyIndicator.add(glass);
         applyReportBusyIndicator.add(labeledBusyIndicator);
-        configureQueryParametersDialog = new ConfigureQueryParametersDialog(dataMiningService, errorReporter, session, retrieverChainProvider, this::onDialogClose);
-        DataMiningEventBus.addHandler(CreateFilterParameterEvent.TYPE, this::onCreateFilterParameter);
-        DataMiningEventBus.addHandler(EditFilterParameterEvent.TYPE, this::onEditFilterParameter);
-        this.resultsPresenter.addPresenterRemovedListener((String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition) -> {
-            currentReport.removeQueryDefinition(queryDefinition);
-        });
-        this.resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
-            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, resultsPresenter.getCurrentPresenterIndex()));
-        });
     }
 
     private void updateSaveLoadButtons() {
@@ -174,13 +151,11 @@ public class DataMiningReportStoreControls extends Composite {
     @UiHandler("loadReportButtonUi")
     void onLoadClick(ClickEvent e) {
         String name = suggestBoxUi.getValue().trim();
-        Optional<StoredDataMiningReportDTO> storedReport = this.reportsProvider.findReportByName(name);
-        if (!storedReport.isPresent()) {
+        this.reportsProvider.findReportByName(name).map(this::applyReport).orElseGet(()->{
             Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportLoadedFailed(name),
                     NotificationType.ERROR);
-        } else {
-            applyReport(storedReport.get());
-        }
+            return null;
+        });
     }
 
     @UiHandler("removeReportButtonUi")
@@ -196,38 +171,12 @@ public class DataMiningReportStoreControls extends Composite {
         }
     }
     
-    private void onCreateFilterParameter(CreateFilterParameterEvent event) {
-        this.configureQueryParametersDialog.show(event, result -> {
-            FilterDimensionParameter parameter = result.get();
-            int activeIndex = resultsPresenter.getCurrentPresenterIndex();
-            filterParameters.add(parameter);
-            filterParameters.addUsage(activeIndex, parameter);
-            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, activeIndex));
-        });
-    }
-    
-    private void onEditFilterParameter(EditFilterParameterEvent event) {
-        this.configureQueryParametersDialog.show(event, result -> {
-            final int activeIndex = resultsPresenter.getCurrentPresenterIndex();
-            filterParameters.remove(event.getParameter());
-            result.ifPresent(parameter -> {
-                filterParameters.add(parameter);
-                filterParameters.addUsage(activeIndex, parameter);
-            });
-            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, activeIndex));
-        });
-    }
-    
-    private void onDialogClose() {
-        final int activeIndex = resultsPresenter.getCurrentPresenterIndex();
-        DataMiningEventBus.fire(new FilterParametersDialogClosedEvent(filterParameters, activeIndex));
-    }
-
     /**
      * Compiles a new {@link DataMiningReportDTO} report based on a the queries from all available tabs in the
      * {@link #resultsPresenter}.
      */
     private DataMiningReportDTO buildReport() {
+        // TODO bug4789: can we simply use reportProvider.getCurrentReport()?
         final ArrayList<StatisticQueryDefinitionDTO> queryDefinitions = new ArrayList<>(StreamSupport
                 .stream(resultsPresenter.getPresenterIds().spliterator(), false)
                 .map(resultsPresenter::getQueryDefinition).filter(Objects::nonNull).collect(Collectors.toList()));
@@ -240,22 +189,20 @@ public class DataMiningReportStoreControls extends Composite {
                     throw new IllegalStateException("The parameters retriever level is not contained by the associated queries data retriever definition");
                 }
             }
-            // TODO bug4789: Check for unused parameters and ask if they should be removed
             return new ModifiableDataMiningReportDTO(queryDefinitions, new ModifiableDataMiningReportParametersDTO(filterParameters));
         } else {
             return null;
         }
     }
 
-    private void applyReport(StoredDataMiningReportDTO storedReport) {
+    private Void applyReport(StoredDataMiningReportDTO storedReport) {
         showBusyIndicator(true);
-        DataMiningReportDTO report = storedReport.getReport();
-        filterParameters = new ModifiableDataMiningReportParametersDTO(report.getParameters());
-        ArrayList<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
-        SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
+        final DataMiningReportDTO report = storedReport.getReport();
+        reportProvider.setCurrentReport(report);
+        final Iterable<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
+        final SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
         executor.run(results -> {
             resultsPresenter.showResults(results);
-            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, resultsPresenter.getCurrentPresenterIndex()));
             showBusyIndicator(false);
             if (!executor.hasErrorOccurred()) {
                 Notification.notify(
@@ -267,6 +214,7 @@ public class DataMiningReportStoreControls extends Composite {
                         NotificationType.WARNING);
             }
         });
+        return null;
     }
     
     private void showBusyIndicator(boolean show) {
@@ -293,8 +241,9 @@ public class DataMiningReportStoreControls extends Composite {
         private boolean errorOccurred = false;
         private Consumer<Collection<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>>> callback;
 
-        public SequentialQueryExecutor(List<StatisticQueryDefinitionDTO> queryDefinitions) {
-            this.queryDefinitions = queryDefinitions;
+        public SequentialQueryExecutor(Iterable<StatisticQueryDefinitionDTO> queryDefinitions) {
+            this.queryDefinitions = new ArrayList<>();
+            Util.addAll(queryDefinitions, this.queryDefinitions);
         }
 
         public void run(Consumer<Collection<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>>> callback) {

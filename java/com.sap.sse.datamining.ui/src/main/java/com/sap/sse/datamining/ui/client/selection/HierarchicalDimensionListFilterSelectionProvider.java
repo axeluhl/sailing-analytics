@@ -140,32 +140,26 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         this.errorReporter = errorReporter;
         this.retrieverChainProvider = retrieverChainProvider;
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
-        
         listeners = new HashSet<>();
         isAwaitingReload = false;
         retrieverChain = null;
         availableFilterDimensions = new ArrayList<>();
         filteredFilterDimensions = new ListDataProvider<>();
-        
         StringMessages stringMessages = getDataMiningStringMessages();
-
         Label filterDimensionsSelectionTitleLabel = new Label(stringMessages.selectDimensionsToFilterBy());
         filterDimensionsSelectionTitleLabel.addStyleName("emphasizedLabel");
         filterDimensionsSelectionTitleLabel.addStyleName("dataMiningMarginLeft");
         filterDimensionsSelectionTitleLabel.addStyleName("filterDimensionsTitleLabel");
-
         clearSelectionButton = new Button(stringMessages.clear());
         clearSelectionButton.addStyleName("floatRight");
         clearSelectionButton.addStyleName("dataMiningMarginRight");
         clearSelectionButton.addClickHandler(e -> clearSelection());
-
         DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
         filterDimensionsList = new DataGrid<>(Integer.MAX_VALUE, resources);
         filterDimensionsList.setAutoHeaderRefreshDisabled(true);
         filterDimensionsList.setAutoFooterRefreshDisabled(true);
         filterDimensionsList.setTableBuilder(new FilterDimensionsListBuilder(filterDimensionsList, resources.dataGridStyle()));
         filteredFilterDimensions.addDataDisplay(filterDimensionsList);
-        
         filterFilterDimensionsPanel = new AbstractFilterablePanel<DimensionWithContext>(
                 null, filteredFilterDimensions, stringMessages) {
             @Override
@@ -184,11 +178,9 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         filterFilterDimensionsPanel.setHeight("100%");
         filterFilterDimensionsPanel.getTextBox().setWidth("100%");
         filterFilterDimensionsPanel.getTextBox().getElement().setPropertyString("placeholder", stringMessages.filterShownDimensions());
-        
         filterDimensionSelectionModel = new MultiSelectionModel<>();
         filterDimensionSelectionModel.addSelectionChangeHandler(this::selectedFilterDimensionsChanged);
         filterDimensionsList.setSelectionModel(filterDimensionSelectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
-        
         checkboxColumn = new Column<DimensionWithContext, Boolean>(new CheckboxCell(true, false)) {
             @Override
             public Boolean getValue(DimensionWithContext object) {
@@ -203,26 +195,21 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
             }
         };
         filterDimensionsList.addColumn(dimensionColumn);
-        
         FlowPanel headerPanel = new FlowPanel();
         headerPanel.addStyleName("dataMiningMarginTop");
         headerPanel.add(filterDimensionsSelectionTitleLabel);
         headerPanel.add(clearSelectionButton);
-        
         DockLayoutPanel filterDimensionsSelectionPanel = new DockLayoutPanel(LayoutUnit);
         filterDimensionsSelectionPanel.addNorth(headerPanel, DimensionSelectionHeaderHeight);
         filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, FilterFilterDimensionsHeight);
         filterDimensionsSelectionPanel.add(filterDimensionsList);
-        
         dimensionFilterSelectionProviders = new HashMap<>();
         dimensionFilterSelectionProvidersPanel = new DockLayoutPanel(LayoutUnit);
         dimensionFilterSelectionProvidersPanel.addStyleName("dimensionFilterSelectionTablesContainer");
         dimensionFilterSelectionProvidersPanel.addStyleName("dataMiningBorderLeft");
-        
         filterSelectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, this);
         filterSelectionPresenterContainer = new ScrollPanel(filterSelectionPresenter.getEntryWidget());
         filterSelectionPresenterContainer.addStyleName("dataMiningBorderTop");
-        
         mainPanel = new DockLayoutPanel(LayoutUnit);
         mainPanel.addSouth(filterSelectionPresenterContainer, SelectionPresenterHeight);
         mainPanel.setWidgetHidden(filterSelectionPresenterContainer, true);
@@ -352,13 +339,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 }
             }
         }
-        
         if (!missingDimensions.isEmpty()) {
             String listedDimensions = missingDimensions.stream().map(d -> d.getDimension().getDisplayName())
                                                                 .collect(Collectors.joining(", "));
             callbackMessages.add(getDataMiningStringMessages().filterDimensionsAreNotAvailable(listedDimensions));
         }
-
         if (!innerCallbacks.isEmpty()) {
             for (InnerSelectionCallback innerCallback : innerCallbacks) {
                 innerCallback.canPublishMessages = true;
@@ -419,7 +404,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 break;
             }
         }
-
         if (dimensionToChange != null) {
             ignoreSelectionChangedNotifications = true;
             final DimensionWithContext changedDimension = dimensionToChange;

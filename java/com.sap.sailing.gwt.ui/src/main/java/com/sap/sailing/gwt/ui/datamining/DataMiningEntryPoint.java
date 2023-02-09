@@ -38,6 +38,7 @@ import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
@@ -49,7 +50,9 @@ import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
 import com.sap.sse.datamining.ui.client.DataMiningWriteService;
 import com.sap.sse.datamining.ui.client.DataMiningWriteServiceAsync;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
+import com.sap.sse.datamining.ui.client.selection.DimensionFilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -124,9 +127,9 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
  * 
  * <b>Report Parameter Handling:</b> When using the query editor, each dimension filter activated for a query can
  * optionally be <em>bound</em> to a {@link FilterDimensionParameter report parameter}. Parameters are named, have a
- * stable ID are specific to an object type (identified by the type's name). When choosing to bind a dimension filter to
- * a parameter, the user may create a new parameter or can choose an existing one whose type matches that of the
- * dimension to which the filter applies. When choosing an existing one, the parameter's
+ * stable ID, and are specific to an object type (identified by the type's name). When choosing to bind a dimension
+ * filter to a parameter, the user may create a new parameter or can choose an existing one whose type matches that of
+ * the dimension to which the filter applies. When choosing an existing one, the parameter's
  * {@link FilterDimensionParameter#getValues() values} are intersected with the values that are available at the stage
  * of the dimension filter to which the parameter is being bound, and the intersection becomes the new filter's
  * selection. If the user has chosen to create a new parameter instead, the current filter's selection defines the
@@ -134,28 +137,79 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
  * parameter's name.
  * <p>
  * 
- * When changing the selection of a dimension filter that is bound to a parameter, the parameter's values are updated
- * accordingly. TODO bug4789: This does not count as a change in the sense that switching tabs another time would need
- * to ask whether or not to preserve those changes because the change is already stored in the current report's
- * parameter model. All queries also using the parameter are then remembered as "to also run" when the query through
- * which the parameter was edited will be run. The query currently shown in the editor will run first, followed in the
- * background by those dependent "to also run" queries whose results then update their respective result presenter tab
- * in the background such that when the user switches to those tabs then the query will either still be running or the
- * new results will be shown already.
+ * TODO bug4789: When changing the selection of a dimension filter that is bound to a parameter, the parameter's values
+ * are updated accordingly. When clearing the selection by clicking on a single value (not its checkbox column for
+ * incremental selection change) then the parameter values are all cleared, too, and the single item selected becomes
+ * the single parameter value. Incremental selection changes, though, are mapped to incremental changes of the parameter
+ * value set, accordingly.
+ * <p>
+ * 
+ * Changes to dimension filters bound to a parameter do not count as a change in the sense that switching tabs another
+ * time would need to ask whether or not to preserve those changes because the change is already stored in the current
+ * report's parameter model. All queries also using the parameter are then remembered as "to also run" when the query
+ * through which the parameter was edited will be run. The query currently shown in the editor will run first, followed
+ * in the background by those dependent "to also run" queries whose results then update their respective result
+ * presenter tab in the background such that when the user switches to those tabs then the query will either still be
+ * running or the new results will be shown already.
  * <p>
  * 
  * When switching to a result presenter tab that has remembered a query that is then
  * {@link QueryDefinitionProvider#applyQueryDefinition(StatisticQueryDefinitionDTO) filled into the query editor}, the
  * selections in all dimension filters bound to a parameter are updated to reflect their parameter's current
  * {@link FilterDimensionParameter#getValues() value}. This update again is not considered a change in the sense that
- * switching tabs another time would need to ask whether or not to preserve those changes.<p>
+ * switching tabs another time would need to ask whether or not to preserve those changes.
+ * <p>
  * 
- * Storing a report stores the parameters with their values and bindings to dimension filters together with the report.<p>
+ * Storing a report stores the parameters with their values and bindings to dimension filters together with the report.
+ * <p>
  * 
  * The parameter names within a report must be unique and are the key by which a user selects them. The UUID should
- * never appear in the user interface.<p>
+ * never appear in the user interface.
+ * <p>
+ * 
+ * <b>Query and Report Object Life Cycle:</b> Note the life cycle of {@link StatisticQueryDefinitionDTO} query objects:
+ * they are created on demand from the {@link QueryDefinitionProvider}'s
+ * {@link QueryDefinitionProvider#getQueryDefinition()} method when the user runs a query, or when loading a stored
+ * query. The query objects are remembered only in the {@link TabbedSailingResultsPresenter} after successful execution
+ * or when loading a report. The UI for viewing/editing a single query ({@link QueryDefinitionProvider}) does not keep a
+ * record of the query object that may have been used to fill the editor.
+ * <p>
+ * 
+ * For {@link DataMiningReportDTO reports}, things are more complicated, especially because a report needs to keep track
+ * of its parameters and their usage across the various queries. When the {@link QueryDefinitionProviderWithControls}
+ * shows the UI elements to edit and build a query, the user can bind its dimension filters to parameters of a report.
+ * In a report object model it would be nice to link the {@link FilterDimensionParameter} objects to their usages in the
+ * {@link StatisticQueryDefinitionDTO} objects, including a reference to the retriever level and dimension function to
+ * which the parameter applies. However, while working with the {@link QueryDefinitionProviderWithControls} there is no
+ * underlying query object model object being maintained; this will only be created when running or saving the query.
+ * TODO bug4789: We can either change this fundamentally and constantly keep a query model around that is tightly
+ * synchronized with the editor; then we'd also have to decide whether this modifies the queries stored in the tabbed
+ * results presenter in-place which would mean a change from the current "invariant" where a query remembered in the
+ * results presenter corresponds to the results stored with it for the respective presenter. Or we manage a
+ * stripped-down "parameter model" only which is super-imposed on the query handling process as follows:
+ * <p>
+ * 
+ * TODO bug4789: Through the tabbed results presenter with its (tab/presenter, query, result) triplets we maintain a
+ * "current report" object model with parameters and their usages recorded as object references into the query models
+ * stored in the report. When a query with its result is stored in the presenter we need additional information about
+ * the parameter usages in the query. The parameters are managed and maintained in the report object model. The
+ * {@link QueryDefinitionProviderWithControls query editor} needs to have read/write access to the report's parameters
+ * and tracks binding information for all {@link DimensionFilterSelectionProvider dimension filter UIs}. When the
+ * {@link DimensionFilterSelectionProvider} modifies the selection while bound to a parameter, the parameter value set
+ * is updated (see above). When a {@link StatisticQueryDefinitionDTO query} is produced from the
+ * {@link QueryDefinitionProviderWithControls query editor}, the parameter usages can be produced as triplets of
+ * (retriever level, dimension function, parameter) object references and can be passed along with the
+ * {@link StatisticQueryDefinitionDTO} query object. When the query executes successfully and is entered into the tabbed
+ * results presenter together with its results, the parameter binding information can be passed along, too, and can then
+ * be used to update the report linked to the tabbed results presenter.
+ * <p>
+ * 
+ * TODO bug4789: When the {@link QueryDefinitionProviderWithControls} query editor is filled from an existing query,
+ * again the parameter binding information for that query must be passed along so that the
+ * {@link DimensionFilterSelectionProvider} UIs can be initialized, knowing about the parameter binding and
+ * filling a bound parameter's value set into the dimension filter UI.
  */
-public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
+public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implements ReportProvider {
 
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
@@ -168,6 +222,17 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
 
     private QueryDefinitionProviderWithControls queryDefinitionProvider;
     private CompositeResultsPresenter<?> resultsPresenter;
+    
+    /**
+     * The {@link #resultsPresenter} is assumed to show tabs based on the queries in this report. A
+     * {@link DataMiningReportStoreControls} control is created which manages the stored reports and can load and save a
+     * report. Loading a report replaces this attribute's value by the report loaded. Storing will store this report.
+     * Running a query successfully so that it updates the {@link #resultsPresenter}'s current tab will update this
+     * report with the query and the corresponding parameter bindings. So will removing a panel from the result
+     * presenter that has a query associated with it.
+     */
+    private DataMiningReportDTO currentReport;
+    
     private Integer resultsPresenterSouthHeight = 350;
     private Integer resultsPresenterEastWidth = 750;
 
@@ -203,6 +268,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
 
             @Override
             public Widget get() {
+                currentReport = new ModifiableDataMiningReportDTO();
                 mainPanel = new LayoutPanel();
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
                 resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null, /* context */ null,
@@ -217,6 +283,9 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
                     }
                 });
+                resultsPresenter.addPresenterRemovedListener((String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition) -> {
+                    currentReport.removeQueryDefinition(queryDefinition);
+                });
                 queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
                         queryDefinition -> queryRunner.run(queryDefinition));
@@ -230,7 +299,8 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(
                             dataMiningService, dataMiningWriteService);
                     queryDefinitionProvider.addControl(new DataMiningReportStoreControls(DataMiningEntryPoint.this,
-                            session, dataMiningService, reportsProvider, mainPanel, queryDefinitionProvider.getRetrieverChainProvider(), resultsPresenter));
+                            session, dataMiningService, reportsProvider, mainPanel, queryDefinitionProvider.getRetrieverChainProvider(), resultsPresenter,
+                            /* report provider */ DataMiningEntryPoint.this));
                 }
                 final Anchor orientationAnchor = new Anchor(
                         AbstractImagePrototype.create(dataMiningResources.orientationIcon()).getSafeHtml());
@@ -289,6 +359,16 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
         panel.add(authorizedContentDecorator);
         panel.ensureDebugId("DataMiningPanel");
         rootPanel.add(panel);
+    }
+
+    @Override
+    public DataMiningReportDTO getCurrentReport() {
+        return currentReport;
+    }
+
+    @Override
+    public void setCurrentReport(DataMiningReportDTO report) {
+        this.currentReport = report;
     }
 
     /**

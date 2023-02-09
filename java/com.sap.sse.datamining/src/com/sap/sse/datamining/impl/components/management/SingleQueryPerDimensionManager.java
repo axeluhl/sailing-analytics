@@ -14,22 +14,20 @@ public class SingleQueryPerDimensionManager extends SingleQueryPerKeyManager<Key
 
     @Override
     protected <ResultType> Iterable<Key> getKeysFor(DataMiningSession session, Query<ResultType> query) {
-        AdditionalDimensionValuesQueryData additionalData = query.getAdditionalData(AdditionalDimensionValuesQueryData.class);
+        final AdditionalDimensionValuesQueryData additionalData = query.getAdditionalData(AdditionalDimensionValuesQueryData.class);
         if (additionalData == null) {
             throw new IllegalArgumentException("This " + this.getClass().getSimpleName()
                                                + " can only manage queries of the " + QueryType.class.getSimpleName()
                                                + " " + QueryType.DIMENSION_VALUES);
         }
-        
-        Collection<Key> keys = new HashSet<>();
-        for (Function<?> dimension : additionalData.getDimensions()) {
+        final Collection<Key> keys = new HashSet<>();
+        for (final Function<?> dimension : additionalData.getDimensions()) {
             keys.add(new Key(session, dimension));
         }
         return keys;
     }
     
     static class Key {
-        
         private DataMiningSession session;
         private Function<?> dimension;
         
@@ -73,7 +71,5 @@ public class SingleQueryPerDimensionManager extends SingleQueryPerKeyManager<Key
                 return false;
             return true;
         }
-        
     }
-
 }

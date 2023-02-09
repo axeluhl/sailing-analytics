@@ -6,6 +6,7 @@ import com.sap.sse.common.NamedWithUUID;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.parameters.ParameterModelListener;
 
 /**
  * A parameter that can be used to keep multiple dimension filters "in sync" so that updates to one of the dimension
@@ -43,6 +44,21 @@ public interface FilterDimensionParameter extends NamedWithUUID {
      *         applied simultaneously to all dimension filters that are bound to this parameter.
      */
     Iterable<? extends Serializable> getValues();
+    
+    /**
+     * Updates this parameter's value set; registered listeners will be notified about the parameter value change after
+     * the update has completed and will additionally receive the previous value set.
+     */
+    <T extends Serializable> void setValues(Iterable<T> newValue);
+    
+    /**
+     * A listener added this way will receive a call to
+     * {@link ParameterModelListener#parameterValueChanged(FilterDimensionParameter, Iterable)}
+     * when the {@link #setValues(Iterable)} method is invoked on this parameter to update its value set.
+     */
+    void addParameterModelListener(ParameterModelListener listener);
+    
+    void removeParameterModelListener(ParameterModelListener listener);
     
     default boolean matches(Serializable value) {
         return Util.contains(getValues(), value);
