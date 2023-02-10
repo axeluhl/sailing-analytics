@@ -35,7 +35,8 @@ public class ValueListFilterParameter extends AbstractParameterizedDimensionFilt
         final HashSet<T> set = new HashSet<>();
         Util.addAll(newValue, set);
         this.values = set;
-        getParameterModelListeners().forEach(l->l.parameterValueChanged(this, oldValues));
+        // iterate on a copy because listeners may choose to unregister due to the event being sent
+        new HashSet<>(getParameterModelListeners()).forEach(l->l.parameterValueChanged(this, oldValues));
     }
 
     @Override

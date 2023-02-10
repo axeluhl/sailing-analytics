@@ -44,28 +44,29 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
+import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.FilterDimensionIdentifier;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.parameters.ParameterModelListener;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
-import com.sap.sse.datamining.ui.client.event.CreateFilterParameterEvent;
-import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
-import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
-import com.sap.sse.datamining.ui.client.event.FilterParametersChangedEvent;
-import com.sap.sse.datamining.ui.client.event.FilterParametersDialogClosedEvent;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.execution.ManagedDataMiningQueryCallback;
 import com.sap.sse.datamining.ui.client.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
 import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -80,7 +81,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * 
  * Items of this type are arranged by the {@link HierarchicalDimensionListFilterSelectionProvider}.
  */
-public class DimensionFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> {
+public class DimensionFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> implements ParameterModelListener {
 
     private static final DataMiningResources Resources = GWT.create(DataMiningResources.class);
     private static final NaturalComparator NaturalComparator = new NaturalComparator();
@@ -121,6 +122,8 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
      * any other filters / queries.
      */
     private FilterDimensionParameter parameter;
+    private ReportProvider reportProvider;
+    private final ReportParameterToDimensionFilterBindings reportParameterBindings;
     
     private String searchInputToApply;
     
@@ -131,9 +134,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     private Iterable<? extends Serializable> selectionToBeApplied;
     private Consumer<Iterable<String>> selectionCallback;
 
-    public DimensionFilterSelectionProvider(Component<?> parent, ComponentContext<?> componentContext, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, DataMiningSession session, DataRetrieverChainDefinitionProvider retrieverChainProvider,
-            FilterSelectionProvider filterSelectionProvider, DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension) {
+    public DimensionFilterSelectionProvider(Component<?> parent, ComponentContext<?> componentContext,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
+            DataRetrieverChainDefinitionProvider retrieverChainProvider,
+            FilterSelectionProvider filterSelectionProvider, DataRetrieverLevelDTO retrieverLevel,
+            FunctionDTO dimension, ReportParameterToDimensionFilterBindings reportParameterBindings,
+            ReportProvider reportProvider) {
         super(parent, componentContext);
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -142,6 +148,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         this.filterSelectionProvider = filterSelectionProvider;
         this.retrieverLevel = retrieverLevel;
         this.dimension = dimension;
+        this.reportParameterBindings = reportParameterBindings;
+        this.reportProvider = reportProvider;
+        parameter = reportParameterBindings.getParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
+        if (parameter != null) {
+            parameter.addParameterModelListener(this);
+        }
         counter = new SimpleManagedDataMiningQueriesCounter();
         listeners = new HashSet<>();
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
@@ -197,21 +209,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         mainPanel.addNorth(filterPanel, 35);
         mainPanel.setWidgetHidden(filterPanel, true);
         mainPanel.add(contentContainer);
-        DataMiningEventBus.addHandler(FilterParametersChangedEvent.TYPE, event -> {
-           this.parameter = event.getUsedParameter(this.retrieverLevel, this.dimension);
-           this.filterPanel.filter();
-           if (this.parameter != null) {
-               boolean selectionChanged = false;
-               for (final Serializable value : this.filterPanel.getAll()) {
-                   final boolean matchedByParameter = parameter.matches(value);
-                   selectionChanged = selectionChanged || selectionModel.isSelected(value) == matchedByParameter;
-                   selectionModel.setSelected(value, matchedByParameter);
-               }
-               if (!selectionChanged) {
-                   this.selectionChanged(null);
-               }
-           }
-        });
         updateContent(null);
     }
 
@@ -235,18 +232,25 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         parameterSettingsButton.addStyleName("query-parameter");
         parameterSettingsButton.addClickHandler(e -> {
             if (this.parameter == null) {
-                DataMiningEventBus.fire(
-                    // FIXME I think "create" is not necessarily right here; couldn't this also be "use existing" when the parameter model of the current report has one for that dimension already?
-                    new CreateFilterParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
-                );
+                // TODO bug4789: when binding a parameter to this dimension filter, observe its value set and record usage in temporary structure ReportParameterToDimensionFilterBindings
+                new PickOrCreateReportParameterDialog(reportProvider.getCurrentReport(), dimension.getReturnTypeName(), getDataMiningStringMessages(),
+                        new DialogCallback<FilterDimensionParameter>() {
+                            @Override
+                            public void ok(FilterDimensionParameter editedObject) {
+                                parameter = editedObject;
+                                reportParameterBindings.setParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension), editedObject);
+                                editedObject.addParameterModelListener(DimensionFilterSelectionProvider.this);
+                                parameterValueChanged(editedObject, Collections.emptySet()); // update this dimension filter's selection based on parameter value set
+                            }
+
+                            @Override
+                            public void cancel() {
+                                parameterSettingsButton.setDown(false);
+                            }
+                }).center();
             } else {
-                DataMiningEventBus.fire(new EditFilterParameterEvent(parameter));
+                unbindFromParameter(this.parameter);
             }
-        });
-        // FIXME bug4789: this isn't enough; the "P" button must always correspond to the current report's parameter binding regarding this dimension filter so that switching tabs updates accordingly
-        DataMiningEventBus.addHandler(FilterParametersDialogClosedEvent.TYPE, event -> {
-            this.parameter = event.getUsedParameter(this.retrieverLevel, this.dimension);
-            parameterSettingsButton.setDown(parameter != null);
         });
         headerPanel.add(parameterSettingsButton);
         headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);
@@ -323,7 +327,22 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         return element.toString();
     }
     
+    /**
+     * If a {@link #parameter} is bound to this dimension filter, the parameter's value is updated to reflect the new
+     * selection.
+     * <p>
+     * 
+     * TODO bug4789: consider finding out whether this was an incremental or "radical" selection change and try to
+     * update the parameter value set accordingly: incrementally if the change seems to be incremental, or by simply
+     * setting the current selected set as the new parameter value set if considered "radical."
+     * <p>
+     * 
+     * Then, all {@link #listeners} are notified.
+     */
     private void selectionChanged(SelectionChangeEvent event) {
+        if (parameter != null) {
+            parameter.setValues(selectionModel.getSelectedSet());
+        }
         notifyListeners();
     }
 
@@ -354,7 +373,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                 missingValues.add(value);
             }
         }
-        
         if (!missingValues.isEmpty()) {
             String listedValues = missingValues.stream().map(this::elementAsString).collect(Collectors.joining(", "));
             callback.accept(Collections.singleton(getDataMiningStringMessages()
@@ -457,4 +475,29 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         
     }
 
+    @Override
+    public void parameterAdded(DataMiningReportDTO report, FilterDimensionParameter parameter) {
+        // we don't care about new parameters here; a user has to pick it for binding this dimension filter to it
+    }
+
+    @Override
+    public void parameterRemoved(DataMiningReportDTO report, FilterDimensionParameter parameter) {
+        if (parameter == this.parameter) {
+            unbindFromParameter(parameter);
+        }
+    }
+
+    private void unbindFromParameter(FilterDimensionParameter parameter) {
+        parameter.removeParameterModelListener(this);
+        reportParameterBindings.removeParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
+        this.parameter = null; // unbind this dimension filter;
+    }
+
+    @Override
+    public void parameterValueChanged(FilterDimensionParameter parameter, Iterable<? extends Serializable> oldValues) {
+        selectionModel.clear();
+        for (final Serializable newValue : parameter.getValues()) {
+            selectionModel.setSelected(newValue, true);
+        }
+    }
 }

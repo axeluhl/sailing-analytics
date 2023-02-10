@@ -48,6 +48,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -59,6 +60,7 @@ import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionPresenter;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.presentation.PlainFilterSelectionPresenter;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
@@ -131,14 +133,20 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     private HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selectionToBeApplied;
     private Consumer<Iterable<String>> selectionCallback;
     
+    private final ReportProvider reportProvider;
+    private final ReportParameterToDimensionFilterBindings reportParameterBindings;
+    
     public HierarchicalDimensionListFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+            DataRetrieverChainDefinitionProvider retrieverChainProvider, ReportProvider reportProvider,
+            ReportParameterToDimensionFilterBindings reportParameterBindings) {
         super(parent, context);
         this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.retrieverChainProvider = retrieverChainProvider;
+        this.reportProvider = reportProvider;
+        this.reportParameterBindings = reportParameterBindings;
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
         listeners = new HashSet<>();
         isAwaitingReload = false;
@@ -445,7 +453,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     private DimensionFilterSelectionProvider addDimensionFilterSelectionProvider(final DimensionWithContext dimension) {
         final DimensionFilterSelectionProvider selectionProvider = new DimensionFilterSelectionProvider(this, getComponentContext(),
-                dataMiningService, errorReporter, session, retrieverChainProvider, this, dimension.getRetrieverLevel(), dimension.getDimension());
+                dataMiningService, errorReporter, session, retrieverChainProvider, this, dimension.getRetrieverLevel(), dimension.getDimension(),
+                reportParameterBindings, reportProvider);
         selectionProvider.addListener(() -> filterSelectionChanged(dimension));
         dimensionFilterSelectionProviders.put(dimension, selectionProvider);
         DimensionWithContext nextDimension = null;
@@ -606,7 +615,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private static class DimensionWithContext implements Comparable<DimensionWithContext> {
-
         private final FunctionDTO dimension;
         private final DataRetrieverLevelDTO retrieverLevel;
         private Collection<String> matchingStrings;
@@ -671,7 +679,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 return false;
             return true;
         }
-        
     }
     
     /**

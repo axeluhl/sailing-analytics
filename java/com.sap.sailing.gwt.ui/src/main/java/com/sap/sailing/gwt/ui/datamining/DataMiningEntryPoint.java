@@ -33,7 +33,9 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -150,7 +152,9 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
  * through which the parameter was edited will be run. The query currently shown in the editor will run first, followed
  * in the background by those dependent "to also run" queries whose results then update their respective result
  * presenter tab in the background such that when the user switches to those tabs then the query will either still be
- * running or the new results will be shown already.
+ * running or the new results will be shown already. The handling of the "to also run" flag could be combined with a
+ * new setting that lets the user choose how to deal with the other queries affected (run immediately, run in background,
+ * run when panel / tab is selected, ...).
  * <p>
  * 
  * When switching to a result presenter tab that has remembered a query that is then
@@ -220,7 +224,25 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
     private final DataMiningWriteServiceAsync dataMiningWriteService = GWT.create(DataMiningWriteService.class);
     private DataMiningSession session;
 
+    /**
+     * The editor for queries of type {@link StatisticQueryDefinitionDTO}. The editor can be
+     * {@link QueryDefinitionProvider#applyQueryDefinition(StatisticQueryDefinitionDTO) filled} from
+     * an existing query which is used by this entry point whenever the composite {@link #resultsPresenter}
+     * switches tabs, so that the query editor shows the query that pertains to the tab selected.
+     * The editor, however, does not keep a live mutable copy of a query during the editing process
+     * but creates a new one in its {@link QueryDefinitionProvider#getQueryDefinition()} method which
+     * is then submitted for execution or storage and is then used to update the {@link #currentReport}
+     * consistently with the {@link #resultsPresenter} so that the queries of the composite result
+     * presenter correspond to the {@link DataMiningReportDTO#getQueryDefinitions() queries} managed
+     * in the current report.
+     */
     private QueryDefinitionProviderWithControls queryDefinitionProvider;
+    
+    /**
+     * Manages multiple queries and their results or error states. The user can switch between them,
+     * and this entry point acts as a change listener in order to synchronize the {@link #currentReport}
+     * with the queries from this result presenter.
+     */
     private CompositeResultsPresenter<?> resultsPresenter;
     
     /**
@@ -274,23 +296,33 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                 resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null, /* context */ null,
                         /* drillDownCallback */ groupKey -> {
                             queryDefinitionProvider.drillDown(groupKey, () -> {
-                                queryRunner.run(queryDefinitionProvider.getQueryDefinition());
+                                final Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> queryDefinitionAndReportParameterBindings =
+                                        queryDefinitionProvider.getQueryDefinitionAndReportParameterBinding();
+                                queryRunner.run(queryDefinitionAndReportParameterBindings.getA(), queryDefinitionAndReportParameterBindings.getB());
                             });
                         }, getStringMessages());
+                // when switching to a different result presenter tab, that tab's query shall be loaded into the query editor:
                 resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
                     StatisticQueryDefinitionDTO queryDefinition = resultsPresenter.getQueryDefinition(presenterId);
                     if (queryDefinition != null) {
                         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
                     }
                 });
+                // removing a tab from the result presenter shall remove its query from the current report
                 resultsPresenter.addPresenterRemovedListener((String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition) -> {
-                    currentReport.removeQueryDefinition(queryDefinition);
+                    if (queryDefinition != null) {
+                        currentReport.removeQueryDefinition(queryDefinition);
+                    }
                 });
                 queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
-                        dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
-                        queryDefinition -> queryRunner.run(queryDefinition));
-                queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
-                        queryDefinitionProvider, resultsPresenter);
+                        dataMiningService, /* report provider */ DataMiningEntryPoint.this,
+                        /* error reporter */ DataMiningEntryPoint.this, settingsControl, settingsManager,
+                        queryDefinitionAndReportParameterBindings -> queryRunner.run(
+                                queryDefinitionAndReportParameterBindings.getA(),
+                                queryDefinitionAndReportParameterBindings.getB()));
+                queryRunner = new SimpleQueryRunner(null, null, session,
+                        dataMiningService, DataMiningEntryPoint.this,
+                        queryDefinitionProvider, resultsPresenter, /* reportProvider */ DataMiningEntryPoint.this);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 if (getUserService().hasServerPermission(ServerActions.DATA_MINING)) {
                     StoredDataMiningQueryDataProvider queryProvider = new StoredDataMiningQueryDataProvider(
@@ -298,7 +330,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(queryProvider));
                     StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(
                             dataMiningService, dataMiningWriteService);
-                    queryDefinitionProvider.addControl(new DataMiningReportStoreControls(DataMiningEntryPoint.this,
+                    queryDefinitionProvider.addControl(new DataMiningReportStoreControls(/* error reporter */ DataMiningEntryPoint.this,
                             session, dataMiningService, reportsProvider, mainPanel, queryDefinitionProvider.getRetrieverChainProvider(), resultsPresenter,
                             /* report provider */ DataMiningEntryPoint.this));
                 }
@@ -337,7 +369,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                                             @Override
                                             public void onSuccess(ModifiableStatisticQueryDefinitionDTO result) {
                                                 queryDefinitionProvider.applyQueryDefinition(result);
-                                                queryRunner.run(result);
+                                                queryRunner.run(result, /* reportParameterBindings */ null);
                                             }
 
                                             @Override

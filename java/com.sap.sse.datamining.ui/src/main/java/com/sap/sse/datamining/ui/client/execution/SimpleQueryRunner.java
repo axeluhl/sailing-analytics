@@ -9,7 +9,11 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
+import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -20,6 +24,7 @@ import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.QueryRunner;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettings;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -29,7 +34,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * The "Run" button with settings and the event handler for the "Run" button which triggers the
- * {@link #run(StatisticQueryDefinitionDTO)} method where the query to run is obtained from the
+ * {@link #run(StatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings)} method where the query to run is obtained from the
  * {@link QueryDefinitionProvider} passed to the constructor. Results received from successful query execution through
  * the {@link DataMiningServiceAsync} are shown in the {@link CompositeResultsPresenter} that was passed to the
  * constructor, in the currently active tab.<p>
@@ -61,13 +66,35 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
      */
     private final Timer queryReleaseTimer;
     private QueryRunnerSettings settings;
+    
+    /**
+     * The query and its optional {@link ReportParameterToDimensionFilterBindings use} of
+     * {@link FilterDimensionParameter report parameters} is fetched from here.
+     */
     private final QueryDefinitionProvider<?> queryDefinitionProvider;
+    
+    /**
+     * Query execution results are sent to the presenter within this result presenter that
+     * was current (e.g., the selected tab) when running the query was triggered.
+     */
     private final CompositeResultsPresenter<?> resultsPresenter;
+    
+    /**
+     * That's where we can obtain the {@link DataMiningReportDTO} from that is considered the "current" report shown and
+     * manipulated by the entry point in whose context this query runner is used. When a query and its parameterization
+     * if fetched from the {@link #queryDefinitionProvider} for execution, it is updated in the
+     * {@link ReportProvider#getCurrentReport() current report}, replacing the query previously shown in the
+     * {@link #resultsPresenter}'s {@link CompositeResultsPresenter#getCurrentPresenterId() current presenter}.
+     */
+    private final ReportProvider reportProvider;
+    
     private final Button runButton;
+
 
     public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            QueryDefinitionProvider<?> queryDefinitionProvider, CompositeResultsPresenter<?> resultsPresenter) {
+            QueryDefinitionProvider<?> queryDefinitionProvider, CompositeResultsPresenter<?> resultsPresenter,
+            ReportProvider reportProvider) {
         super(parent, context);
         this.session = session;
         this.dataMiningService = dataMiningService;
@@ -77,32 +104,40 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
+        this.reportProvider = reportProvider;
         runButton = new Button(getDataMiningStringMessages().run());
         runButton.ensureDebugId("RunDataminingQueryButton");
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                run(queryDefinitionProvider.getQueryDefinition());
+                final Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> queryDefinitionAndParameterBindings = queryDefinitionProvider
+                        .getQueryDefinitionAndReportParameterBinding();
+                run(queryDefinitionAndParameterBindings.getA(), queryDefinitionAndParameterBindings.getB());
             }
         });
         queryReleaseTimer = new Timer() {
             @Override
             public void run() {
-                SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
+                final Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> queryDefinitionAndParameterBindings = queryDefinitionProvider
+                        .getQueryDefinitionAndReportParameterBinding();
+                SimpleQueryRunner.this.run(queryDefinitionAndParameterBindings.getA(), queryDefinitionAndParameterBindings.getB());
             }
         };
         queryDefinitionChanged(queryDefinitionProvider.getQueryDefinition());
     }
 
     @Override
-    public void run(StatisticQueryDefinitionDTO queryDefinition) {
+    public void run(ModifiableStatisticQueryDefinitionDTO queryDefinition, ReportParameterToDimensionFilterBindings reportParameterBindings) {
         final Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         final String presenterId = resultsPresenter.getCurrentPresenterId();
+        final StatisticQueryDefinitionDTO oldPresenterQuery = resultsPresenter.getCurrentQueryDefinition();
+        reportProvider.getCurrentReport().replaceQueryDefinition(oldPresenterQuery, queryDefinition, reportParameterBindings);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator(presenterId);
             dataMiningService.runQuery(session, (ModifiableStatisticQueryDefinitionDTO) queryDefinition,
                     new ManagedDataMiningQueryCallback<Serializable>(counter) {
+                        // TODO bug4789: consistently update the entry point's currentReport, also using the QueryDefinitionProvider's parameter mappings (ReportParameterToDimensionFilterBindings)
                         @Override
                         protected void handleSuccess(QueryResultDTO<Serializable> result) {
                             resultsPresenter.showResult(presenterId, queryDefinition, result);
@@ -111,12 +146,12 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
                         @Override
                         protected void handleFailure(Throwable caught) {
                             errorReporter.reportError("Error running the query: " + caught.getMessage());
-                            resultsPresenter.showError(presenterId,
-                                    getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
+                            resultsPresenter.showError(presenterId, // this also clears the query in the result presenter
+                                    queryDefinition, getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
                         }
                     });
         } else {
-            resultsPresenter.showError(presenterId, getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
+            resultsPresenter.showError(presenterId, queryDefinition, getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
         }
     }
 

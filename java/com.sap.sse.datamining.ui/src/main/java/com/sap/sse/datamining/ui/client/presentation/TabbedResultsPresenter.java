@@ -179,24 +179,24 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
                 break;
             }
         }
-        tabPanel.selectTab(0); // this will also fire the selection event, so the query provider will update according to the query
+        tabPanel.selectTab(0, /* fire events */ true); // this will also fire the selection event, so the query provider will update according to the query
     }
     
     @Override
-    public void showError(String presenterId, String error) {
+    public void showError(String presenterId, StatisticQueryDefinitionDTO queryDefinition, String error) {
         CloseablePresenterTab tab = getTab(presenterId);
         if (tab != null) {
             tab.setText(getDataMiningStringMessages().error());
-            tab.getPresenter().showError(error);
+            tab.getPresenter().showError(queryDefinition, error);
         }
     }
 
     @Override
-    public void showError(String presenterId, String mainError, Iterable<String> detailedErrors) {
+    public void showError(String presenterId, StatisticQueryDefinitionDTO queryDefinition, String mainError, Iterable<String> detailedErrors) {
         CloseablePresenterTab tab = getTab(presenterId);
         if (tab != null) {
             tab.setText(getDataMiningStringMessages().error());
-            tab.getPresenter().showError(mainError, detailedErrors);
+            tab.getPresenter().showError(mainError, detailedErrors, queryDefinition);
         }
     }
 

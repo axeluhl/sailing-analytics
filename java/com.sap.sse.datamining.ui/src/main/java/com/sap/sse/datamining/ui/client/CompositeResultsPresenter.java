@@ -111,22 +111,24 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
      * 
      * @param presenterId
      *            The id of the presenter used to show the error
+     * @param queryDefinition TODO
      * @param error
      *            The error message
      */
-    void showError(String presenterId, String error);
+    void showError(String presenterId, StatisticQueryDefinitionDTO queryDefinition, String error);
     
     /**
      * Shows the given error in the presenter for the given id. Does nothing if no presenter for the given id exists.
      * 
      * @param presenterId
      *            The id of the presenter used to show the error
+     * @param queryDefinition TODO
      * @param mainError
      *            The main error message
      * @param detailedErrors
      *            The detailed error messages
      */
-    void showError(String presenterId, String mainError, Iterable<String> detailedErrors);
+    void showError(String presenterId, StatisticQueryDefinitionDTO queryDefinition, String mainError, Iterable<String> detailedErrors);
     
     /**
      * Shows the busy indicator of the presenter for the given id. Does nothing if no presenter for the given id exists.
@@ -163,13 +165,13 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
     }
 
     @Override
-    default void showError(String error) {
-        showError(getCurrentPresenterId(), error);
+    default void showError(StatisticQueryDefinitionDTO queryDefinition, String error) {
+        showError(getCurrentPresenterId(), queryDefinition, error);
     }
 
     @Override
-    default void showError(String mainError, Iterable<String> detailedErrors) {
-        showError(getCurrentPresenterId(), mainError, detailedErrors);
+    default void showError(String mainError, Iterable<String> detailedErrors, StatisticQueryDefinitionDTO queryDefinition) {
+        showError(getCurrentPresenterId(), queryDefinition, mainError, detailedErrors);
     }
 
     @Override

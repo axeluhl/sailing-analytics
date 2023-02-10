@@ -33,8 +33,8 @@ public interface ResultsPresenter<SettingsType extends Settings> extends Compone
      */
     void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result);
     
-    void showError(String error);
-    void showError(String mainError, Iterable<String> detailedErrors);
+    void showError(StatisticQueryDefinitionDTO queryDefinition, String error);
+    void showError(String mainError, Iterable<String> detailedErrors, StatisticQueryDefinitionDTO queryDefinition);
     void showBusyIndicator();
 
 }

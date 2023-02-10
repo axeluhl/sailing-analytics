@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.FilterDimensionIdentifier;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
@@ -25,7 +27,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     
     private ArrayList<ModifiableStatisticQueryDefinitionDTO> queryDefinitions;
     private HashSet<FilterDimensionParameter> parameters;
-    private HashMap<StatisticQueryDefinitionDTO, HashMap<FilterDimensionIdentifier, FilterDimensionParameter>> parameterUsages;
+    private IdentityHashMap<StatisticQueryDefinitionDTO, HashMap<FilterDimensionIdentifier, FilterDimensionParameter>> parameterUsages;
     
     /**
      * Objects of this type entertain one value change listener for each parameter in {@link #getParameters()} so
@@ -98,8 +100,10 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     }
     
     @Override
-    public void addQueryDefinition(ModifiableStatisticQueryDefinitionDTO queryDefinition) {
-        queryDefinitions.add(queryDefinition);
+    public void addQueryDefinition(int index, ModifiableStatisticQueryDefinitionDTO queryDefinition) {
+        if (!queryDefinitions.contains(queryDefinition)) {
+            queryDefinitions.add(index, queryDefinition);
+        }
     }
     
     /**
@@ -107,9 +111,11 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
      * removing all usages within the query removed.
      */
     @Override
-    public boolean removeQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+    public int removeQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         parameterUsages.remove(queryDefinition);
-        return queryDefinitions.remove(queryDefinition);
+        final int result = queryDefinitions.indexOf(queryDefinition);
+        queryDefinitions.remove(queryDefinition);
+        return result;
     }
 
     @Override
@@ -129,12 +135,8 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     }
     
     @Override
-    public Iterable<Pair<FilterDimensionIdentifier, FilterDimensionParameter>> getParameterUsages(StatisticQueryDefinitionDTO query) {
-        final List<Pair<FilterDimensionIdentifier, FilterDimensionParameter>> result = new ArrayList<>();
-        for (final Entry<FilterDimensionIdentifier, FilterDimensionParameter> e : parameterUsages.get(query).entrySet()) {
-            result.add(new Pair<>(e.getKey(), e.getValue()));
-        }
-        return result;
+    public ReportParameterToDimensionFilterBindings getParameterUsages(StatisticQueryDefinitionDTO query) {
+        return new ReportParameterToDimensionFilterBindings(parameterUsages.get(query));
     }
 
     @Override
@@ -161,7 +163,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     }
     
     @Override
-    public void addParameterUsage(StatisticQueryDefinitionDTO query, FilterDimensionParameter parameter, FilterDimensionIdentifier filterDimensionIdentifier) {
+    public void addParameterUsage(StatisticQueryDefinitionDTO query, FilterDimensionIdentifier filterDimensionIdentifier, FilterDimensionParameter parameter) {
         if (!Util.contains(getParameters(), parameter)) {
             throw new IllegalArgumentException("Parameter "+parameter.getName()+" is not part of this report");
         }
@@ -172,8 +174,8 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     }
     
     @Override
-    public void removeParameterUsage(StatisticQueryDefinitionDTO query, FilterDimensionParameter parameter,
-            FilterDimensionIdentifier filterDimensionIdentifier) {
+    public void removeParameterUsage(StatisticQueryDefinitionDTO query, FilterDimensionIdentifier filterDimensionIdentifier,
+            FilterDimensionParameter parameter) {
         if (parameterUsages.containsKey(query)) {
             parameterUsages.get(query).remove(filterDimensionIdentifier);
         }

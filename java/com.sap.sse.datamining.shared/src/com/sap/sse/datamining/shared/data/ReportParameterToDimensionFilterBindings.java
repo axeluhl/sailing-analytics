@@ -1,20 +1,22 @@
-package com.sap.sse.datamining.ui.client;
+package com.sap.sse.datamining.shared.data;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.FilterDimensionIdentifier;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
-import com.sap.sse.datamining.ui.client.selection.DimensionFilterSelectionProvider;
-import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 
 /**
- * Tracks the use of {@link FilterDimensionParameter}s in the scope of a {@link QueryDefinitionProviderWithControls
- * query editor} with its {@link DimensionFilterSelectionProvider} components where dimension filters can be bound to
- * report parameters.<p>
+ * Tracks the use of {@link FilterDimensionParameter}s in the scope of a {@code QueryDefinitionProviderWithControls}
+ * query editor with its {@code DimensionFilterSelectionProvider} components where dimension filters can be bound to
+ * report parameters. Instances of this class are mutable, and a single instance is assumed to represent the temporary
+ * parameter binding information of a {@code QueryDefinitionProvider} before that provider is asked to
+ * {@link QueryDefinitionProvider#getQueryDefinition() produce its query}.
+ * <p>
  * 
  * The query editor is not constantly maintaining a {@link StatisticQueryDefinitionDTO query object} but can only
  * be filled from one and can produce a new one based on its UI state. Therefore, the parameter binding model as
@@ -24,8 +26,10 @@ import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithCon
  * binding information is converted into an object of this type, tracked by this object while editing the query
  * and transformed back into the report's parameter usage model when running the query successfully and hence
  * updating the report accordingly.
+ * 
+ * @see DataMiningReportDTO#getParameterUsages(StatisticQueryDefinitionDTO)
  */
-public class ReportParameterToDimensionFilterBindings {
+public class ReportParameterToDimensionFilterBindings implements Iterable<Entry<FilterDimensionIdentifier, FilterDimensionParameter>> {
     private final Map<FilterDimensionIdentifier, FilterDimensionParameter> parameterBindings;
 
     public ReportParameterToDimensionFilterBindings() {
@@ -37,16 +41,14 @@ public class ReportParameterToDimensionFilterBindings {
         this.parameterBindings = new HashMap<>(parameterBindings);
     }
     
-    public ReportParameterToDimensionFilterBindings(DataMiningReportDTO report, StatisticQueryDefinitionDTO query) {
-        this(fillFromReportAndQuery(report, query));
-    }
-    
-    private static Map<FilterDimensionIdentifier, FilterDimensionParameter> fillFromReportAndQuery(DataMiningReportDTO report, StatisticQueryDefinitionDTO query) {
-        final Map<FilterDimensionIdentifier, FilterDimensionParameter> result = new HashMap<>();
-        for (final Pair<FilterDimensionIdentifier, FilterDimensionParameter> usage : report.getParameterUsages(query)) {
-            result.put(usage.getA(), usage.getB());
+    /**
+     * Copy constructor
+     */
+    public ReportParameterToDimensionFilterBindings(ReportParameterToDimensionFilterBindings other) {
+        this();
+        for (final Entry<FilterDimensionIdentifier, FilterDimensionParameter> e : other) {
+            setParameterBinding(e.getKey(), e.getValue());
         }
-        return result;
     }
     
     public FilterDimensionParameter getParameterBinding(FilterDimensionIdentifier filterDimensionIdentifier) {
@@ -59,5 +61,10 @@ public class ReportParameterToDimensionFilterBindings {
     
     public void removeParameterBinding(FilterDimensionIdentifier filterDimensionIdentifier) {
         parameterBindings.remove(filterDimensionIdentifier);
+    }
+
+    @Override
+    public Iterator<Entry<FilterDimensionIdentifier, FilterDimensionParameter>> iterator() {
+        return parameterBindings.entrySet().iterator();
     }
 }

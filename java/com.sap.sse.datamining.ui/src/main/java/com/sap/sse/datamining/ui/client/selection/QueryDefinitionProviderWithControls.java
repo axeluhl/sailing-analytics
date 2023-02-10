@@ -34,9 +34,13 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
+import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -53,6 +57,7 @@ import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.GroupingChangedListener;
 import com.sap.sse.datamining.ui.client.GroupingProvider;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.StatisticChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
@@ -106,11 +111,26 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final Panel applyQueryBusyIndicator;
     
     private boolean queryDefinitionChanged;
+    
+    /**
+     * Maintains the UI state regarding the binding of {@link FilterDimensionParameter report parameters} to dimension
+     * filters. Within this editor, users can bind / unbind dimensions to / from parameters from a
+     * {@link DataMiningReportDTO}. These bindings cannot be updated into the report as they occur in the UI because no
+     * {@link StatisticQueryDefinitionDTO} object will exist until one of the {@link #getQueryDefinition()} or
+     * {@link #getQueryDefinitionAndReportParameterBinding()} methods are invoked, which is when a new query object is
+     * created from the UI state.
+     * <p>
+     * 
+     * A copy of these parameter bindings will be returned by {@link #getQueryDefinitionAndReportParameterBinding()}
+     * together with the query so that the current report can be updated from it. See also
+     * {@link DataMiningReportDTO#replaceQueryDefinition(StatisticQueryDefinitionDTO, ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings)}.
+     */
+    private ReportParameterToDimensionFilterBindings reportParameterBindings;
 
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
-            DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            DataMiningSettingsControl settingsControl, DataMiningSettingsInfoManager settingsManager,
-            Consumer<StatisticQueryDefinitionDTO> queryRunner) {
+            DataMiningSession session, DataMiningServiceAsync dataMiningService, ReportProvider reportProvider,
+            ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
+            DataMiningSettingsInfoManager settingsManager, Consumer<Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings>> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         mainPanel = new LayoutPanel();
@@ -163,7 +183,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         groupingProvider.addGroupingChangedListener(providerListener);
         groupingProvider.getEntryWidget().addStyleName("dataMiningMarginBase");
         filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(parent, context, session,
-                dataMiningService, errorReporter, statisticProvider);
+                dataMiningService, errorReporter, statisticProvider, reportProvider, reportParameterBindings);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSelectionProvider.getEntryWidget().addStyleName("dataMiningBorderTop");
         filterSplitPanel = new SplitLayoutPanel(SplitterSize);
@@ -302,7 +322,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     @Override
-    public StatisticQueryDefinitionDTO getQueryDefinition() {
+    public ModifiableStatisticQueryDefinitionDTO getQueryDefinition() {
         ModifiableStatisticQueryDefinitionDTO queryDTO = new ModifiableStatisticQueryDefinitionDTO(
                 LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getExtractionFunction(),
                 statisticProvider.getAggregatorDefinition(), statisticProvider.getDataRetrieverChainDefinition());
@@ -317,6 +337,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
         return queryDTO;
+    }
+
+    @Override
+    public Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> getQueryDefinitionAndReportParameterBinding() {
+        return new Pair<>(getQueryDefinition(), new ReportParameterToDimensionFilterBindings(reportParameterBindings));
     }
 
     @Override
@@ -357,7 +382,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
      * its constituents to the various elements of this UI widget. A new query definition will be produced from this
      * editor UI in {@link #getQueryDefinition()}.
      */
-    private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+    private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) { // TODO bug4789: deliver parameter bindings and establish in local temporary model of type ReportParameterToDimensionFilterBindings
         final Set<ApplyCallback> callbacks = new HashSet<>();
         final Collection<String> errorMessages = new ArrayList<>();
         final String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();

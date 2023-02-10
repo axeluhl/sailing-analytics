@@ -66,7 +66,6 @@ public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
         this.sourceTypeName = sourceTypeName;
         this.returnTypeName = returnTypeName;
         this.parameterTypeNames = new ArrayList<String>(parameterTypeNames);
-        
         this.displayName = displayName;
         this.ordinal = ordinal;
     }

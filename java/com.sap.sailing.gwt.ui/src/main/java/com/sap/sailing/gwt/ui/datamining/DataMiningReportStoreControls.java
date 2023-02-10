@@ -3,12 +3,9 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,22 +29,15 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
-import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
-import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.ModifiableDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
-import com.sap.sse.datamining.shared.impl.dto.parameters.ModifiableDataMiningReportParametersDTO;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
-import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
-import com.sap.sse.datamining.ui.client.presentation.TabbedResultsPresenter;
-import com.sap.sse.datamining.ui.client.selection.HierarchicalDimensionListFilterSelectionProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -176,23 +166,7 @@ public class DataMiningReportStoreControls extends Composite {
      * {@link #resultsPresenter}.
      */
     private DataMiningReportDTO buildReport() {
-        // TODO bug4789: can we simply use reportProvider.getCurrentReport()?
-        final ArrayList<StatisticQueryDefinitionDTO> queryDefinitions = new ArrayList<>(StreamSupport
-                .stream(resultsPresenter.getPresenterIds().spliterator(), false)
-                .map(resultsPresenter::getQueryDefinition).filter(Objects::nonNull).collect(Collectors.toList()));
-        if (!queryDefinitions.isEmpty()) {
-            for (int i = 0; i < queryDefinitions.size(); i++) {
-                final DataRetrieverChainDefinitionDTO retrieverChain = queryDefinitions.get(i).getDataRetrieverChainDefinition();
-                final HashSet<FilterDimensionParameter> parameters = filterParameters.getUsages(i);
-                // TODO bug4789 / bug5804: at most check the parameter type for conformance; retriever levels / dimension functions should not restrict parameter applicability
-                if (parameters.stream().anyMatch(p -> !retrieverChain.getRetrieverLevel(p.getRetrieverLevel().getLevel()).equals(p.getRetrieverLevel()))) {
-                    throw new IllegalStateException("The parameters retriever level is not contained by the associated queries data retriever definition");
-                }
-            }
-            return new ModifiableDataMiningReportDTO(queryDefinitions, new ModifiableDataMiningReportParametersDTO(filterParameters));
-        } else {
-            return null;
-        }
+        return reportProvider.getCurrentReport();
     }
 
     private Void applyReport(StoredDataMiningReportDTO storedReport) {

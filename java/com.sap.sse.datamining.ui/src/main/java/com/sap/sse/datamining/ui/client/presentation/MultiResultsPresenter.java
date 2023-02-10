@@ -99,16 +99,16 @@ public class MultiResultsPresenter extends AbstractDataMiningComponent<Settings>
     }
 
     @Override
-    public void showError(String error) {
+    public void showError(StatisticQueryDefinitionDTO queryDefinition, String error) {
         for (PresenterDescriptor<Object> descriptor : availablePresenters) {
-            descriptor.getPresenter().showError(error);
+            descriptor.getPresenter().showError(queryDefinition, error);
         }
     }
 
     @Override
-    public void showError(String mainError, Iterable<String> detailedErrors) {
+    public void showError(String mainError, Iterable<String> detailedErrors, StatisticQueryDefinitionDTO queryDefinition) {
         for (PresenterDescriptor<Object> descriptor : availablePresenters) {
-            descriptor.getPresenter().showError(mainError, detailedErrors);
+            descriptor.getPresenter().showError(mainError, detailedErrors, queryDefinition);
         }
     }
 
