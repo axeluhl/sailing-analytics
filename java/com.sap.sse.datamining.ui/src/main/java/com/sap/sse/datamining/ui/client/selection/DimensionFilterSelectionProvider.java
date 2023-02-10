@@ -302,12 +302,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     }
 
     public void updateContent(Runnable callback) {
-        HashMap<DataRetrieverLevelDTO,SerializableSettings> retrieverSettings = retrieverChainProvider.getRetrieverSettings();
-        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = filterSelectionProvider.getSelection();
+        final HashMap<DataRetrieverLevelDTO,SerializableSettings> retrieverSettings = retrieverChainProvider.getRetrieverSettings();
+        final HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = filterSelectionProvider.getSelection();
         if (filterSelection.containsKey(retrieverLevel)) {
             filterSelection.get(retrieverLevel).remove(dimension);
         }
-        HashSet<FunctionDTO> dimensions = new HashSet<>();
+        final HashSet<FunctionDTO> dimensions = new HashSet<>();
         dimensions.add(dimension);
         availableData.clear();
         counter.increase();
