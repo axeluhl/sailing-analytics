@@ -70,6 +70,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
         this.parameters = new HashSet<>();
         Util.addAll(parameters, this.parameters);
         parameterModelListeners = new HashSet<>();
+        parameterUsages = new IdentityHashMap<>();
     }
 
     /**

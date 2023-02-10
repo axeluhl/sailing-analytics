@@ -40,6 +40,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -232,22 +233,29 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         parameterSettingsButton.addStyleName("query-parameter");
         parameterSettingsButton.addClickHandler(e -> {
             if (this.parameter == null) {
-                // TODO bug4789: when binding a parameter to this dimension filter, observe its value set and record usage in temporary structure ReportParameterToDimensionFilterBindings
-                new PickOrCreateReportParameterDialog(reportProvider.getCurrentReport(), dimension.getReturnTypeName(), getDataMiningStringMessages(),
+                final DataMiningReportDTO currentReport = reportProvider.getCurrentReport();
+                final Set<FilterDimensionParameter> reportParametersBeforeDialogShown = Util.asNewSet(currentReport.getParameters());
+                new PickOrCreateReportParameterDialog(currentReport, dimension.getReturnTypeName(), getDataMiningStringMessages(),
                         new DialogCallback<FilterDimensionParameter>() {
                             @Override
                             public void ok(FilterDimensionParameter editedObject) {
                                 parameter = editedObject;
                                 reportParameterBindings.setParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension), editedObject);
+                                if (Util.contains(reportParametersBeforeDialogShown, editedObject)) {
+                                    // the parameter existed before; copy its value set to the current selection:
+                                    parameterValueChanged(editedObject, Collections.emptySet());
+                                } else {
+                                    // a new parameter; set the parameter's value to the current selection:
+                                    parameter.setValues(selectionModel.getSelectedSet());
+                                }
                                 editedObject.addParameterModelListener(DimensionFilterSelectionProvider.this);
-                                parameterValueChanged(editedObject, Collections.emptySet()); // update this dimension filter's selection based on parameter value set
                             }
 
                             @Override
                             public void cancel() {
                                 parameterSettingsButton.setDown(false);
                             }
-                }).center();
+                }).show();
             } else {
                 unbindFromParameter(this.parameter);
             }

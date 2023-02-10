@@ -438,13 +438,13 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private void selectedFilterDimensionsChanged(SelectionChangeEvent event) {
-        Iterable<DimensionWithContext> displayedDimensions = new HashSet<>(dimensionFilterSelectionProviders.keySet());
-        for (DimensionWithContext displayedDimension : displayedDimensions) {
+        final Iterable<DimensionWithContext> displayedDimensions = new HashSet<>(dimensionFilterSelectionProviders.keySet());
+        for (final DimensionWithContext displayedDimension : displayedDimensions) {
             if (!filterDimensionSelectionModel.isSelected(displayedDimension)) {
                 removeDimensionFilterSelectionProvider(displayedDimension);
             }
         }
-        for (DimensionWithContext selectedDimension : filterDimensionSelectionModel.getSelectedSet()) {
+        for (final DimensionWithContext selectedDimension : filterDimensionSelectionModel.getSelectedSet()) {
             if (!dimensionFilterSelectionProviders.containsKey(selectedDimension)) {
                 addDimensionFilterSelectionProvider(selectedDimension);
             }

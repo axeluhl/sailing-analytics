@@ -46,6 +46,10 @@ public class ReportParameterToDimensionFilterBindings implements Iterable<Entry<
      */
     public ReportParameterToDimensionFilterBindings(ReportParameterToDimensionFilterBindings other) {
         this();
+        fillFromOther(other);
+    }
+
+    private void fillFromOther(ReportParameterToDimensionFilterBindings other) {
         for (final Entry<FilterDimensionIdentifier, FilterDimensionParameter> e : other) {
             setParameterBinding(e.getKey(), e.getValue());
         }
@@ -66,5 +70,10 @@ public class ReportParameterToDimensionFilterBindings implements Iterable<Entry<
     @Override
     public Iterator<Entry<FilterDimensionIdentifier, FilterDimensionParameter>> iterator() {
         return parameterBindings.entrySet().iterator();
+    }
+
+    public void set(ReportParameterToDimensionFilterBindings parameterUsages) {
+        parameterBindings.clear();
+        fillFromOther(parameterUsages);
     }
 }

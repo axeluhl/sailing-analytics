@@ -92,7 +92,7 @@ public class PickOrCreateReportParameterDialog extends DataEntryDialog<FilterDim
         this(report, typeName, stringMessages, callback, /* paramtersAdded */ new HashSet<>(), /* parametersRemoved */ new HashSet<>());
     }
         
-    public PickOrCreateReportParameterDialog(DataMiningReportDTO report,
+    private PickOrCreateReportParameterDialog(DataMiningReportDTO report,
             String typeName, StringMessages stringMessages, DialogCallback<FilterDimensionParameter> callback,
             Set<FilterDimensionParameter> parametersAdded, Set<FilterDimensionParameter> parametersRemoved) {
         super(stringMessages.pickOrCreateReportParameter(), stringMessages.pickOrCreateReportParameterMessage(),
@@ -180,6 +180,7 @@ public class PickOrCreateReportParameterDialog extends DataEntryDialog<FilterDim
                 final FilterDimensionParameter newParameter = new ValueListFilterParameter(newParameterName, typeName, Collections.emptySet());
                 parametersAdded.add(newParameter);
                 parametersListBox.addItem(newParameter);
+                parametersListBox.setSelectedIndex(parametersListBox.getItemCount()-1);
             }
 
             @Override

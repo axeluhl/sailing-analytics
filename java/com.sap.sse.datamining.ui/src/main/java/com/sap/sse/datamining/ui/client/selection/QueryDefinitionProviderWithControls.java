@@ -125,13 +125,17 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
      * together with the query so that the current report can be updated from it. See also
      * {@link DataMiningReportDTO#replaceQueryDefinition(StatisticQueryDefinitionDTO, ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings)}.
      */
-    private ReportParameterToDimensionFilterBindings reportParameterBindings;
+    private final ReportParameterToDimensionFilterBindings reportParameterBindings;
+    
+    private final ReportProvider reportProvider;
 
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, DataMiningServiceAsync dataMiningService, ReportProvider reportProvider,
             ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
             DataMiningSettingsInfoManager settingsManager, Consumer<Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings>> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
+        this.reportProvider = reportProvider;
+        this.reportParameterBindings = new ReportParameterToDimensionFilterBindings();
         providerListener = new ProviderListener();
         mainPanel = new LayoutPanel();
         // Creating the header panel, that contains the retriever chain provider and the controls
@@ -382,7 +386,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
      * its constituents to the various elements of this UI widget. A new query definition will be produced from this
      * editor UI in {@link #getQueryDefinition()}.
      */
-    private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) { // TODO bug4789: deliver parameter bindings and establish in local temporary model of type ReportParameterToDimensionFilterBindings
+    private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+        reportParameterBindings.set(reportProvider.getCurrentReport().getParameterUsages(queryDefinition));
         final Set<ApplyCallback> callbacks = new HashSet<>();
         final Collection<String> errorMessages = new ArrayList<>();
         final String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
