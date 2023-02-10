@@ -134,6 +134,14 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
      */
     private Iterable<? extends Serializable> selectionToBeApplied;
     private Consumer<Iterable<String>> selectionCallback;
+    
+    /**
+     * Checked in {@link #selectionChanged(SelectionChangeEvent); if set to {@code true} then one selection
+     * change event is ignored. This can be used, e.g., to ignore one selection change event when updating
+     * the selection explicitly after a parameter bound to this filter has changed its value, or during
+     * initial binding of an already existing parameter.
+     */
+    private boolean ignoreNextSelectionChangeEvent;
 
     public DimensionFilterSelectionProvider(Component<?> parent, ComponentContext<?> componentContext,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
@@ -246,6 +254,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                                     parameterValueChanged(editedObject, Collections.emptySet());
                                 } else {
                                     // a new parameter; set the parameter's value to the current selection:
+                                    DimensionFilterSelectionProvider.this.ignoreNextSelectionChangeEvent = true;
                                     parameter.setValues(selectionModel.getSelectedSet());
                                 }
                                 editedObject.addParameterModelListener(DimensionFilterSelectionProvider.this);
@@ -284,6 +293,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.add(toggleFilterButton);
         headerPanel.setCellHorizontalAlignment(toggleFilterButton, HasHorizontalAlignment.ALIGN_RIGHT);
         return headerPanel;
+    }
+    
+    public void removedFromContainer() {
+        if (parameter != null) {
+            parameter.removeParameterModelListener(this);
+        }
     }
 
     public void updateContent(Runnable callback) {
@@ -349,11 +364,17 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
      */
     private void selectionChanged(SelectionChangeEvent event) {
         if (parameter != null) {
-            parameter.setValues(selectionModel.getSelectedSet());
+            if (ignoreNextSelectionChangeEvent) {
+                ignoreNextSelectionChangeEvent = false;
+            } else {
+                parameter.removeParameterModelListener(this);
+                parameter.setValues(selectionModel.getSelectedSet());
+                parameter.addParameterModelListener(this);
+            }
         }
         notifyListeners();
     }
-
+    
     /**
      * @return a non-live snapshot copy of this dimension filter's current selection
      */

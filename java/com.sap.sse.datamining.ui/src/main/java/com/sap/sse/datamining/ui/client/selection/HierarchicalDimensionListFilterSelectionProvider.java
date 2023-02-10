@@ -470,8 +470,10 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
 
     private void removeDimensionFilterSelectionProvider(DimensionWithContext dimension) {
-        DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
+        final DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
         if (selectionProvider != null) {
+            selectionProvider.removedFromContainer(); // in particular, stop listening on report parameter value changes
+            // important to first stop listening for 
             selectionProvider.clearSelection();
             dimensionFilterSelectionProviders.remove(dimension);
             dimensionFilterSelectionProvidersPanel.remove(selectionProvider.getEntryWidget());
@@ -489,29 +491,27 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         if (isUpdatingAvailableFilterValues) {
             throw new IllegalStateException("Update of availabe filter values already in progress");
         }
-
-        List<DimensionWithContext> dimensionsToUpdate = new ArrayList<>();
-        for (DimensionWithContext dimension : dimensionFilterSelectionProviders.keySet()) {
+        final List<DimensionWithContext> dimensionsToUpdate = new ArrayList<>();
+        for (final DimensionWithContext dimension : dimensionFilterSelectionProviders.keySet()) {
             if (dimension.getRetrieverLevel().getLevel() >= fromRetrieverLevel.getLevel()) {
                 dimensionsToUpdate.add(dimension);
             }
         }
         dimensionsToUpdate.sort(null);
-
         isUpdatingAvailableFilterValues = true;
         updateDimensionFilterSelectionProviders(dimensionsToUpdate.iterator(), exceptDimension, onCompletion);
     }
 
     private void updateDimensionFilterSelectionProviders(Iterator<DimensionWithContext> dimensionIterator, DimensionWithContext exceptDimension, Runnable onCompletion) {
         if (dimensionIterator.hasNext()) {
-            DimensionWithContext dimension = dimensionIterator.next();
+            final DimensionWithContext dimension = dimensionIterator.next();
             if (dimension.equals(exceptDimension)) {
                 updateDimensionFilterSelectionProviders(dimensionIterator, exceptDimension, onCompletion);
             } else {
-                DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
-                HashSet<? extends Serializable> selectionBefore = selectionProvider.getSelection();
+                final DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
+                final HashSet<? extends Serializable> selectionBefore = selectionProvider.getSelection();
                 selectionProvider.updateContent(() -> {
-                    boolean selectionChanged = !selectionBefore.equals(selectionProvider.getSelection());
+                    final boolean selectionChanged = !selectionBefore.equals(selectionProvider.getSelection());
                     if (selectionChanged) {
                         isUpdatingAvailableFilterValues = false;
                         updateAvailableFilterValues(dimension.getRetrieverLevel(), dimension, onCompletion);

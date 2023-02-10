@@ -168,8 +168,8 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
 
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
-            StatisticQueryDefinitionDTO queryDefinition = getQueryDefinition();
-            for (QueryDefinitionChangedListener listener : listeners) {
+            final StatisticQueryDefinitionDTO queryDefinition = getQueryDefinition();
+            for (final QueryDefinitionChangedListener listener : listeners) {
                 listener.queryDefinitionChanged(queryDefinition);
             }
         }
