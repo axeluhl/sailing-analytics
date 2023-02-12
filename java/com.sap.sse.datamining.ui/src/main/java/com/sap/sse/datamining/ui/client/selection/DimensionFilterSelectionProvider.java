@@ -397,6 +397,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         Collection<Serializable> missingValues = new ArrayList<>();
         for (Serializable value : selection) {
             if (availableData.contains(value) && (parameter == null || parameter.matches(value))) {
+                // TODO bug4789: clarify how this will interact with a parameter bound to this filter currently
                 selectionModel.setSelected(value, true);
             } else {
                 missingValues.add(value);
@@ -524,6 +525,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
 
     @Override
     public void parameterValueChanged(FilterDimensionParameter parameter, Iterable<? extends Serializable> oldValues) {
+        ignoreNextSelectionChangeEvent = true;
         selectionModel.clear();
         for (final Serializable newValue : parameter.getValues()) {
             selectionModel.setSelected(newValue, true);
