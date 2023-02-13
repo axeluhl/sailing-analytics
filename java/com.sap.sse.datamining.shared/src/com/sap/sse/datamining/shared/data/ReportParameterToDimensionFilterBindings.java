@@ -36,17 +36,24 @@ public class ReportParameterToDimensionFilterBindings implements Iterable<Entry<
         this(new HashMap<>());
     }
     
+    /**
+     * @param parameterBindings {@code null} is permissible here and leads to a new but empty parameter bindings object
+     */
     public ReportParameterToDimensionFilterBindings(
             Map<FilterDimensionIdentifier, FilterDimensionParameter> parameterBindings) {
-        this.parameterBindings = new HashMap<>(parameterBindings);
+        this.parameterBindings = parameterBindings == null ? new HashMap<>() : new HashMap<>(parameterBindings);
     }
     
     /**
      * Copy constructor
+     * 
+     * @param other {@code null} is permissible here and leads to a new but empty parameter bindings object
      */
     public ReportParameterToDimensionFilterBindings(ReportParameterToDimensionFilterBindings other) {
         this();
-        fillFromOther(other);
+        if (other != null) {
+            fillFromOther(other);
+        }
     }
 
     private void fillFromOther(ReportParameterToDimensionFilterBindings other) {

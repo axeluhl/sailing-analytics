@@ -124,6 +124,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
      */
     private FilterDimensionParameter parameter;
     private ReportProvider reportProvider;
+    private final ToggleButton parameterSettingsButton;
     private final ReportParameterToDimensionFilterBindings reportParameterBindings;
     
     private String searchInputToApply;
@@ -141,7 +142,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
      * the selection explicitly after a parameter bound to this filter has changed its value, or during
      * initial binding of an already existing parameter.
      */
-    private boolean ignoreNextSelectionChangeEvent;
+    private boolean dontPropagateNextSelectionChangeEventToBoundParameter;
 
     public DimensionFilterSelectionProvider(Component<?> parent, ComponentContext<?> componentContext,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
@@ -159,10 +160,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         this.dimension = dimension;
         this.reportParameterBindings = reportParameterBindings;
         this.reportProvider = reportProvider;
-        parameter = reportParameterBindings.getParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
-        if (parameter != null) {
-            parameter.addParameterModelListener(this);
-        }
         counter = new SimpleManagedDataMiningQueriesCounter();
         listeners = new HashSet<>();
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
@@ -213,6 +210,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         contentContainer.add(busyIndicator);
         contentContainer.setWidgetTopBottom(busyIndicator, 10, Unit.PX, 10, Unit.PX);
         contentContainer.setWidgetLeftRight(busyIndicator, 10, Unit.PX, 10, Unit.PX);
+        // "P" parameter bind/unbind toggle button
+        final Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
+        parameterIcon.setSize("16px", "16px");
+        parameterSettingsButton = new ToggleButton(parameterIcon);
+        parameterSettingsButton.addStyleName("query-parameter");
+        updateParameterFromReportParameterBindings();
         mainPanel = new DockLayoutPanel(Unit.PX);
         mainPanel.addNorth(createHeaderPanel(), 40);
         mainPanel.addNorth(filterPanel, 35);
@@ -234,11 +237,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.add(headerLabel);
         headerPanel.setCellWidth(headerLabel, "100%");
         headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
-        // "P" parameter bind/unbind toggle button
-        final Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
-        parameterIcon.setSize("16px", "16px");
-        final ToggleButton parameterSettingsButton = new ToggleButton(parameterIcon);
-        parameterSettingsButton.addStyleName("query-parameter");
         parameterSettingsButton.addClickHandler(e -> {
             if (this.parameter == null) {
                 final DataMiningReportDTO currentReport = reportProvider.getCurrentReport();
@@ -257,8 +255,9 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                                 } else {
                                     GWT.log("Setting parameter value of "+parameter.getName()+" from "+retrieverLevel+"/"+dimension+" to "+selectionModel.getSelectedSet());
                                     // a new parameter; set the parameter's value to the current selection:
-                                    DimensionFilterSelectionProvider.this.ignoreNextSelectionChangeEvent = true;
+                                    DimensionFilterSelectionProvider.this.dontPropagateNextSelectionChangeEventToBoundParameter = true;
                                     parameter.setValues(selectionModel.getSelectedSet());
+                                    dontPropagateNextSelectionChangeEventToBoundParameter = false;
                                 }
                                 editedObject.addParameterModelListener(DimensionFilterSelectionProvider.this);
                             }
@@ -369,11 +368,10 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
      */
     private void selectionChanged(SelectionChangeEvent event) {
         if (parameter != null) {
-            if (ignoreNextSelectionChangeEvent) {
+            if (dontPropagateNextSelectionChangeEventToBoundParameter) {
                 GWT.log("Ignoring selection change for "+retrieverLevel+"/"+dimension);
-                ignoreNextSelectionChangeEvent = false;
             } else {
-                GWT.log("Propagating selection change for "+retrieverLevel+"/"+dimension+" to parameter "+parameter.getName());
+                GWT.log("Propagating selection change for "+retrieverLevel+"/"+dimension+" to parameter "+parameter.getName()+"; new value set: "+selectionModel.getSelectedSet());
                 parameter.removeParameterModelListener(this);
                 parameter.setValues(selectionModel.getSelectedSet());
                 parameter.addParameterModelListener(this);
@@ -381,15 +379,16 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         }
         notifyListeners();
     }
-    
+
     /**
      * @return a non-live snapshot copy of this dimension filter's current selection
      */
     public HashSet<? extends Serializable> getSelection() {
         return new HashSet<>(selectionModel.getSelectedSet());
     }
-    
+
     public void setSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
+        updateParameterFromReportParameterBindings();
         selectionToBeApplied = selection;
         selectionCallback = callback;
         if (!busyIndicator.isBusy()) {
@@ -399,17 +398,42 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         }
     }
 
+    /**
+     * Based on {@link #reportParameterBindings} ensures {@link #parameter} matches the entry in {@link #reportParameterBindings} for
+     * this dimension filter and adjusts the parameter toggle button state accordingly. No changes are applied to either the parameter
+     * or the selection.
+     */
+    private void updateParameterFromReportParameterBindings() {
+        final FilterDimensionParameter newParameter = reportParameterBindings.getParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
+        if (parameter != newParameter) {
+            if (parameter != null) {
+                parameter.removeParameterModelListener(this);
+            }
+            if (newParameter != null) {
+                newParameter.addParameterModelListener(this);
+            }
+        }
+        parameterSettingsButton.setDown(newParameter != null);
+        parameter = newParameter;
+    }
+
     private void internalSetSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
+        // a parameter bound not only to this but also to others will then be restricted to the values from availableData but must not;
+        // this method is for "programmatic" update only and not for user-initiated, so it should be fine to temporarily detach any
+        // parameter update listener while manipulating the selection here:
+        dontPropagateNextSelectionChangeEventToBoundParameter = true; // avoid even propagating selection to parameter value
         clearSelection();
         Collection<Serializable> missingValues = new ArrayList<>();
         for (Serializable value : selection) {
-            if (availableData.contains(value) && (parameter == null || parameter.matches(value))) {
-                // TODO bug4789: clarify how this will interact with a parameter bound to this filter currently
+            if (availableData.contains(value)) {
                 selectionModel.setSelected(value, true);
-            } else {
+            } else if (parameter == null || !Util.contains(parameter.getValues(), value)) {
+                // don't add values as missing if they originated from the parameter bound to this dimension filter
                 missingValues.add(value);
             }
         }
+        selectionModel.getSelectedSet(); // flush selection, fire events
+        dontPropagateNextSelectionChangeEventToBoundParameter = false;
         if (!missingValues.isEmpty()) {
             String listedValues = missingValues.stream().map(this::elementAsString).collect(Collectors.joining(", "));
             callback.accept(Collections.singleton(getDataMiningStringMessages()
@@ -534,10 +558,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     public void parameterValueChanged(FilterDimensionParameter parameter, Iterable<? extends Serializable> oldValues) {
         GWT.log("Filter parameter "+parameter.getName()+" with type "+parameter.getTypeName()+" and bound to dimension filter "+
                 retrieverLevel+"/"+dimension+" changed from "+oldValues+" to "+parameter.getValues());
-        ignoreNextSelectionChangeEvent = true;
+        dontPropagateNextSelectionChangeEventToBoundParameter = true;
         selectionModel.clear();
         for (final Serializable newValue : parameter.getValues()) {
             selectionModel.setSelected(newValue, true);
         }
+        selectionModel.getSelectedSet(); // force all selection events to fire while we're still not propagating to parameter value
+        dontPropagateNextSelectionChangeEventToBoundParameter = false;
     }
 }

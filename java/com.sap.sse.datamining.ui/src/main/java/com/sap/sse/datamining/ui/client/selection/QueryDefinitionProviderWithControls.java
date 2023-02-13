@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.builder.shared.HtmlBuilderFactory;
 import com.google.gwt.dom.builder.shared.HtmlUListBuilder;
 import com.google.gwt.dom.client.Style.Overflow;
@@ -387,7 +388,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
      * editor UI in {@link #getQueryDefinition()}.
      */
     private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        reportParameterBindings.set(reportProvider.getCurrentReport().getParameterUsages(queryDefinition));
+        final ReportParameterToDimensionFilterBindings parameterUsages = reportProvider.getCurrentReport().getParameterUsages(queryDefinition);
+        reportParameterBindings.set(parameterUsages);
+        if (parameterUsages == null) {
+            GWT.log("No parameter usages found for query");
+        } else {
+            GWT.log("Found parameter usages "+parameterUsages+" for query");
+        }
         final Set<ApplyCallback> callbacks = new HashSet<>();
         final Collection<String> errorMessages = new ArrayList<>();
         final String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();

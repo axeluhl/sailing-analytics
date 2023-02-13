@@ -37,10 +37,24 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
      */
     private Map<FilterDimensionParameter, ParameterModelListener> parameterValueChangeListeners;
     
+    @SuppressWarnings("unused") // used only to instruct the GWT compiler that ParameterModelListener is to be considered serializable
+    private ParameterModelListener dummyForSerialization;
+    
     private transient Set<ParameterModelListener> parameterModelListeners;
     
-    private class ParameterValueChangeListener implements ParameterModelListener, Serializable {
+    public static class ParameterValueChangeListener implements ParameterModelListener, Serializable {
         private static final long serialVersionUID = 402977347893177440L;
+        
+        private ModifiableDataMiningReportDTO report;
+
+        @SuppressWarnings("unused")
+        @Deprecated // for GWT serialization only
+        ParameterValueChangeListener() {}
+        
+        public ParameterValueChangeListener(ModifiableDataMiningReportDTO report) {
+            super();
+            this.report = report;
+        }
 
         @Override
         public void parameterAdded(DataMiningReportDTO report, FilterDimensionParameter parameter) {
@@ -52,12 +66,12 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
 
         @Override
         public void parameterValueChanged(FilterDimensionParameter parameter, Iterable<? extends Serializable> oldValues) {
-            adjustAllDimensionFiltersInQueriesUsingParameter(parameter);
+            report.adjustAllDimensionFiltersInQueriesUsingParameter(parameter);
         }
     }
     
     /**
-     * Creates an empty report with 
+     * Creates an empty report with no queries and hence no parameter usages.
      */
     public ModifiableDataMiningReportDTO() {
         this(Collections.emptySet(), Collections.emptySet());
@@ -155,7 +169,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     @Override
     public FilterDimensionParameter createParameter(String name, String typeName, Iterable<? extends Serializable> values) {
         final FilterDimensionParameter parameter = new ValueListFilterParameter(name, typeName, values);
-        final ParameterValueChangeListener valueChangeListener = new ParameterValueChangeListener();
+        final ParameterValueChangeListener valueChangeListener = new ParameterValueChangeListener(this);
         parameter.addParameterModelListener(valueChangeListener);
         parameterValueChangeListeners.put(parameter, valueChangeListener);
         parameters.add(parameter);

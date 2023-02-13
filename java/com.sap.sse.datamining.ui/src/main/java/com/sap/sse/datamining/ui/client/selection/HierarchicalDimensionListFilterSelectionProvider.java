@@ -317,12 +317,19 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
-        DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
+        final DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         selectionToBeApplied = queryDefinition.getFilterSelection();
         selectionCallback = callback;
         if (!isUpdatingFilterDimensions && !isAwaitingReload && retrieverChain.equals(this.retrieverChain)) {
             ignoreSelectionChangedNotifications = true;
+            // The following clearing of the selection model will remove all dimension filters and with them
+            // their parameter bindings, if any. In order to restore the report parameter bindings already configured
+            // in reportParameterBindings, we need to "stash" its contents, then force application of the selection clearing,
+            // the restore the parameter bindings:
+            final ReportParameterToDimensionFilterBindings stash = new ReportParameterToDimensionFilterBindings(reportParameterBindings);
             filterDimensionSelectionModel.clear();
+            filterDimensionSelectionModel.getSelectedSet(); // force applying queued selection changes and event handlers to fire
+            reportParameterBindings.set(stash); // un-stash
             setSelection(selectionToBeApplied, selectionCallback);
             selectionToBeApplied = null;
             selectionCallback = null;
@@ -330,16 +337,16 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
 
     private void setSelection(HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection, Consumer<Iterable<String>> callback) {
-        Set<InnerSelectionCallback> innerCallbacks = new HashSet<>();
-        Collection<String> callbackMessages = new ArrayList<>();
-        Collection<DimensionWithContext> missingDimensions = new ArrayList<>();
-        for (DataRetrieverLevelDTO retrieverLevel : filterSelection.keySet()) {
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> levelSelection = filterSelection.get(retrieverLevel);
-            for (FunctionDTO dimension : levelSelection.keySet()) {
-                DimensionWithContext dimensionWithContext = new DimensionWithContext(dimension, retrieverLevel);
-                int index = availableFilterDimensions.indexOf(dimensionWithContext);
+        final Set<InnerSelectionCallback> innerCallbacks = new HashSet<>();
+        final Collection<String> callbackMessages = new ArrayList<>();
+        final Collection<DimensionWithContext> missingDimensions = new ArrayList<>();
+        for (final DataRetrieverLevelDTO retrieverLevel : filterSelection.keySet()) {
+            final HashMap<FunctionDTO, HashSet<? extends Serializable>> levelSelection = filterSelection.get(retrieverLevel);
+            for (final FunctionDTO dimension : levelSelection.keySet()) {
+                final DimensionWithContext dimensionWithContext = new DimensionWithContext(dimension, retrieverLevel);
+                final int index = availableFilterDimensions.indexOf(dimensionWithContext);
                 if (index != -1) {
-                    InnerSelectionCallback innerCallback = new InnerSelectionCallback(callbackMessages, innerCallbacks, callback);
+                    final InnerSelectionCallback innerCallback = new InnerSelectionCallback(callbackMessages, innerCallbacks, callback);
                     innerCallbacks.add(innerCallback);
                     setDimensionSelection(availableFilterDimensions.get(index), levelSelection.get(dimension), innerCallback);
                 } else {
@@ -348,12 +355,12 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
             }
         }
         if (!missingDimensions.isEmpty()) {
-            String listedDimensions = missingDimensions.stream().map(d -> d.getDimension().getDisplayName())
+            final String listedDimensions = missingDimensions.stream().map(d -> d.getDimension().getDisplayName())
                                                                 .collect(Collectors.joining(", "));
             callbackMessages.add(getDataMiningStringMessages().filterDimensionsAreNotAvailable(listedDimensions));
         }
         if (!innerCallbacks.isEmpty()) {
-            for (InnerSelectionCallback innerCallback : innerCallbacks) {
+            for (final InnerSelectionCallback innerCallback : innerCallbacks) {
                 innerCallback.canPublishMessages = true;
             }
         } else {
@@ -427,7 +434,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
 
     private void setDimensionSelection(DimensionWithContext dimension, Collection<? extends Serializable> items, Consumer<Iterable<String>> callback) {
-        DimensionFilterSelectionProvider selectionProvider;
+        final DimensionFilterSelectionProvider selectionProvider;
         if (filterDimensionSelectionModel.isSelected(dimension)) {
             selectionProvider = dimensionFilterSelectionProviders.get(dimension);
         } else {
