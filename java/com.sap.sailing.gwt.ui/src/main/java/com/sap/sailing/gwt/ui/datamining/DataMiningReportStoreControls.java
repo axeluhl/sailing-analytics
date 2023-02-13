@@ -169,7 +169,7 @@ public class DataMiningReportStoreControls extends Composite {
         return reportProvider.getCurrentReport();
     }
 
-    private Void applyReport(StoredDataMiningReportDTO storedReport) {
+    private StoredDataMiningReportDTO applyReport(StoredDataMiningReportDTO storedReport) {
         showBusyIndicator(true);
         final DataMiningReportDTO report = storedReport.getReport();
         reportProvider.setCurrentReport(report);
@@ -188,7 +188,7 @@ public class DataMiningReportStoreControls extends Composite {
                         NotificationType.WARNING);
             }
         });
-        return null;
+        return storedReport;
     }
     
     private void showBusyIndicator(boolean show) {

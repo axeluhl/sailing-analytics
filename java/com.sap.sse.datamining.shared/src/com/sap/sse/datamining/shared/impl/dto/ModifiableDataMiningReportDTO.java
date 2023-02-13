@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -25,6 +24,10 @@ import com.sap.sse.datamining.shared.impl.dto.parameters.ValueListFilterParamete
 public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     private static final long serialVersionUID = -6512175470789118223L;
     
+    /**
+     * Handled by identity; remove and contains checks don't use query equality because modifiable queries can change
+     * their equality/hashCode over their life cycle
+     */
     private ArrayList<ModifiableStatisticQueryDefinitionDTO> queryDefinitions;
     private HashSet<FilterDimensionParameter> parameters;
     private IdentityHashMap<StatisticQueryDefinitionDTO, HashMap<FilterDimensionIdentifier, FilterDimensionParameter>> parameterUsages;
@@ -35,10 +38,10 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
      * parameter will have their {@link StatisticQueryDefinitionDTO#getFilterSelection() filter selections} adjusted
      * accordingly.
      */
-    private Map<FilterDimensionParameter, ParameterModelListener> parameterValueChangeListeners;
+    private HashMap<FilterDimensionParameter, ParameterModelListener> parameterValueChangeListeners;
     
-    @SuppressWarnings("unused") // used only to instruct the GWT compiler that ParameterModelListener is to be considered serializable
-    private ParameterModelListener dummyForSerialization;
+//    @SuppressWarnings("unused") // used only to instruct the GWT compiler that ParameterModelListener is to be considered serializable
+//    private ParameterModelListener dummyForSerialization;
     
     private transient Set<ParameterModelListener> parameterModelListeners;
     
@@ -47,7 +50,6 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
         
         private ModifiableDataMiningReportDTO report;
 
-        @SuppressWarnings("unused")
         @Deprecated // for GWT serialization only
         ParameterValueChangeListener() {}
         
@@ -116,7 +118,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     
     @Override
     public void addQueryDefinition(int index, ModifiableStatisticQueryDefinitionDTO queryDefinition) {
-        if (!queryDefinitions.contains(queryDefinition)) {
+        if (!queryDefinitions.stream().anyMatch(qd->qd==queryDefinition)) {
             queryDefinitions.add(index, queryDefinition);
         }
     }
@@ -128,8 +130,15 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     @Override
     public int removeQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         parameterUsages.remove(queryDefinition);
-        final int result = queryDefinitions.indexOf(queryDefinition);
-        queryDefinitions.remove(queryDefinition);
+        int index = 0;
+        int result = -1;
+        for (final Iterator<ModifiableStatisticQueryDefinitionDTO> i=queryDefinitions.iterator(); i.hasNext(); index++) {
+            if (i.next() == queryDefinition) {
+                result = index;
+                i.remove();
+                break;
+            }
+        }
         return result;
     }
 
