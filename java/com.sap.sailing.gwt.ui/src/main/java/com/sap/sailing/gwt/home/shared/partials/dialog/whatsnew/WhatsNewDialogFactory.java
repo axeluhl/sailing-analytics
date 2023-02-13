@@ -62,6 +62,7 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
                 StringMessages.INSTANCE.whatsNewDialogTitle(), false, StringMessages.INSTANCE.showChangelog(),
                 StringMessages.INSTANCE.cancel(), callback);
         isUserNotified = true;
+        dialog.ensureDebugId("HomeWhatsNewDialog");
         dialog.show();
     }
 

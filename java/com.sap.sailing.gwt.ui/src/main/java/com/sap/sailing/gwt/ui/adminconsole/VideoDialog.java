@@ -245,6 +245,7 @@ public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>>
 
     private ListBox createMimeTextSelection() {
         ListBox mimeTypeListBox = createListBox(false);
+        mimeTypeListBox.ensureDebugId("mimeTypeListBox");
         mimeTypeListBox.addItem(MimeType.unknown.name());
         mimeTypeListBox.addItem(MimeType.mp4.name());
         mimeTypeListBox.addItem(MimeType.mov.name());
@@ -305,6 +306,7 @@ public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>>
     
     private void initFormFlexTable() {
         formFlexTable = new FlexTable();
+        formFlexTable.ensureDebugId("videoDialogFormTable");
         formFlexTable.setWidget(0, 0, new Label(stringMessages.createdAt() + ":"));
         formFlexTable.setWidget(0, 1, createdAtLabel);
         formFlexTable.setWidget(1, 0, new Label(stringMessages.videoUrl() + ":"));

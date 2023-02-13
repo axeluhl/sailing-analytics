@@ -33,15 +33,15 @@
 	}
 	</ui:style>
 	<g:FlowPanel>
-		<g:HTMLPanel addStyleNames="{style.header}">
+		<g:HTMLPanel addStyleNames="{style.header}" debugId="TabPanel">
 			<g:SimplePanel ui:field="additionalHeader" />
 			<div class="{res.mediaCss.grid}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="tabExtension" addStyleNames="{style.tabExtension}" />
-					<c:TabBar ui:field="tabBar" addStyleNames="{style.navigation}" />
+					<c:TabBar ui:field="tabBar" addStyleNames="{style.navigation}" debugId="eventTabBar"/>
 				</div>
 			</div>
 		</g:HTMLPanel>
-		<g:SimplePanel ui:field="tabContentPanelUi" addStyleNames="{style.content}" />
+		<g:SimplePanel ui:field="tabContentPanelUi" addStyleNames="{style.content}" debugId="tabContentPanelUi"/>
 	</g:FlowPanel>
 </ui:UiBinder>

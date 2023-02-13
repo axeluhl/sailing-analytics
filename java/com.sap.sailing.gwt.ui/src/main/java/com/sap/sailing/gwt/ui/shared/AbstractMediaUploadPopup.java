@@ -147,6 +147,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         urlLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         metaDataPanel.add(urlLabel);
         urlInput.addStyleName(sharedHomeResources.sharedHomeCss().input());
+        urlInput.ensureDebugId("urlInput");
         urlInput.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
@@ -158,7 +159,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             public void onChange(ChangeEvent event) {
                 files.clear();
                 mediaObjectMap.clear();
-                addUri(urlInput.getValue(), "", getMimeType(urlInput.getValue()));
+                addUri(urlInput.getValue(), "", getMimeType(urlInput.getValue()), true);
                 checkSaveButton();
             }
         });
@@ -181,6 +182,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 closePopup(event);
             }
         });
+        cancelButton.ensureDebugId("cancelButton");
         buttonGroup.add(cancelButton);
         // Add a 'submit' button.
         saveButton = new Button(i18n.save(), new ClickHandler() {
@@ -222,6 +224,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         headerCancelButton.addStyleName(SharedHomeResources.INSTANCE.sharedHomeCss().headerButton());
         content.add(headerCancelButton);
         content.add(progressOverlay);
+        content.ensureDebugId("mediaUploadContent");
         this.add(content);
     }
 
@@ -236,6 +239,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
 
     private ListBox initMediaTypes() {
         final ListBox mimeTypeListBox = new ListBox();
+        mimeTypeListBox.ensureDebugId("mimeTypeListBox");
         mimeTypeListBox.addItem(MimeType.unknown.name());
         for (MimeType mimeType : MimeType.values()) {
             if (mimeType.isVideo() || mimeType.isImage()) {
@@ -308,7 +312,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                                 logger.log(Level.WARNING, "An unsupported file (" + fileName + " - " + contentType + ") detected. File has been skipped.");
                             } else {
                                 uploadSuccessful = true;
-                                addUri(uri, fileName, mimeType);
+                                addUri(uri, fileName, mimeType, false);
                             }
                         }
                     } else {
@@ -511,7 +515,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         collapsebleFilePanel.getHeaderTextAccessor().setText(header);
     }
 
-    private void addUri(String uri, String fileName, MimeType mimeType) {
+    private void addUri(String uri, String fileName, MimeType mimeType, boolean enableUrlInput) {
         MediaObject mediaObject = new MediaObject();
         mediaObjectMap.put(uri, mediaObject);
         mediaObject.mimeType = mimeType;
@@ -593,7 +597,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         fileExistingPanel.setVisible(false);
         saveButton.setEnabled(true);
         // fileNameInput.setEnabled(true);
-        urlInput.setEnabled(mimeType == MimeType.vimeo || mimeType == MimeType.youtube || mimeType == MimeType.unknown);
+        urlInput.setEnabled(enableUrlInput);
         checkSaveButton();
     }
 
