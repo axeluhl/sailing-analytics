@@ -3,12 +3,15 @@ package com.sap.sse.datamining.shared.impl.dto.parameters;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
 
 public class ValueListFilterParameter extends AbstractParameterizedDimensionFilter {
     private static final long serialVersionUID = -8440835683986197499L;
     
+    private static final Logger logger = Logger.getLogger(ValueListFilterParameter.class.getName());
+
     private HashSet<? extends Serializable> values;
     
     private transient Set<ParameterModelListener> parameterModelListeners;
@@ -18,6 +21,7 @@ public class ValueListFilterParameter extends AbstractParameterizedDimensionFilt
 
     public <T extends Serializable> ValueListFilterParameter(String name, String typeName, Iterable<T> values) {
         super(name, typeName);
+        logger.info("Creating parameter "+name+" of type "+typeName+" with values "+values);
         final HashSet<T> set = new HashSet<>();
         Util.addAll(values, set);
         this.values = set;
@@ -32,6 +36,10 @@ public class ValueListFilterParameter extends AbstractParameterizedDimensionFilt
     @Override
     public <T extends Serializable> void setValues(Iterable<T> newValue) {
         final Iterable<? extends Serializable> oldValues = getValues();
+        logger.info("Setting value of parameter "+getName()+" from "+oldValues+" to "+newValue);
+        if (Util.isEmpty(newValue)) {
+            logger.info("Setting value of parameter "+getName()+" to empty set");
+        }
         final HashSet<T> set = new HashSet<>();
         Util.addAll(newValue, set);
         this.values = set;

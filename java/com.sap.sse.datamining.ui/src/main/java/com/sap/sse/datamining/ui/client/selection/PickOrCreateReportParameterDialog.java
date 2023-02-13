@@ -71,13 +71,19 @@ public class PickOrCreateReportParameterDialog extends DataEntryDialog<FilterDim
 
         @Override
         public void ok(FilterDimensionParameter editedObject) {
+            FilterDimensionParameter result = editedObject;
             for (final FilterDimensionParameter parameterAdded : parametersAdded) {
-                report.createParameter(parameterAdded.getName(), parameterAdded.getTypeName(), Collections.emptySet());
+                final FilterDimensionParameter newParameter = report.createParameter(parameterAdded.getName(), parameterAdded.getTypeName(), Collections.emptySet());
+                if (Util.equalsWithNull(editedObject.getName(), parameterAdded.getName())) {
+                    // editedObject is the parameter created temporarily outside the report that now needs
+                    // to be replaced in the result by the parameter really created within the scope of the report:
+                    result = newParameter;
+                }
             }
             for (final FilterDimensionParameter parameterRemoved : parametersRemoved) {
                 report.removeParameter(parameterRemoved);
             }
-            callback.ok(editedObject);
+            callback.ok(result);
         }
 
         @Override
@@ -129,6 +135,14 @@ public class PickOrCreateReportParameterDialog extends DataEntryDialog<FilterDim
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return parametersListBox;
+    }
+    
+    @Override
+    public void show() {
+        super.show();
+        if (parametersListBox.getItemCount() == 0) {
+            addParameterClicked(/* event */ null);
+        }
     }
 
     @Override

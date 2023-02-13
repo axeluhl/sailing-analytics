@@ -76,4 +76,9 @@ public class ReportParameterToDimensionFilterBindings implements Iterable<Entry<
         parameterBindings.clear();
         fillFromOther(parameterUsages);
     }
+    
+    @Override
+    public String toString() {
+        return parameterBindings.toString();
+    }
 }

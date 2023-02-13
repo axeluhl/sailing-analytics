@@ -249,10 +249,13 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                             public void ok(FilterDimensionParameter editedObject) {
                                 parameter = editedObject;
                                 reportParameterBindings.setParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension), editedObject);
+                                GWT.log("New parameter bindings "+reportParameterBindings);
                                 if (Util.contains(reportParametersBeforeDialogShown, editedObject)) {
+                                    GWT.log("Propagating parameter value of "+parameter.getName()+" to "+retrieverLevel+"/"+dimension+": "+editedObject.getValues());
                                     // the parameter existed before; copy its value set to the current selection:
                                     parameterValueChanged(editedObject, Collections.emptySet());
                                 } else {
+                                    GWT.log("Setting parameter value of "+parameter.getName()+" from "+retrieverLevel+"/"+dimension+" to "+selectionModel.getSelectedSet());
                                     // a new parameter; set the parameter's value to the current selection:
                                     DimensionFilterSelectionProvider.this.ignoreNextSelectionChangeEvent = true;
                                     parameter.setValues(selectionModel.getSelectedSet());
@@ -298,6 +301,8 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     public void removedFromContainer() {
         if (parameter != null) {
             parameter.removeParameterModelListener(this);
+            reportParameterBindings.removeParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
+            parameter = null;
         }
     }
 
@@ -365,8 +370,10 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     private void selectionChanged(SelectionChangeEvent event) {
         if (parameter != null) {
             if (ignoreNextSelectionChangeEvent) {
+                GWT.log("Ignoring selection change for "+retrieverLevel+"/"+dimension);
                 ignoreNextSelectionChangeEvent = false;
             } else {
+                GWT.log("Propagating selection change for "+retrieverLevel+"/"+dimension+" to parameter "+parameter.getName());
                 parameter.removeParameterModelListener(this);
                 parameter.setValues(selectionModel.getSelectedSet());
                 parameter.addParameterModelListener(this);
@@ -525,6 +532,8 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
 
     @Override
     public void parameterValueChanged(FilterDimensionParameter parameter, Iterable<? extends Serializable> oldValues) {
+        GWT.log("Filter parameter "+parameter.getName()+" with type "+parameter.getTypeName()+" and bound to dimension filter "+
+                retrieverLevel+"/"+dimension+" changed from "+oldValues+" to "+parameter.getValues());
         ignoreNextSelectionChangeEvent = true;
         selectionModel.clear();
         for (final Serializable newValue : parameter.getValues()) {
