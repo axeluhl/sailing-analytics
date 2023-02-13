@@ -300,7 +300,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     public void removedFromContainer() {
         if (parameter != null) {
             parameter.removeParameterModelListener(this);
-            reportParameterBindings.removeParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
             parameter = null;
         }
     }

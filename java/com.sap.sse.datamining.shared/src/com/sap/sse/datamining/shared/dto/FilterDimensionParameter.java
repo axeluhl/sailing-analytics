@@ -55,6 +55,9 @@ public interface FilterDimensionParameter extends NamedWithUUID {
      * A listener added this way will receive a call to
      * {@link ParameterModelListener#parameterValueChanged(FilterDimensionParameter, Iterable)}
      * when the {@link #setValues(Iterable)} method is invoked on this parameter to update its value set.
+     * If the {@code listener} object's type is serializable by implementing the {@link Serializable} interface
+     * then it will be serialized together with this object, otherwise the listener will not be serialized
+     * together with this object and hence "get lost." 
      */
     void addParameterModelListener(ParameterModelListener listener);
     

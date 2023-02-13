@@ -77,7 +77,8 @@ public interface DataMiningReportDTO extends Serializable {
             ReportParameterToDimensionFilterBindings parameterBindings) {
         final int index;
         if (toReplace != null) {
-            index = removeQueryDefinition(toReplace);
+            final int i;
+            index = (i=removeQueryDefinition(toReplace)) < 0 ? Util.size(getQueryDefinitions()) : i;
         } else {
             index = Util.size(getQueryDefinitions());
         }

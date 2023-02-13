@@ -100,8 +100,12 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
             final ModifiableStatisticQueryDefinitionDTO query = (ModifiableStatisticQueryDefinitionDTO) usage.getA();
             final DataRetrieverLevelDTO retrieverLevel = usage.getB().getRetrieverLevel();
             final HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selection = query.getFilterSelection();
-            selection.get(retrieverLevel).put(usage.getB().getDimensionFunction(), createHashSetFromIterable(parameter.getValues()));
-            query.setFilterSelectionFor(retrieverLevel, selection.get(retrieverLevel));
+            final HashMap<FunctionDTO, HashSet<? extends Serializable>> selectionForRetrieverLevel = selection.get(retrieverLevel);
+            // note that there may be left-over parameter usages from dimension filters that were removed when they were bound to a parameter
+            if (selectionForRetrieverLevel != null) {
+                selectionForRetrieverLevel.put(usage.getB().getDimensionFunction(), createHashSetFromIterable(parameter.getValues()));
+                query.setFilterSelectionFor(retrieverLevel, selectionForRetrieverLevel);
+            }
         }
     }
     
@@ -124,8 +128,8 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     }
     
     /**
-     * Removes the query definition from this reports and adjustes the {@link #parameterUsages} accordingly,
-     * removing all usages within the query removed.
+     * Removes the query definition from this reports (searched by its identity, not equality) and adjusts the
+     * {@link #parameterUsages} accordingly, removing all usages within the query removed.
      */
     @Override
     public int removeQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
@@ -191,7 +195,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
         if (!Util.contains(getParameters(), parameter)) {
             throw new IllegalArgumentException("Parameter "+parameter.getName()+" is not part of this report");
         }
-        if (!Util.contains(getQueryDefinitions(), query)) {
+        if (!Util.stream(getQueryDefinitions()).anyMatch(q->q==query)) {
             throw new IllegalArgumentException("Query "+query+" is not part of this report");
         }
         parameterUsages.computeIfAbsent(query, k->new HashMap<>()).put(filterDimensionIdentifier, parameter);

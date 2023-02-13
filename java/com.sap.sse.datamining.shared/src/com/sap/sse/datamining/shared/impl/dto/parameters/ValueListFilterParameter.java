@@ -16,6 +16,8 @@ public class ValueListFilterParameter extends AbstractParameterizedDimensionFilt
     
     private transient Set<ParameterModelListener> parameterModelListeners;
 
+    private HashSet<ParameterModelListener> nonTransientParameterModelListeners;
+
     @Deprecated // GWT serialization only
     ValueListFilterParameter() { }
 
@@ -26,6 +28,7 @@ public class ValueListFilterParameter extends AbstractParameterizedDimensionFilt
         Util.addAll(values, set);
         this.values = set;
         this.parameterModelListeners = new HashSet<>();
+        this.nonTransientParameterModelListeners = new HashSet<>();
     }
     
     @Override
@@ -49,15 +52,31 @@ public class ValueListFilterParameter extends AbstractParameterizedDimensionFilt
 
     @Override
     public void addParameterModelListener(ParameterModelListener listener) {
-        getParameterModelListeners().add(listener);
-    }
-
-    @Override
-    public void removeParameterModelListener(ParameterModelListener listener) {
-        getParameterModelListeners().remove(listener);
+        if (listener instanceof Serializable) {
+            nonTransientParameterModelListeners.add(listener);
+        } else {
+            getTransientParameterModelListeners().add(listener);
+        }
     }
     
+    @Override
+    public void removeParameterModelListener(ParameterModelListener listener) {
+        nonTransientParameterModelListeners.remove(listener);
+        getTransientParameterModelListeners().remove(listener);
+    }
+
+    /**
+     * Combines {@link #getTransientParameterModelListeners() transient} and {@link #nonTransientParameterModelListeners}
+     * listeners into one result set.
+     */
     private Set<ParameterModelListener> getParameterModelListeners() {
+        final Set<ParameterModelListener> result = new HashSet<>();
+        result.addAll(nonTransientParameterModelListeners);
+        result.addAll(getTransientParameterModelListeners());
+        return result;
+    }
+    
+    private Set<ParameterModelListener> getTransientParameterModelListeners() {
         if (parameterModelListeners == null) { // transient; may have be nulled by de-serialization
             parameterModelListeners = new HashSet<>();
         }
