@@ -127,19 +127,23 @@ public class DataMiningReportStoreControls extends Composite {
     void onSaveClick(ClickEvent e) {
         final String name = suggestBoxUi.getValue().trim();
         final StoredDataMiningReportDTO report = buildReport();
-        final boolean wouldOverwriteDifferentReport = reportsProvider.findReportByName(name).map(existingEqualNamedReport->existingEqualNamedReport.getId().equals(report.getId())).orElse(false);
-        if (!wouldOverwriteDifferentReport || Window.confirm(StringMessages.INSTANCE.overwriteExistingReportBySameName(name))) {
-            if (report == null) {
-                Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportNoQueriesWereFound(),
-                        NotificationType.ERROR);
-            } else if (reportsProvider.addOrUpdateReport(name, report.getReport())) {
-                Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportUpdateSuccessful(name),
-                        NotificationType.SUCCESS);
-            } else {
-                Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportCreationSuccessful(name),
-                        NotificationType.SUCCESS);
+        if (report == null) {
+            Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportNoQueriesWereFound(),
+                    NotificationType.ERROR);
+        } else {
+            final boolean wouldOverwriteDifferentReport = reportsProvider.findReportByName(name).map(existingEqualNamedReport->!existingEqualNamedReport.getId().equals(report.getId())).orElse(false);
+            if (!wouldOverwriteDifferentReport || Window.confirm(StringMessages.INSTANCE.overwriteExistingReportBySameName(name))) {
+                final StoredDataMiningReportDTO newStoredReportCreatedOrNullIfUpdate = reportsProvider.addOrUpdateReport(name, report.getReport());
+                if (newStoredReportCreatedOrNullIfUpdate == null) {
+                    Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportUpdateSuccessful(name),
+                            NotificationType.SUCCESS);
+                } else {
+                    reportProvider.setCurrentReport(newStoredReportCreatedOrNullIfUpdate);
+                    Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportCreationSuccessful(name),
+                            NotificationType.SUCCESS);
+                }
             }
-    }
+        }
     }
 
     @UiHandler("loadReportButtonUi")

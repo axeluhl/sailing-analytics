@@ -37,12 +37,12 @@ public class StoredDataMiningReportsProvider {
      * Creates a new stored report with the {@code name} or updates an existing one by that name
      * (see {@link #findReportByName(String)}).
      * 
-     * @return {@code true}, if stored report was present and this is an update<br/>
-     *         {@code false}, if a new stored report was created
+     * @return {@coode null}, if stored report was present and this is an update<br/>
+     *         the new stored report with a new UUID if a new stored report was created
      */
-    public boolean addOrUpdateReport(String name, final DataMiningReportDTO report) {
+    public StoredDataMiningReportDTO addOrUpdateReport(String name, final DataMiningReportDTO report) {
         Optional<StoredDataMiningReportDTO> existingStoredReport = findReportByName(name);
-        boolean wasUpdate = !existingStoredReport.isPresent();
+        boolean wasUpdate = existingStoredReport.isPresent();
         final StoredDataMiningReportDTOImpl storedReport = new StoredDataMiningReportDTOImpl(
                 existingStoredReport.map(esr->esr.getId()).orElse(UUID.randomUUID()), name, report);
         dataMiningWriteService.updateOrCreateStoredReport(storedReport, new AsyncCallback<StoredDataMiningReportDTOImpl>() {
@@ -58,7 +58,7 @@ public class StoredDataMiningReportsProvider {
                 listeners.forEach(l -> l.accept(storedReports));
             }
         });
-        return wasUpdate;
+        return wasUpdate ? null : storedReport;
     }
 
     public boolean removeReport(String name) {
