@@ -239,7 +239,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
         parameterSettingsButton.addClickHandler(e -> {
             if (this.parameter == null) {
-                final DataMiningReportDTO currentReport = reportProvider.getCurrentReport();
+                final DataMiningReportDTO currentReport = reportProvider.getCurrentReport().getReport();
                 final Set<FilterDimensionParameter> reportParametersBeforeDialogShown = Util.asNewSet(currentReport.getParameters());
                 new PickOrCreateReportParameterDialog(currentReport, dimension.getReturnTypeName(), getDataMiningStringMessages(),
                         new DialogCallback<FilterDimensionParameter>() {

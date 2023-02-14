@@ -131,7 +131,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         final Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         final String presenterId = resultsPresenter.getCurrentPresenterId();
         final StatisticQueryDefinitionDTO oldPresenterQuery = resultsPresenter.getCurrentQueryDefinition();
-        reportProvider.getCurrentReport().replaceQueryDefinition(oldPresenterQuery, queryDefinition, reportParameterBindings);
+        reportProvider.getCurrentReport().getReport().replaceQueryDefinition(oldPresenterQuery, queryDefinition, reportParameterBindings);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator(presenterId);

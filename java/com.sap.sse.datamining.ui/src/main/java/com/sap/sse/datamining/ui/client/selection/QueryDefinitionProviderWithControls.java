@@ -388,7 +388,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
      * editor UI in {@link #getQueryDefinition()}.
      */
     private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        final ReportParameterToDimensionFilterBindings parameterUsages = reportProvider.getCurrentReport().getParameterUsages(queryDefinition);
+        final ReportParameterToDimensionFilterBindings parameterUsages = reportProvider.getCurrentReport().getReport().getParameterUsages(queryDefinition);
         reportParameterBindings.set(parameterUsages);
         if (parameterUsages == null) {
             GWT.log("No parameter usages found for query");

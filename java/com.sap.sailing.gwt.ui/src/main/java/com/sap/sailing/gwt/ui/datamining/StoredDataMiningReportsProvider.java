@@ -34,10 +34,11 @@ public class StoredDataMiningReportsProvider {
     }
 
     /**
-     * Creates a new stored report with the {@link name} or updates an existing one.
+     * Creates a new stored report with the {@code name} or updates an existing one by that name
+     * (see {@link #findReportByName(String)}).
      * 
-     * @return true, if stored report was present and this is an update<br/>
-     *         false, if a new stored report was created
+     * @return {@code true}, if stored report was present and this is an update<br/>
+     *         {@code false}, if a new stored report was created
      */
     public boolean addOrUpdateReport(String name, final DataMiningReportDTO report) {
         Optional<StoredDataMiningReportDTO> existingStoredReport = findReportByName(name);
@@ -65,7 +66,6 @@ public class StoredDataMiningReportsProvider {
         if (!existingStoredReport.isPresent()) {
             return false;
         }
-
         dataMiningWriteService.removeStoredReport((StoredDataMiningReportDTOImpl) existingStoredReport.get(),
                 new AsyncCallback<StoredDataMiningReportDTOImpl>() {
                     @Override

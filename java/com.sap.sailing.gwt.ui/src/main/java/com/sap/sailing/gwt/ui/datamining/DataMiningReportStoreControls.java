@@ -13,6 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -125,17 +126,20 @@ public class DataMiningReportStoreControls extends Composite {
     @UiHandler("saveReportButtonUi")
     void onSaveClick(ClickEvent e) {
         final String name = suggestBoxUi.getValue().trim();
-        final DataMiningReportDTO report = buildReport();
-        if (report == null) {
-            Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportNoQueriesWereFound(),
-                    NotificationType.ERROR);
-        } else if (reportsProvider.addOrUpdateReport(name, report)) {
-            Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportUpdateSuccessful(name),
-                    NotificationType.SUCCESS);
-        } else {
-            Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportCreationSuccessful(name),
-                    NotificationType.SUCCESS);
-        }
+        final StoredDataMiningReportDTO report = buildReport();
+        final boolean wouldOverwriteDifferentReport = reportsProvider.findReportByName(name).map(existingEqualNamedReport->existingEqualNamedReport.getId().equals(report.getId())).orElse(false);
+        if (!wouldOverwriteDifferentReport || Window.confirm(StringMessages.INSTANCE.overwriteExistingReportBySameName(name))) {
+            if (report == null) {
+                Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportNoQueriesWereFound(),
+                        NotificationType.ERROR);
+            } else if (reportsProvider.addOrUpdateReport(name, report.getReport())) {
+                Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportUpdateSuccessful(name),
+                        NotificationType.SUCCESS);
+            } else {
+                Notification.notify(StringMessages.INSTANCE.dataMiningStoredReportCreationSuccessful(name),
+                        NotificationType.SUCCESS);
+            }
+    }
     }
 
     @UiHandler("loadReportButtonUi")
@@ -165,14 +169,14 @@ public class DataMiningReportStoreControls extends Composite {
      * Compiles a new {@link DataMiningReportDTO} report based on a the queries from all available tabs in the
      * {@link #resultsPresenter}.
      */
-    private DataMiningReportDTO buildReport() {
+    private StoredDataMiningReportDTO buildReport() {
         return reportProvider.getCurrentReport();
     }
 
     private StoredDataMiningReportDTO applyReport(StoredDataMiningReportDTO storedReport) {
         showBusyIndicator(true);
         final DataMiningReportDTO report = storedReport.getReport();
-        reportProvider.setCurrentReport(report);
+        reportProvider.setCurrentReport(storedReport);
         final Iterable<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
         final SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
         executor.run(results -> {

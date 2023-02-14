@@ -39,10 +39,12 @@ import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindin
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
@@ -253,7 +255,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
      * report with the query and the corresponding parameter bindings. So will removing a panel from the result
      * presenter that has a query associated with it.
      */
-    private DataMiningReportDTO currentReport;
+    private StoredDataMiningReportDTO currentReport;
     
     private Integer resultsPresenterSouthHeight = 350;
     private Integer resultsPresenterEastWidth = 750;
@@ -290,7 +292,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
 
             @Override
             public Widget get() {
-                currentReport = new ModifiableDataMiningReportDTO();
+                currentReport = new StoredDataMiningReportDTOImpl(UUID.randomUUID(), /* name */ null, new ModifiableDataMiningReportDTO());
                 mainPanel = new LayoutPanel();
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
                 resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null, /* context */ null,
@@ -311,7 +313,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                 // removing a tab from the result presenter shall remove its query from the current report
                 resultsPresenter.addPresenterRemovedListener((String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition) -> {
                     if (queryDefinition != null) {
-                        currentReport.removeQueryDefinition(queryDefinition);
+                        currentReport.getReport().removeQueryDefinition(queryDefinition);
                     }
                 });
                 queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
@@ -394,12 +396,12 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
     }
 
     @Override
-    public DataMiningReportDTO getCurrentReport() {
+    public StoredDataMiningReportDTO getCurrentReport() {
         return currentReport;
     }
 
     @Override
-    public void setCurrentReport(DataMiningReportDTO report) {
+    public void setCurrentReport(StoredDataMiningReportDTO report) {
         this.currentReport = report;
     }
 

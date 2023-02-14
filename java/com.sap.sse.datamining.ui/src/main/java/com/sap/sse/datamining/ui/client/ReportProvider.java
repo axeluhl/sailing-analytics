@@ -1,8 +1,8 @@
 package com.sap.sse.datamining.ui.client;
 
-import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
 
 public interface ReportProvider {
-    DataMiningReportDTO getCurrentReport();
-    void setCurrentReport(DataMiningReportDTO report);
+    StoredDataMiningReportDTO getCurrentReport();
+    void setCurrentReport(StoredDataMiningReportDTO report);
 }

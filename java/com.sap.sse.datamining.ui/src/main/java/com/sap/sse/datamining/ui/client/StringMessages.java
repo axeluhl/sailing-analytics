@@ -111,4 +111,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String parameterNamesMustBeUniqueInReport(String name, String typeName);
     String newParameterName();
     String parameterNameMustNotBeEmpty();
+    String overwriteExistingReportBySameName(String name);
 }
