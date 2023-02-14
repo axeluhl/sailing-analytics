@@ -81,6 +81,7 @@ public class FileStoragePanel extends FlowPanel {
         VerticalPanel editServicePanelContent = new VerticalPanel();
         editServicePanel.add(editServicePanelContent);
         servicesListBox = new ListBox();
+        servicesListBox.ensureDebugId("servicesListBox");
         servicesListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {

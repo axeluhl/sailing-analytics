@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -24,12 +28,10 @@ import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObser
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
-import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.listedit.ExpandedUiWithCheckboxes;
@@ -38,7 +40,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
-public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
+public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTaskDTO>>
         implements FileStorageServiceConnectionTestObserver {
     private final SailingServiceAsync sailingService;
     
@@ -49,14 +51,15 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
     protected TextBox titleTextBox;
     protected TextBox subtitleTextBox;
     protected TextBox copyrightTextBox;
-    protected IntegerBox widthInPxBox;
-    protected IntegerBox heightInPxBox;
+    protected final VerticalPanel fileInfoVPanel;
     protected final StringListInlineEditorComposite tagsListEditor;
     protected Image image;
     private final ExpandedUiWithCheckboxes<String> expandedUi;
     private final BusyIndicator busyIndicator;
+    private int busyCounter;
+    private final HashMap<String, Pair<Integer, Integer>> imageDimensionsMap;
 
-    protected static class ImageParameterValidator implements Validator<ImageResizingTaskDTO> {
+    protected static class ImageParameterValidator implements Validator<List<ImageResizingTaskDTO>> {
         private final StringMessages stringMessages;
         private List<CheckBox> doResize;
         private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
@@ -67,9 +70,15 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
             this.storageServiceAvailable = storageServiceAvailable;
             this.doResize = new ArrayList<CheckBox>();
         }
-        
+
         public void setCheckBoxes(List<CheckBox> doResize) {
             this.doResize = doResize;
+        }
+
+        private enum CheckBoxStyle {
+            Invisible,
+            Normal,
+            Error
         }
 
         /*
@@ -80,57 +89,96 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
          * will disable the checkbox if there is no working FileStorageService
          */
         @Override
-        public String getErrorMessage(final ImageResizingTaskDTO resizingTask) {
-            String errorMessage = null;
-            final ImageDTO imageToValidate = resizingTask.getImage();
-            final Integer imageWidth = imageToValidate.getWidthInPx();
-            final Integer imageHeight = imageToValidate.getHeightInPx();
-            if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
-                errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
-            } else if (imageToValidate.getSourceRef().startsWith("http:")) {
-                errorMessage = stringMessages.pleaseUseHttpsForImageUrls();
-            } else if (imageWidth == null || imageHeight == null) {
-                errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
-            } else {
-                // check if image is too small for resizing
-                errorMessage = "";
-                for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
-                    if (imageToValidate.hasTag(mediaTag.getName())
-                            && (imageWidth < mediaTag.getMinWidth() || imageHeight < mediaTag.getMinHeight())) {
-                        errorMessage += getImageToSmallErrorMessage(mediaTag, stringMessages) + "\n";
-                    }
-                }
-                if (errorMessage.equals("")) {// Check if image ratio fits for resizing
-                    errorMessage = imageRatioFits(imageToValidate);
-                }
-                if (errorMessage.equals("")) {// check for checkboxes and resizing
+        public String getErrorMessage(final List<ImageResizingTaskDTO> resizingTasks) {
+            StringJoiner errorJoiner = new StringJoiner("\n");
+            final Map<CheckBox, CheckBoxStyle> checkBoxStyleMap = new HashMap<>();
+            for (ImageResizingTaskDTO resizingTask : resizingTasks) {
+                String errorMessage = null;
+                final ImageDTO imageToValidate = resizingTask.getImage();
+                final Integer imageWidth = imageToValidate.getWidthInPx();
+                final Integer imageHeight = imageToValidate.getHeightInPx();
+                if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
+                    errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
+                } else if (imageToValidate.getSourceRef().startsWith("http:")
+                        && !imageToValidate.getSourceRef().contains("localhost")
+                        && !imageToValidate.getSourceRef().contains("127.0.0.1")) {
+                    errorMessage = stringMessages.pleaseUseHttpsForImageUrls();
+                } else if (imageWidth == null || imageHeight == null) {
+                    errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
+                } else {
+                    // check if image is too small for resizing
+                    errorMessage = "";
                     for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
-                        final CheckBox checkBox = getCheckBoxForTag(mediaTag.getName(), imageToValidate);
                         if (imageToValidate.hasTag(mediaTag.getName())
-                                && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight())) {
-                            if (!resizingTask.getResizingTask().contains(mediaTag)) {
-                                errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
-                                checkBox.setStyleName(ExpandedUiWithCheckboxes.getErrorStyle());
-                                if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
-                                    checkBox.setEnabled(false);
-                                }
-                            } else {
-                                checkBox.setStyleName(ExpandedUiWithCheckboxes.getNormalStyle());
-                            }
-                        } else {
-                            checkBox.setStyleName(ExpandedUiWithCheckboxes.getInvisibleStyle());
-                            checkBox.setValue(false);
+                                && (imageWidth < mediaTag.getMinWidth() || imageHeight < mediaTag.getMinHeight())) {
+                            errorMessage += getImageToSmallErrorMessage(mediaTag, stringMessages) + "\n";
                         }
                     }
+                    if (errorMessage.equals("")) {// Check if image ratio fits for resizing
+                        errorMessage = imageRatioFits(imageToValidate);
+                    }
+                    if (errorMessage.equals("")) {// check for checkboxes and resizing
+                        for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
+                            final CheckBox checkBox = getCheckBoxForTag(mediaTag.getName(), imageToValidate);
+                            if (imageToValidate.hasTag(mediaTag.getName())
+                                    && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight())) {
+                                // Image has tag but is not compatible
+                                if (!resizingTask.getResizingTask().contains(mediaTag)) { // Image has tag but resizeTask does not
+                                    String fileName = ImageDialog.extractFileName(imageToValidate.getSourceRef());
+                                    errorMessage += getSizeErrorMessage(fileName, mediaTag, stringMessages) + "\r\n";
+                                    checkBoxStyleMap.put(checkBox, CheckBoxStyle.Error);
+                                    if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
+                                        checkBox.setEnabled(false);
+                                    }
+                                } else {
+                                    // Set checkbox to Normal if not already set to Error
+                                    checkBoxStyleMap.compute(checkBox, (k, v) -> {
+                                        if (v == CheckBoxStyle.Error) {
+                                            return CheckBoxStyle.Error;
+                                        } else {
+                                            return CheckBoxStyle.Normal;
+                                        }
+                                    });
+                                }
+                            } else {
+                                // Set checkbox to Invisble if not already set to Normal or Error
+                                checkBoxStyleMap.compute(checkBox, (k, v) -> {
+                                    if (v == null || v == CheckBoxStyle.Invisible) {
+                                        return CheckBoxStyle.Invisible;
+                                    } else {
+                                        return v;
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
+                        errorMessage += stringMessages.automaticResizeNeedsStorageService() + "\n";
+                    }
                 }
-                if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
-                    errorMessage += stringMessages.automaticResizeNeedsStorageService() + "\n";
+                if (errorMessage.equals("")) {
+                    errorMessage = null;
+                }
+                if (errorMessage != null) {
+                    errorJoiner.add(errorMessage);
                 }
             }
-            if (errorMessage.equals("")) {
-                errorMessage = null;
+            for (Map.Entry<CheckBox, CheckBoxStyle> entry : checkBoxStyleMap.entrySet()) {
+                final CheckBox checkBox = entry.getKey();
+                switch (entry.getValue()) {
+                case Invisible:
+                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getInvisibleStyle());
+                    checkBox.setValue(false);
+                    break;
+                case Normal:
+                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getNormalStyle());
+                    break;
+                case Error:
+                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getErrorStyle());
+                    break;
+                }
             }
-            return errorMessage;
+            return errorJoiner.toString();
         }
 
         /**
@@ -181,8 +229,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
             return errorMessage;
         }
         
-        private String getSizeErrorMessage(MediaTagConstants mediaTag, StringMessages stringMessages) {
-            String errorMessage = stringMessages.imageSizeError(mediaTag.getName(), mediaTag.getMinWidth(),
+        private String getSizeErrorMessage(String fileName, MediaTagConstants mediaTag, StringMessages stringMessages) {
+            String errorMessage = stringMessages.imageSizeError(fileName + " (" + mediaTag.getName() + ")", mediaTag.getMinWidth(),
                     mediaTag.getMaxWidth(), mediaTag.getMinHeight(), mediaTag.getMaxHeight());
             return errorMessage;
         }
@@ -196,47 +244,61 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
 
     public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages,
             FileStorageServiceConnectionTestObservable storageServiceAvailable,
-            DialogCallback<ImageResizingTaskDTO> callback) {
+            DialogCallback<List<ImageResizingTaskDTO>> callback) {
         this(creationDate, sailingService, stringMessages, storageServiceAvailable,
                 new ImageParameterValidator(stringMessages, storageServiceAvailable), callback);
     }
 
     private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages,
             FileStorageServiceConnectionTestObservable storageServiceAvailable, ImageParameterValidator validator,
-            DialogCallback<ImageResizingTaskDTO> callback) {
+            DialogCallback<List<ImageResizingTaskDTO>> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.creationDate = creationDate;
+        fileInfoVPanel = new VerticalPanel();
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
-        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, "image/*");
-        imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
+        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, true, "image/*");
+        imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<Map<String, String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                String imageUrlAsString = event.getValue();
-                if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
-                    widthInPxBox.setText("");
-                    heightInPxBox.setText("");
+            public void onValueChange(ValueChangeEvent<Map<String, String>> event) {
+                Map<String, String> imageUrls = event.getValue();
+                if (imageUrls == null || imageUrls.isEmpty()) {
+                    fileInfoVPanel.clear();
                 } else {
                     busyIndicator.setBusy(true);
-                    ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString,
-                            new AsyncCallback<Util.Pair<Integer, Integer>>() {
-                                @Override
-                                public void onSuccess(Pair<Integer, Integer> imageSize) {
-                                    busyIndicator.setBusy(false);
-                                    if (imageSize != null) {
-                                        widthInPxBox.setValue(imageSize.getA());
-                                        heightInPxBox.setValue(imageSize.getB());
-                                    }
-                                    validateAndUpdate();
-                                }
+                    busyCounter = 0;
+                    for (final String imageUrl : imageUrls.keySet()) {
+                        if (!imageDimensionsMap.containsKey(imageUrl)) {
+                            busyCounter += 1;
+                            ImageDialog.this.sailingService.resolveImageDimensions(imageUrl,
+                                    new AsyncCallback<Pair<Integer, Integer>>() {
+                                        @Override
+                                        public void onSuccess(Pair<Integer, Integer> imageSize) {
+                                            GWT.log("resolve image dimensions - SUCCESS " + imageSize);
+                                            imageDimensionsMap.put(imageUrl, imageSize);
+                                            busyCounter -= 1;
+                                            if (busyCounter <= 0) {
+                                                busyIndicator.setBusy(false);
+                                            }
+                                            validateAndUpdate();
+                                        }
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    busyIndicator.setBusy(false);
-                                }
-                            });
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            GWT.log("resolve image dimensions - FAILURE", caught);
+                                            busyCounter -= 1;
+                                            if (busyCounter <= 0) {
+                                                busyIndicator.setBusy(false);
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+                    if(busyCounter <= 0) {
+                        busyIndicator.setBusy(false);
+                    }
                 }
                 validateAndUpdate();
             }
@@ -260,6 +322,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
                 validateAndUpdate();
             }
         });
+        imageDimensionsMap = new HashMap<>(4);
     }
 
     /**
@@ -269,27 +332,72 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
      * For a lookout to further progressing see {@link SailingService#resizeImage(ImageResizingTaskDTO)}
      */
     @Override
-    protected ImageResizingTaskDTO getResult() {
+    protected List<ImageResizingTaskDTO> getResult() {
         final List<String> tags = new ArrayList<String>();
         for (String tag : tagsListEditor.getValue()) {
             tags.add(tag);
         }
-        final List<MediaTagConstants> resizingTask = new ArrayList<MediaTagConstants>();
+        final List<MediaTagConstants> notCheckedMediaTags = new ArrayList<MediaTagConstants>();
+        for (int i = 0; i < tags.size(); i++) {
+            if (Arrays.asList(MediaTagConstants.values()).contains(MediaTagConstants.fromName(tags.get(i)))
+                    && !expandedUi.getCheckBoxes().get(i).getValue()) {
+                notCheckedMediaTags.add(MediaTagConstants.fromName(tags.get(i)));
+            }
+        }
+        final List<MediaTagConstants> mediaTags = new ArrayList<MediaTagConstants>();
         for (int i = 0; i < tags.size(); i++) {
             if (Arrays.asList(MediaTagConstants.values()).contains(MediaTagConstants.fromName(tags.get(i)))
                     && expandedUi.getCheckBoxes().get(i).getValue()) {
-                resizingTask.add(MediaTagConstants.fromName(tags.get(i)));
+                mediaTags.add(MediaTagConstants.fromName(tags.get(i)));
             }
         }
-        final ImageDTO image = new ImageDTO(imageURLAndUploadComposite.getURL(), creationDate);
-        image.setTitle(titleTextBox.getValue());
-        image.setSubtitle(subtitleTextBox.getValue());
-        image.setCopyright(copyrightTextBox.getValue());
-        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
-            image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+        ArrayList<ImageResizingTaskDTO> results = new ArrayList<>(imageURLAndUploadComposite.getUris().size());
+        List<String> uris = imageURLAndUploadComposite.getUris();
+        fileInfoVPanel.clear();
+        for (int i = 0; i < uris.size(); i++) {
+            final String imageURL = uris.get(i);
+            final String fileName = ImageDialog.extractFileName(imageURL);
+            final ImageDTO image = new ImageDTO(imageURL, creationDate);
+            image.setTitle(titleTextBox.getValue());
+            image.setSubtitle(subtitleTextBox.getValue());
+            image.setCopyright(copyrightTextBox.getValue());
+            final Pair<Integer, Integer> dims = imageDimensionsMap.get(imageURL);
+            final Label fileInfoText;
+            if (dims != null) {
+                image.setSizeInPx(dims.getA(), dims.getB());
+                fileInfoText = new Label(fileName + " (" + dims.getA() + "x" + dims.getB() + ")");
+                
+            } else {
+                fileInfoText = new Label(fileName);
+            }
+            image.setTags(tags);
+            final List<MediaTagConstants> resizeTags = new ArrayList<>();
+            for (final MediaTagConstants mediaTag : mediaTags) {
+                if (imageNeedsResizeForTag(image, mediaTag)) {
+                    resizeTags.add(mediaTag);
+                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize() + " (" + mediaTag.name() + ")");
+                }
+            }
+            for (final MediaTagConstants mediaTag : notCheckedMediaTags) {
+                if (imageNeedsResizeForTag(image, mediaTag)) {
+                    fileInfoText.setText(fileInfoText.getText() + " - " + stringMessages.resize() + " (" + mediaTag.name() + ")");
+                    fileInfoText.setStyleName("errorLabel");
+                }
+            }
+            fileInfoVPanel.add(fileInfoText);
+            results.add(new ImageResizingTaskDTO(image, resizeTags));
         }
-        image.setTags(tags);
-        return new ImageResizingTaskDTO(image, resizingTask);
+        return results;
+    }
+    
+    private static String extractFileName(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
+
+    private static boolean imageNeedsResizeForTag(ImageDTO image, MediaTagConstants mediaTag) {
+        final boolean widthExceeded = image != null && image.getWidthInPx() != null && image.getWidthInPx() > mediaTag.getMaxWidth();
+        final boolean heightExceeded = image != null && image.getWidthInPx() != null && image.getHeightInPx() > mediaTag.getMaxHeight();
+        return widthExceeded || heightExceeded;
     }
 
     @Override
@@ -300,34 +408,26 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-
-        Grid grid = new Grid(11, 2);
-
+        Grid grid = new Grid(10, 2);
         grid.setWidget(0, 0, new Label(stringMessages.createdAt() + ":"));
         grid.setWidget(0, 1, createdAtLabel);
         grid.setWidget(1, 0, new HTML("&nbsp;"));
         grid.setWidget(1, 1, busyIndicator);
         grid.setWidget(2,  0, new Label(stringMessages.imageURL() + ":"));
         grid.setWidget(2, 1, imageURLAndUploadComposite);
-        grid.setWidget(3, 0, new HTML("&nbsp;"));
-
-        grid.setWidget(4,  0, new Label(stringMessages.title() + ":"));
-        grid.setWidget(4, 1, titleTextBox);
-        grid.setWidget(5,  0, new Label(stringMessages.subtitle() + ":"));
-        grid.setWidget(5, 1, subtitleTextBox);
-        grid.setWidget(6, 0, new Label(stringMessages.copyright() + ":"));
-        grid.setWidget(6, 1, copyrightTextBox);
-        grid.setWidget(7, 0, new Label(stringMessages.widthInPx() + ":"));
-        grid.setWidget(7, 1, widthInPxBox);
-        grid.setWidget(8, 0, new Label(stringMessages.heightInPx() + ":"));
-        grid.setWidget(8, 1, heightInPxBox);
-
-        grid.setWidget(9, 0, new HTML("&nbsp;"));
-        grid.setWidget(10, 0, new Label(stringMessages.tags() + ":"));
-        grid.setWidget(10, 1, tagsListEditor);
-
+        grid.setWidget(3, 0, new Label(stringMessages.fileUpload() + ":"));
+        grid.setWidget(3, 1, fileInfoVPanel);
+        grid.setWidget(4, 0, new HTML("&nbsp;"));
+        grid.setWidget(5,  0, new Label(stringMessages.title() + ":"));
+        grid.setWidget(5, 1, titleTextBox);
+        grid.setWidget(6,  0, new Label(stringMessages.subtitle() + ":"));
+        grid.setWidget(6, 1, subtitleTextBox);
+        grid.setWidget(7, 0, new Label(stringMessages.copyright() + ":"));
+        grid.setWidget(7, 1, copyrightTextBox);
+        grid.setWidget(8, 0, new HTML("&nbsp;"));
+        grid.setWidget(9, 0, new Label(stringMessages.tags() + ":"));
+        grid.setWidget(9, 1, tagsListEditor);
         panel.add(grid);
-
         return panel;
     }
 

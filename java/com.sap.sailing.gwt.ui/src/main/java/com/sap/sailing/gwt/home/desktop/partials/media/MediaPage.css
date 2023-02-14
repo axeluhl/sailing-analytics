@@ -125,7 +125,6 @@
 }
 
 .popup {
-    position: fixed!important;
     z-index: 1000;
     width: auto;
     height: auto;
