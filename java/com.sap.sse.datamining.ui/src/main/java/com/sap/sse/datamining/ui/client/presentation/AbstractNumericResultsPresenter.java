@@ -75,9 +75,9 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         currentDataProvider = dataProviders.selectCurrentDataProvider(result.getResultType());
         updateDataSelectionListBox();
         if (currentDataProvider != null) {
-            Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(),
+            final Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(),
                     dataSelectionListBox.getValue());
-            Map<GroupKey, Triple<Number, Number, Long>> errorMargins = currentDataProvider
+            final Map<GroupKey, Triple<Number, Number, Long>> errorMargins = currentDataProvider
                     .getErrorData(getCurrentResult(), dataSelectionListBox.getValue());
             internalShowNumericResults(resultValues, errorMargins);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
@@ -33,6 +32,7 @@ import org.moxieapps.gwt.highcharts.client.labels.DataLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -261,7 +261,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();
-        showResultData();
+        // see bug 5812: if showResultData() is invoked immediately, the clean-up issued above isn't flushed properly into the chart
+        Scheduler.get().scheduleDeferred(this::showResultData);
     }
 
     private void updateKeyComparatorListBox() {
@@ -301,23 +302,26 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         buildMainKeyMapAndSetXAxisCategories();
         createAndAddSeriesToChart();
         Map<GroupKey, List<Number>> valuesPerMainKey = new HashMap<>();
-        for (Entry<GroupKey, ? extends Number> resultEntry : currentResultValues.entrySet()) {
-            GroupKey mainKey = GroupKey.Util.getMainKey(resultEntry.getKey());
-            Number value = resultEntry.getValue();
+        // sort the stream to avoid Highcharts error 15 (points not sorted by X value in series)
+        currentResultValues.entrySet().stream().sorted(
+                (e1, e2)->mainKeyToXValueMap.get(GroupKey.Util.getMainKey(e1.getKey())).compareTo(mainKeyToXValueMap.get(GroupKey.Util.getMainKey(e2.getKey()))))
+                .forEach(resultEntry->{
+            final GroupKey mainKey = GroupKey.Util.getMainKey(resultEntry.getKey());
+            final Number value = resultEntry.getValue();
             if (!isCurrentResultSimple()) {
                 if (!valuesPerMainKey.containsKey(mainKey)) {
                     valuesPerMainKey.put(mainKey, new ArrayList<Number>());
                 }
                 valuesPerMainKey.get(mainKey).add(value);
             }
-            Point point = new Point(mainKeyToXValueMap.get(mainKey), value);
+            final Point point = new Point(mainKeyToXValueMap.get(mainKey), value);
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey())).addPoint(point, false, false, false);
             if (showErrorBars) {
                 final Triple<Number, Number, Long> errorMargins = currentResultErrorMargins == null ? null
                         : currentResultErrorMargins.get(mainKey);
                 if (errorMargins != null) {
-                    Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(),
+                    final Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(),
                             errorMargins.getB());
                     errorMarginsPoint.setName(
                             mainKey.asString() + ", " + getDataMiningStringMessages().elements(errorMargins.getC()));
@@ -325,7 +329,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                             .addPoint(errorMarginsPoint, false, false, false);
                 }
             }
-        }
+        });
         averagePerMainKey.clear();
         medianPerMainKey.clear();
         if (!isCurrentResultSimple()) {
@@ -392,8 +396,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     }
 
     private void createAndAddSeriesToChart() {
-        for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
-            GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
+        for (final GroupKey groupKey : getCurrentResult().getResults().keySet()) {
+            final GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
                 seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
                 if (showErrorBars) {
@@ -402,9 +406,9 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 }
             }
         }
-        List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
+        final List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
         Collections.sort(sortedSeriesKeys);
-        for (GroupKey seriesKey : sortedSeriesKeys) {
+        for (final GroupKey seriesKey : sortedSeriesKeys) {
             chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
             if (showErrorBars) {
                 chart.addSeries(errorSeriesMappedByGroupKey.get(seriesKey), false, false);
