@@ -15,6 +15,10 @@
                you change, e.g., the regatta selection that was bound to a parameter, the selection changes
                for all your queries in the report. Running them again after switching to their results tab
                will get you the synchronized results.</li>
+           <li>Bug fix: sometimes, when removing a dimension from the grouping instructions in DataMining,
+               remnants of the previous grouping structure could have remained when running the new query
+               with fewer dimensions. Deferring the chart update to outside the current event loop has
+               solved this issue.</li>
          </ul>
          <h5 class="articleSubheadline">January 2023</h5>
          <ul class="bulletList">
