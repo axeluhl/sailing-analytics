@@ -40,9 +40,6 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
      */
     private HashMap<FilterDimensionParameter, ParameterModelListener> parameterValueChangeListeners;
     
-//    @SuppressWarnings("unused") // used only to instruct the GWT compiler that ParameterModelListener is to be considered serializable
-//    private ParameterModelListener dummyForSerialization;
-    
     private transient Set<ParameterModelListener> parameterModelListeners;
     
     public static class ParameterValueChangeListener implements ParameterModelListener, Serializable {
