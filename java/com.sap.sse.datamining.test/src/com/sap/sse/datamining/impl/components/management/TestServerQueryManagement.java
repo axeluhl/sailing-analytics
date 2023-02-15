@@ -173,16 +173,6 @@ public class TestServerQueryManagement {
     }
     
     @Test
-    public void testAbortingRandomQueryOfSingleQueryPerKeyManager() {
-        DataMiningQueryManager manager = new SingleQueryPerSessionManager();
-
-        AdditionalQueryData additionalData = new AdditionalStatisticQueryData();
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
-        runQueriesAbortRandomOneAndVerifyAbortion(manager, firstQuery, secondQuery);
-    }
-    
-    @Test
     public void testAbortingRandomQueryOfStrategyPerQueryTypeManager() {
         DataMiningQueryManager manager = new StrategyPerQueryTypeManager();
 
@@ -215,16 +205,6 @@ public class TestServerQueryManagement {
         DataMiningQueryManager manager = new NullDataMiningQueryManager();
 
         AdditionalQueryData additionalData = new AdditionalOtherQueryData();
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
-        runQueriesAbortAllAndVerifyAbortion(manager, firstQuery, secondQuery);
-    }
-    
-    @Test
-    public void testAbortingAllQueryOfSingleQueryPerKeyManager() {
-        DataMiningQueryManager manager = new SingleQueryPerSessionManager();
-
-        AdditionalQueryData additionalData = new AdditionalStatisticQueryData();
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAbortAllAndVerifyAbortion(manager, firstQuery, secondQuery);

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
@@ -21,7 +22,6 @@ import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
-import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.QueryRunner;
 import com.sap.sse.datamining.ui.client.ReportProvider;
@@ -55,7 +55,6 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    private final ManagedDataMiningQueriesCounter counter;
 
     /**
      * Timer to prevent the execution of unnecessary queries, when they're run automatically (see
@@ -99,7 +98,6 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
-        counter = new SimpleManagedDataMiningQueriesCounter();
         queryDefinitionProvider.addQueryDefinitionChangedListener(this);
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
@@ -133,18 +131,17 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         final StatisticQueryDefinitionDTO oldPresenterQuery = resultsPresenter.getCurrentQueryDefinition();
         reportProvider.getCurrentReport().getReport().replaceQueryDefinition(oldPresenterQuery, queryDefinition, reportParameterBindings);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
-            counter.increase();
             resultsPresenter.showBusyIndicator(presenterId);
             dataMiningService.runQuery(session, (ModifiableStatisticQueryDefinitionDTO) queryDefinition,
-                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
-                        // TODO bug4789: consistently update the entry point's currentReport, also using the QueryDefinitionProvider's parameter mappings (ReportParameterToDimensionFilterBindings)
+                    new AsyncCallback<QueryResultDTO<Serializable>>() {
                         @Override
-                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
+                        public void onSuccess(QueryResultDTO<Serializable> result) {
                             resultsPresenter.showResult(presenterId, queryDefinition, result);
                             queryDefinitionProvider.queryDefinitionChangesHaveBeenStored();
                         }
+                        
                         @Override
-                        protected void handleFailure(Throwable caught) {
+                        public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error running the query: " + caught.getMessage());
                             resultsPresenter.showError(presenterId, // this also clears the query in the result presenter
                                     queryDefinition, getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
