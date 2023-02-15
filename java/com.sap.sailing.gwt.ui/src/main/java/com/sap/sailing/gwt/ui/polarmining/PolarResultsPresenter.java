@@ -36,6 +36,7 @@ import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -187,7 +188,7 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResults(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         polarChart.removeAllSeries(false);
         dataCountHistogramChart.removeAllSeries(false);
         dataCountPerAngleHistogramChart.removeAllSeries(false);

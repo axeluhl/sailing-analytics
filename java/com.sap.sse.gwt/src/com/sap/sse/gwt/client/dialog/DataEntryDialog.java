@@ -544,8 +544,6 @@ public abstract class DataEntryDialog<T> {
     /**
      * Creates a standard label for input fields.
      * The label has some default formatting like "no wrap" and a colon right after the label text 
-     * @param name
-     * @return
      */
     public Label createLabel(String name) {
         Label result = new Label(name + ":");

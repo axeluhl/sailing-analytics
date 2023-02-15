@@ -26,6 +26,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.PairWithStats;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -85,10 +86,9 @@ public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> res) {
+    protected void internalShowResults(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> res) {
         chart.removeAllSeries(false);
         seriesMappedByGroupKey.clear();
-        
         result = res;
         createAndAddSeriesToChart();
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {

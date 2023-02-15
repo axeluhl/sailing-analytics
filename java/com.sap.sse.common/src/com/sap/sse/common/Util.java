@@ -848,14 +848,25 @@ public class Util {
         }
         return list;
     }
+
+    /**
+     * Creates a new set in any case
+     */
+    public static <T> Set<T> asNewSet(Iterable<T> iterable) {
+        final Set<T> result = new HashSet<>();
+        addAll(iterable, result);
+        return result;
+    }
     
+    /**
+     * If {@code iterable} already is a set, return it; otherwise create a new set
+     */
     public static <T> Set<T> asSet(Iterable<T> iterable) {
         final Set<T> result;
         if (iterable instanceof Set<?>) {
             result = (Set<T>) iterable;
         } else {
-            result = new HashSet<>();
-            addAll(iterable, result);
+            result = asNewSet(iterable);
         }
         return result;
     }

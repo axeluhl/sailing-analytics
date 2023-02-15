@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.ui.client.presentation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -32,15 +34,29 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         implements CompositeResultsPresenter<Settings> {
 
     protected static final DataMiningResources resources = GWT.create(DataMiningResources.class);
+    
+    /**
+     * Used as a prefix for the ID strings of the presenter tabs which are then used as keys in the
+     * {@link #tabsMappedById} map
+     */
     private static final String IdPrefix = "Tab";
     
+    /**
+     * Counts the presenter tabs and is used in the construction of presenter tab IDs which then become keys in
+     * {@link #tabsMappedById}.
+     */
     private final AtomicInteger idCounter;
     private final ScrolledTabLayoutPanel tabPanel;
+    
+    /**
+     * Presenter tabs, keyed by strings that are constructed from the {@link #IdPrefix} and the {@link #idCounter}
+     */
     private final Map<String, CloseablePresenterTab> tabsMappedById;
     private final DrillDownCallback drillDownCallback;
     private final Map<String, ResultsPresenterFactory<?>> registeredPresenterFactories;
     private final ResultsPresenterFactory<MultiResultsPresenter> defaultFactory;
-    private final Set<CurrentPresenterChangedListener> listeners;
+    private final Set<CurrentPresenterChangedListener> currentPresenterChangedListeners;
+    private final Set<PresenterRemovedListener> presenterRemovedListeners;
     
     public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback) {
         super(parent, context);
@@ -52,26 +68,30 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         registeredPresenterFactories = new HashMap<>();
         defaultFactory = new ResultsPresenterFactory<>(MultiResultsPresenter.class,
                 () -> new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
-        listeners = new HashSet<>();
-
-        addNewTabTab();
+        currentPresenterChangedListeners = new HashSet<>();
+        presenterRemovedListeners = new HashSet<>();
+        addNewTab();
         addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback));
-        
         tabPanel.addSelectionHandler(event -> {
-            String presenterId = ((CloseablePresenterTab) tabPanel.getTabWidget(event.getSelectedItem())).getId();
-            for (CurrentPresenterChangedListener listener : listeners) {
+            final String presenterId = ((CloseablePresenterTab) tabPanel.getTabWidget(event.getSelectedItem())).getId();
+            for (final CurrentPresenterChangedListener listener : currentPresenterChangedListeners) {
                 listener.currentPresenterChanged(presenterId);
             }
         });
     }
 
-    private void addNewTabTab() {
-        Label widget = new Label("This should never be shown");
-        FlowPanel header = new FlowPanel();
+    /**
+     * Adds the virtual tab with the "+" symbol that allows a user to add a new panel to this tabbed results presenter.
+     * When "selected," the selecting event is cancelled and instead the {@link #addTabAndFocus(ResultsPresenter)}
+     * method is invoked, adding a "real" panel just before the virtual "+" panel.
+     */
+    private void addNewTab() {
+        final Label widget = new Label("This should never be shown");
+        final FlowPanel header = new FlowPanel();
         header.addStyleName("resultsPresenterTabHeader");
         header.add(new Image(resources.plusIcon()));
         tabPanel.add(widget, header);
-        // This is necessary to stop the selection of this pseudo tab
+        // This is necessary to stop the selection of this pseudo tabe 
         tabPanel.addBeforeSelectionHandler(event -> {
             if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                 event.cancel();
@@ -85,6 +105,11 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     public String getCurrentPresenterId() {
         return getSelectedTab().getId();
     }
+    
+    @Override
+    public int getCurrentPresenterIndex() {
+        return tabPanel.getSelectedIndex();
+    }
 
     @Override
     public Iterable<String> getPresenterIds() {
@@ -95,6 +120,12 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     @Override
     public boolean containsPresenter(String presenterId) {
         return tabsMappedById.containsKey(presenterId);
+    }
+    
+    @Override
+    public int getPresenterIndex(String presenterId) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        return tab != null ? tabPanel.getWidgetIndex(tab) : -1;
     }
     
     @Override
@@ -128,48 +159,74 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
             presenterTab.getPresenter().showResult(queryDefinition, result);
         }
     }
-
+    
     @Override
-    public void showError(String presenterId, String error) {
-        CloseablePresenterTab tab = getTab(presenterId);
-        if (tab == null) {
-            return;
+    public void showResults(Iterable<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> results) {
+        // TODO bug4789: should we check for changes in the tabs before removing them?
+        new ArrayList<>(tabsMappedById.keySet()).stream().map(tabsMappedById::get).forEach(this::removeTab);
+        for (final Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>> entry : results) {
+            final StatisticQueryDefinitionDTO queryDefinition = entry.getA();
+            final QueryResultDTO<?> result = entry.getB();
+            final ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
+            final CloseablePresenterTab presenterTab = addTabAndFocus(factory.createPresenter());
+            presenterTab.setText(result.getResultSignifier());
+            presenterTab.getPresenter().showResult(queryDefinition, result);
         }
-        
-        tab.setText(getDataMiningStringMessages().error());
-        tab.getPresenter().showError(error);
+        // Needed to remove the remaining empty tab
+        for (final CloseablePresenterTab tab : tabsMappedById.values()) {
+            if (tabPanel.getWidgetIndex(tab.getPresenter().getEntryWidget()) == 0) {
+                removeTab(tab);
+                break;
+            }
+        }
+        tabPanel.selectTab(0, /* fire events */ true); // this will also fire the selection event, so the query provider will update according to the query
+    }
+    
+    @Override
+    public void showError(String presenterId, StatisticQueryDefinitionDTO queryDefinition, String error) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        if (tab != null) {
+            tab.setText(getDataMiningStringMessages().error());
+            tab.getPresenter().showError(queryDefinition, error);
+        }
     }
 
     @Override
-    public void showError(String presenterId, String mainError, Iterable<String> detailedErrors) {
+    public void showError(String presenterId, StatisticQueryDefinitionDTO queryDefinition, String mainError, Iterable<String> detailedErrors) {
         CloseablePresenterTab tab = getTab(presenterId);
-        if (tab == null) {
-            return;
+        if (tab != null) {
+            tab.setText(getDataMiningStringMessages().error());
+            tab.getPresenter().showError(mainError, detailedErrors, queryDefinition);
         }
-        
-        tab.setText(getDataMiningStringMessages().error());
-        tab.getPresenter().showError(mainError, detailedErrors);
     }
 
     @Override
     public void showBusyIndicator(String presenterId) {
         CloseablePresenterTab tab = getTab(presenterId);
-        if (tab == null) {
-            return;
+        if (tab != null) {
+            tab.setText(getDataMiningStringMessages().runningQuery());
+            tab.getPresenter().showBusyIndicator();
         }
-        
-        tab.setText(getDataMiningStringMessages().runningQuery());
-        tab.getPresenter().showBusyIndicator();
     }
 
     @Override
     public void addCurrentPresenterChangedListener(CurrentPresenterChangedListener listener) {
-        listeners.add(listener);
+        currentPresenterChangedListeners.add(listener);
     }
 
     @Override
     public void removeCurrentPresenterChangedListener(CurrentPresenterChangedListener listener) {
-        listeners.remove(listener);
+        currentPresenterChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void addPresenterRemovedListener(PresenterRemovedListener listener) {
+        presenterRemovedListeners.add(listener);
+    }
+    
+    @Override
+    public void removePresenterRemovedListener(PresenterRemovedListener listener) {
+        presenterRemovedListeners.remove(listener);
     }
 
     /**
@@ -209,7 +266,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         String tabId = IdPrefix + idCounter.getAndIncrement();
         CloseablePresenterTab presenterTab = new CloseablePresenterTab(tabId, presenter);
         tabsMappedById.put(tabId, presenterTab);
-
         tabPanel.insert(presenter.getEntryWidget(), presenterTab, tabPanel.getWidgetCount() - 1);
         int presenterIndex = tabPanel.getWidgetIndex(presenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);
@@ -218,8 +274,11 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     protected void removeTab(CloseablePresenterTab tab) {
+        String presenterId = tab.getId();
+        int index = getPresenterIndex(presenterId);
         tab.removeFromParent();
-        tabsMappedById.remove(tab.getId());
+        tabsMappedById.remove(presenterId);
+        this.presenterRemovedListeners.forEach(l -> l.onPresenterRemoved(presenterId, index, tab.getPresenter().getCurrentQueryDefinition()));
     }
 
     @Override
@@ -296,7 +355,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     private class CloseablePresenterTab extends FlowPanel {
-
         private final String id;
         private final Label headerLabel;
         private final ResultsPresenter<?> presenter;
@@ -305,7 +363,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
             this.id = id;
             this.presenter = presenter;
             this.addStyleName("resultsPresenterTabHeader");
-            
             headerLabel = new Label(getDataMiningStringMessages().empty());
             this.add(headerLabel);
             Image closeImage = new Image(resources.closeIcon());

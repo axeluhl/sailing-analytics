@@ -26,6 +26,7 @@ import com.sap.sailing.polars.datamining.shared.PolarBackendData;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -107,7 +108,7 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResults(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         polarChart.removeAllSeries(false);
         speedChart.removeAllSeries(false);
         angleChart.removeAllSeries(false);
@@ -129,7 +130,6 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                 double[] upwindSpeedOverWindSpeed = aggregation.getUpwindSpeedOverWindSpeed();
                 for (int i = 0; i < 30; i++) {
                     upwindSpeedSeries.addPoint(i, upwindSpeedOverWindSpeed[i], false, false, false);
-
                 }
                 speedChart.addSeries(upwindSpeedSeries, false, false);
             }
@@ -149,7 +149,6 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                 double[] upwindAngleOverWindSpeed = aggregation.getUpwindAngleOverWindSpeed();
                 for (int i = 0; i < 30; i++) {
                     upwindAngleSeries.addPoint(i, upwindAngleOverWindSpeed[i], false, false, false);
-
                 }
                 angleChart.addSeries(upwindAngleSeries, false, false);
             }
@@ -159,7 +158,6 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                 double[] downwindAngleOverWindSpeed = aggregation.getDownwindAngleOverWindSpeed();
                 for (int i = 0; i < 30; i++) {
                     downwindAngleSeries.addPoint(i, downwindAngleOverWindSpeed[i], false, false, false);
-
                 }
                 angleChart.addSeries(downwindAngleSeries, false, false);
             }

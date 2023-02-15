@@ -88,10 +88,28 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String keepChangesChangeLossStrategyName();
     String keepChangesChangeLossStrategyTooltip();
     String applyingQuery();
+    String applyingReport();
     String searchAvailableStatistics();
     String reloadComponents();
     String any();
     String and();
     String followingStatisticsAreNotSupportedByAggregatorWarning();
-    
+    String configureQueryParametersDialog();
+    String parameterType(String typeName);
+    String allValues();
+    String listOfValues();
+    String containsText();
+    String endsWithText();
+    String startsWithText();
+    String itemsMatchingTextConstraint();
+    String selectItemsAvailableForParameter();
+    String apply();
+    String noMatchingValuesOrNoFilter();
+    String filterDimensionValues();
+    String pickOrCreateReportParameter();
+    String pickOrCreateReportParameterMessage();
+    String parameterNamesMustBeUniqueInReport(String name, String typeName);
+    String newParameterName();
+    String parameterNameMustNotBeEmpty();
+    String overwriteExistingReportBySameName(String name);
 }

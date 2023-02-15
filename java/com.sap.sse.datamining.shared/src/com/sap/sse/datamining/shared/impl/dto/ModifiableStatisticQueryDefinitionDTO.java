@@ -111,7 +111,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
 
     @Override
     public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection() {
-        return filterSelection;
+        return new HashMap<>(filterSelection);
     }
     
     public void setFilterSelectionFor(DataRetrieverLevelDTO retrieverLevel, HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection) {
@@ -121,7 +121,6 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         if (levelFilterSelection == null) {
             throw new NullPointerException("The level filter selection mustn't be null");
         }
-        
         filterSelection.put(retrieverLevel, levelFilterSelection);
     }
 
