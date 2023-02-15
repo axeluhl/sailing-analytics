@@ -32,7 +32,6 @@ public interface StringMessages extends Messages {
     String settings();
     String settingsForComponent(String localizedShortName);
     String pleaseSelect();
-
     String sharedSettingsLink();
     String resetToDefault();
     String resetToDefaultInProgress();

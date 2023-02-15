@@ -245,21 +245,28 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                         new DialogCallback<FilterDimensionParameter>() {
                             @Override
                             public void ok(FilterDimensionParameter editedObject) {
-                                parameter = editedObject;
-                                reportParameterBindings.setParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension), editedObject);
-                                GWT.log("New parameter bindings "+reportParameterBindings);
-                                if (Util.contains(reportParametersBeforeDialogShown, editedObject)) {
-                                    GWT.log("Propagating parameter value of "+parameter.getName()+" to "+retrieverLevel+"/"+dimension+": "+editedObject.getValues());
-                                    // the parameter existed before; copy its value set to the current selection:
-                                    parameterValueChanged(editedObject, Collections.emptySet());
+                                if (editedObject == null) {
+                                    if (parameter != null) {
+                                        unbindFromParameter(parameter);
+                                    }
+                                    parameterSettingsButton.setDown(false);
                                 } else {
-                                    GWT.log("Setting parameter value of "+parameter.getName()+" from "+retrieverLevel+"/"+dimension+" to "+selectionModel.getSelectedSet());
-                                    // a new parameter; set the parameter's value to the current selection:
-                                    DimensionFilterSelectionProvider.this.dontPropagateNextSelectionChangeEventToBoundParameter = true;
-                                    parameter.setValues(selectionModel.getSelectedSet());
-                                    dontPropagateNextSelectionChangeEventToBoundParameter = false;
+                                    parameter = editedObject;
+                                    reportParameterBindings.setParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension), editedObject);
+                                    GWT.log("New parameter bindings "+reportParameterBindings);
+                                    if (Util.contains(reportParametersBeforeDialogShown, editedObject)) {
+                                        GWT.log("Propagating parameter value of "+parameter.getName()+" to "+retrieverLevel+"/"+dimension+": "+editedObject.getValues());
+                                        // the parameter existed before; copy its value set to the current selection:
+                                        parameterValueChanged(editedObject, Collections.emptySet());
+                                    } else {
+                                        GWT.log("Setting parameter value of "+parameter.getName()+" from "+retrieverLevel+"/"+dimension+" to "+selectionModel.getSelectedSet());
+                                        // a new parameter; set the parameter's value to the current selection:
+                                        DimensionFilterSelectionProvider.this.dontPropagateNextSelectionChangeEventToBoundParameter = true;
+                                        parameter.setValues(selectionModel.getSelectedSet());
+                                        dontPropagateNextSelectionChangeEventToBoundParameter = false;
+                                    }
+                                    editedObject.addParameterModelListener(DimensionFilterSelectionProvider.this);
                                 }
-                                editedObject.addParameterModelListener(DimensionFilterSelectionProvider.this);
                             }
 
                             @Override
@@ -318,14 +325,15 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         busyIndicator.setBusy(true);
         dataMiningService.getDimensionValuesFor(session, retrieverChainProvider.getDataRetrieverChainDefinition(), retrieverLevel, dimensions,
                 retrieverSettings, filterSelection, LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<HashSet<Object>>(counter) {
-                    @SuppressWarnings("unchecked")
                     @Override
                     protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {
                         final Map<GroupKey, HashSet<Object>> results = result.getResults();
                         final List<Serializable> sortedData = new ArrayList<>();
                         if (!results.isEmpty()) {
                             GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
-                            availableData.addAll((Collection<? extends Serializable>) results.get(contentKey));
+                            @SuppressWarnings("unchecked")
+                            final Collection<? extends Serializable> resultsForContentKey = (Collection<? extends Serializable>) results.get(contentKey);
+                            availableData.addAll(resultsForContentKey);
                             sortedData.addAll(availableData);
                             sortedData.sort((o1, o2) -> NaturalComparator.compare(o1.toString(), o2.toString()));
                         }

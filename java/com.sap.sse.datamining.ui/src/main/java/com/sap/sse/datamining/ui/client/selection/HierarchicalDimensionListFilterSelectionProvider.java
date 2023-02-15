@@ -254,7 +254,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     private void updateFilterDimensions() {
         // Try to retain the selection even if the retriever chain has been null in between
-        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
+        final HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
         if (!currentSelection.isEmpty()) {
             selectionToBeApplied = currentSelection;
             selectionCallback = EmptyApplyCallback;
@@ -535,11 +535,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
 
     @Override
     public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getSelection() {
-        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = new HashMap<>();
-        for (DimensionWithContext dimensionWithContext : dimensionFilterSelectionProviders.keySet()) {
-            DataRetrieverLevelDTO retrieverLevel = dimensionWithContext.getRetrieverLevel();
-            FunctionDTO dimension = dimensionWithContext.getDimension();
-            HashSet<? extends Serializable> dimensionFilterSelection = dimensionFilterSelectionProviders.get(dimensionWithContext).getSelection();
+        final HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = new HashMap<>();
+        for (final DimensionWithContext dimensionWithContext : dimensionFilterSelectionProviders.keySet()) {
+            final DataRetrieverLevelDTO retrieverLevel = dimensionWithContext.getRetrieverLevel();
+            final FunctionDTO dimension = dimensionWithContext.getDimension();
+            final HashSet<? extends Serializable> dimensionFilterSelection = dimensionFilterSelectionProviders.get(dimensionWithContext).getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 HashMap<FunctionDTO, HashSet<? extends Serializable>> retrieverFilterSelection = filterSelection.get(retrieverLevel);
                 if (retrieverFilterSelection == null) {

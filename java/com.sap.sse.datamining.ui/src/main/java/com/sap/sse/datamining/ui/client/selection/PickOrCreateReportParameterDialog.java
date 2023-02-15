@@ -46,9 +46,13 @@ public class PickOrCreateReportParameterDialog extends DataEntryDialog<FilterDim
         @Override
         public String getErrorMessage(FilterDimensionParameter valueToValidate) {
             String result = null;
-            for (final FilterDimensionParameter existingParameter : report.getParameters()) {
-                if (existingParameter != valueToValidate && Util.equalsWithNull(existingParameter.getName(), valueToValidate.getName())) {
-                    result = stringMessages.parameterNamesMustBeUniqueInReport(valueToValidate.getName(), valueToValidate.getTypeName());
+            if (valueToValidate == null) {
+                result = stringMessages.pleaseSelect();
+            } else {
+                for (final FilterDimensionParameter existingParameter : report.getParameters()) {
+                    if (existingParameter != valueToValidate && Util.equalsWithNull(existingParameter.getName(), valueToValidate.getName())) {
+                        result = stringMessages.parameterNamesMustBeUniqueInReport(valueToValidate.getName(), valueToValidate.getTypeName());
+                    }
                 }
             }
             return result;
@@ -195,6 +199,8 @@ public class PickOrCreateReportParameterDialog extends DataEntryDialog<FilterDim
                 parametersAdded.add(newParameter);
                 parametersListBox.addItem(newParameter);
                 parametersListBox.setSelectedIndex(parametersListBox.getItemCount()-1);
+                validateAndUpdate();
+                getOkButton().setFocus(true);
             }
 
             @Override

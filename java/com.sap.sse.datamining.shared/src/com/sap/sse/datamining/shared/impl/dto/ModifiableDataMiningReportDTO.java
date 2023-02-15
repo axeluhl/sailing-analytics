@@ -153,7 +153,9 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
         final List<Pair<StatisticQueryDefinitionDTO, FilterDimensionIdentifier>> result = new ArrayList<>();
         for (final Entry<StatisticQueryDefinitionDTO, HashMap<FilterDimensionIdentifier, FilterDimensionParameter>> e : parameterUsages.entrySet()) {
             for (final FilterDimensionIdentifier f : e.getValue().keySet()) {
-                result.add(new Pair<>(e.getKey(), f));
+                if (e.getValue().get(f) == parameter) {
+                    result.add(new Pair<>(e.getKey(), f));
+                }
             }
         }
         return result;
