@@ -294,7 +294,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
             public Widget get() {
                 currentReport = new StoredDataMiningReportDTOImpl(UUID.randomUUID(), /* name */ null, new ModifiableDataMiningReportDTO());
                 mainPanel = new LayoutPanel();
-                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
+                final DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
                 resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null, /* context */ null,
                         /* drillDownCallback */ groupKey -> {
                             queryDefinitionProvider.drillDown(groupKey, () -> {
@@ -324,7 +324,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                                 queryDefinitionAndReportParameterBindings.getB()));
                 queryRunner = new SimpleQueryRunner(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this,
-                        queryDefinitionProvider, resultsPresenter, /* reportProvider */ DataMiningEntryPoint.this);
+                        settingsControl, queryDefinitionProvider, resultsPresenter, /* reportProvider */ DataMiningEntryPoint.this);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 if (getUserService().hasServerPermission(ServerActions.DATA_MINING)) {
                     StoredDataMiningQueryDataProvider queryProvider = new StoredDataMiningQueryDataProvider(

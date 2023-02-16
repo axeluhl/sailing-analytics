@@ -235,10 +235,12 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         return true;
     }
 
+    @Override
     public void setQueryChangedSinceLastRun(boolean queryChangedSinceLastRun) {
         this.queryChangedSinceLastRun = queryChangedSinceLastRun;
     }
 
+    @Override
     public boolean isQueryChangedSinceLastRun() {
         return queryChangedSinceLastRun;
     }
