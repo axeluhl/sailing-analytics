@@ -32,6 +32,9 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     private HashSet<FilterDimensionParameter> parameters;
     private IdentityHashMap<StatisticQueryDefinitionDTO, HashMap<FilterDimensionIdentifier, FilterDimensionParameter>> parameterUsages;
     
+    @SuppressWarnings("unused") // only to force the type to be instantiable for GWT serialization
+    private ParameterModelListener _serializationDummy = null;
+    
     /**
      * Objects of this type entertain one value change listener for each parameter in {@link #getParameters()} so
      * that when a parameter value changes, all {@link #getQueryDefinitions() queries in this report} using this
