@@ -21,22 +21,17 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Extrac
     private final DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain;
     private final Map<DataRetrieverLevel<?, ?>, SerializableSettings> retrieverSettings;
     private final Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection;
-    
     private final List<Function<?>> dimensionsToGroupBy;
-    
     private final Function<ExtractedType> statisticToCalculate;
     private final AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition;
 
 
     public ModifiableStatisticQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain, Function<ExtractedType> statisticToCalculate, AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition) {
         this.locale = locale;
-        
         this.retrieverChain = retrieverChain;
         retrieverSettings = new HashMap<>();
         filterSelection = new HashMap<>();
-        
         dimensionsToGroupBy = new ArrayList<>();
-        
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorDefinition = aggregatorDefinition;
     }
@@ -104,12 +99,10 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Extrac
         if (!this.filterSelection.containsKey(retrieverLevel)) {
             this.filterSelection.put(retrieverLevel, new HashMap<Function<?>, Collection<?>>());
         }
-        
         this.filterSelection.get(retrieverLevel).put(dimensionToFilterBy, filterSelection);
     }
 
     public void addDimensionToGroupBy(Function<?> dimensionToGroupBy) {
         dimensionsToGroupBy.add(dimensionToGroupBy);
     }
-
 }

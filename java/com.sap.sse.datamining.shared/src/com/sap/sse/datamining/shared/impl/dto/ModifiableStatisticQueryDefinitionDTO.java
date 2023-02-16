@@ -52,6 +52,13 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
      * ModifiableStatisticQueryDefinitionDTO.
      */
     private String localeInfoName;
+
+    /**
+     * Used to record whether this query has changed since last run. When, for example, a parameter change triggers the
+     * modification of this query's dimension filter(s), the flag should be {@link #setQueryChangedSinceLastRun(boolean)
+     * set}. It must be un-set when the query is run.
+     */
+    private transient boolean queryChangedSinceLastRun;
     
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -228,4 +235,13 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         return true;
     }
 
+    @Override
+    public void setQueryChangedSinceLastRun(boolean queryChangedSinceLastRun) {
+        this.queryChangedSinceLastRun = queryChangedSinceLastRun;
+    }
+
+    @Override
+    public boolean isQueryChangedSinceLastRun() {
+        return queryChangedSinceLastRun;
+    }
 }

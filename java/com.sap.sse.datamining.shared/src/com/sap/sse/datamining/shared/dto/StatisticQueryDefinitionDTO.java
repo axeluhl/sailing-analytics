@@ -60,4 +60,7 @@ public interface StatisticQueryDefinitionDTO extends Serializable {
      */
     String getLocaleInfoName();
 
+    boolean isQueryChangedSinceLastRun();
+    
+    void setQueryChangedSinceLastRun(boolean queryChangedSinceLastRun);
 }

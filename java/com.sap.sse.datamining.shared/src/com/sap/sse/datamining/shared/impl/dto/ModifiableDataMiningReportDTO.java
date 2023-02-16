@@ -105,6 +105,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
             if (selectionForRetrieverLevel != null) {
                 selectionForRetrieverLevel.put(usage.getB().getDimensionFunction(), createHashSetFromIterable(parameter.getValues()));
                 query.setFilterSelectionFor(retrieverLevel, selectionForRetrieverLevel);
+                query.setQueryChangedSinceLastRun(true);
             }
         }
     }
@@ -130,6 +131,8 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
     /**
      * Removes the query definition from this reports (searched by its identity, not equality) and adjusts the
      * {@link #parameterUsages} accordingly, removing all usages within the query removed.
+     * 
+     * @param queryDefinition handled by identity, not equality.
      */
     @Override
     public int removeQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {

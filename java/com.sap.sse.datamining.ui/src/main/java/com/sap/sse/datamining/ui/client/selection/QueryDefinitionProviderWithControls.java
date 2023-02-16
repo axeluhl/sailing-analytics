@@ -133,7 +133,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, DataMiningServiceAsync dataMiningService, ReportProvider reportProvider,
             ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
-            DataMiningSettingsInfoManager settingsManager, Consumer<Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings>> queryRunner) {
+            DataMiningSettingsInfoManager settingsManager, Consumer<Pair<ModifiableStatisticQueryDefinitionDTO,
+            ReportParameterToDimensionFilterBindings>> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
         this.reportProvider = reportProvider;
         this.reportParameterBindings = new ReportParameterToDimensionFilterBindings();
