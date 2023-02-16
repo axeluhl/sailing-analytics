@@ -24,6 +24,7 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -59,10 +60,7 @@ import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
-import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.ReportProvider;
-import com.sap.sse.datamining.ui.client.execution.ManagedDataMiningQueryCallback;
-import com.sap.sse.datamining.ui.client.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
 import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -90,7 +88,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final DataMiningSession session;
-    private final ManagedDataMiningQueriesCounter counter;
     private final Set<FilterSelectionChangedListener> listeners;
 
     private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
@@ -160,7 +157,6 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         this.dimension = dimension;
         this.reportParameterBindings = reportParameterBindings;
         this.reportProvider = reportProvider;
-        counter = new SimpleManagedDataMiningQueriesCounter();
         listeners = new HashSet<>();
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
         dataGrid = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
@@ -320,13 +316,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         final HashSet<FunctionDTO> dimensions = new HashSet<>();
         dimensions.add(dimension);
         availableData.clear();
-        counter.increase();
         contentContainer.remove(dataGrid);
         busyIndicator.setBusy(true);
         dataMiningService.getDimensionValuesFor(session, retrieverChainProvider.getDataRetrieverChainDefinition(), retrieverLevel, dimensions,
-                retrieverSettings, filterSelection, LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<HashSet<Object>>(counter) {
+                retrieverSettings, filterSelection, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<HashSet<Object>>>() {
                     @Override
-                    protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {
+                    public void onSuccess(QueryResultDTO<HashSet<Object>> result) {
                         final Map<GroupKey, HashSet<Object>> results = result.getResults();
                         final List<Serializable> sortedData = new ArrayList<>();
                         if (!results.isEmpty()) {
@@ -348,8 +343,9 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                             callback.run();
                         }
                     }
+                    
                     @Override
-                    protected void handleFailure(Throwable caught) {
+                    public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error fetching the dimension values of " + dimension + ": " + caught.getMessage());
                         selectionToBeApplied = null;
                         selectionCallback = null;
