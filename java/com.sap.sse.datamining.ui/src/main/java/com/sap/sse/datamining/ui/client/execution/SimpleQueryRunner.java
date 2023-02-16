@@ -1,11 +1,17 @@
 package com.sap.sse.datamining.ui.client.execution;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,10 +28,12 @@ import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.QueryRunner;
 import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettings;
+import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettings.OtherChangedQueriesRunStrategy;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -89,11 +97,10 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     
     private final Button runButton;
 
-
     public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            QueryDefinitionProvider<?> queryDefinitionProvider, CompositeResultsPresenter<?> resultsPresenter,
-            ReportProvider reportProvider) {
+            DataMiningSettingsControl settingsControl, QueryDefinitionProvider<?> queryDefinitionProvider,
+            CompositeResultsPresenter<?> resultsPresenter, ReportProvider reportProvider) {
         super(parent, context);
         this.session = session;
         this.dataMiningService = dataMiningService;
@@ -108,9 +115,27 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                final Map<String, StatisticQueryDefinitionDTO> otherChangedQueriesToAlsoRunInBackground;
+                if (settings.getOtherChangedQueriesRunStrategy() == OtherChangedQueriesRunStrategy.NO) {
+                    otherChangedQueriesToAlsoRunInBackground = Collections.emptyMap();
+                } else {
+                    final Map<String, StatisticQueryDefinitionDTO> otherQueriesAlsoModifiedWithPresenterId = getOtherQueriesAlsoModifiedWithPresenterId();
+                    if (!otherQueriesAlsoModifiedWithPresenterId.isEmpty()
+                            && (settings.getOtherChangedQueriesRunStrategy() == OtherChangedQueriesRunStrategy.AUTOMATICALLY
+                                || (settings.getOtherChangedQueriesRunStrategy() == OtherChangedQueriesRunStrategy.ASK &&
+                                        Window.confirm(getDataMiningStringMessages().runOtherChangedQueriesInBackground())))) {
+                            otherChangedQueriesToAlsoRunInBackground = otherQueriesAlsoModifiedWithPresenterId;
+                    } else {
+                        otherChangedQueriesToAlsoRunInBackground = Collections.emptyMap();
+                    }
+                }
                 final Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> queryDefinitionAndParameterBindings = queryDefinitionProvider
                         .getQueryDefinitionAndReportParameterBinding();
                 run(queryDefinitionAndParameterBindings.getA(), queryDefinitionAndParameterBindings.getB());
+                for (final Entry<String, StatisticQueryDefinitionDTO> e : otherChangedQueriesToAlsoRunInBackground.entrySet()) {
+                    GWT.log("Running query for presenter "+e.getKey()+" in the background");
+                    runQueryAndShowResultsOrErrors(e.getValue(), /* presenter ID */ e.getKey());
+                }
             }
         });
         queryReleaseTimer = new Timer() {
@@ -121,17 +146,41 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
                 SimpleQueryRunner.this.run(queryDefinitionAndParameterBindings.getA(), queryDefinitionAndParameterBindings.getB());
             }
         };
+        settingsControl.addSettingsComponent(this);
         queryDefinitionChanged(queryDefinitionProvider.getQueryDefinition());
+    }
+    
+    /**
+     * Queries other than the one from the {@link CompositeResultsPresenter#getCurrentPresenterId() current presenter}
+     * may also have changed, e.g., due to a parameter value set change that impacts their dimension filtering. The user
+     * may want to run those queries in the background and already replace those presenters' contents if one query is
+     * run.
+     */
+    private Map<String, StatisticQueryDefinitionDTO> getOtherQueriesAlsoModifiedWithPresenterId() {
+        final Map<String, StatisticQueryDefinitionDTO> result = new HashMap<>();
+        for (final String presenterId : resultsPresenter.getPresenterIds()) {
+            if (!presenterId.equals(resultsPresenter.getCurrentPresenterId()) &&
+                    resultsPresenter.getQueryDefinition(presenterId).isQueryChangedSinceLastRun()) {
+                result.put(presenterId, resultsPresenter.getQueryDefinition(presenterId));
+            }
+        }
+        return result;
     }
 
     @Override
     public void run(ModifiableStatisticQueryDefinitionDTO queryDefinition, ReportParameterToDimensionFilterBindings reportParameterBindings) {
-        final Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         final String presenterId = resultsPresenter.getCurrentPresenterId();
         final StatisticQueryDefinitionDTO oldPresenterQuery = resultsPresenter.getCurrentQueryDefinition();
         reportProvider.getCurrentReport().getReport().replaceQueryDefinition(oldPresenterQuery, queryDefinition, reportParameterBindings);
+        runQueryAndShowResultsOrErrors(queryDefinition, presenterId);
+    }
+
+    private void runQueryAndShowResultsOrErrors(StatisticQueryDefinitionDTO queryDefinition,
+            final String presenterId) {
+        final Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             resultsPresenter.showBusyIndicator(presenterId);
+            queryDefinition.setQueryChangedSinceLastRun(false);
             dataMiningService.runQuery(session, (ModifiableStatisticQueryDefinitionDTO) queryDefinition,
                     new AsyncCallback<QueryResultDTO<Serializable>>() {
                         @Override
@@ -142,7 +191,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error running the query: " + caught.getMessage());
+                            errorReporter.reportError(getDataMiningStringMessages().errorRunningDataMiningQuery() + ": " + caught.getMessage());
                             resultsPresenter.showError(presenterId, // this also clears the query in the result presenter
                                     queryDefinition, getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
                         }
@@ -154,9 +203,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
 
     @Override
     public void updateSettings(QueryRunnerSettings newSettings) {
-        if (settings.isRunAutomatically() != newSettings.isRunAutomatically()) {
-            settings = newSettings;
-        }
+        settings = newSettings;
     }
 
     @Override
