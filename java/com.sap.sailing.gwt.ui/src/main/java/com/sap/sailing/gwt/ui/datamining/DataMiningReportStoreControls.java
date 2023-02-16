@@ -178,24 +178,27 @@ public class DataMiningReportStoreControls extends Composite {
     }
 
     private StoredDataMiningReportDTO applyReport(StoredDataMiningReportDTO storedReport) {
-        showBusyIndicator(true);
-        final DataMiningReportDTO report = storedReport.getReport();
-        reportProvider.setCurrentReport(storedReport);
-        final Iterable<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
-        final SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
-        executor.run(results -> {
-            resultsPresenter.showResults(results);
-            showBusyIndicator(false);
-            if (!executor.hasErrorOccurred()) {
-                Notification.notify(
-                        StringMessages.INSTANCE.dataMiningStoredReportLoadedSuccessful(storedReport.getName()),
-                        NotificationType.SUCCESS);
-            } else {
-                Notification.notify(
-                        StringMessages.INSTANCE.dataMiningStoredReportLoadedWithErrors(storedReport.getName()),
-                        NotificationType.WARNING);
-            }
-        });
+        if (!Util.stream(resultsPresenter.getPresenterIds()).map(presenterId->resultsPresenter.getQueryDefinition(presenterId)).anyMatch(queryDefinition->queryDefinition != null) ||
+            Window.confirm(StringMessages.INSTANCE.isItOkToReplaceAllTabsWithQueriesByReport())) {
+            showBusyIndicator(true);
+            final DataMiningReportDTO report = storedReport.getReport();
+            reportProvider.setCurrentReport(storedReport);
+            final Iterable<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
+            final SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
+            executor.run(results -> {
+                resultsPresenter.showResults(results);
+                showBusyIndicator(false);
+                if (!executor.hasErrorOccurred()) {
+                    Notification.notify(
+                            StringMessages.INSTANCE.dataMiningStoredReportLoadedSuccessful(storedReport.getName()),
+                            NotificationType.SUCCESS);
+                } else {
+                    Notification.notify(
+                            StringMessages.INSTANCE.dataMiningStoredReportLoadedWithErrors(storedReport.getName()),
+                            NotificationType.WARNING);
+                }
+            });
+        }
         return storedReport;
     }
     

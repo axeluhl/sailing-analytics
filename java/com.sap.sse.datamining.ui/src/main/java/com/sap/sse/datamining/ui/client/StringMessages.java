@@ -112,4 +112,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String newParameterName();
     String parameterNameMustNotBeEmpty();
     String overwriteExistingReportBySameName(String name);
+    String isItOkToReplaceAllTabsWithQueriesByReport();
 }
