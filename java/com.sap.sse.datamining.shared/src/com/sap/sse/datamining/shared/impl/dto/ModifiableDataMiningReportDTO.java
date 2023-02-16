@@ -105,6 +105,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
             if (selectionForRetrieverLevel != null) {
                 selectionForRetrieverLevel.put(usage.getB().getDimensionFunction(), createHashSetFromIterable(parameter.getValues()));
                 query.setFilterSelectionFor(retrieverLevel, selectionForRetrieverLevel);
+                query.setQueryChangedSinceLastRun(true);
             }
         }
     }
