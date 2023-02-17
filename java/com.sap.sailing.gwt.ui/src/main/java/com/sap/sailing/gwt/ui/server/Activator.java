@@ -38,5 +38,4 @@ public class Activator implements BundleActivator {
     public void setSailingService(SailingServiceImpl sailingServiceImpl) {
         sailingServiceToStopWhenStopping = sailingServiceImpl;
     }
-
 }
