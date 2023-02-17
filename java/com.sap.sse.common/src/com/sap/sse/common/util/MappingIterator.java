@@ -6,6 +6,7 @@ public class MappingIterator<S, T> implements Iterator<T> {
     private final Iterator<S> iterator;
     private final MapFunction<S, T> mapper;
     
+    @FunctionalInterface
     public static interface MapFunction<S, T> {
         T map(S s);
     }

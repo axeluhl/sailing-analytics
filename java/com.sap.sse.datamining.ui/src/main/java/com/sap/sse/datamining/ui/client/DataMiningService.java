@@ -21,6 +21,7 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
 
 public interface DataMiningService extends RemoteService {
 
@@ -72,9 +73,11 @@ public interface DataMiningService extends RemoteService {
     ModifiableStatisticQueryDefinitionDTO localize(ModifiableStatisticQueryDefinitionDTO queryDefinition,
             String localeInfoName) throws UnauthorizedException;
 
-    SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() throws UnauthorizedException;
-
     ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() throws UnauthorizedException;
 
+    ArrayList<StoredDataMiningReportDTOImpl> retrieveStoredReports() throws UnauthorizedException;
+
     ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) throws UnauthorizedException;
+
+    SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() throws UnauthorizedException;
 }

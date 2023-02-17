@@ -3,6 +3,7 @@ package com.sap.sse.datamining.ui.client;
 import java.util.function.Consumer;
 
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 
@@ -23,6 +24,10 @@ public interface DataMiningComponentProvider<SettingsType extends Settings> exte
 
     void reloadComponents();
 
+    /**
+     * The transient model for {@link ReportParameterToDimensionFilterBindings} held by this instance
+     * is expected to have been updated to the new {@code queryDefinition} <em>before</em> invoking this
+     * method.
+     */
     void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback);
-
 }

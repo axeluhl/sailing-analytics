@@ -130,7 +130,7 @@
             <div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
                 <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
                    <g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" 
-                           visible="false">
+                           visible="false" debugId="mediaAddButton">
                    </g:Button>
                 </div>
             </div>

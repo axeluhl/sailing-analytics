@@ -37,6 +37,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 
 /**
  * The UI form to upload data for expedition all in one import.
@@ -149,7 +150,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         formPanel.addSubmitCompleteHandler(event -> {
             validation.run();
             busyIndicator.setBusy(false);
-            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
+            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(FileUploadUtil.getApplicationJsonContent(event));
             if (response == null) {
                 Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {

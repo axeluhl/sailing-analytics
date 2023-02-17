@@ -27,7 +27,7 @@ public enum MediaTagConstants {
     public static final Iterable<String> videoTagSuggestions = Arrays.asList(new String[] { BIGSCREEN.getName(),
             LIVESTREAM.getName(), HIGHLIGHT.getName(), FEATURED.getName(), STAGE.getName() });
     public static final Set<MimeType> SUPPORTED_VIDEO_TYPES = new HashSet<>(Arrays.asList(MimeType.youtube,
-            MimeType.vimeo, MimeType.mp4, MimeType.mp4panorama, MimeType.mp4panoramaflip, MimeType.qt));
+            MimeType.vimeo, MimeType.mp4, MimeType.mp4panorama, MimeType.mp4panoramaflip, MimeType.mov, MimeType.qt));
 
     private MediaTagConstants(String name, int minWidth, int maxWidth, int minHeight, int maxHeight) {
         this.name = name;

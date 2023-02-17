@@ -13,4 +13,4 @@ RUN wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-
  && /opt/sapjvm_8/bin/keytool -importcert -alias AWSRDS -file /tmp/rds.pem -keystore /opt/sapjvm_8/jre/lib/security/cacerts -noprompt -storepass changeit \
  && rm /tmp/rds.pem
 RUN wget -O /home/sailing/WindEstimationModelsTraining.jar https://static.sapsailing.com/WindEstimationModelsTraining.jar
-CMD exec java "${MEMORY}" -Dmongo.uri="${MONGODB_URI}" -jar WindEstimationModelsTraining.jar "${BEARER_TOKEN}" ${TRAINING_DATA_PERCENT}
+CMD exec java "${MEMORY}" -Dmongo.uri="${MONGODB_URI}" -XX:UseParallelGC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=dump/ -Xlog:gc*=info,gc+region*=info,gc+ergo*=info,gc+humongous*=info,gc+liveness=trace:file=logs/gc.log:time,level,tags:filecount=10,filesize=100000000 -jar WindEstimationModelsTraining.jar "${BEARER_TOKEN}" ${TRAINING_DATA_PERCENT}

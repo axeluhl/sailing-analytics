@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractJsonHttpServlet extends SailingServerHttpServlet {
-
     protected void setJsonResponseHeader(HttpServletResponse resp) {
         // to allow access to the json document directly from a client side javascript
         resp.setHeader("Access-Control-Allow-Origin", "*");

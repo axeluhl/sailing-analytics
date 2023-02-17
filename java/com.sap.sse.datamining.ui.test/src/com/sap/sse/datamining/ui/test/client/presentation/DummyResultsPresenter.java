@@ -80,7 +80,7 @@ public class DummyResultsPresenter extends AbstractResultsPresenter<Settings> {
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResults(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
     }
 
 }

@@ -8,22 +8,21 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoEditDialog extends VideoDialog {
-    public VideoEditDialog(VideoDTO video, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
-        super(video.getCreatedAtDate(), new VideoParameterValidator(stringMessages), stringMessages, storageServiceAvailable, callback);
+    public VideoEditDialog(VideoDTO video, StringMessages stringMessages,
+            FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<VideoDTO>> callback) {
+        super(video.getCreatedAtDate(), new VideoParameterValidator(stringMessages), stringMessages,
+                storageServiceAvailable, callback);
         createdAtLabel = new Label(video.getCreatedAtDate().toString());
-        videoURLAndUploadComposite.setURL(video.getSourceRef());
-        titleTextBox = createTextBox(video.getTitle());
-        titleTextBox.setVisibleLength(50);
+        videoURLAndUploadComposite.setUri(video.getSourceRef());
         subtitleTextBox = createTextBox(video.getSubtitle());
         subtitleTextBox.setVisibleLength(50);
         copyrightTextBox = createTextBox(video.getCopyright());
         copyrightTextBox.setVisibleLength(50);
-        lengthIntegerBox = createIntegerBox(video.getLengthInSeconds(), 10);
         List<String> tags = new ArrayList<String>();
         tags.addAll(video.getTags());
         tagsListEditor.setValue(tags);
-        setSelectedMimeType(video.getMimeType());
         setSelectedLocale(video.getLocale());
-        thumbnailURLAndUploadComposite.setURL(video.getThumbnailRef());
+        thumbnailURLAndUploadComposite.setUri(video.getThumbnailRef());
+        initVideoTmpDatas(video.getSourceRef(), video.getTitle(), video.getLengthInSeconds(), video.getMimeType());
     }
 }

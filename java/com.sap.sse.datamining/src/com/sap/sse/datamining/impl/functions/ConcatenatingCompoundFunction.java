@@ -30,9 +30,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     public ConcatenatingCompoundFunction(List<Function<?>> functions, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isLastFunctionADimension(functions));
         checkThatReturnTypesMatch(functions, returnType);
-        
         this.functions = new ArrayList<>(functions);
-        
         simpleName = buildSimpleName();
         ordinal = calculateOrdinal();
     }

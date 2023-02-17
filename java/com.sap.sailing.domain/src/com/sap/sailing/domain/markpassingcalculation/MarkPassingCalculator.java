@@ -561,45 +561,57 @@ public class MarkPassingCalculator {
      */
     public void resume() {
         logger.finest("Resumed MarkPassingCalculator");
-        synchronized (this) {
-            final MarkPassingRaceFingerprint fingerprint;
-            if (markPassingRaceFingerprintRegistry != null) {
-                fingerprint = markPassingRaceFingerprintRegistry.getMarkPassingRaceFingerprint(race.getRaceIdentifier());
-            } else {
-                fingerprint = null;
-            }
-            if (fingerprint != null && fingerprint.matches(race)) {
-                logger.info("Found stored set of mark passings for race "+race.getName()+" with matching fingerprint; loading instead of computing...");
-                // found a set of mark passings stored in the registry where the race fingerprint at the time of their
-                // creation matches that of this mark passing calculator's race; load instead of compute
-                updateMarkPassingsFromRegistry();
-                queue.clear();
-                suspended = false;
-            } else {
-                suspended = false;
-                enqueueUpdate(new StorePositionUpdateStrategy() {
-                    @Override
-                    public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
-                            Map<Competitor, List<GPSFixMoving>> competitorFixesThatReplacedExistingOnes,
-                            Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints,
-                            List<Waypoint> removedWaypoints, IntHolder smallestChangedWaypointIndex,
-                            List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-                            List<Pair<Competitor, Integer>> removedMarkPassings,
-                            List<Pair<Competitor, Integer>> suppressedMarkPassings,
-                            List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder,
-                            CandidateChooser candidateChooser) {
-                    }
-                });
+        // The course lock must be obtained before synchronizing on the MarkPassingCalculator; see bug5803.
+        // The fingerprint.matches(race) call below may need the course read lock, but under the course write
+        // lock in CourseImpl.addWaypoint and the subsequent listener chain a synchronized call to this object's
+        // enqueueUpdate for the waypoint addition will be required, so in order to avoid a deadlock, the order
+        // always must be:
+        //  1. course lock
+        //  2. synchronize on MarkPassingCalculator
+        race.getRace().getCourse().lockForRead();
+        try {
+            synchronized (this) {
+                final MarkPassingRaceFingerprint fingerprint;
                 if (markPassingRaceFingerprintRegistry != null) {
-                    new Thread(()->{
-                        final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = race.getMarkPassings(/* waitForLatestUpdates */ true);
-                        markPassingRaceFingerprintRegistry.storeMarkPassings(race.getRaceIdentifier(),
-                                MarkPassingRaceFingerprintFactory.INSTANCE.createFingerprint(race),
-                                markPassings, race.getRace().getCourse());
-                    }, "Waiting for mark passings for "+race.getName()+" after having resumed to store the results in registry")
-                    .start();
+                    fingerprint = markPassingRaceFingerprintRegistry.getMarkPassingRaceFingerprint(race.getRaceIdentifier());
+                } else {
+                    fingerprint = null;
+                }
+                if (fingerprint != null && fingerprint.matches(race)) { // fingerprint.matches(...) may need to hash the waypoints, requiring the CourseImpl's read lock
+                    logger.info("Found stored set of mark passings for race "+race.getName()+" with matching fingerprint; loading instead of computing...");
+                    // found a set of mark passings stored in the registry where the race fingerprint at the time of their
+                    // creation matches that of this mark passing calculator's race; load instead of compute
+                    updateMarkPassingsFromRegistry();
+                    queue.clear();
+                    suspended = false;
+                } else {
+                    suspended = false;
+                    enqueueUpdate(new StorePositionUpdateStrategy() {
+                        @Override
+                        public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
+                                Map<Competitor, List<GPSFixMoving>> competitorFixesThatReplacedExistingOnes,
+                                Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints,
+                                List<Waypoint> removedWaypoints, IntHolder smallestChangedWaypointIndex,
+                                List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                                List<Pair<Competitor, Integer>> removedMarkPassings,
+                                List<Pair<Competitor, Integer>> suppressedMarkPassings,
+                                List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder,
+                                CandidateChooser candidateChooser) {
+                        }
+                    });
+                    if (markPassingRaceFingerprintRegistry != null) {
+                        new Thread(()->{
+                            final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = race.getMarkPassings(/* waitForLatestUpdates */ true);
+                            markPassingRaceFingerprintRegistry.storeMarkPassings(race.getRaceIdentifier(),
+                                    MarkPassingRaceFingerprintFactory.INSTANCE.createFingerprint(race),
+                                    markPassings, race.getRace().getCourse());
+                        }, "Waiting for mark passings for "+race.getName()+" after having resumed to store the results in registry")
+                        .start();
+                    }
                 }
             }
+        } finally {
+            race.getRace().getCourse().unlockAfterRead();
         }
     }
 
@@ -615,19 +627,17 @@ public class MarkPassingCalculator {
     }
 
     // protected for test case access
-    protected void enqueueUpdate(StorePositionUpdateStrategy update) {
-        synchronized (this) {
-            queue.add(update);
-            // regardless of whether the queue is empty or not, launch the thread if it doesn't run yet and we are not
-            // suspended;
-            // the queue may have filled up while we were suspended
-            if (!suspended) {
-                if (listenerThread == null) {
-                    listenerThread = createAndStartListenerThread();
-                } else if (listenerThread.getState() == State.TERMINATED) {
-                    logger.severe("Listener thread of MarkPassingCalculator (MPC) for race " + race.getRace().getName()
-                            + " terminated but not null. Why are we still receiving updates? We must have been stopped before!");
-                }
+    protected synchronized void enqueueUpdate(StorePositionUpdateStrategy update) {
+        queue.add(update);
+        // regardless of whether the queue is empty or not, launch the thread if it doesn't run yet and we are not
+        // suspended;
+        // the queue may have filled up while we were suspended
+        if (!suspended) {
+            if (listenerThread == null) {
+                listenerThread = createAndStartListenerThread();
+            } else if (listenerThread.getState() == State.TERMINATED) {
+                logger.severe("Listener thread of MarkPassingCalculator (MPC) for race " + race.getRace().getName()
+                        + " terminated but not null. Why are we still receiving updates? We must have been stopped before!");
             }
         }
     }

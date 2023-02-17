@@ -12,6 +12,7 @@ public class GenericListBox<T> extends ListBox implements TakesValue<T> {
     private final List<T> items;
     private final ValueBuilder<T> valueBuilder;
     
+    @FunctionalInterface
     public interface ValueBuilder<T> {
         String getValue(T item);
     }

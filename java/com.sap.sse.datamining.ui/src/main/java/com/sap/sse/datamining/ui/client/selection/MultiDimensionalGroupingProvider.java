@@ -310,7 +310,6 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             clearDimensionBoxes();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
-            
             setSelectedDimensions(dimensionsToSelect, dimensionMatcher, selectionCallback);
             dimensionsToSelect = null;
             dimensionMatcher = null;

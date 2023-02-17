@@ -29,9 +29,9 @@
     </iu>
 
     <!-- multiple Plugins needed for the development -->
-    <iu id='com.gwtplugins.eclipse.suite.v3.feature.feature.group' name='GWT EclipFse Plugin' version='3.0.0.201710131939'>
+    <iu id='com.gwtplugins.eclipse.suite.v3.feature.feature.group' name='GWT EclipFse Plugin' version='3.0.0.202301181602'>
       <repositories size='1'>
-        <repository location='http://storage.googleapis.com/gwt-eclipse-plugin/v3/release'/>
+        <repository location='https://eclipse.gwtproject.org.vertispan.com/2023-01-18'/>
       </repositories>
     </iu>
     <iu id='com.oracle.jmc.feature.ide.feature.group' name='Oracle Java Mission Control IDE Integration'>
