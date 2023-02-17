@@ -1,32 +1,31 @@
-package com.sap.sse.datamining.shared;
+package com.sap.sse.serialization;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Base64Utils;
-import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
 import com.sap.sse.shared.classloading.JoinedClassLoader;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
-/** Static class to (de)serialize {@link DataMiningReportDTO} from/to base64 strings. */
-public final class DataMiningReportSerializer {
+/**
+ * Static class to (de)serialize {@link Serializable} objects from/to base64 strings.
+ */
+public class Base64SerializerDeserializer {
+    private static final Logger LOG = Logger.getLogger(Base64SerializerDeserializer.class.getName());
 
-    private static final Logger LOG = Logger.getLogger(DataMiningReportSerializer.class.getName());
-    private DataMiningReportSerializer() {
-    }
-
-    /** @return the {@link DataMiningReportDTO} as a base64 string serialized with java serialization */
-    public static String reportToBase64(final DataMiningReportDTO dto) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    /** @return the {@code T} as a base64 string serialized with java serialization */
+    public static <T extends Serializable> String toBase64(final T dto) {
+        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try (ObjectOutputStream out = new ObjectOutputStream(stream)) {
             out.writeObject(dto);
-            byte[] bytes = stream.toByteArray();
+            final byte[] bytes = stream.toByteArray();
             return Base64Utils.toBase64(bytes);
         } catch (IOException e) {
             LOG.warning("Could not serialize report: " + e.getMessage());
@@ -34,9 +33,9 @@ public final class DataMiningReportSerializer {
         return "";
     }
 
-    /** @return the {@link DataMiningReportDTO} from a base 64 string deserialized with java serialization */
-    public static DataMiningReportDTO reportFromBase64(final String data, final JoinedClassLoader classLoader) {
-        byte[] bytes;
+    /** @return the {@code T} from a base 64 string deserialized with java serialization */
+    public static <T extends Serializable> T fromBase64(final String data, final JoinedClassLoader classLoader) {
+        final byte[] bytes;
         try {
             bytes = Base64Utils.fromBase64(data);
         } catch (IllegalArgumentException e) {
@@ -46,11 +45,11 @@ public final class DataMiningReportSerializer {
         Thread.currentThread().setContextClassLoader(classLoader);
         try (final ObjectInputStream in = new ObjectInputStreamResolvingAgainstCache<Object>(
                 new ByteArrayInputStream(bytes), /* dummy "cache" */ new Object(), /* resolve listener */ null,
-                /* classLoaderCache */ new HashMap<>()) {}) {
-            Object object = in.readObject();
-            if (object instanceof DataMiningReportDTO) {
-                return (DataMiningReportDTO) object;
-            }
+                /* classLoaderCache */ new HashMap<>()) {
+        }) {
+            @SuppressWarnings("unchecked")
+            final T object = (T) in.readObject();
+            return object;
         } catch (IOException | ClassNotFoundException e) {
             LOG.log(Level.SEVERE, "Could not deserialize report", e);
         } finally {
