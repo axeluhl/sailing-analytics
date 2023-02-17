@@ -184,20 +184,22 @@ public class DataMiningReportStoreControls extends Composite {
             final DataMiningReportDTO report = storedReport.getReport();
             reportProvider.setCurrentReport(storedReport);
             final Iterable<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
-            final SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
-            executor.run(results -> {
-                resultsPresenter.showResults(results);
-                showBusyIndicator(false);
-                if (!executor.hasErrorOccurred()) {
-                    Notification.notify(
-                            StringMessages.INSTANCE.dataMiningStoredReportLoadedSuccessful(storedReport.getName()),
-                            NotificationType.SUCCESS);
-                } else {
-                    Notification.notify(
-                            StringMessages.INSTANCE.dataMiningStoredReportLoadedWithErrors(storedReport.getName()),
-                            NotificationType.WARNING);
-                }
-            });
+            if (!Util.isEmpty(reportQueries)) {
+                final SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
+                executor.run(results -> {
+                    resultsPresenter.showResults(results);
+                    showBusyIndicator(false);
+                    if (!executor.hasErrorOccurred()) {
+                        Notification.notify(
+                                StringMessages.INSTANCE.dataMiningStoredReportLoadedSuccessful(storedReport.getName()),
+                                NotificationType.SUCCESS);
+                    } else {
+                        Notification.notify(
+                                StringMessages.INSTANCE.dataMiningStoredReportLoadedWithErrors(storedReport.getName()),
+                                NotificationType.WARNING);
+                    }
+                });
+            }
         }
         return storedReport;
     }
@@ -226,7 +228,13 @@ public class DataMiningReportStoreControls extends Composite {
         private boolean errorOccurred = false;
         private Consumer<Collection<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>>> callback;
 
+        /**
+         * @param queryDefinitions must contain at least one query
+         */
         public SequentialQueryExecutor(Iterable<StatisticQueryDefinitionDTO> queryDefinitions) {
+            if (Util.isEmpty(queryDefinitions)) {
+                throw new IllegalArgumentException("SequentialQueryExecutor expects at least one query");
+            }
             this.queryDefinitions = new ArrayList<>();
             Util.addAll(queryDefinitions, this.queryDefinitions);
         }

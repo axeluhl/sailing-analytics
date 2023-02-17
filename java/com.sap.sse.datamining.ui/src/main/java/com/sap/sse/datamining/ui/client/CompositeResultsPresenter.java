@@ -99,7 +99,12 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
     
     /**
      * Display the given query result pairs. Any results that are currently displayed will be overridden and additional
-     * child presenters will be created if necessary.
+     * child presenters will be created if necessary. No {@link CurrentPresenterChangedListener} or
+     * {@link PresenterRemovedListener} registered through
+     * {@link #addCurrentPresenterChangedListener(CurrentPresenterChangedListener)} and
+     * {@link #addPresenterRemovedListener(PresenterRemovedListener)}, respectively, will be notified by calling this
+     * method. It is assumed that the caller is entirely replacing all results at once and not incrementally
+     * manipulating, e.g., a report.
      * 
      * @param results
      *            The query result pairs to display
