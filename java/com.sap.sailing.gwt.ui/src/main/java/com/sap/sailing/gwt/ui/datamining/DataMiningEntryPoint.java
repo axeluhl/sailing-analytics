@@ -312,7 +312,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                 });
                 // removing a tab from the result presenter shall remove its query from the current report
                 resultsPresenter.addPresenterRemovedListener((String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition) -> {
-                    if (queryDefinition != null) {
+                    if (queryDefinition != null && currentReport != null && currentReport.getReport() != null) {
                         currentReport.getReport().removeQueryDefinition(queryDefinition);
                     }
                 });

@@ -162,8 +162,7 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     
     @Override
     public void showResults(Iterable<Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>>> results) {
-        // TODO bug4789: should we check for changes in the tabs before removing them?
-        new ArrayList<>(tabsMappedById.keySet()).stream().map(tabsMappedById::get).forEach(this::removeTab);
+        new ArrayList<>(tabsMappedById.keySet()).stream().map(tabsMappedById::get).forEach(this::removeTabNotNotifyingListeners);
         for (final Pair<StatisticQueryDefinitionDTO, QueryResultDTO<?>> entry : results) {
             final StatisticQueryDefinitionDTO queryDefinition = entry.getA();
             final QueryResultDTO<?> result = entry.getB();
@@ -272,13 +271,23 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         tabPanel.scrollToTab(presenterIndex);
         return presenterTab;
     }
+    
+    protected void removeTabNotNotifyingListeners(CloseablePresenterTab tab) {
+        removeTab(tab, /* notifyListeners */ false);
+    }
 
     protected void removeTab(CloseablePresenterTab tab) {
+        removeTab(tab, /* notifyListeners */ true);
+    }
+
+    protected void removeTab(CloseablePresenterTab tab, boolean notifyListeners) {
         String presenterId = tab.getId();
         int index = getPresenterIndex(presenterId);
         tab.removeFromParent();
         tabsMappedById.remove(presenterId);
-        this.presenterRemovedListeners.forEach(l -> l.onPresenterRemoved(presenterId, index, tab.getPresenter().getCurrentQueryDefinition()));
+        if (notifyListeners) {
+            this.presenterRemovedListeners.forEach(l -> l.onPresenterRemoved(presenterId, index, tab.getPresenter().getCurrentQueryDefinition()));
+        }
     }
 
     @Override
