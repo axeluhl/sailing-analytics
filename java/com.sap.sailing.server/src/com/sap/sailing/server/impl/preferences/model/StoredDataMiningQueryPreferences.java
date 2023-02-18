@@ -13,7 +13,7 @@ public class StoredDataMiningQueryPreferences extends AbstractGenericSerializabl
 
     @Override
     protected void addChildSettings() {
-        storedQueries = new SettingsList<>("storedQueries", this, () -> new StoredDataMiningQueryPreference());
+        storedQueries = new SettingsList<>("storedQueries", this, StoredDataMiningQueryPreference::new);
     }
 
     public Iterable<StoredDataMiningQueryPreference> getStoredQueries() {
