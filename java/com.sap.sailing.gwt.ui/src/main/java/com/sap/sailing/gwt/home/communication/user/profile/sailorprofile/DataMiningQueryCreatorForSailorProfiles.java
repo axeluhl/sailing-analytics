@@ -13,7 +13,6 @@ import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Distance;
-import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -21,6 +20,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
+import com.sap.sse.serialization.Base64SerializerDeserializer;
 
 public final class DataMiningQueryCreatorForSailorProfiles {
     private DataMiningQueryCreatorForSailorProfiles() {
@@ -35,7 +35,7 @@ public final class DataMiningQueryCreatorForSailorProfiles {
             List<String> competitorNames) {
         switch (type) {
         case AVERAGE_STARTLINE_DISTANCE:
-            return DataMiningQuerySerializer.toBase64String(createQueryForAverageStartlineDistance(competitorNames));
+            return Base64SerializerDeserializer.toBase64(createQueryForAverageStartlineDistance(competitorNames));
         default:
             return null;
         }
@@ -47,7 +47,6 @@ public final class DataMiningQueryCreatorForSailorProfiles {
                 HasRaceOfCompetitorContext.class.getName(), Distance.class.getName(), new ArrayList<String>(), "", 0);
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Minimum",
                 Distance.class.getName(), Distance.class.getName(), "");
-
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
         retrieverLevels.add(new DataRetrieverLevelDTO(0, leaderboardGroupRetrievalProcessorName,
                 new LocalizedTypeDTO(HasLeaderboardGroupContext.class.getName(), ""), null));
@@ -59,10 +58,8 @@ public final class DataMiningQueryCreatorForSailorProfiles {
                 new LocalizedTypeDTO(HasRaceOfCompetitorContext.class.getName(), ""), null));
         DataRetrieverChainDefinitionDTO retrieverChain = new DataRetrieverChainDefinitionDTO("",
                 RacingEventService.class.getName(), retrieverLevels);
-
         ModifiableStatisticQueryDefinitionDTO queryDefinition = new ModifiableStatisticQueryDefinitionDTO("en",
                 statistic, aggregator, retrieverChain);
-
         HashMap<FunctionDTO, HashSet<? extends Serializable>> retrieverlevel3_FilterSelection = new HashMap<>();
         FunctionDTO filterDimension0 = new FunctionDTO(true, "getCompetitor().getName()",
                 HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
@@ -70,16 +67,12 @@ public final class DataMiningQueryCreatorForSailorProfiles {
         competitorNames.forEach(filterDimension0_Selection::add);
         retrieverlevel3_FilterSelection.put(filterDimension0, filterDimension0_Selection);
         queryDefinition.setFilterSelectionFor(retrieverChain.getRetrieverLevel(3), retrieverlevel3_FilterSelection);
-
         FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getTrackedRaceContext().getRace().getName()",
                 HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
         queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
-
         FunctionDTO dimensionToGroupBy1 = new FunctionDTO(true, "getCompetitor().getName()",
                 HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
         queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy1);
-
         return queryDefinition;
     }
-
 }
