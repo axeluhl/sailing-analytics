@@ -725,7 +725,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                     try {
                         replicable.initiallyFillFrom(uncompressingInputStream);
                     } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Exception trying to reveice initial load for " + replicable.getId(), e);
+                        logger.log(Level.SEVERE, "Exception trying to receive initial load for " + replicable.getId(), e);
                         throw e;
                     }
                     logger.info("Done receiving initial load for " + replicable.getId());
