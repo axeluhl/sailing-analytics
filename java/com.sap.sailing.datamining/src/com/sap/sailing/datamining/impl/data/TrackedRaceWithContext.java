@@ -33,8 +33,11 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+/**
+ * Two objects of this type are considered equal when their {@link #getRegatta() regatta}, {@link #getRaceColumn() race column} and
+ * {@link #getFleet() fleet} are each equal.
+ */
 public class TrackedRaceWithContext implements HasTrackedRaceContext {
-
     private final HasLeaderboardContext leaderboardContext;
     private final Regatta regatta;
     private final RaceColumn raceColumn;
@@ -52,6 +55,43 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         this.trackedRace = trackedRace;
     }
     
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
+        result = prime * result + ((raceColumn == null) ? 0 : raceColumn.hashCode());
+        result = prime * result + ((regatta == null) ? 0 : regatta.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TrackedRaceWithContext other = (TrackedRaceWithContext) obj;
+        if (fleet == null) {
+            if (other.fleet != null)
+                return false;
+        } else if (!fleet.equals(other.fleet))
+            return false;
+        if (raceColumn == null) {
+            if (other.raceColumn != null)
+                return false;
+        } else if (!raceColumn.equals(other.raceColumn))
+            return false;
+        if (regatta == null) {
+            if (other.regatta != null)
+                return false;
+        } else if (!regatta.equals(other.regatta))
+            return false;
+        return true;
+    }
+
     @Override
     public HasLeaderboardContext getLeaderboardContext() {
         return leaderboardContext;

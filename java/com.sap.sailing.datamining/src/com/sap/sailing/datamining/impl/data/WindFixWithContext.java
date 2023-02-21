@@ -4,6 +4,9 @@ import com.sap.sailing.datamining.data.HasWindFixContext;
 import com.sap.sailing.datamining.data.HasWindTrackContext;
 import com.sap.sailing.domain.common.Wind;
 
+/**
+ * Equality is based on the {@link #getWind() wind fix} only.
+ */
 public class WindFixWithContext implements HasWindFixContext {
     private static final long serialVersionUID = -4537126043228674949L;
 
@@ -19,6 +22,31 @@ public class WindFixWithContext implements HasWindFixContext {
         this.windSourceType = windSourceType;
     }
     
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((wind == null) ? 0 : wind.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WindFixWithContext other = (WindFixWithContext) obj;
+        if (wind == null) {
+            if (other.wind != null)
+                return false;
+        } else if (!wind.equals(other.wind))
+            return false;
+        return true;
+    }
+
     @Override
     public HasWindTrackContext getWindTrackContext() {
         return windTrackContext;

@@ -39,6 +39,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
+/**
+ * Equality is based on the combination of {@link #getLeaderboard() leaderboard}, {@link #raceColumn} and
+ * {@link #getCompetitor() competitor}.
+ */
 public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompetitorContext {
     private final static Logger logger = Logger.getLogger(RaceResultOfCompetitorWithContext.class.getName());
     
@@ -55,6 +59,43 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         this.competitor = competitor;
         this.polarDataService = polarDataService;
         this.trackedRaceContext = trackedRaceContext;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
+        result = prime * result + ((leaderboardWithContext == null) ? 0 : leaderboardWithContext.getLeaderboard().hashCode());
+        result = prime * result + ((raceColumn == null) ? 0 : raceColumn.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RaceResultOfCompetitorWithContext other = (RaceResultOfCompetitorWithContext) obj;
+        if (competitor == null) {
+            if (other.competitor != null)
+                return false;
+        } else if (!competitor.equals(other.competitor))
+            return false;
+        if (leaderboardWithContext == null) {
+            if (other.leaderboardWithContext != null)
+                return false;
+        } else if (!leaderboardWithContext.getLeaderboard().equals(other.leaderboardWithContext.getLeaderboard()))
+            return false;
+        if (raceColumn == null) {
+            if (other.raceColumn != null)
+                return false;
+        } else if (!raceColumn.equals(other.raceColumn))
+            return false;
+        return true;
     }
 
     @Override

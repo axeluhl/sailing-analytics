@@ -36,6 +36,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
+/**
+ * Equality is based on the {@link #getTrackedLegOfCompetitor()} only.
+ */
 public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
     private static final long serialVersionUID = 5944904146286262768L;
 
@@ -56,6 +59,31 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         this.competitor = trackedLegOfCompetitor.getCompetitor();
     }
     
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((trackedLegOfCompetitor == null) ? 0 : trackedLegOfCompetitor.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TrackedLegOfCompetitorWithContext other = (TrackedLegOfCompetitorWithContext) obj;
+        if (trackedLegOfCompetitor == null) {
+            if (other.trackedLegOfCompetitor != null)
+                return false;
+        } else if (!trackedLegOfCompetitor.equals(other.trackedLegOfCompetitor))
+            return false;
+        return true;
+    }
+
     @Override
     public HasTrackedLegContext getTrackedLegContext() {
         return trackedLegContext;

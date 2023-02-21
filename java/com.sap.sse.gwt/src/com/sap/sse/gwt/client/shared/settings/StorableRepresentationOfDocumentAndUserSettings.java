@@ -4,7 +4,6 @@ package com.sap.sse.gwt.client.shared.settings;
  * Simple wrapper class which contains the storable representations of User Settings and Document Settings.
  * 
  * @author Vladislav Chumak
- * 
  *
  */
 public class StorableRepresentationOfDocumentAndUserSettings {
