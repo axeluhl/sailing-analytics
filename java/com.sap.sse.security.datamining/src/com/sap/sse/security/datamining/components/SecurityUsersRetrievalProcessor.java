@@ -12,8 +12,8 @@ import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.datamining.data.impl.UserWithContext;
 import com.sap.sse.security.shared.impl.User;
 
-public class SecurityUserRetrievalProcessor extends AbstractRetrievalProcessor<SecurityService, HasUserContext> {
-    public SecurityUserRetrievalProcessor(ExecutorService executor,
+public class SecurityUsersRetrievalProcessor extends AbstractRetrievalProcessor<SecurityService, HasUserContext> {
+    public SecurityUsersRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasUserContext, ?>> resultReceivers, int retrievalLevel,
             String retrievedDataTypeMessageKey) {
         super(SecurityService.class, HasUserContext.class, executor, resultReceivers,

@@ -13,8 +13,8 @@ import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.impl.RoleOfUserGroupWithContext;
 import com.sap.sse.security.shared.RoleDefinition;
 
-public class SecurityRoleOfUserGroupRetrievalProcessor extends AbstractRetrievalProcessor<HasUserGroupContext, HasRoleOfUserGroupContext> {
-    public SecurityRoleOfUserGroupRetrievalProcessor(ExecutorService executor,
+public class SecurityRolesOfUserGroupRetrievalProcessor extends AbstractRetrievalProcessor<HasUserGroupContext, HasRoleOfUserGroupContext> {
+    public SecurityRolesOfUserGroupRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasRoleOfUserGroupContext, ?>> resultReceivers, int retrievalLevel,
             String retrievedDataTypeMessageKey) {
         super(HasUserGroupContext.class, HasRoleOfUserGroupContext.class, executor, resultReceivers,

@@ -12,8 +12,8 @@ import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
 import com.sap.sse.security.datamining.data.impl.UserInUserGroupWithContext;
 import com.sap.sse.security.shared.impl.User;
 
-public class SecurityUserInUserGroupRetrievalProcessor extends AbstractRetrievalProcessor<HasUserGroupContext, HasUserInUserGroupContext> {
-    public SecurityUserInUserGroupRetrievalProcessor(ExecutorService executor,
+public class SecurityUsersInUserGroupRetrievalProcessor extends AbstractRetrievalProcessor<HasUserGroupContext, HasUserInUserGroupContext> {
+    public SecurityUsersInUserGroupRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasUserInUserGroupContext, ?>> resultReceivers, int retrievalLevel,
             String retrievedDataTypeMessageKey) {
         super(HasUserGroupContext.class, HasUserInUserGroupContext.class, executor, resultReceivers,
