@@ -25,10 +25,9 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType, String nameMessageKey) {
         this.dataSourceType = dataSourceType;
         this.retrievedDataType = retrievedDataType;
-        dataRetrieverTypesWithInformation = new ArrayList<>();
-
+        this.dataRetrieverTypesWithInformation = new ArrayList<>();
         this.nameMessageKey = nameMessageKey;
-        isComplete = false;
+        this.isComplete = false;
     }
 
     public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, Class<DataType> retrievedDataType, String nameMessageKey) {
