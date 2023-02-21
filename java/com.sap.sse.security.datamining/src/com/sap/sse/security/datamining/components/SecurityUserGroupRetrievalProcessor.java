@@ -21,13 +21,15 @@ public class SecurityUserGroupRetrievalProcessor extends AbstractRetrievalProces
     }
 
     @Override
-    protected Iterable<HasUserGroupContext> retrieveData(SecurityService element) {
+    protected Iterable<HasUserGroupContext> retrieveData(SecurityService securityService) {
         final Set<HasUserGroupContext> data = new HashSet<>();
-        for (final UserGroup userGroup : element.getUserGroupList()) {
+        for (final UserGroup userGroup : securityService.getUserGroupList()) {
             if (isAborted()) {
                 break;
             }
-            data.add(new UserGroupWithContext(userGroup, element));
+            if (securityService.hasCurrentUserReadPermission(userGroup)) {
+                data.add(new UserGroupWithContext(userGroup, securityService));
+            }
         }
         return data;
     }

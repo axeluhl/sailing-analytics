@@ -51,15 +51,27 @@ public class RoleOfUserGroupWithContext implements HasRoleOfUserGroupContext {
         return true;
     }
 
+    @Override
     public HasUserGroupContext getUserGroupContext() {
         return userGroupContext;
     }
 
-    public RoleDefinition getRoleDefinition() {
+    private RoleDefinition getRoleDefinition() {
         return roleDefinition;
     }
+    
+    @Override
+    public String getRoleName() {
+        return getRoleDefinition().getName();
+    }
 
+    @Override
     public boolean isForAll() {
         return forAll;
+    }
+
+    @Override
+    public int getNumberOfPermissions() {
+        return getRoleDefinition().getPermissions().size();
     }
 }

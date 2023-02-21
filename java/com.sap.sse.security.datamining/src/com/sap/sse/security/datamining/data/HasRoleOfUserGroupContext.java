@@ -1,5 +1,17 @@
 package com.sap.sse.security.datamining.data;
 
-public interface HasRoleOfUserGroupContext {
+import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Statistic;
 
+public interface HasRoleOfUserGroupContext {
+    HasUserGroupContext getUserGroupContext();
+    
+    @Dimension(messageKey="RoleOfUserGroupName")
+    String getRoleName();
+    
+    @Dimension(messageKey="RoleOfUserGroupForAll")
+    boolean isForAll();
+    
+    @Statistic(messageKey="NumberOfPermissions")
+    int getNumberOfPermissions();
 }

@@ -13,6 +13,7 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
+import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
 import com.sap.sse.security.shared.impl.User;
@@ -70,6 +71,7 @@ public class Activator extends AbstractDataMiningActivator {
         final Set<Class<?>> internalClasses = new HashSet<>();
         internalClasses.add(HasUserGroupContext.class);
         internalClasses.add(HasUserInUserGroupContext.class);
+        internalClasses.add(HasRoleOfUserGroupContext.class);
         return internalClasses;
     }
 

@@ -27,7 +27,9 @@ public class SecurityUserInUserGroupRetrievalProcessor extends AbstractRetrieval
             if (isAborted()) {
                 break;
             }
-            data.add(new UserInUserGroupWithContext(element, user));
+            if (element.getSecurityService().hasCurrentUserReadPermission(user)) {
+                data.add(new UserInUserGroupWithContext(element, user));
+            }
         }
         return data;
     }

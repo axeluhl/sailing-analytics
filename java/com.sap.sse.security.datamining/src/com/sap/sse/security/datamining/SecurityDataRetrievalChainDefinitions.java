@@ -12,7 +12,6 @@ import com.sap.sse.security.datamining.components.SecurityUserInUserGroupRetriev
 import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
-import com.sap.sse.security.shared.impl.User;
 
 /**
  * Builds the security-related retriever chains.<p>
@@ -26,9 +25,9 @@ public class SecurityDataRetrievalChainDefinitions {
     
     public SecurityDataRetrievalChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
-        DataRetrieverChainDefinition<SecurityService, User> userGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
-                SecurityService.class, User.class, "SecurityChainForUsers");
-        userGroupRetriever.startWith(SecurityUserGroupRetrievalProcessor.class, HasUserGroupContext.class,
+        DataRetrieverChainDefinition<SecurityService, HasUserGroupContext> userGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
+                SecurityService.class, HasUserGroupContext.class, "SecurityChainForUserGroups");
+        userGroupRetriever.startAndEndWith(SecurityUserGroupRetrievalProcessor.class, HasUserGroupContext.class,
                 "UserGroup");
         dataRetrieverChainDefinitions.add(userGroupRetriever);
         DataRetrieverChainDefinition<SecurityService, HasUserInUserGroupContext> userInUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
@@ -44,5 +43,4 @@ public class SecurityDataRetrievalChainDefinitions {
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions;
     }
-
 }
