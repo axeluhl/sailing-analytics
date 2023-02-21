@@ -2,7 +2,7 @@ package com.sap.sse.security.datamining.data;
 
 import com.sap.sse.datamining.annotations.Connector;
 
-public interface HasUserInUserGroupContext extends HasUserContext {
+public interface HasPermissionOfUserContext extends HasPermissionContext {
     @Connector
-    HasUserGroupContext getUserGroupContext();
+    HasUserContext getUser();
 }

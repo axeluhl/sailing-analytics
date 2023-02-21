@@ -10,8 +10,10 @@ import com.sap.sse.security.datamining.components.SecurityPermissionsOfUserInUse
 import com.sap.sse.security.datamining.components.SecurityRoleOfUserGroupRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUserGroupRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUserInUserGroupRetrievalProcessor;
-import com.sap.sse.security.datamining.data.HasPermissionsOfUserInUserGroupContext;
+import com.sap.sse.security.datamining.components.SecurityUserRetrievalProcessor;
+import com.sap.sse.security.datamining.data.HasPermissionOfUserInUserGroupContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
+import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
 
@@ -31,23 +33,28 @@ public class SecurityDataRetrievalChainDefinitions {
         DataRetrieverChainDefinition<SecurityService, HasUserGroupContext> userGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
                 SecurityService.class, HasUserGroupContext.class, "SecurityChainForUserGroups");
         userGroupRetriever.startAndEndWith(SecurityUserGroupRetrievalProcessor.class, HasUserGroupContext.class,
-                "UserGroup");
+                "UserGroups");
         dataRetrieverChainDefinitions.add(userGroupRetriever);
+        DataRetrieverChainDefinition<SecurityService, HasUserContext> userRetriever = new SimpleDataRetrieverChainDefinition<>(
+                SecurityService.class, HasUserContext.class, "SecurityChainForUsers");
+        userRetriever.startAndEndWith(SecurityUserRetrievalProcessor.class, HasUserContext.class,
+                "Users");
+        dataRetrieverChainDefinitions.add(userRetriever);
         DataRetrieverChainDefinition<SecurityService, HasUserInUserGroupContext> userInUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
-                userGroupRetriever, HasUserInUserGroupContext.class, "UserInUserGroup");
+                userGroupRetriever, HasUserInUserGroupContext.class, "UsersInUserGroup");
         userInUserGroupRetriever.endWith(SecurityUserGroupRetrievalProcessor.class,
-                SecurityUserInUserGroupRetrievalProcessor.class, HasUserInUserGroupContext.class, "UserInUserGroup");
+                SecurityUserInUserGroupRetrievalProcessor.class, HasUserInUserGroupContext.class, "UsersInUserGroup");
         dataRetrieverChainDefinitions.add(userInUserGroupRetriever);
-        DataRetrieverChainDefinition<SecurityService, HasPermissionsOfUserInUserGroupContext> permissionsOfUserInUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
-                userInUserGroupRetriever, HasPermissionsOfUserInUserGroupContext.class, "PermissionsOfUserInUserGroup");
+        DataRetrieverChainDefinition<SecurityService, HasPermissionOfUserInUserGroupContext> permissionsOfUserInUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
+                userInUserGroupRetriever, HasPermissionOfUserInUserGroupContext.class, "PermissionsOfUsersInUserGroup");
         permissionsOfUserInUserGroupRetriever.endWith(SecurityUserInUserGroupRetrievalProcessor.class,
                 SecurityPermissionsOfUserInUserGroupRetrievalProcessor.class,
-                HasPermissionsOfUserInUserGroupContext.class, "PermissionsOfUserInUserGroup");
+                HasPermissionOfUserInUserGroupContext.class, "PermissionsOfUsersInUserGroup");
         dataRetrieverChainDefinitions.add(permissionsOfUserInUserGroupRetriever);
         DataRetrieverChainDefinition<SecurityService, HasRoleOfUserGroupContext> roleOfUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
-                userGroupRetriever, HasRoleOfUserGroupContext.class, "RoleOfUserGroup");
+                userGroupRetriever, HasRoleOfUserGroupContext.class, "RolesOfUserGroup");
         roleOfUserGroupRetriever.endWith(SecurityUserGroupRetrievalProcessor.class,
-                SecurityRoleOfUserGroupRetrievalProcessor.class, HasRoleOfUserGroupContext.class, "RoleInUserGroup");
+                SecurityRoleOfUserGroupRetrievalProcessor.class, HasRoleOfUserGroupContext.class, "RolesOfUserGroup");
         dataRetrieverChainDefinitions.add(roleOfUserGroupRetriever);
     }
 

@@ -1,5 +1,6 @@
 package com.sap.sse.security.datamining.data.impl;
 
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
 import com.sap.sse.security.shared.impl.User;
@@ -53,5 +54,10 @@ public class UserInUserGroupWithContext implements HasUserInUserGroupContext {
     @Override
     public User getUser() {
         return user;
+    }
+
+    @Override
+    public SecurityService getSecurityService() {
+        return getUserGroupContext().getSecurityService();
     }
 }

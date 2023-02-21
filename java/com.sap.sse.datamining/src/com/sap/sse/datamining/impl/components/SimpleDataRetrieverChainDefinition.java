@@ -51,14 +51,14 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     }
 
     @Override
-    public <ResultType> void startAndEndWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
-            Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
+    public void startAndEndWith(Class<? extends Processor<DataSourceType, DataType>> retrieverType,
+            Class<DataType> retrievedDataType, String retrievedDataTypeMessageKey) {
         startAndEndWith(retrieverType, retrievedDataType, /* settings type */ null, /* default settings */ null, retrievedDataTypeMessageKey);
     }
 
     @Override
-    public <ResultType, SettingsType extends SerializableSettings> void startAndEndWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
-                                       Class<ResultType> retrievedDataType, Class<SettingsType> settingsType, SettingsType defaultSettings,
+    public <SettingsType extends SerializableSettings> void startAndEndWith(Class<? extends Processor<DataSourceType, DataType>> retrieverType,
+                                       Class<DataType> retrievedDataType, Class<SettingsType> settingsType, SettingsType defaultSettings,
                                        String retrievedDataTypeMessageKey) {
         startWith(retrieverType, retrievedDataType, settingsType, defaultSettings, retrievedDataTypeMessageKey);
         isComplete = true;

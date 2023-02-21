@@ -197,16 +197,16 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
      * Combines {@link #startWith(Class, Class, String)} and {@link #endWith(Class, Class, Class, String)} by marking this
      * chain as complete with only this single step.
      */
-    <ResultType> void startAndEndWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
-            Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey);
+    void startAndEndWith(Class<? extends Processor<DataSourceType, DataType>> retrieverType,
+            Class<DataType> retrievedDataType, String retrievedDataTypeMessageKey);
 
     /**
      * Combines {@link #startWith(Class, Class, Class, SerializableSettings, String) and
      * {@link #endWith(Class, Class, Class, Class, SerializableSettings, String) by marking this chain as complete with
      * only this single step.
      */
-    <ResultType, SettingsType extends SerializableSettings> void startAndEndWith(
-            Class<? extends Processor<DataSourceType, ResultType>> retrieverType, Class<ResultType> retrievedDataType,
+    <SettingsType extends SerializableSettings> void startAndEndWith(
+            Class<? extends Processor<DataSourceType, DataType>> retrieverType, Class<DataType> retrievedDataType,
             Class<SettingsType> settingsType, SettingsType defaultSettings, String retrievedDataTypeMessageKey);
 
 

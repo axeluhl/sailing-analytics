@@ -13,8 +13,10 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
-import com.sap.sse.security.datamining.data.HasPermissionsOfUserInUserGroupContext;
+import com.sap.sse.security.datamining.data.HasPermissionOfUserContext;
+import com.sap.sse.security.datamining.data.HasPermissionOfUserInUserGroupContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
+import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
 import com.sap.sse.security.shared.impl.User;
@@ -73,7 +75,9 @@ public class Activator extends AbstractDataMiningActivator {
         internalClasses.add(HasUserGroupContext.class);
         internalClasses.add(HasUserInUserGroupContext.class);
         internalClasses.add(HasRoleOfUserGroupContext.class);
-        internalClasses.add(HasPermissionsOfUserInUserGroupContext.class);
+        internalClasses.add(HasPermissionOfUserInUserGroupContext.class);
+        internalClasses.add(HasPermissionOfUserContext.class);
+        internalClasses.add(HasUserContext.class);
         return internalClasses;
     }
 
