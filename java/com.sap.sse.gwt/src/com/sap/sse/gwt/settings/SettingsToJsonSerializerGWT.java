@@ -15,7 +15,6 @@ import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
 /**
  * This is a GWT implementation of an {@link AbstractSettingsToJsonSerializer} that uses the json api library available
  * on the client side.
- *
  */
 public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerializer<JSONObject, JSONArray> {
     

@@ -45,6 +45,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
+/**
+ * Equality is based on competitor and race which are compared by identity, assuming there are no duplicated
+ * instances for the same {@link Competitor} and {@link TrackedRace} entities.
+ */
 public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
 
     private final HasTrackedRaceContext trackedRaceContext;
@@ -53,6 +57,37 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     public RaceOfCompetitorWithContext(HasTrackedRaceContext trackedRaceContext, Competitor competitor) {
         this.trackedRaceContext = trackedRaceContext;
         this.competitor = competitor;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
+        result = prime * result + ((trackedRaceContext == null) ? 0 : trackedRaceContext.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RaceOfCompetitorWithContext other = (RaceOfCompetitorWithContext) obj;
+        if (competitor == null) {
+            if (other.competitor != null)
+                return false;
+        } else if (!competitor.equals(other.competitor))
+            return false;
+        if (trackedRaceContext == null) {
+            if (other.trackedRaceContext != null)
+                return false;
+        } else if (!trackedRaceContext.equals(other.trackedRaceContext))
+            return false;
+        return true;
     }
 
     @Override

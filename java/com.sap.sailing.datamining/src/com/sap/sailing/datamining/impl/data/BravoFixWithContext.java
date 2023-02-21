@@ -14,6 +14,9 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Equality is based on the {@link #getBravoFix() Bravo fix} only.
+ */
 public class BravoFixWithContext implements HasBravoFixContext {
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext;
     
@@ -24,6 +27,38 @@ public class BravoFixWithContext implements HasBravoFixContext {
         this.bravoFix = bravoFix;
     }
     
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((bravoFix == null) ? 0 : bravoFix.hashCode());
+        result = prime * result
+                + ((trackedLegOfCompetitorContext == null) ? 0 : trackedLegOfCompetitorContext.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BravoFixWithContext other = (BravoFixWithContext) obj;
+        if (bravoFix == null) {
+            if (other.bravoFix != null)
+                return false;
+        } else if (!bravoFix.equals(other.bravoFix))
+            return false;
+        if (trackedLegOfCompetitorContext == null) {
+            if (other.trackedLegOfCompetitorContext != null)
+                return false;
+        } else if (!trackedLegOfCompetitorContext.equals(other.trackedLegOfCompetitorContext))
+            return false;
+        return true;
+    }
+
     @Override
     public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext() {
         return trackedLegOfCompetitorContext;
