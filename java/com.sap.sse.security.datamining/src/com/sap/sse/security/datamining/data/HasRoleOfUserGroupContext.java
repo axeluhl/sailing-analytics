@@ -5,7 +5,7 @@ import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasRoleOfUserGroupContext {
-    @Connector(scanForStatistics = false)
+    @Connector(messageKey = "UserGroup", scanForStatistics = false)
     HasUserGroupContext getUserGroupContext();
 
     @Dimension(messageKey = "RoleOfUserGroupName")

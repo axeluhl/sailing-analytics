@@ -9,6 +9,16 @@ public interface HasRoleContext {
     default String getRoleName() {
         return getRole().getName();
     }
+    
+    @Dimension(messageKey = "IsGroupQualified")
+    default boolean isGroupQualified() {
+        return getRole().getQualifiedForTenant() != null;
+    }
+
+    @Dimension(messageKey = "IsUserQualified")
+    default boolean isUserQualified() {
+        return getRole().getQualifiedForUser() != null;
+    }
 
     @Statistic(messageKey = "NumberOfPermissions")
     default int getNumberOfPermissions() {
