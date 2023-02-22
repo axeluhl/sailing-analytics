@@ -13,6 +13,7 @@ import com.sap.sse.security.datamining.components.SecurityPreferencesOfUserRetri
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserGroupRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserInUserGroupsRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserRetrievalProcessor;
+import com.sap.sse.security.datamining.components.SecuritySessionsRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUserGroupsRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUsersInUserGroupRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUsersRetrievalProcessor;
@@ -23,6 +24,7 @@ import com.sap.sse.security.datamining.data.HasPreferenceOfUserInUserGroupContex
 import com.sap.sse.security.datamining.data.HasRoleOfUserContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserInUserGroupContext;
+import com.sap.sse.security.datamining.data.HasSessionContext;
 import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
@@ -47,8 +49,7 @@ public class SecurityDataRetrievalChainDefinitions {
         dataRetrieverChainDefinitions.add(userGroupRetriever);
         DataRetrieverChainDefinition<SecurityService, HasUserContext> userRetriever = new SimpleDataRetrieverChainDefinition<>(
                 SecurityService.class, HasUserContext.class, "SecurityChainForUsers");
-        userRetriever.startAndEndWith(SecurityUsersRetrievalProcessor.class, HasUserContext.class,
-                "Users");
+        userRetriever.startAndEndWith(SecurityUsersRetrievalProcessor.class, HasUserContext.class, "Users");
         dataRetrieverChainDefinitions.add(userRetriever);
         DataRetrieverChainDefinition<SecurityService, HasRoleOfUserContext> roleOfUserRetriever = new SimpleDataRetrieverChainDefinition<>(
                 userRetriever, HasRoleOfUserContext.class, "RolesOfUsers");
@@ -92,6 +93,10 @@ public class SecurityDataRetrievalChainDefinitions {
         roleOfUserGroupRetriever.endWith(SecurityUserGroupsRetrievalProcessor.class,
                 SecurityRolesOfUserGroupRetrievalProcessor.class, HasRoleOfUserGroupContext.class, "RolesOfUserGroup");
         dataRetrieverChainDefinitions.add(roleOfUserGroupRetriever);
+        DataRetrieverChainDefinition<SecurityService, HasSessionContext> sessionRetriever = new SimpleDataRetrieverChainDefinition<>(
+                SecurityService.class, HasSessionContext.class, "Sessions");
+        sessionRetriever.startAndEndWith(SecuritySessionsRetrievalProcessor.class, HasSessionContext.class, "Sessions");
+        dataRetrieverChainDefinitions.add(sessionRetriever);
     }
 
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {

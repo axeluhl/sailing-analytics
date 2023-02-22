@@ -15,5 +15,6 @@ Require-Bundle: com.sap.sse,
  com.sap.sse.datamining,
  com.sap.sse.security,
  com.sap.sse.datamining.annotations,
- com.sap.sse.common
+ com.sap.sse.common,
+ org.apache.shiro.core
 Bundle-ActivationPolicy: lazy

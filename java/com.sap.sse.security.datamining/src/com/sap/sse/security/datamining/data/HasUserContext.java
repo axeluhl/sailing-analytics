@@ -1,6 +1,15 @@
 package com.sap.sse.security.datamining.data;
 
+import java.util.Collection;
+
+import org.apache.shiro.cache.Cache;
+import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.session.mgt.eis.CachingSessionDAO;
+import org.apache.shiro.subject.PrincipalCollection;
+
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -12,7 +21,7 @@ public interface HasUserContext {
     
     SecurityService getSecurityService();
 
-    @Dimension(messageKey="User")
+    @Dimension(messageKey="Name")
     default String getName() {
         return getUser().getName();
     }
@@ -57,11 +66,36 @@ public interface HasUserContext {
         return getSecurityService().getAllPreferences(getUser().getName()).size();
     }
     
+    default Session getSession() {
+        final CacheManager cacheManager = getSecurityService().getCacheManager();
+        final Cache<?, ?> activeSessionCache = cacheManager.getCache(CachingSessionDAO.ACTIVE_SESSION_CACHE_NAME);
+        for (final Object i : activeSessionCache.values()) {
+            if (i instanceof Session) {
+                final Session session = (Session) i;
+                for (final Object attributeKey : session.getAttributeKeys()) {
+                    final Object attributeValue = session.getAttribute(attributeKey);
+                    if (attributeValue instanceof PrincipalCollection) {
+                        final PrincipalCollection pc = (PrincipalCollection) attributeValue;
+                        final Collection<?> principalList = pc.fromRealm(getUser().getName());
+                        if (principalList != null && !principalList.isEmpty()) {
+                            return session;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    @Statistic(messageKey="DurationSinceLastAccess")
+    default Duration getDurationSinceLastAccess() {
+        final Session session = getSession();
+        return session == null ? null : TimePoint.of(session.getLastAccessTime()).until(TimePoint.now());
+    }
+    
     @Statistic(messageKey="DurationUntilSessionExpiry")
     default Duration getDurationUntilSessionExpiry() {
-        // TODO need to find session of that user in ReplicatingCacheManager
-        // something like
-        //     getSecurityService().getCacheManager()....
-        return Duration.NULL;
+        final Session session = getSession();
+        return session == null ? null : TimePoint.now().until(TimePoint.of(session.getLastAccessTime()).plus(Duration.ofMillis(session.getTimeout())));
     }
 }

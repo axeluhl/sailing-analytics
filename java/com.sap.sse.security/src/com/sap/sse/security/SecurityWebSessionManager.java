@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,8 +17,6 @@ import org.apache.shiro.web.servlet.ShiroHttpServletRequest;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.apache.shiro.web.util.WebUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -36,7 +35,7 @@ import com.sap.sse.util.TimerWithRunnable;
  *
  */
 public class SecurityWebSessionManager extends DefaultWebSessionManager {
-    private static final Logger log = LoggerFactory.getLogger(SecurityWebSessionManager.class);
+    private static final Logger log = Logger.getLogger(SecurityWebSessionManager.class.getName());
     private static final TimerWithRunnable timer = new TimerWithRunnable("Timer delaying Session.touch() onChange(s) notifications", /* isDaemon */ true);
     
     private static final Duration MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY = Duration.ONE_SECOND.times(30);
@@ -113,25 +112,26 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     /**
      * Stores the Session's ID, usually as a Cookie, to associate with future requests.
      *
-     * @param session the session that was just {@link #createSession created}.
+     * @param session
+     *            the session that was just {@link #createSession created}.
      */
     @Override
     protected void onStart(Session session, SessionContext context) {
         if (!WebUtils.isHttp(context)) {
-            log.debug("SessionContext argument is not HTTP compatible or does not have an HTTP request/response " +
+            log.fine("SessionContext argument is not HTTP compatible or does not have an HTTP request/response " +
                     "pair. No session ID cookie will be set.");
-            return;
-        }
-        final HttpServletRequest request = WebUtils.getHttpRequest(context);
-        final HttpServletResponse response = WebUtils.getHttpResponse(context);
-        if (isSessionIdCookieEnabled()) {
-            final Serializable sessionId = session.getId();
-            storeSessionId(sessionId, request, response);
         } else {
-            log.debug("Session ID cookie is disabled.  No cookie has been set for new session with id {}", session.getId());
+            final HttpServletRequest request = WebUtils.getHttpRequest(context);
+            final HttpServletResponse response = WebUtils.getHttpResponse(context);
+            if (isSessionIdCookieEnabled()) {
+                final Serializable sessionId = session.getId();
+                storeSessionId(sessionId, request, response);
+            } else {
+                log.fine("Session ID cookie is disabled.  No cookie has been set for new session with id "+session.getId());
+            }
+            request.removeAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE);
+            request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_IS_NEW, Boolean.TRUE);
         }
-        request.removeAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE);
-        request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_IS_NEW, Boolean.TRUE);
     }
 
     private void storeSessionId(Serializable currentId, HttpServletRequest request, HttpServletResponse response) {
@@ -151,6 +151,6 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
         cookie.setValue(idString);
         cookie.setSecure(true);
         cookie.saveTo(request, response);
-        log.trace("Set session ID cookie for session with id {}", idString);
+        log.fine("Set session ID cookie for session with id "+idString);
     }
 }

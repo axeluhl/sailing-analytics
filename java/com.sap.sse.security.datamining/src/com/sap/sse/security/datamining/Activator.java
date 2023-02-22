@@ -20,6 +20,7 @@ import com.sap.sse.security.datamining.data.HasPreferenceOfUserInUserGroupContex
 import com.sap.sse.security.datamining.data.HasRoleOfUserContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserInUserGroupContext;
+import com.sap.sse.security.datamining.data.HasSessionContext;
 import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
@@ -86,6 +87,7 @@ public class Activator extends AbstractDataMiningActivator {
         internalClasses.add(HasRoleOfUserInUserGroupContext.class);
         internalClasses.add(HasPreferenceOfUserContext.class);
         internalClasses.add(HasPreferenceOfUserInUserGroupContext.class);
+        internalClasses.add(HasSessionContext.class);
         return internalClasses;
     }
 
