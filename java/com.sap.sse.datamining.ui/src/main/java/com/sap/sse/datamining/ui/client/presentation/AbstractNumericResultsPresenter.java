@@ -38,7 +38,6 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
 
     public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?> context) {
         super(parent, context);
-
         final List<AbstractNumericDataProvider<? extends Serializable>> basicProviders = Arrays.asList(
                 new NumberDataProvider(), new DistanceDataProvider(), new DurationDataProvider(),
                 new BearingDataProvider());

@@ -302,6 +302,7 @@
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="org.mp4parser.isoparser@default:default"/>
 <setEntry value="com.sap.sse.replication.interfaces@default:default"/>
+<setEntry value="com.sap.sse.security.datamining@5:true"/>
 <setEntry value="com.sap.sse.security.persistence@default:default"/>
 <setEntry value="com.sap.sse.security.interface@default:default"/>
 <setEntry value="com.sap.sse.replication.persistence@default:default"/>

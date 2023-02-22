@@ -48,14 +48,12 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
                         leaderboardName, true, // this information came from place, now hard coded. check with frank
                         autoExpandLastRaceColumn, availableDetailTypes);
                 leaderboardPanel.addAttachHandler(new Handler() {
-
                     @Override
                     public void onAttachOrDetach(AttachEvent event) {
                         if(!event.isAttached()) {
                             componentContext.dispose();
                         }
                     }
-                    
                 });
                 leaderboardPanel.addLeaderboardUpdateListener(SharedLeaderboardEventSeriesTabView.this);
                 consumer.consume(leaderboardPanel);

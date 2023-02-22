@@ -292,6 +292,7 @@
         <setEntry value="com.sap.sse.replication.persistence@default:default"/>
         <setEntry value="com.sap.sse.replication@6:true"/>
         <setEntry value="com.sap.sse.security.common@default:default"/>
+        <setEntry value="com.sap.sse.security.datamining@5:true"/>
         <setEntry value="com.sap.sse.security.interface@default:default"/>
         <setEntry value="com.sap.sse.security.persistence@default:default"/>
         <setEntry value="com.sap.sse.security.ui@6:true"/>
