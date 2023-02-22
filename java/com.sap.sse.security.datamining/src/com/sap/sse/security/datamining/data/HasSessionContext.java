@@ -20,6 +20,9 @@ public interface HasSessionContext {
     @Dimension(messageKey = "StartMonth")
     String getStartMonth();
     
+    @Dimension(messageKey = "ExpiryMonth")
+    String getExpiryMonth();
+    
     @Statistic(messageKey="DurationSinceLastAccess")
     Duration getDurationSinceLastAccess();
     

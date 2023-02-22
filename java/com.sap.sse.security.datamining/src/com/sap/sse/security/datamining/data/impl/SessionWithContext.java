@@ -82,12 +82,23 @@ public class SessionWithContext implements HasSessionContext {
     }
 
     @Override
+    public String getExpiryMonth() {
+        final GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(getExpiryTimePoint().asDate());
+        return String.format("%4d-%02d", gregorianCalendar.get(GregorianCalendar.YEAR), gregorianCalendar.get(GregorianCalendar.MONTH)+1);
+    }
+
+    @Override
     public Duration getDurationSinceLastAccess() {
         return session == null ? null : TimePoint.of(session.getLastAccessTime()).until(TimePoint.now());
     }
     
     @Override
     public Duration getDurationUntilSessionExpiry() {
-        return session == null ? null : TimePoint.now().until(TimePoint.of(session.getLastAccessTime()).plus(Duration.ofMillis(session.getTimeout())));
+        return session == null ? null : TimePoint.now().until(getExpiryTimePoint());
+    }
+
+    private TimePoint getExpiryTimePoint() {
+        return TimePoint.of(session.getLastAccessTime()).plus(Duration.ofMillis(session.getTimeout()));
     }
 }
