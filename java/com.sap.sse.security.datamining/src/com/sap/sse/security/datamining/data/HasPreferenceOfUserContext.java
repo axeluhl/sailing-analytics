@@ -2,7 +2,7 @@ package com.sap.sse.security.datamining.data;
 
 import com.sap.sse.datamining.annotations.Connector;
 
-public interface HasUserInUserGroupContext extends HasUserContext {
+public interface HasPreferenceOfUserContext extends HasPreferenceContext {
     @Connector(scanForStatistics = false)
-    HasUserGroupContext getUserGroupContext();
+    HasUserContext getUserContext();
 }

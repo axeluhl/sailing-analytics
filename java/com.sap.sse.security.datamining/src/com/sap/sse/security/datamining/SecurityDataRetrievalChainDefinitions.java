@@ -7,13 +7,19 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.datamining.components.SecurityPermissionsOfUserInUserGroupRetrievalProcessor;
+import com.sap.sse.security.datamining.components.SecurityPermissionsOfUserRetrievalProcessor;
+import com.sap.sse.security.datamining.components.SecurityPreferencesOfUserInUserGroupRetrievalProcessor;
+import com.sap.sse.security.datamining.components.SecurityPreferencesOfUserRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserGroupRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserInUserGroupsRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUserGroupsRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUsersInUserGroupRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUsersRetrievalProcessor;
+import com.sap.sse.security.datamining.data.HasPermissionOfUserContext;
 import com.sap.sse.security.datamining.data.HasPermissionOfUserInUserGroupContext;
+import com.sap.sse.security.datamining.data.HasPreferenceOfUserContext;
+import com.sap.sse.security.datamining.data.HasPreferenceOfUserInUserGroupContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserInUserGroupContext;
@@ -49,6 +55,16 @@ public class SecurityDataRetrievalChainDefinitions {
         roleOfUserRetriever.endWith(SecurityUsersRetrievalProcessor.class,
                 SecurityRolesOfUserRetrievalProcessor.class, HasRoleOfUserContext.class, "RolesOfUsers");
         dataRetrieverChainDefinitions.add(roleOfUserRetriever);
+        DataRetrieverChainDefinition<SecurityService, HasPermissionOfUserContext> permissionOfUserRetriever = new SimpleDataRetrieverChainDefinition<>(
+                userRetriever, HasPermissionOfUserContext.class, "PermissionsOfUsers");
+        permissionOfUserRetriever.endWith(SecurityUsersRetrievalProcessor.class,
+                SecurityPermissionsOfUserRetrievalProcessor.class, HasPermissionOfUserContext.class, "PermissionsOfUsers");
+        dataRetrieverChainDefinitions.add(permissionOfUserRetriever);
+        DataRetrieverChainDefinition<SecurityService, HasPreferenceOfUserContext> preferenceOfUserRetriever = new SimpleDataRetrieverChainDefinition<>(
+                userRetriever, HasPreferenceOfUserContext.class, "PreferenceOfUsers");
+        preferenceOfUserRetriever.endWith(SecurityUsersRetrievalProcessor.class,
+                SecurityPreferencesOfUserRetrievalProcessor.class, HasPreferenceOfUserContext.class, "PreferenceOfUsers");
+        dataRetrieverChainDefinitions.add(preferenceOfUserRetriever);
         DataRetrieverChainDefinition<SecurityService, HasUserInUserGroupContext> userInUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
                 userGroupRetriever, HasUserInUserGroupContext.class, "UsersInUserGroup");
         userInUserGroupRetriever.endWith(SecurityUserGroupsRetrievalProcessor.class,
@@ -65,6 +81,12 @@ public class SecurityDataRetrievalChainDefinitions {
                 SecurityPermissionsOfUserInUserGroupRetrievalProcessor.class,
                 HasPermissionOfUserInUserGroupContext.class, "PermissionsOfUsersInUserGroup");
         dataRetrieverChainDefinitions.add(permissionsOfUserInUserGroupRetriever);
+        DataRetrieverChainDefinition<SecurityService, HasPreferenceOfUserInUserGroupContext> preferencesOfUserInUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
+                userInUserGroupRetriever, HasPreferenceOfUserInUserGroupContext.class, "PreferencesOfUsersInUserGroup");
+        preferencesOfUserInUserGroupRetriever.endWith(SecurityUsersInUserGroupRetrievalProcessor.class,
+                SecurityPreferencesOfUserInUserGroupRetrievalProcessor.class,
+                HasPreferenceOfUserInUserGroupContext.class, "PreferencesOfUsersInUserGroup");
+        dataRetrieverChainDefinitions.add(preferencesOfUserInUserGroupRetriever);
         DataRetrieverChainDefinition<SecurityService, HasRoleOfUserGroupContext> roleOfUserGroupRetriever = new SimpleDataRetrieverChainDefinition<>(
                 userGroupRetriever, HasRoleOfUserGroupContext.class, "RolesOfUserGroup");
         roleOfUserGroupRetriever.endWith(SecurityUserGroupsRetrievalProcessor.class,

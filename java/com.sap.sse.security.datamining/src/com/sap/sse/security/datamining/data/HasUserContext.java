@@ -1,5 +1,6 @@
 package com.sap.sse.security.datamining.data;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -54,5 +55,13 @@ public interface HasUserContext {
     @Statistic(messageKey="NumberOfPreferences")
     default int getNumberOfPreferences() {
         return getSecurityService().getAllPreferences(getUser().getName()).size();
+    }
+    
+    @Statistic(messageKey="DurationUntilSessionExpiry")
+    default Duration getDurationUntilSessionExpiry() {
+        // TODO need to find session of that user in ReplicatingCacheManager
+        // something like
+        //     getSecurityService().getCacheManager()....
+        return Duration.NULL;
     }
 }
