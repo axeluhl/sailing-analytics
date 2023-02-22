@@ -14,6 +14,7 @@ import com.sap.sse.security.datamining.components.SecurityRolesOfUserGroupRetrie
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserInUserGroupsRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityRolesOfUserRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecuritySessionsRetrievalProcessor;
+import com.sap.sse.security.datamining.components.SecuritySubscriptionsOfUserRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUserGroupsRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUsersInUserGroupRetrievalProcessor;
 import com.sap.sse.security.datamining.components.SecurityUsersRetrievalProcessor;
@@ -25,6 +26,7 @@ import com.sap.sse.security.datamining.data.HasRoleOfUserContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserGroupContext;
 import com.sap.sse.security.datamining.data.HasRoleOfUserInUserGroupContext;
 import com.sap.sse.security.datamining.data.HasSessionContext;
+import com.sap.sse.security.datamining.data.HasSubscriptionContext;
 import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.datamining.data.HasUserGroupContext;
 import com.sap.sse.security.datamining.data.HasUserInUserGroupContext;
@@ -97,6 +99,11 @@ public class SecurityDataRetrievalChainDefinitions {
                 SecurityService.class, HasSessionContext.class, "Sessions");
         sessionRetriever.startAndEndWith(SecuritySessionsRetrievalProcessor.class, HasSessionContext.class, "Sessions");
         dataRetrieverChainDefinitions.add(sessionRetriever);
+        DataRetrieverChainDefinition<SecurityService, HasSubscriptionContext> subscriptionRetriever = new SimpleDataRetrieverChainDefinition<>(
+                userRetriever, HasSubscriptionContext.class, "Subscriptions");
+        subscriptionRetriever.endWith(SecurityUsersRetrievalProcessor.class,
+                SecuritySubscriptionsOfUserRetrievalProcessor.class, HasSubscriptionContext.class, "Subscriptions");
+        dataRetrieverChainDefinitions.add(subscriptionRetriever);
     }
 
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
