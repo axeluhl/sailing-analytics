@@ -9,6 +9,8 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.security.datamining.data.HasRoleContext;
 import com.sap.sse.security.datamining.data.HasUserContext;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 
 public abstract class AbstractSecurityRolesOfUserRetrievalProcessor<HUG extends HasUserContext, HRC extends HasRoleContext>
@@ -28,7 +30,10 @@ extends AbstractRetrievalProcessor<HUG, HRC> {
             if (isAborted()) {
                 break;
             }
-            data.add(createRoleWithContext(element, role));
+            final WithQualifiedObjectIdentifier roleAssociation = PermissionAndRoleAssociation.getWithQualifiedObjectIdentifier(role, element.getUser());
+            if (element.getSecurityService().hasCurrentUserReadPermission(roleAssociation)) {
+                data.add(createRoleWithContext(element, role));
+            }
         }
         return data;
     }

@@ -10,6 +10,8 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.datamining.data.HasPermissionContext;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 
 public abstract class AbstractSecurityPermissionsOfUserRetrievalProcessor<HUG extends HasUserContext, PWC extends HasPermissionContext>
 extends AbstractRetrievalProcessor<HUG, PWC> {
@@ -28,7 +30,10 @@ extends AbstractRetrievalProcessor<HUG, PWC> {
             if (isAborted()) {
                 break;
             }
-            data.add(createPermissionWithContext(element, permission));
+            final WithQualifiedObjectIdentifier permissionAssociation = PermissionAndRoleAssociation.getWithQualifiedObjectIdentifier(permission, element.getUser());
+            if (element.getSecurityService().hasCurrentUserReadPermission(permissionAssociation)) {
+                data.add(createPermissionWithContext(element, permission));
+            }
         }
         return data;
     }
