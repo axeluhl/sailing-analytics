@@ -174,7 +174,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         super(parent, context);
         this.showErrorBars = showErrorBars;
         this.drillDownCallback = drillDownCallback;
-        
         chartPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -184,7 +183,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         };
         chart = createChart();
         chartPanel.setWidget(chart);
-        
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
         sortByPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -202,7 +200,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         sortByPanel.add(keyComparatorListBox);
         sortByPanel.setVisible(false);
         addControl(sortByPanel);
-
         HorizontalPanel decimalsPanel = new HorizontalPanel();
         decimalsPanel.setSpacing(5);
         decimalsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -217,7 +214,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             showResultData();
         });
         addControl(decimalsPanel);
-        
         HorizontalPanel showDataLabelsPanel = new HorizontalPanel();
         showDataLabelsPanel.setSpacing(5);
         showDataLabelsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -230,14 +226,11 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             showResultData();
         });
         addControl(showDataLabelsPanel);
-        
-
         StringMessages stringMessages = getDataMiningStringMessages();
         ChartToCsvExporter csvExporter = new ChartToCsvExporter(stringMessages.csvCopiedToClipboard());
         Button exportButton = new Button(stringMessages.csvExport());
         exportButton.addClickHandler(e -> csvExporter.exportChartAsCsvToClipboard(chart));
         addControl(exportButton);
-
         seriesMappedByGroupKey = new HashMap<>();
         errorSeriesMappedByGroupKey = new HashMap<>();
         simpleResultSeriesKey = new GenericGroupKey<>(getDataMiningStringMessages().results());
