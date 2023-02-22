@@ -8,7 +8,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 public interface HasUserGroupContext {
-    @Connector(messageKey="UserGroup", ordinal=0)
+    @Connector(ordinal=0)
     UserGroup getUserGroup();
     
     @Dimension(messageKey="ImpliesRoles")
