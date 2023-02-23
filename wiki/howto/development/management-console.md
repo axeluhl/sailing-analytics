@@ -11,7 +11,7 @@ As of February 2023, the management console entry points are disabled by default
 
 Multiple design calls where held to discuss and plan the implementation of the management console.
 
-See https://static.sapsailing.com/management-console/
+See [https://static.sapsailing.com/management-console/](https://static.sapsailing.com/management-console/)
 to access these folders, you might require ssh access.
 Any link directly pointing to a file should be publicly available.
 
@@ -20,7 +20,7 @@ These include discussions of the overall design philosophy, as well as more oper
 ## Design References
 
 To ensure a seamless user experience design documents where created in advance, as well as in parallel, to development.
-Not all functions the current admin console is capable of where able to be covered due to budget constraints. 
+Not all functions the current admin console is capable of were able to be covered due to budget constraints. 
 The design documents do however provide a foundation for overall UX, layout and style of the new management console and were used as such in early development.
 
 ### Login
@@ -115,7 +115,7 @@ Currently these only cover simple CRUD operations.
 
 ### Styles
 
-gss styles and ressources are defined in com.sap.sailing.gwt.managementconsole.resources and should be iterated on centrally, to ensure the overall style is compliant. 
+gss styles and resources are defined in com.sap.sailing.gwt.managementconsole.resources and should be iterated on centrally, to ensure the overall style is compliant. 
 
 ### EventBus
 
