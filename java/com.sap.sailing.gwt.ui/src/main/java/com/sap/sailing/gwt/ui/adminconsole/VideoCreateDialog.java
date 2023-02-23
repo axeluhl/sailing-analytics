@@ -6,26 +6,23 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoCreateDialog extends VideoDialog {
 
-    public VideoCreateDialog(String initialTag, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
-        super(new Date(), new VideoParameterValidator(stringMessages), stringMessages, storageServiceAvailable, callback);
+    public VideoCreateDialog(String initialTag, StringMessages stringMessages,
+            FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<VideoDTO>> callback) {
+        super(new Date(), new VideoParameterValidator(stringMessages), stringMessages, storageServiceAvailable,
+                callback);
         createdAtLabel = new Label(creationDate.toString());
-        titleTextBox = createTextBox(null);
-        titleTextBox.setVisibleLength(50);
         subtitleTextBox = createTextBox(null);
         subtitleTextBox.setVisibleLength(50);
         copyrightTextBox = createTextBox(null);
         copyrightTextBox.setVisibleLength(50);
-        lengthIntegerBox = createIntegerBox(null, 10);
         List<String> tags = new ArrayList<>();
-        if(initialTag != null && !initialTag.isEmpty()) {
+        if (initialTag != null && !initialTag.isEmpty()) {
             tags.add(initialTag);
         }
         tagsListEditor.setValue(tags);
-        setSelectedMimeType(MimeType.unknown);
     }
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.uploadpopup;
 
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 import com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources;
 import com.sap.sailing.gwt.ui.shared.AbstractMediaUploadPopup;
@@ -9,14 +10,14 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class DesktopMediaUploadPopup extends AbstractMediaUploadPopup {
 
-    public DesktopMediaUploadPopup(Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
-        super(updateVideo, updateImage);
+    public DesktopMediaUploadPopup(BiConsumer<List<ImageDTO>, List<VideoDTO>> updateImagesAndVideos) {
+        super(updateImagesAndVideos);
         MediaPageResources.INSTANCE.css().ensureInjected();
         addStyleName(MediaPageResources.INSTANCE.css().popup());
     }
 
     @Override
-    protected void updateFileName(String fileName) {
+    protected String getTitleFromFileName(String fileName) {
         if (fileName == null) {
             fileName = "";
         }
@@ -26,7 +27,6 @@ public class DesktopMediaUploadPopup extends AbstractMediaUploadPopup {
         } else {
             name = fileName;
         }
-        titleTextBox.setValue(name);
-        fileNameInput.setValue(fileName);
+        return name;
     }
 }

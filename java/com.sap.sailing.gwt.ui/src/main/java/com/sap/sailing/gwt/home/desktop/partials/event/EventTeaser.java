@@ -47,6 +47,7 @@ public class EventTeaser extends Composite {
         EventTeaserResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         eventLink.setHref(placeNavigation.getTargetUrl());
+        this.ensureDebugId("eventTeaser-" + event.getId());
         
         Event.sinkEvents(eventLink, Event.ONCLICK);
         Event.setEventListener(eventLink, new EventListener() {

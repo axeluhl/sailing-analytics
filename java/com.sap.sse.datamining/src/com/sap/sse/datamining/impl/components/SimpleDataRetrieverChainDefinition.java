@@ -25,10 +25,9 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType, String nameMessageKey) {
         this.dataSourceType = dataSourceType;
         this.retrievedDataType = retrievedDataType;
-        dataRetrieverTypesWithInformation = new ArrayList<>();
-
+        this.dataRetrieverTypesWithInformation = new ArrayList<>();
         this.nameMessageKey = nameMessageKey;
-        isComplete = false;
+        this.isComplete = false;
     }
 
     public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, Class<DataType> retrievedDataType, String nameMessageKey) {
@@ -49,6 +48,20 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     @Override
     public Class<DataType> getRetrievedDataType() {
         return retrievedDataType;
+    }
+
+    @Override
+    public void startAndEndWith(Class<? extends Processor<DataSourceType, DataType>> retrieverType,
+            Class<DataType> retrievedDataType, String retrievedDataTypeMessageKey) {
+        startAndEndWith(retrieverType, retrievedDataType, /* settings type */ null, /* default settings */ null, retrievedDataTypeMessageKey);
+    }
+
+    @Override
+    public <SettingsType extends SerializableSettings> void startAndEndWith(Class<? extends Processor<DataSourceType, DataType>> retrieverType,
+                                       Class<DataType> retrievedDataType, Class<SettingsType> settingsType, SettingsType defaultSettings,
+                                       String retrievedDataTypeMessageKey) {
+        startWith(retrieverType, retrievedDataType, settingsType, defaultSettings, retrievedDataTypeMessageKey);
+        isComplete = true;
     }
     
     @Override

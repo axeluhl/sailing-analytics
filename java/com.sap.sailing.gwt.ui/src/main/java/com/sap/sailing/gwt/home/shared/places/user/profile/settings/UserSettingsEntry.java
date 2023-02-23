@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.settings;
 
-import com.sap.sse.security.ui.settings.StoredSettingsLocation;
+import com.sap.sse.security.shared.SettingsAndPreferencesConstants;
 
 public class UserSettingsEntry {
 
@@ -12,7 +12,7 @@ public class UserSettingsEntry {
 
     public UserSettingsEntry(String key, String profileData, String localData) {
         super();
-        final int separatorIndex = key.indexOf(StoredSettingsLocation.DOCUMENT_SETTINGS_SUFFIX_SEPARATOR);
+        final int separatorIndex = key.indexOf(SettingsAndPreferencesConstants.DOCUMENT_SETTINGS_SUFFIX_SEPARATOR);
         if(separatorIndex > 0) {
             keyWithoutContext = key.substring(0, separatorIndex);
             documentSettingsId = key.substring(separatorIndex + 1);

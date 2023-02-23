@@ -123,6 +123,12 @@ button.uploadButton:after {
     font-family: 'Open Sans',sans-serif;
 }
 
+.popup button.headerButton {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
 .subTitle {
     width: 100%;
     color: #333;

@@ -32,7 +32,6 @@ public interface StringMessages extends Messages {
     String settings();
     String settingsForComponent(String localizedShortName);
     String pleaseSelect();
-
     String sharedSettingsLink();
     String resetToDefault();
     String resetToDefaultInProgress();
@@ -98,6 +97,16 @@ public interface StringMessages extends Messages {
     String dataMiningStoredQueryRemovedSuccessful(String name);
     String dataMiningStoredQueryRemovedFailed(String name);
     String loadOrSaveQueries();
+    String loadOrSaveReports();
+    String dataMiningStoredReportPlaceholder();
+    String dataMiningStoredReportUpdateSuccessful(String name);
+    String dataMiningStoredReportCreationSuccessful(String name);
+    String dataMiningStoredReportLoadedSuccessful(String name);
+    String dataMiningStoredReportLoadedWithErrors(String name);
+    String dataMiningStoredReportLoadedFailed(String name);
+    String dataMiningStoredReportRemovedSuccessful(String name);
+    String dataMiningStoredReportRemovedFailed(String name);
+    String dataMiningStoredReportNoQueriesWereFound();
     String whatsNewDialogTitle();
     String whatsNewDialogMessage();
     String showChangelog();

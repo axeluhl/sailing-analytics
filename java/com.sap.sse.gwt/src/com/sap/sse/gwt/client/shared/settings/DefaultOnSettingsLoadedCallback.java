@@ -7,5 +7,4 @@ public abstract class DefaultOnSettingsLoadedCallback<S extends Settings> implem
     public void onError(Throwable caught, S fallbackDefaultSettings) {
         onSuccess(fallbackDefaultSettings);
     }
-
 }

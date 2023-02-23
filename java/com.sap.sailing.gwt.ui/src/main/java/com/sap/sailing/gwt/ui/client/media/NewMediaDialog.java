@@ -2,15 +2,18 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -93,7 +96,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             } else if (media.title == null || media.title.trim().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.name());
             } else if (media.mimeType == null) {
-                errorMessage = stringMessages.pleaseEnterA(stringMessages.mimeType());
+                errorMessage = stringMessages.fileTypeNotSupported();
             } else if (media.startTime == null) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.startTime());
             } else if (media.duration == null) {
@@ -152,18 +155,16 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         this.assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         this.assignedRaces.add(raceIdentifier);
         this.mediaService = mediaService;
-
-        urlBox = new URLFieldWithFileUpload(stringMessages, true, false, "audio/*,video/*");
-        urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+        urlBox = new URLFieldWithFileUpload(stringMessages, /* multi */ false, /* initiallyEnabled */ true, /* showUrlAfterUpload */ false, "audio/*,video/*");
+        urlBox.addValueChangeHandler(new ValueChangeHandler<Map<String, String>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
+            public void onValueChange(ValueChangeEvent<Map<String, String>> event) {
                 nameBox.setValue(urlBox.getName());
                 mediaTrack.title = nameBox.getValue();
                 validateAndUpdate();
             }
         });
         getCancelButton().addClickHandler(clickEvent-> urlBox.deleteCurrentFile());
-        
         nameBox = createTextBox(null);
         nameBox.addStyleName(RESOURCES.css().nameBoxClass());
         nameBox.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -232,7 +233,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     @Override
     protected void validateAndUpdate() {
         super.validateAndUpdate();
-        if (urlBox.getURL() == null || urlBox.getURL().isEmpty()) {
+        if (urlBox.getUri() == null || urlBox.getUri().isEmpty()) {
             getOkButton().setEnabled(false);
         }
     }
@@ -258,10 +259,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 }
             }
         }
+        if (mimeTypeListBox.getSelectedIndex() < 1) {
+            mediaTrack.mimeType = null;
+        }
     }
 
     protected void updateFromUrl() {
-        String url = urlBox.getValue();
+        String url = urlBox.getUri();
         if (url != null && !url.isEmpty()) {
             boolean urlChanged = !url.equals(lastCheckedUrl);
             lastCheckedUrl = url;
@@ -269,12 +273,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 remoteMp4WasStarted = false;
                 remoteMp4WasFinished = false;
                 manuallyEditedStartTime = false;
-
                 if (mediaTrack.startTime == null) {
                     mediaTrack.startTime = defaultStartTime;
                 }
-
-                
                 boolean isVimeoUrl = isVimeoUrl(url);
                 String youtubeId = YoutubeApi.getIdByUrl(url);
                 if (youtubeId != null) {
@@ -310,20 +311,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     anchor.setHref(url);
                     //remove trailing / as well
                     String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
-                    int dotPos = lastPathSegment.lastIndexOf('.');
-                    if (dotPos >= 0) {
-                        String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
-                        List<MimeType> possibleMimeTypes = MimeType.byExtension(fileEnding);
-                        if (possibleMimeTypes.size() > 0) {
-                            mediaTrack.mimeType = possibleMimeTypes.get(0);
-                        } else {
-                            mediaTrack.mimeType = null;
-                        }
-                        if (mediaTrack.mimeType != null && MediaSubType.mp4 == mediaTrack.mimeType.getMediaSubType()) {
-                            processMp4(mediaTrack);
-                        } else {
-                            loadMediaDuration();
-                        }
+                    MimeType mimeType = MimeType.byExtension(lastPathSegment);
+                    if (mimeType != MimeType.unknown) {
+                        mediaTrack.mimeType = mimeType;
                     } else {
                         mediaTrack.mimeType = null;
                     }
@@ -446,7 +436,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     }
     
     private void requestProgressPercentage(final Timer t, final Label counter) {
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, PROGRESS_STATUS_URL);
+        final RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, PROGRESS_STATUS_URL);
         builder.setHeader(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA(), HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB());
         try {
             builder.sendRequest(null, new RequestCallback() {
@@ -572,6 +562,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             }
             @Override
             public void onFailure(Throwable caught) {
+                GWT.log("Error in backend", caught);
                 busyIndicator.setBusy(false);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack, MimeType.mp4MimeTypes());
@@ -671,6 +662,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         for (int i = 0; i < proposedMimeTypes.length; i++) {
             mimeTypeListBox.addItem(proposedMimeTypes[i].name());
         }
+        mimeTypeListBox.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                mediaTrack.mimeType = MimeType.byName(mimeTypeListBox.getSelectedValue());
+                validateAndUpdate();
+            }
+        });
         fp.add(mimeTypeListBox);
         infoLabel.setWidget(fp);
         updateBoxByMimeType();

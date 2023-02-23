@@ -18,6 +18,8 @@ public interface SharedHomeResources extends CommonIcons {
     public interface LocalCss extends CssResource {
         String primary();
 
+        String headerButton();
+
         String right();
 
         String label();

@@ -31,7 +31,6 @@ public class AnchorDataMiningSettingsControl extends AbstractDataMiningComponent
     public AnchorDataMiningSettingsControl(Component<?> parent, ComponentContext<?> context) {
         super(parent, context);
         components = new LinkedHashSet<>();
-
         anchor = new Anchor(AbstractImagePrototype.create(resources.darkSettingsIcon()).getSafeHtml());
         anchor.addStyleName("settingsAnchor");
         anchor.setTitle(getDataMiningStringMessages().dataMiningSettings());

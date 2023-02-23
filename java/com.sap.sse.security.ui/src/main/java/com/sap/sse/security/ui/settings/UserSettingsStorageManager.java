@@ -185,7 +185,6 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
         keys.add(storageKeyForUserSettings);
         keys.add(storageKeyForDocumentSettings);
         userService.getPreferences(keys, new AsyncCallback<Map<String, String>>() {
-
             @Override
             public void onSuccess(Map<String, String> result) {
                 String userSettings = result.get(storageKeyForUserSettings);
@@ -211,7 +210,6 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
         retrieveSettingsCallbacksQueue.add(callback);
         if (userStatusEventHandler == null) {
             this.userStatusEventHandler = new UserStatusEventHandler() {
-
                 // call this method always on user status change event in order to cause sync between local storage
                 // and server
                 @Override

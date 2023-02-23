@@ -194,6 +194,23 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
                      SettingsType defaultSettings, String retrievedDataTypeMessageKey);
     
     /**
+     * Combines {@link #startWith(Class, Class, String)} and {@link #endWith(Class, Class, Class, String)} by marking this
+     * chain as complete with only this single step.
+     */
+    void startAndEndWith(Class<? extends Processor<DataSourceType, DataType>> retrieverType,
+            Class<DataType> retrievedDataType, String retrievedDataTypeMessageKey);
+
+    /**
+     * Combines {@link #startWith(Class, Class, Class, SerializableSettings, String) and
+     * {@link #endWith(Class, Class, Class, Class, SerializableSettings, String) by marking this chain as complete with
+     * only this single step.
+     */
+    <SettingsType extends SerializableSettings> void startAndEndWith(
+            Class<? extends Processor<DataSourceType, DataType>> retrieverType, Class<DataType> retrievedDataType,
+            Class<SettingsType> settingsType, SettingsType defaultSettings, String retrievedDataTypeMessageKey);
+
+
+    /**
      * @return The chain represented as list of the retriever levels with additional informations like their
      *         <code>RetrieverType</code>, <code>ResultType</code> or message key
      */

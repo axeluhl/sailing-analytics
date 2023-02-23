@@ -132,6 +132,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        this.ensureDebugId("eventDialog");
         this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();

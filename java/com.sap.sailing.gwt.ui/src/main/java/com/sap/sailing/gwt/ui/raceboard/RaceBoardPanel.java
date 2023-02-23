@@ -265,25 +265,26 @@ public class RaceBoardPanel
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
+        regattaAndRaceTimeInformationHeader.getElement().getStyle().setProperty("pointerEvents", "auto");
         Runnable shareLinkAction = null;
-        if(raceboardContextDefinition != null) {
+        if (raceboardContextDefinition != null) {
             final RaceboardContextDefinition strippedRaceBoardContextDefinition = new RaceboardContextDefinition(
                     raceboardContextDefinition.getRegattaName(), raceboardContextDefinition.getRaceName(),
                     raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                     raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
             final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(RACEBOARD_PATH, strippedRaceBoardContextDefinition);
-            if(showChartMarkEditMediaButtonsAndVideo) {
+            if (showChartMarkEditMediaButtonsAndVideo) {
                 shareLinkAction = () -> {
                     final ShareLinkDialog shareLinkDialog = new ShareLinkDialog(RACEBOARD_PATH, lifecycle,
                             getSettings(), sailingService, stringMessages, linkWithSettingsGenerator);
                     shareLinkDialog.initLinkAndShow();
                 };
-            }else {
-                if(NavigatorUtil.clientHasNavigatorShareSupport()) {
+            } else {
+                if (NavigatorUtil.clientHasNavigatorShareSupport()) {
                     shareLinkAction = () -> {
                         NavigatorUtil.shareUrl(linkWithSettingsGenerator.createUrl(getSettings()), null);
                     };
-                }else if(NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
+                } else if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
                     shareLinkAction = () ->{
                         NavigatorUtil.copyToClipboard(linkWithSettingsGenerator.createUrl(getSettings()));
                     };
@@ -294,6 +295,7 @@ public class RaceBoardPanel
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(),
                 mainCss.usermanagement_open(), mainCss.user_menu_premium());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
+        this.userManagementMenuView.asWidget().getElement().getStyle().setProperty("pointerEvents", "auto");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);

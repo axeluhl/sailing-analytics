@@ -10,6 +10,9 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
+/**
+ * Equality is based solely on the {@link #getManeuver() maneuver} that constitutes the mark passing.
+ */
 public class MarkPassingWithContext implements HasMarkPassingContext {
     private static final long serialVersionUID = -337042113749307686L;
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
@@ -21,6 +24,31 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver markPassingManeuver) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.maneuver = markPassingManeuver;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((maneuver == null) ? 0 : maneuver.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MarkPassingWithContext other = (MarkPassingWithContext) obj;
+        if (maneuver == null) {
+            if (other.maneuver != null)
+                return false;
+        } else if (!maneuver.equals(other.maneuver))
+            return false;
+        return true;
     }
 
     @Override

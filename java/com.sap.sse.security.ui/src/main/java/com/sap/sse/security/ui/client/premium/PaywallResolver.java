@@ -75,7 +75,7 @@ public class PaywallResolver {
 
     /**
      * Get the permission based on the given action and secured DTO context object. If the disabled flag (Bug 5696
-     * workaraound) is set on {@link PaywallResolver} the result will always be TRUE. If no action is set the default
+     * workaround) is set on {@link PaywallResolver} the result will always be TRUE. If no action is set the default
      * {@link DefaultActions}.READ will be used. From the {@link UserService} there is the default behavior, that if the
      * context object is NULL the result is set to FALSE.
      * 

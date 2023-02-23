@@ -106,7 +106,6 @@ public class WhitelabelTest extends AbstractSeleniumTest {
         validateIsDisplayed(homePage.getImprintLink(), false);
         validateIsDisplayed(homePage.getPrivacyLink(), false);
         validateIsDisplayed(homePage.getSupportLink(), false);
-        validateIsDisplayed(homePage.getFeedbackLink(), false);
         validateIsDisplayed(homePage.getNewsLink(), false);
         validateIsDisplayed(homePage.getLanguageSelectionLabel(), true);
         assertThat(homePage.getLanguageSelectionLabel().getText(), not(containsString("SAP")));

@@ -51,14 +51,26 @@ public abstract class Subscription implements Serializable {
     private final TimePoint trialEnd;
 
     /**
-     * Subscription status, it could be trial, active, or cancelled.
+     * Subscription status; from the Chargebee docs:
+     * <p>
+     * 
+     * Possible values are:
+     * <ul>
+     * <li><tt>future</tt> The subscription is scheduled to start at a future date.</li>
+     * <li><tt>in_trial</tt> The subscription is in trial.</li>
+     * <li><tt>active</tt> The subscription is active and will be charged for automatically based on the items in
+     * it.</li>
+     * <li><tt>non_renewing</tt> The subscription will be canceled at the end of the current term.</li>
+     * <li><tt>paused</tt> The subscription is paused. The subscription will not renew while in this state.</li>
+     * <li><tt>cancelled</tt> The subscription has been canceled and is no longer in service.</li>
+     * </ul>
      */
     private final String subscriptionStatus;
 
     /**
      * Subscription payment status, it records if user has successfully paid for the subscription. User will pay for the
-     * subscription only if the subscription is turned to active(after trial period) If user has successfully paid for
-     * the subscription, this has value success, otherwise no_success
+     * subscription only if the subscription is turned to active (after trial period). If user has successfully paid for
+     * the subscription, this has value {@code "success"}, otherwise {@code "no_success"}
      */
     protected String paymentStatus;
 
@@ -199,6 +211,21 @@ public abstract class Subscription implements Serializable {
         return trialEnd;
     }
 
+    /**
+     * Returns the subscription status; from the Chargebee docs:
+     * <p>
+     * 
+     * Possible values are:
+     * <ul>
+     * <li><tt>future</tt> The subscription is scheduled to start at a future date.</li>
+     * <li><tt>in_trial</tt> The subscription is in trial.</li>
+     * <li><tt>active</tt> The subscription is active and will be charged for automatically based on the items in
+     * it.</li>
+     * <li><tt>non_renewing</tt> The subscription will be canceled at the end of the current term.</li>
+     * <li><tt>paused</tt> The subscription is paused. The subscription will not renew while in this state.</li>
+     * <li><tt>cancelled</tt> The subscription has been canceled and is no longer in service.</li>
+     * </ul>
+     */
     public String getSubscriptionStatus() {
         return subscriptionStatus;
     }

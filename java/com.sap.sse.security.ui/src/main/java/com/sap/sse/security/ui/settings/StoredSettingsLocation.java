@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.settings;
 
 import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
+import com.sap.sse.security.shared.SettingsAndPreferencesConstants;
 
 /**
  * Represents the definition for User Settings and Document Settings storage keys, which may be required by
@@ -11,9 +12,6 @@ import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
  *
  */
 public class StoredSettingsLocation {
-
-    public static final String DOCUMENT_SETTINGS_SUFFIX_SEPARATOR = "#";
-
     private final String PREFIX;
 
     private final String userSettingsIdPart;
@@ -55,7 +53,7 @@ public class StoredSettingsLocation {
      * @return Storage key for Document Settings
      */
     public String generateStorageKeyForDocumentSettings() {
-        return generateStorageKeyForUserSettings() + DOCUMENT_SETTINGS_SUFFIX_SEPARATOR + documentSettingsIdPart;
+        return generateStorageKeyForUserSettings() + SettingsAndPreferencesConstants.DOCUMENT_SETTINGS_SUFFIX_SEPARATOR + documentSettingsIdPart;
     }
 
     /**

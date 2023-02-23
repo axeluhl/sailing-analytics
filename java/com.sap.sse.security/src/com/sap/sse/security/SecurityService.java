@@ -298,6 +298,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void setPreference(String username, String key, String value);
 
+    /**
+     * @see UserStore#setPreferenceObject(String, String, Object)}
+     */
     void setPreferenceObject(String name, String preferenceKey, Object preference);
 
     /**

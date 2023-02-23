@@ -127,7 +127,6 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             if (settingsStorageManager != null) {
                 settingsStorageManager.retrieveSettingsRepresentation(
                         new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
-
                             @Override
                             public void onError(Throwable caught,
                                     StorableRepresentationOfDocumentAndUserSettings fallbackSettingsRepresentation) {
@@ -140,13 +139,11 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
                                     StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
                                 callback.onSuccess(getSettingsObject(settingsRepresentation, systemDefaultSettings));
                             }
-
                         });
             } else {
                 callback.onSuccess(getSettingsObject(new StorableRepresentationOfDocumentAndUserSettings(null, null),
                         systemDefaultSettings));
             }
-
         } else {
             S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(systemDefaultSettings,
                     cachedSettingsRepresentation);

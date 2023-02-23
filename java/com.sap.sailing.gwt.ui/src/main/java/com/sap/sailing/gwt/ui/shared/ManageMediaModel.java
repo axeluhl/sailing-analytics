@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -110,22 +111,40 @@ public class ManageMediaModel {
         });
     }
 
-    public void addImage(ImageDTO image, Consumer<EventDTO> callback) {
+    public void addImages(List<ImageDTO> imageList, Consumer<EventDTO> callback) {
         loadEventData(eventDto -> {
-            eventDto.getImages().add(image);
+            for (ImageDTO image: imageList) {
+                eventDto.getImages().add(image);
+                mediaDto.addPhoto(new SailingImageDTO(null, image));
+            }
             updateEventDto(eventDto, callback);
-            mediaDto.addPhoto(new SailingImageDTO(null, image));
         });
     }
 
-    public void addVideo(VideoDTO video, Consumer<EventDTO> callback) {
+    public void addVideos(List<VideoDTO> videoList, Consumer<EventDTO> callback) {
         loadEventData(eventDto -> {
-            eventDto.getVideos().add(video);
+            for (VideoDTO video: videoList) {
+                eventDto.getVideos().add(video);
+                mediaDto.addVideo(new SailingVideoDTO(null, video));
+            }
             updateEventDto(eventDto, callback);
-            mediaDto.addVideo(new SailingVideoDTO(null, video));
         });
     }
-    
+
+    public void addImagesAndVideos(List<ImageDTO> imageList, List<VideoDTO> videoList, Consumer<EventDTO> callback) {
+        loadEventData(eventDto -> {
+            for (ImageDTO image: imageList) {
+                eventDto.getImages().add(image);
+                mediaDto.addPhoto(new SailingImageDTO(null, image));
+            }
+            for (VideoDTO video: videoList) {
+                eventDto.getVideos().add(video);
+                mediaDto.addVideo(new SailingVideoDTO(null, video));
+            }
+            updateEventDto(eventDto, callback);
+        });
+    }
+
     public void reloadMedia(Consumer<EventDTO> callback) {
         loadEventData(eventDto -> {
             setVideos(eventDto.getVideos());
@@ -156,7 +175,6 @@ public class ManageMediaModel {
                 public void onSuccess(EventDTO eventDto) {
                     setEventDto(eventDto);
                     callback.accept(eventDto);
-                    Notification.notify(i18n.updateEventSuccessfully(), NotificationType.SUCCESS);
                 }
 
                 @Override
@@ -169,7 +187,7 @@ public class ManageMediaModel {
     }
 
     /**
-     * Check media update permission on default object (eventViewDTO from init).
+     * Check permission on default object (eventViewDTO from init).
      */
     public boolean hasPermissions() {
         final boolean hasPermission;

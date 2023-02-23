@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.presentation.dataproviders.AbstractNumericDataProvider;
 import com.sap.sse.datamining.ui.client.presentation.dataproviders.AverageWithStatsDataProvider;
@@ -37,7 +38,6 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
 
     public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?> context) {
         super(parent, context);
-
         final List<AbstractNumericDataProvider<? extends Serializable>> basicProviders = Arrays.asList(
                 new NumberDataProvider(), new DistanceDataProvider(), new DurationDataProvider(),
                 new BearingDataProvider());
@@ -70,13 +70,13 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
      * {@link Number}s returned by the provider will then be passed to {@link #internalShowNumericResults(Map, Map)} for
      * display.
      */
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResults(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         currentDataProvider = dataProviders.selectCurrentDataProvider(result.getResultType());
         updateDataSelectionListBox();
         if (currentDataProvider != null) {
-            Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(),
+            final Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(),
                     dataSelectionListBox.getValue());
-            Map<GroupKey, Triple<Number, Number, Long>> errorMargins = currentDataProvider
+            final Map<GroupKey, Triple<Number, Number, Long>> errorMargins = currentDataProvider
                     .getErrorData(getCurrentResult(), dataSelectionListBox.getValue());
             internalShowNumericResults(resultValues, errorMargins);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -86,7 +86,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
                 }
             });
         } else {
-            showError(getDataMiningStringMessages().cantDisplayDataOfType(getCurrentResult().getResultType()));
+            showError(queryDefinition, getDataMiningStringMessages().cantDisplayDataOfType(getCurrentResult().getResultType()));
         }
     }
 

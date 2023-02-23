@@ -20,10 +20,18 @@ public class StrategyPerQueryTypeManager implements DataMiningQueryManager {
     private final AtomicInteger runningQueryCounter;
     
     public StrategyPerQueryTypeManager() {
+        // here is a possibility to provide different query managers for different types of queries;
+        // also see bug 5813; there used to be different managers trying to allow only one query per
+        // scope, but the problem was that within a single session multiple queries could need to run
+        // in parallel, and server-side we currently have no good way to identify two Query objects as
+        // referring to the same query on the client side because there is no stable ID on those Query
+        // objects. The same goes for Dimension queries where different queries may use equal dimensions
+        // that here couldn't be told apart. So currently we're not using any aborting query managers
+        // but instead rely on resource consumption-based query aborting.
         managersMappedByQueryType = new HashMap<>();
-        managersMappedByQueryType.put(QueryType.STATISTIC, new SingleQueryPerSessionManager());
-        managersMappedByQueryType.put(QueryType.DIMENSION_VALUES, new SingleQueryPerDimensionManager());
         managersMappedByQueryType.put(QueryType.OTHER, NULL);
+        managersMappedByQueryType.put(QueryType.STATISTIC, NULL);
+        managersMappedByQueryType.put(QueryType.DIMENSION_VALUES, NULL);
         runningQueryCounter = new AtomicInteger();
     }
 

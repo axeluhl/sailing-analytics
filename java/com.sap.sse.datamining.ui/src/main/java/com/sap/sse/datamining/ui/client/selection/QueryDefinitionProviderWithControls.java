@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.builder.shared.HtmlBuilderFactory;
 import com.google.gwt.dom.builder.shared.HtmlUListBuilder;
 import com.google.gwt.dom.client.Style.Overflow;
@@ -34,9 +35,13 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
+import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -48,10 +53,12 @@ import com.sap.sse.datamining.ui.client.DataMiningComponentProvider;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
+import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.GroupingChangedListener;
 import com.sap.sse.datamining.ui.client.GroupingProvider;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.StatisticChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
@@ -69,6 +76,13 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * Contains the widgets through which a {@link StatisticQueryDefinitionDTO} can be viewed and edited. This in particular
+ * includes a {@link StatisticProvider} which in turn manages the aggregation function selection widget and the
+ * statistic function selected; a {@link GroupingProvider} through which the user selects one or more dimensions by
+ * which to group results, and a {@link FilterSelectionProvider} used to show the dimensions by which the user can
+ * filter, grouped by the retriever levels of the retriever chain implied by the statistic selected by the user.
+ */
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings>
         implements WithControls {
 
@@ -97,16 +111,35 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     private final Panel applyQueryBusyIndicator;
     
-    private final DialogBox confirmChangeLossDialog;
-    private StatisticQueryDefinitionDTO queryDefinitionToBeApplied;
     private boolean queryDefinitionChanged;
+    
+    /**
+     * Maintains the UI state regarding the binding of {@link FilterDimensionParameter report parameters} to dimension
+     * filters. Within this editor, users can bind / unbind dimensions to / from parameters from a
+     * {@link DataMiningReportDTO}. These bindings cannot be updated into the report as they occur in the UI because no
+     * {@link StatisticQueryDefinitionDTO} object will exist until one of the {@link #getQueryDefinition()} or
+     * {@link #getQueryDefinitionAndReportParameterBinding()} methods are invoked, which is when a new query object is
+     * created from the UI state.
+     * <p>
+     * 
+     * A copy of these parameter bindings will be returned by {@link #getQueryDefinitionAndReportParameterBinding()}
+     * together with the query so that the current report can be updated from it. See also
+     * {@link DataMiningReportDTO#replaceQueryDefinition(StatisticQueryDefinitionDTO, ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings)}.
+     */
+    private final ReportParameterToDimensionFilterBindings reportParameterBindings;
+    
+    private final ReportProvider reportProvider;
 
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
-            DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            DataMiningSettingsControl settingsControl, DataMiningSettingsInfoManager settingsManager,
-            Consumer<StatisticQueryDefinitionDTO> queryRunner) {
+            DataMiningSession session, DataMiningServiceAsync dataMiningService, ReportProvider reportProvider,
+            ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
+            DataMiningSettingsInfoManager settingsManager, Consumer<Pair<ModifiableStatisticQueryDefinitionDTO,
+            ReportParameterToDimensionFilterBindings>> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
+        this.reportProvider = reportProvider;
+        this.reportParameterBindings = new ReportParameterToDimensionFilterBindings();
         providerListener = new ProviderListener();
+        mainPanel = new LayoutPanel();
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("dataMiningMarginBase");
@@ -114,12 +147,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         // instead of pushing its content into the next line when there is not enough space.
         controlsPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
         controlsPanel.getElement().getStyle().setWhiteSpace(WhiteSpace.NOWRAP);
-
         this.settingsControl = settingsControl;
         addControl(this.settingsControl.getEntryWidget());
         settings = new AdvancedDataMiningSettings();
         this.settingsControl.addSettingsComponent(this);
-
         queryDefinitionViewerToggleButton = new ToggleButton(getDataMiningStringMessages().viewQueryDefinition(),
                 new ClickHandler() {
                     @Override
@@ -135,7 +166,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, getDataMiningStringMessages(),
                                                           dataMiningService, errorReporter, this, queryRunner);
-
         reloadComponentsButton = new Button(getDataMiningStringMessages().reloadComponents());
         reloadComponentsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -143,37 +173,30 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 reloadComponents();
             }
         });
-
         if (settings.isDeveloperOptions()) {
             addControl(reloadComponentsButton);
             addControl(queryDefinitionViewerToggleButton);
             addControl(predefinedQueryRunner.getEntryWidget());
         }
-        
-        confirmChangeLossDialog = createConfirmChangeLossDialog();
-
+        // Setting up the query component providers
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
                                                             errorReporter, settingsControl, settingsManager);
         Widget statisticProviderWidget = statisticProvider.getEntryWidget();
         statisticProviderWidget.addStyleName("dataMiningMarginBase");
         statisticProvider.addStatisticChangedListener(providerListener);
-        
         groupingProvider = new MultiDimensionalGroupingProvider(parent, context, dataMiningService,
                                                                 errorReporter, statisticProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
         groupingProvider.getEntryWidget().addStyleName("dataMiningMarginBase");
-
         filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(parent, context, session,
-                dataMiningService, errorReporter, statisticProvider);
+                dataMiningService, errorReporter, statisticProvider, reportProvider, reportParameterBindings);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSelectionProvider.getEntryWidget().addStyleName("dataMiningBorderTop");
-        
         filterSplitPanel = new SplitLayoutPanel(SplitterSize);
         filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), FooterPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), InitialQueryDefinitionViewerWidth);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
-        
         Widget glass = new SimplePanel();
         glass.addStyleName("whiteGlass");
         HTML labeledBusyIndicator = new HTML(SafeHtmlUtils.fromString(getDataMiningStringMessages().applyingQuery()));
@@ -181,51 +204,41 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         applyQueryBusyIndicator = new LayoutPanel();
         applyQueryBusyIndicator.add(glass);
         applyQueryBusyIndicator.add(labeledBusyIndicator);
-
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(SplitterSize);
         headerPanel.addWest(statisticProviderWidget, InitialStatisticProviderWidth);
         headerPanel.add(controlsPanel);
-        
         DockLayoutPanel contentPanel = new DockLayoutPanel(Unit.PX);
         contentPanel.addNorth(headerPanel, HeaderPanelHeight);
         contentPanel.add(filterSplitPanel);
-        
-        mainPanel = new LayoutPanel();
         mainPanel.add(contentPanel);
-
         // Storing the different component providers in a list
         providers = new ArrayList<>();
         providers.add(statisticProvider);
         providers.add(groupingProvider);
         providers.add(filterSelectionProvider);
         reloadComponents();
+        // Setting up dialogs and event handlers
     }
 
-    private DialogBox createConfirmChangeLossDialog() {
+    private DialogBox createConfirmChangeLossDialog(StatisticQueryDefinitionDTO queryDefinition) {
         StringMessages stringMessages = getDataMiningStringMessages();
-        
         DialogBox dialog = new DialogBox(false, true);
         dialog.setAnimationEnabled(true);
         dialog.setText(stringMessages.changesWillBeLost());
         dialog.setGlassEnabled(true);
-
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setSpacing(5);
         contentPanel.add(new HTML(new SafeHtmlBuilder()
                 .appendEscapedLines(stringMessages.confirmQueryDefinitionChangeLoss()).toSafeHtml()));
-        
         CheckBox rememberDecisionCheckBox = new CheckBox(stringMessages.rememberDecisionCanBeChangedInSettings());
         contentPanel.add(rememberDecisionCheckBox);
-
         FlowPanel buttonPanel = new FlowPanel();
         buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
-        
         Button discardChanges = new Button(stringMessages.discardChanges());
         discardChanges.addClickHandler(e -> {
             dialog.hide();
-            setQueryDefinition(queryDefinitionToBeApplied);
-            queryDefinitionToBeApplied = null;
+            setQueryDefinition(queryDefinition);
             if (rememberDecisionCheckBox.getValue()) {
                 settings.setChangeLossStrategy(ChangeLossStrategy.DISCARD_CHANGES);
                 rememberDecisionCheckBox.setValue(false);
@@ -233,7 +246,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         });
         discardChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(discardChanges);
-        
         Button keepChanges = new Button(stringMessages.keepChanges());
         keepChanges.addClickHandler(e -> {
             dialog.hide();
@@ -244,9 +256,12 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         });
         keepChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(keepChanges);
-
         dialog.setWidget(contentPanel);
         return dialog;
+    }
+    
+    public DataRetrieverChainDefinitionProvider getRetrieverChainProvider() {
+        return this.statisticProvider;
     }
 
     /**
@@ -313,24 +328,26 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     @Override
-    public StatisticQueryDefinitionDTO getQueryDefinition() {
+    public ModifiableStatisticQueryDefinitionDTO getQueryDefinition() {
         ModifiableStatisticQueryDefinitionDTO queryDTO = new ModifiableStatisticQueryDefinitionDTO(
                 LocaleInfo.getCurrentLocale().getLocaleName(), statisticProvider.getExtractionFunction(),
                 statisticProvider.getAggregatorDefinition(), statisticProvider.getDataRetrieverChainDefinition());
         for (FunctionDTO dimension : groupingProvider.getDimensionsToGroupBy()) {
             queryDTO.appendDimensionToGroupBy(dimension);
         }
-
         for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsEntry : statisticProvider.getRetrieverSettings().entrySet()) {
             queryDTO.setRetrieverSettings(retrieverSettingsEntry.getKey(), retrieverSettingsEntry.getValue());
         }
-
         for (Entry<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionEntry : filterSelectionProvider
                 .getSelection().entrySet()) {
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
-
         return queryDTO;
+    }
+
+    @Override
+    public Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> getQueryDefinitionAndReportParameterBinding() {
+        return new Pair<>(getQueryDefinition(), new ReportParameterToDimensionFilterBindings(reportParameterBindings));
     }
 
     @Override
@@ -339,16 +356,19 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
     
     /**
-     * Displays the given query definition, using the given {@link ChangeLossStrategy} to handle a possible loss of changes.
-     * @param queryDefinition The query to be displayed
-     * @param strategy The strategy to use if the current query definition has been changed
+     * Displays the given query definition, using the given {@link ChangeLossStrategy} to handle a possible loss of
+     * changes.
+     * 
+     * @param queryDefinition
+     *            The query to be displayed
+     * @param strategy
+     *            The strategy to use if the current query definition has been changed
      */
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, ChangeLossStrategy strategy) {
         if (queryDefinitionChanged) {
             switch (strategy) {
             case ASK:
-                queryDefinitionToBeApplied = queryDefinition;
-                confirmChangeLossDialog.center();
+                createConfirmChangeLossDialog(queryDefinition).center();
                 break;
             case DISCARD_CHANGES:
                 setQueryDefinition(queryDefinition);
@@ -363,30 +383,38 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         
     }
 
+    /**
+     * Contrary to the name, this method does not remember the entire {@link StatisticQueryDefinitionDTO} but only copies
+     * its constituents to the various elements of this UI widget. A new query definition will be produced from this
+     * editor UI in {@link #getQueryDefinition()}.
+     */
     private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        Set<ApplyCallback> callbacks = new HashSet<>();
-        Collection<String> errorMessages = new ArrayList<>();
-        String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
-        
+        final ReportParameterToDimensionFilterBindings parameterUsages = reportProvider.getCurrentReport().getReport().getParameterUsages(queryDefinition);
+        reportParameterBindings.set(parameterUsages);
+        if (parameterUsages == null) {
+            GWT.log("No parameter usages found for query");
+        } else {
+            GWT.log("Found parameter usages "+parameterUsages+" for query");
+        }
+        final Set<ApplyCallback> callbacks = new HashSet<>();
+        final Collection<String> errorMessages = new ArrayList<>();
+        final String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
         setBlockChangeNotification(true);
-        
-        ApplyCallback statisticCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+        final ApplyCallback statisticCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
         callbacks.add(statisticCallback);
         statisticProvider.applyQueryDefinition(queryDefinition, statisticCallback);
         // The statistic wasn't available, if the callback was called immediately and an error occurred
         // Applying the query to the remaining component providers can be skipped
         if (!callbacks.isEmpty() || errorMessages.isEmpty()) {
-            ApplyCallback groupingCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+            final ApplyCallback groupingCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
             callbacks.add(groupingCallback);
             groupingProvider.applyQueryDefinition(queryDefinition, groupingCallback);
-            
-            ApplyCallback filterCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+            final ApplyCallback filterCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
             callbacks.add(filterCallback);
             filterSelectionProvider.applyQueryDefinition(queryDefinition, filterCallback);
         }
-        
         if (!callbacks.isEmpty()) {
-            for (ApplyCallback callback : callbacks) {
+            for (final ApplyCallback callback : callbacks) {
                 callback.isArmed = true;
             }
             if (applyQueryBusyIndicator.getParent() == null) {
@@ -404,33 +432,28 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         applyQueryBusyIndicator.removeFromParent();
         setBlockChangeNotification(false);
         queryDefinitionChanged = false;
+        notifyQueryDefinitionChanged();
     }
     
     private void showErrorWhileApplyingQueryDialog(Iterable<String> errorMessages, String retrieverChainName) {
         StringMessages stringMessages = getDataMiningStringMessages();
-        
         DialogBox dialog = new DialogBox(false, true);
         dialog.setText(stringMessages.anErrorOccurredWhileApplyingTheQuery());
         dialog.setAnimationEnabled(true);
         dialog.setGlassEnabled(true);
-        
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.add(new HTML(SafeHtmlUtils.fromString(stringMessages.queryBasedOnRetrieverChainCanNotBeApplied(retrieverChainName))));
-        
         HtmlUListBuilder messagesBuilder = HtmlBuilderFactory.get().createUListBuilder();
         for (String errorMessage : errorMessages) {
             messagesBuilder.startLI().text(errorMessage).end();
         }
         contentPanel.add(new HTML(messagesBuilder.asSafeHtml()));
-
         FlowPanel buttonPanel = new FlowPanel();
         buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
-        
         Button okButton = new Button(stringMessages.ok());
         okButton.addClickHandler(e -> dialog.hide());
         buttonPanel.add(okButton);
-
         dialog.setWidget(contentPanel);
         dialog.center();
     }
@@ -520,7 +543,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     private class ApplyCallback implements Consumer<Iterable<String>> {
-        
         private final Collection<String> allMessages;
         private final Set<ApplyCallback> callbacks;
         private final String retrieverChainName;
@@ -540,11 +562,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 applyQueryDefinitionCompleted(allMessages, retrieverChainName);
             }
         }
-        
     }
 
     private class ProviderListener implements StatisticChangedListener, FilterSelectionChangedListener, GroupingChangedListener {
-
         @Override
         public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
             if (providersAwaitingReload()) {
@@ -584,7 +604,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 notifyQueryDefinitionChanged();
             }
         }
-
     }
 
     private class FirstDimensionSelectionDialog extends DataEntryDialog<FunctionDTO> {

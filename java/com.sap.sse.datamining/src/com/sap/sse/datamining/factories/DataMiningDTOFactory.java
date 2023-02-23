@@ -30,7 +30,6 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class DataMiningDTOFactory {
-
     public StatisticQueryDefinitionDTO createQueryDefinitionDTO(StatisticQueryDefinition<?, ?, ?, ?> queryDefinition,
             ResourceBundleStringMessages stringMessages, Locale locale, String localeInfoName) {
         FunctionDTO statisticToCalculate = createFunctionDTO(queryDefinition.getStatisticToCalculate(), stringMessages,
@@ -41,7 +40,6 @@ public class DataMiningDTOFactory {
                 queryDefinition.getDataRetrieverChainDefinition(), stringMessages, locale);
         ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = new ModifiableStatisticQueryDefinitionDTO(
                 localeInfoName, statisticToCalculate, aggregatorDefinition, dataRetrieverChainDefinition);
-
         Map<DataRetrieverLevel<?, ?>, SerializableSettings> retrieverSettings = queryDefinition.getRetrieverSettings();
         Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = queryDefinition
                 .getFilterSelection();
@@ -55,7 +53,6 @@ public class DataMiningDTOFactory {
             if (levelSettings != null) {
                 queryDefinitionDTO.setRetrieverSettings(retrieverLevelDTO, levelSettings);
             }
-            
             HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection = new HashMap<>();
             if (filterSelection.containsKey(retrieverLevel)) {
                 for (Entry<Function<?>, Collection<?>> dimensionFilterSelection : filterSelection.get(retrieverLevel)
@@ -69,11 +66,9 @@ public class DataMiningDTOFactory {
             }
             queryDefinitionDTO.setFilterSelectionFor(retrieverLevelDTO, levelFilterSelection);
         }
-
         for (Function<?> dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
             queryDefinitionDTO.appendDimensionToGroupBy(createFunctionDTO(dimensionToGroupBy, stringMessages, locale));
         }
-
         return queryDefinitionDTO;
     }
 
