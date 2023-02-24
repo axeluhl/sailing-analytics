@@ -152,6 +152,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                     }
                 }
                 if (nextUpdate != null) {
+                    logger.fine(()->"Handling next update task for "+trackedRace.getRaceIdentifier()+"; still "+updateQueue.size()+" tasks in the queue");
                     updateGraphGenerator(nextUpdate.getA(), nextUpdate.getB(), nextUpdate.getC());
                 }
             } while (nextUpdate != null);
