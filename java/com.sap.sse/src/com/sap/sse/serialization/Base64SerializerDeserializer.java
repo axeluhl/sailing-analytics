@@ -33,12 +33,27 @@ public class Base64SerializerDeserializer {
         return "";
     }
 
-    /** @return the {@code T} from a base 64 string deserialized with java serialization */
+    /**
+     * Tries to de-serialize the {@code data} that is assumed to be Base64-encoded. If this fails with an exception, the
+     * exception is logged with level {@link Level#SEVERE}, and {@code null} is returned.
+     * 
+     * @return the {@code T} from a base 64 string deserialized with java serialization
+     */
     public static <T extends Serializable> T fromBase64(final String data, final JoinedClassLoader classLoader) {
+        return fromBase64(data, classLoader, Level.SEVERE);
+    }
+
+    /**
+     * Tries to de-serialize the {@code data} that is assumed to be Base64-encoded. If this fails with an exception, the
+     * exception is logged with {@code logLevel} specified, and {@code null} is returned.
+     * 
+     * @return the {@code T} from a base 64 string deserialized with java serialization
+     */
+    public static <T extends Serializable> T fromBase64(final String data, final JoinedClassLoader classLoader, Level logLevel) {
         final byte[] bytes;
         try {
             bytes = Base64Utils.fromBase64(data);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | AssertionError e) {
             return null;
         }
         final ClassLoader oldThreadContextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -51,7 +66,7 @@ public class Base64SerializerDeserializer {
             final T object = (T) in.readObject();
             return object;
         } catch (IOException | ClassNotFoundException e) {
-            LOG.log(Level.SEVERE, "Could not deserialize report", e);
+            LOG.log(logLevel, "Could not deserialize report", e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldThreadContextClassLoader);
         }
