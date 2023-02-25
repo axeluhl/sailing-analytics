@@ -42,6 +42,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sailing.domain.windestimation.TimePointAndPositionWithToleranceComparator;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
@@ -127,9 +128,11 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         Wait.wait(()->!polarDataService.isCurrentlyActiveAndOrHasQueue(), /* timeout */ Optional.of(Duration.ONE_MINUTE),
                 /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for polar data service to finish computing");
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), timePointForFixes);
+        final IncrementalWindEstimation windEstimation = windEstimationFactoryService.createIncrementalWindEstimationTrack(getTrackedRace());
         getTrackedRace()
-                .setWindEstimation(windEstimationFactoryService.createIncrementalWindEstimationTrack(getTrackedRace()));
+                .setWindEstimation(windEstimation);
         getTrackedRace().waitForManeuverDetectionToFinish();
+        windEstimation.waitUntilDone();
     }
 
     @Test

@@ -117,6 +117,15 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
         return estimatedWindTrack;
     }
     
+    @Override
+    public void waitUntilDone() throws InterruptedException {
+        synchronized (this) {
+            while (updateTask != null) {
+                this.wait();
+            }
+        }
+    }
+
     /**
      * In
      * {@link IncrementalMstHmmWindEstimationForTrackedRace#newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)}
@@ -149,6 +158,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                     if (nextUpdate == null) {
                         logger.fine(()->"No more updates enqueued for "+trackedRace.getRaceIdentifier()+"; terminating update task");
                         updateTask = null;
+                        IncrementalMstHmmWindEstimationForTrackedRace.this.notifyAll();
                     }
                 }
                 if (nextUpdate != null) {
@@ -236,6 +246,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
         if (queueWasEmpty && updateTask == null) {
             logger.fine(()->"Creating a new recalculation task for "+trackedRace.getRaceIdentifier());
             updateTask = new GraphRecalculationTask();
+            IncrementalMstHmmWindEstimationForTrackedRace.this.notifyAll();
             recalculator.execute(updateTask);
         }
     }

@@ -17,6 +17,14 @@ public interface HasPreferenceContext {
     @Dimension(messageKey = "PreferenceValue")
     String getPreferenceValue();
     
+    @Dimension(messageKey = "NumberOfObjectsContained")
+    default int getNumberOfObjectsContainedDimension() {
+        return getNumberOfObjectsContained();
+    }
+
+    @Statistic(messageKey = "NumberOfObjectsContained")
+    int getNumberOfObjectsContained();
+    
     @Statistic(messageKey = "PreferenceValueSize")
     default int getPreferenceValueSize() {
         return getPreferenceValue() == null ? 0 : getPreferenceValue().length();
