@@ -36,22 +36,45 @@ public abstract class AbstractPreferenceWithContext implements HasPreferenceCont
     @Override
     public int getNumberOfObjectsContained() {
         int result;
-        if (!Util.hasLength(getPreferenceValue())) {
-            result = 0;
+        final String stringValue = getPreferenceValue();
+        result = getNumberOfObjectsContained(stringValue);
+        return result;
+    }
+    
+    private int getNumberOfObjectsContained(final Object o) {
+        int result = 0;
+        if (o instanceof String) {
+            result = getNumberOfObjectsContained((String) o);
+        } else  if (o instanceof JSONArray) {
+            final JSONArray array = (JSONArray) o;
+            for (final Object a : array) {
+                if (a != null) {
+                    if (a instanceof String) {
+                        result += getNumberOfObjectsContained((String) a);
+                    } else if (a instanceof JSONObject) {
+                        result += getNumberOfObjectsContained((JSONObject) a);
+                    } else {
+                        result++;
+                    }
+                }
+            }
+        } else if (o instanceof JSONObject) {
+            result = getNumberOfObjectsContained((JSONObject) o);
         } else {
-            final Object fromBase64 = Base64SerializerDeserializer.fromBase64(getPreferenceValue(), joinedClassLoader, Level.FINEST);
+            result = 1;
+        }
+        return result;
+    }
+
+    private int getNumberOfObjectsContained(final String stringValueMaybeBase64SerializedMaybeJson) {
+        int result = 0;
+        if (Util.hasLength(stringValueMaybeBase64SerializedMaybeJson)) {
+            final Object fromBase64 = Base64SerializerDeserializer.fromBase64(stringValueMaybeBase64SerializedMaybeJson, joinedClassLoader, Level.FINEST);
             if (fromBase64 == null) {
                 // probably not Base64-encoded; try JSON:
                 final JSONParser jsonParser = new JSONParser();
                 try {
-                    final Object o = jsonParser.parse(getPreferenceValue());
-                    if (o instanceof JSONArray) {
-                        result = ((JSONArray) o).size();
-                    } else if (o instanceof JSONObject) {
-                        result = ((JSONObject) o).size();
-                    } else {
-                        result = 0;
-                    }
+                    result += getNumberOfObjectsContained(jsonParser.parse(stringValueMaybeBase64SerializedMaybeJson));
                 } catch (ParseException e) {
                     result = 1; // it's a single string
                 }
@@ -60,6 +83,14 @@ public abstract class AbstractPreferenceWithContext implements HasPreferenceCont
             } else {
                 result = 1; // it's a single Java object
             }
+        }
+        return result;
+    }
+
+    private int getNumberOfObjectsContained(JSONObject a) {
+        int result = 0;
+        for (final Object o : a.values()) {
+            result += getNumberOfObjectsContained(o);
         }
         return result;
     }
