@@ -440,7 +440,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
         final User user = getUserByName(username);
-        if (user != null) {
+        if (user != null && user.isEmailValidated()) {
             final String toAddress = user.getEmail();
             if (toAddress != null) {
                 MailService mailService = getMailService();
