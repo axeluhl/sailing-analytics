@@ -150,7 +150,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.defaultWriteObject();
-        oos.writeObject(new ArrayList<>(roles));
+        oos.writeObject(new ArrayList<>(getRolesInternal()));
     }
     
     @SuppressWarnings("unchecked")

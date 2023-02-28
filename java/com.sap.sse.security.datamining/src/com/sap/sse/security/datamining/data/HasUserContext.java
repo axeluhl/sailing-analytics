@@ -36,6 +36,16 @@ public interface HasUserContext {
         return Util.hasLength(getUser().getFullName());
     }
     
+    @Dimension(messageKey="FullName")
+    default String getFullName() {
+        return getUser().getFullName();
+    }
+    
+    @Dimension(messageKey="EMail")
+    default String getEMail() {
+        return getUser().getEmail();
+    }
+    
     @Dimension(messageKey="HasCompany")
     default boolean hasCompany() {
         return Util.hasLength(getUser().getCompany());
