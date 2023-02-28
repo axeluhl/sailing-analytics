@@ -35,7 +35,7 @@
             }
          ]
       },
-      {  
+      {
          "collectionName":"LandscapeManagementUi",
          "folders":[  
             {  
@@ -52,7 +52,24 @@
             }
          ]
       },
-      {  
+      {
+         "collectionName":"SailingLandscape",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.landscape/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/SailingLandscape_StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
          "collectionName":"SecurityDataMining",
          "folders":[  
             {  
