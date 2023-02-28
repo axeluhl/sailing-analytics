@@ -410,4 +410,23 @@ public interface LandscapeService {
     void addShard(Iterable<String> selectedLeaderboardNames, 
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, 
             AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName) throws Exception;
+
+    /**
+     * Removes all application processes {@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
+     * found running} on {@code host} and deploys them to another host. The configuration of all application processes
+     * found on that host is read and remembered so it can be applied on the new host to create an equivalent process.
+     * 
+     * @param host
+     *            must be a "multi-instance" host intended for sharing; this must be indicated by the tag value
+     *            {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE "___multi___"} on the {@code sailing-analytics-server} tag of the instance. Otherwise, the
+     *            method will throw an {@link IllegalStateException}.
+     * @param optionalInstanceTypeForNewInstance
+     * @param optionalPreferredInstanceToDeployTo
+     * @param optionalKeyName
+     * @param privateKeyEncryptionPassphrase
+     */
+    void moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
+            Optional<InstanceType> optionalInstanceTypeForNewInstance,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase);
 }

@@ -1678,4 +1678,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             .build()
             .run();
     }
+    
+    @Override
+    public void moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
+            Optional<InstanceType> optionalInstanceTypeForNewInstance,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) {
+        
+    }
 }
