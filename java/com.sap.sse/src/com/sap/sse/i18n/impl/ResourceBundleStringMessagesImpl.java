@@ -71,7 +71,7 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
         return i < message.length() - 1 && message.charAt(i) == '\'' && message.charAt(i + 1) == '\'';
     }
 
-    private static final Pattern placeholderMatcher = Pattern.compile("\\{([0-9]+)\\}.*$");
+    private static final Pattern placeholderMatcher = Pattern.compile("\\{([0-9]+)\\}.*", Pattern.DOTALL);
 
     /**
      * @return -1 if there is no placeholder starting at character {@code i} in {@code message}, or the number of the
