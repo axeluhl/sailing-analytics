@@ -1510,9 +1510,16 @@ public class LandscapeServiceImpl implements LandscapeService {
                 serverAction -> getSecurityService().getUsersWithPermissions(getReplicaSetQualifiedObjectIdentifier(replicaSet).getPermission(serverAction))
                 .forEach(usersToSendMailTo::add));
         for (final User user : usersToSendMailTo) {
-            getSecurityService().sendMail(user.getName(),
-                    stringMessages.get(user.getLocaleOrDefault(), subjectMessageKey, replicaSet.getServerName()),
-                    stringMessages.get(user.getLocaleOrDefault(), bodyMessageKey, replicaSet.getServerName()));
+            final String subject = stringMessages.get(user.getLocaleOrDefault(), subjectMessageKey, replicaSet.getServerName());
+            final String body = stringMessages.get(user.getLocaleOrDefault(), bodyMessageKey, replicaSet.getServerName());
+            if (user.isEmailValidated()) {
+                getSecurityService().sendMail(user.getName(),
+                        subject,
+                        body);
+            } else {
+                logger.warning("Not sending e-mail with subject "+subject+" to user "+user.getName()+
+                        " with e-mail address "+user.getEmail()+" because e-mail address has not been validated");
+            }
         }
     }
 
