@@ -35,6 +35,13 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
     @Override
     public String get(Locale locale, String messageKey, String... parameters) {
         final String message = getResourceBundle(locale).getString(messageKey);
+        return get(message, parameters);
+    }
+
+    /**
+     * package-protected to allow access by test fragment
+     */
+    String get(final String message, String... parameters) {
         final StringBuilder result = new StringBuilder();
         boolean withinQuotedArea = false;
         for (int i = 0; i < message.length(); i++) {

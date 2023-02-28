@@ -64,6 +64,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
@@ -1476,12 +1477,12 @@ public class LandscapeServiceImpl implements LandscapeService {
         return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), newMaster, replicaSet.getReplicas());
     }
 
-    private void sendMailAboutMasterAvailable(
+    private void sendMailAboutMasterUnavailable(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws MailException {
         sendMailToReplicaSetOwner(replicaSet, "MasterUnavailableMailSubject", "MasterUnavailableMailBody", Optional.of(ServerActions.CONFIGURE_LOCAL_SERVER));
     }
 
-    private void sendMailAboutMasterUnavailable(
+    private void sendMailAboutMasterAvailable(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws MailException {
         sendMailToReplicaSetOwner(replicaSet, "MasterAvailableMailSubject", "MasterAvailableMailBody", Optional.of(ServerActions.CONFIGURE_LOCAL_SERVER));
     }
@@ -1501,7 +1502,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             final String subjectMessageKey, final String bodyMessageKey, Optional<Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet) throws MailException {
         final OwnershipAnnotation serverOwnership = getSecurityService().getOwnership(getReplicaSetQualifiedObjectIdentifier(replicaSet));
         final User serverOwner;
-        final ResourceBundleStringMessagesImpl stringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader(), StandardCharsets.UTF_8.name());
+        final ResourceBundleStringMessages stringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader(), StandardCharsets.UTF_8.name());
         final Set<User> usersToSendMailTo = new HashSet<>();
         if (serverOwnership != null && serverOwnership.getAnnotation() != null && (serverOwner = serverOwnership.getAnnotation().getUserOwner()) != null) {
             usersToSendMailTo.add(serverOwner);
