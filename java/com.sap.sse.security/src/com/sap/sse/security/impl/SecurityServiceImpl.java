@@ -440,15 +440,20 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
         final User user = getUserByName(username);
-        if (user != null && user.isEmailValidated()) {
-            final String toAddress = user.getEmail();
-            if (toAddress != null) {
-                MailService mailService = getMailService();
-                if (mailService == null) {
-                    logger.warning(String.format("Could not send mail to user %s: no MailService found", username));
-                } else {
-                    getMailService().sendMail(toAddress, subject, body);
+        if (user != null) {
+            if (user.isEmailValidated()) {
+                final String toAddress = user.getEmail();
+                if (toAddress != null) {
+                    MailService mailService = getMailService();
+                    if (mailService == null) {
+                        logger.warning(String.format("Could not send mail to user %s: no MailService found", username));
+                    } else {
+                        getMailService().sendMail(toAddress, subject, body);
+                    }
                 }
+            } else {
+                logger.warning("Not sending e-mail with subject "+subject+" to user "+user.getName()+
+                        " with e-mail address "+user.getEmail()+" because e-mail address has not been validated");
             }
         }
     }
