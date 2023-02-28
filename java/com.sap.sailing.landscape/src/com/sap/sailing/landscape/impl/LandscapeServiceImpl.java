@@ -110,6 +110,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.util.Wait;
@@ -429,8 +430,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingServer from = sailingServerFactory.getSailingServer(new URL("https", hostnameFromWhichToArchive, "/"), bearerTokenOrNullForApplicationReplicaSetToArchive);
         final SailingServer archive = sailingServerFactory.getSailingServer(new URL("https", hostnameOfArchive, "/"), bearerTokenOrNullForArchive);
         logger.info("Importing master data from "+from+" to "+archive);
-        sendMailToReplicaSetOwner(archiveReplicaSet, "StartingToArchiveReplicaSetIntoSubject", "StartingToArchiveReplicaSetIntoBody", Optional.empty());
-        sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "StartingToArchiveReplicaSetSubject", "StartingToArchiveReplicaSetBody", Optional.empty());
+        sendMailToReplicaSetOwner(archiveReplicaSet, "StartingToArchiveReplicaSetIntoSubject", "StartingToArchiveReplicaSetIntoBody", Optional.of(ServerActions.CAN_IMPORT_MASTERDATA));
+        sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "StartingToArchiveReplicaSetSubject", "StartingToArchiveReplicaSetBody", Optional.of(ServerActions.CAN_EXPORT_MASTERDATA));
         // Note: if from.getLeaderboardGroupIds() returns an empty set, "all" leaderboards will be imported by the MDI which again is the empty set.
         // In this case, no comparison is required; in fact it wouldn't even work because passing an empty set to the archive into which the import
         // was done would implicitly compare all leaderboard groups, resulting in the entire archive server content being the "diff."
@@ -511,8 +512,8 @@ public class LandscapeServiceImpl implements LandscapeService {
                     " did not work"+(mdiProgress != null ? mdiProgress.getErrorMessage() : " (no result at all)"));
             compareServersResult = null;
         }
-        sendMailToReplicaSetOwner(archiveReplicaSet, "FinishedToArchiveReplicaSetIntoSubject", "FinishedToArchiveReplicaSetIntoBody", Optional.empty());
-        sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "FinishedToArchiveReplicaSetSubject", "FinishedToArchiveReplicaSetBody", Optional.empty());
+        sendMailToReplicaSetOwner(archiveReplicaSet, "FinishedToArchiveReplicaSetIntoSubject", "FinishedToArchiveReplicaSetIntoBody", Optional.of(ServerActions.CAN_IMPORT_MASTERDATA));
+        sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "FinishedToArchiveReplicaSetSubject", "FinishedToArchiveReplicaSetBody", Optional.of(ServerActions.CAN_EXPORT_MASTERDATA));
         return new Util.Pair<>(mdiProgress, compareServersResult);
     }
 
@@ -1477,12 +1478,12 @@ public class LandscapeServiceImpl implements LandscapeService {
 
     private void sendMailAboutMasterAvailable(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws MailException {
-        sendMailToReplicaSetOwner(replicaSet, "MasterUnavailableMailSubject", "MasterUnavailableMailBody", Optional.empty());
+        sendMailToReplicaSetOwner(replicaSet, "MasterUnavailableMailSubject", "MasterUnavailableMailBody", Optional.of(ServerActions.CONFIGURE_LOCAL_SERVER));
     }
 
     private void sendMailAboutMasterUnavailable(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws MailException {
-        sendMailToReplicaSetOwner(replicaSet, "MasterAvailableMailSubject", "MasterAvailableMailBody", Optional.empty());
+        sendMailToReplicaSetOwner(replicaSet, "MasterAvailableMailSubject", "MasterAvailableMailBody", Optional.of(ServerActions.CONFIGURE_LOCAL_SERVER));
     }
     
     /**
