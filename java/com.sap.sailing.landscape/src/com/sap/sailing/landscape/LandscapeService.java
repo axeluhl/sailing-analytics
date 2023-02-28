@@ -414,19 +414,26 @@ public interface LandscapeService {
     /**
      * Removes all application processes {@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
      * found running} on {@code host} and deploys them to another host. The configuration of all application processes
-     * found on that host is read and remembered so it can be applied on the new host to create an equivalent process.
+     * found on that host is read and remembered so it can be applied on the new host to create an equivalent process.<p>
+     * 
+     * For those processes that are the primary instance of their replica set this method ensures that there is at least one
+     * healthy replica available before moving the primary instance to the new host. When moving a primary process, it is
+     * first removed from the "-m" target group, the new process is launched on the new host, and when it is healthy it is
+     * added to the "-m" target group.<p>
+     * 
+     * Moving a replica is easier: the replica can be launched on the new host first, added to the public target group when
+     * healthy, and then the replica on the old {@code host} can be terminated and removed.
      * 
      * @param host
      *            must be a "multi-instance" host intended for sharing; this must be indicated by the tag value
-     *            {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE "___multi___"} on the {@code sailing-analytics-server} tag of the instance. Otherwise, the
-     *            method will throw an {@link IllegalStateException}.
+     *            {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE "___multi___"} on the
+     *            {@code sailing-analytics-server} tag of the instance. Otherwise, the method will throw an
+     *            {@link IllegalStateException}.
      * @param optionalInstanceTypeForNewInstance
-     * @param optionalPreferredInstanceToDeployTo
-     * @param optionalKeyName
-     * @param privateKeyEncryptionPassphrase
+     *            if not specified, the new multi-instance launched will use the same instance type as the one from
+     *            where the processes are moved away ({@code host})
      */
     void moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
             Optional<InstanceType> optionalInstanceTypeForNewInstance,
-            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase);
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase);
 }
