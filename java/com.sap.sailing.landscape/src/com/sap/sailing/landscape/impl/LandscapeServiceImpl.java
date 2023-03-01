@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.impl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,6 +63,9 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.mail.MailException;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Landscape;
@@ -100,10 +104,15 @@ import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.JvmUtils;
@@ -121,6 +130,8 @@ import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeServiceImpl implements LandscapeService {
     private static final Logger logger = Logger.getLogger(LandscapeServiceImpl.class.getName());
+    
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/SailingLandscape_StringMessages";
 
     private static final String TEMPORARY_UPGRADE_REPLICA_NAME_SUFFIX = " (Upgrade Replica)";
 
@@ -420,6 +431,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingServer from = sailingServerFactory.getSailingServer(new URL("https", hostnameFromWhichToArchive, "/"), bearerTokenOrNullForApplicationReplicaSetToArchive);
         final SailingServer archive = sailingServerFactory.getSailingServer(new URL("https", hostnameOfArchive, "/"), bearerTokenOrNullForArchive);
         logger.info("Importing master data from "+from+" to "+archive);
+        sendMailToReplicaSetOwner(archiveReplicaSet, "StartingToArchiveReplicaSetIntoSubject", "StartingToArchiveReplicaSetIntoBody", Optional.of(ServerActions.CAN_IMPORT_MASTERDATA));
+        sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "StartingToArchiveReplicaSetSubject", "StartingToArchiveReplicaSetBody", Optional.of(ServerActions.CAN_EXPORT_MASTERDATA));
         // Note: if from.getLeaderboardGroupIds() returns an empty set, "all" leaderboards will be imported by the MDI which again is the empty set.
         // In this case, no comparison is required; in fact it wouldn't even work because passing an empty set to the archive into which the import
         // was done would implicitly compare all leaderboard groups, resulting in the entire archive server content being the "diff."
@@ -500,6 +513,8 @@ public class LandscapeServiceImpl implements LandscapeService {
                     " did not work"+(mdiProgress != null ? mdiProgress.getErrorMessage() : " (no result at all)"));
             compareServersResult = null;
         }
+        sendMailToReplicaSetOwner(archiveReplicaSet, "FinishedToArchiveReplicaSetIntoSubject", "FinishedToArchiveReplicaSetIntoBody", Optional.of(ServerActions.CAN_IMPORT_MASTERDATA));
+        sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "FinishedToArchiveReplicaSetSubject", "FinishedToArchiveReplicaSetBody", Optional.of(ServerActions.CAN_EXPORT_MASTERDATA));
         return new Util.Pair<>(mdiProgress, compareServersResult);
     }
 
@@ -746,6 +761,10 @@ public class LandscapeServiceImpl implements LandscapeService {
             Integer optionalMemoryTotalSizeFactorOrNull, final AwsRegion region, final Release release) {
         final AppConfigBuilderT masterConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         final String bearerTokenUsedByMaster = getEffectiveBearerToken(optionalMasterReplicationBearerTokenOrNull);
+        final User currentUser = getSecurityService().getCurrentUser();
+        if (currentUser != null && currentUser.isEmailValidated() && currentUser.getEmail() != null) {
+            masterConfigurationBuilder.setCommaSeparatedEmailAddressesToNotifyOfStartup(currentUser.getEmail());
+        }
         masterConfigurationBuilder
             .setLandscape(getLandscape())
             .setServerName(replicaSetName)
@@ -768,6 +787,10 @@ public class LandscapeServiceImpl implements LandscapeService {
             String replicaSetName, final int masterPort, final Release release,
             final String bearerTokenUsedByReplicas, final String masterHostname) {
         final AppConfigBuilderT replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
+        final User currentUser = getSecurityService().getCurrentUser();
+        if (currentUser != null && currentUser.isEmailValidated() && currentUser.getEmail() != null) {
+            replicaConfigurationBuilder.setCommaSeparatedEmailAddressesToNotifyOfStartup(currentUser.getEmail());
+        }
         // no specific memory configuration is made here; replicas are mostly launched on a dedicated host and hence can
         // grab as much memory as they can get on that host
         replicaConfigurationBuilder
@@ -917,6 +940,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 + replicaSet.getPublicTargetGroup() + " and " + replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().addTarget(master.getHost());
         replicaSet.getMasterTargetGroup().addTarget(master.getHost());
+        sendMailAboutMasterAvailable(replicaSet);
         // the following map stores the assignment of the temporary upgrade replicas to the public / shard target groups
         // for later removal as the final auto-scaling replicas start to replace them:
         final Map<TargetGroup<String>, Iterable<AwsInstance<String>>> tempUpgradeReplicasByTargetGroup = new HashMap<>();
@@ -1152,6 +1176,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().removeTarget(replicaSet.getMaster().getHost());
         replicaSet.getMasterTargetGroup().removeTarget(replicaSet.getMaster().getHost());
+        sendMailAboutMasterUnavailable(replicaSet);
         return additionalReplicaStarted;
     }
 
@@ -1444,11 +1469,64 @@ public class LandscapeServiceImpl implements LandscapeService {
         logger.info("Adding new master "+newMaster+" to target groups");
         replicaSet.getPublicTargetGroup().addTarget(hostToDeployTo);
         replicaSet.getMasterTargetGroup().addTarget(hostToDeployTo);
+        sendMailAboutMasterAvailable(replicaSet);
         if (newTemporaryReplica != null) {
             newTemporaryReplica.stopAndTerminateIfLast(Landscape.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         }
         replicaSet.restartAllReplicas(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), newMaster, replicaSet.getReplicas());
+    }
+
+    private void sendMailAboutMasterUnavailable(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws MailException {
+        sendMailToReplicaSetOwner(replicaSet, "MasterUnavailableMailSubject", "MasterUnavailableMailBody", Optional.of(ServerActions.CONFIGURE_LOCAL_SERVER));
+    }
+
+    private void sendMailAboutMasterAvailable(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) throws MailException {
+        sendMailToReplicaSetOwner(replicaSet, "MasterAvailableMailSubject", "MasterAvailableMailBody", Optional.of(ServerActions.CONFIGURE_LOCAL_SERVER));
+    }
+    
+    /**
+     * @param subjectMessageKey
+     *            must have a single placeholder argument representing the name of the replica set
+     * @param bodyMessageKey
+     *            must have a single placeholder argument representing the name of the replica set
+     * @param alsoSendToAllUsersWithThisPermissionOnReplicaSet
+     *            when not empty, all users that have permission to this {@link SecuredSecurityTypes#SERVER SERVER}
+     *            action on the {@code replicaSet} will receive the e-mail in addition to the server owner. No user
+     *            will receive the e-mail twice.
+     */
+    private void sendMailToReplicaSetOwner(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            final String subjectMessageKey, final String bodyMessageKey, Optional<Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet) throws MailException {
+        final OwnershipAnnotation serverOwnership = getSecurityService().getOwnership(getReplicaSetQualifiedObjectIdentifier(replicaSet));
+        final User serverOwner;
+        final ResourceBundleStringMessages stringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader(), StandardCharsets.UTF_8.name());
+        final Set<User> usersToSendMailTo = new HashSet<>();
+        if (serverOwnership != null && serverOwnership.getAnnotation() != null && (serverOwner = serverOwnership.getAnnotation().getUserOwner()) != null) {
+            usersToSendMailTo.add(serverOwner);
+        }
+        alsoSendToAllUsersWithThisPermissionOnReplicaSet.ifPresent(
+                serverAction -> getSecurityService().getUsersWithPermissions(getReplicaSetQualifiedObjectIdentifier(replicaSet).getPermission(serverAction))
+                .forEach(usersToSendMailTo::add));
+        for (final User user : usersToSendMailTo) {
+            final String subject = stringMessages.get(user.getLocaleOrDefault(), subjectMessageKey, replicaSet.getServerName());
+            final String body = stringMessages.get(user.getLocaleOrDefault(), bodyMessageKey, replicaSet.getServerName());
+            if (user.isEmailValidated()) {
+                getSecurityService().sendMail(user.getName(),
+                        subject,
+                        body);
+            } else {
+                logger.warning("Not sending e-mail with subject "+subject+" to user "+user.getName()+
+                        " with e-mail address "+user.getEmail()+" because e-mail address has not been validated");
+            }
+        }
+    }
+
+    private QualifiedObjectIdentifier getReplicaSetQualifiedObjectIdentifier(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) {
+        return SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(replicaSet.getServerName()));
     }
 
     /**

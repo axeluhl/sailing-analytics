@@ -23,6 +23,18 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">March 2023</h2>
+          <ul class="bulletList">
+            <li>Users with administrative permissions on a server replica set will now be notified by e-mail about important
+                events affecting the replica set, such as when the primary server instance is upgraded or moved and hence
+                the replica set temporarily cannot accept write requests, or when the replica set is being archived and
+                hence no other archiving should be run at the same time and the replica set being archived should not be
+                modified during the archiving process. The <tt>SERVER</tt> permissions checked are <tt>CAN_IMPORT_MASTERDATA</tt>
+                and <tt>CAN_EXPORT_MASTERDATA</tt> for the archiving process, and <tt>CONFIGURE_LOCAL_SERVER</tt> in case of
+                the primary server becoming unavailable. E-Mail is sent only to addresses that were previously validated
+                successfully.
+            </li>
+          </ul>
           <h2 class="articleSubheadline">February 2023</h2>
           <ul class="bulletList">
             <li>Added ability to upload multiple video or image files of an event at once. It also includes some optimizations and bug fixes.

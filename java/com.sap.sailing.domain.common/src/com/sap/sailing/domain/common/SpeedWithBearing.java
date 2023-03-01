@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -44,4 +45,8 @@ public interface SpeedWithBearing extends Speed {
      * Adds two directed speeds onto each other using vector addition.
      */
     SpeedWithBearing add(SpeedWithBearing other);
+    
+    default SpeedWithBearing scale(double d) {
+        return new KnotSpeedWithBearingImpl(getKnots(), getBearing());
+    }
 }

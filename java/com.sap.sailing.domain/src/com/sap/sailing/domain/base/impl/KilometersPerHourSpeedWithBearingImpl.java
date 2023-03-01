@@ -43,7 +43,12 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
     public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
         return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(this, targetSpeedWithBearing);
     }
-
+    
+    @Override
+    public SpeedWithBearing scale(double d) {
+        return SpeedWithBearing.super.scale(d);
+    }
+    
     @Override
     public String toString() {
         return super.toString()+" to "+getBearing().getDegrees()+"°";

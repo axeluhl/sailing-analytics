@@ -309,11 +309,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public AggregationProcessorDefinitionRegistry getAggregationProcessorRegistry() {
-        return aggregationProcessorDefinitionRegistry;
-    }
-
-    @Override
     public void registerAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition) {
         boolean componentsChanged = aggregationProcessorDefinitionRegistry.register(aggregationProcessorDefinition);
         if (componentsChanged) {

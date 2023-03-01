@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sse.common.Distance;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -18,37 +18,37 @@ import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefiniti
 import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class ParallelDistanceMedianAggregationProcessor
-             extends AbstractParallelGroupedDataStoringAggregationProcessor<Distance, Distance> {
+public class ParallelSpeedMedianAggregationProcessor
+             extends AbstractParallelGroupedDataStoringAggregationProcessor<Speed, Speed> {
     
-    private static final AggregationProcessorDefinition<Distance, Distance> DEFINITION =
-            new SimpleAggregationProcessorDefinition<>(Distance.class, Distance.class, "Median", ParallelDistanceMedianAggregationProcessor.class);
+    private static final AggregationProcessorDefinition<Speed, Speed> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(Speed.class, Speed.class, "Median", ParallelSpeedMedianAggregationProcessor.class);
     
-    public static AggregationProcessorDefinition<Distance, Distance> getDefinition() {
+    public static AggregationProcessorDefinition<Speed, Speed> getDefinition() {
         return DEFINITION;
     }
 
-    private Map<GroupKey, List<Distance>> groupedValues;
+    private Map<GroupKey, List<Speed>> groupedValues;
 
-    public ParallelDistanceMedianAggregationProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, Distance>, ?>> resultReceivers) {
+    public ParallelSpeedMedianAggregationProcessor(ExecutorService executor,
+            Collection<Processor<Map<GroupKey, Speed>, ?>> resultReceivers) {
         super(executor, resultReceivers, "Median");
         groupedValues = new HashMap<>();
     }
 
     @Override
-    protected void storeElement(GroupedDataEntry<Distance> element) {
+    protected void storeElement(GroupedDataEntry<Speed> element) {
         GroupKey key = element.getKey();
         if (!groupedValues.containsKey(key)) {
-            groupedValues.put(key, new ArrayList<Distance>());
+            groupedValues.put(key, new ArrayList<Speed>());
         }
         groupedValues.get(key).add(element.getDataEntry());
     }
 
     @Override
-    protected Map<GroupKey, Distance> aggregateResult() {
-        Map<GroupKey, Distance> result = new HashMap<>();
-        for (Entry<GroupKey, List<Distance>> groupedValuesEntry : groupedValues.entrySet()) {
+    protected Map<GroupKey, Speed> aggregateResult() {
+        Map<GroupKey, Speed> result = new HashMap<>();
+        for (Entry<GroupKey, List<Speed>> groupedValuesEntry : groupedValues.entrySet()) {
             if (isAborted()) {
                 break;
             }
@@ -57,12 +57,12 @@ public class ParallelDistanceMedianAggregationProcessor
         return result;
     }
 
-    private Distance getMedianOf(List<Distance> values) {
+    private Speed getMedianOf(List<Speed> values) {
         Collections.sort(values);
         if (listSizeIsEven(values)) {
             int index1 = (values.size() / 2) - 1;
             int index2 = index1 + 1;
-            return new MeterDistance((values.get(index1).getMeters() + values.get(index2).getMeters()) / 2);
+            return new KnotSpeedImpl((values.get(index1).getKnots() + values.get(index2).getKnots()) / 2);
         } else {
             int index = ((values.size() + 1) / 2) - 1;
             return values.get(index);
