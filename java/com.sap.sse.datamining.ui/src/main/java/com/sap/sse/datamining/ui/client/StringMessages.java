@@ -115,4 +115,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String isItOkToReplaceAllTabsWithQueriesByReport();
     String runOtherChangedQueriesInBackground();
     String askUser();
+    String beaufort();
+    String kilometersPerHour();
+    String knots();
+    String metersPerSecond();
+    String statuteMilesPerHour();
 }
