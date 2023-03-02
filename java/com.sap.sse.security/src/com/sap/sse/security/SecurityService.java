@@ -269,6 +269,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     CacheManager getCacheManager();
     
+    /**
+     * Sends mail to the user identified by {@code username} if that user is found and has a non-{@code null}
+     * {@link User#getEmail() e-mail address}. Note that this method does <em>not</em> check whether that
+     * e-mail address is validated. This way this method can also be used to, e.g., send an e-mail in order
+     * to validate an e-mail address.
+     */
     void sendMail(String username, String subject, String body) throws MailException;
 
     /**

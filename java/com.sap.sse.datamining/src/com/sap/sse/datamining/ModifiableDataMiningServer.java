@@ -2,7 +2,6 @@ package com.sap.sse.datamining;
 
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
@@ -30,7 +29,6 @@ public interface ModifiableDataMiningServer extends DataMiningServer {
     void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     
-    AggregationProcessorDefinitionRegistry getAggregationProcessorRegistry();
     void registerAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition);
     void unregisterAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition);
     

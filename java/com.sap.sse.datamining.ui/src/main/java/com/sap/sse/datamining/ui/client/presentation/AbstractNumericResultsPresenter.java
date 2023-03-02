@@ -25,6 +25,7 @@ import com.sap.sse.datamining.ui.client.presentation.dataproviders.DataProviders
 import com.sap.sse.datamining.ui.client.presentation.dataproviders.DistanceDataProvider;
 import com.sap.sse.datamining.ui.client.presentation.dataproviders.DurationDataProvider;
 import com.sap.sse.datamining.ui.client.presentation.dataproviders.NumberDataProvider;
+import com.sap.sse.datamining.ui.client.presentation.dataproviders.SpeedDataProvider;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -40,8 +41,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         super(parent, context);
         final List<AbstractNumericDataProvider<? extends Serializable>> basicProviders = Arrays.asList(
                 new NumberDataProvider(), new DistanceDataProvider(), new DurationDataProvider(),
-                new BearingDataProvider());
-
+                new BearingDataProvider(), new SpeedDataProvider());
         final List<AbstractNumericDataProvider<? extends Serializable>> allProviders = new ArrayList<>(basicProviders);
         allProviders.add(new AverageWithStatsDataProvider(new DataProvidersPrecedenceList(basicProviders)));
         dataProviders = new DataProvidersPrecedenceList(allProviders);
