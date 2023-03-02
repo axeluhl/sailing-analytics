@@ -26,15 +26,15 @@ import com.sap.sse.i18n.impl.NullResourceBundleStringMessages;
  * </pre>
  */
 public interface ResourceBundleStringMessages {
-    public static final ResourceBundleStringMessages NULL = new NullResourceBundleStringMessages();
+    static final ResourceBundleStringMessages NULL = new NullResourceBundleStringMessages();
 
-    public String getResourceBaseName();
+    String getResourceBaseName();
 
-    public String get(Locale locale, String messageKey);
+    String get(Locale locale, String messageKey);
 
-    public String get(Locale locale, String messageKey, String... parameters);
+    String get(Locale locale, String messageKey, String... parameters);
 
-    public static final class Util {
+    static final class Util {
         private static final Locale FALLBACK_LOCALE = Locale.ROOT;
 
         public static Control createControl(String encoding) {
