@@ -241,6 +241,7 @@ public interface LandscapeService {
      * {@link AwsApplicationReplicaSet#isEligibleForDeployment(com.sap.sse.landscape.aws.ApplicationProcessHost, Optional, Optional, byte[])
      * eligible} for deploying a process of the replica set to it. In particular, the directory as derived from the
      * replica set name and the HTTP port must not be used by any other application already deployed on that host.
+     * The replica process is registered with the {@code replicaSet}'s public target group.
      */
     <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
      MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
@@ -413,16 +414,19 @@ public interface LandscapeService {
 
     /**
      * Removes all application processes {@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
-     * found running} on {@code host} and deploys them to another host. The configuration of all application processes
-     * found on that host is read and remembered so it can be applied on the new host to create an equivalent process.<p>
+     * found running} on {@code host} and deploys them to another host in the same availability zone like {@code host}.
+     * The configuration of all application processes found on that host is read and remembered so it can be applied on
+     * the new host to create an equivalent process.
+     * <p>
      * 
-     * For those processes that are the primary instance of their replica set this method ensures that there is at least one
-     * healthy replica available before moving the primary instance to the new host. When moving a primary process, it is
-     * first removed from the "-m" target group, the new process is launched on the new host, and when it is healthy it is
-     * added to the "-m" target group.<p>
+     * For those processes that are the primary ("master") instance of their replica set this method ensures that there
+     * is at least one healthy replica available before moving the primary instance to the new host. When moving a
+     * primary process, it is first removed from the "-m" target group, the new process is launched on the new host, and
+     * when it is healthy it is added to the "-m" target group.
+     * <p>
      * 
-     * Moving a replica is easier: the replica can be launched on the new host first, added to the public target group when
-     * healthy, and then the replica on the old {@code host} can be terminated and removed.
+     * Moving a replica is easier: the replica can be launched on the new host first, added to the public target group
+     * when healthy, and then the replica on the old {@code host} can be terminated and removed.
      * 
      * @param host
      *            must be a "multi-instance" host intended for sharing; this must be indicated by the tag value
@@ -435,5 +439,5 @@ public interface LandscapeService {
      */
     void moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
             Optional<InstanceType> optionalInstanceTypeForNewInstance,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase);
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

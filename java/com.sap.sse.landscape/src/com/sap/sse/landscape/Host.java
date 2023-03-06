@@ -1,6 +1,7 @@
 package com.sap.sse.landscape;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
@@ -11,6 +12,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -34,7 +36,7 @@ public interface Host extends WithID {
      * {@code timeout}, or forever in case {@code timeout} is {@code null}
      * 
      * @param timeoutEmptyMeaningForever
-     *            if {@code null}, waits forever
+     *            if not {@link Optional#isPresent() present}, waits forever
      */
     InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) throws TimeoutException, Exception;
     
@@ -123,4 +125,29 @@ public interface Host extends WithID {
     Iterable<SecurityGroup> getSecurityGroups();
 
     TimePoint getLaunchTimePoint();
+    
+    /**
+     * Checks whether an SSH connection with the "root" user can be established successfully. A ten-second timeout is
+     * used.
+     * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     */
+    default boolean isReady(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final boolean result;
+        final SshCommandChannel channel = createRootSshChannel(Optional.of(Duration.ONE_SECOND.times(10)),
+                optionalKeyName, privateKeyEncryptionPassphrase);
+        if (channel != null) {
+            channel.sendCommandLineSynchronously("pwd", new ByteArrayOutputStream());
+            final String response = channel.getStreamContentsAsString();
+            result = Util.hasLength(response);
+        } else {
+            result = false;
+        }
+        return result;
+    }
 }
