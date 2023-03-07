@@ -150,4 +150,13 @@ public interface Host extends WithID {
         }
         return result;
     }
+    
+    /**
+     * Checks whether this host is a "shared" one to which multiple application processes may be deployed.<p>
+     * 
+     * This default implementation returns {@code false}.
+     */
+    default boolean isSharedHost() {
+        return false;
+    }
 }

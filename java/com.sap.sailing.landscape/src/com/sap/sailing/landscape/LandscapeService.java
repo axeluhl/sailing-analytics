@@ -2,6 +2,7 @@ package com.sap.sailing.landscape;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -17,6 +18,7 @@ import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -400,23 +402,25 @@ public interface LandscapeService {
     
     void removeShardingKeysFromShard(Iterable<String> selectedleaderboards, 
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription,AwsRegion region, String shardName, String bearertoken) throws Exception;
+            AwsRegion region,String shardName, String bearertoken) throws Exception;
     
     public void appendShardingKeysToShard(Iterable<String> selectedLeaderboards,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken) throws Exception;
+            AwsRegion region, String shardName, String bearertoken) throws Exception;
     
     void removeShard(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, String shardTargetGroupArn) throws Exception;
     
     void addShard(Iterable<String> selectedLeaderboardNames, 
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, 
-            AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName) throws Exception;
+            AwsRegion region, String bearertoken, String shardName) throws Exception;
 
     /**
      * Removes all application processes {@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
-     * found running} on {@code host} and deploys them to another host in the same availability zone like {@code host}.
-     * The configuration of all application processes found on that host is read and remembered so it can be applied on
-     * the new host to create an equivalent process.
+     * found running} on {@code host} and deploys them to another host in {@code host}'s availability zone. The default
+     * configuration for primaries and replicas is used based on the application replica set the processes belong to,
+     * except for the memory configuration which is copied from the processes running on {@code host}. This will mean
+     * that any hand-crafted special configuration will get lost during the process. So don't apply this operation to
+     * hosts running non-standard application processes with non-default configurations.
      * <p>
      * 
      * For those processes that are the primary ("master") instance of their replica set this method ensures that there
@@ -436,8 +440,13 @@ public interface LandscapeService {
      * @param optionalInstanceTypeForNewInstance
      *            if not specified, the new multi-instance launched will use the same instance type as the one from
      *            where the processes are moved away ({@code host})
+     * @return a triple of which the {@link Triple#getA() first} element is the new host to which the processes have
+     *         been moved, the {@link Triple#getB() second} element is the set of master processes moved, and the
+     *         {@link Triple#getC() third} element is the set of replica processes moved; the master and replica process
+     *         maps are keyed by the names of the application replica sets to which the processes belong.
      */
-    void moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
+    Triple<SailingAnalyticsHost<String>, Map<String, SailingAnalyticsProcess<String>>, Map<String, SailingAnalyticsProcess<String>>>
+    moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
             Optional<InstanceType> optionalInstanceTypeForNewInstance,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

@@ -89,7 +89,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * @param <MetricsT>
  */
 public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
-    static final long DEFAULT_DNS_TTL_SECONDS = 60l;
+    long DEFAULT_DNS_TTL_SECONDS = 60l;
     
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
