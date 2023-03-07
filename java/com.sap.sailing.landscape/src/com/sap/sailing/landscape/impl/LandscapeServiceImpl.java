@@ -1851,7 +1851,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             final SailingAnalyticsProcess<String> process)
             throws Exception {
         final String totalMemorySizeFactorAsString = process.getEnvShValueFor(DefaultProcessConfigurationVariables.TOTAL_MEMORY_SIZE_FACTOR, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
-        final Integer totalMemorySizeFactor = totalMemorySizeFactorAsString == null ? null : Integer.valueOf(totalMemorySizeFactorAsString);
+        final Integer totalMemorySizeFactor = Util.hasLength(totalMemorySizeFactorAsString) ? Integer.valueOf(totalMemorySizeFactorAsString) : null;
         return totalMemorySizeFactor;
     }
 
