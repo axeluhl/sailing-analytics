@@ -63,6 +63,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
@@ -257,7 +258,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                         replicaConfigurationBuilder.setMemoryTotalSizeFactor(optionalMemoryTotalSizeFactorOrNull);
                     }
                     // the process launcher uses the DeployProcessOnMultiServer procedure to launch the process based on the replica config 
-                    DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcessBuilder =
+                    final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcessBuilder =
                             DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> builder(replicaConfigurationBuilder, hostToDeployTo);
                     if (optionalKeyName != null) {
                         replicaDeploymentProcessBuilder.setKeyName(optionalKeyName);
@@ -265,7 +266,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                     replicaDeploymentProcessBuilder
                         .setOptionalTimeout(Landscape.WAIT_FOR_PROCESS_TIMEOUT)
                         .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
-                    DeployProcessOnMultiServer<String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcess;
+                    final DeployProcessOnMultiServer<String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcess;
                     try {
                         replicaDeploymentProcess = replicaDeploymentProcessBuilder.build();
                         replicaDeploymentProcess.run();
@@ -1678,7 +1679,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public void removeShardingKeysFromShard(Iterable<String> selectedleaderboards,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearerToken)
+            AwsRegion region, String shardName, String bearerToken)
             throws Exception {
         final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearerToken,
                 /* HTTPS port */ Optional.of(443));
@@ -1693,7 +1694,6 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setShardingKeys(shardingKeys)
             .setReplicaset(applicationReplicaSet)
             .setShardName(shardName)
-            .setPassphrase(passphraseForPrivateKeyDecription)
             .build()
             .run();
     }
@@ -1701,7 +1701,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public void appendShardingKeysToShard(Iterable<String> selectedLeaderboards,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearerToken)
+            AwsRegion region, String shardName, String bearerToken)
             throws Exception {
         final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearerToken,
                 /* HTTPS port */ Optional.of(443));
@@ -1716,7 +1716,6 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setShardingKeys(shardingkeys)
             .setReplicaset(applicationReplicaSet)
             .setShardName(shardName)
-            .setPassphrase(passphraseForPrivateKeyDecription)
             .build()
             .run();
     }
@@ -1736,7 +1735,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public void addShard(Iterable<String> selectedLeaderboardNames,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            AwsRegion region, String bearerToken, byte[] passphraseForPrivateKeyDecription, String shardName)
+            AwsRegion region, String bearerToken, String shardName)
             throws Exception {
         final SailingServer server = getSailingServer(applicationReplicaSet.getHostname(), bearerToken,
                 Optional.of(443));
@@ -1752,8 +1751,114 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setRegion(region)
             .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardName(shardName)
-            .setPassphrase(passphraseForPrivateKeyDecription)
             .build()
             .run();
+    }
+    
+    @Override
+    public Triple<SailingAnalyticsHost<String>, Map<String, SailingAnalyticsProcess<String>>, Map<String, SailingAnalyticsProcess<String>>>
+    moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
+            Optional<InstanceType> optionalInstanceTypeForNewInstance,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        if (!host.getInstance().tags().stream().anyMatch(tag->
+                tag.key().equals(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG) &&
+                tag.value().equals(SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE))) {
+            throw new IllegalArgumentException("Host "+host+" is not tagged as multiserver. The host is expected to have value "+
+                    SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE+" for tag "+
+                    SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG);
+        }
+        logger.info("Moving all application processes from shared host "+host+" to a newly started shared host.");
+        final AwsRegion region = host.getRegion();
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
+        final SailingAnalyticsHost<String> targetHost = createEmptyMultiServer(region,
+                Optional.of(optionalInstanceTypeForNewInstance.orElse(host.getInstanceType())),
+                Optional.of(host.getAvailabilityZone()),
+                Optional.of(SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_DEFAULT_NAME),
+                Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+        Wait.wait(()->targetHost.isReady(Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase), Landscape.WAIT_FOR_HOST_TIMEOUT,
+                /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Waiting until host "+host.getId()+" is ready");
+        final Map<String, SailingAnalyticsProcess<String>> masterProcessesMoved = new HashMap<>();
+        final Map<String, SailingAnalyticsProcess<String>> replicaProcessesMoved = new HashMap<>();
+        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet : getLandscape()
+                .getApplicationReplicaSetsByTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
+                        hostSupplier, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                        privateKeyEncryptionPassphrase)) {
+            if (replicaSet.getMaster().getHost().getId().equals(host.getId())) {
+                // We're moving a master process:
+                logger.info("Found master process "+replicaSet.getMaster()+" on host "+host+" to move to "+targetHost);
+                masterProcessesMoved.put(replicaSet.getName(), replicaSet.getMaster());
+                // Try to obtain the replicas' replication bearer token from a replica; if no replica is found in the
+                // application replica set, use the master's replication token as a default
+                final String replicaReplicationBearerToken = Util.stream(replicaSet.getReplicas()).findAny()
+                        .map(replica -> {
+                            try {
+                                return replica.getEnvShValueFor(
+                                        DefaultProcessConfigurationVariables.REPLICATE_MASTER_BEARER_TOKEN,
+                                        Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                                        privateKeyEncryptionPassphrase);
+                            } catch (Exception e) {
+                                logger.log(Level.SEVERE, "Error trying to obtain environment variable value for "+
+                                        DefaultProcessConfigurationVariables.REPLICATE_MASTER_BEARER_TOKEN+" from host "+replica, e);
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .orElse(replicaSet.getMaster().getEnvShValueFor(
+                                DefaultProcessConfigurationVariables.REPLICATE_MASTER_BEARER_TOKEN,
+                                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                                privateKeyEncryptionPassphrase));
+                final Integer totalMemorySizeFactor = getTotalMemorySizeFactor(optionalKeyName, privateKeyEncryptionPassphrase, replicaSet.getMaster());
+                moveMasterToOtherInstance(replicaSet, /* useSharedInstance */ true,
+                        /* optionalInstanceType */ Optional.empty(), Optional.of(targetHost), optionalKeyName,
+                        privateKeyEncryptionPassphrase,
+                        /* optionalMasterReplicationBearerTokenOrNull */ replicaSet.getMaster().getEnvShValueFor(
+                                DefaultProcessConfigurationVariables.REPLICATE_MASTER_BEARER_TOKEN,
+                                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                                privateKeyEncryptionPassphrase),
+                        replicaReplicationBearerToken,
+                        totalMemorySizeFactor == null ? getMemoryInMegabytes(optionalKeyName, privateKeyEncryptionPassphrase, replicaSet.getMaster()) : null,
+                        totalMemorySizeFactor); 
+                logger.info("Done moving master of "+replicaSet.getName()+" from "+host+" to "+targetHost);
+            } else {
+                final SailingAnalyticsProcess<String> replica;
+                if ((replica = Util.stream(replicaSet.getReplicas()).filter(r->r.getHost().getId().equals(host.getId())).findFirst().orElse(null)) != null) {
+                    // We're moving a replica process:
+                    logger.info("Found replica process "+replica+" on host "+host+" to move to "+targetHost);
+                    final String replicaReplicationBearerToken = replica.getEnvShValueFor(
+                            DefaultProcessConfigurationVariables.REPLICATE_MASTER_BEARER_TOKEN,
+                            Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                            privateKeyEncryptionPassphrase);
+                    replicaProcessesMoved.put(replicaSet.getName(), replica);
+                    final Integer totalMemorySizeFactor = getTotalMemorySizeFactor(optionalKeyName, privateKeyEncryptionPassphrase, replica);
+                    final SailingAnalyticsProcess<String> newReplica = deployReplicaToExistingHost(replicaSet, targetHost, optionalKeyName, privateKeyEncryptionPassphrase,
+                            replicaReplicationBearerToken,
+                            totalMemorySizeFactor == null ? getMemoryInMegabytes(optionalKeyName, privateKeyEncryptionPassphrase, replica) : null,
+                            totalMemorySizeFactor);
+                    if (newReplica != null && newReplica.isReady(Landscape.WAIT_FOR_PROCESS_TIMEOUT)) {
+                        logger.info("New replica " + newReplica + " deployed successfully to " + targetHost
+                                + "; removing old replica " + replica
+                                + " from public target group of application replica set " + replicaSet.getName());
+                        replicaSet.getPublicTargetGroup().removeTarget(replica.getHost());
+                        logger.info("Stopping old replica "+replica);
+                        replica.stopAndTerminateIfLast(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                    }
+                }
+            }
+        }
+        return new Triple<>(targetHost, masterProcessesMoved, replicaProcessesMoved);
+    }
+
+    private Integer getTotalMemorySizeFactor(String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            final SailingAnalyticsProcess<String> process)
+            throws Exception {
+        final String totalMemorySizeFactorAsString = process.getEnvShValueFor(DefaultProcessConfigurationVariables.TOTAL_MEMORY_SIZE_FACTOR, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+        final Integer totalMemorySizeFactor = Util.hasLength(totalMemorySizeFactorAsString) ? Integer.valueOf(totalMemorySizeFactorAsString) : null;
+        return totalMemorySizeFactor;
+    }
+
+    private Integer getMemoryInMegabytes(String optionalKeyName, byte[] privateKeyEncryptionPassphrase, final SailingAnalyticsProcess<String> process)
+            throws Exception {
+        final String memoryInMegabytesAsString = process.getEnvShValueFor(DefaultProcessConfigurationVariables.MEMORY, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+        final Integer memoryInMegabytes = JvmUtils.getMegabytesFromJvmSize(memoryInMegabytesAsString).orElse(null);
+        return memoryInMegabytes;
     }
 }
