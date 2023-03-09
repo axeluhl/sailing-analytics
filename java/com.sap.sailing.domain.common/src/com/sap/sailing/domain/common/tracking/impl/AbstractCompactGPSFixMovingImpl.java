@@ -69,6 +69,11 @@ public abstract class AbstractCompactGPSFixMovingImpl extends AbstractCompactGPS
         public Speed projectTo(Position position, Bearing projectTo) {
             return AbstractSpeedWithAbstractBearingImpl.projectTo(this, position, projectTo);
         }
+        
+        @Override
+        public SpeedWithBearing scale(double d) {
+            return SpeedWithBearing.super.scale(d);
+        }
     }
     
     public AbstractCompactGPSFixMovingImpl(TimePoint timePoint) {

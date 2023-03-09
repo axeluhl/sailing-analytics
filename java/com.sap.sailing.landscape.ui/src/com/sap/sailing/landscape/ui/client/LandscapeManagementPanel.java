@@ -351,6 +351,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                         Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_OPEN_SHARD_MANAGEMENT,
                 selectedReplicaSet -> openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), selectedReplicaSet));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_MOVE_ALL_APPLICATION_PROCESSES_AWAY_FROM,
+                applicationReplicaSetWhoseMastersHostToDecommission -> moveAllApplicationProcessesAwayFrom(stringMessages,
+                        applicationReplicaSetWhoseMastersHostToDecommission));
         // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -426,7 +429,19 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetToMoveMasterFor)));
         applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
-        machineImagesTable.addColumn(object->object.getId(), stringMessages.id());
+        
+        final SafeHtmlCell amiIdCell = new SafeHtmlCell();
+        final Column<AmazonMachineImageDTO, SafeHtml> amiIdColumn = new Column<AmazonMachineImageDTO, SafeHtml>(amiIdCell) {
+            @Override
+            public SafeHtml getValue(AmazonMachineImageDTO ami) {
+                return new LinkBuilder()
+                        .setRegion(regionsTable.getSelectionModel().getSelectedObject())
+                        .setAmiId(ami.getId())
+                        .setPathMode(LinkBuilder.pathModes.InstanceByAmiIdSearch)
+                        .build();
+            }
+        };
+        machineImagesTable.addColumn(amiIdColumn, stringMessages.id());
         machineImagesTable.addColumn(object->object.getRegionId(), stringMessages.region());
         machineImagesTable.addColumn(object->object.getName(), stringMessages.name());
         machineImagesTable.addColumn(object->object.getType(), stringMessages.imageType());
@@ -487,20 +502,19 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
     
     private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
-        new ShardManagementDialog(landscapeManagementService, replicaset, region, sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), errorReporter, stringMessages,
-                new DialogCallback<Boolean>() {
-                    @Override
-                    public void ok(Boolean hasAnythingChanged) {
-                        if (hasAnythingChanged) {
-                            refreshApplicationReplicaSetsTable();
-                        }
-                    }
+        new ShardManagementDialog(landscapeManagementService, replicaset, region, errorReporter, stringMessages, new DialogCallback<Boolean>() {
+            @Override
+            public void ok(Boolean hasAnythingChanged) {
+                if (hasAnythingChanged) {
+                    refreshApplicationReplicaSetsTable();
+                }
+            }
 
-                    @Override
-                    public void cancel() {
-                        // there is no cancel button
-                    }
-        }).show();
+            @Override
+            public void cancel() {
+                // there is no cancel button
+            }
+      }).show();
     }
     
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
@@ -890,6 +904,39 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         });
     }
+    
+    private void moveAllApplicationProcessesAwayFrom(StringMessages stringMessages, SailingApplicationReplicaSetDTO<String> applicationReplicaSetOnWhichToDeployMaster) {
+        final AwsInstanceDTO fromHost = applicationReplicaSetOnWhichToDeployMaster.getMaster().getHost();
+        new MoveAllAwayFromHostDialog(landscapeManagementService, fromHost,
+                applicationReplicaSetsTable.getDataProvider().getList(), stringMessages, errorReporter, new DialogCallback<String>() {
+                    @Override
+                    public void ok(String optionalInstanceTypeName) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.moveAllApplicationProcessesAwayFrom(fromHost, optionalInstanceTypeName,
+                                sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        applicationReplicaSetsBusy.setBusy(false);
+                                        errorReporter.reportError(caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        applicationReplicaSetsBusy.setBusy(false);
+                                        Notification.notify(stringMessages.successfullyMovedAllProcessesAwayFromHost(fromHost.getInstanceId()), NotificationType.SUCCESS);
+                                        refreshApplicationReplicaSetsTable();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
+    }
 
     private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, SailingApplicationReplicaSetDTO<String> applicationReplicaSetOnWhichToDeployMaster) {
         landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
@@ -902,8 +949,8 @@ public class LandscapeManagementPanel extends SimplePanel {
             public void onSuccess(ArrayList<ReleaseDTO> result) {
                 new CreateApplicationReplicaSetDialog(landscapeManagementService, /* sharedMasterInstanceAlreadyExists */ true,
                         result.stream().map(r->r.getName())::iterator, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
-            @Override
-            public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                    @Override
+                    public void ok(CreateApplicationReplicaSetInstructions instructions) {
                         applicationReplicaSetsBusy.setBusy(true);
                         landscapeManagementService.deployApplicationToExistingHost(instructions.getName(), applicationReplicaSetOnWhichToDeployMaster.getMaster().getHost(), 
                                 instructions.getDedicatedInstanceType(), instructions.isDynamicLoadBalancerMapping(),
@@ -932,12 +979,12 @@ public class LandscapeManagementPanel extends SimplePanel {
                                     }
                                  }
                               });
-            }
-            
-            @Override
-            public void cancel() {
-            }
-         },
+                    }
+                    
+                    @Override
+                    public void cancel() {
+                    }
+                 },
                 regionsTable.getSelectionModel().getSelectedObject().equals(SharedLandscapeConstants.REGION_WITH_DEFAULT_LOAD_BALANCER))
                 .show();
             }

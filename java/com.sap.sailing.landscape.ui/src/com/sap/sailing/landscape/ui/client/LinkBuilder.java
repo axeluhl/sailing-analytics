@@ -9,7 +9,8 @@ import com.sap.sse.common.Builder;
 public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
 
     static public enum pathModes {
-        InstanceSearch, ImageSearch, AmiSearch, Hostname, ReplicaLinks, Version, MasterHost, TargetGroupSearch, AutoScalingGroupSearch
+        InstanceSearch, InstanceByAmiIdSearch, ImageSearch, AmiSearch, Hostname,
+        ReplicaLinks, Version, MasterHost, TargetGroupSearch, AutoScalingGroupSearch
     };
 
     private pathModes pathMode;
@@ -18,6 +19,7 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
     private SailingApplicationReplicaSetDTO<String> replicaSet;
     private String targetGroupName;
     private String autoScalingGroupName;
+    private String amiId;
 
     LinkBuilder setPathMode(pathModes mode) {
         pathMode = mode;
@@ -38,6 +40,11 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
         this.instanceId = instanceId;
         return self();
     }
+    
+    LinkBuilder setAmiId(String amiId) {
+        this.amiId = amiId;
+        return self();
+    }
 
     LinkBuilder setRegion(String region) {
         this.region = region;
@@ -51,6 +58,10 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
 
     private String getEc2ConsoleLinkForInstanceId(String instanceId) {
         return getEc2ConsoleBaseUrlForSelectedRegion() + "#Instances:search=" + instanceId;
+    }
+    
+    private String getEc2ConsoleLinkForInstancesUsingImageWithId(String imageId) {
+        return getEc2ConsoleBaseUrlForSelectedRegion() + "#Instances:imageId="+imageId;
     }
 
     private String getEc2ConsoleLinkForTargetGroupName(String name) {
@@ -78,6 +89,11 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
     private void appendEc2InstanceLink(final SafeHtmlBuilder builder, final String instanceId) {
         final String ec2Link = getEc2ConsoleLinkForInstanceId(instanceId);
         appendEc2Link(builder, ec2Link, instanceId);
+    }
+
+    private void appendEc2InstanceByAmiIdLink(final SafeHtmlBuilder builder, final String amiId) {
+        final String ec2Link = getEc2ConsoleLinkForInstancesUsingImageWithId(amiId);
+        appendEc2Link(builder, ec2Link, amiId);
     }
 
     private void appendEc2AmiLink(final SafeHtmlBuilder builder, final String amiId) {
@@ -152,6 +168,9 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
                 checkAttribute(region, "Region");
                 appendEc2InstanceLink(builder, instanceId);
                 break;
+            case InstanceByAmiIdSearch:
+                appendEc2InstanceByAmiIdLink(builder, amiId);
+                break;
             case Version:
                 checkAttribute(replicaSet, "Replicaset");
                 final String version = replicaSet.getVersion();
@@ -175,8 +194,6 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
                 checkAttribute(region, "Region");
                 checkAttribute(autoScalingGroupName, "Auto-Scaling Group Name");
                 appendEc2AutoScalingGroupLink(builder, autoScalingGroupName);
-                break;
-            default:
                 break;
             }
         } catch (Exception e) {

@@ -61,4 +61,7 @@ public interface IconResources extends ClientBundle {
     
     @Source("images/shardmanagement.png")
     ImageResource shardManagementIcon();
+
+    @Source("images/moveAway.png")
+    ImageResource moveAway();
 }
