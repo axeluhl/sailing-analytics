@@ -15,6 +15,7 @@ run_apt_update_upgrade() {
   echo "Updating packages using apt" >>/var/log/sailing.err
   apt-get -y update; apt-get -y upgrade
   apt-get -y install linux-image-cloud-amd64
+  apt-get -y autoremove
 }
 
 run_git_pull() {
