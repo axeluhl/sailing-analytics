@@ -926,7 +926,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                     @Override
                                     public void onSuccess(Void result) {
                                         applicationReplicaSetsBusy.setBusy(false);
-                                        Notification.notify(stringMessages.successfullyMovedAllProcessesAwayFromHost(fromHost.toString()), NotificationType.SUCCESS);
+                                        Notification.notify(stringMessages.successfullyMovedAllProcessesAwayFromHost(fromHost.getInstanceId()), NotificationType.SUCCESS);
                                         refreshApplicationReplicaSetsTable();
                                     }
                                 });
