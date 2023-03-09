@@ -429,7 +429,19 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetToMoveMasterFor)));
         applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
-        machineImagesTable.addColumn(object->object.getId(), stringMessages.id());
+        
+        final SafeHtmlCell amiIdCell = new SafeHtmlCell();
+        final Column<AmazonMachineImageDTO, SafeHtml> amiIdColumn = new Column<AmazonMachineImageDTO, SafeHtml>(amiIdCell) {
+            @Override
+            public SafeHtml getValue(AmazonMachineImageDTO ami) {
+                return new LinkBuilder()
+                        .setRegion(regionsTable.getSelectionModel().getSelectedObject())
+                        .setAmiId(ami.getId())
+                        .setPathMode(LinkBuilder.pathModes.InstanceByAmiIdSearch)
+                        .build();
+            }
+        };
+        machineImagesTable.addColumn(amiIdColumn, stringMessages.id());
         machineImagesTable.addColumn(object->object.getRegionId(), stringMessages.region());
         machineImagesTable.addColumn(object->object.getName(), stringMessages.name());
         machineImagesTable.addColumn(object->object.getType(), stringMessages.imageType());
@@ -914,7 +926,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                     @Override
                                     public void onSuccess(Void result) {
                                         applicationReplicaSetsBusy.setBusy(false);
-                                        Notification.notify(stringMessages.successfullyMovedAllProcessesAwayFromHost(fromHost.toString()), NotificationType.SUCCESS);
+                                        Notification.notify(stringMessages.successfullyMovedAllProcessesAwayFromHost(fromHost.getInstanceId()), NotificationType.SUCCESS);
                                         refreshApplicationReplicaSetsTable();
                                     }
                                 });
