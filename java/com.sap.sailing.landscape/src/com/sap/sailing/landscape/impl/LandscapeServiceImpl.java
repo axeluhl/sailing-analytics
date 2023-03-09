@@ -1474,7 +1474,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         if (newTemporaryReplica != null) {
             newTemporaryReplica.stopAndTerminateIfLast(Landscape.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         }
-        replicaSet.restartAllReplicas(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+        // here, although we're waiting for a process to become healthy, that process may need to fetch a large
+        // initial load before reaching the healthy state, so we'll use the longer HOST timeout here:
+        replicaSet.restartAllReplicas(Landscape.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), newMaster, replicaSet.getReplicas());
     }
 
