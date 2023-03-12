@@ -33,6 +33,13 @@ public interface Course extends CourseBase, Renamable {
 
     void unlockAfterRead();
 
+    /**
+     * Note that the listener's methods will be called while this course still holds its write lock. Should your
+     * listener use synchronization to obtain any object's monitor, all other code also synchronizing on those
+     * objects must make sure to either own at least this course's read lock before entering the synchronized
+     * block or ensure that no attempt is made to acquire this course's lock while in the synchronized block (lock /
+     * synchronization ordering). Otherwise, deadlocks can result. See also bug 5803.
+     */
     void addCourseListener(CourseListener listener);
 
     void removeCourseListener(CourseListener listener);

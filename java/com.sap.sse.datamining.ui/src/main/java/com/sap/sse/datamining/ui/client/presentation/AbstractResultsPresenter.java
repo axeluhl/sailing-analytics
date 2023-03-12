@@ -66,7 +66,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
         errorLabel.setStyleName("chart-importantMessage");
         labeledBusyIndicator = new HTML(getDataMiningStringMessages().runningQuery());
         labeledBusyIndicator.setStyleName("chart-busyMessage");
-        showError(getDataMiningStringMessages().runAQuery());
+        showError(/* query definition */ null, getDataMiningStringMessages().runAQuery());
     }
 
     @Override
@@ -86,37 +86,37 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
             this.currentResult = result;
             this.currentQueryDefinition = queryDefinition;
             updateCurrentResultInfo();
-            internalShowResults(getCurrentResult());
+            internalShowResults(queryDefinition, getCurrentResult());
             if (state != ResultsPresenterState.RESULT) {
                 mainPanel.setWidgetHidden(controlsPanel, controlsPanel.getWidgetCount() == 0);
                 presentationPanel.setWidget(getPresentationWidget());
                 state = ResultsPresenterState.RESULT;
             }
         } else {
-            showError(getDataMiningStringMessages().noDataFound() + ".");
+            showError(queryDefinition, getDataMiningStringMessages().noDataFound() + ".");
         }
     }
 
-    abstract protected void internalShowResults(QueryResultDTO<?> result);
+    abstract protected void internalShowResults(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result);
 
     protected abstract Widget getPresentationWidget();
 
     @Override
-    public void showError(String error) {
-        showError(SafeHtmlUtils.fromString(error));
+    public void showError(StatisticQueryDefinitionDTO queryDefinition, String error) {
+        showError(queryDefinition, SafeHtmlUtils.fromString(error));
     }
 
     @Override
-    public void showError(String mainError, Iterable<String> detailedErrors) {
+    public void showError(String mainError, Iterable<String> detailedErrors, StatisticQueryDefinitionDTO queryDefinition) {
         StringBuilder errorBuilder = new StringBuilder(mainError + ":<br /><ul>");
         for (String detailedError : detailedErrors) {
             errorBuilder.append("<li>" + detailedError + "</li>");
         }
         errorBuilder.append("</ul>");
-        showError(SafeHtmlUtils.fromTrustedString(errorBuilder.toString()));
+        showError(queryDefinition, SafeHtmlUtils.fromTrustedString(errorBuilder.toString()));
     }
 
-    private void showError(SafeHtml error) {
+    private void showError(StatisticQueryDefinitionDTO queryDefinition, SafeHtml error) {
         if (state != ResultsPresenterState.ERROR) {
             mainPanel.setWidgetHidden(controlsPanel, true);
             presentationPanel.setWidget(errorLabel);
@@ -124,7 +124,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
         }
         errorLabel.setHTML(error);
         currentResult = null;
-        currentQueryDefinition = null;
+        currentQueryDefinition = queryDefinition; 
         updateCurrentResultInfo();
     }
 
@@ -136,7 +136,6 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
             state = ResultsPresenterState.BUSY;
         }
         currentResult = null;
-        currentQueryDefinition = null;
         updateCurrentResultInfo();
     }
 

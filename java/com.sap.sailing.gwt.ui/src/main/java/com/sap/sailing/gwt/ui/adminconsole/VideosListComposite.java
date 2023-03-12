@@ -82,6 +82,7 @@ public class VideosListComposite extends Composite {
         panel.add(videosControlsPanel);
 
         Button createVideoBtn = new Button("Add gallery video");
+        createVideoBtn.ensureDebugId("addVideoBtn");
         createVideoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -249,34 +250,36 @@ public class VideosListComposite extends Composite {
 
     private void openCreateVideoDialog(String initialTag) {
         VideoCreateDialog dialog = new VideoCreateDialog(initialTag, stringMessages, storageServiceAvailable,
-                new DialogCallback<VideoDTO>() {
+                new DialogCallback<List<VideoDTO>>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(VideoDTO newVideo) {
-                        videoListDataProvider.getList().add(newVideo);
+                    public void ok(List<VideoDTO> newVideos) {
+                        videoListDataProvider.getList().addAll(newVideos);
                         updateTableVisisbilty();
                     }
                 });
+        dialog.ensureDebugId("createVideoDialog");
         dialog.show();
     }
 
     private void openEditVideoDialog(final VideoDTO selectedVideo) {
         VideoEditDialog dialog = new VideoEditDialog(selectedVideo, stringMessages, storageServiceAvailable,
-                new DialogCallback<VideoDTO>() {
+                new DialogCallback<List<VideoDTO>>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(VideoDTO updatedVideo) {
+                    public void ok(List<VideoDTO> updatedVideos) {
                         videoListDataProvider.getList().remove(selectedVideo);
-                        videoListDataProvider.getList().add(updatedVideo);
+                        videoListDataProvider.getList().add(updatedVideos.get(0));
                         updateTableVisisbilty();
                     }
                 });
+        dialog.ensureDebugId("editVideoDialog");
         dialog.show();
     }
 

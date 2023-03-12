@@ -22,7 +22,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * <p>
  * 
  * You want to at least specify an {@link Builder#setInstanceName(String) instance name} and
- * {@link Builder#setInstanceType(InstanceType)}.
+ * {@link Builder#setInstanceType(InstanceType) instance type}.
  * 
  * @author Axel Uhl (D043530)
  *

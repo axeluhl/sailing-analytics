@@ -56,13 +56,11 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     final protected Set<ShardingKey> shardingKeys;
     final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
     final Region region;
-    final byte[] passphraseForPrivateKeyDecryption;
     private final String pathPrefixForShardingKey;
 
     protected ShardProcedure(BuilderImpl<?,?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
         this.shardName = builder.getShardName();
-        this.passphraseForPrivateKeyDecryption = builder.getPassphrase();
         this.replicaSet = builder.getReplicaSet();
         this.shardingKeys = builder.getShardingKeys();
         this.region = builder.getRegion();
@@ -87,8 +85,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
 
         BuilderT setRegion(Region region);
-
-        BuilderT setPassphrase(byte[] passphrase);
     }
 
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>, 
@@ -134,12 +130,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         @Override
         public BuilderT setRegion(Region region) {
             this.region = region;
-            return self();
-        }
-
-        @Override
-        public BuilderT setPassphrase(byte[] passphrase) {
-            this.passphraseForPrivateKeyDecryption = passphrase;
             return self();
         }
 

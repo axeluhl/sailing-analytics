@@ -7,6 +7,7 @@ import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
 /**
@@ -26,7 +27,9 @@ public interface AwsInstance<ShardingKey> extends Host {
     AwsLandscape<ShardingKey> getLandscape();
     
     String getInstanceId();
-    
+
+    InstanceType getInstanceType();
+
     /**
      * Obtains a fresh copy of the instance by looking it up in the {@link #getRegion() region} by its {@link #getInstanceId() ID}.
      */

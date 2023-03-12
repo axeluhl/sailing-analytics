@@ -43,6 +43,8 @@ public class CourseImpl extends RenamableImpl implements Course {
     
     private final List<Waypoint> waypoints;
     private final Map<Waypoint, Integer> waypointIndexes;
+    private Waypoint firstWaypoint;
+    private Waypoint lastWaypoint;
     private final List<Leg> legs;
     private UUID originatingCourseTemplateId;
     private final Map<Mark, UUID> associatedRoles;
@@ -68,13 +70,14 @@ public class CourseImpl extends RenamableImpl implements Course {
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
                 /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
-        this.waypoints = new ArrayList<Waypoint>();
-        waypointIndexes = new HashMap<Waypoint, Integer>();
+        this.waypoints = new ArrayList<>();
+        waypointIndexes = new HashMap<>();
         legs = new ArrayList<Leg>();
         Iterator<Waypoint> waypointIter = waypoints.iterator();
         int i=0;
         if (waypointIter.hasNext()) {
             Waypoint previous = waypointIter.next();
+            firstWaypoint = previous;
             this.waypoints.add(previous);
             waypointIndexes.put(previous, i++);
             while (waypointIter.hasNext()) {
@@ -86,6 +89,7 @@ public class CourseImpl extends RenamableImpl implements Course {
                 legs.add(leg);
                 previous = current;
             }
+            lastWaypoint = previous;
         }
         assert this.waypoints.size() == waypointIndexes.size();
     }
@@ -153,7 +157,16 @@ public class CourseImpl extends RenamableImpl implements Course {
             if (waypoints.size() > 1) {
                 legs.add(new LegImpl(this, waypoints.size()-2));
             }
+            if (zeroBasedPosition == 0) {
+                firstWaypoint = waypointToAdd;
+            }
+            if (zeroBasedPosition == waypoints.size()-1) {
+                lastWaypoint = waypointToAdd;
+            }
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
+            // note: we're still holding the course's write lock, so if any listener should synchronize on any object
+            // then all other code also synchronizing on those objects and requiring a lock on this course must make sure to obtain
+            // this course's lock *before* the synchronized block. See also bug 5803.
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', after notifying listeners");
             assert waypoints.size() == waypointIndexes.size();
@@ -183,6 +196,17 @@ public class CourseImpl extends RenamableImpl implements Course {
                 if (!legs.isEmpty()) { // if we had only one waypoint, we didn't have any legs
                     // last waypoint was removed; remove last leg
                     legs.remove(legs.size() - 1);
+                }
+                if (waypoints.isEmpty()) {
+                    firstWaypoint = null;
+                    lastWaypoint = null;
+                } else {
+                    if (zeroBasedPosition == 0) {
+                        firstWaypoint = waypoints.get(0);
+                    }
+                    if (zeroBasedPosition == waypoints.size()) {
+                        lastWaypoint = waypoints.get(waypoints.size()-1);
+                    }
                 }
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', before notifying listeners");
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
@@ -305,22 +329,12 @@ public class CourseImpl extends RenamableImpl implements Course {
 
     @Override
     public Waypoint getFirstWaypoint() {
-        lockForRead();
-        try {
-            return waypoints.isEmpty() ? null : waypoints.get(0);
-        } finally {
-            unlockAfterRead();
-        }
+        return firstWaypoint;
     }
 
     @Override
     public Waypoint getLastWaypoint() {
-        lockForRead();
-        try {
-            return waypoints.isEmpty() ? null : waypoints.get(waypoints.size() - 1);
-        } finally {
-            unlockAfterRead();
-        }
+        return lastWaypoint;
     }
 
     @Override

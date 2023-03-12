@@ -23,6 +23,33 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">March 2023</h2>
+          <ul class="bulletList">
+            <li>Users with administrative permissions on a server replica set will now be notified by e-mail about important
+                events affecting the replica set, such as when the primary server instance is upgraded or moved and hence
+                the replica set temporarily cannot accept write requests, or when the replica set is being archived and
+                hence no other archiving should be run at the same time and the replica set being archived should not be
+                modified during the archiving process. The <tt>SERVER</tt> permissions checked are <tt>CAN_IMPORT_MASTERDATA</tt>
+                and <tt>CAN_EXPORT_MASTERDATA</tt> for the archiving process, and <tt>CONFIGURE_LOCAL_SERVER</tt> in case of
+                the primary server becoming unavailable. E-Mail is sent only to addresses that were previously validated
+                successfully.
+            </li>
+            <li>The landscape management panel in the administration console now offers a new action to move all application
+                processes away from a server instance to a new one of which the user can determine the instance type.
+                This is helpful, e.g., when a shared instance has an outdated image / installation, requires kernel updates
+                or other things that at least would require a re-boot. Instead, moving to a new instance which is launched
+                off the latest default image gives a fresh platform to launch the application processes on.
+            </li>
+            <li>The list of Amazon Machine Images in the landscape management panel now shows the AMI ID as a link that
+                will open an AWS console, showing the instances launched off that AMI. This way it becomes easy to see
+                which instances are using which of the managed AMIs.
+            </li>
+          </ul>
+          <h2 class="articleSubheadline">February 2023</h2>
+          <ul class="bulletList">
+            <li>Added ability to upload multiple video or image files of an event at once. It also includes some optimizations and bug fixes.
+            </li>
+          </ul>
           <h2 class="articleSubheadline">January 2023</h2>
           <ul class="bulletList">
             <li>Support for managing sharded replication in the "Landscape" panel of the "Advanced" category in the

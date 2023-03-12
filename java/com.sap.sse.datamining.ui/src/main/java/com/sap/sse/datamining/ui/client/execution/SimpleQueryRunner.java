@@ -1,15 +1,26 @@
 package com.sap.sse.datamining.ui.client.execution;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
+import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -17,18 +28,31 @@ import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
-import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
+import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.QueryRunner;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettings;
+import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettings.OtherChangedQueriesRunStrategy;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * The "Run" button with settings and the event handler for the "Run" button which triggers the
+ * {@link #run(StatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings)} method where the query to run is obtained from the
+ * {@link QueryDefinitionProvider} passed to the constructor. Results received from successful query execution through
+ * the {@link DataMiningServiceAsync} are shown in the {@link CompositeResultsPresenter} that was passed to the
+ * constructor, in the currently active tab.<p>
+ * 
+ * When the result is displayed, the {@link CompositeResultsPresenter#showResult(String, StatisticQueryDefinitionDTO, QueryResultDTO)}
+ * method binds the query and result to the presenter ID managed by the composite results presenter.
+ * 
+ * @see QueryDefinitionProvider#getQueryDefinition()
+ */
 public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSettings> implements QueryRunner {
-
     /**
      * The delay before a query is sent to the {@link DataMiningService}.
      * 
@@ -39,7 +63,6 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    private final ManagedDataMiningQueriesCounter counter;
 
     /**
      * Timer to prevent the execution of unnecessary queries, when they're run automatically (see
@@ -50,74 +73,137 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
      */
     private final Timer queryReleaseTimer;
     private QueryRunnerSettings settings;
+    
+    /**
+     * The query and its optional {@link ReportParameterToDimensionFilterBindings use} of
+     * {@link FilterDimensionParameter report parameters} is fetched from here.
+     */
     private final QueryDefinitionProvider<?> queryDefinitionProvider;
+    
+    /**
+     * Query execution results are sent to the presenter within this result presenter that
+     * was current (e.g., the selected tab) when running the query was triggered.
+     */
     private final CompositeResultsPresenter<?> resultsPresenter;
+    
+    /**
+     * That's where we can obtain the {@link DataMiningReportDTO} from that is considered the "current" report shown and
+     * manipulated by the entry point in whose context this query runner is used. When a query and its parameterization
+     * if fetched from the {@link #queryDefinitionProvider} for execution, it is updated in the
+     * {@link ReportProvider#getCurrentReport() current report}, replacing the query previously shown in the
+     * {@link #resultsPresenter}'s {@link CompositeResultsPresenter#getCurrentPresenterId() current presenter}.
+     */
+    private final ReportProvider reportProvider;
+    
     private final Button runButton;
 
     public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            QueryDefinitionProvider<?> queryDefinitionProvider, CompositeResultsPresenter<?> resultsPresenter) {
+            DataMiningSettingsControl settingsControl, QueryDefinitionProvider<?> queryDefinitionProvider,
+            CompositeResultsPresenter<?> resultsPresenter, ReportProvider reportProvider) {
         super(parent, context);
         this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
-        counter = new SimpleManagedDataMiningQueriesCounter();
         queryDefinitionProvider.addQueryDefinitionChangedListener(this);
-
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
-
+        this.reportProvider = reportProvider;
         runButton = new Button(getDataMiningStringMessages().run());
         runButton.ensureDebugId("RunDataminingQueryButton");
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                run(queryDefinitionProvider.getQueryDefinition());
+                final Map<String, StatisticQueryDefinitionDTO> otherChangedQueriesToAlsoRunInBackground;
+                if (settings.getOtherChangedQueriesRunStrategy() == OtherChangedQueriesRunStrategy.NO) {
+                    otherChangedQueriesToAlsoRunInBackground = Collections.emptyMap();
+                } else {
+                    final Map<String, StatisticQueryDefinitionDTO> otherQueriesAlsoModifiedWithPresenterId = getOtherQueriesAlsoModifiedWithPresenterId();
+                    if (!otherQueriesAlsoModifiedWithPresenterId.isEmpty()
+                            && (settings.getOtherChangedQueriesRunStrategy() == OtherChangedQueriesRunStrategy.AUTOMATICALLY
+                                || (settings.getOtherChangedQueriesRunStrategy() == OtherChangedQueriesRunStrategy.ASK &&
+                                        Window.confirm(getDataMiningStringMessages().runOtherChangedQueriesInBackground())))) {
+                            otherChangedQueriesToAlsoRunInBackground = otherQueriesAlsoModifiedWithPresenterId;
+                    } else {
+                        otherChangedQueriesToAlsoRunInBackground = Collections.emptyMap();
+                    }
+                }
+                final Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> queryDefinitionAndParameterBindings = queryDefinitionProvider
+                        .getQueryDefinitionAndReportParameterBinding();
+                run(queryDefinitionAndParameterBindings.getA(), queryDefinitionAndParameterBindings.getB());
+                for (final Entry<String, StatisticQueryDefinitionDTO> e : otherChangedQueriesToAlsoRunInBackground.entrySet()) {
+                    GWT.log("Running query for presenter "+e.getKey()+" in the background");
+                    runQueryAndShowResultsOrErrors(e.getValue(), /* presenter ID */ e.getKey());
+                }
             }
         });
-
         queryReleaseTimer = new Timer() {
             @Override
             public void run() {
-                SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
+                final Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings> queryDefinitionAndParameterBindings = queryDefinitionProvider
+                        .getQueryDefinitionAndReportParameterBinding();
+                SimpleQueryRunner.this.run(queryDefinitionAndParameterBindings.getA(), queryDefinitionAndParameterBindings.getB());
             }
         };
-        
+        settingsControl.addSettingsComponent(this);
         queryDefinitionChanged(queryDefinitionProvider.getQueryDefinition());
+    }
+    
+    /**
+     * Queries other than the one from the {@link CompositeResultsPresenter#getCurrentPresenterId() current presenter}
+     * may also have changed, e.g., due to a parameter value set change that impacts their dimension filtering. The user
+     * may want to run those queries in the background and already replace those presenters' contents if one query is
+     * run.
+     */
+    private Map<String, StatisticQueryDefinitionDTO> getOtherQueriesAlsoModifiedWithPresenterId() {
+        final Map<String, StatisticQueryDefinitionDTO> result = new HashMap<>();
+        for (final String presenterId : resultsPresenter.getPresenterIds()) {
+            if (!presenterId.equals(resultsPresenter.getCurrentPresenterId()) &&
+                    resultsPresenter.getQueryDefinition(presenterId).isQueryChangedSinceLastRun()) {
+                result.put(presenterId, resultsPresenter.getQueryDefinition(presenterId));
+            }
+        }
+        return result;
     }
 
     @Override
-    public void run(StatisticQueryDefinitionDTO queryDefinition) {
-        Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
-        String presenterId = resultsPresenter.getCurrentPresenterId();
+    public void run(ModifiableStatisticQueryDefinitionDTO queryDefinition, ReportParameterToDimensionFilterBindings reportParameterBindings) {
+        final String presenterId = resultsPresenter.getCurrentPresenterId();
+        final StatisticQueryDefinitionDTO oldPresenterQuery = resultsPresenter.getCurrentQueryDefinition();
+        reportProvider.getCurrentReport().getReport().replaceQueryDefinition(oldPresenterQuery, queryDefinition, reportParameterBindings);
+        runQueryAndShowResultsOrErrors(queryDefinition, presenterId);
+    }
+
+    private void runQueryAndShowResultsOrErrors(StatisticQueryDefinitionDTO queryDefinition,
+            final String presenterId) {
+        final Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
-            counter.increase();
             resultsPresenter.showBusyIndicator(presenterId);
+            queryDefinition.setQueryChangedSinceLastRun(false);
             dataMiningService.runQuery(session, (ModifiableStatisticQueryDefinitionDTO) queryDefinition,
-                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
+                    new AsyncCallback<QueryResultDTO<Serializable>>() {
                         @Override
-                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
+                        public void onSuccess(QueryResultDTO<Serializable> result) {
                             resultsPresenter.showResult(presenterId, queryDefinition, result);
                             queryDefinitionProvider.queryDefinitionChangesHaveBeenStored();
                         }
+                        
                         @Override
-                        protected void handleFailure(Throwable caught) {
-                            errorReporter.reportError("Error running the query: " + caught.getMessage());
-                            resultsPresenter.showError(presenterId,
-                                    getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(getDataMiningStringMessages().errorRunningDataMiningQuery() + ": " + caught.getMessage());
+                            resultsPresenter.showError(presenterId, // this also clears the query in the result presenter
+                                    queryDefinition, getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
                         }
                     });
         } else {
-            resultsPresenter.showError(presenterId, getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
+            resultsPresenter.showError(presenterId, queryDefinition, getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
         }
     }
 
     @Override
     public void updateSettings(QueryRunnerSettings newSettings) {
-        if (settings.isRunAutomatically() != newSettings.isRunAutomatically()) {
-            settings = newSettings;
-        }
+        settings = newSettings;
     }
 
     @Override

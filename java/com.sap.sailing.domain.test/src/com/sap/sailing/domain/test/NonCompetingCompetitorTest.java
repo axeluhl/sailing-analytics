@@ -32,7 +32,7 @@ public class NonCompetingCompetitorTest extends AbstractManeuverDetectionTestCas
     public void setUp() throws Exception {
         super.setUp();
         super.setUp(
-                new URL("http://skitrac.traclive.dk/events/event_20160222_ESSSTPeter/5a265e70-519a-0134-dd23-10b11c4ed8fd.txt"),
+                new URL("http://event2.tractrac.com/events/event_20160222_ESSSTPeter/5a265e70-519a-0134-dd23-10b11c4ed8fd.txt"),
                 /* liveUri */null, /* storedUri */null, new ReceiverType[] { ReceiverType.MARKPASSINGS,
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
     }

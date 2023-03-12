@@ -85,10 +85,10 @@ if [ -z "${REPLICATE_MASTER_EXCHANGE_NAME}" ]; then
   REPLICATE_MASTER_EXCHANGE_NAME=${SERVER_NAME}
 fi
 if [ -z "${BUILD_COMPLETE_NOTIFY}" ]; then
-  export BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+  export BUILD_COMPLETE_NOTIFY=axel.uhl@sap.com
 fi
 if [ -z "${SERVER_STARTUP_NOTIFY}" ]; then
-  export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+  export SERVER_STARTUP_NOTIFY=axel.uhl@sap.com
 fi
 if [ -z "${MEMORY}" ]; then
   # Compute a default amount of memory based on available physical RAM, with a minimum of 2GB:

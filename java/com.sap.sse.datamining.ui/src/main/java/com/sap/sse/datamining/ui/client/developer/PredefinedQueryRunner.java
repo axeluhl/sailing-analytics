@@ -17,7 +17,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
-import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
@@ -36,7 +37,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final QueryDefinitionProvider<?> queryDefinitionProvider;
-    private final Consumer<StatisticQueryDefinitionDTO> queryRunner;
+    private final Consumer<Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings>> queryRunner;
 
     private final Button showDialogButton;
     private final DialogBox dialogBox;
@@ -46,7 +47,8 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
     public PredefinedQueryRunner(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            QueryDefinitionProvider<?> queryDefinitionProvider, Consumer<StatisticQueryDefinitionDTO> queryRunner) {
+            QueryDefinitionProvider<?> queryDefinitionProvider,
+            Consumer<Pair<ModifiableStatisticQueryDefinitionDTO, ReportParameterToDimensionFilterBindings>> queryRunner) {
         super(parent, context);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -146,7 +148,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
                     @Override
                     public void onSuccess(ModifiableStatisticQueryDefinitionDTO queryDefinition) {
                         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
-                        queryRunner.accept(queryDefinition);
+                        queryRunner.accept(new Pair<>(queryDefinition, /* parameter bindings */ null));
                     }
                     @Override
                     public void onFailure(Throwable error) {

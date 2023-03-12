@@ -25,5 +25,11 @@ public interface IncrementalWindEstimation extends WindEstimationInteraction {
      * Gets the produced wind track of this wind estimation
      */
     WindTrack getWindTrack();
+    
+    /**
+     * Allows test set-ups to wait until this estimator is done in case it performs tasks
+     * asynchronously.
+     */
+    default void waitUntilDone() throws InterruptedException {}
 
 }

@@ -52,7 +52,6 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
     @Override
     public void selectionChanged() {
         presentationPanel.clear();
-
         Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selection = filterSelectionProvider
                 .getSelection();
         List<DataRetrieverLevelDTO> sortedLevels = new ArrayList<>(selection.keySet());
@@ -67,16 +66,13 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
     }
 
     private class RetrieverLevelFilterSelectionPresenter {
-
         private final HorizontalPanel mainPanel;
 
         public RetrieverLevelFilterSelectionPresenter(DataRetrieverLevelDTO retrieverLevel,
                 Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection) {
-
             Label levelLabel = new Label(retrieverLevel.getRetrievedDataType().getDisplayName());
             levelLabel.setWidth("100px");
             levelLabel.addStyleName("emphasizedLabel");
-
             VerticalPanel presentationPanel = new VerticalPanel();
             List<FunctionDTO> sortedDimensions = new ArrayList<>(levelSelection.keySet());
             Collections.sort(sortedDimensions);
@@ -91,7 +87,6 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
                 presentationPanel.add(dimensionSelectionPresenter.getEntryWidget());
                 first = false;
             }
-
             mainPanel = new HorizontalPanel();
             mainPanel.add(levelLabel);
             mainPanel.add(presentationPanel);

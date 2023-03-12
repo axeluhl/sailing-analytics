@@ -231,7 +231,7 @@ public class JorgesTracTracParallelLoadingTest {
     @Test
     public void logParallelLoading() throws CreateModelException, URISyntaxException, InterruptedException, IOException {
         outputs = new ConcurrentHashMap<>();
-        final String jsonUrl = "http://skitrac.traclive.dk/events/event_20160622_ESSCardiff/jsonservice.php";
+        final String jsonUrl = "http://event2.tractrac.com/events/event_20160622_ESSCardiff/jsonservice.php";
         start(jsonUrl);
         lock.await(60, TimeUnit.SECONDS);
         Map<String, StringBuilder> firstRunsOutput = outputs;

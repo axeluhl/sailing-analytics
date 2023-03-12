@@ -1121,6 +1121,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String images();
     String imagesWithCount(int number);
     String video();
+    
+    String videoUrl();
+    String language();
+    String videoLengthSeconds();
+    String thumbnailUrl();
+    
     String videosWithCount(int number);
     String flagImageURL();
     String imageURLs();
@@ -2062,6 +2068,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String swissTimingUpdateUsername();
     String swissTimingUpdatePassword();
     String allowResizing();
+    String resize();
     String resizeSuccessfull();
     String resizeUnsuccessful(String cause);
     String automaticResizeNeedsStorageService();
@@ -2384,9 +2391,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String confirmDeleteImage();
     String confirmDeleteVideo();
     String fileUpload();
+    String uploadedFiles();
     String or();
     String noMediaSelected();
     String fileTypeNotSupported();
+    String fileWithDetectedMimeTypeNotSupported(String mimeType);
+    String notSupportedFileTypesDetected();
+    String videoAdded();
+    String imageAdded();
     String noImageOrVideoDetected();
     String errorWhileUpdatingEvent();
     String updateEventSuccessfully();

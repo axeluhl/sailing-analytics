@@ -11,6 +11,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
+import com.sap.sailing.selenium.pages.adminconsole.advanced.FileStoragePO;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
 import com.sap.sailing.selenium.pages.adminconsole.common.WhatsNewDialogPO;
@@ -105,6 +106,8 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String ADVANCED_MASTERDATA_IDENTIFIER = "MasterDataImport";
     private static final String ADVANCED_LOCAL_SERVER_LABEL = "Local Server";
     private static final String ADVANCED_LOCAL_SERVER_IDENTIFIER = "LocalServer";
+    private static final String ADVANCED_FILE_STORAGE_LABEL = "File Storage";
+    private static final String ADVANCED_FILE_STORAGE_IDENTIFIER = "fileStoragePanel";
 
     private static final String LEADERBOARDS_PLACE = "LeaderboardsPlace";
     private static final String EXPEDITION_DEVICE_CONFIGURATIONS_PLACE = "ExpeditionDeviceConfigurationsPlace";
@@ -239,6 +242,12 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
         return new MasterDataImportPO(this.driver,
                 goToTab(ADVANCED_MASTERDATA_LABEL, ADVANCED_MASTERDATA_IDENTIFIER, false));
+    }
+    
+    public FileStoragePO goToFileStorage() {
+        goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
+        return new FileStoragePO(this.driver,
+                goToTab(ADVANCED_FILE_STORAGE_LABEL, ADVANCED_FILE_STORAGE_IDENTIFIER, false));
     }
 
     public SmartphoneTrackingEventManagementPanelPO goToSmartphoneTrackingPanel() {

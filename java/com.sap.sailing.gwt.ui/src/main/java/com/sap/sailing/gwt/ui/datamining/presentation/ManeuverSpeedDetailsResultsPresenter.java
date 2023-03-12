@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -115,17 +116,14 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
         minDataCount = chartConfigPanel.getMinDataCount();
         minValue = chartConfigPanel.getMinValue();
         maxValue = chartConfigPanel.getMaxValue();
-        
         boolean zeroTo360AxisLabeling = chartConfigPanel.isZeroTo360AxisLabeling();
         xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
         xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
-        
         polarChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         lineChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         dataCountHistogramChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
-        
         if (result != null) {
-            internalShowResults(result);
+            internalShowResults(/* queryDefinition */ null, result);
         }
     }
 
@@ -135,11 +133,10 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResults(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         polarChart.removeAllSeries(false);
         lineChart.removeAllSeries(false);
         dataCountHistogramChart.removeAllSeries(false);
-        
         this.result = result;
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
@@ -185,7 +182,6 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResults
         dataCountHistogramChart.redraw();
         // Initially resize the chart. Otherwise it's too big. FIXME with a better solution
         Timer timer = new Timer() {
-
             @Override
             public void run() {
                 polarChart.setSizeToMatchContainer();

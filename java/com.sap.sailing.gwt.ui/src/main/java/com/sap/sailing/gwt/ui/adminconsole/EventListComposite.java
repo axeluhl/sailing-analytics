@@ -624,7 +624,7 @@ public class EventListComposite extends Composite {
             public void ok(EventDTO updatedEvent) {
                 updateEvent(selectedEvent, updatedEvent);
             }
-        });
+        }, presenter.getMediaServiceWrite());
         dialog.show();
     }
 

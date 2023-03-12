@@ -527,7 +527,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                 final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
                                 return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                             }) : null;
-                    Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
+                    Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns, cache);
                     return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
                             rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
                             fillTotalPointsUncorrected, cache);

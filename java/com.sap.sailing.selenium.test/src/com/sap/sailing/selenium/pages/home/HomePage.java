@@ -41,9 +41,6 @@ public class HomePage extends HostPageWithAuthentication {
     @FindBy(how=BySeleniumId.class, using = "supportAnchor")
     private WebElement sapSupportAnchor;
 
-    @FindBy(how = BySeleniumId.class, using = "feedbackAnchor")
-    private WebElement feedbackAnchor;
-    
     @FindBy(how= BySeleniumId.class, using = "whatsNewAnchor")
     private WebElement whatsNewAnchor;
     
@@ -116,10 +113,6 @@ public class HomePage extends HostPageWithAuthentication {
         return sapSupportAnchor;
     }
     
-    public WebElement getFeedbackLink() {
-        return feedbackAnchor;
-    }
-    
     public WebElement getNewsLink() {
         return whatsNewAnchor;
     }
@@ -130,5 +123,9 @@ public class HomePage extends HostPageWithAuthentication {
     
     public void clickOnEventsMenuItem() {
         driver.findElement(new BySeleniumId("eventsPage")).click();
+    }
+    
+    public void clickOnEvent(String eventId) {
+        driver.findElement(new BySeleniumId("eventTeaser-" + eventId)).click();
     }
 }

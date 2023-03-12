@@ -13,13 +13,13 @@ import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPrefer
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.DataMiningServer;
-import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.serialization.Base64SerializerDeserializer;
 
 /** Implementation of {@link StoredDataMiningQueryPersister}. */
 public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQueryPersister {
@@ -37,7 +37,6 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
     @SuppressWarnings("unchecked")
     @Override
     public ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() {
-
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
                 SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES);
         if (prefs == null) {
@@ -54,10 +53,8 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
     public StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query) {
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
                 SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES);
-
         // remove query
-        Collection<StoredDataMiningQueryPreference> updatedQueries = removeQueryFromIterable(query, prefs);
-
+        final Collection<StoredDataMiningQueryPreference> updatedQueries = removeQueryFromIterable(query, prefs);
         updatedQueries.add(transform(query));
         prefs = new StoredDataMiningQueryPreferences();
         prefs.setStoredQueries(updatedQueries);
@@ -70,10 +67,8 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
     public StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query) {
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
                 SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES);
-
         // remove query
-        Collection<StoredDataMiningQueryPreference> updatedQueries = removeQueryFromIterable(query, prefs);
-
+        final Collection<StoredDataMiningQueryPreference> updatedQueries = removeQueryFromIterable(query, prefs);
         // update preferences
         prefs = new StoredDataMiningQueryPreferences();
         prefs.setStoredQueries(updatedQueries);
@@ -87,12 +82,10 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
         if (prefs != null) {
             // copy existing preferences
             Iterable<StoredDataMiningQueryPreference> storedPrefs = prefs.getStoredQueries();
-
             // remove existing preference with the same UUID if it exists
             storedPrefs = StreamSupport.stream(storedPrefs.spliterator(), false)
                     .filter(q -> !q.getId().equals(query.getId())).collect(Collectors.toList());
-
-            Collection<StoredDataMiningQueryPreference> updatedEntries = new ArrayList<>();
+            final Collection<StoredDataMiningQueryPreference> updatedEntries = new ArrayList<>();
             Util.addAll(storedPrefs, updatedEntries);
             return updatedEntries;
         }
@@ -119,7 +112,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     /** Converts a {@link StoredDataMiningQueryDTO} to a {@link StoredDataMiningQueryPreference}. */
     private StoredDataMiningQueryPreference transform(StoredDataMiningQueryDTO dto) {
-        String serializedQuery = DataMiningQuerySerializer.toBase64String(dto.getQuery());
+        String serializedQuery = Base64SerializerDeserializer.toBase64(dto.getQuery());
         return new StoredDataMiningQueryPreference(dto.getName(), dto.getId(), serializedQuery);
     }
 

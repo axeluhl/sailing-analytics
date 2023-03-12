@@ -14,6 +14,7 @@ Require-Bundle: com.sap.sse.gwt,
  org.apache.shiro.core
 Export-Package: com.sap.sse.datamining.ui.client,
  com.sap.sse.datamining.ui.client.developer,
+ com.sap.sse.datamining.ui.client.event,
  com.sap.sse.datamining.ui.client.execution,
  com.sap.sse.datamining.ui.client.presentation,
  com.sap.sse.datamining.ui.client.presentation.dataproviders,

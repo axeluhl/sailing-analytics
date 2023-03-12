@@ -48,6 +48,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -59,6 +60,7 @@ import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionPresenter;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
+import com.sap.sse.datamining.ui.client.ReportProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.presentation.PlainFilterSelectionPresenter;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
@@ -70,6 +72,19 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * A UI component that shows a list with dimensions, grouped by their retriever levels, from which the user can select
+ * those dimensions for which he/she wants to specify filter conditions. For each dimension selected from the list, a
+ * {@link DimensionFilterSelectionProvider} is added dynamically to a horizontally expanding sequence of those dimension
+ * filter controls.
+ * <p>
+ * 
+ * As the user adds filter conditions for dimensions, only dimension values that pass those filters are displayed in
+ * those dimension filter controls further to the right. For example, if the user starts out by filtering by boat class
+ * name and selects only the "6mR" boat class, then adds a dimension filter for regatta name, then only those regattas
+ * in the 6mR boat class are displayed in the dimension filter list to the right of the boat class dimension filter
+ * column.
+ */
 public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> implements FilterSelectionProvider {
     
     private static final String DimensionListSubheaderAttribute = "subheader";
@@ -99,6 +114,12 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     private final AbstractFilterablePanel<DimensionWithContext> filterFilterDimensionsPanel;
     private final MultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
+    
+    /**
+     * The list of dimensions from which the user can select for filtering by those dimensions selected;
+     * The grid is split into sections that correspond to retriever levels; each such retriever level
+     * section shows a corresponding heading.
+     */
     private final DataGrid<DimensionWithContext> filterDimensionsList;
     private final Column<DimensionWithContext, Boolean> checkboxColumn;
     
@@ -112,41 +133,41 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     private HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selectionToBeApplied;
     private Consumer<Iterable<String>> selectionCallback;
     
+    private final ReportProvider reportProvider;
+    private final ReportParameterToDimensionFilterBindings reportParameterBindings;
+    
     public HierarchicalDimensionListFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+            DataRetrieverChainDefinitionProvider retrieverChainProvider, ReportProvider reportProvider,
+            ReportParameterToDimensionFilterBindings reportParameterBindings) {
         super(parent, context);
         this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.retrieverChainProvider = retrieverChainProvider;
+        this.reportProvider = reportProvider;
+        this.reportParameterBindings = reportParameterBindings;
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
-        
         listeners = new HashSet<>();
         isAwaitingReload = false;
         retrieverChain = null;
         availableFilterDimensions = new ArrayList<>();
         filteredFilterDimensions = new ListDataProvider<>();
-        
         StringMessages stringMessages = getDataMiningStringMessages();
-
         Label filterDimensionsSelectionTitleLabel = new Label(stringMessages.selectDimensionsToFilterBy());
         filterDimensionsSelectionTitleLabel.addStyleName("emphasizedLabel");
         filterDimensionsSelectionTitleLabel.addStyleName("dataMiningMarginLeft");
         filterDimensionsSelectionTitleLabel.addStyleName("filterDimensionsTitleLabel");
-
         clearSelectionButton = new Button(stringMessages.clear());
         clearSelectionButton.addStyleName("floatRight");
         clearSelectionButton.addStyleName("dataMiningMarginRight");
         clearSelectionButton.addClickHandler(e -> clearSelection());
-
         DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
         filterDimensionsList = new DataGrid<>(Integer.MAX_VALUE, resources);
         filterDimensionsList.setAutoHeaderRefreshDisabled(true);
         filterDimensionsList.setAutoFooterRefreshDisabled(true);
         filterDimensionsList.setTableBuilder(new FilterDimensionsListBuilder(filterDimensionsList, resources.dataGridStyle()));
         filteredFilterDimensions.addDataDisplay(filterDimensionsList);
-        
         filterFilterDimensionsPanel = new AbstractFilterablePanel<DimensionWithContext>(
                 null, filteredFilterDimensions, stringMessages) {
             @Override
@@ -165,11 +186,9 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         filterFilterDimensionsPanel.setHeight("100%");
         filterFilterDimensionsPanel.getTextBox().setWidth("100%");
         filterFilterDimensionsPanel.getTextBox().getElement().setPropertyString("placeholder", stringMessages.filterShownDimensions());
-        
         filterDimensionSelectionModel = new MultiSelectionModel<>();
         filterDimensionSelectionModel.addSelectionChangeHandler(this::selectedFilterDimensionsChanged);
         filterDimensionsList.setSelectionModel(filterDimensionSelectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
-        
         checkboxColumn = new Column<DimensionWithContext, Boolean>(new CheckboxCell(true, false)) {
             @Override
             public Boolean getValue(DimensionWithContext object) {
@@ -184,26 +203,21 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
             }
         };
         filterDimensionsList.addColumn(dimensionColumn);
-        
         FlowPanel headerPanel = new FlowPanel();
         headerPanel.addStyleName("dataMiningMarginTop");
         headerPanel.add(filterDimensionsSelectionTitleLabel);
         headerPanel.add(clearSelectionButton);
-        
         DockLayoutPanel filterDimensionsSelectionPanel = new DockLayoutPanel(LayoutUnit);
         filterDimensionsSelectionPanel.addNorth(headerPanel, DimensionSelectionHeaderHeight);
         filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, FilterFilterDimensionsHeight);
         filterDimensionsSelectionPanel.add(filterDimensionsList);
-        
         dimensionFilterSelectionProviders = new HashMap<>();
         dimensionFilterSelectionProvidersPanel = new DockLayoutPanel(LayoutUnit);
         dimensionFilterSelectionProvidersPanel.addStyleName("dimensionFilterSelectionTablesContainer");
         dimensionFilterSelectionProvidersPanel.addStyleName("dataMiningBorderLeft");
-        
         filterSelectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, this);
         filterSelectionPresenterContainer = new ScrollPanel(filterSelectionPresenter.getEntryWidget());
         filterSelectionPresenterContainer.addStyleName("dataMiningBorderTop");
-        
         mainPanel = new DockLayoutPanel(LayoutUnit);
         mainPanel.addSouth(filterSelectionPresenterContainer, SelectionPresenterHeight);
         mainPanel.setWidgetHidden(filterSelectionPresenterContainer, true);
@@ -240,12 +254,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     private void updateFilterDimensions() {
         // Try to retain the selection even if the retriever chain has been null in between
-        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
+        final HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
         if (!currentSelection.isEmpty()) {
             selectionToBeApplied = currentSelection;
             selectionCallback = EmptyApplyCallback;
         }
-        
         if (retrieverChain != null) {
             isUpdatingFilterDimensions = true;
             clearContent();
@@ -261,7 +274,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                     }
                     availableFilterDimensions.sort(null);
                     filterFilterDimensionsPanel.updateAll(availableFilterDimensions);
-    
                     updateControls();
                     if (selectionToBeApplied != null) {
                         ignoreSelectionChangedNotifications = true;
@@ -305,12 +317,19 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
-        DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
+        final DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         selectionToBeApplied = queryDefinition.getFilterSelection();
         selectionCallback = callback;
         if (!isUpdatingFilterDimensions && !isAwaitingReload && retrieverChain.equals(this.retrieverChain)) {
             ignoreSelectionChangedNotifications = true;
+            // The following clearing of the selection model will remove all dimension filters and with them
+            // their parameter bindings, if any. In order to restore the report parameter bindings already configured
+            // in reportParameterBindings, we need to "stash" its contents, then force application of the selection clearing,
+            // the restore the parameter bindings:
+            final ReportParameterToDimensionFilterBindings stash = new ReportParameterToDimensionFilterBindings(reportParameterBindings);
             filterDimensionSelectionModel.clear();
+            filterDimensionSelectionModel.getSelectedSet(); // force applying queued selection changes and event handlers to fire
+            reportParameterBindings.set(stash); // un-stash
             setSelection(selectionToBeApplied, selectionCallback);
             selectionToBeApplied = null;
             selectionCallback = null;
@@ -318,16 +337,16 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
 
     private void setSelection(HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection, Consumer<Iterable<String>> callback) {
-        Set<InnerSelectionCallback> innerCallbacks = new HashSet<>();
-        Collection<String> callbackMessages = new ArrayList<>();
-        Collection<DimensionWithContext> missingDimensions = new ArrayList<>();
-        for (DataRetrieverLevelDTO retrieverLevel : filterSelection.keySet()) {
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> levelSelection = filterSelection.get(retrieverLevel);
-            for (FunctionDTO dimension : levelSelection.keySet()) {
-                DimensionWithContext dimensionWithContext = new DimensionWithContext(dimension, retrieverLevel);
-                int index = availableFilterDimensions.indexOf(dimensionWithContext);
+        final Set<InnerSelectionCallback> innerCallbacks = new HashSet<>();
+        final Collection<String> callbackMessages = new ArrayList<>();
+        final Collection<DimensionWithContext> missingDimensions = new ArrayList<>();
+        for (final DataRetrieverLevelDTO retrieverLevel : filterSelection.keySet()) {
+            final HashMap<FunctionDTO, HashSet<? extends Serializable>> levelSelection = filterSelection.get(retrieverLevel);
+            for (final FunctionDTO dimension : levelSelection.keySet()) {
+                final DimensionWithContext dimensionWithContext = new DimensionWithContext(dimension, retrieverLevel);
+                final int index = availableFilterDimensions.indexOf(dimensionWithContext);
                 if (index != -1) {
-                    InnerSelectionCallback innerCallback = new InnerSelectionCallback(callbackMessages, innerCallbacks, callback);
+                    final InnerSelectionCallback innerCallback = new InnerSelectionCallback(callbackMessages, innerCallbacks, callback);
                     innerCallbacks.add(innerCallback);
                     setDimensionSelection(availableFilterDimensions.get(index), levelSelection.get(dimension), innerCallback);
                 } else {
@@ -335,15 +354,13 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 }
             }
         }
-        
         if (!missingDimensions.isEmpty()) {
-            String listedDimensions = missingDimensions.stream().map(d -> d.getDimension().getDisplayName())
+            final String listedDimensions = missingDimensions.stream().map(d -> d.getDimension().getDisplayName())
                                                                 .collect(Collectors.joining(", "));
             callbackMessages.add(getDataMiningStringMessages().filterDimensionsAreNotAvailable(listedDimensions));
         }
-
         if (!innerCallbacks.isEmpty()) {
-            for (InnerSelectionCallback innerCallback : innerCallbacks) {
+            for (final InnerSelectionCallback innerCallback : innerCallbacks) {
                 innerCallback.canPublishMessages = true;
             }
         } else {
@@ -402,7 +419,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 break;
             }
         }
-
         if (dimensionToChange != null) {
             ignoreSelectionChangedNotifications = true;
             final DimensionWithContext changedDimension = dimensionToChange;
@@ -418,7 +434,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
 
     private void setDimensionSelection(DimensionWithContext dimension, Collection<? extends Serializable> items, Consumer<Iterable<String>> callback) {
-        DimensionFilterSelectionProvider selectionProvider;
+        final DimensionFilterSelectionProvider selectionProvider;
         if (filterDimensionSelectionModel.isSelected(dimension)) {
             selectionProvider = dimensionFilterSelectionProviders.get(dimension);
         } else {
@@ -429,26 +445,25 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private void selectedFilterDimensionsChanged(SelectionChangeEvent event) {
-        Iterable<DimensionWithContext> displayedDimensions = new HashSet<>(dimensionFilterSelectionProviders.keySet());
-        for (DimensionWithContext displayedDimension : displayedDimensions) {
+        final Iterable<DimensionWithContext> displayedDimensions = new HashSet<>(dimensionFilterSelectionProviders.keySet());
+        for (final DimensionWithContext displayedDimension : displayedDimensions) {
             if (!filterDimensionSelectionModel.isSelected(displayedDimension)) {
                 removeDimensionFilterSelectionProvider(displayedDimension);
             }
         }
-        
-        for (DimensionWithContext selectedDimension : filterDimensionSelectionModel.getSelectedSet()) {
+        for (final DimensionWithContext selectedDimension : filterDimensionSelectionModel.getSelectedSet()) {
             if (!dimensionFilterSelectionProviders.containsKey(selectedDimension)) {
                 addDimensionFilterSelectionProvider(selectedDimension);
             }
         }
     }
     
-    private DimensionFilterSelectionProvider addDimensionFilterSelectionProvider(DimensionWithContext dimension) {
-        DimensionFilterSelectionProvider selectionProvider = new DimensionFilterSelectionProvider(this, getComponentContext(),
-                dataMiningService, errorReporter, session, retrieverChainProvider, this, dimension.getRetrieverLevel(), dimension.getDimension());
+    private DimensionFilterSelectionProvider addDimensionFilterSelectionProvider(final DimensionWithContext dimension) {
+        final DimensionFilterSelectionProvider selectionProvider = new DimensionFilterSelectionProvider(this, getComponentContext(),
+                dataMiningService, errorReporter, session, retrieverChainProvider, this, dimension.getRetrieverLevel(), dimension.getDimension(),
+                reportParameterBindings, reportProvider);
         selectionProvider.addListener(() -> filterSelectionChanged(dimension));
         dimensionFilterSelectionProviders.put(dimension, selectionProvider);
-
         DimensionWithContext nextDimension = null;
         for (DimensionWithContext displayedDimension : dimensionFilterSelectionProviders.keySet()) {
             if (displayedDimension.compareTo(dimension) > 0 &&
@@ -458,13 +473,14 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         }
         Widget beforeWidget = nextDimension != null ? dimensionFilterSelectionProviders.get(nextDimension).getEntryWidget() : null;
         dimensionFilterSelectionProvidersPanel.insertWest(selectionProvider.getEntryWidget(), FilterSelectionTableWidth, beforeWidget);
-        
         return selectionProvider;
     }
 
     private void removeDimensionFilterSelectionProvider(DimensionWithContext dimension) {
-        DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
+        final DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
         if (selectionProvider != null) {
+            selectionProvider.removedFromContainer(); // in particular, stop listening on report parameter value changes
+            // important to first stop listening for 
             selectionProvider.clearSelection();
             dimensionFilterSelectionProviders.remove(dimension);
             dimensionFilterSelectionProvidersPanel.remove(selectionProvider.getEntryWidget());
@@ -482,29 +498,27 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         if (isUpdatingAvailableFilterValues) {
             throw new IllegalStateException("Update of availabe filter values already in progress");
         }
-
-        List<DimensionWithContext> dimensionsToUpdate = new ArrayList<>();
-        for (DimensionWithContext dimension : dimensionFilterSelectionProviders.keySet()) {
+        final List<DimensionWithContext> dimensionsToUpdate = new ArrayList<>();
+        for (final DimensionWithContext dimension : dimensionFilterSelectionProviders.keySet()) {
             if (dimension.getRetrieverLevel().getLevel() >= fromRetrieverLevel.getLevel()) {
                 dimensionsToUpdate.add(dimension);
             }
         }
         dimensionsToUpdate.sort(null);
-
         isUpdatingAvailableFilterValues = true;
         updateDimensionFilterSelectionProviders(dimensionsToUpdate.iterator(), exceptDimension, onCompletion);
     }
 
     private void updateDimensionFilterSelectionProviders(Iterator<DimensionWithContext> dimensionIterator, DimensionWithContext exceptDimension, Runnable onCompletion) {
         if (dimensionIterator.hasNext()) {
-            DimensionWithContext dimension = dimensionIterator.next();
+            final DimensionWithContext dimension = dimensionIterator.next();
             if (dimension.equals(exceptDimension)) {
                 updateDimensionFilterSelectionProviders(dimensionIterator, exceptDimension, onCompletion);
             } else {
-                DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
-                HashSet<? extends Serializable> selectionBefore = selectionProvider.getSelection();
+                final DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
+                final HashSet<? extends Serializable> selectionBefore = selectionProvider.getSelection();
                 selectionProvider.updateContent(() -> {
-                    boolean selectionChanged = !selectionBefore.equals(selectionProvider.getSelection());
+                    final boolean selectionChanged = !selectionBefore.equals(selectionProvider.getSelection());
                     if (selectionChanged) {
                         isUpdatingAvailableFilterValues = false;
                         updateAvailableFilterValues(dimension.getRetrieverLevel(), dimension, onCompletion);
@@ -521,11 +535,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
 
     @Override
     public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getSelection() {
-        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = new HashMap<>();
-        for (DimensionWithContext dimensionWithContext : dimensionFilterSelectionProviders.keySet()) {
-            DataRetrieverLevelDTO retrieverLevel = dimensionWithContext.getRetrieverLevel();
-            FunctionDTO dimension = dimensionWithContext.getDimension();
-            HashSet<? extends Serializable> dimensionFilterSelection = dimensionFilterSelectionProviders.get(dimensionWithContext).getSelection();
+        final HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = new HashMap<>();
+        for (final DimensionWithContext dimensionWithContext : dimensionFilterSelectionProviders.keySet()) {
+            final DataRetrieverLevelDTO retrieverLevel = dimensionWithContext.getRetrieverLevel();
+            final FunctionDTO dimension = dimensionWithContext.getDimension();
+            final HashSet<? extends Serializable> dimensionFilterSelection = dimensionFilterSelectionProviders.get(dimensionWithContext).getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 HashMap<FunctionDTO, HashSet<? extends Serializable>> retrieverFilterSelection = filterSelection.get(retrieverLevel);
                 if (retrieverFilterSelection == null) {
@@ -608,7 +622,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private static class DimensionWithContext implements Comparable<DimensionWithContext> {
-
         private final FunctionDTO dimension;
         private final DataRetrieverLevelDTO retrieverLevel;
         private Collection<String> matchingStrings;
@@ -673,9 +686,12 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 return false;
             return true;
         }
-        
     }
     
+    /**
+     * Responsible for grouping the dimensions by their retriever level and inserting headings for each
+     * such retriever level
+     */
     private class FilterDimensionsListBuilder extends BaseCellTableBuilder<DimensionWithContext> {
         
         private final String headerStyle;

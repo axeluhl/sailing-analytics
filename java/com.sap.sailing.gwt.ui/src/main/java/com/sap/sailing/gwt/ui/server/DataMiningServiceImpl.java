@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -47,6 +48,7 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningReportDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -63,14 +65,15 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     protected final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
+    protected final StoredDataMiningReportPersister storedDataMiningReportPersistor;
     private final DataMiningDTOFactory dtoFactory;
 
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService(),
-                dataMiningServerTracker);
+        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(getSecurityService(), dataMiningServerTracker);
+        storedDataMiningReportPersistor = new StoredDataMiningReportPersisterImpl(getSecurityService(), dataMiningServerTracker);
         dtoFactory = new DataMiningDTOFactory();
     }
 
@@ -363,12 +366,12 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     public <ResultType extends Serializable> QueryResultDTO<ResultType> runQuery(DataMiningSession session,
             ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO) {
         checkDataMiningPermission();
-        DataMiningServer dataMiningServer = getDataMiningServer();
-        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer
+        final DataMiningServer dataMiningServer = getDataMiningServer();
+        final StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer
                 .getQueryDefinitionForDTO(queryDefinitionDTO);
-        Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
+        final Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
         logger.info("Handing query "+query+" to server for processing on behalf of user "+SessionUtils.getPrincipal());
-        QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+        final QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
         logger.info("Obtained result for query "+query+" from server on behalf of user "+SessionUtils.getPrincipal());
         return dtoFactory.createResultDTO(result);
     }
@@ -418,11 +421,6 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     }
 
     @Override
-    public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
-        return null;
-    }
-
-    @Override
     public ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() {
         checkDataMiningPermission();
         return storedDataMiningQueryPersistor.retrieveStoredQueries();
@@ -431,5 +429,16 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
     @Override
     public ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) {
         return (ModifiableStatisticQueryDefinitionDTO) dataMiningServerTracker.getService().fromBase64String(serializedQuery);
+    }
+
+    @Override
+    public ArrayList<StoredDataMiningReportDTOImpl> retrieveStoredReports() throws UnauthorizedException {
+        checkDataMiningPermission();
+        return storedDataMiningReportPersistor.getStoredReports();
+    }
+
+    @Override
+    public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
+        return null;
     }
 }

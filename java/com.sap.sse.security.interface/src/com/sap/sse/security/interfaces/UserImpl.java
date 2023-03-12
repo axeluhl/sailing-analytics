@@ -77,10 +77,18 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     private transient UserGroupProvider userGroupProvider;
     
     /**
-     * Roles can refer back to this user object, e.g., for the user qualification, or during the tenant
-     * qualification if this user belongs to the tenant for which the role is qualified. Therefore, this
-     * set has to be transient, and the {@link #roleListForSerialization} field takes over the serialization
-     * which is resolved by {@link #readResolve}.
+     * Roles can refer back to this user object, e.g., for the user qualification, or during the tenant qualification if
+     * this user belongs to the tenant for which the role is qualified. Therefore, this set has to be transient, and the
+     * {@link #roleListForSerialization} field takes over the serialization.
+     * <p>
+     * 
+     * While it seems obvious to resolve the list into a {@link HashSet} in the {@code readResolve()} method, care must
+     * be taken due to the possibility of object graph cycles. In such cases the {@link UserGroup} and {@link User}
+     * objects referenced by {@link Role#getQualifiedForTenant() user group} and {@link Role#getQualifiedForUser() user}
+     * qualifications may not be fully resolved yet when this object's {@code readResolve()} method is invoked.
+     * Therefore, this field is resolved lazily. It remains {@code null} during the entire de-serialization process,
+     * including {@code readResolve()}. It is initialized with a new {@link Set} only when first requested.
+     * When a thread reads a non-{@code null} reference here then the set returned is fully initialized.
      * 
      * @see #writeObject
      * @see #readResolve
@@ -125,12 +133,24 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     
     @Override
     protected Set<Role> getRolesInternal() {
+        final Set<Role> result;
+        if (roles != null) {
+            result = roles;
+        } else {
+            synchronized (this) {
+                if (roles == null) {
+                    result = new HashSet<>(roleListForSerialization);
+                    roleListForSerialization = null;
+                    roles = result;
+                }
+            }
+        }
         return roles;
     }
     
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.defaultWriteObject();
-        oos.writeObject(new ArrayList<>(roles));
+        oos.writeObject(new ArrayList<>(getRolesInternal()));
     }
     
     @SuppressWarnings("unchecked")
@@ -138,12 +158,6 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
             throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         roleListForSerialization = (List<Role>) ois.readObject();
-    }
-    
-    protected Object readResolve() {
-        roles = new HashSet<>(roleListForSerialization);
-        roleListForSerialization = null;
-        return this;
     }
     
     /**

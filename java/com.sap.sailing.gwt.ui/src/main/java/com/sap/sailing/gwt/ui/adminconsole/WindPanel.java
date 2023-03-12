@@ -75,6 +75,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -476,7 +477,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 importResultPanel.clear();
-                String windImportResultJson = event.getResults();
+                String windImportResultJson = FileUploadUtil.getApplicationJsonContent(event);
                 try {
                     WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
                     JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();
