@@ -40,6 +40,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Establishing support@sapsailing.com with AWS SES, SNS, and Lambda|wiki/info/landscape/support-email]]
   * [[Creating an EC2 image for a MongoDB Replica Set from scratch|wiki/info/landscape/creating-ec2-mongodb-image-from-scratch]]
   * [[Setting up dedicated S3 buckets|wiki/info/landscape/s3-bucket-setup]]
+  * [[Large-Scale Set-Ups, e.g., Olympic Games|wiki/info/landscape/olympic-setup]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
