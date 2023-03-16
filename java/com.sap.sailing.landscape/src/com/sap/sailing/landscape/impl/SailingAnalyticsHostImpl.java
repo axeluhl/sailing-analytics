@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.MapBuilder;
@@ -28,5 +29,18 @@ implements SailingAnalyticsHost<ShardingKey> {
         return MapBuilder.of(super.getAdditionalEnvironmentPropertiesAndWhetherStringTyped())
                 .put(SailingProcessConfigurationVariables.EXPEDITION_PORT.name(), /* String-typed */ false)
                 .build();
+    }
+
+    /**
+     * Shared sailing hosts are identified by checking their tag
+     * {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} for value
+     * {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE}.
+     * <p>
+     */
+    @Override
+    public boolean isSharedHost() {
+        return getInstance().tags().stream()
+                .anyMatch(tag -> tag.key().equals(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG)
+                        && tag.value().equals(SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE));
     }
 }

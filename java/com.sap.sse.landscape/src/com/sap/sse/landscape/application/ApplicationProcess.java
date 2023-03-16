@@ -106,10 +106,8 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     String getMasterServerName(Optional<Duration> optionalTimeout) throws Exception;
 
     /**
-     * Obtains the last def@Override
-    inition of the process configuration variable specified, or {@code null} if that variable cannot be found
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
      * in the evaluated {@code env.sh} file.
-     * @throws Exception 
      */
     String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception;

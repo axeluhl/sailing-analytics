@@ -1,6 +1,8 @@
 package com.sap.sailing.landscape.gateway.jaxrs.api;
 
 import java.text.SimpleDateFormat;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +39,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompareServersResultJso
 import com.sap.sailing.server.gateway.serialization.impl.DataImportProgressJsonSerializer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
@@ -56,6 +59,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String REPLICA_SET_NAME_FORM_PARAM = "replicaSetName";
     private static final String DEDICATED_INSTANCE_TYPE_FORM_PARAM = "dedicatedInstanceType";
     private static final String SHARED_INSTANCE_TYPE_FORM_PARAM = "sharedInstanceType";
+    private static final String INSTANCE_ID = "instanceId";
     private static final String INSTANCE_TYPE_FORM_PARAM = "instanceType";
     private static final String DYNAMIC_LOAD_BALANCER_MAPPING_FORM_PARAM = "dynamicLoadBalancerMapping";
     private static final String RELEASE_NAME_FORM_PARAM = "releaseName";
@@ -86,6 +90,11 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String RESPONSE_ERROR_MESSAGE = "message";
     private static final String RESPONSE_RELEASE = "release";
     private static final String HOST_ID_FORM_PARAM = "hostId";
+    private static final String NEW_HOST_ID = "newHostId";
+    private static final String MASTER_PROCESSES_MOVED = "masterProcessesMoved";
+    private static final String REPLICA_PROCESSES_MOVED = "replicaProcessesMoved";
+    private static final String REPLICA_SET_NAME = "replicaSetName";
+    private static final String PORT = "port";
 
     @Context
     UriInfo uriInfo;
@@ -266,6 +275,51 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             response = badRequest("Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage());
         }
         return response;
+    }
+
+    @Path("/moveallapplicationprocessesawayfrom")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response moveAllApplicationProcessesAwayFrom(
+            @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(INSTANCE_ID) String fromInstanceWithId,
+            @FormParam(INSTANCE_TYPE_FORM_PARAM) String optionalInstanceType,
+            @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        try {
+            final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
+            final SailingAnalyticsHost<String> fromHost = getLandscapeService().getLandscape().getHostByInstanceId(region, fromInstanceWithId, new SailingAnalyticsHostSupplier<>());
+            final byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
+            final Triple<SailingAnalyticsHost<String>, Map<String, SailingAnalyticsProcess<String>>, Map<String, SailingAnalyticsProcess<String>>> result = getLandscapeService()
+                    .moveAllApplicationProcessesAwayFrom(fromHost,
+                            Optional.ofNullable(optionalInstanceType == null ? null : InstanceType.valueOf(optionalInstanceType)),
+                            optionalKeyName, passphraseForPrivateKeyDecryption);
+            final JSONObject jsonResult = new JSONObject();
+            jsonResult.put(NEW_HOST_ID, result.getA().getId());
+            final JSONArray masterProcessesMoved = getProcessesAndTheirReplicaSetNamesAsJSONArray(result.getB());
+            jsonResult.put(MASTER_PROCESSES_MOVED, masterProcessesMoved);
+            final JSONArray replicaProcessesMoved = getProcessesAndTheirReplicaSetNamesAsJSONArray(result.getC());
+            jsonResult.put(REPLICA_PROCESSES_MOVED, replicaProcessesMoved);
+            response = Response.ok(streamingOutput(jsonResult)).build();
+        } catch (Exception e) {
+            final String msg = "Error trying to move processes away from instance with ID "+fromInstanceWithId+" in region "+regionId+": "+e.getMessage();
+            logger.log(Level.SEVERE, msg, e);
+            response = badRequest(msg);
+        }
+        return response;
+    }
+
+    private JSONArray getProcessesAndTheirReplicaSetNamesAsJSONArray(Map<String, SailingAnalyticsProcess<String>> processesKeyedByTheirApplicationReplicaSetName) {
+        final JSONArray result = new JSONArray();
+        for (final Entry<String, SailingAnalyticsProcess<String>> e : processesKeyedByTheirApplicationReplicaSetName.entrySet()) {
+            final JSONObject processJson = new JSONObject();
+            processJson.put(REPLICA_SET_NAME, e.getKey());
+            processJson.put(PORT, e.getValue().getPort());
+        }
+        return result;
     }
 
     @Path("/removeapplicationreplicaset")
