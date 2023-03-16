@@ -119,6 +119,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
@@ -807,9 +808,11 @@ public class RaceBoardPanel
             final FlowPanel helpButtonPanel = new FlowPanel();
             final HelpButton helpButton = new HelpButton(HelpButtonResources.INSTANCE,
                     stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview");
-            helpButtonPanel.add(helpButton);
-            helpButtonPanel.setStyleName("HelpButton");
-            regattaAndRaceTimeInformationHeader.add(helpButtonPanel);
+            if (!DeviceDetector.isMobile()) {
+                helpButtonPanel.add(helpButton);
+                helpButtonPanel.setStyleName("HelpButton");
+                regattaAndRaceTimeInformationHeader.add(helpButtonPanel);
+            }
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
             final DataByLogo dataByLogo = new DataByLogo();
