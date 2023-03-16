@@ -416,6 +416,16 @@ We have created a Global Accelerator [Tokyo2020](https://us-west-2.console.aws.a
 
 The Route53 entry ``tokyo2020.sapsailing.com`` now is an alias A record pointing to this global accelerator (``aca060e6eabf4ba3e.awsglobalaccelerator.com.``).
 
+### Geo-Blocking
+
+While for Tokyo 2020 this was not requested, for Paris 2024 we heard rumors that it may. If it does, using the []AWS Web Application Firewall (WAF)](https://us-east-1.console.aws.amazon.com/wafv2/homev2/start) provides the solution. There, we can create so-called Web Access Control Lists (Web ACLs) which need to be created per region where an ALB is used.
+
+A Web ACL consists of a number of rules and has a default action (typically "Allow" or "Block") for those requests not matched by any rule. An ACL can be associated with one or more resources, in particular with Application Load Balancers (ALBs) deployed in the region.
+
+Rules, in turn, consist of statements that can be combined using logical operators. The rule type of interest for geo-blocking is "Originates from a country in" where one or more countries can be selected. When combined with an "Allow" or "Block" action, this results in the geo-blocking behavior desired.
+
+For requests blocked by the rule, the response code, response headers and message body to return to the client can be configured. We can use this, e.g., to configure a 301 re-direct to a static page that informs the user about the geo-blocking.
+
 ### Application Load Balancers (ALBs) and Target Groups
 
 In each region supported, a dedicated load balancer for the Global Accelerator-based event setup has been set up (``Tokyo2020ALB`` or simply ``ALB``). A single target group with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-ded-tokyo2020`` (public).
