@@ -30,16 +30,14 @@ public class GetSailorProfileAction implements SailingAction<SailorProfileDTO>, 
     @GwtIncompatible
     public SailorProfileDTO execute(SailingDispatchContext ctx) throws DispatchException {
         CompetitorAndBoatStore store = ctx.getRacingEventService().getCompetitorAndBoatStore();
-
         SailorProfilePreferences prefs = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
-        SailorProfilePreference pref = findSailorProfile(store, prefs);
-
+        SailorProfilePreference pref = findSailorProfile(prefs);
         return convertSailorProfilePreferenceToDto(pref, store, ctx.getRacingEventService());
     }
 
     /** find the SailorProfilePreference in SailorProfilePreferences from the {@link #uuid} */
     @GwtIncompatible
-    private SailorProfilePreference findSailorProfile(CompetitorAndBoatStore store, SailorProfilePreferences prefs) {
+    private SailorProfilePreference findSailorProfile(SailorProfilePreferences prefs) {
         SailorProfilePreference result = null;
         if (prefs != null) {
             for (SailorProfilePreference p : prefs.getSailorProfiles()) {
@@ -50,7 +48,5 @@ public class GetSailorProfileAction implements SailingAction<SailorProfileDTO>, 
             }
         }
         return result;
-
     }
-
 }
