@@ -18,12 +18,16 @@
 		.filter > input {
 			width: 100%;
 		}
+		.help {
+	        position: absolute;
+	        left: 138px;
+		}
 	</ui:style>	
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.columns}">
 			<div class="{res.mediaCss.small12} {style.pageTitle}">
 			     <ui:text from="{i18n.racesAndTracking}" />
-			     <h:HelpButton ui:field='HelpButton' description='Video Guide' url='https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview' />
+			     <h:HelpButton addStyleNames= "{style.help}" ui:field='HelpButton' description='Video Guide' url='https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview' />
 			</div>
 			<sp:filter.RacesByCompetitorTextBoxFilter addStyleNames="{res.mediaCss.small12} {style.filter}" ui:field="competitorFilterUi" />
 		</div>

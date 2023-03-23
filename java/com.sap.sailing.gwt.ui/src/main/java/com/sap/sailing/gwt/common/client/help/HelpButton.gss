@@ -1,8 +1,10 @@
 @def SHADOW_COLOR #21a0e4;
 
 .help-icon {
-    width: 23px;
+    width: 17px;
+    position: absolute;
     height: auto;
+    margin: 3px;
     box-shadow: 0 0 5px SHADOW_COLOR;
     background-color: rgba(33, 160, 228, .4);
     border-radius: 100%;
