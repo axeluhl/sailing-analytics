@@ -87,7 +87,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  */
 public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
-    private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
+    private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
     private static AwsLandscape<String> landscape;
     private static AwsRegion region;
     private static byte[] keyPass;
