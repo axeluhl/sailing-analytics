@@ -732,6 +732,13 @@
          unpack="false"/>
 
    <plugin
+         id="bcprov-ext"
+         download-size="0"
+         install-size="0"
+         version="1.72.0"
+         unpack="false"/>
+
+   <plugin
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
