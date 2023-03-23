@@ -388,7 +388,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalInstanceType,
             Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) throws Exception {
         final EligibleInstanceForReplicaSetFindingStrategy strategyForFindingOrLaunchingInstanceForUnmangedReplica =
-                new EligbleInstanceForReplicaSetFindingStrategyImpl(this, region, optionalKeyName,
+                new EligibleInstanceForReplicaSetFindingStrategyImpl(this, region, optionalKeyName,
                         privateKeyEncryptionPassphrase, /* master==false because we'd like to deploy a replica */ false,
                         /* mustBeDifferentAvailabilityZone */ true, optionalInstanceType,
                         optionalPreferredInstanceToDeployTo);
@@ -1432,7 +1432,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         SailingAnalyticsHost<String> hostToDeployTo = null;
         if (useSharedInstance) {
             // determine new shared host before stopping old master; we want to *move* and not end up on the same instance again
-            hostToDeployTo = new EligbleInstanceForReplicaSetFindingStrategyImpl(this,
+            hostToDeployTo = new EligibleInstanceForReplicaSetFindingStrategyImpl(this,
                     region, optionalKeyName, privateKeyEncryptionPassphrase,
                     /* master */ true, /* mustBeDifferentAvailabilityZone */ true, optionalInstanceType,
                     optionalPreferredInstanceToDeployTo).getInstanceToDeployTo(replicaSet);
