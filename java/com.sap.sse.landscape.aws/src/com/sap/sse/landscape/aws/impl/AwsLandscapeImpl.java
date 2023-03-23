@@ -913,13 +913,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        keyPair.getKeyPair(new JSch(), privateKeyEncryptionPassphrase).writePrivateKey(bos);
-        return bos.toByteArray();
-    }
-
-    @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes() {
         // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)

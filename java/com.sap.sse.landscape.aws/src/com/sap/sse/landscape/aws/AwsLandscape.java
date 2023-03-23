@@ -305,12 +305,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<SSHKeyPair> getSSHKeyPairs();
 
     /**
-     * Assumes that the {@code keyPair}'s private key has been encrypted using this landscape's default encryption passphrase
-     * and uses that to decrypt it.
-     */
-    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException;
-
-    /**
      * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
      * and stores it persistently also in the local server's database with the private key encrypted.
      * <p>
