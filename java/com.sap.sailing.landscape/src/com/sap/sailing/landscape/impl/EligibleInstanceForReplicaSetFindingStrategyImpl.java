@@ -35,8 +35,8 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @author Axel Uhl (d043530)
  *
  */
-public class EligbleInstanceForReplicaSetFindingStrategyImpl implements EligibleInstanceForReplicaSetFindingStrategy {
-    private static final Logger logger = Logger.getLogger(EligbleInstanceForReplicaSetFindingStrategyImpl.class.getName());
+public class EligibleInstanceForReplicaSetFindingStrategyImpl implements EligibleInstanceForReplicaSetFindingStrategy {
+    private static final Logger logger = Logger.getLogger(EligibleInstanceForReplicaSetFindingStrategyImpl.class.getName());
 
     private final LandscapeService landscapeService;
     private final AwsRegion region;
@@ -102,7 +102,7 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
      *            auto-scaling group) and additional rules regarding availability zone "anti-affinity" as defined here
      *            (see {@link #master}), the default rules for selecting or launching an eligible instance apply.
      */
-    public EligbleInstanceForReplicaSetFindingStrategyImpl(LandscapeService landscapeService, AwsRegion region,
+    public EligibleInstanceForReplicaSetFindingStrategyImpl(LandscapeService landscapeService, AwsRegion region,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, boolean master,
             boolean mustBeDifferentAvailabilityZone, Optional<InstanceType> optionalInstanceType,
             Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) {
