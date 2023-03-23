@@ -1096,6 +1096,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 .setLandscape(getLandscape())
                 .setRegion(region)
                 .setTags(Tags.with(UPGRADE_REPLICA_TAG_KEY, replicaSet.getName()));
+            optionalKeyName.ifPresent(replicaHostBuilder::setKeyName);
             final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
             logger.info("Launching dedicated replica host of type "+instanceType+" for replica "+replica);
             replicaHostStartProcedure.run();
