@@ -306,7 +306,9 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     /**
      * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
-     * and stores it persistently also in the local server's database with the private key encrypted.
+     * and stores it persistently also in the local server's database with the private key encrypted. This will currently
+     * not work for keys of type ED25519 because the {@code getPrivateKey()} method of {@link KeyPair} is not implemented
+     * for that key type and instead throws an {@link UnsupportedOperationException}.
      * <p>
      * 
      * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
@@ -315,7 +317,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
 
     /**
-     * Creates a key pair with the given name in the region specified and obtains the key details and stores them in
+     * Creates an RSA key pair with the given name in the region specified and obtains the key details and stores them in
      * this landscape persistently, such that {@link #getKeyPairInfo(Region, String)} as well as
      * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key. The private key is
      * stored encrypted with the passphrase provided as parameter {@code privateKeyEncryptionPassphrase}.<p>
