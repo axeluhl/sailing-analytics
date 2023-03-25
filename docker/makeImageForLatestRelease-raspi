@@ -1,9 +1,9 @@
 #!/bin/bash
 release=$1
-if [ "$release" = "" ]; then
+if [ "${release}" = "" ]; then
   SET_LATEST=1
   release=$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
-  echo Latest release is $release
+  echo Latest release is ${release}
 fi
 GITROOT="`dirname $0`/.."
 DOCKERDIR="${GITROOT}/docker"
