@@ -300,4 +300,6 @@ public interface LandscapeManagementWriteServiceAsync {
      */
     void moveAllApplicationProcessesAwayFrom(AwsInstanceDTO host, String optionalInstanceTypeForNewInstance,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Void> callback);
+
+    void hasDNSResourceRecordsForReplicaSet(String replicaSetName, String optionalDomainName, AsyncCallback<Boolean> callback);
 }
