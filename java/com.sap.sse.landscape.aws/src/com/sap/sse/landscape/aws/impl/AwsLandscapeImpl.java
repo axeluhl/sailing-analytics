@@ -232,6 +232,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         this.pathPrefixForShardingKey = pathPrefixForShardingKey;
     }
     
+    /**
+     * @param unencryptedKeyPair
+     *            will not work for keys of type ED25519 because for those types the {@code getPrivateKey} method of
+     *            {@link KeyPair} is not implemented and throws an {@link UnsupportedOperationException} instead.
+     */
     private static byte[] getPrivateKeyBytes(KeyPair unencryptedKeyPair) {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         unencryptedKeyPair.writePrivateKey(bos);
@@ -910,13 +915,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<SSHKeyPair> getSSHKeyPairs() {
         return landscapeState.getSSHKeyPairs();
-    }
-
-    @Override
-    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        keyPair.getKeyPair(new JSch(), privateKeyEncryptionPassphrase).writePrivateKey(bos);
-        return bos.toByteArray();
     }
 
     @Override
@@ -2074,6 +2072,4 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                         .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
                                 .targetValue((double) AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET)));
     }
-        
-    
 }

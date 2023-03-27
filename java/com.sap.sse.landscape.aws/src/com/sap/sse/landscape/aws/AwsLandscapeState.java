@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws;
 
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl;
 import com.sap.sse.landscape.aws.impl.SSHKeyPairListener;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
@@ -18,8 +17,6 @@ public interface AwsLandscapeState extends Replicable<ReplicableAwsLandscapeStat
     SSHKeyPair getSSHKeyPair(String regionId, String keyName);
 
     Iterable<SSHKeyPair> getSSHKeyPairs();
-
-    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException;
 
     void addSSHKeyPair(SSHKeyPair result);
 

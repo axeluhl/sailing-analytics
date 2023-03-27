@@ -34,7 +34,11 @@ public class SSHKeyPair extends NamedImpl implements Named, WithQualifiedObjectI
     /**
      * This constructor variant accepts an unencrypted private key but in turn insists on a valid, non-{@code null}
      * encryption passphrase which will be used to encrypt the private key before storing it in the new object's
-     * {@link #encryptedPrivateKey} field.
+     * {@link #encryptedPrivateKey} field.<p>
+     * 
+     * Currently, this will not work for ED25519 keys because the {@code getPrivateKey()} method in {@link KeyPair} used by
+     * {@link KeyPair#writePrivateKey(java.io.OutputStream)} is not implemented for that key type and throws an
+     * {@link UnsupportedOperationException}. See also https://github.com/mwiede/jsch/issues/294.
      */
     public SSHKeyPair(String regionId, String creatorName, TimePoint creationTime, String keyName, byte[] publicKey, byte[] unencryptedPrivateKey,
             byte[] privateKeyEncryptionPassphrase) throws JSchException {
