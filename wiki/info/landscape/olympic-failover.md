@@ -6,11 +6,11 @@ This page is meant to describe a couple of failure scenarios and appropiate miti
 
 ### Scenario
 
-The Lenovo P1 device on which the SAP Sailing Analytics Master is running fails and is not available anymore. Reason could be a hardware failure on the CPU e.g.
+The Lenovo P1 device on which the SAP Sailing Analytics Master / Primary is running fails and is not available anymore. Reason could be a hardware failure on the CPU e.g.
 
 The local replica on the second P1 device is still available, also the cloud replicas are still available. Data from the past is still available to users and on-site consumers. However no new data will be stored.
 
-The mongodb replicaset member running will also be not available anymore.
+The mongodb replicaset member running on the primary P1 will also be not available anymore.
 
 ### Mitigation
 
@@ -23,6 +23,8 @@ Cloud replicas need to be reconfigured to the new channel that the master uses a
 SSH tunnels won't need to change.
 
 The local replica has to be safely shut down, on-site users might experience some change, depending on how we decide with local routing.
+
+Alternatively, based on the Tokyo 2020 experience, we may consider running the second Lenovo P1 laptop also in "master/primary" mode as a "shadow" where all we need to focus on is initially connecting the TracTrac races and linking them properly to the leaderboard slots. From there on, administration other than adding or removing wind sources, proved to be low effort and close to zero interaction. The official scores are transmitted after confirmation from TracTrac, and so are all start time, finish times, and penalties. This approach could help reduce the time to fail over from the primary to the shadow system in a lot less time than would be required for a re-start of the second Lenovo P1 in master/primary mode.
 
 ### Open questions
 
