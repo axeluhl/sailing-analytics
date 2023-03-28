@@ -6,11 +6,11 @@ This page is meant to describe a couple of failure scenarios and appropiate miti
 
 ### Scenario
 
-The Lenovo P1 device on which the SAP Sailing Analytics Master is running fails and is not available anymore. Reason could be a hardware failure on the CPU e.g.
+The Lenovo P1 device on which the SAP Sailing Analytics Master / Primary is running fails and is not available anymore. Reason could be a hardware failure on the CPU e.g.
 
 The local replica on the second P1 device is still available, also the cloud replicas are still available. Data from the past is still available to users and on-site consumers. However no new data will be stored.
 
-The mongodb replicaset member running will also be not available anymore.
+The mongodb replicaset member running on the primary P1 will also be not available anymore.
 
 ### Mitigation
 
