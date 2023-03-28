@@ -44,6 +44,20 @@
                 will open an AWS console, showing the instances launched off that AMI. This way it becomes easy to see
                 which instances are using which of the managed AMIs.
             </li>
+            <li>SSH keys produced with new versions of OpenSSH as well as the highly secure ED25519 keys are now supported
+                for AWS landscape management. This removes the requirement to convert new OpenSSH keys to PEM format before
+                starting to work with them.
+            </li>
+            <li>For the DNS name resulting from a new replica set name and an optional domain name or the default domain name
+                (<tt>sapsailing.com</tt>) it is now checked that this name is not taken yet. An error message will be shown
+                otherwise.
+            </li>
+            <li>Sorting of replica-set table by name is now case-insensitive.</li>
+            <li>Bug fix: when working cross-region with the Landscape panel, temporary upgrade replicas were identified
+                trying to obtain their host name from their IP address. When this is attempted, however, for an IP address
+                identifying a host in one region and the host name is determined from within another region then the
+                internal DNS name chosen is that of the other region and therefore incorrect. Instead, now the IP address's
+                numeric representation is used instead.</li>
           </ul>
           <h2 class="articleSubheadline">February 2023</h2>
           <ul class="bulletList">

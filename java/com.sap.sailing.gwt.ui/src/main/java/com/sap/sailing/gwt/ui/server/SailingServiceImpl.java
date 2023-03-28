@@ -3402,7 +3402,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             for (Entry<Class<? extends OperationWithResult<?, ?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
-            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(),
+            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostAddress(),
                     replicaDescriptor.getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
                     replicaDescriptor.getReplicableIdsAsStrings(), replicaDescriptor.getAdditionalInformation(),
                     replicationCountByOperationClassName,

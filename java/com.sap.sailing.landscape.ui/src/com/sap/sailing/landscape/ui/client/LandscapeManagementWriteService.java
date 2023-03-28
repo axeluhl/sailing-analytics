@@ -160,4 +160,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     void moveAllApplicationProcessesAwayFrom(AwsInstanceDTO host, String optionalInstanceTypeForNewInstance,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    boolean hasDNSResourceRecordsForReplicaSet(String replicaSetName, String optionalDomainName);
 }

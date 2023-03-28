@@ -449,4 +449,6 @@ public interface LandscapeService {
     moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
             Optional<InstanceType> optionalInstanceTypeForNewInstance,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    String getHostname(String replicaSetName, String optionalDomainName);
 }
