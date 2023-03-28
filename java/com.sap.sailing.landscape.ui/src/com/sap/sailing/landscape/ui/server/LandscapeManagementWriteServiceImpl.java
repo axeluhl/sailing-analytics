@@ -110,6 +110,7 @@ import com.sap.sse.util.ThreadPoolUtil;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
@@ -949,5 +950,15 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 Optional.ofNullable(optionalInstanceTypeForNewInstance == null ? null
                         : InstanceType.valueOf(optionalInstanceTypeForNewInstance)),
                 optionalKeyName, privateKeyEncryptionPassphrase);
+    }
+    
+    @Override
+    public boolean hasDNSResourceRecordsForReplicaSet(String replicaSetName, String optionalDomainName) {
+        final AwsLandscape<String> landscape = getLandscape();
+        final LandscapeService landscapeService = getLandscapeService();
+        final String hostname = landscapeService.getHostname(replicaSetName, optionalDomainName);
+        final Iterable<ResourceRecordSet> existingDNSRulesForHostname = landscape.getResourceRecordSets(hostname);
+        // Failing early in case DNS record already exists (see also bug 5826):
+        return existingDNSRulesForHostname != null && !Util.isEmpty(existingDNSRulesForHostname);
     }
 }

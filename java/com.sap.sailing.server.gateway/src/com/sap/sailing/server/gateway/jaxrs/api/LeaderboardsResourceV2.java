@@ -320,6 +320,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS,
                 DetailType.LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
+                DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.OVERALL_TIME_ON_TIME_FACTOR,
                 DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE };
     }
@@ -461,6 +462,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     name = "legCurrentSignedCrossTrackErrorInMeters";
                     if (currentLegEntry != null && currentLegEntry.currentOrAverageSignedCrossTrackErrorInMeters != null) {
                         value = currentLegEntry.currentOrAverageSignedCrossTrackErrorInMeters;
+                    }
+                    break;
+                case LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+                    name = "currentLegAverageSpeedOverGround-kts";
+                    if (currentLegEntry != null && currentLegEntry.averageSpeedOverGroundInKnots != null) {
+                        value = currentLegEntry.averageSpeedOverGroundInKnots;
                     }
                     break;
                 case OVERALL_TIME_ON_TIME_FACTOR:
