@@ -1,0 +1,9 @@
+REPLICATION_HOST=rabbit.internal.sapsailing.com
+MONGODB_HOST=dbserver.internal.sapsailing.com
+MONGODB_PORT=10202
+EXPEDITION_PORT=2010
+REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.shared.server.impl.SharedSailingDataImpl,com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl
+REPLICATE_MASTER_SERVLET_PORT=8888
+REPLICATE_MASTER_QUEUE_HOST=rabbit.internal.sapsailing.com
+REPLICATE_MASTER_QUEUE_PORT=5672
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog -XX:ThreadPriorityPolicy=2"
