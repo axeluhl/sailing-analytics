@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -13,8 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsLandscapeOperation;
@@ -126,13 +123,6 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     @Override
     public Iterable<SSHKeyPair> getSSHKeyPairs() {
         return Collections.unmodifiableCollection(sshKeyPairs.values());
-    }
-
-    @Override
-    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        keyPair.getKeyPair(new JSch(), privateKeyEncryptionPassphrase).writePrivateKey(bos);
-        return bos.toByteArray();
     }
 
     @Override

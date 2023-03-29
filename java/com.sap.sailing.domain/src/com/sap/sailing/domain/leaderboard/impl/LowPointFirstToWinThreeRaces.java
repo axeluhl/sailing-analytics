@@ -33,7 +33,7 @@ import com.sap.sse.common.Util.Pair;
  * <p>
  * 
  * Those carried wins are added to the
- * {@link #isWin(com.sap.sailing.domain.leaderboard.Leaderboard, com.sap.sailing.domain.base.Competitor, com.sap.sailing.domain.base.RaceColumn, com.sap.sse.common.TimePoint, com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache, Function<Competitor, Double>)
+ * {@link #isWin(Leaderboard, Competitor, RaceColumn, TimePoint, Function, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
  * wins} achieved in the medal series. More wins rank better. Equal numbers of races won make the score in the last race
  * in that series the first tie-breaker. Note that "last race" can be different races in case of multiple fleets in that
  * medal series, such as in a semi-final medal series split into fleets A and B. Should the tie not be resolved this

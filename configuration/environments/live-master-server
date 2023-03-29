@@ -1,0 +1,19 @@
+# To enable the use of the shared SecurityService and SharedSailingData from security-service.sapsailing.com:
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
+# obtain initial polar sheet data from the archive server, without live replication:
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dpolardata.source.url=https://www.sapsailing.com"
+# obtain initial models for wind estimation from maneuvers from the archive server, without live replication:
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dwindestimation.source.url=https://www.sapsailing.com"
+REPLICATE_ON_START=com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl,com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl
+REPLICATE_MASTER_SERVLET_HOST=security-service.sapsailing.com
+REPLICATE_MASTER_EXCHANGE_NAME=security_service
+
+# Provide authentication credentials for a user on the security-service.sapsailing.com permitted to replicate, either by username/password...
+#REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
+#REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
+# Or by bearer token, obtained, e.g., through
+#   curl -d "username=myuser&password=mysecretpassword" "https://security-service.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# or by logging in to the security-service.sapsailing.com server with a user having the SERVER:REPLICATE:security-service and SERVER:READ_REPLICATOR:security-service
+# permissions, using your web browser and then navigating to
+#     https://security-service.sapsailing.com/security/api/restsecurity/access_token
+#REPLICATE_MASTER_BEARER_TOKEN=

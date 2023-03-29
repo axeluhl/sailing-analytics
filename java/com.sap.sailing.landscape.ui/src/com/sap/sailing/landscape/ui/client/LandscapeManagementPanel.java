@@ -257,7 +257,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return result;
             }
         };
-        applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name());
+        applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name(), (rs1, rs2)->rs1.getReplicaSetName().toLowerCase().compareTo(rs2.getReplicaSetName().toLowerCase()));
         final SafeHtmlCell versionCell = new SafeHtmlCell();
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> versionColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(versionCell) {
             @Override
