@@ -8,18 +8,21 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
@@ -132,6 +135,25 @@ public class SecuredServerImpl implements SecuredServer {
         final Object usernameValue = ownershipJson.get(OwnershipResource.KEY_USERNAME);
         final String username = usernameValue == null ? null : usernameValue.toString();
         return new Pair<>(groupId, username);
+    }
+    
+    @Override
+    public void setGroupAndUserOwner(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId,
+            Optional<String> displayName, Optional<UUID> groupId, Optional<String> username) throws ClientProtocolException, IOException, ParseException {
+        final URL setGroupAndUserOwnerUrl = new URL(getBaseUrl(),
+                SECURITY_API_PREFIX + OwnershipResource.RESTSECURITY_OWNERSHIP + "/"
+                        + type.getName() + "/" + typeRelativeObjectId.toString());
+        final HttpPut putRequest = new HttpPut(setGroupAndUserOwnerUrl.toString());
+        final JSONObject ownershipJson = new JSONObject();
+        username.map(un->ownershipJson.put(OwnershipResource.KEY_USERNAME, un));
+        groupId.map(gid->ownershipJson.put(OwnershipResource.KEY_GROUP_ID, gid));
+        displayName.map(dn->ownershipJson.put(OwnershipResource.KEY_DISPLAY_NAME, dn));
+        final HttpEntity entity = new StringEntity(ownershipJson.toJSONString(), "UTF-8");
+        putRequest.setEntity(entity);
+        final CloseableHttpResponse response = createHttpClient().execute(putRequest);
+        if (response.getStatusLine().getStatusCode() >= 300) {
+            throw new IllegalArgumentException(response.getStatusLine().getReasonPhrase());
+        }
     }
     
     @Override

@@ -765,7 +765,16 @@ public class LandscapeServiceImpl implements LandscapeService {
             // security realm that the application replica set's master process will use if it existed already. Add the user to the group
             securityServiceServer.addCurrentUserToGroup(userGroupId);
         } else {
-            securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
+            final UUID groupId = securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
+            try {
+                securityServiceServer.setGroupAndUserOwner(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString()),
+                        Optional.empty() /* displayName */, Optional.of(groupId), Optional.empty() /* leave user owner unchanged */);
+            } catch (Exception e) {
+                // this didn't work, but it's not the end of the world if we cannot update the new group's ownership,
+                // although it's a bit surprising because the user identified by the bearerToken should be the group's
+                // owner...
+                logger.warning("Couldn't update user group ownership of user group "+serverGroupName+": "+e.getMessage());
+            }
         }
     }
 

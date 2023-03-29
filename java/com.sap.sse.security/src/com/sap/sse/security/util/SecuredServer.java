@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
@@ -38,8 +39,21 @@ public interface SecuredServer {
      */
     UUID getUserGroupIdByName(String userGroupName) throws MalformedURLException, ClientProtocolException, IOException, ParseException, IllegalAccessException;
 
+    /**
+     * @return a pair of the owning user group's UUID and the owning user's name 
+     */
     Pair<UUID, String> getGroupAndUserOwner(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId)
             throws ClientProtocolException, IOException, ParseException;
+    
+    /**
+     * Set group (if {@code groupId} is present) and user (if {@code username} is present) ownership of the object
+     * identified by {@code type} and {@code typeRelativeObjectId}, optionally also its display name, to the group
+     * identified by {@code groupId} and the user identified by {@code username}. If this fails for any reason that
+     * manifests itself in a non-2XX HTTP response code, an {@link IllegalArgumentException} is thrown.
+     */
+    void setGroupAndUserOwner(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId,
+            Optional<String> displayName, Optional<UUID> groupId, Optional<String> username)
+            throws MalformedURLException, ClientProtocolException, IOException, ParseException;
 
     Iterable<Pair<WildcardPermission, Boolean>> hasPermissions(Iterable<WildcardPermission> permissions) throws UnsupportedEncodingException, MalformedURLException, ClientProtocolException, IOException, ParseException;
     /**
