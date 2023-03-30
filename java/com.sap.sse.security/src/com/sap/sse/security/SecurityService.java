@@ -141,9 +141,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getUserGroup(UUID id);
 
     UserGroup getUserGroupByName(String name);
-    
+
     Iterable<UserGroup> getUserGroupsOfUser(User user);
 
+    /**
+     * Creates a user group with the given {@code id} and {@code name} and makes the calling subject
+     * its owner and a member of the group and assigns the {@code user} role qualified to the new
+     * group to the calling subject ({@code user:{name}}).
+     */
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
     
     void addUserToUserGroup(UserGroup group, User user);
