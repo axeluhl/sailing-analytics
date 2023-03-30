@@ -1,0 +1,4 @@
+#!/bin/bash
+tunnels-no-internet
+sleep 2
+tractrac-B
