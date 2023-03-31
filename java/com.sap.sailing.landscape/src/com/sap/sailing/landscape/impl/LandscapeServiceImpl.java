@@ -767,6 +767,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             final UUID groupId = securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
             try {
+                // try to set the group owner of the new group to the group itself, allowing all users with role user:{group-name} to
+                // change / edit it.
                 securityServiceServer.setGroupAndUserOwner(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString()),
                         Optional.empty() /* displayName */, Optional.of(groupId), Optional.empty() /* leave user owner unchanged */);
             } catch (Exception e) {

@@ -147,7 +147,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * Creates a user group with the given {@code id} and {@code name} and makes the calling subject
      * its owner and a member of the group and assigns the {@code user} role qualified to the new
-     * group to the calling subject ({@code user:{name}}).
+     * group to the calling subject ({@code user:{name}}) as a "transitive" role assignment, allowing
+     * the user to grant that role also to other users, in turn.
      */
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
     
