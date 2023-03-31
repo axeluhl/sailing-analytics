@@ -146,10 +146,12 @@ public class SecuredServerImpl implements SecuredServer {
         final HttpPut putRequest = new HttpPut(setGroupAndUserOwnerUrl.toString());
         final JSONObject ownershipJson = new JSONObject();
         username.map(un->ownershipJson.put(OwnershipResource.KEY_USERNAME, un));
-        groupId.map(gid->ownershipJson.put(OwnershipResource.KEY_GROUP_ID, gid));
+        groupId.map(gid->ownershipJson.put(OwnershipResource.KEY_GROUP_ID, gid.toString()));
         displayName.map(dn->ownershipJson.put(OwnershipResource.KEY_DISPLAY_NAME, dn));
         final HttpEntity entity = new StringEntity(ownershipJson.toJSONString(), "UTF-8");
+        putRequest.setHeader(HTTP.CONTENT_TYPE, "application/json");
         putRequest.setEntity(entity);
+        authenticate(putRequest);
         final CloseableHttpResponse response = createHttpClient().execute(putRequest);
         if (response.getStatusLine().getStatusCode() >= 300) {
             throw new IllegalArgumentException(response.getStatusLine().getReasonPhrase());
@@ -242,7 +244,7 @@ public class SecuredServerImpl implements SecuredServer {
             paramPayload.put(UserGroupResource.KEY_GROUP_NAME, userGroupName);
             final URL createUserGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP);
             final HttpPut putRequest = new HttpPut(createUserGroupUrl.toString());
-            putRequest.setEntity(new StringEntity(paramPayload.toJSONString()));
+            putRequest.setEntity(new StringEntity(paramPayload.toJSONString(), "UTF-8"));
             putRequest.setHeader(HTTP.CONTENT_TYPE, "application/json");
             final Pair<Object, Integer> response = getJsonParsedResponse(putRequest);
             if (response.getA() instanceof JSONObject) {
