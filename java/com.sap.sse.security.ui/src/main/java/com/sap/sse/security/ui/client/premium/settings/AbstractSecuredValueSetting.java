@@ -26,7 +26,7 @@ public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetti
     }
     
     @Override
-    public T getValue() {
+    public final T getValue() {
         if(dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
             return super.getValue();
         }else {
@@ -39,6 +39,24 @@ public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetti
         if(dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
             super.setValue(value);
         }
+    }
+    
+    @Override
+    public final void resetToDefault() {
+        super.setValue(getDefaultValue());
+    }
+    
+    @Override
+    public final boolean isDefaultValue() {
+        final T value = super.getValue();
+        if (value == getDefaultValue()) {
+            return true;
+        }
+        if (value != null) {
+            return value.equals(getDefaultValue());
+        }
+        // value == null && defaultValue != null => value isn't default
+        return false;
     }
     
     public void getUnlockingSubscriptionPlans(Consumer<List<String>> callback) {
