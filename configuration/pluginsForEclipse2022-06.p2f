@@ -29,9 +29,9 @@
     </iu>
 
     <!-- multiple Plugins needed for the development -->
-    <iu id='com.gwtplugins.eclipse.suite.v3.feature.feature.group' name='GWT EclipFse Plugin' version='3.0.0.202301181602'>
+    <iu id='com.gwtplugins.eclipse.suite.v3.feature.feature.group' name='GWT Eclipse Plugin' version='4.0.0.202302020242'>
       <repositories size='1'>
-        <repository location='https://eclipse.gwtproject.org.vertispan.com/2023-01-18'/>
+        <repository location='https://plugins.gwtproject.org/eclipse/gwt-eclipse-plugin/4.0.0'/>
       </repositories>
     </iu>
     <iu id='com.oracle.jmc.feature.ide.feature.group' name='Oracle Java Mission Control IDE Integration'>
@@ -70,11 +70,6 @@
       </repositories>
     </iu>
     <iu id='org.sf.feeling.decompiler.cfr.feature.group' name='Enhanced Class Decompiler CFR Extension (Optional)'>
-      <repositories size='1'>
-        <repository location='https://ecd-plugin.github.io/update'/>
-      </repositories>
-    </iu>
-    <iu id='org.sf.feeling.decompiler.jad.feature.group' name='Enhanced Class Decompiler Jad Extension (Optional)'>
       <repositories size='1'>
         <repository location='https://ecd-plugin.github.io/update'/>
       </repositories>
