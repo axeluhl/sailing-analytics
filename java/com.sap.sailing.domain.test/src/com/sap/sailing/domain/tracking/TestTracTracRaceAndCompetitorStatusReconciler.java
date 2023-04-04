@@ -35,6 +35,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceAndCompetitorStatusWithRaceLogReconciler;
 import com.sap.sse.common.Color;
@@ -85,6 +86,17 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         tractracRace = mock(IRace.class);
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.RACING);
         trackedRace = mock(TrackedRace.class);
+        when(trackedRace.getRaceLogResolver()).thenReturn(new RaceLogAndTrackedRaceResolver() {
+            @Override
+            public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
+                return null;
+            }
+
+            @Override
+            public TrackedRace resolveTrackedRace(SimpleRaceLogIdentifier identifier) {
+                return null;
+            }
+        });
         tractracCompetitor = mock(ICompetitor.class);
         tractracRaceCompetitor = mock(IRaceCompetitor.class);
         when(tractracRaceCompetitor.getRace()).thenReturn(tractracRace);
@@ -187,6 +199,17 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         raceLog.add(new RaceLogPassChangeEventImpl(manualAbortTimePoint, author, /* pass id */ 2));
         raceLog.add(new RaceLogStartTimeEventImpl(newStartTimePoint, author, /* pass id */ 2, newStartTimePoint, /* courseAreaId */ null));
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.NONE);
+        when(trackedRace.getRaceLogResolver()).thenReturn(new RaceLogAndTrackedRaceResolver() {
+            @Override
+            public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
+                return null;
+            }
+
+            @Override
+            public TrackedRace resolveTrackedRace(SimpleRaceLogIdentifier identifier) {
+                return null;
+            }
+        });
         final TimePoint noneStatusTimePoint = manualAbortTimePoint.plus(Duration.ONE_MINUTE.times(1));
         when(tractracRace.getStatusLastChangedTime()).thenReturn(noneStatusTimePoint.asMillis());
         final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
@@ -200,6 +223,26 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         reconciler.reconcileRaceStatus(tractracRace, trackedRace);
         assertEquals(2, raceLog.getCurrentPassId()); // assert that the NONE state did not add a new pass
         assertSame(abortFlagEvent, abortingFlagFinder.analyze());
+    }
+
+    @Test
+    public void testManualAbandonThenNoStartTimeInNextPassYetMayCauseNewPassChangeForTracTracStatusNONE() {
+        final TimePoint manualAbortTimePoint = startOfPass.plus(Duration.ONE_MINUTE);
+        raceLog.add(new RaceLogFlagEventImpl(manualAbortTimePoint, author, /* pass id */ 1, Flags.NOVEMBER, /* lower flag */ null, /* isDisplayed */ true));
+        raceLog.add(new RaceLogPassChangeEventImpl(manualAbortTimePoint, author, /* pass id */ 2));
+        when(tractracRace.getStatus()).thenReturn(RaceStatusType.NONE);
+        final TimePoint noneStatusTimePoint = manualAbortTimePoint.plus(Duration.ONE_MINUTE.times(1));
+        when(tractracRace.getStatusLastChangedTime()).thenReturn(noneStatusTimePoint.asMillis());
+        final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+        final RaceLogFlagEvent abortFlagEvent = abortingFlagFinder.analyze();
+        assertNotNull(abortFlagEvent);
+        assertSame(Flags.NOVEMBER, abortFlagEvent.getUpperFlag());
+        assertTrue(abortFlagEvent.isDisplayed());
+        assertEquals(manualAbortTimePoint, abortFlagEvent.getLogicalTimePoint());
+        assertEquals(1, abortFlagEvent.getPassId());
+        assertEquals(2, raceLog.getCurrentPassId());
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace);
+        assertTrue(raceLog.getCurrentPassId() >= 2); // if NONE advanced an empty pass by another one we don't mind
     }
 
     @Test
