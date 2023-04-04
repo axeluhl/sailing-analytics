@@ -25,6 +25,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -175,6 +176,29 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         assertEquals(2, raceLog.getCurrentPassId());
         reconciler.reconcileRaceStatus(tractracRace, trackedRace); // assert that reconciliation is idempotent
         assertEquals(2, raceLog.getCurrentPassId());
+        assertSame(abortFlagEvent, abortingFlagFinder.analyze());
+    }
+
+    @Test
+    public void testManualAbandonThenNewStartTimeShouldNotCauseChangeForTracTracStatusNONE() {
+        final TimePoint manualAbortTimePoint = startOfPass.plus(Duration.ONE_MINUTE);
+        final TimePoint newStartTimePoint = startOfPass.plus(Duration.ONE_MINUTE.times(2));
+        raceLog.add(new RaceLogFlagEventImpl(manualAbortTimePoint, author, /* pass id */ 1, Flags.NOVEMBER, /* lower flag */ null, /* isDisplayed */ true));
+        raceLog.add(new RaceLogPassChangeEventImpl(manualAbortTimePoint, author, /* pass id */ 2));
+        raceLog.add(new RaceLogStartTimeEventImpl(newStartTimePoint, author, /* pass id */ 2, newStartTimePoint, /* courseAreaId */ null));
+        when(tractracRace.getStatus()).thenReturn(RaceStatusType.NONE);
+        final TimePoint noneStatusTimePoint = manualAbortTimePoint.plus(Duration.ONE_MINUTE.times(1));
+        when(tractracRace.getStatusLastChangedTime()).thenReturn(noneStatusTimePoint.asMillis());
+        final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+        final RaceLogFlagEvent abortFlagEvent = abortingFlagFinder.analyze();
+        assertNotNull(abortFlagEvent);
+        assertSame(Flags.NOVEMBER, abortFlagEvent.getUpperFlag());
+        assertTrue(abortFlagEvent.isDisplayed());
+        assertEquals(manualAbortTimePoint, abortFlagEvent.getLogicalTimePoint());
+        assertEquals(1, abortFlagEvent.getPassId());
+        assertEquals(2, raceLog.getCurrentPassId());
+        reconciler.reconcileRaceStatus(tractracRace, trackedRace);
+        assertEquals(2, raceLog.getCurrentPassId()); // assert that the NONE state did not add a new pass
         assertSame(abortFlagEvent, abortingFlagFinder.analyze());
     }
 
