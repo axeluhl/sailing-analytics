@@ -521,7 +521,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
                     final Double pointsScoredByNext = leaderboard.getTotalPoints(next, raceColumn, timePoint);
                     assertTrue((pointsScoredByPrevious==null && pointsScoredByNext==null)
                             || pointsScoredByPrevious <= pointsScoredByNext);
-                    if (pointsScoredByPrevious < pointsScoredByNext) {
+                    if (pointsScoredByPrevious != null && pointsScoredByPrevious < pointsScoredByNext) {
                         differenceFound = true;
                         break;
                     }
