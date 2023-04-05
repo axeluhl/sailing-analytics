@@ -49,6 +49,7 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFlagEv
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogORCCertificateAssignmentEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogORCImpliedWindSourceEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogORCLegDataEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogResultsAreOfficialEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogTagEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogUseCompetitorsFromRaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
@@ -76,7 +77,8 @@ public class RaceLogEventDeserializerTest {
                     new RaceLogORCLegDataEventDeserializer(competitorDeserializer),
                     null, new RaceLogORCCertificateAssignmentEventDeserializer(competitorDeserializer),
                     new RaceLogORCImpliedWindSourceEventDeserializer(competitorDeserializer),
-                    new RaceLogExcludeWindSourceEventDeserializer(competitorDeserializer));
+                    new RaceLogExcludeWindSourceEventDeserializer(competitorDeserializer),
+                    new RaceLogResultsAreOfficialEventDeserializer(competitorDeserializer));
         }
     }
     
