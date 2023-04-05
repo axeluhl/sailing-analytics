@@ -65,12 +65,37 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
     public boolean isMedalWinAmountCriteria() {
         return true;
     }
-    
+
+    /**
+     * TODO this is all broken... We need to first tell whether the competitors sailed in the same fleet. Only then
+     * does it make sense to look at the races in that last medal series, moving backwards from the last; followed
+     * by the comparison of the opening series scores.
+     * 
+     * TODO If the competitors are from different medal series fleets (A/B in the Formula Kite semi-final medal series, for example),
+     * they must be compared by their rank within their fleet first, and as a secondary criterion by their opening series score.
+     * 
+     * TODO We somehow would have to keep track of the in-fleet rank for the competitor's last medal series here.
+     */
     @Override
-    public boolean isLastMedalRaceCriteria() {
-        return true;
+    public int compareByLastMedalRacesCriteria(List<Pair<RaceColumn, Double>> o1Scores,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard) {
+        final Pair<RaceColumn, Double> o1LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o1Scores);
+        final Pair<RaceColumn, Double> o2LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o2Scores);
+        final int result;
+        if (o1LastNonNullMedalRaceScore == null) {
+            if (o2LastNonNullMedalRaceScore == null) {
+                result = 0;
+            } else {
+                result = nullScoresAreBetter ? -1 : 1;
+            }
+        } else if (o2LastNonNullMedalRaceScore == null) {
+            result = nullScoresAreBetter ? 1 : -1;
+        } else {
+            result = compareBySingleRaceColumnScore(o1LastNonNullMedalRaceScore.getB(), o2LastNonNullMedalRaceScore.getB(), nullScoresAreBetter);
+        }
+        return result;
     }
-    
+
     /**
      * Still returns {@code null} if {@link Leaderboard#getNetPoints(Competitor, RaceColumn, TimePoint, Set)} returns {@code null}.
      * Otherwise, if the {@code raceColumn} is a medal race column and not the medal series' carry-forward column, 1.0 is returned

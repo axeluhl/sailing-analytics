@@ -167,14 +167,6 @@ public interface ScoringScheme extends Serializable {
     }
     
     /**
-     * Returning {@code true} makes the last medal race (having valid scores) a secondary ranking criteria for
-     * competitors that have an equal overall score.
-     */
-    default boolean isLastMedalRaceCriteria() {
-        return false;
-    }
-
-    /**
      * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
      * medal race column it usually counts double. Under certain circumstances, columns may also count with factors
      * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee
@@ -348,5 +340,20 @@ public interface ScoringScheme extends Serializable {
             result = 0;
         }
         return result;
+    }
+    
+    /**
+     * Compares by the scores of a single race column. If only one of the competitors has a result this competitor is
+     * ranked better than the other one.
+     */
+    default int compareBySingleRaceColumnScore(Double o1Score, Double o2Score, boolean nullScoresAreBetter) {
+        return Comparator
+                .nullsLast((Double o1s, Double o2s) -> getScoreComparator(nullScoresAreBetter).compare(o1s, o2s))
+                .compare(o1Score, o2Score);
+    }
+
+    default int compareByLastMedalRacesCriteria(List<Pair<RaceColumn, Double>> o1Scores,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard) {
+        return 0;
     }
 }

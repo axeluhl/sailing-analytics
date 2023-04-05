@@ -142,8 +142,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         Double o2MedalRaceScore = 0.0;
         Double o1CarryForwardScoreInMedals = null;
         Double o2CarryForwardScoreInMedals = null;
-        Double o1LastMedalScore = null;
-        Double o2LastMedalScore = null;
         // When a column has isStartsWithZeroScore, the competitor's score only need to be reset to zero if from there on
         // the competitor scored in this or any subsequent columns
         boolean needToResetO1ScoreUponNextValidResult = false;
@@ -212,11 +210,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     if (!raceColumn.isCarryForward()) {
                         if (o1Score != null) {
                             o1MedalRaceScore += o1Score;
-                            o1LastMedalScore = o1Score;
                         }
                         if (o2Score != null) {
                             o2MedalRaceScore += o2Score;
-                            o2LastMedalScore = o2Score;
                         }
                     } else {
                         o1CarryForwardScoreInMedals = o1Score;
@@ -282,12 +278,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                                 zeroBasedIndexOfLastMedalSeriesInWhichO1Scored>=0 || zeroBasedIndexOfLastMedalSeriesInWhichO2Scored>=0);
                         if (result == 0) {
                             if (scoringScheme.isCarryForwardInMedalsCriteria()) {
-                                result = compareBySingleRaceColumnScore(o1CarryForwardScoreInMedals, o2CarryForwardScoreInMedals);
+                                result = scoringScheme.compareBySingleRaceColumnScore(o1CarryForwardScoreInMedals,
+                                        o2CarryForwardScoreInMedals, nullScoresAreBetter);
                             }
                             if (result == 0) {
-                                if (scoringScheme.isLastMedalRaceCriteria()) {
-                                    result = compareBySingleRaceColumnScore(o1LastMedalScore, o2LastMedalScore);
-                                }
+                                result = scoringScheme.compareByLastMedalRacesCriteria(o1Scores, o2Scores, nullScoresAreBetter, leaderboard);
                                 if (result == 0) {
                                     result = scoringScheme.compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore, nullScoresAreBetter);
                                     if (result == 0) {
@@ -322,14 +317,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private int getZeroBasedIndexOfSeries(final RaceColumnInSeries raceColumnInSeries) {
         final Series medalSeries = raceColumnInSeries.getSeries();
         return Util.indexOf(medalSeries.getRegatta().getSeries(), medalSeries);
-    }
-
-    /**
-     * Compares by the scores of a single race column. If only one of the competitors has a result this competitor is
-     * ranked better than the other one.
-     */
-    private int compareBySingleRaceColumnScore(Double o1Score, Double o2Score) {
-        return Comparator.nullsLast((Double o1s, Double o2s)->getScoreComparator().compare(o1s, o2s)).compare(o1Score, o2Score);
     }
 
     private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {

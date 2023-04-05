@@ -1,8 +1,13 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.List;
+
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * This class is a derivation of the LowPointScoring scheme. The following additional rules apply:
@@ -40,10 +45,31 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
     }
     
     @Override
-    public boolean isLastMedalRaceCriteria() {
-        return true;
+    public int compareByLastMedalRacesCriteria(List<Pair<RaceColumn, Double>> o1Scores,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard) {
+        final Pair<RaceColumn, Double> o1LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o1Scores);
+        final Pair<RaceColumn, Double> o2LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o2Scores);
+        final int result;
+        if (o1LastNonNullMedalRaceScore == null) {
+            if (o2LastNonNullMedalRaceScore == null) {
+                result = 0;
+            } else {
+                result = nullScoresAreBetter ? -1 : 1;
+            }
+        } else if (o2LastNonNullMedalRaceScore == null) {
+            result = nullScoresAreBetter ? 1 : -1;
+        } else {
+            result = compareBySingleRaceColumnScore(o1LastNonNullMedalRaceScore.getB(), o2LastNonNullMedalRaceScore.getB(), nullScoresAreBetter);
+        }
+        return result;
     }
-    
+
+    private Pair<RaceColumn, Double> getLastNonNullMedalRaceScore(List<Pair<RaceColumn, Double>> o2Scores) {
+        return Util.first(Util.filter(
+                () -> o2Scores.listIterator(o2Scores.size()),
+                raceColumnAndScore -> raceColumnAndScore.getA().isMedalRace() && raceColumnAndScore.getB() != null));
+    }
+
     /**
      * If {@link #isMedalWinAmountCriteria()} returns {@code true}, this will be the amount of races that must be won,
      * in order to win the medal series instantly
