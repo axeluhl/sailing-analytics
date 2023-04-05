@@ -155,17 +155,20 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * decide upon the first difference), across <em>all</em> scores throughout the leaderboard. Here, however, we need
      * to distinguish between competitors who only sailed in the opening series (anything preceding the first medal
      * series), and those who did score in at least one medal race, because the medal series are evaluated only by wins
-     * and as a secondary tie breaker then by the last medal race score and after that the rank at the end of the opening
-     * series.<p>
+     * and as a secondary tie breaker then by the medal race scores looked at from the end, and after that the rank at
+     * the end of the opening series.
+     * <p>
      * 
      * It is safe to assume that if {@code o1} has valid medal series scores then so will {@code o2}, and vice versa,
      * because otherwise ranking by medal series participation would already have decided who ranks better. If none has
-     * score in a medal race then we default to the {@code super} implementation with a default RRS A8.1 decision.<p>
+     * score in a medal race then we default to the {@code super} implementation with a default RRS A8.1 decision.
+     * <p>
      * 
-     * Otherwise (both have scored in at least one medal race) we have to assume that both sailed in the same medal series,
-     * scored the same number of wins (including wins carried forward) and were also tied on the scores in their respective
-     * last medal race. Then, the decision is to be made based on the opening series rank, which in itself includes the
-     * entire tie-breaking rule set with {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
+     * Otherwise (both have scored in at least one medal race) we have to assume that both sailed in the same medal
+     * series, scored the same number of wins (including wins carried forward) and were also tied on the scores in their
+     * respective last medal race. Then, the decision is to be made based on the opening series rank, which in itself
+     * includes the entire tie-breaking rule set with
+     * {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
      * etc., only up to the end of the opening series.
      */
     @Override
