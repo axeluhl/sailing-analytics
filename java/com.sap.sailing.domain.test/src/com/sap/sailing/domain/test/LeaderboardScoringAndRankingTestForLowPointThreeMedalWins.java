@@ -228,7 +228,15 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     
     /**
      * In this test A races one race, B two. The semi-finals are crafted such that there are ties on wins
-     * between competitors from A and B, so checking the last race's rank shall break the tie.
+     * between competitors from A and B, so checking the last race's rank shall break the tie within the
+     * respective semi-final fleet (A or B, respectively). Things are further crafted such that two competitors
+     * in B tied on wins are also tied on score in their last B semi-final race, both scoring DNF, so the
+     * tie-breaking comparison must continue with the last-but-one race. For the A fleet the set-up is such
+     * that they only race one race, but two competitors not winning both score a DNF, so their tie needs to
+     * be resolved based on their opening series ranks.<p>
+     * 
+     * Once the A/B fleets have their internal tie-breaking done, their non-winning ranks have to be compared
+     * pair-wise (2nd vs. 2nd, 3rd vs. 3rd, and so on) based on their opening series rank for overall ranking.
      */
     @Test
     public void testWithTiesInSemiFinalWithDifferentNumbersOfSemifinalRaces() {
@@ -242,51 +250,76 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         //   Carried Wins  SF1        Wins
         //        2         1          3
         //        1         2          1
-        //                  3          0
-        //                  4          0
+        //                  5 (DNF)    0       <------- tied with 4th seed based on wins, tied on last race, better by seed from opening series
+        //                  5 (DNF)    0
         final TrackedRace sf1ARace = new MockedTrackedRaceWithStartTimeAndRanks(now, semiFinalists.getA());
         final RaceColumn sf1Column = leaderboard.getRaceColumnByName("SF1");
+        leaderboard.getScoreCorrection().setMaxPointsReason(semiFinalists.getA().get(2), sf1Column, MaxPointsReason.DNF);
+        leaderboard.getScoreCorrection().correctScore(semiFinalists.getA().get(2), sf1Column, 5.0);
+        leaderboard.getScoreCorrection().setMaxPointsReason(semiFinalists.getA().get(3), sf1Column, MaxPointsReason.DNF);
+        leaderboard.getScoreCorrection().correctScore(semiFinalists.getA().get(3), sf1Column, 5.0);
         sf1Column.setTrackedRace(sf1Column.getFleetByName(SEMIFINAL_FLEET_A_NAME), sf1ARace);
         // scores for the B semi-finalists in the order of their seeding:
-        //   Carried Wins  SF1  SF2   Wins
-        //        2         4    1     3
-        //        1         3    2     1
-        //                  2    3     0
-        //                  1    4     1
+        //   Carried Wins  SF1  SF2     Wins
+        //        2         4    1       3
+        //        1         3    5 (DNF) 1
+        //                  2    2       0
+        //                  1    5 (DNF) 1      <------ tied with 2nd seed based on wins, same rank/score in SF2, better in SF1
         final TrackedRace sf1BRace = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(
                 semiFinalists.getB().get(3),
                 semiFinalists.getB().get(2),
                 semiFinalists.getB().get(1),
                 semiFinalists.getB().get(0)));
+        // The expected orders for A/B: A1,A2,A3/A4 (depending on opening series score); B1,B4,B2,B3
+        // This merges into places 5-10 overall, based on Opening Series rank: A2/B4, A3/A4/B2, A3/A4/B3 (where A3/A4 is decided based on Opening Series again)
         sf1Column.setTrackedRace(sf1Column.getFleetByName(SEMIFINAL_FLEET_B_NAME), sf1BRace);
-        final TrackedRace sf2BRace = new MockedTrackedRaceWithStartTimeAndRanks(now, semiFinalists.getB());
+        final TrackedRace sf2BRace = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(
+                semiFinalists.getB().get(0),
+                semiFinalists.getB().get(2),
+                semiFinalists.getB().get(1),
+                semiFinalists.getB().get(3)));
         final RaceColumn sf2Column = leaderboard.getRaceColumnByName("SF2");
         sf2Column.setTrackedRace(sf2Column.getFleetByName(SEMIFINAL_FLEET_B_NAME), sf2BRace);
+        leaderboard.getScoreCorrection().setMaxPointsReason(semiFinalists.getB().get(1), sf2Column, MaxPointsReason.DNF);
+        leaderboard.getScoreCorrection().correctScore(semiFinalists.getB().get(1), sf2Column, 5.0);
+        leaderboard.getScoreCorrection().setMaxPointsReason(semiFinalists.getB().get(3), sf2Column, MaxPointsReason.DNF);
+        leaderboard.getScoreCorrection().correctScore(semiFinalists.getB().get(3), sf2Column, 5.0);
         final Iterable<Competitor> rankResultsAfterSemifinals = leaderboard.getCompetitorsFromBestToWorst(later);
-        // So we should see ties on one win each for zero index-based A(1), B(1), and B(3).
-        // Their last race's scores are, respectively,                 2  ,  2  ,      4
-        // So A(1) and B(1) need to break their tie based on the opening series, and B(3) ranks worse.
         // Overall ranks 1 and 2 are taken by the finalists; 3 and 4 by the semi-final winners. Start looking at rank 5 (zero-based 4):
-        if (Util.indexOf(openingSeriesRankResult, semiFinalists.getA().get(1)) < Util.indexOf(openingSeriesRankResult, semiFinalists.getB().get(1))) {
-            assertSame(Util.get(rankResultsAfterSemifinals, 4), semiFinalists.getA().get(1));
-            assertSame(Util.get(rankResultsAfterSemifinals, 5), semiFinalists.getB().get(1));
+        assertRanksBasedOnOpeningSeriesRanking(/* zeroBasedRankOfCompetitorWithBetterOpeningSeriesScore */ 2,
+                semiFinalists.getA().get(0), semiFinalists.getB().get(0),
+                openingSeriesRankResult, rankResultsAfterSemifinals);
+        assertRanksBasedOnOpeningSeriesRanking(/* zeroBasedRankOfCompetitorWithBetterOpeningSeriesScore */ 4,
+                semiFinalists.getA().get(1), semiFinalists.getB().get(3),
+                openingSeriesRankResult, rankResultsAfterSemifinals);
+        // find out whether A3 or A4 scored better in the opening series:
+        final Competitor betterOfA3AndA4AfterOpeningSeries;
+        final Competitor worseOfA3AndA4AfterOpeningSeries;
+        if (Util.indexOf(openingSeriesRankResult, semiFinalists.getA().get(2)) < Util.indexOf(openingSeriesRankResult, semiFinalists.getA().get(3))) {
+            betterOfA3AndA4AfterOpeningSeries = semiFinalists.getA().get(2);
+            worseOfA3AndA4AfterOpeningSeries = semiFinalists.getA().get(3);
         } else {
-            assertSame(Util.get(rankResultsAfterSemifinals, 5), semiFinalists.getA().get(1));
-            assertSame(Util.get(rankResultsAfterSemifinals, 4), semiFinalists.getB().get(1));
+            betterOfA3AndA4AfterOpeningSeries = semiFinalists.getA().get(3);
+            worseOfA3AndA4AfterOpeningSeries = semiFinalists.getA().get(2);
         }
-        assertSame(Util.get(rankResultsAfterSemifinals, 6), semiFinalists.getB().get(3));
-        // And we should see ties on zero wins each for zero index-based A(2), A(3), and B(2)
-        // Their last race's scores are, respectively,                    3  ,  4  ,      3
-        // So A(2) and B(2) are tied on the last race too, and the opening series rank decides,
-        // and A(3) follows
-        if (Util.indexOf(openingSeriesRankResult, semiFinalists.getA().get(2)) < Util.indexOf(openingSeriesRankResult, semiFinalists.getB().get(2))) {
-            assertSame(Util.get(rankResultsAfterSemifinals, 7), semiFinalists.getA().get(2));
-            assertSame(Util.get(rankResultsAfterSemifinals, 8), semiFinalists.getB().get(2));
+        assertRanksBasedOnOpeningSeriesRanking(/* zeroBasedRankOfCompetitorWithBetterOpeningSeriesScore */ 6,
+                betterOfA3AndA4AfterOpeningSeries, semiFinalists.getB().get(1),
+                openingSeriesRankResult, rankResultsAfterSemifinals);
+        assertRanksBasedOnOpeningSeriesRanking(/* zeroBasedRankOfCompetitorWithBetterOpeningSeriesScore */ 6,
+                worseOfA3AndA4AfterOpeningSeries, semiFinalists.getB().get(2),
+                openingSeriesRankResult, rankResultsAfterSemifinals);
+    }
+
+    private void assertRanksBasedOnOpeningSeriesRanking(final int expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore, final Competitor aSemiFinalist,
+            final Competitor bSemiFinalist, final Iterable<Competitor> openingSeriesRankResult,
+            final Iterable<Competitor> rankResultsAfterSemifinals) {
+        if (Util.indexOf(openingSeriesRankResult, aSemiFinalist) < Util.indexOf(openingSeriesRankResult, bSemiFinalist)) {
+            assertSame(Util.get(rankResultsAfterSemifinals, expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore), aSemiFinalist);
+            assertSame(Util.get(rankResultsAfterSemifinals, expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore+1), bSemiFinalist);
         } else {
-            assertSame(Util.get(rankResultsAfterSemifinals, 8), semiFinalists.getA().get(2));
-            assertSame(Util.get(rankResultsAfterSemifinals, 7), semiFinalists.getB().get(2));
+            assertSame(Util.get(rankResultsAfterSemifinals, expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore+1), aSemiFinalist);
+            assertSame(Util.get(rankResultsAfterSemifinals, expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore), bSemiFinalist);
         }
-        assertSame(Util.get(rankResultsAfterSemifinals, 9), semiFinalists.getA().get(3));
     }
     
     /**
@@ -300,7 +333,8 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         final Series semiFinalSeries = regatta.getSeriesByName(SEMIFINAL_SERIES_NAME);
         runRacesInFinalUntilThreeWins(semiFinalists.getA(), semiFinalSeries, SEMIFINAL_FLEET_A_NAME, now);
         runRacesInFinalUntilThreeWins(semiFinalists.getB(), semiFinalSeries, SEMIFINAL_FLEET_B_NAME, now);
-        // check that the semi-final winners took three wins (including carried wins) each:
+        // check that the semi-final winners took three wins (including carried wins) each (note, they are at zero-based ranks 2/3 due to the
+        // grand finalists already at zero-based ranks 0/1):
         final Iterable<Competitor> rankResultsAfterSemifinals = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(3.0, leaderboard.getNetPoints(Util.get(rankResultsAfterSemifinals, 2), later), EPSILON);
         assertEquals(3.0, leaderboard.getNetPoints(Util.get(rankResultsAfterSemifinals, 3), later), EPSILON);
@@ -337,7 +371,8 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     }
     
     /**
-     * Returns the semi-finalists for A and B fleets
+     * Returns the semi-finalists for A and B fleets and set the carried wins for semi-finalists
+     * and grand finalists.
      */
     private Pair<List<Competitor>, List<Competitor>> assignCarryForwardWinsToSemiFinalistsAndGrandFinalists(TimePoint timePoint) {
         // now compute and enter the wins carried forward:
@@ -394,7 +429,7 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     }
 
     /**
-     * For all finalists adjacent in the {@code rankResultsAfterGrandFinal} checks that the competitor ranked better
+     * For all finalists adjacent in the {@code rankResultsAfterSemiFinal} checks that the competitor ranked better
      * has more or equal wins; if equal wins, scored better in the last race; if scored equal in the last race had
      * better rank in {@code openingSeriesRankResult}.
      */
@@ -407,8 +442,31 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
         allSemifinalists.addAll(semiFinalists.getA());
         allSemifinalists.addAll(semiFinalists.getB());
         assertEquals(allSemifinalists, new HashSet<>(semiFinalistsInRankedOrder));
+        // assert that each two adjacent odd/even-numbered semi-finalists in the overall
+        // ranking stem from the two different semi-final fleets:
+        for (int i=0; i<semiFinalists.getA().size(); i++) {
+            assertTrue(!semiFinalists.getA().contains(semiFinalistsInRankedOrder.get(i)) ||
+                    semiFinalists.getB().contains(semiFinalistsInRankedOrder.get(i+1)));
+            assertTrue(!semiFinalists.getA().contains(semiFinalistsInRankedOrder.get(i+1)) ||
+                    semiFinalists.getB().contains(semiFinalistsInRankedOrder.get(i)));
+        }
+        assertCorrectMedalSeriesSequence(leaderboard, semiFinalSeries, semiFinalists.getA(), rankResultsAfterSemiFinal, openingSeriesRankResult, timePoint);
+        assertCorrectMedalSeriesSequence(leaderboard, semiFinalSeries, semiFinalists.getB(), rankResultsAfterSemiFinal, openingSeriesRankResult, timePoint);
+    }
+
+    /**
+     * Constructs a sorted sequence from the {@code competitorsFromOneFleet}, sorted by their order in
+     * {@code rankResultsAfterSeries}, then compares all adjacent pairs in that sequence for their correct comparison,
+     * using
+     * {@link #assertCorrectMedalSeriesSequence(Leaderboard, Series, Competitor, Competitor, Iterable, TimePoint)}.
+     */
+    private void assertCorrectMedalSeriesSequence(Leaderboard leaderboard, Series semiFinalSeries, List<Competitor> competitorsFromOneFleet,
+            Iterable<Competitor> rankResultsAfterSeries, Iterable<Competitor> openingSeriesRankResult,
+            TimePoint timePoint) {
+        final Iterable<Competitor> competitorsFromOneFleetOrderedByRankResults =
+                Util.filter(rankResultsAfterSeries, competitorsFromOneFleet::contains);
         Competitor previous = null;
-        for (final Competitor next : semiFinalistsInRankedOrder) {
+        for (final Competitor next : competitorsFromOneFleetOrderedByRankResults) {
             if (previous != null) {
                 assertCorrectMedalSeriesSequence(leaderboard, semiFinalSeries, previous, next, openingSeriesRankResult, timePoint);
             }
@@ -437,28 +495,43 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
     }
 
     /**
+     * Can be used to assert the ranking <em>within</em> a single medal series fleet, such as the grand final,
+     * or the semi-final fleet A, or the semi-final fleet B.<p>
+     * 
      * Checks that {@code previous} (considered as ranked better than {@code next}) has more or equal wins; if equal
-     * wins, scored better in the last race; if scored equal in the last race had better rank in
-     * {@code openingSeriesRankResult}.
+     * wins, scored better in the last race, then last-but-one race, and so on; if scored equal in all races up to the first
+     * in the medal series, check that "previous" had better rank in {@code openingSeriesRankResult}.
      */
     private void assertCorrectMedalSeriesSequence(Leaderboard leaderboard, Series medalSeries, Competitor previous,
             Competitor next, Iterable<Competitor> openingSeriesRankResult, TimePoint timePoint) {
+        // assert same fleet
+        assertSame(medalSeries.getRaceColumns().iterator().next().getFleetOfCompetitor(previous),
+                   medalSeries.getRaceColumns().iterator().next().getFleetOfCompetitor(next));
+        // assert previous is really "better" than next
         assertTrue(leaderboard.getNetPoints(previous, timePoint) >= leaderboard.getNetPoints(next, timePoint));
         if (leaderboard.getNetPoints(previous, timePoint).doubleValue() == leaderboard.getNetPoints(next, timePoint).doubleValue()) {
-            // equal number of wins; look at last race scored:
-            final Double previousLastScore = getLastScoredRace(leaderboard, medalSeries, previous, timePoint);
-            final Double nextLastScore = getLastScoredRace(leaderboard, medalSeries, next, timePoint);
-            assertTrue(previousLastScore <= nextLastScore);
-            if (previousLastScore.doubleValue() == nextLastScore.doubleValue()) {
-                // equal score in last race; expect tie to have been broken by opening series
+            // equal number of wins; look at last race scored, then last-but-one, and so on, until a difference is found
+            // or we reach the first race:
+            final List<? extends RaceColumnInSeries> raceColumnsInReverseOrder = Util.asList(medalSeries.getRaceColumns());
+            Collections.reverse(raceColumnsInReverseOrder);
+            boolean differenceFound = false;
+            for (final RaceColumnInSeries raceColumn : raceColumnsInReverseOrder) {
+                if (!raceColumn.isCarryForward()) {
+                    final Double pointsScoredByPrevious = leaderboard.getTotalPoints(previous, raceColumn, timePoint);
+                    final Double pointsScoredByNext = leaderboard.getTotalPoints(next, raceColumn, timePoint);
+                    assertTrue((pointsScoredByPrevious==null && pointsScoredByNext==null)
+                            || pointsScoredByPrevious <= pointsScoredByNext);
+                    if (pointsScoredByPrevious < pointsScoredByNext) {
+                        differenceFound = true;
+                        break;
+                    }
+                }
+            }
+            if (!differenceFound) {
+                // equal score in all races in the medal series; expect tie to have been broken by opening series
                 assertTrue(Util.indexOf(openingSeriesRankResult, previous) < Util.indexOf(openingSeriesRankResult, next));
             }
         }
-    }
-
-    private Double getLastScoredRace(Leaderboard leaderboard, Series medalSeries, Competitor competitor, TimePoint timePoint) {
-        Iterable<Double> pointsScored = Util.map(medalSeries.getRaceColumns(), raceColumn->leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
-        return Util.last(Util.filter(pointsScored, points->points!=null));
     }
 
     /**
