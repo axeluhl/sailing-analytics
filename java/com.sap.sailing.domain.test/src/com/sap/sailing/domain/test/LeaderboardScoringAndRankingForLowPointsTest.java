@@ -39,7 +39,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * behavior is not changed and still works for those same cases in case the {@link ScoringSchemeType#LOW_POINT} scoring
  * scheme is used.
  */
-public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardScoringAndRankingTestBase {
+public class LeaderboardScoringAndRankingForLowPointsTest extends LeaderboardScoringAndRankingTestBase {
     private static final double EPSILON = 0.000001;
 
     private void executePreSeries(List<Competitor> yellow, List<Competitor> blue, TimePoint now) {

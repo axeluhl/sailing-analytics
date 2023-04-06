@@ -52,7 +52,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * same cases in case the {@link ScoringSchemeType#LOW_POINT} scoring scheme is used, e.g., for those competitors
  * who did not advance to the semi-final stage.
  */
-public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends LeaderboardScoringAndRankingTestBase {
+public class LeaderboardScoringAndRankingForLowPointThreeMedalWinsTest extends LeaderboardScoringAndRankingTestBase {
     private static final String SEMIFINAL_SERIES_NAME = "Semifinal";
     private static final String SEMIFINAL_FLEET_A_NAME = "A";
     private static final String SEMIFINAL_FLEET_B_NAME = "B";
