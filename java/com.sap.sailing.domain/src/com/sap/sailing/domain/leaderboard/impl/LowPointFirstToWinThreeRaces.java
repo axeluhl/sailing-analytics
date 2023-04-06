@@ -105,9 +105,10 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                 final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
                 final Series medalSeriesInWhichBothScored = Util.get(regatta.getSeries(), zeroBasedIndexOfLastMedalSeriesInWhichBothScored);
                 assert medalSeriesInWhichBothScored.isMedal();
-                final RaceColumn firstRaceColumnInMedalSeries = medalSeriesInWhichBothScored.getRaceColumns().iterator().next();
-                final Fleet o1MedalFleet = firstRaceColumnInMedalSeries.getFleetOfCompetitor(o1);
-                final Fleet o2MedalFleet = firstRaceColumnInMedalSeries.getFleetOfCompetitor(o2);
+                final RaceColumn firstNonCarryRaceColumnInMedalSeries = Util.first(Util.filter(medalSeriesInWhichBothScored.getRaceColumns(),
+                        rc->!rc.isCarryForward()));
+                final Fleet o1MedalFleet = firstNonCarryRaceColumnInMedalSeries.getFleetOfCompetitor(o1);
+                final Fleet o2MedalFleet = firstNonCarryRaceColumnInMedalSeries.getFleetOfCompetitor(o2);
                 final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
                 // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
                 // to speed up / save the total points (re-)calculation
@@ -121,9 +122,9 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                     // o1 and o2 scored in different fleets of the same medal series; compare as follows:
                     // - by their rank inside their fleet
                     final int o1RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o1MedalFleet, totalPointsSupplier, o1,
-                            openingSeriesTotalRankComparator, nullScoresAreBetter, leaderboard, timePoint, cache);
+                            openingSeriesTotalRankComparator, firstNonCarryRaceColumnInMedalSeries, nullScoresAreBetter, leaderboard, timePoint, cache);
                     final int o2RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o2MedalFleet, totalPointsSupplier, o2,
-                            openingSeriesTotalRankComparator, nullScoresAreBetter, leaderboard, timePoint, cache);
+                            openingSeriesTotalRankComparator, firstNonCarryRaceColumnInMedalSeries, nullScoresAreBetter, leaderboard, timePoint, cache);
                     result = Integer.compare(o1RankInMedalSeriesFleet, o2RankInMedalSeriesFleet);
                     if (result == 0) {
                         // - then by opening series rank
@@ -137,10 +138,10 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
 
     private int getRankInMedalSeriesFleet(Series medalSeries, Fleet medalFleet,
             BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, Competitor competitor,
-            final LeaderboardTotalRankComparator openingSeriesTotalRankComparator, boolean nullScoresAreBetter,
-            Leaderboard leaderboard,
-            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        final List<Competitor> competitorsInMedalFleet = Util.asList(medalSeries.getRaceColumns().iterator().next().getAllCompetitors(medalFleet));
+            final LeaderboardTotalRankComparator openingSeriesTotalRankComparator, RaceColumn firstNonCarryRaceColumnInMedalSeries,
+            boolean nullScoresAreBetter,
+            Leaderboard leaderboard, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final List<Competitor> competitorsInMedalFleet = Util.asList(firstNonCarryRaceColumnInMedalSeries.getAllCompetitors(medalFleet));
         competitorsInMedalFleet.sort((c1, c2)->compareByInMedalSeriesFleetRules(c1, c2, totalPointsSupplier, medalSeries,
                 openingSeriesTotalRankComparator, nullScoresAreBetter, leaderboard, timePoint, cache));
         return competitorsInMedalFleet.indexOf(competitor)+1;

@@ -310,8 +310,10 @@ public class LeaderboardScoringAndRankingTestForLowPointThreeMedalWins extends L
                 openingSeriesRankResult, rankResultsAfterSemifinals);
     }
 
-    private void assertRanksBasedOnOpeningSeriesRanking(final int expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore, final Competitor aSemiFinalist,
-            final Competitor bSemiFinalist, final Iterable<Competitor> openingSeriesRankResult,
+    private void assertRanksBasedOnOpeningSeriesRanking(
+            final int expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore,
+            final Competitor aSemiFinalist, final Competitor bSemiFinalist,
+            final Iterable<Competitor> openingSeriesRankResult,
             final Iterable<Competitor> rankResultsAfterSemifinals) {
         if (Util.indexOf(openingSeriesRankResult, aSemiFinalist) < Util.indexOf(openingSeriesRankResult, bSemiFinalist)) {
             assertSame(Util.get(rankResultsAfterSemifinals, expectedZeroBasedRankAfterSemifinalsOfCompetitorWithBetterOpeningSeriesScore), aSemiFinalist);
