@@ -204,10 +204,9 @@ public interface ScoringScheme extends Serializable {
     }
     
     /**
-     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top
-     * for that column, considering any score corrections and penalties, too.
-     * @param totalPointsSupplier provides the 
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint. If the
+     * competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top for
+     * that column, considering any score corrections and penalties, too.<p>
      */
     default boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
@@ -352,8 +351,9 @@ public interface ScoringScheme extends Serializable {
                 .compare(o1Score, o2Score);
     }
 
-    default int compareByLastMedalRacesCriteria(List<Pair<RaceColumn, Double>> o1Scores,
-            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard) {
+    default int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         return 0;
     }
 }

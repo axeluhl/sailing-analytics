@@ -1,11 +1,15 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
@@ -45,8 +49,9 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
     }
     
     @Override
-    public int compareByLastMedalRacesCriteria(List<Pair<RaceColumn, Double>> o1Scores,
-            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard) {
+    public int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         final Pair<RaceColumn, Double> o1LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o1Scores);
         final Pair<RaceColumn, Double> o2LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o2Scores);
         final int result;

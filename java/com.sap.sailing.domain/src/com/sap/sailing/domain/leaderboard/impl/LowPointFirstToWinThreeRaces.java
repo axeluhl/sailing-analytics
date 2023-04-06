@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -7,10 +8,14 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
@@ -61,37 +66,142 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         return ScoringSchemeType.LOW_POINT_FIRST_TO_WIN_THREE_RACES;
     }
 
+    /**
+     * We cannot simply go by the number of medal races won because during the semi-final medal series which is split
+     * into two fleets the competitors are not ranked across these fleets based on wins but first within their fleet
+     * based on wins, then based on last race, second-to-last, ..., and then lastly by the opening series rank, and only
+     * then are the two semi-final fleets merged one by one, with two equal ranks in fleets A/B decided based on the
+     * opening series rank again. This all happens in
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
+     */
     @Override
     public boolean isMedalWinAmountCriteria() {
-        return true;
+        return false;
     }
 
     /**
-     * TODO this is all broken... We need to first tell whether the competitors sailed in the same fleet. Only then
-     * does it make sense to look at the races in that last medal series, moving backwards from the last; followed
-     * by the comparison of the opening series scores.
+     * Assumes that {@code o1} and {@code o2} participated and scored in the same number of medal series and compares
+     * the two competitors with each other. If they both compete in the same fleet in their last medal series, first their
+     * number of wins (including the carried-forward wins), then the scores in the last, last-but-one, etc. races until a
+     * difference is found, and if no difference is found that way, by the opening series rank.<p>
      * 
-     * TODO If the competitors are from different medal series fleets (A/B in the Formula Kite semi-final medal series, for example),
-     * they must be compared by their rank within their fleet first, and as a secondary criterion by their opening series score.
-     * 
-     * TODO We somehow would have to keep track of the in-fleet rank for the competitor's last medal series here.
+     * Should the competitors have competed in different fleets in the same medal series (like the A/B fleets of
+     * the semi-final stage) then first compute and compare their rank within their fleet by the criteria stated
+     * above, and if they both ranked equally well in their respective fleet, compare by their opening series rank.
      */
     @Override
-    public int compareByLastMedalRacesCriteria(List<Pair<RaceColumn, Double>> o1Scores,
-            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard) {
-        final Pair<RaceColumn, Double> o1LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o1Scores);
-        final Pair<RaceColumn, Double> o2LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o2Scores);
-        final int result;
-        if (o1LastNonNullMedalRaceScore == null) {
-            if (o2LastNonNullMedalRaceScore == null) {
+    public int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint,
+            int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        int result;
+        if (zeroBasedIndexOfLastMedalSeriesInWhichBothScored < 0) {
+            result = 0; // neither scored in a medal series, so nothing to compare
+        } else {
+            if (!(leaderboard instanceof RegattaLeaderboard)) {
                 result = 0;
             } else {
-                result = nullScoresAreBetter ? -1 : 1;
+                final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+                final Series medalSeriesInWhichBothScored = Util.get(regatta.getSeries(), zeroBasedIndexOfLastMedalSeriesInWhichBothScored);
+                assert medalSeriesInWhichBothScored.isMedal();
+                final RaceColumn firstRaceColumnInMedalSeries = medalSeriesInWhichBothScored.getRaceColumns().iterator().next();
+                final Fleet o1MedalFleet = firstRaceColumnInMedalSeries.getFleetOfCompetitor(o1);
+                final Fleet o2MedalFleet = firstRaceColumnInMedalSeries.getFleetOfCompetitor(o2);
+                final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
+                // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
+                // to speed up / save the total points (re-)calculation
+                final LeaderboardTotalRankComparator openingSeriesTotalRankComparator = new LeaderboardTotalRankComparator(
+                        leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns,
+                        totalPointsSupplier, cache);
+                if (o1MedalFleet == o2MedalFleet) {
+                    result = compareByInMedalSeriesFleetRules(o1, o2, totalPointsSupplier, medalSeriesInWhichBothScored, openingSeriesTotalRankComparator,
+                            nullScoresAreBetter, leaderboard, timePoint, cache);
+                } else {
+                    // o1 and o2 scored in different fleets of the same medal series; compare as follows:
+                    // - by their rank inside their fleet
+                    final int o1RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o1MedalFleet, totalPointsSupplier, o1,
+                            openingSeriesTotalRankComparator, nullScoresAreBetter, leaderboard, timePoint, cache);
+                    final int o2RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o2MedalFleet, totalPointsSupplier, o2,
+                            openingSeriesTotalRankComparator, nullScoresAreBetter, leaderboard, timePoint, cache);
+                    result = Integer.compare(o1RankInMedalSeriesFleet, o2RankInMedalSeriesFleet);
+                    if (result == 0) {
+                        // - then by opening series rank
+                        result = openingSeriesTotalRankComparator.compare(o1, o2);
+                    }
+                }
             }
-        } else if (o2LastNonNullMedalRaceScore == null) {
-            result = nullScoresAreBetter ? 1 : -1;
+        }
+        return result;
+    }
+
+    private int getRankInMedalSeriesFleet(Series medalSeries, Fleet medalFleet,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, Competitor competitor,
+            final LeaderboardTotalRankComparator openingSeriesTotalRankComparator, boolean nullScoresAreBetter,
+            Leaderboard leaderboard,
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final List<Competitor> competitorsInMedalFleet = Util.asList(medalSeries.getRaceColumns().iterator().next().getAllCompetitors(medalFleet));
+        competitorsInMedalFleet.sort((c1, c2)->compareByInMedalSeriesFleetRules(c1, c2, totalPointsSupplier, medalSeries,
+                openingSeriesTotalRankComparator, nullScoresAreBetter, leaderboard, timePoint, cache));
+        return competitorsInMedalFleet.indexOf(competitor)+1;
+    }
+
+    /**
+     * Compares two competitors who scored in the same fleet of the same medal series by the following criteria,
+     * in this order of decreasing precedence:
+     * <ul>
+     * <li>The number of "wins" (including the wins carried from an earlier stage and noted in the corresponding "carry forward" column)</li>
+     * <li>The scores achieved in the medal races, from last to first, until the first difference is found</li>
+     * <li>The opening series rank</li>
+     * </ul>
+     */
+    private int compareByInMedalSeriesFleetRules(Competitor o1, Competitor o2, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            final Series medalSeriesInWhichBothScored, final LeaderboardTotalRankComparator openingSeriesTotalRankComparator, boolean nullScoresAreBetter,
+            Leaderboard leaderboard,
+            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        int result;
+        final int numberOfMedalRacesWonO1 = Util.stream(medalSeriesInWhichBothScored.getRaceColumns())
+                .mapToInt(raceColumn -> getWinCount(leaderboard, o1, raceColumn,
+                        totalPointsSupplier.apply(o1, raceColumn), timePoint,
+                        c -> totalPointsSupplier.apply(c, raceColumn), cache))
+                .sum();
+        final int numberOfMedalRacesWonO2 = Util.stream(medalSeriesInWhichBothScored.getRaceColumns())
+                .mapToInt(raceColumn -> getWinCount(leaderboard, o1, raceColumn,
+                        totalPointsSupplier.apply(o2, raceColumn), timePoint,
+                        c -> totalPointsSupplier.apply(c, raceColumn), cache))
+                .sum();
+        // compare by in-fleet rules:
+        // - first by number of wins:
+        if (numberOfMedalRacesWonO1 != numberOfMedalRacesWonO2) {
+            result = Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
         } else {
-            result = compareBySingleRaceColumnScore(o1LastNonNullMedalRaceScore.getB(), o2LastNonNullMedalRaceScore.getB(), nullScoresAreBetter);
+            // - then by comparing scores statrting at the last race in the series, going backward until tie is broken or first race is reached
+            result = compareByScoresFromLastToFirstRace(medalSeriesInWhichBothScored.getRaceColumns(), o1, o2, totalPointsSupplier, nullScoresAreBetter);
+            if (result == 0) {
+                // - then by opening series rank
+                result = openingSeriesTotalRankComparator.compare(o1, o2);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Ignores the first carry column in the medal series where the carried wins are expected. Both competitors
+     * must have sailed in the same fleet in this race column.
+     */
+    private int compareByScoresFromLastToFirstRace(Iterable<? extends RaceColumnInSeries> raceColumns, Competitor o1,
+            Competitor o2, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, boolean nullScoresAreBetter) {
+        assert Util.stream(raceColumns).allMatch(rc->rc.getFleetOfCompetitor(o1) == rc.getFleetOfCompetitor(o2));
+        final List<? extends RaceColumnInSeries> medalRaceRolumnsWithReverseOrdering = Util.asList(raceColumns);
+        Collections.reverse(medalRaceRolumnsWithReverseOrdering);
+        int result = 0;
+        for (final RaceColumnInSeries raceColumn : medalRaceRolumnsWithReverseOrdering) {
+            final Double o1Score = totalPointsSupplier.apply(o1, raceColumn);
+            final Double o2Score = totalPointsSupplier.apply(o2, raceColumn);
+            result = getScoreComparator(nullScoresAreBetter).compare(o1Score, o2Score);
+            if (result != 0) {
+                break;
+            }
         }
         return result;
     }
@@ -145,7 +255,8 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      */
     @Override
     public int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
-            final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Integer winCount;
         if (raceColumn.isCarryForward()) {
             winCount = totalPoints == null ? 0 : totalPoints.intValue();
@@ -154,11 +265,27 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         }
         return winCount;
     }
+    
+    /**
+     * See OG2024_SAL_ORIS_R8_V1.2_20230330.pdf: "A boat shall be credited with a win when it is scored with one point
+     * in a medal series race."
+     */
+    @Override
+    public boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Function<Competitor, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return isWin(competitor, totalPointsSupplier);
+    }
+
+    private boolean isWin(Competitor competitor, Function<Competitor, Double> totalPointsSupplier) {
+        return Util.equalsWithNull(totalPointsSupplier.apply(competitor), Double.valueOf(1.0));
+    }
 
     /**
      * When the competitors have valid medal race scores, this scoring scheme ignores the score sums altogether and
-     * assumes that a {@link #compareByMedalRacesWon(int, int) comparison by the number of medal races won} is being
-     * performed because {@link #isMedalWinAmountCriteria()} returns {@code true} for this scoring scheme.
+     * assumes that
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)} 
+     * handles the medal series ranking altogether.
      */
     @Override
     public int compareByScoreSum(double o1ScoreSum, double o2ScoreSum, boolean nullScoresAreBetter,

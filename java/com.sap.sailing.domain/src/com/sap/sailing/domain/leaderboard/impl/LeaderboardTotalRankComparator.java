@@ -282,7 +282,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                                         o2CarryForwardScoreInMedals, nullScoresAreBetter);
                             }
                             if (result == 0) {
-                                result = scoringScheme.compareByLastMedalRacesCriteria(o1Scores, o2Scores, nullScoresAreBetter, leaderboard);
+                                result = scoringScheme.compareByLastMedalRacesCriteria(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, leaderboard,
+                                        (competitor, raceColumn)->totalPointsCache.get(new Pair<>(competitor, raceColumn)),
+                                        cache, timePoint, zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
                                 if (result == 0) {
                                     result = scoringScheme.compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore, nullScoresAreBetter);
                                     if (result == 0) {
