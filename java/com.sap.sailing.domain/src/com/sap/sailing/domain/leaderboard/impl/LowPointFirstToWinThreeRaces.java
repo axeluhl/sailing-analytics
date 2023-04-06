@@ -73,10 +73,22 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * then are the two semi-final fleets merged one by one, with two equal ranks in fleets A/B decided based on the
      * opening series rank again. This all happens in
      * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
+     * Yet, we have to respond with {@code true} here in order to <em>count</em> the medal races won. We will then
+     * ignore that result in {@link #compareByMedalRacesWon(int, int)} and instead do it all in
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
      */
     @Override
     public boolean isMedalWinAmountCriteria() {
-        return false;
+        return true;
+    }
+
+    /**
+     * Always returns {@code 0}; the heavy lifting is done by
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
+     */
+    @Override
+    public int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        return 0;
     }
 
     /**
@@ -167,7 +179,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                         c -> totalPointsSupplier.apply(c, raceColumn), cache))
                 .sum();
         final int numberOfMedalRacesWonO2 = Util.stream(medalSeriesInWhichBothScored.getRaceColumns())
-                .mapToInt(raceColumn -> getWinCount(leaderboard, o1, raceColumn,
+                .mapToInt(raceColumn -> getWinCount(leaderboard, o2, raceColumn,
                         totalPointsSupplier.apply(o2, raceColumn), timePoint,
                         c -> totalPointsSupplier.apply(c, raceColumn), cache))
                 .sum();
