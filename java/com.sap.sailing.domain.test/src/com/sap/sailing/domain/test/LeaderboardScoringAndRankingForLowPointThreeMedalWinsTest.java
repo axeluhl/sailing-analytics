@@ -340,7 +340,8 @@ public class LeaderboardScoringAndRankingForLowPointThreeMedalWinsTest extends L
         final Iterable<Competitor> rankResultsAfterSemifinals = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(3.0, leaderboard.getNetPoints(Util.get(rankResultsAfterSemifinals, 2), later), EPSILON);
         assertEquals(3.0, leaderboard.getNetPoints(Util.get(rankResultsAfterSemifinals, 3), later), EPSILON);
-        assertSemiFinalistRanks(leaderboard, semiFinalSeries, semiFinalists, leaderboard.getCompetitorsFromBestToWorst(later), openingSeriesRankResult, later);
+        assertSemiFinalistRanks(leaderboard, semiFinalSeries, semiFinalists,
+                leaderboard.getCompetitorsFromBestToWorst(later), openingSeriesRankResult, later);
         return openingSeriesRankResult;
     }
 
@@ -446,7 +447,7 @@ public class LeaderboardScoringAndRankingForLowPointThreeMedalWinsTest extends L
         assertEquals(allSemifinalists, new HashSet<>(semiFinalistsInRankedOrder));
         // assert that each two adjacent odd/even-numbered semi-finalists in the overall
         // ranking stem from the two different semi-final fleets:
-        for (int i=0; i<semiFinalists.getA().size(); i++) {
+        for (int i=0; i<semiFinalists.getA().size(); i += 2) {
             assertTrue(!semiFinalists.getA().contains(semiFinalistsInRankedOrder.get(i)) ||
                     semiFinalists.getB().contains(semiFinalistsInRankedOrder.get(i+1)));
             assertTrue(!semiFinalists.getA().contains(semiFinalistsInRankedOrder.get(i+1)) ||
