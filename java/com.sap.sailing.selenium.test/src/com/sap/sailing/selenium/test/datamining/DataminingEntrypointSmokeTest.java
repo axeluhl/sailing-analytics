@@ -9,7 +9,7 @@ import com.sap.sailing.selenium.pages.datamining.DataMiningPage;
 import com.sap.sailing.selenium.pages.datamining.DataMiningPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class SmokeTestDataminingEntrypoint extends AbstractSeleniumTest {
+public class DataminingEntrypointSmokeTest extends AbstractSeleniumTest {
     @Override
     @Before
     public void setUp() {
