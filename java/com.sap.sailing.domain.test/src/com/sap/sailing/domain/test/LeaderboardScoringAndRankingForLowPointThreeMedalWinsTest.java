@@ -305,7 +305,7 @@ public class LeaderboardScoringAndRankingForLowPointThreeMedalWinsTest extends L
         assertRanksBasedOnOpeningSeriesRanking(/* zeroBasedRankOfCompetitorWithBetterOpeningSeriesScore */ 6,
                 betterOfA3AndA4AfterOpeningSeries, semiFinalists.getB().get(1),
                 openingSeriesRankResult, rankResultsAfterSemifinals);
-        assertRanksBasedOnOpeningSeriesRanking(/* zeroBasedRankOfCompetitorWithBetterOpeningSeriesScore */ 6,
+        assertRanksBasedOnOpeningSeriesRanking(/* zeroBasedRankOfCompetitorWithBetterOpeningSeriesScore */ 8,
                 worseOfA3AndA4AfterOpeningSeries, semiFinalists.getB().get(2),
                 openingSeriesRankResult, rankResultsAfterSemifinals);
     }

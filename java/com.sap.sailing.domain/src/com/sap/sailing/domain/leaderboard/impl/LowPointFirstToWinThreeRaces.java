@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -124,9 +125,9 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                 final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
                 // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
                 // to speed up / save the total points (re-)calculation
-                final LeaderboardTotalRankComparator openingSeriesTotalRankComparator = new LeaderboardTotalRankComparator(
+                final Supplier<LeaderboardTotalRankComparator> openingSeriesTotalRankComparator = ()->new LeaderboardTotalRankComparator(
                         leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns,
-                        totalPointsSupplier, cache);
+                        totalPointsSupplier, cache); // TODO turn into supplier for lazy evaluation; it may not be needed in all cases
                 if (o1MedalFleet == o2MedalFleet) {
                     result = compareByInMedalSeriesFleetRules(o1, o2, totalPointsSupplier, medalSeriesInWhichBothScored, openingSeriesTotalRankComparator,
                             nullScoresAreBetter, leaderboard, timePoint, cache);
@@ -140,7 +141,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                     result = Integer.compare(o1RankInMedalSeriesFleet, o2RankInMedalSeriesFleet);
                     if (result == 0) {
                         // - then by opening series rank
-                        result = openingSeriesTotalRankComparator.compare(o1, o2);
+                        result = openingSeriesTotalRankComparator.get().compare(o1, o2);
                     }
                 }
             }
@@ -150,7 +151,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
 
     private int getRankInMedalSeriesFleet(Series medalSeries, Fleet medalFleet,
             BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, Competitor competitor,
-            final LeaderboardTotalRankComparator openingSeriesTotalRankComparator, RaceColumn firstNonCarryRaceColumnInMedalSeries,
+            final Supplier<LeaderboardTotalRankComparator> openingSeriesTotalRankComparator, RaceColumn firstNonCarryRaceColumnInMedalSeries,
             boolean nullScoresAreBetter,
             Leaderboard leaderboard, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final List<Competitor> competitorsInMedalFleet = Util.asList(firstNonCarryRaceColumnInMedalSeries.getAllCompetitors(medalFleet));
@@ -168,10 +169,11 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * <li>The opening series rank</li>
      * </ul>
      */
-    private int compareByInMedalSeriesFleetRules(Competitor o1, Competitor o2, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
-            final Series medalSeriesInWhichBothScored, final LeaderboardTotalRankComparator openingSeriesTotalRankComparator, boolean nullScoresAreBetter,
-            Leaderboard leaderboard,
-            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    private int compareByInMedalSeriesFleetRules(Competitor o1, Competitor o2,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, final Series medalSeriesInWhichBothScored,
+            final Supplier<LeaderboardTotalRankComparator> openingSeriesTotalRankComparator,
+            boolean nullScoresAreBetter, Leaderboard leaderboard, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int result;
         final int numberOfMedalRacesWonO1 = Util.stream(medalSeriesInWhichBothScored.getRaceColumns())
                 .mapToInt(raceColumn -> getWinCount(leaderboard, o1, raceColumn,
@@ -192,7 +194,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
             result = compareByScoresFromLastToFirstRace(medalSeriesInWhichBothScored.getRaceColumns(), o1, o2, totalPointsSupplier, nullScoresAreBetter);
             if (result == 0) {
                 // - then by opening series rank
-                result = openingSeriesTotalRankComparator.compare(o1, o2);
+                result = openingSeriesTotalRankComparator.get().compare(o1, o2);
             }
         }
         return result;
