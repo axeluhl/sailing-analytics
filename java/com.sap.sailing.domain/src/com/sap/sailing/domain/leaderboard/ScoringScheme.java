@@ -167,14 +167,6 @@ public interface ScoringScheme extends Serializable {
     }
     
     /**
-     * Returning {@code true} makes the last medal race (having valid scores) a secondary ranking criteria for
-     * competitors that have an equal overall score.
-     */
-    default boolean isLastMedalRaceCriteria() {
-        return false;
-    }
-
-    /**
      * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
      * medal race column it usually counts double. Under certain circumstances, columns may also count with factors
      * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee
@@ -212,10 +204,9 @@ public interface ScoringScheme extends Serializable {
     }
     
     /**
-     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top
-     * for that column, considering any score corrections and penalties, too.
-     * @param totalPointsSupplier provides the 
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint. If the
+     * competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top for
+     * that column, considering any score corrections and penalties, too.<p>
      */
     default boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
@@ -348,5 +339,21 @@ public interface ScoringScheme extends Serializable {
             result = 0;
         }
         return result;
+    }
+    
+    /**
+     * Compares by the scores of a single race column. If only one of the competitors has a result this competitor is
+     * ranked better than the other one.
+     */
+    default int compareBySingleRaceColumnScore(Double o1Score, Double o2Score, boolean nullScoresAreBetter) {
+        return Comparator
+                .nullsLast((Double o1s, Double o2s) -> getScoreComparator(nullScoresAreBetter).compare(o1s, o2s))
+                .compare(o1Score, o2Score);
+    }
+
+    default int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        return 0;
     }
 }

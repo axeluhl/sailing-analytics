@@ -127,6 +127,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeServiceImpl implements LandscapeService {
@@ -168,6 +169,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             Integer optionalMemoryTotalSizeFactorOrNull, Optional<Integer> minimumAutoScalingGroupSize,
             Optional<Integer> maximumAutoScalingGroupSize) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
+        final String hostname = getHostname(name, optionalDomainName);
+        final Iterable<ResourceRecordSet> existingDNSRulesForHostname = landscape.getResourceRecordSets(hostname);
+        // Failing early in case DNS record already exists (see also bug 5826):
+        if (existingDNSRulesForHostname != null && !Util.isEmpty(existingDNSRulesForHostname)) {
+            throw new IllegalArgumentException("DNS record for "+hostname+" already exists");
+        }
         final AwsRegion region = new AwsRegion(regionId, landscape);
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
@@ -217,7 +224,6 @@ public class LandscapeServiceImpl implements LandscapeService {
         });
         // if an unmanaged replica process was launched, return a replica set that contains it; otherwise use the one we already have (without any replica)
         return unmanagedReplica.map(ur->{
-           
                 try {
                     return getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur));
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -318,6 +324,12 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalInstanceType,
                     Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
+        final String hostname = getHostname(replicaSetName, optionalDomainName);
+        final Iterable<ResourceRecordSet> existingDNSRulesForHostname = landscape.getResourceRecordSets(hostname);
+        // Failing early in case DNS record already exists (see also bug 5826):
+        if (existingDNSRulesForHostname != null && !Util.isEmpty(existingDNSRulesForHostname)) {
+            throw new IllegalArgumentException("DNS record for "+hostname+" already exists");
+        }
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSetName,
                 masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
@@ -834,8 +846,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder =
                 dynamicLoadBalancerMapping ? CreateDynamicLoadBalancerMapping.builder() : CreateDNSBasedLoadBalancerMapping.builder();
-        final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
-        final String masterHostname = replicaSetName+"."+domainName;
+        final String masterHostname = getHostname(replicaSetName, optionalDomainName);
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
             .setHostname(masterHostname)
@@ -883,6 +894,13 @@ public class LandscapeServiceImpl implements LandscapeService {
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion,
                         autoScalingGroups, launchConfigurations, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
         return applicationReplicaSet;
+    }
+
+    @Override
+    public String getHostname(String replicaSetName, String optionalDomainName) {
+        final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
+        final String masterHostname = replicaSetName+"."+domainName;
+        return masterHostname;
     }
 
     @Override
@@ -1081,7 +1099,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             // old replica was on a shared instance; in this case we'll over-provision, but it won't be long.
             replicaConfigurationBuilder
                 .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
-                    .setMasterHostname(master.getHost().getPrivateAddress().getHostName())
+                    .setMasterHostname(master.getHost().getPrivateAddress().getHostAddress())
                     .setMasterHttpPort(master.getPort())
                     .setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken))
                     .build());
@@ -1096,6 +1114,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 .setLandscape(getLandscape())
                 .setRegion(region)
                 .setTags(Tags.with(UPGRADE_REPLICA_TAG_KEY, replicaSet.getName()));
+            optionalKeyName.ifPresent(replicaHostBuilder::setKeyName);
             final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
             logger.info("Launching dedicated replica host of type "+instanceType+" for replica "+replica);
             replicaHostStartProcedure.run();

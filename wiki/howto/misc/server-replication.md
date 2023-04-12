@@ -118,7 +118,7 @@ Steps to get it working:
  192.168.1.50	tw2014 tw2014.sapsailing.com
  </pre>
 * For rewriting the URLs and Ports to the fitting spectator URL when entering the URL we need an Apache installed (apt-get install apache2) and set up like on our sapsailing.com server. Please check 000-macros.conf, 001-events.conf and 000-main.conf and set it up as you need for the event. They need to be in the config dir of apache (/etc/apache2/mods-enabled and /etc/apache2/sites-enabled)
-* For better remote administration of the local replica, set up and autossh tunnel to trac@sapsailing.com and put it into rc.local for autostarting, e.g. as the following:
+* For better remote administration of the local replica, set up an autossh tunnel to `trac@sapsailing.com` and put it into `rc.local` for autostarting, e.g. as the following:
 <pre>
 autossh -M 20009 -f -N -L 1337:127.0.0.1:22 -i SSHKEY trac@sapsailing.com
 </pre>
