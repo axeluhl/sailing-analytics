@@ -55,7 +55,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
     public SshKeyManagementPanel(StringMessages stringMessages, UserService userService,
             LandscapeManagementWriteServiceAsync landscapeManagementService, AdminConsoleTableResources tableResources,
             ErrorReporter errorReporter, AwsAccessKeyProvider awsAccessKeyProvider,
-            RefreshableSingleSelectionModel<String> regionSelectionModel) {
+            RefreshableSingleSelectionModel<String> regionSelectionModel, int keysPerPageCount) {
         this.regionSelectionModel = regionSelectionModel;
         this.landscapeManagementService = landscapeManagementService;
         this.errorReporter = errorReporter;
@@ -92,6 +92,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
                         return Arrays.asList(t.getName(), t.getRegionId(), t.getCreatorName());
                     }
         };
+        sshKeyTable.getTable().setPageSize(keysPerPageCount);
         sshKeyTable.addColumn(object->object.getRegionId(), stringMessages.region());
         sshKeyTable.addColumn(object->object.getName(), stringMessages.name());
         sshKeyTable.addColumn(object->object.getCreatorName(), stringMessages.creator());
