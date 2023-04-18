@@ -156,7 +156,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         };
         sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
-                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel(), /* keysPerPage */ DEFAULT_AMOUNT_SSHKEYS_PER_PAGE);
+                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel(), DEFAULT_AMOUNT_SSHKEYS_PER_PAGE);
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
         sshKeysCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         regionsTable.addColumn(new TextColumn<String>() {
