@@ -14,11 +14,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -379,9 +379,39 @@ public class Util {
         addAll(map(iterable, mapper), result);
         return result;
     }
+    
+    @FunctionalInterface
+    public static interface UtilPredicate<T> {
+        boolean test(T t);
+    }
 
-    public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
-        return ()->StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate).iterator();
+    public static <T> Iterable<T> filter(final Iterable<T> iterable, final UtilPredicate<T> predicate) {
+        return ()->new Iterator<T>() {
+            private boolean hasNext = true;
+            private Iterator<T> iterator = iterable.iterator();
+            private T next = advance();
+            
+            @Override
+            public boolean hasNext() {
+                return hasNext;
+            }
+
+            private T advance() {
+                while ((hasNext=iterator.hasNext()) && !predicate.test(next=iterator.next())) {
+                }
+                return next;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext) {
+                    throw new NoSuchElementException();
+                }
+                final T result = next;
+                advance();
+                return result;
+            }
+        };
     }
     
     /**

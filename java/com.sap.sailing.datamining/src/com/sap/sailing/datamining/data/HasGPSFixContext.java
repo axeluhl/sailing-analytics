@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Statistic;
 
@@ -22,4 +23,10 @@ public interface HasGPSFixContext {
 
     @Statistic(messageKey = "VMG", resultDecimals = 2)
     SpeedWithBearing getVelocityMadeGood();
+
+    @Statistic(messageKey = "XTE", resultDecimals = 2)
+    Distance getXTE();
+
+    @Statistic(messageKey = "AbsoluteXTE", resultDecimals = 2)
+    Distance getAbsoluteXTE();
 }
