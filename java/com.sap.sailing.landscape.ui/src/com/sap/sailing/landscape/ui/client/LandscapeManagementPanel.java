@@ -128,6 +128,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     
     //Spacing for Setupbar (AWS/SSH/REGION)
     private static final int DEFAULT_SETUPBAR_HEIGHT = 300;
+    private static final int DEFAULT_AMOUNT_SSHKEYS_PER_PAGE = 3;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -155,7 +156,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         };
         sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
-                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel());
+                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel(), DEFAULT_AMOUNT_SSHKEYS_PER_PAGE);
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
         sshKeysCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         regionsTable.addColumn(new TextColumn<String>() {
