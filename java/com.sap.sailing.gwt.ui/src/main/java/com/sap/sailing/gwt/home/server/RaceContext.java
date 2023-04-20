@@ -592,7 +592,7 @@ public class RaceContext {
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             if (abortingFlagEvent != null) {
                 RaceLogRaceStatus lastStatus = state.getStatus();
-                if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
+                if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED) || lastStatus.equals(RaceLogRaceStatus.PRESCHEDULED)) {
                     result = abortingFlagEvent;
                 }
             }
