@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertSame;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -39,7 +43,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * behavior is not changed and still works for those same cases in case the {@link ScoringSchemeType#LOW_POINT} scoring
  * scheme is used.
  */
-public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardScoringAndRankingTestBase {
+public class LeaderboardScoringAndRankingForLowPointsTest extends LeaderboardScoringAndRankingTestBase {
     private static final double EPSILON = 0.000001;
 
     private void executePreSeries(List<Competitor> yellow, List<Competitor> blue, TimePoint now) {
@@ -69,9 +73,20 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         return regatta;
     }
 
+    private Regatta setupRegattaWithHighPoint() {
+        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("IMOCA", /* typicallyStartsUpwind */ false);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
+                false, CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
+                DomainFactory.INSTANCE
+                        .createScoringScheme(ScoringSchemeType.HIGH_POINT_LAST_BREAKS_TIE),
+                "123", /* course area */null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
+        return regatta;
+    }
+
     private void setupMedalSeriesWithCarryOverAndFourRaceColumns() {
         Set<? extends Fleet> medalFleets = Collections.singleton(new FleetImpl("Default"));
-        List<String> medalRaceColumnNames = new ArrayList<String>();
+        List<String> medalRaceColumnNames = new ArrayList<>();
         medalRaceColumnNames.add("Carry");
         medalRaceColumnNames.add("M1");
         medalRaceColumnNames.add("M2");
@@ -85,11 +100,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     private void setupQualificationSeriesWithOneRaceColumn() {
-        List<Fleet> qualificationFleets = new ArrayList<Fleet>();
+        final List<Fleet> qualificationFleets = new ArrayList<>();
         for (String qualificationFleetName : new String[] { "Yellow", "Blue" }) {
             qualificationFleets.add(new FleetImpl(qualificationFleetName));
         }
-        List<String> qualificationRaceColumnNames = new ArrayList<String>();
+        List<String> qualificationRaceColumnNames = new ArrayList<>();
         qualificationRaceColumnNames.add("Q");
         Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false,
                 /* isFleetsCanRunInParallel */ true, qualificationFleets, qualificationRaceColumnNames,
@@ -112,6 +127,45 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         List<Pair<Competitor, Double>> nonFinalistsAfterScore = afterFinalResults.subList(4, afterFinalResults.size());
         Assert.assertEquals(nonFinalistsPreScore, nonFinalistsAfterScore);
     }
+    
+    @Test
+    public void testTORTieBreakOnLastRace() {
+        final TimePoint now = TimePoint.now();
+        final TimePoint later = now.plus(Duration.ONE_MINUTE);
+        series = new ArrayList<>();
+        final List<Fleet> fleets = new ArrayList<>();
+        final Fleet defaultFleet = new FleetImpl("Default");
+        fleets.add(defaultFleet);
+        List<String> raceColumnNames = Arrays.asList("Alicante", "Cape Town");
+        Series qualificationSeries = new SeriesImpl("IMOCA In-Port", /* isMedal */false,
+                /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames,
+                /* trackedRegattaRegistry */ null);
+        series.add(qualificationSeries);
+        final Regatta regatta = setupRegattaWithHighPoint();
+        final List<Competitor> competitors = createCompetitors(5);
+        qualificationSeries.getRaceColumnByName("Alicante").setTrackedRace(defaultFleet, new MockedTrackedRaceWithStartTimeAndRanks(now, competitors));
+        qualificationSeries.getRaceColumnByName("Cape Town").setTrackedRace(defaultFleet, new MockedTrackedRaceWithStartTimeAndRanks(now, competitors));
+        final Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        setScore(leaderboard, competitors.get(0), 4, 4);
+        setScore(leaderboard, competitors.get(1), 5, 3);
+        setScore(leaderboard, competitors.get(2), 0, 5);
+        setScore(leaderboard, competitors.get(3), 2, 2);
+        setScore(leaderboard, competitors.get(4), 3, 0);
+        assertSame(competitors.get(0), Util.get(leaderboard.getCompetitorsFromBestToWorst(later), 0));
+        assertSame(competitors.get(1), Util.get(leaderboard.getCompetitorsFromBestToWorst(later), 1));
+        assertSame(competitors.get(2), Util.get(leaderboard.getCompetitorsFromBestToWorst(later), 2));
+        assertSame(competitors.get(3), Util.get(leaderboard.getCompetitorsFromBestToWorst(later), 3));
+        assertSame(competitors.get(4), Util.get(leaderboard.getCompetitorsFromBestToWorst(later), 4));
+    }
+
+    private void setScore(Leaderboard leaderboard, Competitor competitor, double... scores) {
+        int i=0;
+        for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (i < scores.length) {
+                leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, scores[i++]);
+            }
+        }
+    }
 
     /**
      * In this test the preseries winner will win the first race, and should get a score of 2, all other finalists
@@ -120,7 +174,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
      */
     @Test
     public void testFirstPreseriesWinsAgain() throws NoWindException {
-        series = new ArrayList<Series>();
+        series = new ArrayList<>();
         setupQualificationSeriesWithOneRaceColumn();
 
         setupMedalSeriesWithCarryOverAndFourRaceColumns();

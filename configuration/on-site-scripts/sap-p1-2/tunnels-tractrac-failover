@@ -1,0 +1,5 @@
+#!/bin/bash
+killall autossh
+# Tunnel to cloud MongoDB on port 10203; reverse tunnel to localhost:10202 for MongoDB
+autossh -M 20504 -f -A -N -L 443:security-service.sapsailing.com:443 -R 10202:localhost:10202 -L 10203:localhost:10203 -L 5673:rabbit-ap-northeast-1.sapsailing.com:5672 -L 15673:localhost:15673 -L 5675:rabbit.internal.sapsailing.com:5672 -L 15675:rabbit.internal.sapsailing.com:15672 -R 15674:localhost:15672 -R 18222:localhost:22 ec2-user@tokyo-ssh.sapsailing.com
+# The tunnel connection to sap-p1-1 is expected to be established from the sap-p1-1 side by a reverse port forward

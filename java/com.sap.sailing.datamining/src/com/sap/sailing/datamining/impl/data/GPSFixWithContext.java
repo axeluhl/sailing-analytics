@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -77,5 +78,15 @@ public class GPSFixWithContext implements HasGPSFixContext {
     @Override
     public SpeedWithBearing getVelocityMadeGood() {
         return getTrackedRace().getVelocityMadeGood(getTrackedLegOfCompetitorContext().getCompetitor(), getTimePoint());
+    }
+
+    @Override
+    public Distance getXTE() {
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getSignedCrossTrackError(getTimePoint());
+    }
+
+    @Override
+    public Distance getAbsoluteXTE() {
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getAbsoluteCrossTrackError(getTimePoint());
     }
 }

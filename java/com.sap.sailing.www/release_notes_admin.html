@@ -25,6 +25,10 @@
                 <div class="innerContent">
           <h2 class="articleSubheadline">March 2023</h2>
           <ul class="bulletList">
+            <li>Added boat classes "IMOCA", "VO65" and "VO60"</li>
+          </ul>
+          <h2 class="articleSubheadline">March 2023</h2>
+          <ul class="bulletList">
             <li>Users with administrative permissions on a server replica set will now be notified by e-mail about important
                 events affecting the replica set, such as when the primary server instance is upgraded or moved and hence
                 the replica set temporarily cannot accept write requests, or when the replica set is being archived and
@@ -58,6 +62,22 @@
                 identifying a host in one region and the host name is determined from within another region then the
                 internal DNS name chosen is that of the other region and therefore incorrect. Instead, now the IP address's
                 numeric representation is used instead.</li>
+            <li>The scoring scheme "Low Point System, First with three wins in medals is winner" has been adjusted to meet the
+                Olympic requirements; see official ORIS document OG2024_SAL_ORIS_R8_V1.2_20230330.pdf. It should be used as follows:
+                An opening series, optionally split into qualification and final series in case the fleet is split, is followed
+                by two medal series: one for the semi-final, and another for the grand final. Both of these medal series should
+                start with a carry-forward which will be interpreted by the scoring scheme as the "number of wins carried forward."
+                These carried wins need to be entered manually into the leaderboard (two wins for the best-seeded, one for the
+                second-best seeded competitor for each fleet in those medal series). The semi-final series should consist of
+                two fleets (A/B, equal rank 0) and will need seven race columns in addition to the carry-forward column because
+                four competitors will race for the first to take three wins (defined as score 1.0 by the document), with a total
+                of three carried wins may take six races at most, but due to a  standard penalty (STP) no competitor may score a
+                win in the first race of a semi-final fleet.<p>
+                The grand-finalists also race for the first to take three wins (including the carried-forward wins). They are
+                ranked by wins, then by the last race rank, then by the second-to-last race rank and so on, up to the first
+                grand-final race, and then by the opening series rank. Likewise, the semi-finalists will be ranked in their
+                respective semi-final fleet. For their overall rank of the competitors ranking 2nd to 4th in their semi-final
+                the two equally-ranked competitors from fleets A and B will be compared based on their opening series rank.</li>
           </ul>
           <h2 class="articleSubheadline">February 2023</h2>
           <ul class="bulletList">
