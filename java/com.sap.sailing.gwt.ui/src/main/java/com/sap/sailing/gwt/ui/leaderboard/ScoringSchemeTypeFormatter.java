@@ -52,6 +52,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointSystemFirstThreeWins();
         case HIGH_POINT_BY_WINS_TIES_LASTLY_BROKEN_BY_OTHER_LEADERBOARD:
             return stringMessages.scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboard();
+        case LOW_POINT_A82_ONLY:
+            return stringMessages.scoringSchemeLowPointA82Only();
         }
         return null;
     }
@@ -84,6 +86,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointSystemFirstThreeWinsDescription();
         case HIGH_POINT_BY_WINS_TIES_LASTLY_BROKEN_BY_OTHER_LEADERBOARD:
             return stringMessages.scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboardDescription();
+        case LOW_POINT_A82_ONLY:
+            return stringMessages.scoringSchemeLowPointA82OnlyDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }
