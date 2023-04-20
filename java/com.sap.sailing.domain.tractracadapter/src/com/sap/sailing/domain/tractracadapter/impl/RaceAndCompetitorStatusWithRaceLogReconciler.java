@@ -242,8 +242,9 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         RaceLogFlagEvent abortingFlagEvent = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             if (abortingFlagEvent == null) {
-                final RaceLogRaceStatus status = ReadonlyRaceStateImpl.getOrCreate(trackedRace.getRaceLogResolver(), raceLog).getStatus();
-                if (status == RaceLogRaceStatus.UNSCHEDULED || status == RaceLogRaceStatus.PRESCHEDULED) {
+                final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(trackedRace.getRaceLogResolver(), raceLog);
+                final RaceLogRaceStatus status = raceState.getStatus();
+                if (status.isAbortingFlagFromPreviousPassValid()) {
                     final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
                     abortingFlagEvent = abortingFlagFinder.analyze();
                 }
