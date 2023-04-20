@@ -220,8 +220,8 @@ public class RaceContext {
                 lastFlagsDisplayedStateChanged = previousFlagState.hasPoleChanged(mostInterestingFlagPole);
             }
         }
-        switch (state.getStatus()) {
-        case FINISHED:
+        final RaceLogRaceStatus status = state.getStatus();
+        if (status == RaceLogRaceStatus.FINISHED) {
             TimeRange protestTime = state.getProtestTime();
             if (protestTime != null) {
                 lastUpperFlag = Flags.BRAVO;
@@ -229,9 +229,7 @@ public class RaceContext {
                 lastFlagsAreDisplayed = true;
                 lastFlagsDisplayedStateChanged = true;
             }
-            break;
-        case UNSCHEDULED:
-        case PRESCHEDULED:
+        } else if (state.getStatus().isAbortingFlagFromPreviousPassValid()) {
             // search for race aborting in last pass
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
@@ -241,19 +239,14 @@ public class RaceContext {
                 lastFlagsAreDisplayed = abortingFlagEvent.isDisplayed();
                 lastFlagsDisplayedStateChanged = true;
             }
-            break;
-        case FINISHING:
-        case RUNNING:
-        case SCHEDULED:
-        case STARTPHASE:
-        case UNKNOWN:
-            break;
         }
-        ;
+        final FlagStateDTO result;
         if (lastUpperFlag != null || lastLowerFlag != null) {
-            return new FlagStateDTO(lastUpperFlag, lastLowerFlag, lastFlagsAreDisplayed, lastFlagsDisplayedStateChanged);
+            result = new FlagStateDTO(lastUpperFlag, lastLowerFlag, lastFlagsAreDisplayed, lastFlagsDisplayedStateChanged);
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
     
     private String getCourseAreaOrNull() {
@@ -592,7 +585,7 @@ public class RaceContext {
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             if (abortingFlagEvent != null) {
                 RaceLogRaceStatus lastStatus = state.getStatus();
-                if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED) || lastStatus.equals(RaceLogRaceStatus.PRESCHEDULED)) {
+                if (lastStatus.isAbortingFlagFromPreviousPassValid()) {
                     result = abortingFlagEvent;
                 }
             }

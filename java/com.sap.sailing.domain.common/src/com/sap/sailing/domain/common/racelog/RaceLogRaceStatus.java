@@ -14,6 +14,10 @@ public enum RaceLogRaceStatus {
     RaceLogRaceStatus(int orderNumber) {
         this.orderNumber = orderNumber;
     }
+    
+    public boolean isAbortingFlagFromPreviousPassValid() {
+        return this == UNSCHEDULED || this == PRESCHEDULED;
+    }
 
     public static boolean isPreRunning(RaceLogRaceStatus status) {
         return status != null &&
