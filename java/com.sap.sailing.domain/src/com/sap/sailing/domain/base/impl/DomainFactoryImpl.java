@@ -59,6 +59,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointA82Only;
 import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinThreeRaces;
+import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinThreeRacesA82Only;
 import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
@@ -161,6 +162,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
             return new HighPointByWinsTiesLastlyBrokenByOtherLeaderboard();
         case LOW_POINT_A82_ONLY:
             return new LowPointA82Only();
+        case LOW_POINT_FIRST_TO_WIN_THREE_RACES_A82_ONLY:
+            return new LowPointFirstToWinThreeRacesA82Only();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }

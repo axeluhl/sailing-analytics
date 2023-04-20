@@ -2428,4 +2428,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String helptextLinkingRaces();
     String scoringSchemeLowPointA82Only();
     String scoringSchemeLowPointA82OnlyDescription();
+    String scoringSchemeLowPointSystemFirstThreeWinsA82Only();
+    String scoringSchemeLowPointSystemFirstThreeWinsA82OnlyDescription();
 }
