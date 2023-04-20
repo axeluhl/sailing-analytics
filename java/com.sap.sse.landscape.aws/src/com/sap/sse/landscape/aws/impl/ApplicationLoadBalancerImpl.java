@@ -304,6 +304,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
         return Util.stream(getRules()).filter(r->isDefaultRedirectRule(r, hostname)).findAny()
             .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule.ruleArn(), hostname, pathWithLeadingSlash, query))
             .orElseGet(()->{
+                // FIXME bug 5787: this rule would then typically end up at the end of the rule set, being superseded by all other rules for the replica set; use shiftRulesToMakeSpaceAt with the first rule priority of the replica set identified by hostname
                 final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
                 addRulesAssigningUnusedPriorities(/* forceContiguous */ false, defaultRedirectRule);
                 return defaultRedirectRule;
