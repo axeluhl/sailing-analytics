@@ -231,6 +231,7 @@ public class RaceContext {
             }
             break;
         case UNSCHEDULED:
+        case PRESCHEDULED:
             // search for race aborting in last pass
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
@@ -244,7 +245,6 @@ public class RaceContext {
         case FINISHING:
         case RUNNING:
         case SCHEDULED:
-        case PRESCHEDULED:
         case STARTPHASE:
         case UNKNOWN:
             break;
