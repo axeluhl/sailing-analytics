@@ -60,6 +60,8 @@ The webserver is registered as target in various locations:
 * as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively.
 * as target of the elastic IP address ``54.229.94.254``
 
+Note that the elastic IP address ``54.229.94.254`` is in turn the target of the DNS record ``mail.sapsailing.com`` as well as the ``TXT`` DNS record for ``sapsailing.com`` for SPF e-mail validation.
+
 Furthermore, it is helpful to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:
 
 ```
@@ -70,6 +72,10 @@ Use Status 127.0.0.1 internal-server-status
 ```
 
 The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
+
+After (re-)booting the webserver, check that all services have come up before adding the instance to its respective target groups. For example, ensure that the Wiki "Gollum" service has been launched (see ``/home/wiki/serve.sh``). Furthermore, ensure that the Docker daemon is running and that it runs the Docker registry containers (``registry-ui-1`` and ``registry-registry-1``). See [here](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) for how this is set up.
+
+The webserver must be tagged with key ``CentralReverseProxy`` where the value is ignored, but ``true`` is a good default.
 
 ### DNS and Application Load Balancers (ALBs)
 
