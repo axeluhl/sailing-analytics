@@ -95,10 +95,10 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
     }
 
     public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept,
-            boolean useSymbollicInversionIfPossible) {
+            boolean useSymbolicInversionIfPossible) {
         this.hasIntercept = hasIntercept;
         this.polynomialOrder = polynomialOrder;
-        this.useSymbollicInversionIfPossible = useSymbollicInversionIfPossible;
+        this.useSymbollicInversionIfPossible = useSymbolicInversionIfPossible;
         if (hasIntercept) {
             matrixOfXSums = new double[polynomialOrder + 1][polynomialOrder + 1];
             vectorOfXYMultSums = new double[polynomialOrder + 1];
