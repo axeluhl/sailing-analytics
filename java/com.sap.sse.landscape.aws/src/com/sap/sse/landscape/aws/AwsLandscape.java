@@ -564,6 +564,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     SecurityGroup getSecurityGroup(String securityGroupId, Region region);
 
+    Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, Region region);
+
     void addTargetsToTargetGroup(
             TargetGroup<ShardingKey> targetGroup,
             Iterable<AwsInstance<ShardingKey>> targets);

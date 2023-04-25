@@ -199,6 +199,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
+    private static final String SAILING_APP_SECURITY_GROUP_NAME = "Sailing Analytics App";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final Optional<String> sessionToken;
@@ -1073,6 +1074,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return healthCheckPort == 443 ? ProtocolEnum.HTTPS : ProtocolEnum.HTTP;
     }
     
+    /**
+     * Finds the ID of the "default" VPC in the {@code region} specified. If there is no such default VPC in that {@code region},
+     * an {@link IllegalStateException} will be thrown.
+     */
     private String getVpcId(com.sap.sse.landscape.Region region) {
         Vpc vpc = getEc2Client(getRegion(region)).describeVpcs().vpcs().stream().filter(myVpc->myVpc.isDefault()).findAny().
                 orElseThrow(()->new IllegalStateException("No default VPC found in region "+region));
@@ -1126,6 +1131,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
+    public Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, com.sap.sse.landscape.Region region) {
+        final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> securityGroups = getEc2Client(getRegion(region)).describeSecurityGroups(
+                sg->sg.filters(Filter.builder().name("group-name").values(securityGroupName).build())).securityGroups();
+        return securityGroups.stream().findFirst().map(sg->()->sg.groupId());
+    }
+
+    @Override
     public void addTargetsToTargetGroup(
             TargetGroup<ShardingKey> targetGroup,
             Iterable<AwsInstance<ShardingKey>> targets) {
@@ -1167,16 +1179,17 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
-        final SecurityGroup result;
-        // TODO find a better way, e.g., by tagging, to identify the security group per region to use for application hosts
-        if (region.getId().equals(Region.EU_WEST_1.id())) {
-            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
-        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
-            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
-        } else {
-            result = null;
-        }
-        return result;
+        return getSecurityGroupByName(SAILING_APP_SECURITY_GROUP_NAME, region).orElseGet(()->{
+            final SecurityGroup result;
+            if (region.getId().equals(Region.EU_WEST_1.id())) {
+                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
+            } else if (region.getId().equals(Region.EU_WEST_2.id())) {
+                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
+            } else {
+                result = null;
+            }
+            return result;
+        });
     }
 
     @Override
