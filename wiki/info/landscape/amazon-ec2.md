@@ -60,6 +60,16 @@ The webserver is registered as target in various locations:
 * as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively.
 * as target of the elastic IP address ``54.229.94.254``
 
+Changing the DNS entry especially for ``logfiles.internal.sapsailing.com`` requires re-mounting those NFS shares wherever they were used. Go to at least all instances tagged with ``sailing-analytics-server`` and, as user ``root``, execute the following commands:
+
+```
+   umount -l -f /var/log/old
+   umount -l -f /home/scores
+   mount -a
+```
+
+This will re-mount those two essential NFS mounts and avoid, e.g., the set-up of new application processes to hang when trying to create symbolic links into ``/home/scores`` for the various file-based result importers.
+
 Note that the elastic IP address ``54.229.94.254`` is in turn the target of the DNS record ``mail.sapsailing.com`` as well as the ``TXT`` DNS record for ``sapsailing.com`` for SPF e-mail validation.
 
 Furthermore, it is helpful to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:

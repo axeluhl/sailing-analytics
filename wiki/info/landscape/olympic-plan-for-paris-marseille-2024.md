@@ -2,6 +2,18 @@
 
 As a baseline we'll use the [Olympic Setup](/wiki/info/landscape/olympic-setup). The major change, though, would be that instead of running a local on-site master and a local on-site replica we would run two master instances locally on site where one is the "shadow" and the other one is the "production" master.
 
+We captured a set of scripts and configuration files in out Git repository at ``configuration/on-site-scripts``, in particular also separately for the two laptops, in ``configuration/on-site-scripts/sap-p1-1`` and ``configuration/on-site-scripts/sap-p1-2``.
+
+Many of these scripts and configuration files contain an explicit reference to the replica set name (and therefore sub-domain name, DB name, tag values, etc.) ``tokyo2020``. With the test event up in July 2023 and the Paris Olympic Summer Games 2024 we should consider making this a parameter of these scripts so it is easy to adjust. We will need different sub-domains for the test event and the Games where the latter most likely will have ``paris2024.sapsailing.com`` as its domain name and hence ``paris2024`` as the replica set name.
+
+## VPCs and VPC Peering
+
+From Tokyo2020 we still have the VPCs around in five regions (``eu-west-3``, ``us-west-1``, ``us-east-1``, ``ap-northeast-1``, and ``ap-southeast-2``). But they are named ``Tokyo2020`` and our scripts currently depend on this. But VPCs can easily be renamed, and with that we may save a lot of work regarding re-peering those VPCs. We will, though need routes to the new "primary" VPC ``eu-west-3`` from everywhere because the ``paris2024-ssh.sapsailing.com`` jump host will be based there. Note the inconsistency in capitalization: for the VPC name and as part of instance names such as ``SL Tokyo2020 (Upgrade Replica)`` we use ``Tokyo2020``, for basically everything else it's ``tokyo2020`` (lowercase). When switching to a parameterized approach we should probably harmonize this and use the lowercase name consistently throughout.
+
+I've started with re-naming the VPCs and their routing tables from ``Tokyo2020`` to ``Paris2024``. I've also added VPC peering between Paris (``eu-west-3``) and California (``us-west-1``), Virginia (``us-east-1``), and Sydney (``ap-southeast-2``). The peering between Paris and Tokyo (``ap-northeast-1``) already existed because for Tokyo 2020, Paris hosted replicas that needed to access the jump host in the Tokyo region.
+
+I've also copied the "SAP Sailing Analytics 1.150" image to all five regions.
+
 ## Master and Shadow Master
 
 We will use one laptop as production master, the other as "shadow master." The reason for not using a master and a local replica is that if the local master fails, re-starting later in the event can cause significant delays until all races have loaded and replicated again.
