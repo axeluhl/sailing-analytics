@@ -345,7 +345,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
             BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final int result;
         if (!hasMedalScores(o1Scores)) {
-            result = super.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
+            result = compareByA81TieBreak(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
                     discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
         } else {
             final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
@@ -355,6 +355,23 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                     .compare(o1, o2);
         }
         return result;
+    }
+
+    /**
+     * Computes a tie break; this default implementation delegates to the super-class implementation which is
+     * expected to compute a regular A8.1 tie break, sorting the scores so the best are first, and then looking
+     * for the first difference.<p>
+     * 
+     * Subclasses may change this behavior, e.g., so that 0 is returned and hence A8.1 is ignored; this will
+     * usually then default to a comparison based on A8.2 (last race).
+     */
+    protected int compareByA81TieBreak(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
+            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return super.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
+                discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
     }
 
     /**

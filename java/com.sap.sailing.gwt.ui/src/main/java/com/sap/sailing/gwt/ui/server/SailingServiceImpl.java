@@ -1062,8 +1062,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (abortingFlagEvent != null) {
                 raceInfoDTO.isRaceAbortedInPassBefore = true;
                 raceInfoDTO.abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint().asDate();
-
-                if (raceInfoDTO.lastStatus == RaceLogRaceStatus.UNSCHEDULED || raceInfoDTO.lastStatus == RaceLogRaceStatus.PRESCHEDULED) {
+                if (raceInfoDTO.lastStatus.isAbortingFlagFromPreviousPassValid()) {
                     raceInfoDTO.lastUpperFlag = abortingFlagEvent.getUpperFlag();
                     raceInfoDTO.lastLowerFlag = abortingFlagEvent.getLowerFlag();
                     raceInfoDTO.lastFlagsAreDisplayed = abortingFlagEvent.isDisplayed();
