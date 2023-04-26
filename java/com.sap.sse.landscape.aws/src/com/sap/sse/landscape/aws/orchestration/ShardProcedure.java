@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -278,13 +279,17 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                 }
                 final String name = getAvailableDNSMappedAlbName(loadBalancerNames);
                 // Create a new alb
-                res = getLandscape().createLoadBalancer(name, region);
+                res = getLandscape().createLoadBalancer(name, region, getSecurityGroupForVpc());
             }
             changeReplicaSetLoadBalancer(res, replicaSet);
         }
         return res;
     }
     
+    private SecurityGroup getSecurityGroupForVpc() throws InterruptedException, ExecutionException {
+        return getLandscape().getSecurityGroup(replicaSet.getLoadBalancer().getSecurityGroupIds().get(0), region);
+    }
+
     /**
      * This method changes the {@code replicaSetToMove}'s load balancer to another one. This method contains a 6min
      * sleep, which is necessary for ensuring that all DNS rules point to the new one. This method can fail if the

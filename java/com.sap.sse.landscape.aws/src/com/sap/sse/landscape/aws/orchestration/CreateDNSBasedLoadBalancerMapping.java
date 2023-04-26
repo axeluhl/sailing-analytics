@@ -12,6 +12,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -69,17 +70,21 @@ implements Procedure<ShardingKey> {
             if (super.getLoadBalancerUsed() != null) {
                 result = super.getLoadBalancerUsed();
             } else {
-                result = getOrCreateDNSMappedLoadBalancer(getLandscape(), getProcess().getHost().getRegion());
+                result = getOrCreateDNSMappedLoadBalancer(getLandscape(), getProcess().getHost().getRegion(), getSecurityGroupForVpc());
             }
             return result;
         }
 
         /**
-         * Finds or creates a {@link ApplicationLoadBalander} load balancer in the {@code region} that is DNS-mapped and still has
-         * at least the length of {@link #createRules()} additional rules available.
+         * Finds or creates a {@link ApplicationLoadBalander} load balancer in the {@code region} that is DNS-mapped and
+         * still has at least the length of {@link #createRules()} additional rules available.
+         * 
+         * @param securityGroupForVpc
+         *            if provided, the security group's VPC association will be used to constrain the subnets for the
+         *            AZs to that VPC; if {@code null}, the default subnet for each respective AZ is used
          */
         private ApplicationLoadBalancer<ShardingKey> getOrCreateDNSMappedLoadBalancer(
-                AwsLandscape<ShardingKey> landscape, Region region) throws InterruptedException, ExecutionException {
+                AwsLandscape<ShardingKey> landscape, Region region, SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException {
             ApplicationLoadBalancer<ShardingKey> result = null;
             final Set<String> loadBalancerNames = new HashSet<>();
             for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : landscape.getLoadBalancers(region)) {
@@ -94,7 +99,7 @@ implements Procedure<ShardingKey> {
             if (result == null) {
                 String newLoadBalancerName = getAvailableDNSMappedAlbName(loadBalancerNames);
                 logger.info("Creating DNS-mapped application load balancer "+newLoadBalancerName);
-                result = landscape.createLoadBalancer(newLoadBalancerName, region);
+                result = landscape.createLoadBalancer(newLoadBalancerName, region, securityGroupForVpc);
                 waitUntilLoadBalancerProvisioned(landscape, result);
             }
             return result;

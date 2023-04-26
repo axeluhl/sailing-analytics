@@ -467,7 +467,8 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     @Test
     public void createEmptyLoadBalancerTest() throws InterruptedException, ExecutionException {
         final String albName = "MyAlb"+new Random().nextInt();
-        final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region);
+        final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region,
+                /* securityGroupForVpc null means use default VPC which is OK for this test */ null);
         try {
             assertNotNull(alb);
             assertEquals(albName, alb.getName());

@@ -423,15 +423,21 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String name, Region region);
 
     /**
-     * Creates an application load balancer with the name and in the region specified. The method returns once the request
-     * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
-     * to find out more.<p>
+     * Creates an application load balancer with the name and in the region specified. The method returns once the
+     * request has been responded to. The load balancer may still be in a pre-ready state. Use
+     * {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)} to find out more.
+     * <p>
      * 
-     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port 443 with host, path, and query
-     * left unchanged; and an HTTPS listener that forwards to a default target group to which the default central reverse proxy of the {@code region}
-     * is added as a target.
+     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port
+     * 443 with host, path, and query left unchanged; and an HTTPS listener that forwards to a default target group to
+     * which the default central reverse proxy of the {@code region} is added as a target.
+     * 
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region) throws InterruptedException, ExecutionException;
+    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException;
 
     Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb);
 
@@ -607,9 +613,14 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * only a wildcard DNS record exists for the domain. There is a naming rule in place such that
      * {@link #getNonDNSMappedLoadBalancer(Region, String)}, when called with an equal {@code wildcardDomain} and
      * {@code region}, will deliver the load balancer created by this call.
+     * 
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain) throws InterruptedException, ExecutionException;
-    
+    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException;
+
     /**
      * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
      * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.

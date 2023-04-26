@@ -851,6 +851,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setProcess(master)
             .setHostname(masterHostname)
             .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setSecurityGroupForVpc(landscape.getDefaultSecurityGroupForApplicationHosts(region))
             .setLandscape(landscape)
             .build();
         createLoadBalancerMapping.run();

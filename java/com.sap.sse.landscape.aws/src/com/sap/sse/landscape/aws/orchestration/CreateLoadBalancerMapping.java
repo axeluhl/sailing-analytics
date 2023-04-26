@@ -11,6 +11,7 @@ import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -106,6 +107,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         BuilderT setTimeout(Duration timeout);
         BuilderT setKeyName(String keyName);
         BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
+        BuilderT setSecurityGroupForVpc(SecurityGroup securityGroupForVpc);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
@@ -120,6 +122,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         private Optional<Duration> optionalTimeout = Optional.empty();
         private Optional<String> optionalKeyName = Optional.empty(); // if empty, SSH key pair used to start the instance hosting the process will be used
         private byte[] privateKeyEncryptionPassphrase;
+        private SecurityGroup securityGroupForVpc;
 
         @Override
         public BuilderT setProcess(ProcessT process) {
@@ -127,6 +130,16 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             return self();
         }
         
+        protected SecurityGroup getSecurityGroupForVpc() {
+            return securityGroupForVpc;
+        }
+
+        @Override
+        public BuilderT setSecurityGroupForVpc(SecurityGroup securityGroupForVpc) {
+            this.securityGroupForVpc = securityGroupForVpc;
+            return self();
+        }
+
         @Override
         public BuilderT setKeyName(String keyName) {
             this.optionalKeyName = Optional.ofNullable(keyName);
@@ -221,7 +234,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     protected String getHostName() {
         return hostname;
     }
-
+    
     private AwsInstance<ShardingKey> getHost() {
         @SuppressWarnings("unchecked")
         final AwsInstance<ShardingKey> result = (AwsInstance<ShardingKey>) getProcess().getHost();

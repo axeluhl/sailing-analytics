@@ -318,11 +318,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region) throws InterruptedException, ExecutionException {
+    public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException {
         Region awsRegion = getRegion(region);
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
         final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
-        final SubnetMapping[] subnetMappings = Util.toArray(Util.map(getSubnetsForAvailabilityZones(awsRegion, availabilityZones),
+        final SubnetMapping[] subnetMappings = Util.toArray(Util.map(getSubnetsForAvailabilityZones(awsRegion, availabilityZones, securityGroupForVpc),
                 subnet->SubnetMapping.builder().subnetId(subnet.subnetId()).build()), new SubnetMapping[0]);
         final CreateLoadBalancerResponse response = client
                 .createLoadBalancer(CreateLoadBalancerRequest.builder()
@@ -344,7 +345,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private Subnet getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(AwsAvailabilityZone az, SecurityGroup securityGroup, Region region) {
         final Ec2Client ec2Client = getEc2Client(region);
         final String vpcId = ec2Client.describeSecurityGroups(b->b.groupIds(securityGroup.getId())).securityGroups().iterator().next().vpcId();
-        return ec2Client.describeSubnets(b->b.filters(Filter.builder().name("vpc-id").values(vpcId).build())).subnets().iterator().next();
+        return ec2Client.describeSubnets(b->b.filters(
+                Filter.builder().name("vpc-id").values(vpcId).build(),
+                Filter.builder().name("availability-zone-id").values(az.getId()).build()))
+                .subnets().iterator().next();
     }
     
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -512,13 +516,17 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * Grabs all subnets that are default subnet for any of the availability zones specified
      * <p>
      * 
-     * FIXME bug5838: for a non-default VPC its subnets won't be the default subnets for their AZs either. Hence, we
-     * need to get the VPC-ID, either immediately or through a security group whose
-     * {@link software.amazon.awssdk.services.ec2.model.SecurityGroup#vpcId() VPC-ID} could be used
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs) {
-        return Util.filter(getEc2Client(region).describeSubnets().subnets(), subnet -> subnet.defaultForAz()
-                && Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId()));
+    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs, SecurityGroup securityGroupForVpc) {
+        final Ec2Client ec2Client = getEc2Client(region);
+        final Optional<String> vpcId = Optional.ofNullable(securityGroupForVpc).map(
+                sg->ec2Client.describeSecurityGroups(b->b.groupIds(sg.getId())).securityGroups().get(0).vpcId());
+        return Util.filter(ec2Client.describeSubnets().subnets(),
+                subnet -> vpcId.map(i->i.equals(subnet.vpcId())).orElse(subnet.defaultForAz()) &&
+                          Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId()));
     }
 
     @Override
@@ -943,10 +951,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             .minCount(numberOfHostsToLaunch)
             .maxCount(numberOfHostsToLaunch)
             .instanceType(instanceType).keyName(keyName)
+            .subnetId(getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroups.iterator().next(), getRegion(az.getRegion())).subnetId())
             .placement(Placement.builder().availabilityZone(az.getName()).build())
             .securityGroupIds(Util.mapToArrayList(securityGroups, SecurityGroup::getId));
-        runInstancesRequestBuilder.subnetId(getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(
-                az, securityGroups.iterator().next(), getRegion(az.getRegion())).subnetId());
         if (userData != null) {
             runInstancesRequestBuilder.userData(Base64.getEncoder().encodeToString(String.join("\n", userData).getBytes()));
         }
@@ -1229,8 +1236,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(
-            com.sap.sse.landscape.Region region, String wildcardDomain) throws InterruptedException, ExecutionException {
-        return createLoadBalancer(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
+            com.sap.sse.landscape.Region region, String wildcardDomain, SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException {
+        return createLoadBalancer(getNonDNSMappedLoadBalancerName(wildcardDomain), region, securityGroupForVpc);
     }
 
     private String getNonDNSMappedLoadBalancerName(String wildcardDomain) {
