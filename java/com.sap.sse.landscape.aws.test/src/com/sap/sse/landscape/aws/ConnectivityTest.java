@@ -492,7 +492,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
         final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, ApplicationProcess.HEALTH_CHECK_PATH, 80,
-                /* loadBalancerArn */ null);
+                /* loadBalancerArn */ null, /* vpcId */ null);
         try {
             final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,
                     targetGroup.getTargetGroupArn(), targetGroup.getLoadBalancerArn(), targetGroup.getProtocol(),

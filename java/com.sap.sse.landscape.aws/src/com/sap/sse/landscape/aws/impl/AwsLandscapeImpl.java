@@ -400,7 +400,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn());
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId());
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1035,7 +1035,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
-            String healthCheckPath, int healthCheckPort, String loadBalancerArn) {
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
                 loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
@@ -1049,7 +1049,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .healthCheckPort(""+healthCheckPort)
                 .healthCheckProtocol(guessProtocolFromPort(healthCheckPort))
                 .port(port)
-                .vpcId(getVpcId(region))
+                .vpcId(vpcId == null ? getVpcId(region) : vpcId)
                 .protocol(guessProtocolFromPort(port))
                 .targetType(TargetTypeEnum.INSTANCE)
                 .build()).targetGroups().iterator().next();
@@ -2029,8 +2029,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(com.sap.sse.landscape.Region region, String targetGroupName, int port) {
-        return createTargetGroup(region, targetGroupName, port, ApplicationProcess.HEALTH_CHECK_PATH, port, null);
+    public TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(com.sap.sse.landscape.Region region, String targetGroupName, int port, String vpcId) {
+        return createTargetGroup(region, targetGroupName, port, ApplicationProcess.HEALTH_CHECK_PATH, port, null, vpcId);
     }
     
     @Override
@@ -2072,7 +2072,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public TargetGroup<ShardingKey> copyTargetGroup(TargetGroup<ShardingKey> parent, String suffix) {
-        TargetGroup<ShardingKey> child =  createTargetGroupWithoutLoadbalancer(parent.getRegion(), parent.getName()+ suffix, parent.getPort());
+        TargetGroup<ShardingKey> child =  createTargetGroupWithoutLoadbalancer(parent.getRegion(), parent.getName()+ suffix, parent.getPort(),
+                parent.getLoadBalancer().getVpcId());
         child.addTargets(parent.getRegisteredTargets().keySet());
         return child;
     }

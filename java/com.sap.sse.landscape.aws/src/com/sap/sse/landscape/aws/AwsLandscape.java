@@ -483,15 +483,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}. The
      * protocol (HTTP or HTTPS) is inferred from the port: 443 means HTTPS; anything else means HTTP.
-     * 
      * @param loadBalancerArn
      *            will be set as the resulting target group's {@link TargetGroup#getLoadBalancerArn() load balancer
      *            ARN}. This is helpful if you already know to which load balancer you will add rules in a moment that
      *            will forward to this target group. Just created, the target group's load balancer ARN in AWS will still
      *            be {@code null}, so cannot be discovered.
+     * @param vpcId if {@code null}, the {@code region}'s default VPC will be used
      */
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
-            String healthCheckPath, int healthCheckPort, String loadBalancerArn);
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId);
     /**
      * Copies a target group from an existing target group. The name gets extended with {@code suffix}
      * @param parent 
@@ -809,7 +809,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     void updateInstanceTypeInAutoScalingGroup(Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, InstanceType instanceType);
 
-    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
+    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port, String vpcId);
     
     /**
      * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the auto-scaling group
