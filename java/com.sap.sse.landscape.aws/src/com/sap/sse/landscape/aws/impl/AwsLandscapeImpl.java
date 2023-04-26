@@ -48,8 +48,6 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaSet;
-import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -919,13 +917,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes() {
-        // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)
-        return null;
-    }
-    
-    @Override
     public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, HostT> hostSupplier,
             int numberOfHostsToLaunch, MachineImage fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
@@ -934,6 +925,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                     " with image "+fromImage+" that lives in region "+fromImage.getRegion()+" which is different."+
                     " Consider copying the image to that region.");
         }
+        final Ec2Client ec2Client = getEc2Client(getRegion(az.getRegion()));
         final Builder runInstancesRequestBuilder = RunInstancesRequest.builder()
             .additionalInfo("Test " + getClass().getName())
             .imageId(fromImage.getId().toString())
@@ -941,7 +933,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             .maxCount(numberOfHostsToLaunch)
             .instanceType(instanceType).keyName(keyName)
             .placement(Placement.builder().availabilityZone(az.getName()).build())
-            .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId()));
+            .securityGroupIds(Util.mapToArrayList(securityGroups, SecurityGroup::getId));
+        final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> awsSecurityGroups = ec2Client.describeSecurityGroups(
+                b->b.groupIds(Util.asList(Util.map(securityGroups, SecurityGroup::getId)))).securityGroups();
+        ec2Client.describeSubnets().subnets().stream().filter(
+                subnet->
+                    subnet.availabilityZoneId().equals(az.getId()) &&
+                    subnet.vpcId().equals(awsSecurityGroups.iterator().next().vpcId()))
+                .findFirst()
+                .map(subnet->runInstancesRequestBuilder.subnetId(subnet.subnetId()));
         if (userData != null) {
             runInstancesRequestBuilder.userData(Base64.getEncoder().encodeToString(String.join("\n", userData).getBytes()));
         }
@@ -951,7 +951,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         });
         final RunInstancesRequest launchRequest = runInstancesRequestBuilder.build();
         logger.info("Launching instance(s): "+launchRequest);
-        final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
+        final RunInstancesResponse response = ec2Client.runInstances(launchRequest);
         final List<HostT> result = new ArrayList<>();
         for (final Instance instance : response.instances()) {
             try {
@@ -1133,7 +1133,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, com.sap.sse.landscape.Region region) {
         final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> securityGroups = getEc2Client(getRegion(region)).describeSecurityGroups(
-                sg->sg.filters(Filter.builder().name("group-name").values(securityGroupName).build())).securityGroups();
+                sg->sg.filters(Filter.builder().name("tag:Name").values(securityGroupName).build())).securityGroups();
         return securityGroups.stream().findFirst().map(sg->()->sg.groupId());
     }
 
