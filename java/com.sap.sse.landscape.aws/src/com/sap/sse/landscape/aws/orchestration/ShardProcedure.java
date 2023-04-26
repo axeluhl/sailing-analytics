@@ -54,8 +54,8 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     protected final ShardingKey SHARDING_KEY_UNUSED_BY_ANY_APPLICATION = (ShardingKey) "lauycaluy3cla3yrclaurlIYQL8";
     protected final String shardName;
     final protected Set<ShardingKey> shardingKeys;
-    final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
-    final Region region;
+    final protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
+    final protected Region region;
     private final String pathPrefixForShardingKey;
 
     protected ShardProcedure(BuilderImpl<?,?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
@@ -82,7 +82,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
 
         BuilderT setShardingKeys(Set<ShardingKey> shardingkeys);
 
-        BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
+        BuilderT setReplicaSet(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
 
         BuilderT setRegion(Region region);
     }
@@ -122,7 +122,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         }
 
         @Override
-        public BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset) {
+        public BuilderT setReplicaSet(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset) {
             this.replicaSet = replicaset;
             return self();
         }

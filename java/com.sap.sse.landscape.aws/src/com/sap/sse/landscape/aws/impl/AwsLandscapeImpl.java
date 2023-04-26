@@ -341,6 +341,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return result;
     }
     
+    private Subnet getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(AwsAvailabilityZone az, SecurityGroup securityGroup, Region region) {
+        final Ec2Client ec2Client = getEc2Client(region);
+        final String vpcId = ec2Client.describeSecurityGroups(b->b.groupIds(securityGroup.getId())).securityGroups().iterator().next().vpcId();
+        return ec2Client.describeSubnets(b->b.filters(Filter.builder().name("vpc-id").values(vpcId).build())).subnets().iterator().next();
+    }
+    
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpListener(ApplicationLoadBalancer<ShardingKey> alb) {
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -504,6 +510,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     /**
      * Grabs all subnets that are default subnet for any of the availability zones specified
+     * <p>
+     * 
+     * FIXME bug5838: for a non-default VPC its subnets won't be the default subnets for their AZs either. Hence, we
+     * need to get the VPC-ID, either immediately or through a security group whose
+     * {@link software.amazon.awssdk.services.ec2.model.SecurityGroup#vpcId() VPC-ID} could be used
      */
     private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs) {
         return Util.filter(getEc2Client(region).describeSubnets().subnets(), subnet -> subnet.defaultForAz()
@@ -934,14 +945,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             .instanceType(instanceType).keyName(keyName)
             .placement(Placement.builder().availabilityZone(az.getName()).build())
             .securityGroupIds(Util.mapToArrayList(securityGroups, SecurityGroup::getId));
-        final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> awsSecurityGroups = ec2Client.describeSecurityGroups(
-                b->b.groupIds(Util.asList(Util.map(securityGroups, SecurityGroup::getId)))).securityGroups();
-        ec2Client.describeSubnets().subnets().stream().filter(
-                subnet->
-                    subnet.availabilityZoneId().equals(az.getId()) &&
-                    subnet.vpcId().equals(awsSecurityGroups.iterator().next().vpcId()))
-                .findFirst()
-                .map(subnet->runInstancesRequestBuilder.subnetId(subnet.subnetId()));
+        runInstancesRequestBuilder.subnetId(getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(
+                az, securityGroups.iterator().next(), getRegion(az.getRegion())).subnetId());
         if (userData != null) {
             runInstancesRequestBuilder.userData(Base64.getEncoder().encodeToString(String.join("\n", userData).getBytes()));
         }
@@ -1941,18 +1946,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
             int minReplicas, int maxReplicas, int maxRequestsPerTarget) {
         logger.info("Creating launch configuration for replica set "+replicaSetName);
-        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final Region awsRegion = getRegion(region);
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(awsRegion);
         final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
         final String launchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         final String autoScalingGroupName = getAutoScalingGroupName(replicaSetName);
         final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final SecurityGroup securityGroup = getDefaultSecurityGroupForApplicationHosts(region);
         final int instanceWarmupTimeInSeconds = (int) Duration.ONE_MINUTE.times(3).asSeconds();
         autoScalingClient.createLaunchConfiguration(b->b
                 .launchConfigurationName(launchConfigurationName)
                 .keyName(keyName)
                 .imageId(imageId)
                 .instanceMonitoring(i->i.enabled(true))
-                .securityGroups(getDefaultSecurityGroupForApplicationHosts(region).getId())
+                .securityGroups(securityGroup.getId())
                 .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
                 .instanceType(instanceType.toString()));
         logger.info("Creating auto-scaling group for replica set "+replicaSetName);
@@ -1962,7 +1969,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .maxSize(maxReplicas)
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
-                .availabilityZones(Util.toArray(Util.map(availabilityZones, az->az.getName()), new String[3]))
+                .vpcZoneIdentifier(Util.joinStrings(",", Util.map(availabilityZones,
+                        az->getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroup, awsRegion))))
                 .targetGroupARNs(publicTargetGroup.getTargetGroupArn())
                 .launchConfigurationName(launchConfigurationName);
             tags.ifPresent(t->{
