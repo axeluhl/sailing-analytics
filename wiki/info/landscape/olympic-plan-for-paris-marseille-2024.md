@@ -57,7 +57,29 @@ ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 
 Make sure to align the ``INSTALL_FROM_RELEASE`` parameter to match up with the release used on site.
 
-## Switching
+## SSH Tunnels
+
+The baseline is again the Tokyo 2020 set-up. Besides the jump host's re-naming from ``tokyo-ssh.sapsailing.com`` to ``paris-ssh.sapsailing.com``. The tunnel scripts for ``sap-p1-2`` that assume ``sap-p1-2`` is (primary) master seem to be faulty. At least, they don't establish a reverse port forward for port 8888 which, however, seems necessary to let cloud replicas reach the on-site master. ``sap-p1-2`` becoming (primary) on-site master means that ``sap-p1-1`` has failed. This can be a problem with the application process but could even be a hardware issue where the entire machine has crashed and has become unavailable. Therefore, ``sap-p1-2`` must take over at least the application and become primary master, and this requires the reverse port forward like this: ``-R '*:8888:localhost:8888'``
+
+The ports and their semantics:
+
+*   443: HTTPS port of security-service.sapsailing.com (or its local replacement through NGINX)
+*  5673: Outbound RabbitMQ to use by on-site master (or local replacement)
+*  5675: Inbound RabbitMQ for replication from security-service.sapsailing.com (or local replacement)
+*  9443: NGINX HTTP port on sap-p1-1 (also reverse-forwarded from paris-ssh.sapsailing.com)
+*  9444: NGINX HTTP port on sap-p1-2 (also reverse-forwarded from paris-ssh.sapsailing.com)
+* 10201: MongoDB on sap-p1-1
+* 10202: MongoDB on sap-p1-2
+* 10203: MongoDB on paris-ssh.sapsailing.com
+* 15673: HTTP to RabbitMQ administration UI of the RabbitMQ server reached on port 5673
+* 15675: HTTP to RabbitMQ administration UI of the RabbitMQ server reached on port 5675
+
+### Regular Operations
+
+* Three MongoDB nodes form the ``paris2024`` replica set: ``sap-p1-1:10201``, ``sap-p1-2:10202``, and ``paris-ssh.sapsailing.com:10203``, where SSH tunnels forward ports 10201..10203 such that everywhere on the three hosts involved the replica set can be addressed as ``mongodb://localhost:10201,localhost:10202,localhost:10203/?replicaSet=paris2024&retryWrites=true&readPreference=nearest``
+* ``sap-p1-1`` runs the ``paris2024`` production master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``security-service.sapsailing.com`` (which actually forwards to the ALB hosting the rules for ``security-service.sapsailing.com`` and RabbitMQ ``rabbit.internal.sapsailing.com`` tunneled through port 5675, with the RabbitMQ admin UI tunneled through port 15675; outbound replication goes to local port 5673 which tunnels to ``rabbit-eu-west-3.sapsailing.com`` whose admin UI is reached through port 15673 which tunnels to ``rabbit-eu-west-3.sapsailing.com:15672``
+* ``sap-p1-2`` runs the ``paris2024`` shadow master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024-shadow``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``security-service.sapsailing.com`` (which actually forwards to the ALB hosting the rules for ``security-service.sapsailing.com`` and RabbitMQ ``rabbit.internal.sapsailing.com`` tunneled through port 5675, with the RabbitMQ admin UI tunneled through port 15675; outbound replication goes to local port 5673 which tunnels to the RabbitMQ running locally on ``sap-p1-2``, port 5672 whose admin UI is then reached through port 15673 which tunnels to ``sap-p1-2:15672``
+* The database ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live`` is backed up on a regular basis (nightly) to the local MongoDB replica set ``paris2024`` DB named ``security_service``.
 
 ### Production Master Failure
 
@@ -68,10 +90,6 @@ Approach: Switch to previous shadow master, re-configuring all SSH tunnels accor
 ### Internet Failure
 
 As in the Tokyo 2020 scenario; in particular, the local security service must be started which will work off a regularly updated local MongoDB copy of the cloud-based security-service.sapsailing.com; this also requires to adjust /etc/hosts and the tunnels accordingly.
-
-## SSH Tunnels
-
-TBD; baseline is again the Tokyo 2020 set-up.
 
 ## Test Plan for Test Event Marseille July 2023
 
@@ -93,6 +111,10 @@ Combine the above scenarios: a failing production master (hardware or VM-only) w
 
 ## TODO Before / During On-Site Set-Up (Both, Test Event and OSG2024)
 
+* Set up Global Accelerator and have the already established DNS record ``paris2024.sapsailing.com`` (placeholder that points to the Dynamic ALB in the default region ``eu-west-1`` to effectively forward to the central reverse proxy and ultimately the archive server's landing page) become an alias pointing to this Global Accelerator
+* Set up logging buckets for ALBs in all supported regions
+* Set up ALBs in all supported regions, define their three rules (redirect for ``paris2024.sapsailing.com/`` path; forward to public target group for all other ``paris2024.sapsailing.com`` traffic; default rule forwarding to IP-based target group containing the ``eu-west-1`` central reverse proxy) and register them with the Global Accelerator
 * Add SSH public keys for password-less private keys of ``sap-p1-1`` and ``sap-p1-2`` to ``ec2-user@paris-ssh.sapsailing.com:.ssh/authorized_keys.org`` so that when the authorized_keys file is updated automatically, the on-site keys are still preserved.
 * Create LetsEncrypt certificates for the NGINX installations for paris2024.sapsailing.com and security-service.sapsailing.com and install to the two on-site laptops' NGINX environments
-* Ensure the MongoDB installations on both laptops use 
+* Ensure the MongoDB installations on both laptops use the ``paris2024`` replica set
+* Adjust Athena queries to include all ALB logging buckets from all regions
