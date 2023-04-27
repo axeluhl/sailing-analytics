@@ -65,7 +65,7 @@ The ports and their semantics:
 
 *   443: HTTPS port of security-service.sapsailing.com (or its local replacement through NGINX)
 *  5673: Outbound RabbitMQ to use by on-site master (or local replacement)
-*  5675: Inbound RabbitMQ for replication from security-service.sapsailing.com (or local replacement)
+*  5675: Inbound RabbitMQ (rabbit.internal.sapsailing.com) for replication from security-service.sapsailing.com (or local replacement)
 *  9443: NGINX HTTP port on sap-p1-1 (also reverse-forwarded from paris-ssh.sapsailing.com)
 *  9444: NGINX HTTP port on sap-p1-2 (also reverse-forwarded from paris-ssh.sapsailing.com)
 * 10201: MongoDB on sap-p1-1
@@ -73,23 +73,51 @@ The ports and their semantics:
 * 10203: MongoDB on paris-ssh.sapsailing.com
 * 15673: HTTP to RabbitMQ administration UI of the RabbitMQ server reached on port 5673
 * 15675: HTTP to RabbitMQ administration UI of the RabbitMQ server reached on port 5675
+* 22222: SSH access to sapsailing.com:22, e.g., for Git access through ``ssh://trac@localhost:22222/home/trac/git``
+* 22443: HTTPS access to sapsailing.com:443, e.g., for trying to download a release, although chances are slim this works without local ``/etc/hosts`` magic, e.g., for ``releases.sapsailing.com``
+
+``/etc/hosts`` must map ``security-service.sapsailing.com`` to ``localhost`` so that local port 443 can be forwarded to different targets based on needs.
 
 ### Regular Operations
 
 * Three MongoDB nodes form the ``paris2024`` replica set: ``sap-p1-1:10201``, ``sap-p1-2:10202``, and ``paris-ssh.sapsailing.com:10203``, where SSH tunnels forward ports 10201..10203 such that everywhere on the three hosts involved the replica set can be addressed as ``mongodb://localhost:10201,localhost:10202,localhost:10203/?replicaSet=paris2024&retryWrites=true&readPreference=nearest``
 * ``sap-p1-1`` runs the ``paris2024`` production master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``security-service.sapsailing.com`` (which actually forwards to the ALB hosting the rules for ``security-service.sapsailing.com`` and RabbitMQ ``rabbit.internal.sapsailing.com`` tunneled through port 5675, with the RabbitMQ admin UI tunneled through port 15675; outbound replication goes to local port 5673 which tunnels to ``rabbit-eu-west-3.sapsailing.com`` whose admin UI is reached through port 15673 which tunnels to ``rabbit-eu-west-3.sapsailing.com:15672``
 * ``sap-p1-2`` runs the ``paris2024`` shadow master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024-shadow``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``security-service.sapsailing.com`` (which actually forwards to the ALB hosting the rules for ``security-service.sapsailing.com`` and RabbitMQ ``rabbit.internal.sapsailing.com`` tunneled through port 5675, with the RabbitMQ admin UI tunneled through port 15675; outbound replication goes to local port 5673 which tunnels to the RabbitMQ running locally on ``sap-p1-2``, port 5672 whose admin UI is then reached through port 15673 which tunnels to ``sap-p1-2:15672``
-* The database ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live`` is backed up on a regular basis (nightly) to the local MongoDB replica set ``paris2024`` DB named ``security_service``.
+* The database ``mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/security_service?replicaSet=live`` is backed up on a regular basis (nightly) to the local MongoDB replica set ``paris2024`` DB named ``security_service`` which makes it visible especially in the two MongoDB replicas running on ``sap-p1-1`` and ``sap-p1-2``
 
 ### Production Master Failure
 
 Situation: production master fails, e.g., because of a Java VM crash or a deadlock or user issues such as killing the wrong process...
 
-Approach: Switch to previous shadow master, re-configuring all SSH tunnels accordingly; this includes the 8888 reverse forward from the cloud to the local on-site master, as well as the RabbitMQ forward which needs to switch from the local RabbitMQ running on the shadow master's host to the cloud-based RabbitMQ. Clients such as SwissTiming clients need to switch to the shadow master. To remedy gaps in replication due to the SSH tunnel switch we may want to circulate the replica instances, rolling over to a new set of replicas that fetch a new initial load.
+Approach: Switch to previous shadow master on ``sap-p1-2``, re-configuring all SSH tunnels accordingly; this includes the 8888 reverse forward from the cloud to the local on-site master, as well as the RabbitMQ forward which needs to switch from the local RabbitMQ running on the shadow master's host to the cloud-based RabbitMQ. Clients such as SwissTiming clients need to switch to the shadow master. To remedy gaps in replication due to the SSH tunnel switch we may want to circulate the replica instances, rolling over to a new set of replicas that fetch a new initial load. If ``sap-p1-1``'s operating system is still alive, its SSH tunnel especially for port 8888 reverse forwarding from ``paris-ssh.sapsailing.com`` must be terminated because otherwise ``sap-p1-2`` may not be able to establish its according reverse forward of port 8888.
+
+Here are the major changes:
+
+* ``sap-p1-2`` runs the ``paris2024`` shadow master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024-shadow``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``security-service.sapsailing.com`` (which actually forwards to the ALB hosting the rules for ``security-service.sapsailing.com`` and RabbitMQ ``rabbit.internal.sapsailing.com`` tunneled through port 5675, with the RabbitMQ admin UI tunneled through port 15675; *outbound replication goes to local port 5673 which tunnels to* ``rabbit-eu-west-3.sapsailing.com`` *whose admin UI is reached through port 15673 which tunnels to* ``rabbit-eu-west-3.sapsailing.com:15672``
+
 
 ### Internet Failure
 
-As in the Tokyo 2020 scenario; in particular, the local security service must be started which will work off a regularly updated local MongoDB copy of the cloud-based security-service.sapsailing.com; this also requires to adjust /etc/hosts and the tunnels accordingly.
+While cloud replicas and hence the ALBs and Global Accelerator will remain reachable with the latest data snapshot at the time the connection is lost, we will then lose the following capabilities:
+
+* replicate the official ``security-service.sapsailing.com`` service, both, from an HTTP as well as a RabbitMQ perspective; ``rabbit.internal.sapsailing.com`` will then no longer be reachable from the on-site network
+* keep the cloud MongoDB instance on ``paris-ssh.sapsailing.com`` synchronized; it will fall behind
+* outbound replication to ``rabbit-eu-west-3.sapsailing.com`` and from there on to the cloud replicas in all regions supported will stop
+* inbound "reverse" replication from the cloud replicas to the on-site master through the reverse forward of ``paris-ssh.sapsailing.com:8888`` will stop working; the cloud replicas will start buffering the operations to send to their master and will keep re-trying in growing time intervals
+
+To recover with as little disruption as possible, switching to a local copy of the ``security-service`` and to a local RabbitMQ for "outbound" replication is required. Of course, no replicas will be listening on that local RabbitMQ, but in order to not stop working, the application server will need a RabbitMQ that can be reached on the outbound port 5673. This is achieved by switching the SSH tunnel such that port 5673 will then forward to a RabbitMQ running locally.
+
+We will then start ``sap-p1-1:/home/sailing/servers/security_service`` on port 8889 which will connect to the local MongoDB replica set still consisting of the two on-site nodes, using the database ``security_service`` that has been obtained as a copy of the ``live`` MongoDB replica set in our default region. This local security service uses the local RabbitMQ running on the same host for its outbound replication. On both on-site laptops the port 443 then needs to forward to the NGINX instance running locally as a reverse proxy for the local security service. On ``sap-p1-1`` this is port 9443, on ``sap-p1-2`` this is port 9444. Furthermore, the port forward from port 5675 and 15675 on both laptops then must point to the local RabbitMQ used outbound by the security service running locally. This will usually be the RabbitMQ running on ``sap-p1-1``, so ``sap-p1-1:5672``, or ``sap-p1-1:15672``, respectively, for the admin port.
+
+This makes for the following set-up:
+
+* Only two MongoDB nodes remain available on site from the ``paris2024`` replica set: ``sap-p1-1:10201`` and ``sap-p1-2:10202``, where SSH tunnels forward ports 10201..10203 such that everywhere on the three hosts involved the replica set can be addressed as ``mongodb://localhost:10201,localhost:10202,localhost:10203/?replicaSet=paris2024&retryWrites=true&readPreference=nearest``
+* ``sap-p1-1`` runs the ``paris2024`` production master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``sap-p1-1:9443`` which is the port of the local NGINX acting as an SSL-offloading reverse proxy for the security service running locally on port 8889; port 5675 forwards to ``sap-p1-1:5672`` where the local RabbitMQ runs, with the local ``sap-p1-1`` RabbitMQ admin UI tunneled through port 15675; outbound replication goes to local port 5673 which then also tunnels to the local RabbitMQ on ``sap-p1-1:5672``, whose admin UI is reached through port 15673 which tunnels to ``sap-p1-1:15672``
+* ``sap-p1-2`` runs the ``paris2024`` shadow master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024-shadow``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``sap-p1-1:9443`` which is the reverse proxy for the security service running on ``sap-p1-1:8889``, and RabbitMQ tunneled through port 5675 to ``sap-p1-1:5672``, with the RabbitMQ admin UI tunneled through port 15675 to ``sap-p1-1:15672``; outbound replication still goes to local port 5673 which tunnels to the RabbitMQ running locally on ``sap-p1-2``, port 5672 whose admin UI is then reached through port 15673 which tunnels to ``sap-p1-2:15672`` which keeps the shadow master's outbound replication from interfering with the production master's outbound replication.
+
+### Internet Failure Using Shadow Master
+
+TODO
 
 ## Test Plan for Test Event Marseille July 2023
 
