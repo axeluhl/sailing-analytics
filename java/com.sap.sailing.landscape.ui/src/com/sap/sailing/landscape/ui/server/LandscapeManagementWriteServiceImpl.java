@@ -703,6 +703,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setProcess(master)
             .setHostname(masterHostname)
             .setTargetGroupNamePrefix(LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setSecurityGroupForVpc(getLandscape().getDefaultSecurityGroupForApplicationHosts(new AwsRegion(regionId, getLandscape())))
             .setLandscape(getLandscape())
             .build();
         createLoadBalancerMapping.run();

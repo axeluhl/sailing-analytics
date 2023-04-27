@@ -1,13 +1,8 @@
 package com.sap.sse.landscape;
 
-import java.util.Map;
 import java.util.Optional;
 
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.application.ApplicationProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaSet;
-import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 public interface Landscape<ShardingKey> {
@@ -27,12 +22,6 @@ public interface Landscape<ShardingKey> {
      */
     Optional<Duration> WAIT_FOR_PROCESS_TIMEOUT = Optional.of(Duration.ONE_MINUTE);
 
-    /**
-     * Tells which scope currently lives where
-     */
-    <ApplicationProcessMetricsT extends ApplicationProcessMetrics, ApplicationProcessT extends ApplicationProcess<ShardingKey, ApplicationProcessMetricsT, ApplicationProcessT>>
-    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, ApplicationProcessMetricsT, ApplicationProcessT>> getScopes();
-    
     /**
      * @return the security group that shall be assigned by default to any application server host, whether master or
      *         replica

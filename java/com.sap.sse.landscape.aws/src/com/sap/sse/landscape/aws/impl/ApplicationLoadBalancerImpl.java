@@ -72,6 +72,16 @@ implements ApplicationLoadBalancer<ShardingKey> {
     public Region getRegion() {
         return region;
     }
+    
+    @Override
+    public String getVpcId() {
+        return loadBalancer.vpcId();
+    }
+    
+    @Override
+    public List<String> getSecurityGroupIds() {
+        return loadBalancer.securityGroups();
+    }
 
     @Override
     public Iterable<Rule> getRules() {

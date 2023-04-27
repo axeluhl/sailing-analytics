@@ -404,7 +404,7 @@ The above configuration needs also to be set on the rabbitmq installations of th
 
 The primary AWS region for the tokyo2020 replica set is ap-northeast-1 (Tokyo). In order to provide low latencies for the RHBs we'd like to add replicas also in other regions. Since we want to not expose the RabbitMQ running ap-northeast-1 to the outside world, we plan to peer the VPCs of other regions with the one in ap-northeast-1.
 
-The pre-requisite for VPCs to get peered is that their CIDRs (such as 172.31.0.0/16) don't overlap. The default VPC in each region always uses the same CIDR (172.31.0.0/16), and hence in order to peer VPCs all but one must be non-default VPC. To avoid confusion when lanuching instances or setting up security groups it can be adequate for those peering regions other than our default region eu-west-1 to set up non-default VPCs with peering-capable CIDRs and remove the default VPC. This way users cannot accidentally launch instances or define security groups for any VPC other than the peered one.
+The pre-requisite for VPCs to get peered is that their CIDRs (such as 172.31.0.0/16) don't overlap. The default VPC in each region always uses the same CIDR (172.31.0.0/16), and hence in order to peer VPCs all but one must be non-default VPC. To avoid confusion when launching instances or setting up security groups it can be adequate for those peering regions other than our default region ``eu-west-1`` to set up non-default VPCs with peering-capable CIDRs and remove the default VPC. This way users cannot accidentally launch instances or define security groups for any VPC other than the peered one.
 
 After having peered the VPCs, the VPCs default routing table must be extended by a route to the peered VPC's CIDR using the peering connection.
 
@@ -418,7 +418,7 @@ The Route53 entry ``tokyo2020.sapsailing.com`` now is an alias A record pointing
 
 ### Geo-Blocking
 
-While for Tokyo 2020 this was not requested, for Paris 2024 we heard rumors that it may. If it does, using the []AWS Web Application Firewall (WAF)](https://us-east-1.console.aws.amazon.com/wafv2/homev2/start) provides the solution. There, we can create so-called Web Access Control Lists (Web ACLs) which need to be created per region where an ALB is used.
+While for Tokyo 2020 this was not requested, for Paris 2024 we heard rumors that it may. If it does, using the [AWS Web Application Firewall (WAF)](https://us-east-1.console.aws.amazon.com/wafv2/homev2/start) provides the solution. There, we can create so-called Web Access Control Lists (Web ACLs) which need to be created per region where an ALB is used.
 
 A Web ACL consists of a number of rules and has a default action (typically "Allow" or "Block") for those requests not matched by any rule. An ACL can be associated with one or more resources, in particular with Application Load Balancers (ALBs) deployed in the region.
 
@@ -552,7 +552,7 @@ REPLICATE_MASTER_BEARER_TOKEN="***"
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 ```
 
-(Adjust the release accordingly, of course).
+(Adjust the release accordingly, of course). (NOTE: During the first production days of the event we noticed that it was really a BAD IDEA to have all replicas use the same DB set-up, all writing to the MongoDB PRIMARY of the "live" replica set in eu-west-1. With tens of replicas running concurrently, this led to a massive block-up based on MongoDB not writing fast enough. This gave rise to a new application server AMI which now has a MongoDB set-up included, using "replica" as the MongoDB replica set name. Now, each replica hence can write into its own MongoDB instance, isolated from all others and scaling linearly.)
 
 In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
 
