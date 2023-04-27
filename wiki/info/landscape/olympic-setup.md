@@ -552,7 +552,7 @@ REPLICATE_MASTER_BEARER_TOKEN="***"
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 ```
 
-(Adjust the release accordingly, of course).
+(Adjust the release accordingly, of course). (NOTE: During the first production days of the event we noticed that it was really a BAD IDEA to have all replicas use the same DB set-up, all writing to the MongoDB PRIMARY of the "live" replica set in eu-west-1. With tens of replicas running concurrently, this led to a massive block-up based on MongoDB not writing fast enough. This gave rise to a new application server AMI which now has a MongoDB set-up included, using "replica" as the MongoDB replica set name. Now, each replica hence can write into its own MongoDB instance, isolated from all others and scaling linearly.)
 
 In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
 

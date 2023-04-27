@@ -8,7 +8,7 @@ Many of these scripts and configuration files contain an explicit reference to t
 
 ## VPCs and VPC Peering
 
-From Tokyo2020 we still have the VPCs around in five regions (``eu-west-3``, ``us-west-1``, ``us-east-1``, ``ap-northeast-1``, and ``ap-southeast-2``). But they are named ``Tokyo2020`` and our scripts currently depend on this. But VPCs can easily be renamed, and with that we may save a lot of work regarding re-peering those VPCs. We will, though need routes to the new "primary" VPC ``eu-west-3`` from everywhere because the ``paris2024-ssh.sapsailing.com`` jump host will be based there. Note the inconsistency in capitalization: for the VPC name and as part of instance names such as ``SL Tokyo2020 (Upgrade Replica)`` we use ``Tokyo2020``, for basically everything else it's ``tokyo2020`` (lowercase). When switching to a parameterized approach we should probably harmonize this and use the lowercase name consistently throughout.
+From Tokyo2020 we still have the VPCs around in five regions (``eu-west-3``, ``us-west-1``, ``us-east-1``, ``ap-northeast-1``, and ``ap-southeast-2``). They were named ``Tokyo2020`` and our scripts currently depend on this. But VPCs can easily be renamed, and with that we may save a lot of work regarding re-peering those VPCs. We will, though need routes to the new "primary" VPC ``eu-west-3`` from everywhere because the ``paris-ssh.sapsailing.com`` jump host will be based there. Note the inconsistency in capitalization: for the VPC name and as part of instance names such as ``SL Tokyo2020 (Upgrade Replica)`` we use ``Tokyo2020``, for basically everything else it's ``tokyo2020`` (lowercase). When switching to a parameterized approach we should probably harmonize this and use the lowercase name consistently throughout.
 
 I've started with re-naming the VPCs and their routing tables from ``Tokyo2020`` to ``Paris2024``. I've also added VPC peering between Paris (``eu-west-3``) and California (``us-west-1``), Virginia (``us-east-1``), and Sydney (``ap-southeast-2``). The peering between Paris and Tokyo (``ap-northeast-1``) already existed because for Tokyo 2020, Paris hosted replicas that needed to access the jump host in the Tokyo region.
 
@@ -20,11 +20,42 @@ We will use one laptop as production master, the other as "shadow master." The r
 
 Both laptops shall run their local RabbitMQ instance. Each of the two master processes can optionally write into its local RabbitMQ through an SSH tunnel which may instead redirect to the cloud-based RabbitMQ for an active Internet/Cloud connection.
 
-This will require to set up two MongoDB databases (not separate processes, just different DB names).
+This will require to set up two MongoDB databases (not separate processes, just different DB names), e.g., "paris2024" and "paris2024-shadow". Note that for the shadow master this means that the DB name does not follow the typical naming convention where the ``SERVER_NAME`` property ("paris2024" for both, the primary and the shadow master) also is used as the default MongoDB database name.
 
 Note: The shadow master must have at least one registered replica because otherwise it would not send any operations into the RabbitMQ replication channel. This can be a challenge for a shadow master that has never seen any replica. We could, for example, simulate a replica registration when the shadow master is still basically empty, using, e.g., a CURL request and then ignoring and later deleting the initial load queue on the local RabbitMQ.
 
 Furthermore, the shadow master must not send into the production RabbitMQ replication channel that is used by the production master instance while it is not in production itself, because it would duplicate the operations sent. Instead, the shadow master shall use a local RabbitMQ instance to which an SSH tunnel forwards.
+
+## Cloud RabbitMQ
+
+Instead of ``rabbit-ap-northeast-1.sapsailing.com`` we will use ``rabbit-eu-west-3.sapsailing.com`` pointing to the internal IP address of the RabbitMQ installation in ``eu-west-3`` that is used as the default for the on-site master processes as well as for all cloud replicas.
+
+## ALB and Target Group Set-Up
+
+Like for Tokyo2020, a separate ALB for the Paris2024 event will be set up in each of the regions supported. They will all be registered with the Global Accelerator to whose anycast-IP adresses the DNS alias record for ``paris2024.sapsailing.com`` will point. Different from Tokyo2020 where we used a static "404 - Not Found" rule as the default rule for all of these ALBs, we can and should use an IP-based target group for the default rule's forwarding and should registed the ``eu-west-1`` "Webserver" (Central Reverse Proxy)'s internal IP address in these target groups. This way, when archiving the event, cached DNS records can still resolve to the Global Accelerator and from there to the ALB(s) and from there, via these default rules, back to the central reverse proxy which then should now where to find the ``paris2024.sapsailing.com`` content in the archive.
+
+Target group naming conventions have changed slightly since Tokyo2020: instead of ``S-ded-tokyo2020`` we will use only ``S-paris2024`` for the public target group containing all the cloud replicas.
+
+## Cloud Replica Set-Up
+
+Based on the cloud replica set-up for Tokyo2020 we can derive the following user data for Paris2024 cloud replicas:
+
+```
+INSTALL_FROM_RELEASE=build-.............
+SERVER_NAME=paris2024
+MONGODB_URI="mongodb://localhost/paris2024-replica?replicaSet=replica&retryWrites=true&readPreference=nearest"
+USE_ENVIRONMENT=live-replica-server
+REPLICATION_CHANNEL=paris2024-replica
+REPLICATION_HOST=rabbit-eu-west-3.sapsailing.com
+REPLICATE_MASTER_SERVLET_HOST=paris-ssh.internal.sapsailing.com
+REPLICATE_MASTER_SERVLET_PORT=8888
+REPLICATE_MASTER_EXCHANGE_NAME=paris2024
+REPLICATE_MASTER_QUEUE_HOST=rabbit-eu-west-3.sapsailing.com
+REPLICATE_MASTER_BEARER_TOKEN="***"
+ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
+```
+
+Make sure to align the ``INSTALL_FROM_RELEASE`` parameter to match up with the release used on site.
 
 ## Switching
 
@@ -59,3 +90,9 @@ This can be caused by a deadlock, VM crash, Full GC phase, massive performance d
 ### Test Primary Mater Failures with no Internet Connection
 
 Combine the above scenarios: a failing production master (hardware or VM-only) will require different tunnel re-configurations, especially regarding the then local security-service.sapsailing.com environment which may need to move to the shadow laptop.
+
+## TODO Before / During On-Site Set-Up (Both, Test Event and OSG2024)
+
+* Add SSH public keys for password-less private keys of ``sap-p1-1`` and ``sap-p1-2`` to ``ec2-user@paris-ssh.sapsailing.com:.ssh/authorized_keys.org`` so that when the authorized_keys file is updated automatically, the on-site keys are still preserved.
+* Create LetsEncrypt certificates for the NGINX installations for paris2024.sapsailing.com and security-service.sapsailing.com and install to the two on-site laptops' NGINX environments
+* Ensure the MongoDB installations on both laptops use 

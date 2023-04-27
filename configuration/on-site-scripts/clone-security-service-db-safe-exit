@@ -8,7 +8,7 @@ ssh ec2-user@tokyo-ssh.sapsailing.com "set -e; cd /tmp; rm -rf /tmp/dump; mongod
 echo 'use security_service_bak
 db.dropDatabase()
 db.copyDatabase("security_service", "security_service_bak")
-quit()' | mongo "mongodb://localhost/security_service_bak?replicaSet=security_service&retryWrites=true&readPreference=nearest" && logger -t sailing "Succesfull, continuing..." || ( logger -t sailing "SEVERE: mongo finished with $?"; exit 1 )
+quit()' | mongo "mongodb://localhost/security_service_bak?replicaSet=security_service&retryWrites=true&readPreference=nearest" && logger -t sailing "Succesful, continuing..." || ( logger -t sailing "SEVERE: mongo finished with $?"; exit 1 )
 mongorestore --drop --host security_service/localhost && logger -t sailing "mongorestore finished with $?. Done cloning security_service DB from eu-west-1 live replica set to local tokyo2020 replica set." || ( logger -t sailing "SEVERE: mongorestore finished with $?. Aborting..."; echo 'use security_service
 db.dropDatabase()
 db.copyDatabase("security_service_bak", "security_service")
