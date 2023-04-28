@@ -1,6 +1,6 @@
-# Failover Scenarios for [Olympic Setup](https://wiki.sapsailing.com/wiki/info/landscape/olympic-setup)
+# Failover Scenarios for [Olympic Setup Tokyo 2020](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup)
 
-This page is meant to describe a couple of failure scenarios and appropiate mitigation approaches. In addition open questions are documented. It refers to the setup described in detail [here](https://wiki.sapsailing.com/wiki/info/landscape/olympic-setup). It is work in progress and far from complete.
+This page is meant to describe a couple of failure scenarios and appropiate mitigation approaches. In addition open questions are documented. It refers to the setup described in detail [here](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup). It is work in progress and far from complete.
 
 ## Hardware failure on primary Lenovo P1 with the Sailing Analytics Master
 

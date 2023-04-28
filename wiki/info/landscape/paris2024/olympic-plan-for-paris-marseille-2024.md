@@ -1,6 +1,6 @@
 # Thoughts on Landscape Configuration for Paris 2024 / Marseille
 
-As a baseline we'll use the [Olympic Setup](/wiki/info/landscape/olympic-setup). The major change, though, would be that instead of running a local on-site master and a local on-site replica we would run two master instances locally on site where one is the "shadow" and the other one is the "production" master.
+As a baseline we'll use the [Olympic Setup From Tokyo 2020](/wiki/info/landscape/tokyo2020/olympic-setup). The major change, though, would be that instead of running a local on-site master and a local on-site replica we would run two master instances locally on site where one is the "shadow" and the other one is the "production" master.
 
 We captured a set of scripts and configuration files in out Git repository at ``configuration/on-site-scripts``, in particular also separately for the two laptops, in ``configuration/on-site-scripts/sap-p1-1`` and ``configuration/on-site-scripts/sap-p1-2``.
 
