@@ -1,6 +1,6 @@
 # Thoughts on Landscape Configuration for Paris 2024 / Marseille
 
-As a baseline we'll use the [Olympic Setup](/wiki/info/landscape/olympic-setup). The major change, though, would be that instead of running a local on-site master and a local on-site replica we would run two master instances locally on site where one is the "shadow" and the other one is the "production" master.
+As a baseline we'll use the [Olympic Setup From Tokyo 2020](/wiki/info/landscape/tokyo2020/olympic-setup). The major change, though, would be that instead of running a local on-site master and a local on-site replica we would run two master instances locally on site where one is the "shadow" and the other one is the "production" master.
 
 We captured a set of scripts and configuration files in out Git repository at ``configuration/on-site-scripts``, in particular also separately for the two laptops, in ``configuration/on-site-scripts/sap-p1-1`` and ``configuration/on-site-scripts/sap-p1-2``.
 
@@ -25,6 +25,8 @@ This will require to set up two MongoDB databases (not separate processes, just 
 Note: The shadow master must have at least one registered replica because otherwise it would not send any operations into the RabbitMQ replication channel. This can be a challenge for a shadow master that has never seen any replica. We could, for example, simulate a replica registration when the shadow master is still basically empty, using, e.g., a CURL request and then ignoring and later deleting the initial load queue on the local RabbitMQ.
 
 Furthermore, the shadow master must not send into the production RabbitMQ replication channel that is used by the production master instance while it is not in production itself, because it would duplicate the operations sent. Instead, the shadow master shall use a local RabbitMQ instance to which an SSH tunnel forwards.
+
+We will install a cron job that regularly performs a "compareServers" between production and shadow master. Any deviation shall be notified using the e-mail notification mechanism in place for all other alerts and monitoring activities, too.
 
 ## Cloud RabbitMQ
 
@@ -64,7 +66,7 @@ The baseline is again the Tokyo 2020 set-up. Besides the jump host's re-naming f
 The ports and their semantics:
 
 *   443: HTTPS port of security-service.sapsailing.com (or its local replacement through NGINX)
-*  5673: Outbound RabbitMQ to use by on-site master (or local replacement)
+*  5673: Outbound RabbitMQ to use by on-site master (regularly to RabbitMQ in eu-west-3, local replacement as fallback)
 *  5675: Inbound RabbitMQ (rabbit.internal.sapsailing.com) for replication from security-service.sapsailing.com (or local replacement)
 *  9443: NGINX HTTP port on sap-p1-1 (also reverse-forwarded from paris-ssh.sapsailing.com)
 *  9444: NGINX HTTP port on sap-p1-2 (also reverse-forwarded from paris-ssh.sapsailing.com)
@@ -95,7 +97,6 @@ Here are the major changes:
 
 * ``sap-p1-2`` runs the ``paris2024`` shadow master from ``/home/sailing/servers/paris2024`` against local database ``paris2024:paris2024-shadow``, replicating from ``security-service.sapsailing.com`` through SSH tunnel from local port 443 pointing to ``security-service.sapsailing.com`` (which actually forwards to the ALB hosting the rules for ``security-service.sapsailing.com`` and RabbitMQ ``rabbit.internal.sapsailing.com`` tunneled through port 5675, with the RabbitMQ admin UI tunneled through port 15675; *outbound replication goes to local port 5673 which tunnels to* ``rabbit-eu-west-3.sapsailing.com`` *whose admin UI is reached through port 15673 which tunnels to* ``rabbit-eu-west-3.sapsailing.com:15672``
 
-
 ### Internet Failure
 
 While cloud replicas and hence the ALBs and Global Accelerator will remain reachable with the latest data snapshot at the time the connection is lost, we will then lose the following capabilities:
@@ -117,7 +118,7 @@ This makes for the following set-up:
 
 ### Internet Failure Using Shadow Master
 
-TODO
+
 
 ## Test Plan for Test Event Marseille July 2023
 
