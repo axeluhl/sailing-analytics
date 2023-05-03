@@ -8,7 +8,7 @@ if [ $# -eq 0 ]; then
     echo
     echo "Will tell all replicas in the cloud to stop replicating. This works by invoking the"
     echo "get-replica-ips script and for each of them to stop replicating, using the stopReplicating.sh"
-    echo "script in their /home/sailing/servers/tokyo2020 directory, passing through the bearer token."
+    echo "script in their /home/sailing/servers/paris2024 directory, passing through the bearer token."
     echo "Note: this will NOT stop replication on the local replica on sap-p1-2!"
     exit 2
 fi
@@ -22,5 +22,5 @@ do
     esac
 done
 for i in `./get-replica-ips`; do
-  ssh -o StrictHostKeyChecking=no root@$i "su - sailing -c \"cd /home/sailing/servers/tokyo2020; ./stopReplicating.sh ${BEARER_TOKEN}\""
+  ssh -o StrictHostKeyChecking=no root@$i "su - sailing -c \"cd /home/sailing/servers/paris2024; ./stopReplicating.sh ${BEARER_TOKEN}\""
 done

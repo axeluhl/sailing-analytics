@@ -1,6 +1,6 @@
 #!/bin/bash
-LAUNCH_CONFIGURATION_NAME_PATTERN="^tokyo2020-.*"
-AUTO_SCALING_GROUP_NAME_PATTERN="^tokyo2020.*"
+LAUNCH_CONFIGURATION_NAME_PATTERN="^paris2024-.*"
+AUTO_SCALING_GROUP_NAME_PATTERN="^paris2024.*"
 KEY_NAME=Axel
 
 if [ $# -eq 0 ]; then
@@ -13,9 +13,9 @@ if [ $# -eq 0 ]; then
     echo
     echo "Example: $0 -R build-202106041327 -k Jan"
     echo
-    echo "Will upgrade the auto-scaling group tokyo2020-* in the regions from regions.txt with a new"
-    echo "launch configuration that will be derived from the existing launch configuration named tokyo2020-*"
-    echo "by copying it to tokyo2020-{RELEASE_NAME} while updating the INSTALL_FROM_RELEASE parameter in the"
+    echo "Will upgrade the auto-scaling group paris2024-* in the regions from regions.txt with a new"
+    echo "launch configuration that will be derived from the existing launch configuration named paris2024-*"
+    echo "by copying it to paris2024-{RELEASE_NAME} while updating the INSTALL_FROM_RELEASE parameter in the"
     echo "user data to the {RELEASE_NAME}, and optionally adjusting the AMI, key pair name and instance type if specified."
     echo "Note: this will NOT terminate any instances in the target group!"
     exit 2
@@ -53,7 +53,7 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
   SECURITY_GROUP=$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.SecurityGroups[0]' )
   BLOCK_DEVICE_MAPPINGS="$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.BlockDeviceMappings' )"
   NEW_USER_DATA=$( echo "${OLD_USER_DATA}" | sed -e 's/^INSTALL_FROM_RELEASE=.*$/INSTALL_FROM_RELEASE='${RELEASE}'/' )
-  NEW_LAUNCH_CONFIGURATION_NAME=tokyo2020-${RELEASE}
+  NEW_LAUNCH_CONFIGURATION_NAME=paris2024-${RELEASE}
   echo "Creating new launch configuration ${NEW_LAUNCH_CONFIGURATION_NAME}"
   aws autoscaling create-launch-configuration --launch-configuration-name ${NEW_LAUNCH_CONFIGURATION_NAME} --image-id ${REGIONAL_IMAGE_ID} --key-name ${KEY_NAME} --security-groups ${SECURITY_GROUP} --user-data "${NEW_USER_DATA}" --instance-type ${REGIONAL_INSTANCE_TYPE} --block-device-mappings "${BLOCK_DEVICE_MAPPINGS}"
   EXIT_CODE=$?

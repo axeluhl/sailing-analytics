@@ -3,6 +3,6 @@
 IPs=""
 for i in $( cat `dirname $0`/regions.txt ); do
   echo Region: $i >&2
-  IPs="${IPs} $( aws --region $i ec2 describe-instances --filters Name=instance-state-name,Values=running Name=tag:sailing-analytics-server,Values=tokyo2020 | jq .Reservations[].Instances[].PublicIpAddress -r )"
+  IPs="${IPs} $( aws --region $i ec2 describe-instances --filters Name=instance-state-name,Values=running Name=tag:sailing-analytics-server,Values=paris2024 | jq .Reservations[].Instances[].PublicIpAddress -r )"
 done
 echo "${IPs}"

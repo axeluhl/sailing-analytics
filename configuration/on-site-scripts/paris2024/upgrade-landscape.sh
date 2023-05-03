@@ -11,12 +11,12 @@
 #  - wait until master is healthy
 #  - on sap-p1-2:servers/replica run ./stop; ./start to bring up on-site replica again
 #  - launch upgraded cloud replicas and replace old replicas in target group (launch-replicas-in-all-regions.sh)
-#  - terminate all instances named "SL Tokyo2020 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
-#  - manually inspect the health of everything and terminate the "SL Tokyo2020 (Upgrade Replica)" instances when enough new instances
-#    named "SL Tokyo2020 (auto-replica)" are available
+#  - terminate all instances named "SL Paris2024 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
+#  - manually inspect the health of everything and terminate the "SL Paris2024 (Upgrade Replica)" instances when enough new instances
+#    named "SL Paris2024 (auto-replica)" are available
 #
 KEY_NAME=Axel
-INSTANCE_NAME_TO_TERMINATE="SL Tokyo2020 (auto-replica)"
+INSTANCE_NAME_TO_TERMINATE="SL Paris2024 (auto-replica)"
 if [ $# -eq 0 ]; then
     echo "$0 -R <release-name> -b <replication-bearer-token> [-t <instance-type>] [-i <ami-id>] [-k <key-pair-name>] [-s]"
     echo ""
@@ -40,9 +40,9 @@ if [ $# -eq 0 ]; then
     echo " - wait until master is healthy"
     echo " - on sap-p1-2:servers/replica run ./stop; ./start to bring up on-site replica again"
     echo " - launch upgraded cloud replicas and replace old replicas in target group (launch-replicas-in-all-regions.sh)"
-    echo " - terminate all instances named \"SL Tokyo2020 (auto-replica)\"; this should cause the auto-scaling group to launch new instances as required"
-    echo " - manually inspect the health of everything and terminate the \"SL Tokyo2020 (Upgrade Replica)\" instances when enough new instances"
-    echo "   named \"SL Tokyo2020 (auto-replica)\" are available"
+    echo " - terminate all instances named \"SL Paris2024 (auto-replica)\"; this should cause the auto-scaling group to launch new instances as required"
+    echo " - manually inspect the health of everything and terminate the \"SL Paris2024 (Upgrade Replica)\" instances when enough new instances"
+    echo "   named \"SL Paris2024 (auto-replica)\" are available"
     exit 2
 fi
 options='R:b:t:i:k:s'
@@ -124,7 +124,7 @@ if [ "${EXIT_CODE}" != "0" ]; then
   echo "Re-launching replica on sap-p1-2 failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
-echo " * Launching upgraded replicas SL Tokyo2020 (Upgrade Replica) in the regions"
+echo " * Launching upgraded replicas SL Paris2024 (Upgrade Replica) in the regions"
 OPTIONS="-b ${BEARER_TOKEN} -R ${RELEASE}"
 if [ -n "${IMAGE_ID}" ]; then
   OPTIONS="${OPTIONS} -i ${IMAGE_ID}"

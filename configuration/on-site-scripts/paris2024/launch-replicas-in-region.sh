@@ -3,8 +3,8 @@ INSTANCE_TYPE=c5.2xlarge
 REPLICA_SET_NAME=replica
 REPLICA_SET_PRIMARY=localhost
 KEY_NAME=Axel
-VPC=Tokyo2020
-TARGET_GROUP_NAME=S-ded-tokyo2020
+VPC=Paris2024
+TARGET_GROUP_NAME=S-paris2024
 COUNT=1
 
 if [ $# -eq 0 ]; then
@@ -24,8 +24,8 @@ if [ $# -eq 0 ]; then
     echo "Example: $0 -g ap-southeast-2 -b 098toyw098typ9e8/87t9shytp98894y5= -R build-202106041327 -k Jan"
     echo
     echo "Will launch one or more (see -c) new replicas in the AWS region specified with -g  with the release specified with -R"
-    echo "which will register at the master proxy tokyo-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
-    echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-ded-tokyo2020"
+    echo "which will register at the master proxy paris-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
+    echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-paris2024"
     echo "in that region, with all auto-replicas registered before removed from the target group."
     echo "Specify -r and -p if you are launching in eu-west-1 because it has a special non-default environment."
     exit 2
@@ -69,17 +69,17 @@ while [ ${i} -lt ${COUNT} ]; do
   SUBNET_ID=$( echo "${SUBNETS}" | jq -r '.Subnets['${SUBNET_INDEX}'].SubnetId' )
   echo "Launching image with ID ${IMAGE_ID} into subnet #${SUBNET_INDEX} in region ${REGION} with ID ${SUBNET_ID} in VPC ${VPC_ID}"
   PRIVATE_IP_AND_INSTANCE_ID=$( aws --region ${REGION} ec2 run-instances --subnet-id ${SUBNET_ID} --instance-type ${INSTANCE_TYPE} --security-group-ids ${SECURITY_GROUP_ID} --image-id ${IMAGE_ID} --user-data "INSTALL_FROM_RELEASE=${RELEASE}
-SERVER_NAME=tokyo2020
-MONGODB_URI=\"mongodb://${REPLICA_SET_PRIMARY}/tokyo2020-replica?replicaSet=${REPLICA_SET_NAME}&retryWrites=true&readPreference=nearest\"
+SERVER_NAME=paris2024
+MONGODB_URI=\"mongodb://${REPLICA_SET_PRIMARY}/paris2024-replica?replicaSet=${REPLICA_SET_NAME}&retryWrites=true&readPreference=nearest\"
 USE_ENVIRONMENT=live-replica-server
-REPLICATION_CHANNEL=tokyo2020-replica
-REPLICATION_HOST=rabbit-ap-northeast-1.sapsailing.com
-REPLICATE_MASTER_SERVLET_HOST=tokyo-ssh.internal.sapsailing.com
+REPLICATION_CHANNEL=paris2024-replica
+REPLICATION_HOST=rabbit-eu-west-3.sapsailing.com
+REPLICATE_MASTER_SERVLET_HOST=paris-ssh.internal.sapsailing.com
 REPLICATE_MASTER_SERVLET_PORT=8888
-REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
-REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
+REPLICATE_MASTER_EXCHANGE_NAME=paris2024
+REPLICATE_MASTER_QUEUE_HOST=rabbit-eu-west-3.sapsailing.com
 REPLICATE_MASTER_BEARER_TOKEN=${BEARER_TOKEN}
-ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)},{Key=sailing-analytics-server,Value=tokyo2020}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress + " " + .Instances[].InstanceId' )
+ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Paris2024 (Upgrade Replica)},{Key=sailing-analytics-server,Value=paris2024}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Paris2024 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress + " " + .Instances[].InstanceId' )
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" != "0" ]; then
     echo "Error launching instance in region ${REGION}. Exiting with status ${EXIT_CODE}"
@@ -95,7 +95,7 @@ ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" 
   fi
   # Now wait for those instances launched to become available
   echo "Waiting for instance with private IP ${PRIVATE_IP} in region ${REGION} to become healthy..."
-  while ! ssh -A -o StrictHostKeyChecking=no ec2-user@tokyo-ssh.sapsailing.com "ssh -o StrictHostKeyChecking=no root@${PRIVATE_IP} \"cd /home/sailing/servers/tokyo2020; ./status >/dev/null\""; do
+  while ! ssh -A -o StrictHostKeyChecking=no ec2-user@paris-ssh.sapsailing.com "ssh -o StrictHostKeyChecking=no root@${PRIVATE_IP} \"cd /home/sailing/servers/paris2024; ./status >/dev/null\""; do
     echo "${PRIVATE_IP} in region ${REGION} still not healthy. Trying again in 10s..."
     sleep 10
   done

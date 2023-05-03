@@ -15,16 +15,16 @@ else
   # Discover replicas
   IPs=""
   for i in $( cat `dirname $0`/regions.txt ); do
-    IPs="$( aws --region $i ec2 describe-instances --filters Name=instance-state-name,Values=running Name=tag:sailing-analytics-server,Values=tokyo2020 | jq .Reservations[].Instances[].PublicIpAddress -r )"
+    IPs="$( aws --region $i ec2 describe-instances --filters Name=instance-state-name,Values=running Name=tag:sailing-analytics-server,Values=paris2024 | jq .Reservations[].Instances[].PublicIpAddress -r )"
     if [ -z "${IPs}" ]; then
       echo "Couldn't find a running replica in region $i" >&2
       message="Couldn't find a running replica in region $i"
       echo "${message}" | notify-operators "${message}"
     else
       read first others <<<"${IPs}"
-      if ! ssh -o StrictHostKeyChecking=no root@${first} "curl https://tokyo2020.sapsailing.com/gwt/status 2>/dev/null >/dev/null"; then
-	echo "Problem reaching tokyo2020.sapsailing.com from instance ${first} in region ${i}" >&2
-	message="Problem reaching tokyo2020.sapsailing.com from instance ${first} in region ${i}"
+      if ! ssh -o StrictHostKeyChecking=no root@${first} "curl https://paris2024.sapsailing.com/gwt/status 2>/dev/null >/dev/null"; then
+	echo "Problem reaching paris2024.sapsailing.com from instance ${first} in region ${i}" >&2
+	message="Problem reaching paris2024.sapsailing.com from instance ${first} in region ${i}"
 	echo "${message}" | notify-operators "${message}"
       else
 	echo "Access from region ${i}, IP ${first} OK." >&2
