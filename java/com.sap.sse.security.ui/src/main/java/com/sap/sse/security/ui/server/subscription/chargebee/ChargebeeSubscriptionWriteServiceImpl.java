@@ -1,6 +1,9 @@
 package com.sap.sse.security.ui.server.subscription.chargebee;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -8,6 +11,7 @@ import java.util.logging.Logger;
 
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
+import com.chargebee.models.HostedPage.CheckoutNewForItemsRequest;
 import com.chargebee.models.HostedPage.Content;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Subscription.SubscriptionItem;
@@ -141,13 +145,17 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             }else {
                 final Pair<String, String> usernames = getUserFirstAndLastName(user);
                 final String locale = user.getLocaleOrDefault().getLanguage();
-                final Result result = HostedPage.checkoutNewForItems()
+                final CheckoutNewForItemsRequest requestBuilder = HostedPage.checkoutNewForItems()
                         .subscriptionItemItemPriceId(0, priceId)
                         .subscriptionItemQuantity(0,1)
                         .customerId(user.getName()).customerEmail(user.getEmail())
                         .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
-                        .customerLocale(locale).billingAddressFirstName(usernames.getA())
-                        .billingAddressLastName(usernames.getB()).request();
+                        .billingAddressFirstName(usernames.getA())
+                        .billingAddressLastName(usernames.getB());
+                if (isChargebeeSupportedLocale(locale)) {
+                    requestBuilder.customerLocale(locale);
+                }
+                final Result result = requestBuilder.request();
                 response.setHostedPageJSONString(result.hostedPage().toJson());
             }
         } catch (final Exception e) {
@@ -157,6 +165,13 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
         return response;
     }
 
+    /**
+     * Checks whether {@code locale} is supported as defined by Chargbee here: https://www.chargebee.com/docs/supported-locales.html
+     */
+    private boolean isChargebeeSupportedLocale(String locale) {
+        final Set<String> supportedLocales = new HashSet<>(Arrays.asList("en", "fr", "it", "pt", "es"));
+        return supportedLocales.contains(locale);
+    }
     @Override
     public boolean cancelSubscription(String planId) {
         boolean result;
