@@ -169,7 +169,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
      * Checks whether {@code locale} is supported as defined by Chargbee here: https://www.chargebee.com/docs/supported-locales.html
      */
     private boolean isChargebeeSupportedLocale(String locale) {
-        final Set<String> supportedLocales = new HashSet<>(Arrays.asList("en", "fr", "it", "pt", "es"));
+        final Set<String> supportedLocales = new HashSet<>(Arrays.asList("en", "fr", "de", "it", "pt", "es"));
         return supportedLocales.contains(locale);
     }
     @Override
