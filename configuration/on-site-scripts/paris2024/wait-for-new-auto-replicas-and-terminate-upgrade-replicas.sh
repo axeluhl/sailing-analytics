@@ -1,8 +1,8 @@
 #!/bin/bash
-VPC="Tokyo2020"
-TARGET_GROUP_NAME="S-ded-tokyo2020"
-UPGRADE_REPLICA_NAME="SL Tokyo2020 (Upgrade Replica)"
-AUTO_REPLICA_NAME="SL Tokyo2020 (auto-replica)"
+VPC="Paris2024"
+TARGET_GROUP_NAME="S-paris2024"
+UPGRADE_REPLICA_NAME="SL Paris2024 (Upgrade Replica)"
+AUTO_REPLICA_NAME="SL Paris2024 (auto-replica)"
 
 if [ $# -eq 0 ]; then
     echo "$0 [ -g <AWS-region> ]"

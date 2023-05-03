@@ -30,7 +30,7 @@ We will install a cron job that regularly performs a "compareServers" between pr
 
 ## Cloud RabbitMQ
 
-Instead of ``rabbit-ap-northeast-1.sapsailing.com`` we will use ``rabbit-eu-west-3.sapsailing.com`` pointing to the internal IP address of the RabbitMQ installation in ``eu-west-3`` that is used as the default for the on-site master processes as well as for all cloud replicas.
+We will use ``rabbit-eu-west-3.sapsailing.com`` pointing to the internal IP address of the RabbitMQ installation in ``eu-west-3`` that is used as the default for the on-site master processes as well as for all cloud replicas.
 
 ## ALB and Target Group Set-Up
 
@@ -118,7 +118,39 @@ This makes for the following set-up:
 
 ### Internet Failure Using Shadow Master
 
+TODO
 
+## Checklist After Event
+
+The experience during "Tokyo 2020" has shown that after the last race of the last day everybody gets in a rush, and the on-site infrastructure starts to get dismantled quickly. For us this means that we need to prepare well for switching to cloud-only operations. The approach in Enoshima worked well, although we were caught a bit by surprise regarding the speed at which infrastructure was taken down.
+
+### Cleanly Remove On-Site MongoDB Replicas from ``paris2024`` MongoDB Replica Set
+
+Connecting to the ``paris2024`` MongoDB replica set, first we need to make sure that the cloud replica can become primary. The production configuration was such that by assigning a priority and votes of 0 the cloud replica never would become primary. Now it shall, so we need to change its priority and votes value in the configuration first. For this, issue the following command in the MongoDB shell while connected to the ``paris2024`` replica set:
+
+```
+  cfg=rs.config()
+```
+
+Then find the member using port number ``10203`` which is the cloud replica. Typically, this would be the first element (index 0) in the ``members`` array of the ``cfg`` object. Assuming it *is* at index 0, issue the following commands (replacing the 0 index by the actual index of the ``10203`` port member):
+
+```
+  cfg.members[0].priority=1
+  cfg.members[0].votes=1
+  rs.reconfig()
+  rs.remove("localhost:10201")
+  rs.remove("localhost:10202")
+```
+
+This will make the MongoDB cloud replica running on ``paris-ssh.sapsailing.com`` the single primary of the now single-element replica set. The MongoDB processes running on the on-site laptops can then be stopped.
+
+### Stop Replication in Cloud Replicas
+
+Then, all cloud replicas need to stop replicating because soon the on-site master will be stopped. See script ``configuration/on-site-scripts/paris2024/stop-all-cloud-replicas.sh``.
+
+### Stop On-Site Master and Launch Cloud Master on ``paris-ssh.sapsailingcom``
+
+Next, an application master for the ``paris2024`` application replica set needs to be launched on ``paris-ssh.sapsailing.com``. It uses the MongoDB URI ``mongodb://localhost:10203/paris2024?replicaSet=paris2024&retryWrites=true&readPreference=nearest``, hence connecting to the single-instance MongoDB "replica set" running on the same host. Other than this the instance uses a standard configuration for a live master. This configuration can already be prepared before the event. All that then needs to be done is to adjust the release to the one that all cloud replicas are using.
 
 ## Test Plan for Test Event Marseille July 2023
 
@@ -134,7 +166,7 @@ This will require switching entirely to the shadow master. Depending on the stat
 
 This can be caused by a deadlock, VM crash, Full GC phase, massive performance degradation or other faulty behavior. We then need to actively close the reverse SSH port forward from the cloud to the production master's 8888 HTTP port, as a precaution switch the RabbitMQ tunnel from the cloud-based to the local RabbitMQ instance so that in case the production master "wakes up" again, e.g., after a Full GC, it does not start to interfere with the now active shadow master on the RabbitMQ fan-out exchange. On the shadow master we need to re-configure the SSH tunnels, particularly to target the cloud-based RabbitMQ and have the reverse port forward on port 8888 target the shadow master on site now.
 
-### Test Primary Mater Failures with no Internet Connection
+### Test Primary Master Failures with no Internet Connection
 
 Combine the above scenarios: a failing production master (hardware or VM-only) will require different tunnel re-configurations, especially regarding the then local security-service.sapsailing.com environment which may need to move to the shadow laptop.
 

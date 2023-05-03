@@ -1,5 +1,5 @@
 #!/bin/bash
-TARGET_GROUP_NAME=S-ded-tokyo2020
+TARGET_GROUP_NAME=S-paris2024
 
 if [ $# -eq 0 ]; then
     echo "$0 -R <release-name> -b <replication-bearer-token> [-t <instance-type>] [-i <ami-id>] [-k <key-pair-name>]"
@@ -13,9 +13,9 @@ if [ $# -eq 0 ]; then
     echo "Example: $0 -b 098toyw098typ9e8/87t9shytp98894y5= -R build-202106041327 -k Jan"
     echo
     echo "Will launch as many new replicas in regions $( cat `dirname $0`/regions.txt ) with the release specified with -R"
-    echo "as there are currently healthy auto-replicas registered with the S-ded-tokyo2020 target group in the region (at least one)"
-    echo "which will register at the master proxy tokyo-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
-    echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-ded-tokyo2020"
+    echo "as there are currently healthy auto-replicas registered with the S-paris2024 target group in the region (at least one)"
+    echo "which will register at the master proxy paris-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
+    echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-paris2024"
     echo "in that region, with all auto-replicas registered before removed from the target group."
     exit 2
 fi
@@ -52,7 +52,7 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
   else
     MONGODB_PRIMARY="localhost"
     MONGODB_REPLICA_SET="replica"
-    VPC_NAME="Tokyo2020"
+    VPC_NAME="Paris2024"
   fi
   echo "Using MongoDB primary ${MONGODB_PRIMARY} and replica set ${MONGODB_REPLICA_SET}"
   OPTIONS="-g ${REGION} -b ${BEARER_TOKEN} -R ${RELEASE} -p ${MONGODB_PRIMARY} -r ${MONGODB_REPLICA_SET} -v ${VPC_NAME} -c ${HEALTHY_TARGETS_IN_REGION}"
