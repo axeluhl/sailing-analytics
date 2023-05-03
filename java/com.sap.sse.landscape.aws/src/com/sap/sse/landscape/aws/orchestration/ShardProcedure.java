@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -54,8 +55,8 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     protected final ShardingKey SHARDING_KEY_UNUSED_BY_ANY_APPLICATION = (ShardingKey) "lauycaluy3cla3yrclaurlIYQL8";
     protected final String shardName;
     final protected Set<ShardingKey> shardingKeys;
-    final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
-    final Region region;
+    final protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
+    final protected Region region;
     private final String pathPrefixForShardingKey;
 
     protected ShardProcedure(BuilderImpl<?,?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
@@ -82,7 +83,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
 
         BuilderT setShardingKeys(Set<ShardingKey> shardingkeys);
 
-        BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
+        BuilderT setReplicaSet(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
 
         BuilderT setRegion(Region region);
     }
@@ -122,7 +123,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         }
 
         @Override
-        public BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset) {
+        public BuilderT setReplicaSet(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset) {
             this.replicaSet = replicaset;
             return self();
         }
@@ -278,13 +279,17 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                 }
                 final String name = getAvailableDNSMappedAlbName(loadBalancerNames);
                 // Create a new alb
-                res = getLandscape().createLoadBalancer(name, region);
+                res = getLandscape().createLoadBalancer(name, region, getSecurityGroupForVpc());
             }
             changeReplicaSetLoadBalancer(res, replicaSet);
         }
         return res;
     }
     
+    private SecurityGroup getSecurityGroupForVpc() throws InterruptedException, ExecutionException {
+        return getLandscape().getSecurityGroup(replicaSet.getLoadBalancer().getSecurityGroupIds().get(0), region);
+    }
+
     /**
      * This method changes the {@code replicaSetToMove}'s load balancer to another one. This method contains a 6min
      * sleep, which is necessary for ensuring that all DNS rules point to the new one. This method can fail if the

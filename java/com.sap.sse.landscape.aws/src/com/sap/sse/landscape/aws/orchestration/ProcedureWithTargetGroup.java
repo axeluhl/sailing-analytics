@@ -96,7 +96,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, ProcessT process) {
         return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName, process.getPort(),
                 process.getHealthCheckPath(), /* use traffic port as health check port, too */ process.getPort(),
-                getLoadBalancerUsed().getArn());
+                getLoadBalancerUsed().getArn(), getLoadBalancerUsed().getVpcId());
     }
     
     @Override

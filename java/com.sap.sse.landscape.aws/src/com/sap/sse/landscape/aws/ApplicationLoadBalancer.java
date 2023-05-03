@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -68,6 +69,10 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Region getRegion();
 
     String getArn();
+
+    String getVpcId();
+
+    List<String> getSecurityGroupIds();
     
     default String getId() {
         return getArn().substring(getArn().lastIndexOf('/')+1);
