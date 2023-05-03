@@ -225,7 +225,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
             getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
             getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true,
-            createRules(getLoadBalancerUsed(), getHostName(), masterTargetGroupCreated, publicTargetGroupCreated));
+                    createRules(getLoadBalancerUsed(), getHostName(), masterTargetGroupCreated, publicTargetGroupCreated));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

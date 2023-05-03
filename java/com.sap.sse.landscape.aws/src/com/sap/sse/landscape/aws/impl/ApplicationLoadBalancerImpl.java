@@ -203,6 +203,8 @@ implements ApplicationLoadBalancer<ShardingKey> {
 
     @Override
     public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules) {
+        // FIXME: shouldn't we check for ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER before adding the rules?
+        // TODO bug5787: allow caller to specify an insertion point; either as an index or as a rule before which to insert
         final Iterable<Rule> existingRules = getRules();
         if (Util.size(existingRules)-1 + rules.length > MAX_PRIORITY) { // -1 due to the default rule being part of existingRules
             throw new IllegalArgumentException("The "+rules.length+" new rules won't find enough unused priority numbers because there are already "+
@@ -314,11 +316,24 @@ implements ApplicationLoadBalancer<ShardingKey> {
         return Util.stream(getRules()).filter(r->isDefaultRedirectRule(r, hostname)).findAny()
             .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule.ruleArn(), hostname, pathWithLeadingSlash, query))
             .orElseGet(()->{
-                // FIXME bug 5787: this rule would then typically end up at the end of the rule set, being superseded by all other rules for the replica set; use shiftRulesToMakeSpaceAt with the first rule priority of the replica set identified by hostname
-                final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
-                addRulesAssigningUnusedPriorities(/* forceContiguous */ false, defaultRedirectRule);
-                return defaultRedirectRule;
+                return insertAndReturnDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
             });
+    }
+
+    /**
+     * Checks the load balancer rule set size. If already at its maximum, an {@link IllegalStateException} is thrown because
+     * adding a default rule is not possible, and this method does not handle moving an appplication replica set to a different
+     * load balancer. If there is space for at least one more rule, searches this load balancer's rule set for the first rule
+     * for hostname header {@code hostname}. It then uses {@link #shiftRulesToMakeSpaceAt(int)} for that position to make
+     * space for the new default redirect rule.
+     * 
+     * @return the new default redirect rule that was inserted into this load balancer's HTTPS listener's rule set
+     */
+    private Rule insertAndReturnDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        // FIXME bug 5787: this rule would then typically end up at the end of the rule set, being superseded by all other rules for the replica set; use shiftRulesToMakeSpaceAt with the first rule priority of the replica set identified by hostname
+        final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
+        addRulesAssigningUnusedPriorities(/* forceContiguous */ false, defaultRedirectRule);
+        return defaultRedirectRule;
     }
     
     @Override
