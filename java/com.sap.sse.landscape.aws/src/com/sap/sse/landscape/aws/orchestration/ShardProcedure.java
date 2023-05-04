@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -376,7 +377,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             Map<TargetGroup<ShardingKey>, Iterable<ShardingKey>> shardingKeysPerTargetGroup) throws Exception {
         targetAlb
                 .addRulesAssigningUnusedPriorities(/* forceContiguous */ true,
-                        createRules(targetAlb, replicaSet.getHostname(),
+                        Optional.empty(), createRules(targetAlb, replicaSet.getHostname(),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getMasterTargetGroup()),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getPublicTargetGroup())))
                 .forEach(t -> tempRules.add(t));

@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -51,6 +51,11 @@ implements ApplicationLoadBalancer<ShardingKey> {
         this.region = region;
         this.loadBalancer = loadBalancer;
         this.landscape = landscape;
+    }
+    
+    @Override
+    public AwsLandscape<ShardingKey> getLandscape() {
+        return landscape;
     }
 
     @Override
@@ -202,14 +207,18 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
 
     @Override
-    public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules) {
-        // FIXME: shouldn't we check for ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER before adding the rules?
+    public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<Rule> insertBefore, Rule... rules) {
         // TODO bug5787: allow caller to specify an insertion point; either as an index or as a rule before which to insert
         final Iterable<Rule> existingRules = getRules();
         if (Util.size(existingRules)-1 + rules.length > MAX_PRIORITY) { // -1 due to the default rule being part of existingRules
             throw new IllegalArgumentException("The "+rules.length+" new rules won't find enough unused priority numbers because there are already "+
                     (Util.size(existingRules)-1)+" of them and together they would exceed the maximum of "+MAX_PRIORITY+" by "+
                     (Util.size(existingRules)-1 + rules.length - MAX_PRIORITY));
+        }
+        if (Util.size(existingRules) + rules.length > MAX_RULES_PER_LOADBALANCER) {
+            throw new IllegalArgumentException("The " + rules.length + " new rules would make the ALB " + getName()
+                    + " exceed its maximum number of rules (" + MAX_PRIORITY + ") by "
+                    + (Util.size(existingRules) + rules.length - MAX_RULES_PER_LOADBALANCER));
         }
         final List<Rule> result = new ArrayList<>(rules.length);
         final List<Rule> sortedExistingNonDefaultRules = new ArrayList<>(Util.size(existingRules)-1);
@@ -227,7 +236,11 @@ implements ApplicationLoadBalancer<ShardingKey> {
         while (rulesIndex < rules.length) {
             // find next available slot
             int nextPriority = MAX_PRIORITY+1; // if no further rule exists, the usable gap ends after MAX_PRIORITY
-            while (existingRulesIter.hasNext() && (nextPriority=Integer.valueOf(existingRulesIter.next().priority())) <= previousPriority+stepwidth) {
+            final Rule[] nextRule = new Rule[1]; // using an array to make it final so we can access it inside the mapping function below
+            boolean stillLookingForRuleToInsertBefore = insertBefore.isPresent();
+            while (existingRulesIter.hasNext() &&
+                    ((nextPriority=Integer.valueOf((nextRule[0]=existingRulesIter.next()).priority())) <= previousPriority+stepwidth) ||
+                     (stillLookingForRuleToInsertBefore && (stillLookingForRuleToInsertBefore=insertBefore.map(rule->!rule.ruleArn().equals(nextRule[0].ruleArn())).orElse(false)))) {
                 // not enough space for stepwidth many rules; keep on searching
                 previousPriority = nextPriority;
                 if (!existingRulesIter.hasNext()) {
@@ -330,9 +343,10 @@ implements ApplicationLoadBalancer<ShardingKey> {
      * @return the new default redirect rule that was inserted into this load balancer's HTTPS listener's rule set
      */
     private Rule insertAndReturnDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
-        // FIXME bug 5787: this rule would then typically end up at the end of the rule set, being superseded by all other rules for the replica set; use shiftRulesToMakeSpaceAt with the first rule priority of the replica set identified by hostname
         final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
-        addRulesAssigningUnusedPriorities(/* forceContiguous */ false, defaultRedirectRule);
+        addRulesAssigningUnusedPriorities(/* forceContiguous */ false,
+                Util.stream(getRules()).filter(rule->rule.conditions().stream().anyMatch(condition->condition.field().equals("host-header") && condition.hostHeaderConfig().values().contains(hostname))).findFirst(),
+                defaultRedirectRule);
         return defaultRedirectRule;
     }
     
