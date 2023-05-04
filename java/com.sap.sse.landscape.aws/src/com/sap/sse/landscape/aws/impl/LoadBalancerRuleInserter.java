@@ -29,19 +29,19 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriority
  * @author Axel Uhl (d043530)
  *
  */
-public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter.RuleAdapter> {
+public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter.RuleAdapter<RA>> {
     private final LoadBalancerAdapter<RA> loadBalancerAdapter;
     private final int maxPriority;
-    private final int maxRulesParLoadBalancer;
+    private final int maxRulesPerLoadBalancer;
     
-    public static interface RuleAdapter {
+    public static interface RuleAdapter<RA extends RuleAdapter<RA>> {
         boolean isDefault();
         String priority();
         String ruleArn();
-        RuleAdapter copyWithNewPriority(int priorityToUseForRuleCopy);
+        RA copyWithNewPriority(int priorityToUseForRuleCopy);
     }
     
-    public static interface LoadBalancerAdapter<RA extends RuleAdapter> extends Named {
+    public static interface LoadBalancerAdapter<RA extends RuleAdapter<RA>> extends Named {
         Iterable<RA> getRules();
 
         void updateLoadBalancerListenerRulePriorities(List<Pair<Integer, RA>> newPrioritiesForExistingRules);
@@ -49,7 +49,7 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         void addRules(List<RA> result);
     }
     
-    private static class ALBRuleAdapter implements RuleAdapter {
+    public static class ALBRuleAdapter implements RuleAdapter<ALBRuleAdapter> {
         private final Rule rule;
         
         private ALBRuleAdapter(Rule rule) {
@@ -72,7 +72,7 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         }
 
         @Override
-        public RuleAdapter copyWithNewPriority(int priorityToUseForRuleCopy) {
+        public ALBRuleAdapter copyWithNewPriority(int priorityToUseForRuleCopy) {
             return new ALBRuleAdapter(rule.copy(b->b.priority(""+priorityToUseForRuleCopy).build()));
         }
         
@@ -114,14 +114,19 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         
     }
     
-    public LoadBalancerRuleInserter(LoadBalancerAdapter<RA> loadBalancerAdapter, int maxPriority, int maxRulesParLoadBalancer) {
+    public LoadBalancerRuleInserter(LoadBalancerAdapter<RA> loadBalancerAdapter, int maxPriority, int maxRulesPerLoadBalancer) {
         super();
         this.loadBalancerAdapter = loadBalancerAdapter;
         this.maxPriority = maxPriority;
-        this.maxRulesParLoadBalancer = maxRulesParLoadBalancer;
+        this.maxRulesPerLoadBalancer = maxRulesPerLoadBalancer;
     }
     
-    static ALBRuleAdapter createRuleAdapter(Rule rule) {
+    public static <ShardingKey> LoadBalancerRuleInserter<ShardingKey, ALBRuleAdapter> create(
+            ApplicationLoadBalancer<ShardingKey> alb, int maxPriority, int maxRulesPerLoadBalancer) {
+        return new LoadBalancerRuleInserter<>(createLoadBalancerAdapter(alb), maxPriority, maxRulesPerLoadBalancer);
+    }
+    
+    public static ALBRuleAdapter createRuleAdapter(Rule rule) {
         return new ALBRuleAdapter(rule);
     }
     
@@ -129,35 +134,37 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         return new ALBAdapter<ShardingKey>(alb);
     }
 
-    public List<RuleAdapter> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<RA> insertBefore, RA... rules) {
+    public List<RA> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<RA> insertBefore,
+            Iterable<RA> rules) {
         final Iterable<RA> existingRules = loadBalancerAdapter.getRules();
-        if (Util.size(existingRules)-1 + rules.length > maxPriority) { // -1 due to the default rule being part of existingRules
-            throw new IllegalArgumentException("The "+rules.length+" new rules won't find enough unused priority numbers because there are already "+
+        final int rulesSize = Util.size(rules);
+        if (Util.size(existingRules)-1 + rulesSize > maxPriority) { // -1 due to the default rule being part of existingRules
+            throw new IllegalArgumentException("The "+rulesSize+" new rules won't find enough unused priority numbers because there are already "+
                     (Util.size(existingRules)-1)+" of them and together they would exceed the maximum of "+maxPriority+" by "+
-                    (Util.size(existingRules)-1 + rules.length - maxPriority));
+                    (Util.size(existingRules)-1 + rulesSize - maxPriority));
         }
-        if (Util.size(existingRules) + rules.length > maxRulesParLoadBalancer) {
-            throw new IllegalArgumentException("The " + rules.length + " new rules would make the ALB " + loadBalancerAdapter.getName()
+        if (Util.size(existingRules) + rulesSize > maxRulesPerLoadBalancer) {
+            throw new IllegalArgumentException("The " + rulesSize + " new rules would make the ALB " + loadBalancerAdapter.getName()
                     + " exceed its maximum number of rules (" + maxPriority + ") by "
-                    + (Util.size(existingRules) + rules.length - maxRulesParLoadBalancer));
+                    + (Util.size(existingRules) + rulesSize - maxRulesPerLoadBalancer));
         }
-        final List<RA> result = new ArrayList<>(rules.length);
+        final List<RA> result = new ArrayList<>(rulesSize);
         final List<RA> sortedExistingNonDefaultRules = new ArrayList<>(Util.size(existingRules)-1);
         Util.addAll(Util.filter(existingRules, r->!r.isDefault()), sortedExistingNonDefaultRules);
         Collections.sort(sortedExistingNonDefaultRules, (r1, r2)->Integer.valueOf(r1.priority()).compareTo(Integer.valueOf(r2.priority())));
         final int stepwidth;
         if (forceContiguous) {
-            stepwidth = rules.length;
+            stepwidth = rulesSize;
         } else {
             stepwidth = 1;
         }
-        int rulesIndex = 0;
+        final Iterator<RA> rulesIterator = rules.iterator();
         int previousPriority = 0;
         final Iterator<RA> existingRulesIter = sortedExistingNonDefaultRules.iterator();
-        while (rulesIndex < rules.length) {
+        while (rulesIterator.hasNext()) {
             // find next available slot
             int nextPriority = maxPriority+1; // if no further rule exists, the usable gap ends after MAX_PRIORITY
-            final RA[] nextRule = new RA[1]; // using an array to make it final so we can access it inside the mapping function below
+            final RuleAdapter<?>[] nextRule = new RuleAdapter<?>[1]; // using an array to make it final so we can access it inside the mapping function below
             boolean stillLookingForRuleToInsertBefore = insertBefore.isPresent();
             while (existingRulesIter.hasNext() &&
                     ((nextPriority=Integer.valueOf((nextRule[0]=existingRulesIter.next()).priority())) <= previousPriority+stepwidth) ||
@@ -173,16 +180,16 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
                     previousPriority = squeezeExistingRulesAndReturnLastUsedPriority(sortedExistingNonDefaultRules);
                     nextPriority = maxPriority+1;
                     // we previously checked already that there is enough room for the new set of rules
-                    assert previousPriority + rules.length <= maxPriority;
+                    assert previousPriority + rulesSize <= maxPriority;
                 } else {
                     throw new IllegalStateException(
-                            "The " + rules.length + " new rules don't fit into the existing rule set of load balancer "
+                            "The " + rulesSize + " new rules don't fit into the existing rule set of load balancer "
                                     + loadBalancerAdapter.getName() + " without exceeding the maximum priority of " + maxPriority);
                 }
             }
-            while (rulesIndex < rules.length && ++previousPriority < nextPriority) {
+            while (rulesIterator.hasNext() && ++previousPriority < nextPriority) {
                 final int priorityToUseForNextRule = previousPriority;
-                result.add(rules[rulesIndex++].copyWithNewPriority(priorityToUseForNextRule));
+                result.add(rulesIterator.next().copyWithNewPriority(priorityToUseForNextRule));
             }
         }
         loadBalancerAdapter.addRules(result);
@@ -190,13 +197,12 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
     }
     
     private int squeezeExistingRulesAndReturnLastUsedPriority(final List<RA> sortedExistingNonDefaultRules) {
-        final List<Pair<Integer, RuleAdapter>> newPrioritiesForExistingRules = new LinkedList<>();
+        final List<Pair<Integer, RA>> newPrioritiesForExistingRules = new LinkedList<>();
         int priority = 0;
-        for (final RuleAdapter existingRule : sortedExistingNonDefaultRules) {
+        for (final RA existingRule : sortedExistingNonDefaultRules) {
             newPrioritiesForExistingRules.add(new Pair<>(++priority, existingRule));
         }
         loadBalancerAdapter.updateLoadBalancerListenerRulePriorities(newPrioritiesForExistingRules);
         return priority;
     }
-
 }

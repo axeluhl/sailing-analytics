@@ -1,11 +1,10 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -21,6 +20,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
+import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter.ALBRuleAdapter;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -208,74 +208,10 @@ implements ApplicationLoadBalancer<ShardingKey> {
 
     @Override
     public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<Rule> insertBefore, Rule... rules) {
-        // TODO bug5787: allow caller to specify an insertion point; either as an index or as a rule before which to insert
-        final Iterable<Rule> existingRules = getRules();
-        if (Util.size(existingRules)-1 + rules.length > MAX_PRIORITY) { // -1 due to the default rule being part of existingRules
-            throw new IllegalArgumentException("The "+rules.length+" new rules won't find enough unused priority numbers because there are already "+
-                    (Util.size(existingRules)-1)+" of them and together they would exceed the maximum of "+MAX_PRIORITY+" by "+
-                    (Util.size(existingRules)-1 + rules.length - MAX_PRIORITY));
-        }
-        if (Util.size(existingRules) + rules.length > MAX_RULES_PER_LOADBALANCER) {
-            throw new IllegalArgumentException("The " + rules.length + " new rules would make the ALB " + getName()
-                    + " exceed its maximum number of rules (" + MAX_PRIORITY + ") by "
-                    + (Util.size(existingRules) + rules.length - MAX_RULES_PER_LOADBALANCER));
-        }
-        final List<Rule> result = new ArrayList<>(rules.length);
-        final List<Rule> sortedExistingNonDefaultRules = new ArrayList<>(Util.size(existingRules)-1);
-        Util.addAll(Util.filter(existingRules, r->!r.isDefault()), sortedExistingNonDefaultRules);
-        Collections.sort(sortedExistingNonDefaultRules, (r1, r2)->Integer.valueOf(r1.priority()).compareTo(Integer.valueOf(r2.priority())));
-        final int stepwidth;
-        if (forceContiguous) {
-            stepwidth = rules.length;
-        } else {
-            stepwidth = 1;
-        }
-        int rulesIndex = 0;
-        int previousPriority = 0;
-        final Iterator<Rule> existingRulesIter = sortedExistingNonDefaultRules.iterator();
-        while (rulesIndex < rules.length) {
-            // find next available slot
-            int nextPriority = MAX_PRIORITY+1; // if no further rule exists, the usable gap ends after MAX_PRIORITY
-            final Rule[] nextRule = new Rule[1]; // using an array to make it final so we can access it inside the mapping function below
-            boolean stillLookingForRuleToInsertBefore = insertBefore.isPresent();
-            while (existingRulesIter.hasNext() &&
-                    ((nextPriority=Integer.valueOf((nextRule[0]=existingRulesIter.next()).priority())) <= previousPriority+stepwidth) ||
-                     (stillLookingForRuleToInsertBefore && (stillLookingForRuleToInsertBefore=insertBefore.map(rule->!rule.ruleArn().equals(nextRule[0].ruleArn())).orElse(false)))) {
-                // not enough space for stepwidth many rules; keep on searching
-                previousPriority = nextPriority;
-                if (!existingRulesIter.hasNext()) {
-                    nextPriority = MAX_PRIORITY+1;
-                }
-            }
-            if (previousPriority+stepwidth > MAX_PRIORITY) {
-                if (forceContiguous) {
-                    previousPriority = squeezeExistingRulesAndReturnLastUsedPriority(sortedExistingNonDefaultRules);
-                    nextPriority = MAX_PRIORITY+1;
-                    // we previously checked already that there is enough room for the new set of rules
-                    assert previousPriority + rules.length <= MAX_PRIORITY;
-                } else {
-                    throw new IllegalStateException(
-                            "The " + rules.length + " new rules don't fit into the existing rule set of load balancer "
-                                    + getName() + " without exceeding the maximum priority of " + MAX_PRIORITY);
-                }
-            }
-            while (rulesIndex < rules.length && ++previousPriority < nextPriority) {
-                final int priorityToUseForNextRule = previousPriority;
-                result.add(rules[rulesIndex++].copy(b->b.priority(""+priorityToUseForNextRule)));
-            }
-        }
-        addRules(result.toArray(new Rule[0]));
-        return result;
-    }
-
-    private int squeezeExistingRulesAndReturnLastUsedPriority(final List<Rule> sortedExistingNonDefaultRules) {
-        final List<RulePriorityPair> newPrioritiesForExistingRules = new LinkedList<>();
-        int priority = 0;
-        for (final Rule existingRule : sortedExistingNonDefaultRules) {
-            newPrioritiesForExistingRules.add(RulePriorityPair.builder().ruleArn(existingRule.ruleArn()).priority(++priority).build());
-        }
-        landscape.updateLoadBalancerListenerRulePriorities(getRegion(), newPrioritiesForExistingRules);
-        return priority;
+        final List<Rule> rulesAsList = Arrays.asList(rules);
+        return Util.map(LoadBalancerRuleInserter.create(this, MAX_PRIORITY, MAX_RULES_PER_LOADBALANCER).addRulesAssigningUnusedPriorities(
+                forceContiguous, insertBefore.map(LoadBalancerRuleInserter::createRuleAdapter),
+                Util.map(rulesAsList, LoadBalancerRuleInserter::createRuleAdapter)), ALBRuleAdapter::getRule);
     }
 
     @Override
