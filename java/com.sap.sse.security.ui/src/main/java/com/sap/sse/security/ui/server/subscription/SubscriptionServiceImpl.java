@@ -36,6 +36,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
@@ -224,11 +225,14 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
             isUserSubscribedToAllPlanCategories = true;
             hasHadSubscriptionForOneTimePlan = plan.getIsOneTimePlan();
         } else {
+            final Set<PlanCategory> categoriesRequired = new HashSet<>(plan.getPlanCategories());
             for (SubscriptionPlan subscriptionPlan : getSecurityService().getAllSubscriptionPlans().values()) {
-                if (isUserSubscribedToPlan(subscriptionPlan.getId())
-                        && Util.containsAny(plan.getPlanCategories(), subscriptionPlan.getPlanCategories())) {
-                    isUserSubscribedToAllPlanCategories = true;
-                    break;
+                if (isUserSubscribedToPlan(subscriptionPlan.getId())) {
+                    categoriesRequired.removeAll(subscriptionPlan.getPlanCategories());
+                    if (categoriesRequired.isEmpty()) {
+                        isUserSubscribedToAllPlanCategories = true;
+                        break;
+                    }
                 }
             }
             try {
