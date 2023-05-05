@@ -36,6 +36,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
@@ -218,34 +219,38 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
     
     protected SubscriptionPlanDTO convertToDto(SubscriptionPlan plan) {
         final boolean isUserSubscribedToPlan = isUserSubscribedToPlan(plan.getId());
-        boolean isUserSubscribedToPlanCategory = false;
+        boolean isUserSubscribedToAllPlanCategories = false;
         boolean hasHadSubscriptionForOneTimePlan;
-        if(isUserSubscribedToPlan) {
-            isUserSubscribedToPlanCategory = true;
+        if (isUserSubscribedToPlan) {
+            isUserSubscribedToAllPlanCategories = true;
             hasHadSubscriptionForOneTimePlan = plan.getIsOneTimePlan();
         } else {
+            final Set<PlanCategory> categoriesRequired = new HashSet<>(plan.getPlanCategories());
             for (SubscriptionPlan subscriptionPlan : getSecurityService().getAllSubscriptionPlans().values()) {
-                if(isUserSubscribedToPlan(subscriptionPlan.getId()) 
-                        && Util.containsAny(plan.getPlanCategories(), subscriptionPlan.getPlanCategories())) {
-                    isUserSubscribedToPlanCategory = true;
-                    break;
+                if (isUserSubscribedToPlan(subscriptionPlan.getId())) {
+                    categoriesRequired.removeAll(subscriptionPlan.getPlanCategories());
+                    if (categoriesRequired.isEmpty()) {
+                        isUserSubscribedToAllPlanCategories = true;
+                        break;
+                    }
                 }
             }
             try {
                 final User currentUser = getCurrentUser();
-                hasHadSubscriptionForOneTimePlan = currentUser.hasAnySubscription(plan.getId()) && plan.getIsOneTimePlan();
+                hasHadSubscriptionForOneTimePlan = currentUser.hasAnySubscription(plan.getId())
+                        && plan.getIsOneTimePlan();
             } catch (UserManagementException e) {
                 hasHadSubscriptionForOneTimePlan = false;
             }
         }
         final boolean disablePrice = hasHadSubscriptionForOneTimePlan;
-        Set<SubscriptionPrice> prices = new HashSet<>();
+        final Set<SubscriptionPrice> prices = new HashSet<>();
         plan.getPrices().forEach(price -> {
             price.setDisablePlan(disablePrice);
             prices.add(price);
         });
-        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, prices,
-                plan.getPlanCategories(), hasHadSubscriptionForOneTimePlan, isUserSubscribedToPlanCategory, null, plan.getGroup());
+        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, prices, plan.getPlanCategories(),
+                hasHadSubscriptionForOneTimePlan, isUserSubscribedToAllPlanCategories, null, plan.getGroup());
     }
 
     private boolean isUserSubscribedToPlan(String planId) {
