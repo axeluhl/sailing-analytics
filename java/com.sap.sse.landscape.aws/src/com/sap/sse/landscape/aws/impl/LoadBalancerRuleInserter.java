@@ -270,7 +270,7 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
      * @throws IllegalStateException
      *             gets thrown if shifting exceeds the limit of priorities
      */
-    private void shiftRulesToMakeSpaceAt(int targetPriority, int howManySlots) throws IllegalStateException {
+    public void shiftRulesToMakeSpaceAt(int targetPriority, int howManySlots) throws IllegalStateException {
         final Iterable<RA> rulesSorted = getRulesSortedByPriority();
         int minimumPriorityForNextRule = targetPriority + howManySlots;
         final List<Pair<Integer, RA>> result = new ArrayList<>();

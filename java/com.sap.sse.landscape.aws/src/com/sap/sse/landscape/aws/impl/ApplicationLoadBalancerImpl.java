@@ -32,7 +32,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActi
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 
 public class ApplicationLoadBalancerImpl<ShardingKey>
@@ -107,51 +106,6 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public Iterable<Rule> addRules(Rule... rulesToAdd) {
         return landscape.createLoadBalancerListenerRules(region, getListener(ProtocolEnum.HTTPS), rulesToAdd);
-    }
-    
-    /**
-     * Returns the priority if the priority is not higher than {@code MAX_PRIORITY}
-     * @param priority
-     *          requested priority
-     * @return  
-     *          Priority if it's valid
-     * @throws IllegalStateException
-     *          If the requested priority is higher than {@code MAX_PRIORITY}
-     */
-    private int checkNewPriority(int priority) throws IllegalStateException {
-        if (priority < MAX_PRIORITY) {
-            return priority;
-        } else {
-            throw new IllegalStateException("Priority was greater than " + MAX_PRIORITY +"!");
-        }
-    }
-    
-    @Override
-    public void shiftRulesToMakeSpaceAt(int targetPrio) throws IllegalStateException {
-        final Iterable<Rule> rules = getRules();
-        final TreeMap<Integer, Rule> rulesSorted = getRulesSorted(rules);
-        int lastPrio = targetPrio;
-        boolean skipNext = false;
-        final Collection<RulePriorityPair> result = new ArrayList<>();
-        if (rulesSorted.get(targetPrio) != null) {// if there is a rule on prio
-            for (Entry<Integer, Rule> entry : rulesSorted.entrySet()) {
-                final Integer priority = entry.getKey();
-                if (priority >= targetPrio && !skipNext) {
-                    // if prio is higher than target prio and is not supposed to be skipped
-                    if (priority - lastPrio > 0) {
-                        // if there is a gap between current prio and the last one. -> so this one is not supposed to be
-                        // skipped and every rule after this
-                        skipNext = true;
-                        break;
-                    } else {
-                        lastPrio = priority + 1;
-                        result.add(RulePriorityPair.builder().ruleArn(entry.getValue().ruleArn())
-                                .priority(checkNewPriority(lastPrio)).build());
-                    }
-                }
-            }
-            landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
-        }
     }
     
     @Override

@@ -27,6 +27,7 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -217,7 +218,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         Util.addAll(shardingKeys, shardingKeyForConsumption);
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         while (!shardingKeyForConsumption.isEmpty()) {
-            alb.shiftRulesToMakeSpaceAt(ruleIdx);
+            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY, ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
             final Set<ShardingKey> shardingKeysForNextRule = new HashSet<>();
             for (final Iterator<ShardingKey> i=shardingKeyForConsumption.iterator();
                     shardingKeysForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {

@@ -121,18 +121,6 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<Rule> insertBefore, Rule... rules);
     
     /**
-     * For inserting e.g. Shard at a specific priority, we must ensure that the priority is unique in the ruleset. This
-     * function shifts every priority starting at the highest priority one higher for making the priority at
-     * {@code index} free.
-     * 
-     * @param index
-     *            index supposed to be free
-     * @throws IllegalStateException
-     *             gets thrown if shifting exceeds the limit of priorities
-     */
-    void shiftRulesToMakeSpaceAt(int index) throws IllegalStateException;
-    
-    /**
      * Returns the priority which should be used as the next sharding priority.
      * @param hostname
      *          hostname of replica set from which the shard gets created
