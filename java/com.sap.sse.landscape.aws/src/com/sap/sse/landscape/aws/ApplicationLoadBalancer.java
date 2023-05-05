@@ -53,6 +53,8 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      */
     public static final int MAX_PRIORITY = 50000;
     
+    AwsLandscape<ShardingKey> getLandscape();
+    
     /**
      * The DNS name of this load balancer; can be used, e.g., to set a CNAME DNS record pointing
      * to this load balancer.
@@ -106,21 +108,17 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      * original order to the resulting sequence. Otherwise, the existing rules are "compressed" by re-numbering their
      * priorities to make space for the new rules at the end of the list.
      * 
+     * @param insertBefore
+     *            if empty, the new {@code rules} can be inserted anywhere in the list of rules; if a {@link Rule} is
+     *            specified and that rule is part of this ALB's {@link #getRules() rules},
+     *            {@link #shiftRulesToMakeSpaceAt(int) make space} at that point and insert the new {@code rules} there.
+     *            If the rule specified cannot be found in this ALB's {@link #getRules()}, an {@link IllegalArgumentException}
+     *            is thrown. The rules are compared by their {@link Rule#ruleArn() ARN}, not by their Java object identity.
+     * 
      * @return copies of the original rules, with unused {@link Rule#priority() priorities} assigned, as passed already
      *         to {@link #addRules(Rule...)}.
      */
-    Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules);
-    
-    /**
-     * For inserting e.g. Shard at a specific priority, we must ensure that the priority is unique in the ruleset.
-     * This function shifts every priority starting at the highest priority one higher for making the priority at {@code index}
-     * free. 
-     * @param index
-     *          index supposed to be free
-     * @throws IllegalStateException
-     *          gets thrown if shifting exceeds the limit of priorities
-     */
-    void shiftRulesToMakeSpaceAt(int index) throws IllegalStateException;
+    Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<Rule> insertBefore, Rule... rules);
     
     /**
      * Returns the priority which should be used as the next sharding priority.
