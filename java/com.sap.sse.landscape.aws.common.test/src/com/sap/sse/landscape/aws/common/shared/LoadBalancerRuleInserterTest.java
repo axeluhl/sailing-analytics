@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -127,6 +126,23 @@ public class LoadBalancerRuleInserterTest {
     }
 
     @Test
+    public void testContiguousInsertBeforeWithEnoughSpace() {
+        addRules(1, true, 1, 2);
+        loadBalancerAdapter.addRules(Arrays.asList(new TestRuleAdapter(/* isDefault */ false, 5, RULE_NAME_PREFIX+5)));
+        addRulesBefore(1, true, /* insert before: */ 5, /* insert rule numbers: */ 3, 4);
+        assertRuleOrder(1, 2, 3, 4, 5);
+    }
+
+    @Test
+    public void testNonContiguousInsertBeforeWithoutEnoughSpace() {
+        addRules(1, true, 1);
+        loadBalancerAdapter.addRules(Arrays.asList(new TestRuleAdapter(/* isDefault */ false, 3, RULE_NAME_PREFIX+3)));
+        loadBalancerAdapter.addRules(Arrays.asList(new TestRuleAdapter(/* isDefault */ false, 5, RULE_NAME_PREFIX+5)));
+        addRulesBefore(1, false, /* insert before: */ 5, /* insert rule numbers: */ 2, 4);
+        assertRuleOrder(1, 2, 3, 4, 5);
+    }
+
+   @Test
     public void testInsertInHole() {
         addRules(1, true, 1);
         loadBalancerAdapter.addRules(Arrays.asList(new TestRuleAdapter(/* isDefault */ false, 4, RULE_NAME_PREFIX+4)));
@@ -171,6 +187,17 @@ public class LoadBalancerRuleInserterTest {
         }
     }
     
+    @Test
+    public void testExceptionForRuleToInsertBeforeNotFound() {
+        addRules(1, true, 1);
+        try {
+            addRulesBefore(1, true, Optional.of(new TestRuleAdapter(/* isDefault */ false, 2, RULE_NAME_PREFIX+2)), 2);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+    
     private void addRules(int priority, boolean forceContiguous, Integer... ruleNumbers) {
         addRulesBefore(priority, forceContiguous, /* insertBefore */ Optional.empty(), ruleNumbers);
     }
@@ -192,7 +219,7 @@ public class LoadBalancerRuleInserterTest {
     }
 
     private Iterable<TestRuleAdapter> getRulesSortedByPriority() {
-        return Util.stream(loadBalancerAdapter.getRules()).sorted((r1, r2)->Integer.compare(Integer.valueOf(r1.priority()), Integer.valueOf(r2.priority())))::iterator;
+        return ruleInserter.getRulesSortedByPriority();
     }
     
     private void assertUniqueAscendingPriorities() {

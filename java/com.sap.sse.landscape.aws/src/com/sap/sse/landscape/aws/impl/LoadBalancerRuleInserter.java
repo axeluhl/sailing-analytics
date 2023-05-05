@@ -134,10 +134,48 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         return new ALBAdapter<ShardingKey>(alb);
     }
 
+    /**
+     * As the rule {@link Rule#priority() priorities} within a load balancer's listener have to be unique, this method
+     * supports adding rules by assigning yet unused priorities to them. It keeps the order in which the {@code rules}
+     * are passed. If {@code forceContiguous} is {@code false}, for each rule the next available priority is chosen and
+     * assigned by creating a copy of the {@link Rule} object and adding it to the resulting sequence. This can lead to
+     * existing rules interleaving with the rules to add while ensuring that the {@code rules} have priorities in
+     * numerically ascending order, consistent with the order in which they were passed to this method.
+     * <p>
+     * 
+     * If {@code forceContiguous} is {@code true}, the rules that result will have contiguously increasing priority
+     * values, hence not interleaving with other existing rules. If there are enough contiguous unused priorities
+     * available, they are selected and assigned by creating copies of the {@link Rule} objects and adding them in their
+     * original order to the resulting sequence. Otherwise, the existing rules are "compressed" by re-numbering their
+     * priorities to make space for the new rules at the end of the list.
+     * 
+     * @param forceContiguous
+     *            if {@code true}, the {@code rules} must be inserted as a contiguous sequence in the overall sequence
+     *            of rules ordered by priority; otherwise it is permissible to look for unused priorities anywhere along
+     *            the sequence and to use existing gaps in the priority sequence, possibly separating the {@code rules}
+     *            into one or more sub-sequences scattered throughout the resulting rules sequence
+     * @param insertBefore
+     *            if empty, the new {@code rules} can be inserted anywhere in the list of rules, of course adhering to
+     *            the {@code forceContiguous} rules explained above; if a {@link RuleAdapter} is specified and that rule
+     *            is part of this ALB's {@link LoadBalancerAdapter#getRules() rules}, find unused priorities before that
+     *            rule according to the {@code forceContiguous} rules, and if necessary
+     *            {@link #shiftRulesToMakeSpaceAt(int) make space} at that point and insert the {@code rules} rules not
+     *            yet inserted prior to that point there. If the rule specified cannot be found in this ALB's
+     *            {@link #getRules()}, an {@link IllegalArgumentException} is thrown. The rules are compared by their
+     *            {@link Rule#ruleArn() ARN}, not by their Java object identity.
+     * 
+     * @return {@link RuleAdapter#copyWithNewPriority(int) copies} of the original rules, with unused
+     *         {@link RuleAdapter#priority() priorities} assigned, as passed already to
+     *         {@link LoadBalancerAdapter#addRules(List)}.
+     */
     public List<RA> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<RA> insertBefore,
             Iterable<RA> rules) {
         final Iterable<RA> existingRules = loadBalancerAdapter.getRules();
+        if (insertBefore.isPresent() && !Util.contains(Util.map(existingRules, RuleAdapter::ruleArn), insertBefore.get().ruleArn())) {
+            throw new IllegalArgumentException("Didn't find rule to insert before: "+insertBefore.get());
+        }
         final int rulesSize = Util.size(rules);
+        int remainingNumberOfRulesToAdd = rulesSize;
         if (Util.size(existingRules)-1 + rulesSize > maxPriority) { // -1 due to the default rule being part of existingRules
             throw new IllegalArgumentException("The "+rulesSize+" new rules won't find enough unused priority numbers because there are already "+
                     (Util.size(existingRules)-1)+" of them and together they would exceed the maximum of "+maxPriority+" by "+
@@ -161,19 +199,28 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         final Iterator<RA> rulesIterator = rules.iterator();
         int previousPriority = 0;
         final Iterator<RA> existingRulesIter = sortedExistingNonDefaultRules.iterator();
+        boolean foundRuleToInsertBefore = false;
         while (rulesIterator.hasNext()) {
             // find next available slot
             int nextPriority = maxPriority+1; // if no further rule exists, the usable gap ends after MAX_PRIORITY
             final RuleAdapter<?>[] nextRule = new RuleAdapter<?>[1]; // using an array to make it final so we can access it inside the mapping function below
-            boolean stillLookingForRuleToInsertBefore = insertBefore.isPresent();
+            // search for space until
+            //  - we reach the end of the existing rules list, or
             while (existingRulesIter.hasNext() &&
-                    ((nextPriority=Integer.valueOf((nextRule[0]=existingRulesIter.next()).priority())) <= previousPriority+stepwidth) ||
-                     (stillLookingForRuleToInsertBefore && (stillLookingForRuleToInsertBefore=insertBefore.map(rule->!rule.ruleArn().equals(nextRule[0].ruleArn())).orElse(false)))) {
+            //  - we find enough space, or
+                    ((nextPriority=Integer.valueOf((nextRule[0]=existingRulesIter.next()).priority())) <= previousPriority+stepwidth) &&
+            //  - the rule before which all new rules must be inserted is found
+                    (!insertBefore.isPresent() || !(foundRuleToInsertBefore=insertBefore.map(rule->rule.ruleArn().equals(nextRule[0].ruleArn())).orElse(false)))) {
                 // not enough space for stepwidth many rules; keep on searching
                 previousPriority = nextPriority;
                 if (!existingRulesIter.hasNext()) {
                     nextPriority = maxPriority+1;
                 }
+            }
+            if (foundRuleToInsertBefore) {
+                // We must insert all remaining rules from rulesIterator here, making space if necessary
+                shiftRulesToMakeSpaceAt(nextPriority, remainingNumberOfRulesToAdd);
+                nextPriority += remainingNumberOfRulesToAdd;
             }
             if (previousPriority+stepwidth > maxPriority) {
                 if (forceContiguous) {
@@ -190,6 +237,7 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
             while (rulesIterator.hasNext() && ++previousPriority < nextPriority) {
                 final int priorityToUseForNextRule = previousPriority;
                 result.add(rulesIterator.next().copyWithNewPriority(priorityToUseForNextRule));
+                remainingNumberOfRulesToAdd--;
             }
         }
         loadBalancerAdapter.addRules(result);
@@ -204,5 +252,40 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         }
         loadBalancerAdapter.updateLoadBalancerListenerRulePriorities(newPrioritiesForExistingRules);
         return priority;
+    }
+    
+    public Iterable<RA> getRulesSortedByPriority() {
+        return Util.stream(loadBalancerAdapter.getRules()).sorted((r1, r2)->Integer.compare(Integer.valueOf(r1.priority()), Integer.valueOf(r2.priority())))::iterator;
+    }
+
+    /**
+     * For inserting rules before some other rule we may need to shift other rules' priorities to make enough space in
+     * the sequence of ascending unique priorities. This function shifts every priority starting at the highest priority
+     * one higher for making the priority at {@code targetPrio} free.
+     * 
+     * @param targetPriority
+     *            index supposed to be free
+     * @param howManySlots
+     *            tells how many free slots are needed; must be greater than or equal to 1
+     * @throws IllegalStateException
+     *             gets thrown if shifting exceeds the limit of priorities
+     */
+    private void shiftRulesToMakeSpaceAt(int targetPriority, int howManySlots) throws IllegalStateException {
+        final Iterable<RA> rulesSorted = getRulesSortedByPriority();
+        int minimumPriorityForNextRule = targetPriority + howManySlots;
+        final List<Pair<Integer, RA>> result = new ArrayList<>();
+        for (final RA rule : rulesSorted) {
+            final int priority = Integer.valueOf(rule.priority());
+            final int newPriorityForRule;
+            // if targetPriority not reached or rule priority is already greater than required then the rule can be copied unchanged:
+            if (priority < targetPriority || priority >= minimumPriorityForNextRule) {
+                newPriorityForRule = priority;
+            } else {
+                newPriorityForRule = minimumPriorityForNextRule;
+                minimumPriorityForNextRule = newPriorityForRule + 1;
+            }
+            result.add(new Pair<>(newPriorityForRule, rule));
+        }
+        loadBalancerAdapter.updateLoadBalancerListenerRulePriorities(result);
     }
 }
