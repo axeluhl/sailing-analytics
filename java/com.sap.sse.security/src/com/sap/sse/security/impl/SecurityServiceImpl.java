@@ -1962,6 +1962,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
             result = createActionReturningCreatedObject.call();
         } catch (AuthorizationException e) {
+            logger.warning("Unauthorized request to create user with name \""+username+"\": "+e.getMessage());
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
