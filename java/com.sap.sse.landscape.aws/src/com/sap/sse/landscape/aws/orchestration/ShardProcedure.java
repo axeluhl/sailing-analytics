@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -26,6 +27,7 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -216,7 +218,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         Util.addAll(shardingKeys, shardingKeyForConsumption);
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         while (!shardingKeyForConsumption.isEmpty()) {
-            alb.shiftRulesToMakeSpaceAt(ruleIdx);
+            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY, ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
             final Set<ShardingKey> shardingKeysForNextRule = new HashSet<>();
             for (final Iterator<ShardingKey> i=shardingKeyForConsumption.iterator();
                     shardingKeysForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {
@@ -251,7 +253,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         final int requiredRules = numberOfRequiredRules(Util.size(shardingKeys))
                 + (existingShardingRules + /* 5 std rules per replica set */ NUMBER_OF_RULES_PER_REPLICA_SET);
         final ApplicationLoadBalancer<ShardingKey> res;
-        if (Util.size(replicaSet.getLoadBalancerRules())
+        if (Util.size(replicaSet.getLoadBalancer().getRules())
                 + numberOfRequiredRules(Util.size(shardingKeys)) < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
             res = replicaSet.getLoadBalancer();
         } else {
@@ -261,7 +263,8 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             final Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancersFiltered = Util.filter(loadBalancers,
                     t -> {
                         try {
-                            return !t.getArn().equals(replicaSet.getLoadBalancer().getArn());
+                            return t.getVpcId().equals(replicaSet.getLoadBalancer().getVpcId())
+                                    && !t.getArn().equals(replicaSet.getLoadBalancer().getArn());
                         } catch (InterruptedException | ExecutionException e) {
                             logger.log(Level.WARNING, "Exception while trying to obtain a load balancer's ARN", e);
                             throw new RuntimeException(e);
@@ -374,8 +377,8 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             Collection<TargetGroup<ShardingKey>> originalTargetGroups,
             Map<TargetGroup<ShardingKey>, Iterable<ShardingKey>> shardingKeysPerTargetGroup) throws Exception {
         targetAlb
-                .addRulesAssigningUnusedPriorities(true,
-                        createRules(targetAlb, replicaSet.getHostname(),
+                .addRulesAssigningUnusedPriorities(/* forceContiguous */ true,
+                        Optional.empty(), createRules(targetAlb, replicaSet.getHostname(),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getMasterTargetGroup()),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getPublicTargetGroup())))
                 .forEach(t -> tempRules.add(t));

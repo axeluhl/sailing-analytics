@@ -20,7 +20,7 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
     private Boolean isUserSubscribedToPlan;
     private Set<PlanCategory> planCategory;
     private Boolean userWasAlreadySubscribedToOneTimePlan;
-    private Boolean isUserSubscribedToPlanCategory;
+    private Boolean isUserSubscribedToAllPlanCategories;
     private PlanGroup group;
 
     /**
@@ -32,12 +32,12 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
 
     public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices,
             Set<PlanCategory> planCategory, boolean userWasAlreadySubscribedToOneTimePlan,
-            boolean isUserSubscribedToPlanCategory, String error, PlanGroup group) {
+            boolean isUserSubscribedToAllPlanCategories, String error, PlanGroup group) {
         this.id = id;
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
         this.planCategory = planCategory;
         this.userWasAlreadySubscribedToOneTimePlan = userWasAlreadySubscribedToOneTimePlan;
-        this.isUserSubscribedToPlanCategory = isUserSubscribedToPlanCategory;
+        this.isUserSubscribedToAllPlanCategories = isUserSubscribedToAllPlanCategories;
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.error = error;
         this.group = group;
@@ -81,8 +81,8 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
         return prices;
     }
 
-    public boolean isUserSubscribedToPlanCategory() {
-        return isUserSubscribedToPlanCategory;
+    public boolean isUserSubscribedToAllPlanCategories() {
+        return isUserSubscribedToAllPlanCategories;
     }
 
     public void setError(String error) {

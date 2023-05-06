@@ -91,7 +91,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                 } else {
                                     groupDTO = new SubscriptionGroupDTO(plan.getGroup().getId(),
                                             plan.isUserSubscribedToPlan(), plan.getPrices(), plan.getGroup(),
-                                            plan.isUserSubscribedToPlanCategory(), plan.getError(), type);
+                                            plan.isUserSubscribedToAllPlanCategories(), plan.getError(), type);
                                     groupMap.put(plan.getGroup(), groupDTO);
                                 }
                             });
@@ -147,7 +147,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     }
     
     private boolean checkIfUserIsSubscribedToPlanCategory(final SubscriptionPlanDTO plan) {
-        return plan.isUserSubscribedToPlanCategory();
+        return plan.isUserSubscribedToAllPlanCategories();
     }
     
     private boolean checkIfUserWasAlreadySubscripedToOneTimePlan(final SubscriptionPlanDTO plan) {
