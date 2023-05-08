@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
@@ -14,6 +16,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * Represents a remote instance of a server process or an entire application replica set with a master and zero or more
@@ -97,4 +100,30 @@ public interface SecuredServer {
     UUID createUserGroupAndAddCurrentUser(String serverGroupName) throws ClientProtocolException, IOException, ParseException, IllegalAccessException;
 
     Iterable<String> getNamesOfUsersInGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
+
+    /**
+     * Obtains the access control lists defined for the object identified by {@code type} and
+     * {@code typeRelativeObjectId}.
+     * 
+     * @return a valid, non-{@code null} map which may be empty. It does support the {@code null} key which then means
+     *         the "<Any>" virtual group of which implicitly all users are a member. The keys of the map returned identify
+     *         {@link UserGroup} objects, the value sets contain the names of the actions allowed/disallowed for the group
+     *         identified by the corresponding key. Disallowed actions are indicated by a leading exclamation mark, as in
+     *         {@code "!UPDATE"}.
+     */
+    Map<UUID, Set<String>> getAccessControlLists(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId)
+            throws ClientProtocolException, IOException, ParseException;
+
+    /**
+     * Updates the access control lists for the object identified by {@code type} and {@code typeRelativeObjectId}.
+     * 
+     * @param actionsPerGroup
+     *            a valid, non-{@code null} map which may be empty. It does support the {@code null} key which then
+     *            means the "<Any>" virtual group of which implicitly all users are a member. The keys of the map
+     *            returned identify {@link UserGroup} objects, the value sets contain the names of the actions
+     *            allowed/disallowed for the group identified by the corresponding key. Disallowed actions are indicated
+     *            by a leading exclamation mark, as in {@code "!UPDATE"}.
+     */
+    void setAccessControlLists(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId,
+            Map<UUID, Set<String>> actionsPerGroup) throws ClientProtocolException, IOException, ParseException;
 }

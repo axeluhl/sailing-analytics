@@ -8,7 +8,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -149,6 +151,39 @@ public class SecuredServerImpl implements SecuredServer {
         groupId.map(gid->ownershipJson.put(OwnershipResource.KEY_GROUP_ID, gid.toString()));
         displayName.map(dn->ownershipJson.put(OwnershipResource.KEY_DISPLAY_NAME, dn));
         final HttpEntity entity = new StringEntity(ownershipJson.toJSONString(), "UTF-8");
+        putRequest.setHeader(HTTP.CONTENT_TYPE, "application/json");
+        putRequest.setEntity(entity);
+        authenticate(putRequest);
+        final CloseableHttpResponse response = createHttpClient().execute(putRequest);
+        if (response.getStatusLine().getStatusCode() >= 300) {
+            throw new IllegalArgumentException(response.getStatusLine().getReasonPhrase());
+        }
+    }
+    
+    @Override
+    public Map<UUID, Set<String>> getAccessControlLists(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId) throws ClientProtocolException, IOException, ParseException {
+        final URL getGroupAndUserOwnerUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + OwnershipResource.RESTSECURITY_OWNERSHIP
+                + "/" + type.getName() + "/" + typeRelativeObjectId.toString() + "/" + OwnershipResource.KEY_ACL);
+        final HttpGet getRequest = new HttpGet(getGroupAndUserOwnerUrl.toString());
+        final JSONObject aclJson = (JSONObject) getJsonParsedResponse(getRequest).getA();
+        // TODO implement SecuredServerImpl.getAccessControlList
+        return null;
+    }
+    
+    @Override
+    public void setAccessControlLists(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId,
+            Map<UUID, Set<String>> actionsPerGroup) throws ClientProtocolException, IOException, ParseException {
+        final URL setGroupAndUserOwnerUrl = new URL(getBaseUrl(),
+                SECURITY_API_PREFIX + OwnershipResource.RESTSECURITY_OWNERSHIP + "/"
+                        + type.getName() + "/" + typeRelativeObjectId.toString() + "/" + OwnershipResource.KEY_ACL);
+        final HttpPut putRequest = new HttpPut(setGroupAndUserOwnerUrl.toString());
+        final JSONObject aclJson = new JSONObject();
+        // TODO implement SecuredServerImpl.setAccessControlList
+        int TODO;
+//        username.map(un->ownershipJson.put(OwnershipResource.KEY_USERNAME, un));
+//        groupId.map(gid->ownershipJson.put(OwnershipResource.KEY_GROUP_ID, gid.toString()));
+//        displayName.map(dn->ownershipJson.put(OwnershipResource.KEY_DISPLAY_NAME, dn));
+        final HttpEntity entity = new StringEntity(aclJson.toJSONString(), "UTF-8");
         putRequest.setHeader(HTTP.CONTENT_TYPE, "application/json");
         putRequest.setEntity(entity);
         authenticate(putRequest);
