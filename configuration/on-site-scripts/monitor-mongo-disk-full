@@ -1,7 +1,0 @@
-#!/bin/bash
-WARN_THRESHOLD_PERCENT=80
-mongo_volume_fill=$( ssh ec2-user@tokyo-ssh.sapsailing.com df /var/lib/mongo | awk '{ print $5; }' | tail -n 1 | sed -e 's/%$//' )
-if [ ${mongo_volume_fill} -gt ${WARN_THRESHOLD_PERCENT} ]; then
-  subjectAndBody="MongoDB volume on tokyo-ssh.sapsailing.com almost full; currently at ${mongo_volume_fill}%"
-  echo "${subjectAndBody}" | notify-operators "${subjectAndBody}"
-fi

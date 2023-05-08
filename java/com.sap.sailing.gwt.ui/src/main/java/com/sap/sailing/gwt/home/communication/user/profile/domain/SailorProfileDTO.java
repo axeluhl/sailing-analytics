@@ -30,6 +30,7 @@ public class SailorProfileDTO implements Result, Serializable {
     private ArrayList<BadgeDTO> badges = new ArrayList<>();
     private ArrayList<BoatClassDTO> boatclasses = new ArrayList<>();
 
+    @Deprecated //Used for GWT serialization only.
     protected SailorProfileDTO() {
 
     }

@@ -423,15 +423,21 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String name, Region region);
 
     /**
-     * Creates an application load balancer with the name and in the region specified. The method returns once the request
-     * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
-     * to find out more.<p>
+     * Creates an application load balancer with the name and in the region specified. The method returns once the
+     * request has been responded to. The load balancer may still be in a pre-ready state. Use
+     * {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)} to find out more.
+     * <p>
      * 
-     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port 443 with host, path, and query
-     * left unchanged; and an HTTPS listener that forwards to a default target group to which the default central reverse proxy of the {@code region}
-     * is added as a target.
+     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port
+     * 443 with host, path, and query left unchanged; and an HTTPS listener that forwards to a default target group to
+     * which the default central reverse proxy of the {@code region} is added as a target.
+     * 
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region) throws InterruptedException, ExecutionException;
+    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException;
 
     Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb);
 
@@ -477,15 +483,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}. The
      * protocol (HTTP or HTTPS) is inferred from the port: 443 means HTTPS; anything else means HTTP.
-     * 
      * @param loadBalancerArn
      *            will be set as the resulting target group's {@link TargetGroup#getLoadBalancerArn() load balancer
      *            ARN}. This is helpful if you already know to which load balancer you will add rules in a moment that
      *            will forward to this target group. Just created, the target group's load balancer ARN in AWS will still
      *            be {@code null}, so cannot be discovered.
+     * @param vpcId if {@code null}, the {@code region}'s default VPC will be used
      */
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
-            String healthCheckPath, int healthCheckPort, String loadBalancerArn);
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId);
     /**
      * Copies a target group from an existing target group. The name gets extended with {@code suffix}
      * @param parent 
@@ -564,6 +570,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     SecurityGroup getSecurityGroup(String securityGroupId, Region region);
 
+    Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, Region region);
+
     void addTargetsToTargetGroup(
             TargetGroup<ShardingKey> targetGroup,
             Iterable<AwsInstance<ShardingKey>> targets);
@@ -605,9 +613,14 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * only a wildcard DNS record exists for the domain. There is a naming rule in place such that
      * {@link #getNonDNSMappedLoadBalancer(Region, String)}, when called with an equal {@code wildcardDomain} and
      * {@code region}, will deliver the load balancer created by this call.
+     * 
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain) throws InterruptedException, ExecutionException;
-    
+    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException;
+
     /**
      * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
      * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
@@ -796,7 +809,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     void updateInstanceTypeInAutoScalingGroup(Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, InstanceType instanceType);
 
-    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
+    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port, String vpcId);
     
     /**
      * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the auto-scaling group

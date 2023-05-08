@@ -1,0 +1,17 @@
+127.0.0.1	localhost
+127.0.0.1	security-service.sapsailing.com
+127.0.1.1	sap-p1-2 sap-p1-2.sapsailing.com
+10.1.3.195	sap-p1-1 sap-p1-1.sapsailing.com
+#10.94.81.137	sap-p1-1 sap-p1-1.sapsailing.com
+127.0.0.1	paris2024-master.sapsailing.com
+127.0.0.1	www.sapsailing.com
+# TracTrac on-site servers
+10.1.1.104      stso1
+10.1.1.105      stso2
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters

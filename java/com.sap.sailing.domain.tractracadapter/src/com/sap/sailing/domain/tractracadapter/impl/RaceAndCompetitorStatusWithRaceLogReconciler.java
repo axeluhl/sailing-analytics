@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sse.common.TimePoint;
@@ -241,8 +242,12 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         RaceLogFlagEvent abortingFlagEvent = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             if (abortingFlagEvent == null) {
-                final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
-                abortingFlagEvent = abortingFlagFinder.analyze();
+                final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(trackedRace.getRaceLogResolver(), raceLog);
+                final RaceLogRaceStatus status = raceState.getStatus();
+                if (status.isAbortingFlagFromPreviousPassValid()) {
+                    final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+                    abortingFlagEvent = abortingFlagFinder.analyze();
+                }
             }
         }
         final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);

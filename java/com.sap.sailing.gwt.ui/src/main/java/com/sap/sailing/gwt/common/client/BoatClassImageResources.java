@@ -432,6 +432,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource International14Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IMOCA.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource ImocaIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_MEN.png")
     @ImageOptions(preventInlining = true)
     ImageResource IQFOilMenIcon();
@@ -595,6 +599,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VARIANTA.png")
     @ImageOptions(preventInlining = true)
     ImageResource VariantaIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VO.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource VOIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/X_99.png")
     @ImageOptions(preventInlining = true)

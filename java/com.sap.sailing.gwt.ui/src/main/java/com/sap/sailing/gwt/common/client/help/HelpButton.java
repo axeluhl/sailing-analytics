@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.common.client.help;
 
 import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 
@@ -8,6 +9,10 @@ public class HelpButton extends Composite {
     private final Image icon;
     private final HelpButtonPopup popup;
 
+    public @UiConstructor HelpButton(final String description, final String url) {
+        this(HelpButtonResources.INSTANCE, description, url);
+    }
+    
     public HelpButton(final HelpButtonResources resources, final String description, final String url) {
         resources.style().ensureInjected();
         this.icon = new Image(resources.icon());

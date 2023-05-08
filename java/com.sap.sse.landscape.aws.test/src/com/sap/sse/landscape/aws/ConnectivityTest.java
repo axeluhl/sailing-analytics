@@ -467,7 +467,8 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     @Test
     public void createEmptyLoadBalancerTest() throws InterruptedException, ExecutionException {
         final String albName = "MyAlb"+new Random().nextInt();
-        final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region);
+        final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region,
+                /* securityGroupForVpc null means use default VPC which is OK for this test */ null);
         try {
             assertNotNull(alb);
             assertEquals(albName, alb.getName());
@@ -491,7 +492,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
         final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, ApplicationProcess.HEALTH_CHECK_PATH, 80,
-                /* loadBalancerArn */ null);
+                /* loadBalancerArn */ null, /* vpcId */ null);
         try {
             final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,
                     targetGroup.getTargetGroupArn(), targetGroup.getLoadBalancerArn(), targetGroup.getProtocol(),

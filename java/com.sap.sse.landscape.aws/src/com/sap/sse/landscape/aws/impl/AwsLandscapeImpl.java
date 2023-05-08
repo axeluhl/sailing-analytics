@@ -48,8 +48,6 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaSet;
-import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -199,6 +197,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
+    private static final String SAILING_APP_SECURITY_GROUP_NAME = "Sailing Analytics App";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final Optional<String> sessionToken;
@@ -319,11 +318,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region) throws InterruptedException, ExecutionException {
+    public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException {
         Region awsRegion = getRegion(region);
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
         final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
-        final SubnetMapping[] subnetMappings = Util.toArray(Util.map(getSubnetsForAvailabilityZones(awsRegion, availabilityZones),
+        final SubnetMapping[] subnetMappings = Util.toArray(Util.map(getSubnetsForAvailabilityZones(awsRegion, availabilityZones, securityGroupForVpc),
                 subnet->SubnetMapping.builder().subnetId(subnet.subnetId()).build()), new SubnetMapping[0]);
         final CreateLoadBalancerResponse response = client
                 .createLoadBalancer(CreateLoadBalancerRequest.builder()
@@ -340,6 +340,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         createLoadBalancerHttpListener(result);
         createLoadBalancerHttpsListener(result);
         return result;
+    }
+    
+    private Subnet getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(AwsAvailabilityZone az, SecurityGroup securityGroup, Region region) {
+        final Ec2Client ec2Client = getEc2Client(region);
+        final String vpcId = ec2Client.describeSecurityGroups(b->b.groupIds(securityGroup.getId())).securityGroups().iterator().next().vpcId();
+        return ec2Client.describeSubnets(b->b.filters(
+                Filter.builder().name("vpc-id").values(vpcId).build(),
+                Filter.builder().name("availability-zone-id").values(az.getId()).build()))
+                .subnets().iterator().next();
     }
     
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -391,7 +400,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn());
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId());
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -505,10 +514,19 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     /**
      * Grabs all subnets that are default subnet for any of the availability zones specified
+     * <p>
+     * 
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs) {
-        return Util.filter(getEc2Client(region).describeSubnets().subnets(), subnet -> subnet.defaultForAz()
-                && Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId()));
+    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs, SecurityGroup securityGroupForVpc) {
+        final Ec2Client ec2Client = getEc2Client(region);
+        final Optional<String> vpcId = Optional.ofNullable(securityGroupForVpc).map(
+                sg->ec2Client.describeSecurityGroups(b->b.groupIds(sg.getId())).securityGroups().get(0).vpcId());
+        return Util.filter(ec2Client.describeSubnets().subnets(),
+                subnet -> vpcId.map(i->i.equals(subnet.vpcId())).orElse(subnet.defaultForAz()) &&
+                          Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId()));
     }
 
     @Override
@@ -918,13 +936,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes() {
-        // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)
-        return null;
-    }
-    
-    @Override
     public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, HostT> hostSupplier,
             int numberOfHostsToLaunch, MachineImage fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
@@ -933,14 +944,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                     " with image "+fromImage+" that lives in region "+fromImage.getRegion()+" which is different."+
                     " Consider copying the image to that region.");
         }
+        final Ec2Client ec2Client = getEc2Client(getRegion(az.getRegion()));
         final Builder runInstancesRequestBuilder = RunInstancesRequest.builder()
             .additionalInfo("Test " + getClass().getName())
             .imageId(fromImage.getId().toString())
             .minCount(numberOfHostsToLaunch)
             .maxCount(numberOfHostsToLaunch)
             .instanceType(instanceType).keyName(keyName)
+            .subnetId(getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroups.iterator().next(), getRegion(az.getRegion())).subnetId())
             .placement(Placement.builder().availabilityZone(az.getName()).build())
-            .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId()));
+            .securityGroupIds(Util.mapToArrayList(securityGroups, SecurityGroup::getId));
         if (userData != null) {
             runInstancesRequestBuilder.userData(Base64.getEncoder().encodeToString(String.join("\n", userData).getBytes()));
         }
@@ -950,7 +963,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         });
         final RunInstancesRequest launchRequest = runInstancesRequestBuilder.build();
         logger.info("Launching instance(s): "+launchRequest);
-        final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
+        final RunInstancesResponse response = ec2Client.runInstances(launchRequest);
         final List<HostT> result = new ArrayList<>();
         for (final Instance instance : response.instances()) {
             try {
@@ -1022,7 +1035,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
-            String healthCheckPath, int healthCheckPort, String loadBalancerArn) {
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
                 loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
@@ -1036,7 +1049,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .healthCheckPort(""+healthCheckPort)
                 .healthCheckProtocol(guessProtocolFromPort(healthCheckPort))
                 .port(port)
-                .vpcId(getVpcId(region))
+                .vpcId(vpcId == null ? getVpcId(region) : vpcId)
                 .protocol(guessProtocolFromPort(port))
                 .targetType(TargetTypeEnum.INSTANCE)
                 .build()).targetGroups().iterator().next();
@@ -1073,6 +1086,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return healthCheckPort == 443 ? ProtocolEnum.HTTPS : ProtocolEnum.HTTP;
     }
     
+    /**
+     * Finds the ID of the "default" VPC in the {@code region} specified. If there is no such default VPC in that {@code region},
+     * an {@link IllegalStateException} will be thrown.
+     */
     private String getVpcId(com.sap.sse.landscape.Region region) {
         Vpc vpc = getEc2Client(getRegion(region)).describeVpcs().vpcs().stream().filter(myVpc->myVpc.isDefault()).findAny().
                 orElseThrow(()->new IllegalStateException("No default VPC found in region "+region));
@@ -1126,6 +1143,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
+    public Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, com.sap.sse.landscape.Region region) {
+        final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> securityGroups = getEc2Client(getRegion(region)).describeSecurityGroups(
+                sg->sg.filters(Filter.builder().name("tag:Name").values(securityGroupName).build())).securityGroups();
+        return securityGroups.stream().findFirst().map(sg->()->sg.groupId());
+    }
+
+    @Override
     public void addTargetsToTargetGroup(
             TargetGroup<ShardingKey> targetGroup,
             Iterable<AwsInstance<ShardingKey>> targets) {
@@ -1167,16 +1191,17 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
-        final SecurityGroup result;
-        // TODO find a better way, e.g., by tagging, to identify the security group per region to use for application hosts
-        if (region.getId().equals(Region.EU_WEST_1.id())) {
-            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
-        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
-            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
-        } else {
-            result = null;
-        }
-        return result;
+        return getSecurityGroupByName(SAILING_APP_SECURITY_GROUP_NAME, region).orElseGet(()->{
+            final SecurityGroup result;
+            if (region.getId().equals(Region.EU_WEST_1.id())) {
+                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
+            } else if (region.getId().equals(Region.EU_WEST_2.id())) {
+                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
+            } else {
+                result = null;
+            }
+            return result;
+        });
     }
 
     @Override
@@ -1211,8 +1236,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(
-            com.sap.sse.landscape.Region region, String wildcardDomain) throws InterruptedException, ExecutionException {
-        return createLoadBalancer(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
+            com.sap.sse.landscape.Region region, String wildcardDomain, SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException {
+        return createLoadBalancer(getNonDNSMappedLoadBalancerName(wildcardDomain), region, securityGroupForVpc);
     }
 
     private String getNonDNSMappedLoadBalancerName(String wildcardDomain) {
@@ -1928,18 +1953,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
             int minReplicas, int maxReplicas, int maxRequestsPerTarget) {
         logger.info("Creating launch configuration for replica set "+replicaSetName);
-        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final Region awsRegion = getRegion(region);
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(awsRegion);
         final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
         final String launchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         final String autoScalingGroupName = getAutoScalingGroupName(replicaSetName);
         final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final SecurityGroup securityGroup = getDefaultSecurityGroupForApplicationHosts(region);
         final int instanceWarmupTimeInSeconds = (int) Duration.ONE_MINUTE.times(3).asSeconds();
         autoScalingClient.createLaunchConfiguration(b->b
                 .launchConfigurationName(launchConfigurationName)
                 .keyName(keyName)
                 .imageId(imageId)
                 .instanceMonitoring(i->i.enabled(true))
-                .securityGroups(getDefaultSecurityGroupForApplicationHosts(region).getId())
+                .securityGroups(securityGroup.getId())
                 .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
                 .instanceType(instanceType.toString()));
         logger.info("Creating auto-scaling group for replica set "+replicaSetName);
@@ -1949,7 +1976,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .maxSize(maxReplicas)
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
-                .availabilityZones(Util.toArray(Util.map(availabilityZones, az->az.getName()), new String[3]))
+                .vpcZoneIdentifier(Util.joinStrings(",", Util.map(availabilityZones,
+                        az->getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroup, awsRegion))))
                 .targetGroupARNs(publicTargetGroup.getTargetGroupArn())
                 .launchConfigurationName(launchConfigurationName);
             tags.ifPresent(t->{
@@ -2001,8 +2029,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(com.sap.sse.landscape.Region region, String targetGroupName, int port) {
-        return createTargetGroup(region, targetGroupName, port, ApplicationProcess.HEALTH_CHECK_PATH, port, null);
+    public TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(com.sap.sse.landscape.Region region, String targetGroupName, int port, String vpcId) {
+        return createTargetGroup(region, targetGroupName, port, ApplicationProcess.HEALTH_CHECK_PATH, port, null, vpcId);
     }
     
     @Override
@@ -2044,7 +2072,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public TargetGroup<ShardingKey> copyTargetGroup(TargetGroup<ShardingKey> parent, String suffix) {
-        TargetGroup<ShardingKey> child =  createTargetGroupWithoutLoadbalancer(parent.getRegion(), parent.getName()+ suffix, parent.getPort());
+        TargetGroup<ShardingKey> child =  createTargetGroupWithoutLoadbalancer(parent.getRegion(), parent.getName()+ suffix, parent.getPort(),
+                parent.getLoadBalancer().getVpcId());
         child.addTargets(parent.getRegisteredTargets().keySet());
         return child;
     }

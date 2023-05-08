@@ -1,0 +1,19 @@
+#!/bin/bash
+DELAY_FILE=/tmp/mongo-replica-set-delay
+NOTIFYING_THRESHOLD_SECOND_AVERAGE=10
+echo "rs.printSecondaryReplicationInfo()" | \
+  mongo "mongodb://localhost:10201,localhost:10202,localhost:10203/?replicaSet=paris2024&retryWrites=true&readPreference=nearest" | 
+  grep "\(behind the primary\)" | sed -e 's/^[ \t]*\([0-9]*\) secs.*$/\1/' >>${DELAY_FILE}
+s=0
+c=0
+for i in `cat ${DELAY_FILE} | tail -n 10`; do 
+  s=$(( $s + $i ))
+  c=$(( c + 1 ))
+done
+q=$(( $s / $c ))
+if [ $q -gt ${NOTIFYING_THRESHOLD_SECOND_AVERAGE} ]; then
+  echo "rs.printSecondaryReplicationInfo()" | \
+  mongo "mongodb://localhost:10201/?replicaSet=paris2024&retryWrites=true&readPreference=nearest" | \
+  grep "\(^source:\)\|\(syncedTo:\)\|\(behind the primary\)" | \
+  notify-operators "SLOW MONGODB REPLICATION"
+fi

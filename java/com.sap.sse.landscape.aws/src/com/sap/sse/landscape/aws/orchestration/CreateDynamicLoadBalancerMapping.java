@@ -50,7 +50,7 @@ implements Procedure<ShardingKey> {
             if (existingLoadBalancer != null) {
                 result = existingLoadBalancer;
             } else {
-                result = landscape.createNonDNSMappedLoadBalancer(region, domainName);
+                result = landscape.createNonDNSMappedLoadBalancer(region, domainName, getSecurityGroupForVpc());
                 waitUntilLoadBalancerProvisioned(landscape, result);
                 createWildcardRoute53Mapping(landscape, result, domainName);
             }

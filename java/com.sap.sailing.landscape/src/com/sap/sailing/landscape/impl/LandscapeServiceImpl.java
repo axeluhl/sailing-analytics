@@ -862,6 +862,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setProcess(master)
             .setHostname(masterHostname)
             .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setSecurityGroupForVpc(landscape.getDefaultSecurityGroupForApplicationHosts(region))
             .setLandscape(landscape)
             .build();
         createLoadBalancerMapping.run();
@@ -1724,7 +1725,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setRegion(region)
             .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardingKeys(shardingKeys)
-            .setReplicaset(applicationReplicaSet)
+            .setReplicaSet(applicationReplicaSet)
             .setShardName(shardName)
             .build()
             .run();
@@ -1746,7 +1747,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setRegion(region)
             .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardingKeys(shardingkeys)
-            .setReplicaset(applicationReplicaSet)
+            .setReplicaSet(applicationReplicaSet)
             .setShardName(shardName)
             .build()
             .run();
@@ -1779,7 +1780,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setLandscape(getLandscape())
             .setTargetGroupNamePrefix(LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX)
             .setShardingKeys(shardingkeys)
-            .setReplicaset(applicationReplicaSet)
+            .setReplicaSet(applicationReplicaSet)
             .setRegion(region)
             .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardName(shardName)
