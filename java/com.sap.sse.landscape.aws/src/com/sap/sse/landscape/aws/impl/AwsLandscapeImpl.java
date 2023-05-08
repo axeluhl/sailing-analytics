@@ -1977,7 +1977,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
                 .vpcZoneIdentifier(Util.joinStrings(",", Util.map(availabilityZones,
-                        az->getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroup, awsRegion))))
+                        az->getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroup, awsRegion).subnetId())))
                 .targetGroupARNs(publicTargetGroup.getTargetGroupArn())
                 .launchConfigurationName(launchConfigurationName);
             tags.ifPresent(t->{
