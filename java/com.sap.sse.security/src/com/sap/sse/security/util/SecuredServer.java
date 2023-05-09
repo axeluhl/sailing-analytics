@@ -95,7 +95,9 @@ public interface SecuredServer {
 
     /**
      * Create a user group named {@code serverGroupName} if no group by that name exists yet. The group will be owned by the
-     * user authenticated for this server, and the user will be added to the group.
+     * user authenticated for this server, and the user will be added to the group. The {@code user} role qualified to the new
+     * group will be assigned to the calling subject ({@code user:{name}}) as a "transitive" role assignment, allowing
+     * the user to grant that role also to other users, in turn.
      */
     UUID createUserGroupAndAddCurrentUser(String serverGroupName) throws ClientProtocolException, IOException, ParseException, IllegalAccessException;
 

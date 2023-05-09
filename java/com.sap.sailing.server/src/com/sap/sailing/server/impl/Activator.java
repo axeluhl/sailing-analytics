@@ -57,6 +57,7 @@ import com.sap.sailing.server.impl.preferences.model.StoredDataMiningReportPrefe
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
+import com.sap.sailing.server.security.EventManagerRole;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
@@ -251,6 +252,7 @@ public class Activator implements BundleActivator {
                                 // implementing another Construct like OSGIHasPermissionsProvider
                                 final RoleDefinition sailingViewerRoleDefinition = securityService
                                         .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(EventManagerRole.getInstance(), /* makeReadableForAll */ true);
                                 securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance(), /* makeReadableForAll */ true);
                                 securityService.getOrCreateRoleDefinitionFromPrototype(ArchiveDataMiningRole.getInstance(), /* makeReadableForAll */ true);
                                 securityService.getOrCreateRoleDefinitionFromPrototype(AllDataMiningRole.getInstance(), /* makeReadableForAll */ true);

@@ -88,13 +88,13 @@ A user group can specify roles whose permissions to grant to clients trying to p
 
 This concept can be used, e.g., to make the objects of an event publicly readable by everyone: the event and all its contained objects can be given to a dedicated user group, and that group can then specify the role *sailing_viewer* to be granted to *all* users trying to access objects owned by this dedicated group.
 
-Another example: a group of sailors is sailing a training session together. They would like their tracks to be visible exactly to the members of their user group. So they create a user group for their training group, assign all their users to that group, create the event and all sub-ordinate objects with their training user group as the group owner and add the *sailing_viewer* role to that group, restricting its application to the memmbers of their user group.
+Another example: a group of sailors is sailing a training session together. They would like their tracks to be visible exactly to the members of their user group. So they create a user group for their training group, assign all their users to that group, create the event and all sub-ordinate objects with their training user group as the group owner and add the *sailing_viewer* role to that group, restricting its application to the members of their user group.
 
 ## Defaults upon First Server Startup
 
 On fresh instances that do not use a shared UserStore, the "<all>" user as well as the user "admin" are automatically created if no users exist yet on this instance. This "admin" user has the unqualified "admin" role associated, which means this user has the permission to do everything. On event servers, this user is typically used to give permissions to specific event admin user. The "admin" user's initial password is "admin" and should be changed before making that server publicly reachable.
 
-Upon the first start of server or server cluster, the server-specific user group is created. The server or server cluster represents a logical object with type ``SERVER`` that has a number of actions associated with it for which permissions are checked before a client can execute them. The ``SERVER`` object is owned by the server-specific group.
+Upon the first start of a server or server cluster, the server-specific user group is created. The server or server cluster represents a logical object with type ``SERVER`` that has a number of actions associated with it for which permissions are checked before a client can execute them. The ``SERVER`` object is owned by the server-specific group.
 
 Additionally, on fresh instances not sharing a UserStore, a set of default roles with default permissions are created:
 
@@ -122,14 +122,34 @@ the event hierarchy now and can then be restricted to the members of that group 
 
 ## Granting Permissions
 
-Generally, a user who has a permission can grant this permission to another user. This is helpful, e.g., if a user wants to establish delegate users who may take over some of his/her tasks. In the future, the system may impose some restrictions on this general rule, particularly for roles and permissions that users may need to pay for. Establishing such permissions may require another specific permission.
+Generally, a user who has a permission can grant this permission to another user. This is helpful, e.g., if a user wants to establish delegate users who may take over some of his/her tasks. Establishing such permissions may require another specific permission.
+
+There are two exceptions, however.
+
+- Permissions obtained through an Access Control List (ACL) are not considered when computing the set of permissions a user may grant to other users. Note that permissions *denied* by an ACL from a user cannot be granted by that user to anyone else, regardless of how that user may otherwise have obtained the permission.
+
+- Permissions acquired through a role assignment to a user with the assignment not marked as "transitive" are not considered for the set of permissions a user can grant to others. An example for such a role is the "premium" role for which users generally have to subscribe and pay; obviously we don't want those users to be able to pass on the permissions obtained this way to other users. Note how this is different from permissions obtained through roles on a group (either for the members of the group only, or for all users): such permissions *do* add to the set of permissions a user can grant to other users.
 
 ## Server Properties
 
+In order to modify server properties through the corresponding API or UI, the user requires the ``SERVER:CONFIGURE_LOCAL_SERVER:{server-name}`` permission. Note, though, that fewer permissions may suffice if the user makes the corresponding changes at a more basic level, e.g., by explicitly adding an ACL or adding a role to a group.
+
 ### Public Server
 
-A server that is configured to be *public* adds the ``sailing_viewer`` role to its server-specific group (``{servername}-server``) and marks it to be granted to *all* users trying to access objects owned by the server group. When server administrators follow the advice to make this server group their default creation group (the group used for the group ownership of new objects created by the user) then all those objects will be publicly readable.
+A server that is configured to be *public* adds the ``sailing_viewer`` role to its server-specific group (``{servername}-server``) and marks it to be granted to *all* users trying to access objects owned by the server group. When server administrators who are members of the server group follow the advice to make this server group their default creation group (the group used for the group ownership of new objects created by the user) then all those objects will be publicly readable.
+
+Note that in order to carry out this change, a user must have the ``UPDATE`` permission for the server group because a role is *added* to that group. Furthermore, the user has to have acquired the permissions implied by the ``sailing_viewer`` role for all objects owned by the server group, not through an ACL nor through a non-transitive role assignment. The ``user`` role does imply these permissions. Therefore, for example, it is sufficient for a user to have a transitive ``user`` or ``sailing_viewer`` role assignment qualified for the server group in order to be able to switch that server to *public*. Alternatively, it is sufficient to be member of the server group if the server group implies role ``user`` or role ``sailing_viewer`` for its members when accessing objects owned by the server group.
 
 ### Self-Service Server
 
-If a server is configured as a self-service server, an ACL is created for the ``SERVER`` object that grants the ``CREATE_OBJECT`` permission to the anonymous *null* group. This way, all users, including those not logged in, are permitted to create not only a new user during a sign-up process but also objects of any other types, such as events, regattas, or leaderboards.
+If a server is configured as a self-service server, an ACL is created for the ``SERVER`` object that grants the ``CREATE_OBJECT`` permission to the anonymous *null* group. This way, all users, including those not logged in, are permitted to create not only a new user during a sign-up process but also objects of any other types, such as events, regattas, or leaderboards. As explained above, in order to be permitted to configure a server like this, the user must himself/herself have acquired this permission, but not through an ACL and not through a non-transitive role assignment. Furthermore, the user must have the permission ``SERVER:CHANGE_ACL:{servername}``.
+
+## Setting up Administrative Permissions for a New Application Replica Set
+
+When a new application replica set is created by a user, a corresponding ``{servername}-server`` user group is created, owned by the user who creates the replica set, and owned by itself for the group ownership. The user is automatically made a member of that group, and the group is assigned an ACL that grants all its members the ``READ`` permission, so the members can at least see the group and its members and roles. Furthermore, the creating user receives a transitive ``user`` role assignment qualified for the new server group.
+
+Based on the user ownership of the server group the user who creates the replica set has a few permissions for the ``SERVER`` object as well as the server group. In particular, based on the ``USER_GROUP:UPDATE`` permission acquired through the ownership and the ``user`` role that every user has assigned, qualified for the objects owned by the user, the user who created the replica set can add further users to the server group. The user creating the replica set also has all permissions implied by the ``sailing_viewer`` role for all objects owned by the server group because the ``user`` role implies all permissions implied by the ``sailing_viewer`` role, in particular for the ``READ`` and ``READ_PUBLIC`` actions. This way, the user who creates the replica set can also toggle its *public* state.
+
+Two more 
+
+For toggling the "self service" property, however, the ``user`` role does not imply sufficient permissions. 
