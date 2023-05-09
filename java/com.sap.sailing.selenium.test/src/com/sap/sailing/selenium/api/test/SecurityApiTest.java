@@ -12,6 +12,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
@@ -92,6 +96,19 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         final UUID adminTenantGroupId = securedServer.getUserGroupIdByName("admin-tenant");
         final Pair<UUID, String> userAndGroupOwner = securedServer.getGroupAndUserOwner(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(adminTenantGroupId.toString()));
         assertEquals(adminTenantGroupId, userAndGroupOwner.getA());
+    }
+
+    @Test
+    public void testSetAndGetAcl() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        final UUID adminTenantGroupId = securedServer.getUserGroupIdByName("admin-tenant");
+        final Map<UUID, Set<String>> actionsByGroups = new HashMap<>();
+        actionsByGroups.put(null, Collections.singleton("READ"));
+        actionsByGroups.put(adminTenantGroupId, Collections.singleton("!DELETE"));
+        securedServer.setAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(adminTenantGroupId.toString()), actionsByGroups);
+        final Map<UUID, Set<String>> groupIdAndActions = securedServer.getAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(adminTenantGroupId.toString()));
+        assertEquals(actionsByGroups, groupIdAndActions);
     }
 
     @Test

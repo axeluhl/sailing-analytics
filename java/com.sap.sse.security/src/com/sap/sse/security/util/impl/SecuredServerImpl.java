@@ -7,8 +7,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -166,8 +169,20 @@ public class SecuredServerImpl implements SecuredServer {
                 + "/" + type.getName() + "/" + typeRelativeObjectId.toString() + "/" + OwnershipResource.KEY_ACL);
         final HttpGet getRequest = new HttpGet(getGroupAndUserOwnerUrl.toString());
         final JSONObject aclJson = (JSONObject) getJsonParsedResponse(getRequest).getA();
-        // TODO implement SecuredServerImpl.getAccessControlList
-        return null;
+        final Map<UUID, Set<String>> result = new HashMap<>();
+        final JSONArray actionsByUserGroups = (JSONArray) aclJson.get(OwnershipResource.KEY_ACL);
+        for (final Object actionsByUserGroup : actionsByUserGroups) {
+            final JSONObject actionsByUserGroupJson = (JSONObject) actionsByUserGroup;
+            final Object groupIdAsString = actionsByUserGroupJson.get(OwnershipResource.KEY_GROUP_ID);
+            final UUID groupId = groupIdAsString == null ? null : UUID.fromString(groupIdAsString.toString());
+            final JSONArray actions = (JSONArray) actionsByUserGroupJson.get(OwnershipResource.KEY_ACTIONS);
+            final Set<String> actionStringSet = new HashSet<>();
+            for (final Object action : actions) {
+                actionStringSet.add(action.toString());
+            }
+            result.put(groupId, actionStringSet);
+        }
+        return result;
     }
     
     @Override
@@ -178,11 +193,16 @@ public class SecuredServerImpl implements SecuredServer {
                         + type.getName() + "/" + typeRelativeObjectId.toString() + "/" + OwnershipResource.KEY_ACL);
         final HttpPut putRequest = new HttpPut(setGroupAndUserOwnerUrl.toString());
         final JSONObject aclJson = new JSONObject();
-        // TODO implement SecuredServerImpl.setAccessControlList
-        int TODO;
-//        username.map(un->ownershipJson.put(OwnershipResource.KEY_USERNAME, un));
-//        groupId.map(gid->ownershipJson.put(OwnershipResource.KEY_GROUP_ID, gid.toString()));
-//        displayName.map(dn->ownershipJson.put(OwnershipResource.KEY_DISPLAY_NAME, dn));
+        final JSONArray actionsByUserGroupJson = new JSONArray();
+        aclJson.put(OwnershipResource.KEY_ACL, actionsByUserGroupJson);
+        for (final Entry<UUID, Set<String>> e : actionsPerGroup.entrySet()) {
+            final JSONObject groupIdAndPermissions = new JSONObject();
+            groupIdAndPermissions.put(OwnershipResource.KEY_GROUP_ID, e.getKey() == null ? null : e.getKey().toString());
+            final JSONArray actionsJson = new JSONArray();
+            actionsJson.addAll(e.getValue());
+            groupIdAndPermissions.put(OwnershipResource.KEY_ACTIONS, actionsJson);
+            actionsByUserGroupJson.add(groupIdAndPermissions);
+        }
         final HttpEntity entity = new StringEntity(aclJson.toJSONString(), "UTF-8");
         putRequest.setHeader(HTTP.CONTENT_TYPE, "application/json");
         putRequest.setEntity(entity);
