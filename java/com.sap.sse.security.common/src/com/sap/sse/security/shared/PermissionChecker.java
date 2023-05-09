@@ -531,7 +531,7 @@ public class PermissionChecker {
             BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, Iterable<R> additionalRoles, 
             boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, boolean matchOnlyNonTransitiveRoles) {
         PermissionState result = PermissionState.NONE;
-        // 1.. check direct permissions
+        // 1. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
                 if (permissionChecker.apply(directPermission, permission)) {
