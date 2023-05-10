@@ -2130,8 +2130,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
-            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
-                    rolePrototype.getPermissions());
+            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
             setOwnership(result.getIdentifier(), null, getServerGroup());
         } else if (rolePrototype.getPermissions() != null
                 && !rolePrototype.getPermissions().equals(potentiallyExistingRoleDefinition.getPermissions())) {

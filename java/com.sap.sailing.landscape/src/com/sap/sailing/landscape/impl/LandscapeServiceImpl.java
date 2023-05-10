@@ -58,7 +58,6 @@ import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
-import com.sap.sailing.server.security.EventManagerRole;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -110,6 +109,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.ServerAdminRole;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -770,11 +770,12 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             groupId = securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
             try {
-                securityServiceServer.addRoleToUser(EventManagerRole.getInstance().getId(), securityServiceServer.getUsername(), null, null, /* transitive */ true);
+                securityServiceServer.addRoleToUser(ServerAdminRole.getInstance().getId(), securityServiceServer.getUsername(),
+                        /* qualified for server group: */ groupId, null, /* transitive */ true);
             } catch (Exception e) {
                 // this didn't work, but it's not the end of the world if we cannot grant the requesting user the
                 // event_manager:{group-name} role; the user may end up not having SERVER:CREATE_OBJECT...
-                logger.warning("Couldn't grant role "+" of user group "+serverGroupName+": "+e.getMessage());
+                logger.warning("Couldn't grant role "+ServerAdminRole.getInstance().getName()+" to user "+securityServiceServer.getUsername()+": "+e.getMessage());
             }
             try {
                 // try to set the group owner of the new group to the group itself, allowing all users with role user:{group-name} to

@@ -8,12 +8,12 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 /**
- * Specifies a role that when associated to a user gives read access to the sailing domain parts needed for the home
- * page and basic analytical frontends.
+ * Specifies a role that when associated to a user gives access to create objects on a server and to upload media for an
+ * event; these are all permissions that an event manager will need as long as he/she doesn't need to change underlying
+ * server infrastructure configuration.
  */
 public class EventManagerRole extends RolePrototype {
-    private static final long serialVersionUID = 3291793984984443193L;
-
+    private static final long serialVersionUID = 6775068846340911064L;
     private static final EventManagerRole INSTANCE = new EventManagerRole();
 
     EventManagerRole() {

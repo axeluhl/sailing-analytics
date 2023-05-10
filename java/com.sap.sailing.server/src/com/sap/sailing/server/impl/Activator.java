@@ -78,6 +78,7 @@ import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.ServerAdminRole;
 import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.shared.subscription.AllDataMiningRole;
 import com.sap.sse.security.shared.subscription.ArchiveDataMiningRole;
@@ -253,6 +254,7 @@ public class Activator implements BundleActivator {
                                 final RoleDefinition sailingViewerRoleDefinition = securityService
                                         .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance(), /* makeReadableForAll */ true);
                                 securityService.getOrCreateRoleDefinitionFromPrototype(EventManagerRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(ServerAdminRole.getInstance(), /* makeReadableForAll */ true);
                                 securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance(), /* makeReadableForAll */ true);
                                 securityService.getOrCreateRoleDefinitionFromPrototype(ArchiveDataMiningRole.getInstance(), /* makeReadableForAll */ true);
                                 securityService.getOrCreateRoleDefinitionFromPrototype(AllDataMiningRole.getInstance(), /* makeReadableForAll */ true);
