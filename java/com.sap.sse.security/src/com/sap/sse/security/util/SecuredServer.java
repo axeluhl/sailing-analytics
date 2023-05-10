@@ -95,11 +95,29 @@ public interface SecuredServer {
 
     /**
      * Create a user group named {@code serverGroupName} if no group by that name exists yet. The group will be owned by the
-     * user authenticated for this server, and the user will be added to the group.
+     * user authenticated for this server, and the user will be added to the group. The {@code user} role qualified to the new
+     * group will be assigned to the calling subject ({@code user:{name}}) as a "transitive" role assignment, allowing
+     * the user to grant that role also to other users, in turn.
      */
     UUID createUserGroupAndAddCurrentUser(String serverGroupName) throws ClientProtocolException, IOException, ParseException, IllegalAccessException;
 
     Iterable<String> getNamesOfUsersInGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
+
+    /**
+     * Adds the role identified by {@code roleId} to the user identified by {@code username} and makes it transitive or
+     * non-transitive based on the value of the {@code transitive} parameter.
+     */
+    void addRoleToUser(UUID roleId, String username, UUID qualifiedForGroupWithId, String qualifiedForUserWithName,
+            boolean transitive) throws MalformedURLException, ClientProtocolException, IOException, ParseException;
+
+    public static interface RoleDescriptor {
+        UUID getRoleDefinitionId();
+        UUID getQualifiedForGroupWithId();
+        String getQualifiedForUserWithName();
+        Boolean isTransitive();
+    }
+    
+    Iterable<RoleDescriptor> getRoles(String username) throws ClientProtocolException, IOException, ParseException;
 
     /**
      * Obtains the access control lists defined for the object identified by {@code type} and

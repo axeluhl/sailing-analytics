@@ -319,6 +319,63 @@ public class SecuredServerImpl implements SecuredServer {
     }
 
     @Override
+    public void addRoleToUser(UUID roleId, String username, UUID qualifiedForGroupWithId, String qualifiedForUserWithName, boolean transitive) throws ClientProtocolException, IOException, ParseException {
+        final URL addRoleToUserUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + SecurityResource.RESTSECURITY +
+                SecurityResource.ADD_ROLE_TO_USER_METHOD
+                + "?" + SecurityResource.USERNAME+"="+username
+                + "&" + SecurityResource.ROLE_DEFINITION_ID+"="+roleId.toString()
+                + (qualifiedForGroupWithId == null ? "" : ("&" + SecurityResource.QUALIFYING_GROUP_ID+"="+qualifiedForGroupWithId.toString()))
+                + (qualifiedForUserWithName == null ? "" : ("&" + SecurityResource.QUALIFYING_USERNAME+"="+qualifiedForUserWithName))
+                + "&" + SecurityResource.TRANSITIVE+"="+transitive);
+        final HttpPut putRequest = new HttpPut(addRoleToUserUrl.toString());
+        final Pair<Object, Integer> result = getJsonParsedResponse(putRequest);
+        final Integer status = result.getB();
+        if (status == Response.Status.FORBIDDEN.getStatusCode() || status == Response.Status.UNAUTHORIZED.getStatusCode()) {
+            throw new AuthorizationException("Not allowed to add role with ID "+roleId+" to user "+username+": "+result.getA());
+        } else if (status < 200 || status >= 300) {
+            throw new IllegalArgumentException("Couldn't add role with ID "+roleId+ " to user "+username+": "+result.getA());
+        }
+    }
+    
+    @Override
+    public Iterable<RoleDescriptor> getRoles(String username) throws ClientProtocolException, IOException, ParseException {
+        final URL getRolesForUserUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + SecurityResource.RESTSECURITY +
+                SecurityResource.GET_ROLES_FOR_USER_METHOD
+                + "?" + SecurityResource.USERNAME+"="+username);
+        final HttpGet getRequest = new HttpGet(getRolesForUserUrl.toString());
+        final Pair<Object, Integer> result = getJsonParsedResponse(getRequest);
+        final Integer status = result.getB();
+        if (status == Response.Status.FORBIDDEN.getStatusCode() || status == Response.Status.UNAUTHORIZED.getStatusCode()) {
+            throw new AuthorizationException("Not allowed to get roles for user "+username+" to user "+username+": "+result.getA());
+        } else if (status < 200 || status >= 300) {
+            throw new IllegalArgumentException("Couldn't get roles from user "+username+": "+result.getA());
+        }
+        return Util.map((JSONArray) result.getA(), jsonRole->new RoleDescriptor() {
+            final JSONObject jsonRoleObject = (JSONObject) jsonRole;
+
+            @Override
+            public UUID getRoleDefinitionId() {
+                return UUID.fromString(jsonRoleObject.get(SecurityResource.ROLE_DEFINITION_ID).toString());
+            }
+
+            @Override
+            public UUID getQualifiedForGroupWithId() {
+                return jsonRoleObject.get(SecurityResource.QUALIFYING_GROUP_ID) == null ? null : UUID.fromString(jsonRoleObject.get(SecurityResource.QUALIFYING_GROUP_ID).toString());
+            }
+
+            @Override
+            public String getQualifiedForUserWithName() {
+                return jsonRoleObject.get(SecurityResource.QUALIFYING_USERNAME) == null ? null : jsonRoleObject.get(SecurityResource.QUALIFYING_USERNAME).toString();
+            }
+
+            @Override
+            public Boolean isTransitive() {
+                return jsonRoleObject.get(SecurityResource.TRANSITIVE) == null ? null : (Boolean) jsonRoleObject.get(SecurityResource.TRANSITIVE);
+            }
+        });
+    }
+
+    @Override
     public String toString() {
         return getBaseUrl().toString();
     }

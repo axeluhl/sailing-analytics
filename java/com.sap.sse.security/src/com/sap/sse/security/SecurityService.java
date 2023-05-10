@@ -790,8 +790,19 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * Updates the currently held SubscriptionPlanPrices for all known SubscriptionPlans
+     * 
      * @param itemPrices
      */
     void updateSubscriptionPlanPrices(Map<String, BigDecimal> itemPrices);
 
+    Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException;
+
+    /**
+     * @return the role associated with the given IDs and qualifiers
+     * @throws UserManagementException
+     *             if the current user does not have the meta permission to give this specific, qualified role in this
+     *             context.
+     */
+    Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID qualifyingGroupId, String userQualifierName,
+            boolean transitive) throws UserManagementException;
 }
