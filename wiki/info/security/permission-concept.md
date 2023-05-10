@@ -111,6 +111,16 @@ this role qualified for objects whose group owner is the user's dedicated group 
 
 Note that for good reasons this role does not imply all ("&ast;") permissions to object owners. All permissions would include features that we may want to charge a price for. The ``user`` role shall include only those permissions that all users with no premium permissions have. In a sense, the user role's permission set is the difference of the admin role's permission set ("&ast;") minus all premium permissions.
 
+### Role "server_admin"
+
+Users shall be assigned this role if they need to administer infrastructure aspects of a server or replica set. It includes all ``SERVER`` permissions. While one particular permission (``SERVER:CREATE_OBJECT``) is also required by those creating *content* on a server, most other permissions implied by this role do not affect the actual content management. Examples of things users with this role can do are to configure the server's file storage for media file uploads, use the UI to make the server public/non-public or self-serviced, configure remote server references, configure and run replication, export and import masterdata to/from other server environments (depending on their permissions in the respective other environment), and use the data mining tool.
+
+The role should usually be granted qualified for the ``...-server`` group owning the ``SERVER`` object representing the replica set.
+
+### Role "event_manager"
+
+The role comes with the ``SERVER:CREATE_OBJECT`` and the ``EVENT:UPLOAD_MEDIA`` permissions. With these, plus with the ``USER:{server-group}`` role a user can create and configure events, regattas, leaderboard, etc. as needed for actually running the event. It will *not* allow the user to make changes to the server's infrastructure, launch replicas, or configure the server's file storage. See the ``server_admin`` role for these permissions.
+
 ### Role "sailing_viewer"
 
 This role can be used to publish the data of a sailing event. When assigning this to a user, the user obtains all
@@ -146,10 +156,18 @@ If a server is configured as a self-service server, an ACL is created for the ``
 
 ## Setting up Administrative Permissions for a New Application Replica Set
 
-When a new application replica set is created by a user, a corresponding ``{servername}-server`` user group is created, owned by the user who creates the replica set, and owned by itself for the group ownership. The user is automatically made a member of that group, and the group is assigned an ACL that grants all its members the ``READ`` permission, so the members can at least see the group and its members and roles. Furthermore, the creating user receives a transitive ``user`` role assignment qualified for the new server group.
+When a new application replica set is created by a user, a corresponding ``{servername}-server`` user group is created if it doesn't exist yet, owned by the user who creates the replica set, and owned by itself for the group ownership. The user is automatically made a member of that group, and the group is assigned an ACL that grants all its members the ``READ`` permission, so the members can at least see the group and its members and roles. Furthermore, the creating user receives a transitive ``user`` role assignment qualified for the new server group. If the group is new, the user will also be assigned the ``server_admin:{servername}-server`` role so that he/she can apply all administrative operations to the replica set, in particular launching replicas, configuring the file storage, setting remote server references, and making the replica set *public* and/or *self-servicable*.
 
 Based on the user ownership of the server group the user who creates the replica set has a few permissions for the ``SERVER`` object as well as the server group. In particular, based on the ``USER_GROUP:UPDATE`` permission acquired through the ownership and the ``user`` role that every user has assigned, qualified for the objects owned by the user, the user who created the replica set can add further users to the server group. The user creating the replica set also has all permissions implied by the ``sailing_viewer`` role for all objects owned by the server group because the ``user`` role implies all permissions implied by the ``sailing_viewer`` role, in particular for the ``READ`` and ``READ_PUBLIC`` actions. This way, the user who creates the replica set can also toggle its *public* state.
 
-Two more 
+If the creator of the replica set wants to enable other users to do things on this replica set, the following steps need to be accomplished:
 
-For toggling the "self service" property, however, the ``user`` role does not imply sufficient permissions. 
+- Add the user you want to enable to the ``{servername}-server`` group; this will allow the user to set the default owner group for new objects created on that server to the ``{servername}-server`` group which is important in particular when it's a *public* server, because for such *public* servers objects are made visible to other users (including anonymous ones) by letting the ``{servername}-server`` group own them and by assigning the ``sailing_viewer`` role to the ``{servername}-server`` group.
+
+- Assign the ``user:{servername}-server`` role to the user to enable. This will allow that user to read, create, delete and update objects owned by the server group. If the server group owns itself, it will also allow the user to add other users to the group and to modify the set of roles the group implies. If that's not what you want, have the ``{servername}-server`` group not be owned by itself but, e.g., your own personal user group ``{username}-tenant``.
+
+- Depending on the tasks the user you want to enable shall be able to accomplish, assign one of the roles ``server_admin`` or ``event_manager``, constrained to the ``{servername}-server`` group.
+
+    - The ``event_manager`` role will allow the user to create new objects on the server and to upload media clips for events. Together with the ``user`` role (see above) this will be sufficient for the user to operate an event on the server / replica set. The essential permission granted by the ``event_manager`` role is the ``SERVER:CREATE_OBJECT`` permission, allowing the user to create objects on the server at all.
+    
+    - The ``server_admin`` role will allow the user to manage all aspects of the server, particularly the infrastructure aspects such as configuring the file storage, replication, master-data import/export, publicness and self-service enablement. Note that the ``server_admin`` role does *not* include the ``EVENT:UPLOAD_MEDIA`` permission, so you may want to additionally pass on the ``event_manager`` role if that is required by the receiving user.
