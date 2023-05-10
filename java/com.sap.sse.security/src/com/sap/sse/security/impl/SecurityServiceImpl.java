@@ -2130,8 +2130,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
-            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
-                    rolePrototype.getPermissions());
+            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
             setOwnership(result.getIdentifier(), null, getServerGroup());
         } else if (rolePrototype.getPermissions() != null
                 && !rolePrototype.getPermissions().equals(potentiallyExistingRoleDefinition.getPermissions())) {
@@ -2523,17 +2522,14 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
         }
-
         for (Map.Entry<RoleDefinition, Boolean> entr : source.getRoleDefinitionMap().entrySet()) {
             putRoleDefinitionToUserGroup(destination, entr.getKey(), entr.getValue());
         }
-
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
                     existingRole.getQualifiedForUser(), existingRole.isTransitive());
-            addRoleForUser(userAndRole.getA(),
-                    copyRole);
+            addRoleForUser(userAndRole.getA(), copyRole);
             callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
         }
     }
@@ -2986,4 +2982,46 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         return null;
     }
 
+    @Override
+    public Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException {
+        final User user;
+        if (qualifyingUsername == null || qualifyingUsername.trim().isEmpty()) {
+            user = null;
+        } else {
+            user = getUserByName(qualifyingUsername);
+            if (user == null) {
+                throw new UserManagementException("User "+qualifyingUsername+" not found for role qualification");
+            }
+        }
+        final UserGroup group;
+        if (qualifyingTenantId == null) {
+            group = null;
+        } else {
+            group = getUserGroup(qualifyingTenantId);
+            if (group == null) {
+                throw new UserManagementException("Group with ID "+qualifyingTenantId+" not found for role qualification");
+            }
+        }
+        final RoleDefinition roleDefinition = getRoleDefinition(roleDefinitionId);
+        if (roleDefinition == null) {
+            throw new UserManagementException("Role definition with ID "+roleDefinitionId+" not found");
+        }
+        return new Role(roleDefinition, group, user, transitive);
+    }
+
+    /**
+     * @return the role associated with the given IDs and qualifiers
+     * @throws UserManagementException
+     *             if the current user does not have the meta permission to give this specific, qualified role in this
+     *             context.
+     */
+    @Override
+    public Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID tenantId, String userQualifierName, boolean transitive) throws UserManagementException {
+        final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName, transitive);
+        if (!hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                role.getRoleDefinition(), role.getQualificationAsOwnership())) {
+            throw new UserManagementException("You are not allowed to take this role to the user.");
+        }
+        return role;
+    }
 }

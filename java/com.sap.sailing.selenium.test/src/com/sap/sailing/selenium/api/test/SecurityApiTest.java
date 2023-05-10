@@ -12,6 +12,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
@@ -25,6 +29,7 @@ import com.sap.sailing.selenium.api.event.SecurityApi.AccessToken;
 import com.sap.sailing.selenium.api.event.SecurityApi.Hello;
 import com.sap.sailing.selenium.api.event.SecurityApi.User;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sailing.server.security.EventManagerRole;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -33,6 +38,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.security.util.SecuredServer;
+import com.sap.sse.security.util.SecuredServer.RoleDescriptor;
 import com.sap.sse.security.util.impl.SecuredServerImpl;
 
 public class SecurityApiTest extends AbstractSeleniumTest {
@@ -49,7 +55,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     @Test
     public void testCreateAndGetUser() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        final AccessToken createUserResponse = securityApi.createUser(adminCtx, "max", USERNAME_FULL, null, "start123");
+        final AccessToken createUserResponse = securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, "start123");
         assertEquals("Responded username of createUser is different!", USERNAME, createUserResponse.getUsername());
         assertNotNull("Token is missing in reponse!", createUserResponse.getAccessToken());
         User getUserResponse = securityApi.getUser(adminCtx, USERNAME);
@@ -95,6 +101,19 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testSetAndGetAcl() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        final UUID adminTenantGroupId = securedServer.getUserGroupIdByName("admin-tenant");
+        final Map<UUID, Set<String>> actionsByGroups = new HashMap<>();
+        actionsByGroups.put(null, Collections.singleton("READ"));
+        actionsByGroups.put(adminTenantGroupId, Collections.singleton("!DELETE"));
+        securedServer.setAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(adminTenantGroupId.toString()), actionsByGroups);
+        final Map<UUID, Set<String>> groupIdAndActions = securedServer.getAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(adminTenantGroupId.toString()));
+        assertEquals(actionsByGroups, groupIdAndActions);
+    }
+
+    @Test
     public void testCreateUserGroup() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -123,6 +142,19 @@ public class SecurityApiTest extends AbstractSeleniumTest {
             final Iterable<String> usernamesInGroup = securedServer.getNamesOfUsersInGroup(humbaGroupId);
             assertTrue(Util.contains(usernamesInGroup, ApiContext.ADMIN_USERNAME));
         }
+    }
+
+    @Test
+    public void testAddRoleToUser() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, "start123");
+        securedServer.addRoleToUser(EventManagerRole.getInstance().getId(), USERNAME, /* qualified for group */ null, /* qualifiedForUserWithName */ USERNAME, /* transitive */ true);
+        final Iterable<RoleDescriptor> roles = securedServer.getRoles(USERNAME);
+        assertTrue(Util.stream(roles)
+                .anyMatch(r -> r.getQualifiedForGroupWithId() == null
+                        && r.getQualifiedForUserWithName().equals(USERNAME) && r.isTransitive()
+                        && r.getRoleDefinitionId().equals(EventManagerRole.getInstance().getId())));
     }
 
     @Test

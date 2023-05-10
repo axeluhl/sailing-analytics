@@ -109,6 +109,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.ServerAdminRole;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -742,7 +743,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingServer securityServiceServer = sailingServerFactory.getSailingServer(
                 RemoteServerUtil.getBaseServerUrl(securityServiceHostname, securityServicePort==null?443:securityServicePort), bearerTokenUsedByReplicas);
         final UUID userGroupId = securityServiceServer.getUserGroupIdByName(serverGroupName);
+        final UUID groupId;
         if (userGroupId != null) {
+            groupId = userGroupId;
             final TypeRelativeObjectIdentifier serverGroupTypeRelativeObjectId = new TypeRelativeObjectIdentifier(userGroupId.toString());
             final Iterable<Pair<WildcardPermission, Boolean>> permissions = securityServiceServer.hasPermissions(Arrays.asList(
                     SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.CREATE, serverGroupTypeRelativeObjectId),
@@ -765,7 +768,37 @@ public class LandscapeServiceImpl implements LandscapeService {
             // security realm that the application replica set's master process will use if it existed already. Add the user to the group
             securityServiceServer.addCurrentUserToGroup(userGroupId);
         } else {
-            securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
+            groupId = securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
+            try {
+                securityServiceServer.addRoleToUser(ServerAdminRole.getInstance().getId(), securityServiceServer.getUsername(),
+                        /* qualified for server group: */ groupId, null, /* transitive */ true);
+            } catch (Exception e) {
+                // this didn't work, but it's not the end of the world if we cannot grant the requesting user the
+                // event_manager:{group-name} role; the user may end up not having SERVER:CREATE_OBJECT...
+                logger.warning("Couldn't grant role "+ServerAdminRole.getInstance().getName()+" to user "+securityServiceServer.getUsername()+": "+e.getMessage());
+            }
+            try {
+                // try to set the group owner of the new group to the group itself, allowing all users with role user:{group-name} to
+                // change / edit it.
+                securityServiceServer.setGroupAndUserOwner(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString()),
+                        Optional.empty() /* displayName */, Optional.of(groupId), Optional.empty() /* leave user owner unchanged */);
+            } catch (Exception e) {
+                // this didn't work, but it's not the end of the world if we cannot update the new group's ownership,
+                // although it's a bit surprising because the user identified by the bearerToken should be the group's
+                // owner...
+                logger.warning("Couldn't update user group ownership of user group "+serverGroupName+": "+e.getMessage());
+            }
+        }
+        ensureGroupMembersCanReadGroup(securityServiceServer, groupId);
+    }
+
+    private void ensureGroupMembersCanReadGroup(SailingServer securityServiceServer, UUID groupId) throws ClientProtocolException, IOException, ParseException {
+        // cleanly copy result as it may be unmodifiable
+        final Map<UUID, Set<String>> acls = new HashMap<>(securityServiceServer.getAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString())));
+        final Set<String> actionsForGroup = acls.computeIfAbsent(groupId, gid->new HashSet<>());
+        if (!actionsForGroup.contains(DefaultActions.READ.name()) && !actionsForGroup.contains("!"+DefaultActions.READ.name())) {
+            actionsForGroup.add(DefaultActions.READ.name());
+            securityServiceServer.setAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString()), acls);
         }
     }
 

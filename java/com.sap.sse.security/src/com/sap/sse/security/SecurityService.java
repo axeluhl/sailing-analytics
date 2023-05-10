@@ -141,9 +141,15 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getUserGroup(UUID id);
 
     UserGroup getUserGroupByName(String name);
-    
+
     Iterable<UserGroup> getUserGroupsOfUser(User user);
 
+    /**
+     * Creates a user group with the given {@code id} and {@code name} and makes the calling subject
+     * its owner and a member of the group and assigns the {@code user} role qualified to the new
+     * group to the calling subject ({@code user:{name}}) as a "transitive" role assignment, allowing
+     * the user to grant that role also to other users, in turn.
+     */
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
     
     void addUserToUserGroup(UserGroup group, User user);
@@ -784,8 +790,19 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * Updates the currently held SubscriptionPlanPrices for all known SubscriptionPlans
+     * 
      * @param itemPrices
      */
     void updateSubscriptionPlanPrices(Map<String, BigDecimal> itemPrices);
 
+    Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException;
+
+    /**
+     * @return the role associated with the given IDs and qualifiers
+     * @throws UserManagementException
+     *             if the current user does not have the meta permission to give this specific, qualified role in this
+     *             context.
+     */
+    Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID qualifyingGroupId, String userQualifierName,
+            boolean transitive) throws UserManagementException;
 }

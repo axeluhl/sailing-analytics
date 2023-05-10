@@ -128,7 +128,7 @@ public class OwnershipResource extends AbstractSecurityResource {
         return Response.ok(streamingOutput(result)).build();
     }
 
-    @Path("{objectType}/{typeRelativeObjectId}/acl")
+    @Path("{objectType}/{typeRelativeObjectId}/"+KEY_ACL)
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getAccessControlLists(@PathParam("objectType") String objectType,
@@ -155,7 +155,7 @@ public class OwnershipResource extends AbstractSecurityResource {
         return Response.ok(streamingOutput(result)).build();
     }
 
-    @Path("{objectType}/{typeRelativeObjectId}/acl")
+    @Path("{objectType}/{typeRelativeObjectId}/"+KEY_ACL)
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
