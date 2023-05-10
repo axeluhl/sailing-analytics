@@ -92,6 +92,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
      * 
      * @see #writeObject
      * @see #readResolve
+     * @see #roleListForSerialization
      */
     private transient Set<Role> roles;
     

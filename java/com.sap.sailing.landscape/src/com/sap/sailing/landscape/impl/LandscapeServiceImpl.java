@@ -58,6 +58,7 @@ import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
+import com.sap.sailing.server.security.EventManagerRole;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -768,6 +769,13 @@ public class LandscapeServiceImpl implements LandscapeService {
             securityServiceServer.addCurrentUserToGroup(userGroupId);
         } else {
             groupId = securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
+            try {
+                securityServiceServer.addRoleToUser(EventManagerRole.getInstance().getId(), securityServiceServer.getUsername(), null, null, /* transitive */ true);
+            } catch (Exception e) {
+                // this didn't work, but it's not the end of the world if we cannot grant the requesting user the
+                // event_manager:{group-name} role; the user may end up not having SERVER:CREATE_OBJECT...
+                logger.warning("Couldn't grant role "+" of user group "+serverGroupName+": "+e.getMessage());
+            }
             try {
                 // try to set the group owner of the new group to the group itself, allowing all users with role user:{group-name} to
                 // change / edit it.

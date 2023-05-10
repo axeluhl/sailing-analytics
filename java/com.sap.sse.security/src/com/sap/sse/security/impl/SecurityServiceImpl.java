@@ -2983,4 +2983,46 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         return null;
     }
 
+    @Override
+    public Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException {
+        final User user;
+        if (qualifyingUsername == null || qualifyingUsername.trim().isEmpty()) {
+            user = null;
+        } else {
+            user = getUserByName(qualifyingUsername);
+            if (user == null) {
+                throw new UserManagementException("User "+qualifyingUsername+" not found for role qualification");
+            }
+        }
+        final UserGroup group;
+        if (qualifyingTenantId == null) {
+            group = null;
+        } else {
+            group = getUserGroup(qualifyingTenantId);
+            if (group == null) {
+                throw new UserManagementException("Group with ID "+qualifyingTenantId+" not found for role qualification");
+            }
+        }
+        final RoleDefinition roleDefinition = getRoleDefinition(roleDefinitionId);
+        if (roleDefinition == null) {
+            throw new UserManagementException("Role definition with ID "+roleDefinitionId+" not found");
+        }
+        return new Role(roleDefinition, group, user, transitive);
+    }
+
+    /**
+     * @return the role associated with the given IDs and qualifiers
+     * @throws UserManagementException
+     *             if the current user does not have the meta permission to give this specific, qualified role in this
+     *             context.
+     */
+    @Override
+    public Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID tenantId, String userQualifierName, boolean transitive) throws UserManagementException {
+        final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName, transitive);
+        if (!hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                role.getRoleDefinition(), role.getQualificationAsOwnership())) {
+            throw new UserManagementException("You are not allowed to take this role to the user.");
+        }
+        return role;
+    }
 }

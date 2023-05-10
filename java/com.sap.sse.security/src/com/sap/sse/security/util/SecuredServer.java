@@ -104,6 +104,22 @@ public interface SecuredServer {
     Iterable<String> getNamesOfUsersInGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
 
     /**
+     * Adds the role identified by {@code roleId} to the user identified by {@code username} and makes it transitive or
+     * non-transitive based on the value of the {@code transitive} parameter.
+     */
+    void addRoleToUser(UUID roleId, String username, UUID qualifiedForGroupWithId, String qualifiedForUserWithName,
+            boolean transitive) throws MalformedURLException, ClientProtocolException, IOException, ParseException;
+
+    public static interface RoleDescriptor {
+        UUID getRoleDefinitionId();
+        UUID getQualifiedForGroupWithId();
+        String getQualifiedForUserWithName();
+        Boolean isTransitive();
+    }
+    
+    Iterable<RoleDescriptor> getRoles(String username) throws ClientProtocolException, IOException, ParseException;
+
+    /**
      * Obtains the access control lists defined for the object identified by {@code type} and
      * {@code typeRelativeObjectId}.
      * 
