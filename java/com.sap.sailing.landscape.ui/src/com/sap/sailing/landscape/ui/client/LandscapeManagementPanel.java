@@ -1020,8 +1020,9 @@ public class LandscapeManagementPanel extends SimplePanel {
 
     private void removeApplicationReplicaSet(String regionId, final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
         assert replicaSetIterator.hasNext();
+        final MongoEndpointDTO selectedMongoEndpointForDBArchiving = mongoEndpointsTable.getSelectionModel().getSelectedObject();
         final SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove = replicaSetIterator.next();
-        landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove,
+        landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, selectedMongoEndpointForDBArchiving,
                 sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                         ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,

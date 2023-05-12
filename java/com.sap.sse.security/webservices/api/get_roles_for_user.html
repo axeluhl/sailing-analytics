@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity</h2>
+
+<b>Description:</b>
+<p>The service obtains or changes the ownership of object, or obtains or changes access control list (ACL) properties of an object.</p>
+<br/>
+
+<b>Change Ownership</b>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>GET /get_roles_for_user</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>a JSON document of the following format<br>
+            <pre>
+            [
+              {
+                "role_definition_id": "dc77e3d1-d405-435e-8699-ce7245f6fd7a",
+                "role_name": "admin",
+                "owning_group_id": "be5c4abd-eeba-472f-8391-51661d2420a1",
+                "owning_user_name": null,
+                "qualifying_group_id": "be5c4abd-eeba-472f-8391-51661d2420a1",
+                "qualifying_username": null,
+                "transitive": true
+              },
+              {
+                "role_definition_id": "ad1d5148-b13d-4464-90c4-7c396e4d4e2e",
+                "role_name": "user",
+                "owning_group_id": null,
+                "owning_user_name": "uhl",
+                "qualifying_group_id": "a87d046d-4197-4d4a-8882-0baa57599e57",
+                "qualifying_username": null,
+                "transitive": true
+              }
+            ]</pre>
+            The <tt>owning_group_id</tt> and <tt>owning_user_name</tt> refer to the ownership information for
+            the role <em>association</em>. Typically, this would be the default ownership group of, and the user
+            assigning the role to the receiving user.
+        </td>
+    </tr>
+     <tr>
+        <td>Query Parameter:</td>
+        <td>
+            <div>username</div> An optional user name, telling the user for which to obtain the role assignments;
+                                if not provided, the user of the authenticated subject of the request will be used instead.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -H 'Authorization: Bearer MVPg/uCV1QGqMDmDtUuOQBrSrB1NlIldm0LW+dnxZ2A=' https://security-service.sapsailing.com/security/api/restsecurity/get_roles_for_user</code><br>
+                Will provide a JSON document as explained above.</td>
+    </tr>
+</table>
+</body>
+</html>

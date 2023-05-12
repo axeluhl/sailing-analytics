@@ -176,9 +176,14 @@ public interface LandscapeService {
             boolean removeApplicationReplicaSet, MongoEndpoint moveDatabaseHere, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption) throws Exception;
     
+    /**
+     * @param moveDatabaseHere
+     *            if not {@code null}, the application replica set master's database will be moved to this MongoDB
+     *            endpoint
+     */
     void removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove,
-            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+            MongoEndpoint moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption) throws Exception;
 
     Release getRelease(String releaseNameOrNullForLatestMaster);
 

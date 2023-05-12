@@ -308,6 +308,13 @@ public interface ScoringScheme extends Serializable {
         return new Pair<>(newNumberOfMedalRacesWonSoFar, newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore);
     }
 
+    /**
+     * @param totalPointsSupplier
+     *            can supply the scores for the competitors in the {@code raceColumn}. In particular,
+     *            {@code totalPointsSupplier.apply(competitor).equals(totalPoints)} holds true, meaning that the total
+     *            points supplied are consistent for the race column and the {@code competitor} provided in the
+     *            {@code totalPoints} parameter.
+     */
     default int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
             final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {

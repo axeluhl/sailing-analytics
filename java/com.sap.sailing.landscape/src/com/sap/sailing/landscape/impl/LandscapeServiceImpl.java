@@ -496,7 +496,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                         logger.info("Removing the application replica set archived ("+from+") was requested");
                         final SailingAnalyticsProcess<String> fromMaster = applicationReplicaSetToArchive.getMaster();
                         final Database fromDatabase = fromMaster.getDatabaseConfiguration(region, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-                        removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption);
+                        removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, /* not using moveDatabaseHere at this place; see below */ null, optionalKeyName, passphraseForPrivateKeyDecryption);
                         if (moveDatabaseHere != null) {
                             final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
                             logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
@@ -548,7 +548,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public void removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
+            MongoEndpoint moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         if (applicationReplicaSet.isLocalReplicaSet()) {
             throw new IllegalArgumentException("A replica set cannot remove itself. Current replica set: "+ServerInfo.getName());
@@ -599,6 +599,16 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
+        final Database fromDatabase = applicationReplicaSet.getMaster().getDatabaseConfiguration(region,
+                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                passphraseForPrivateKeyDecryption);
+        if (moveDatabaseHere != null) {
+            final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
+            logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
+            getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
+        } else {
+            logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
+        }
     }
 
     private boolean isAllAutoScalingReplicasShutDown(
@@ -615,6 +625,11 @@ public class LandscapeServiceImpl implements LandscapeService {
         return true;
     }
 
+    /**
+     * Returns a procedure that drops the {@link #toDatabase} first; then copies {@code fromDatabase} to {@code toDatabase} and starts comparing
+     * the result with the original. If the comparison fails, the {@link CopyAndCompareMongoDatabase#run()} method will throw an
+     * {@link IllegalStateException}. If the comparison succeeds, the {@code fromDatabase} will then be deleted.
+     */
     private <BuilderT extends CopyAndCompareMongoDatabase.Builder<BuilderT, String>> CopyAndCompareMongoDatabase<String>
     getCopyAndCompareMongoDatabaseBuilder(Database fromDatabase, Database toDatabase) throws Exception {
         BuilderT builder = CopyAndCompareMongoDatabase.<BuilderT, String>builder()

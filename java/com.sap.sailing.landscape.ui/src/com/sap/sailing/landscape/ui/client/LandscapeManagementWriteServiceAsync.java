@@ -117,8 +117,8 @@ public interface LandscapeManagementWriteServiceAsync {
             String passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
     void removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDescryption, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,

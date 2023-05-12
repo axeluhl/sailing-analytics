@@ -341,7 +341,7 @@ public class SecuredServerImpl implements SecuredServer {
     public Iterable<RoleDescriptor> getRoles(String username) throws ClientProtocolException, IOException, ParseException {
         final URL getRolesForUserUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + SecurityResource.RESTSECURITY +
                 SecurityResource.GET_ROLES_FOR_USER_METHOD
-                + "?" + SecurityResource.USERNAME+"="+username);
+                + (username == null ? "" : ("?" + SecurityResource.USERNAME+"="+username)));
         final HttpGet getRequest = new HttpGet(getRolesForUserUrl.toString());
         final Pair<Object, Integer> result = getJsonParsedResponse(getRequest);
         final Integer status = result.getB();
