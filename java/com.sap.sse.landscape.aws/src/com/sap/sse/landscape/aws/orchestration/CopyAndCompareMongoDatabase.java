@@ -15,8 +15,18 @@ import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * A procedure that is provided with a source and a target database configuration, expected to differ from one another.
- * The content of the source database is copied to the target and then compared using MD5 hashes. Those hashes are computed
- * using {@link Database#getMD5Hash()}.
+ * The content of the source database is copied to the target and then compared using MD5 hashes. Those hashes are
+ * computed using {@link Database#getMD5Hash()}.
+ * <p>
+ * 
+ * The {@link #dropTargetFirst} field decides whether in the target endpoint the database with the
+ * {@link #sourceDatabase}'s name will be dropped before starting with moving. The
+ * {@link #dropSourceAfterSuccessfulCopy} decides whether the {@link #sourceDatabase} will be dropped after moving it
+ * successfully.
+ * <p>
+ * 
+ * If the comparison after the copy process fails, an {@link IllegalStateException} will be thrown by the {@link #run()}
+ * method.
  * 
  * @author Axel Uhl (D043530)
  *

@@ -33,6 +33,10 @@
                 group which the user creating a group has always received, also before this update. See
                 <a href="https://wiki.sapsailing.com/wiki/info/security/permission-concept">https://wiki.sapsailing.com/wiki/info/security/permission-concept</a>
                 for more details.</li>
+            <li>When removing a replica set, now the selection in the table showing the MongoDB endpoints is honored: when a selection has been made there,
+                after successfully removing the replica set, its master database will be moved to the MongoDB endpoint selected and will, after successful
+                comparison with the original, be removed from its original location. Likewise, a new parameter is available for the corresponding
+                REST API endpoint for removing replica sets.</li>
           </ul>
           <h2 class="articleSubheadline">April 2023</h2>
           <ul class="bulletList">

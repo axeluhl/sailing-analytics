@@ -38,6 +38,13 @@
             <div><tt>keyName</tt>, the name of the SSH key to use; must identify an existing SSH key by that name in the region specified
                           and will be used to log on to existing and new instances using a root ssh connection.</div>
             <div><tt>privateKeyEncryptionPassphrase</tt>, the pass phrase to decrypt the private key for the key specified by the keyName parameter</div>
+            <div><tt>mongoUriToArchiveDbTo</tt>, if provided, this must identify a full-fledged database-specific MongoDB URI, such as
+                                        <tt>mongodb://172.16.0.123/mynewevent?replicaSet=archive&retryWrites=true&readPreference=nearest</tt>.
+                                        If provided, it specified the database end point to which to move the replica set's original DB content.
+                                        After moving, the DB content will be compared by hashing original and copy, and only if this comparison
+                                        was successful will the original be dropped. Note: although you must specify a DB name ("mynewevent" in
+                                        the example above), the DB name in the URI will be ignored, and the original DB name will be used under
+                                        all circumstances for the copy.</div>
         </td>
     </tr>
     <tr>

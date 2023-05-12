@@ -335,22 +335,24 @@ public class SecurityResource extends AbstractSecurityResource {
     @Produces("application/json;charset=UTF-8")
     public Response getRoles(@QueryParam(USERNAME) String username) {
         final JSONArray result = new JSONArray();
-        final User user = getService().getUserByName(username);
-        getService().checkCurrentUserReadPermission(user);
-        for (final Role role : user.getRoles()) {
-            final JSONObject roleJson = new JSONObject();
-            result.add(roleJson);
-            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
-            final QualifiedObjectIdentifier qualifiedObjectIdentifierForRoleAssociation = SecuredSecurityTypes.ROLE_ASSOCIATION.getQualifiedObjectIdentifier(associationTypeIdentifier);
-            if (getService().hasCurrentUserAnyPermission(qualifiedObjectIdentifierForRoleAssociation.getPermission(DefaultActions.READ))) {
-                final OwnershipAnnotation ownership = getService().getOwnership(qualifiedObjectIdentifierForRoleAssociation);
-                roleJson.put(ROLE_DEFINITION_ID, role.getRoleDefinition().getIdAsString());
-                roleJson.put(ROLE_NAME, role.getRoleDefinition().getName());
-                roleJson.put(OWNING_GROUP_ID, ownership == null ? null : ownership.getAnnotation() == null ? null : ownership.getAnnotation().getTenantOwner() == null ? null : ownership.getAnnotation().getTenantOwner().getId().toString());
-                roleJson.put(OWNING_USER_NAME, ownership == null ? null : ownership.getAnnotation() == null ? null : ownership.getAnnotation().getUserOwner() == null ? null : ownership.getAnnotation().getUserOwner().getName());
-                roleJson.put(QUALIFYING_GROUP_ID, role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId().toString());
-                roleJson.put(QUALIFYING_USERNAME, role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName());
-                roleJson.put(TRANSITIVE, role.isTransitive());
+        final User user = username == null ? getService().getCurrentUser() : getService().getUserByName(username);
+        if (user != null) {
+            getService().checkCurrentUserReadPermission(user);
+            for (final Role role : user.getRoles()) {
+                final JSONObject roleJson = new JSONObject();
+                result.add(roleJson);
+                final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+                final QualifiedObjectIdentifier qualifiedObjectIdentifierForRoleAssociation = SecuredSecurityTypes.ROLE_ASSOCIATION.getQualifiedObjectIdentifier(associationTypeIdentifier);
+                if (getService().hasCurrentUserAnyPermission(qualifiedObjectIdentifierForRoleAssociation.getPermission(DefaultActions.READ))) {
+                    final OwnershipAnnotation ownership = getService().getOwnership(qualifiedObjectIdentifierForRoleAssociation);
+                    roleJson.put(ROLE_DEFINITION_ID, role.getRoleDefinition().getIdAsString());
+                    roleJson.put(ROLE_NAME, role.getRoleDefinition().getName());
+                    roleJson.put(OWNING_GROUP_ID, ownership == null ? null : ownership.getAnnotation() == null ? null : ownership.getAnnotation().getTenantOwner() == null ? null : ownership.getAnnotation().getTenantOwner().getId().toString());
+                    roleJson.put(OWNING_USER_NAME, ownership == null ? null : ownership.getAnnotation() == null ? null : ownership.getAnnotation().getUserOwner() == null ? null : ownership.getAnnotation().getUserOwner().getName());
+                    roleJson.put(QUALIFYING_GROUP_ID, role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId().toString());
+                    roleJson.put(QUALIFYING_USERNAME, role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName());
+                    roleJson.put(TRANSITIVE, role.isTransitive());
+                }
             }
         }
         return Response.ok(streamingOutput(result)).build();

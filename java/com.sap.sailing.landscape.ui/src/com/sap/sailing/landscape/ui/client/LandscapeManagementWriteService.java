@@ -85,8 +85,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 
     SailingApplicationReplicaSetDTO<String> removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption) throws Exception;
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDescryption) throws Exception;
 
     SailingApplicationReplicaSetDTO<String> createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
