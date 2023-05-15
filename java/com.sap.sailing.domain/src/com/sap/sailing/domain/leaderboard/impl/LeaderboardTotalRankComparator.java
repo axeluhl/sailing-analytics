@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreakingLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -62,15 +61,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
     private final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache;
-    
-    /**
-     * Considers all of the leaderboard's columns in their state at <code>timePoint</code> for calculating the score and rank.
-     */
-    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, ScoringScheme scoringScheme,
-            boolean nullScoresAreBetter, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
-            throws NoWindException {
-        this(leaderboard, timePoint, scoringScheme, nullScoresAreBetter, leaderboard.getRaceColumns(), cache);
-    }
     
     /**
      * Considers only the race columns specified in <code>raceColumnsToConsider</code> and behaves as if the other columns
