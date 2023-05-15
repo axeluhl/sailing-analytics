@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,8 +15,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -57,7 +60,11 @@ import com.sap.sse.common.Util.Pair;
  * 
  * This scoring scheme changes the definition of the net points sum for all medal series participants to equal the
  * number of wins, considering the {@link Series#isStartsWithZeroScore()} and the wins carried over into the series as
- * specified by {@link Series#isFirstColumnNonDiscardableCarryForward()}.
+ * specified by {@link Series#isFirstColumnNonDiscardableCarryForward()}.<p>
+ * 
+ * The penalty score calculation for an {@link MaxPointsReason#STP STP} IRM code is changed: instead of adding 1.0 to
+ * the score from tracking, this scoring scheme adds 1.1. This shall help avoid ties, particularly when it comes to
+ * deciding a race's winner which shall happen based on lowest score (<em>not</em> score equaling 1.0) now.
  */
 public class LowPointFirstToWinThreeRaces extends LowPoint {
     private static final long serialVersionUID = 7072175334160798617L;
@@ -234,7 +241,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         if (netPoints != null && raceColumn.isMedalRace() && !raceColumn.isCarryForward()) {
             // TODO bug 5778: consider passing through a cache object
             final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
-            result = isWin(leaderboard, competitor, raceColumn, timePoint, c->leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache),
+            result = isWin(leaderboard, competitor, raceColumn, timePoint, c->leaderboard.getTotalPoints(c, raceColumn, timePoint, cache),
                     cache) ? 1.0 : 0.0;
         } else {
             result = netPoints; // includes the null case
@@ -282,18 +289,30 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
     }
     
     /**
-     * See OG2024_SAL_ORIS_R8_V1.2_20230330.pdf: "A boat shall be credited with a win when it is scored with one point
-     * in a medal series race."
+     * After some back and forth between the Formula Kite class and World Sailing and the IOC, it seems they now settle for
+     * an approach by which the "winner" of a race is called the competitor with the lowest score. With the other special rule
+     * of making a standard penalty {@link MaxPointsReason#STP STP} count 1.1 (instead of 1.0) during the medal series, ties
+     * between winner and runner-up are to be avoided.<p>
+     * 
+     * (Used to be, based on OG2024_SAL_ORIS_R8_V1.2_20230330.pdf: "A boat shall be credited with a win when it is scored with one point
+     * in a medal series race.")
      */
     @Override
     public boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Function<Competitor, Double> totalPointsSupplier,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return isWin(competitor, totalPointsSupplier);
-    }
-
-    private boolean isWin(Competitor competitor, Function<Competitor, Double> totalPointsSupplier) {
-        return Util.equalsWithNull(totalPointsSupplier.apply(competitor), Double.valueOf(1.0));
+        final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+        final Double competitorTotalPoints = totalPointsSupplier.apply(competitor);
+        final Comparator<Double> scoreComparator = getScoreComparator(/* nullScoresAreBetter */ false);
+        for (final Competitor otherCompetitor : leaderboard.getCompetitors()) {
+            if (otherCompetitor != competitor && raceColumn.getFleetOfCompetitor(otherCompetitor) == fleetOfCompetitor &&
+                    scoreComparator.compare(competitorTotalPoints, totalPointsSupplier.apply(otherCompetitor)) > 0) {
+                // otherCompetitor is in same fleet and has a better score ("less" in the view of the score comparator)
+                // so competitor hasn't won this race
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -383,5 +402,21 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
 
     private boolean hasMedalScores(List<Pair<RaceColumn, Double>> o1Scores) {
         return o1Scores.stream().anyMatch(p->p.getA().isMedalRace() && p.getB() != null);
+    }
+
+    @Override
+    public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
+            Integer numberOfCompetitorsInRace,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
+            Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
+        final Double result;
+        if (maxPointsReason == MaxPointsReason.STP && raceColumn.isMedalRace()) {
+            final Double uncorrectedScore = uncorrectedScoreProvider.get();
+            result = uncorrectedScore == null ? null : uncorrectedScore + 1.1;
+        } else {
+            result = super.getPenaltyScore(raceColumn, competitor, maxPointsReason, numberOfCompetitorsInRace,
+                    numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard, uncorrectedScoreProvider);
+        }
+        return result;
     }
 }

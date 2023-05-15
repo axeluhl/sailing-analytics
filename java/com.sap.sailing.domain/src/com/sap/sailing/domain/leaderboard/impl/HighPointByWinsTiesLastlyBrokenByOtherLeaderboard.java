@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -71,7 +72,7 @@ public class HighPointByWinsTiesLastlyBrokenByOtherLeaderboard extends HighPoint
      * 
      * Should by some definition one penalty code be considered "better" than another, manual intervention based on
      * 1/1000th of a point may be required, or the implementation of
-     * {@link ScoringScheme#getPenaltyScore(RaceColumn, Competitor, MaxPointsReason, Integer, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint, com.sap.sailing.domain.leaderboard.Leaderboard)}
+     * {@link ScoringScheme#getPenaltyScore(RaceColumn, Competitor, MaxPointsReason, Integer, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint, com.sap.sailing.domain.leaderboard.Leaderboard, Supplier)}
      * must be overridden accordingly here to provide those 1/1000th of a point automatically.
      */
     @Override
