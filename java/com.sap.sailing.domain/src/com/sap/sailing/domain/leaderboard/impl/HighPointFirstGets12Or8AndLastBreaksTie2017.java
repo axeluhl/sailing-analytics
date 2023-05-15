@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.function.Supplier;
+
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -37,7 +39,7 @@ public class HighPointFirstGets12Or8AndLastBreaksTie2017 extends AbstractHighPoi
     
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint, Leaderboard leaderboard) {
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint, Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
         Double result;
         /**
          * 1. Get all competitors without a max point reason.

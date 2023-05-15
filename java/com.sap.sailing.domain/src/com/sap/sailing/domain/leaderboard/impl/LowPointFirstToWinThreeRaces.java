@@ -14,8 +14,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
@@ -57,7 +59,11 @@ import com.sap.sse.common.Util.Pair;
  * 
  * This scoring scheme changes the definition of the net points sum for all medal series participants to equal the
  * number of wins, considering the {@link Series#isStartsWithZeroScore()} and the wins carried over into the series as
- * specified by {@link Series#isFirstColumnNonDiscardableCarryForward()}.
+ * specified by {@link Series#isFirstColumnNonDiscardableCarryForward()}.<p>
+ * 
+ * The penalty score calculation for an {@link MaxPointsReason#STP STP} IRM code is changed: instead of adding 1.0 to
+ * the score from tracking, this scoring scheme adds 1.1. This shall help avoid ties, particularly when it comes to
+ * deciding a race's winner which shall happen based on lowest score (<em>not</em> score equaling 1.0) now.
  */
 public class LowPointFirstToWinThreeRaces extends LowPoint {
     private static final long serialVersionUID = 7072175334160798617L;
@@ -383,5 +389,21 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
 
     private boolean hasMedalScores(List<Pair<RaceColumn, Double>> o1Scores) {
         return o1Scores.stream().anyMatch(p->p.getA().isMedalRace() && p.getB() != null);
+    }
+
+    @Override
+    public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
+            Integer numberOfCompetitorsInRace,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
+            Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
+        final Double result;
+        if (maxPointsReason == MaxPointsReason.STP) {
+            final Double uncorrectedScore = uncorrectedScoreProvider.get();
+            result = uncorrectedScore == null ? null : uncorrectedScore + 1.1;
+        } else {
+            result = super.getPenaltyScore(raceColumn, competitor, maxPointsReason, numberOfCompetitorsInRace,
+                    numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard, uncorrectedScoreProvider);
+        }
+        return result;
     }
 }
