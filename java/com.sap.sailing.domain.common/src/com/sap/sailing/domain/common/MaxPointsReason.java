@@ -26,7 +26,7 @@ public enum MaxPointsReason {
     /** 20 % penalty under rule 30.2 */
     ZFP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
     /** Took a Scoring penalty under rule 44.3 (a) */
-    SCP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
+    SCP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ true, /* calculateScoreDuringRace */ true),
     /** Disqualification not excludable under rule 90.3 (b) */
     DNE(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Disqualification for gross misconduct not excludable under rule 90.3 (b) */
