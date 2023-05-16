@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -105,4 +106,7 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     
     @Statistic(messageKey="NumberOfTacks", resultDecimals=0)
     public Integer getNumberOfTacks();
+    
+    @Statistic(messageKey="VMG", resultDecimals=2)
+    public Speed getVelocityMadeGood();
 }

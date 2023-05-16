@@ -216,9 +216,6 @@ public enum DetailType implements Serializable {
 
     private SortingOrder defaultSortingOrder;
     
-    /**
-     * TODO:
-     */
     private Action premiumAction;
 
     private final String[] oldNames;
@@ -238,6 +235,10 @@ public enum DetailType implements Serializable {
         return defaultSortingOrder;
     }
     
+    /**
+     * If not {@code null} then the user must have permission to execute the action returned on the
+     * leaderboard to which it is applied.
+     */
     public Action getPremiumAction() {
         return this.premiumAction;
     }

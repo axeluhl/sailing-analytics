@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -75,7 +76,6 @@ public interface ScoringScheme extends Serializable {
      * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to
      * know the number of competitors in the race, some need to know the total number of competitors in the leaderboard
      * or regatta.
-     * 
      * @param numberOfCompetitorsInLeaderboardFetcher
      *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single
      *            race; otherwise, this parameter tells the number of competitors in the same race as
@@ -88,10 +88,11 @@ public interface ScoringScheme extends Serializable {
      *            may be required in case a "penalty" such as a redress needs to inspect the scores of other race
      *            columns as well; implementations need to take great care not to cause endless recursions by
      *            naively asking the leaderboard for scores which would recurse into this method
+     * @param uncorrectedScoreProvider TODO
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
             Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
-            TimePoint timePoint, Leaderboard leaderboard);
+            TimePoint timePoint, Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider);
 
     /**
      * @param competitor1Scores
@@ -308,6 +309,13 @@ public interface ScoringScheme extends Serializable {
         return new Pair<>(newNumberOfMedalRacesWonSoFar, newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore);
     }
 
+    /**
+     * @param totalPointsSupplier
+     *            can supply the scores for the competitors in the {@code raceColumn}. In particular,
+     *            {@code totalPointsSupplier.apply(competitor).equals(totalPoints)} holds true, meaning that the total
+     *            points supplied are consistent for the race column and the {@code competitor} provided in the
+     *            {@code totalPoints} parameter.
+     */
     default int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
             final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {

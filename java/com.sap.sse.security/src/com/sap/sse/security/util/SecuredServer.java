@@ -117,6 +117,9 @@ public interface SecuredServer {
         Boolean isTransitive();
     }
     
+    /**
+     * @param username may be {@code null} which will then fetch the roles of the user currently authenticated
+     */
     Iterable<RoleDescriptor> getRoles(String username) throws ClientProtocolException, IOException, ParseException;
 
     /**

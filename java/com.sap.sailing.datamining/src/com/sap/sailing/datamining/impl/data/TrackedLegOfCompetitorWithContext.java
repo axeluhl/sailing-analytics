@@ -30,6 +30,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -508,5 +509,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     @Override
     public Double getRankPredictionErrorRhumbLineBasedAcrossFirstThreeQuarters() {
         return getRankPredictionError(this::getRankRhumbLineBasedAverageAcrossFirstThreeQuarters);
+    }
+
+    @Override
+    public Speed getVelocityMadeGood() {
+        final TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
+        return getTrackedLegOfCompetitor().getAverageVelocityMadeGood(finishTime == null ? TimePoint.now() : finishTime);
     }
 }

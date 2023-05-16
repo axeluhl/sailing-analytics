@@ -331,7 +331,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
             @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
             @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
-            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase,
+            @FormParam(MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM) String mongoUriToArchiveDbTo) {
         checkLandscapeManageAwsPermission();
         Response response;
         final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
@@ -343,7 +344,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             if (applicationReplicaSetToRemove == null) {
                 response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
             } else {
-                getLandscapeService().removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, optionalKeyName, passphraseForPrivateKeyDecryption);
+                getLandscapeService().removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, null, optionalKeyName, passphraseForPrivateKeyDecryption);
                 response = Response.ok().build();
             }
         } catch (Exception e) {
