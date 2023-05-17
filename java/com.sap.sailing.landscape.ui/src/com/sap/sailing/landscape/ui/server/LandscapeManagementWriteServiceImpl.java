@@ -102,6 +102,7 @@ import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -624,6 +625,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
+        if (removeApplicationReplicaSet) {
+            getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                    new TypeRelativeObjectIdentifier(applicationReplicaSetToArchive.getReplicaSetName())));
+        }
         final Pair<DataImportProgress, CompareServersResult> result = getLandscapeService().archiveReplicaSet(regionId,
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId, getLandscape()), applicationReplicaSetToArchive),
                 bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
@@ -649,6 +654,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
+        getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                new TypeRelativeObjectIdentifier(applicationReplicaSetToRemove.getReplicaSetName())));
         getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
                 new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), null, optionalKeyName, passphraseForPrivateKeyDecryption);
         return null;
