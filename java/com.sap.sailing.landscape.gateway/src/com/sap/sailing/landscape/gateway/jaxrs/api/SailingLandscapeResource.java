@@ -47,6 +47,8 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.MongoUriParser;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -248,6 +250,10 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(REMOVE_APPLICATION_REPLICA_SET_FORM_PARAM) @DefaultValue("true") boolean removeApplicationReplicaSet,
             @FormParam(MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM) String mongoUriToArchiveDbTo) {
         checkLandscapeManageAwsPermission();
+        if (removeApplicationReplicaSet) {
+            getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                    new TypeRelativeObjectIdentifier(replicaSetName)));
+        }
         Response response;
         final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
@@ -334,6 +340,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase,
             @FormParam(MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM) String mongoUriToArchiveDbTo) {
         checkLandscapeManageAwsPermission();
+        getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                new TypeRelativeObjectIdentifier(replicaSetName)));
         Response response;
         final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
