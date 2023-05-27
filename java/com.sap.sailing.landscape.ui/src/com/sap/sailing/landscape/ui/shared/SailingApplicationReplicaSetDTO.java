@@ -35,6 +35,9 @@ public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSe
         Util.addAll(replicas, this.replicas);
     }
     
+    /**
+     * Same as {@link #getReplicaSetName()}, adapting to the {@link Named} interface
+     */
     public String getName() {
         return getReplicaSetName();
     }
