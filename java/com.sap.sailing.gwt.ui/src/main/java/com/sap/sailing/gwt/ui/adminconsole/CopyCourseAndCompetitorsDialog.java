@@ -91,7 +91,8 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
             if (leaderboard.getName().equals(nameOfSelectedLeaderboard)) {
                 for (final RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
                     for (final FleetDTO fleet : raceColumn.getFleets()) {
-                        if (!raceColumn.getName().equals(raceToExclude.getA().getName()) ||
+                        if (!fromLeaderboardName.equals(nameOfSelectedLeaderboard) | // see also bug5848: if a different leaderboard is selected, don't filter
+                                !raceColumn.getName().equals(raceToExclude.getA().getName()) ||
                                 !fleet.getName().equals(raceToExclude.getB().getName())) {
                             newRaces.add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, leaderboard));
                         }
