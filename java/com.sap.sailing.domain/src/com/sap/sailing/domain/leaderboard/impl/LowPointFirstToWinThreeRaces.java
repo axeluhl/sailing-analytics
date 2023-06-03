@@ -305,11 +305,21 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
         final Double competitorTotalPoints = totalPointsSupplier.apply(competitor);
         final Comparator<Double> scoreComparator = getScoreComparator(/* nullScoresAreBetter */ false);
         for (final Competitor otherCompetitor : leaderboard.getCompetitors()) {
-            if (otherCompetitor != competitor && raceColumn.getFleetOfCompetitor(otherCompetitor) == fleetOfCompetitor &&
-                    scoreComparator.compare(competitorTotalPoints, totalPointsSupplier.apply(otherCompetitor)) > 0) {
-                // otherCompetitor is in same fleet and has a better score ("less" in the view of the score comparator)
-                // so competitor hasn't won this race
-                return false;
+            if (otherCompetitor != competitor && raceColumn.getFleetOfCompetitor(otherCompetitor) == fleetOfCompetitor) {
+                final int totalPointsCompareResult = scoreComparator.compare(competitorTotalPoints, totalPointsSupplier.apply(otherCompetitor));
+                if (totalPointsCompareResult > 0) {
+                    // otherCompetitor is in same fleet and has a better score ("less" in the view of the score comparator)
+                    // so competitor hasn't won this race
+                    return false;
+                } else if (totalPointsCompareResult == 0) {
+                    // both have the same score; compare by finishing order:
+                    final int finishingOrderCompareResult = Integer.compare(leaderboard.getTrackedRank(competitor, raceColumn, timePoint, cache),
+                            leaderboard.getTrackedRank(otherCompetitor, raceColumn, timePoint, cache));
+                    if (finishingOrderCompareResult > 0) {
+                        // competitor is ranked worse than otherCompetitor at timePoint, so hasn't won
+                        return false;
+                    }
+                }
             }
         }
         return true;
@@ -410,7 +420,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
             NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
             Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
         final Double result;
-        if (maxPointsReason == MaxPointsReason.STP && raceColumn.isMedalRace()) {
+        if ((maxPointsReason == MaxPointsReason.STP || maxPointsReason == MaxPointsReason.SCP) && raceColumn.isMedalRace()) {
             final Double uncorrectedScore = uncorrectedScoreProvider.get();
             result = uncorrectedScore == null ? null : uncorrectedScore + 1.1;
         } else {

@@ -434,6 +434,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             Callable<T> actionToDeleteObject);
     
+    /**
+     * Deletes {@link #deleteOwnership(QualifiedObjectIdentifier) ownership} and
+     * {@link #deleteAccessControlList(QualifiedObjectIdentifier) ACLs} for the object identified by {@code identifier}
+     */
     void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier);
 
     <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(

@@ -37,16 +37,17 @@
                 after successfully removing the replica set, its master database will be moved to the MongoDB endpoint selected and will, after successful
                 comparison with the original, be removed from its original location. Likewise, a new parameter is available for the corresponding
                 REST API endpoint for removing replica sets.</li>
-            <li>An STP scoring code ("Standard Penalty") now by default adds 1.0 to the competitor's score as calculated based on the ranking.
-                The STP code is shown already with the beginning of the race, but any official scoring result entered after the race will be
+            <li>An STP or SCP scoring code ("Standard Penalty" / "Scoring Penalty") now by default adds 1.0 to the competitor's score as calculated based on the ranking.
+                The STP / SCP code is shown already with the beginning of the race, but any official scoring result entered after the race will be
                 used during replay only once the competitor has finished the race. For the medal stages of the new Formula Kite scoring
-                (Low Point, First to Win Three Races, both, the A8.1 and A8.2 variants) an STP will add 1.1 to the competitor's score.</li>
+                (Low Point, First to Win Three Races, both, the A8.1 and A8.2 variants) an STP / SCP will add 1.1 to the competitor's score.</li>
             <li>The "Low Point, First to Win Three Races" scoring schemes, which rank competitors in the medal series based on the number of
                 "races won" now count a win if the competitor has achieved the lowest score in that race. This changes the previous rule where
                 the competitor needed to score 1.0 points in order to be called the "winner" of that race. In particular, with this change
                 a competitor with, say, 2.0 points can be the "winner" of the race in case the competitor finishing first took a standard
-                penalty (STP) which adds 1.1 points to the 1.0 point awarded for finishing first, so a total of 2.1 points, thus worse
-                than the 2.0 points of the competitor finishing second.</li>
+                penalty (STP) or scoring penalty (SCP) which adds 1.1 points to the 1.0 point awarded for finishing first, so a total of 2.1 points, thus worse
+                than the 2.0 points of the competitor finishing second. Should there still be a tie on points, the finishing order is
+                used to break that tie.</li>
           </ul>
           <h2 class="articleSubheadline">April 2023</h2>
           <ul class="bulletList">

@@ -609,6 +609,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
         }
+        getSecurityService().deleteAllDataForRemovedObject(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                new TypeRelativeObjectIdentifier(applicationReplicaSet.getServerName())));
     }
 
     private boolean isAllAutoScalingReplicasShutDown(
