@@ -177,6 +177,13 @@ public interface LandscapeService {
             byte[] passphraseForPrivateKeyDecryption) throws Exception;
     
     /**
+     * If the replica set is mapped through DNS, the DNS record is removed first, before any attempts are made to shut down
+     * the processes and to remove the ALB rules and target groups. This way, this method can also be used at the end of
+     * an archiving process where a reverse proxy entry has already been set to direct traffic for the replica set
+     * to the archive from now on. It is then important that the DNS record is removed before starting to dismantle the
+     * replica set because only then the traffic will be routed to the archive before the replica set's infrastructure
+     * really becomes unresponsive.
+     * 
      * @param moveDatabaseHere
      *            if not {@code null}, the application replica set master's database will be moved to this MongoDB
      *            endpoint

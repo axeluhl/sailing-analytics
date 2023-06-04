@@ -23,6 +23,17 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">June 2023</h2>
+          <ul class="bulletList">
+            <li>Handling an error condition more "gracefully:" when in the "Low Point, First to Win Three Races in Final" a competitor
+                was assigned a number of carried wins, but that competitor then did not compete in either of the semi-final fleets, an internal
+                error would keep the entire leaderboard from displaying. This is now ameliorated by logging a warning and sorting
+                such a competitor as "worse" than others with equal points/wins.</li>
+            <li>When archiving a DNS-mapped replica set, the DNS record was removed only after all infrastructure (processes,
+                instances, load balancer listener rules, target groups) were removed. This led to the unfortunate situation that
+                the reverse-proxy rule that was already active would not get triggered until the DNS record was finally removed.
+                Now, the DNS record is the first thing to remove for a replica set when deleting it.</li>
+          </ul>
           <h2 class="articleSubheadline">May 2023</h2>
           <ul class="bulletList">
             <li>When a user with landscape management permissions creates a new application replica set, e.g., for a new event and the user group created

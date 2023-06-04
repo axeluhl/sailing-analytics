@@ -556,6 +556,18 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
+        final Iterable<Rule> currentLoadBalancerRuleSet = applicationReplicaSet.getLoadBalancer().getRules();
+        final String loadBalancerDNSName = applicationReplicaSet.getLoadBalancer().getDNSName();
+        final ResourceRecordSet dnsResourceRecordSet = applicationReplicaSet.getResourceRecordSet();
+        if (dnsResourceRecordSet != null) {
+            // remove the DNS record if this replica set was a DNS-mapped one;
+            // when later stopping replicas, they will try to cleanly de-register from their master during VM shut-down,
+            // although this is not too critical, given that the entire replica set will now be removed. Yet, the Java VM
+            // is more than likely to still have a cached copy of the replica set's DNS record, thus most likely still
+            // cleanly de-registering from their master.
+            logger.info("Removing DNS CNAME record "+dnsResourceRecordSet);
+            getLandscape().removeDNSRecord(applicationReplicaSet.getHostedZoneId(), applicationReplicaSet.getHostname(), RRType.CNAME, loadBalancerDNSName);
+        }
         // Remove all shards
         for (AwsShard<String> shard : applicationReplicaSet.getShards().keySet()) {
             applicationReplicaSet.removeShard(shard, getLandscape());
@@ -579,11 +591,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         // remove the target groups
         getLandscape().deleteTargetGroup(applicationReplicaSet.getMasterTargetGroup());
         getLandscape().deleteTargetGroup(applicationReplicaSet.getPublicTargetGroup());
-        final String loadBalancerDNSName = applicationReplicaSet.getLoadBalancer().getDNSName();
-        final Iterable<Rule> currentLoadBalancerRuleSet = applicationReplicaSet.getLoadBalancer().getRules();
-        if (applicationReplicaSet.getResourceRecordSet() != null) {
+        if (dnsResourceRecordSet != null) {
             // remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
-            if (applicationReplicaSet.getResourceRecordSet().resourceRecords().stream().filter(rr->
+            if (dnsResourceRecordSet.resourceRecords().stream().filter(rr->
                     AwsLandscape.removeTrailingDotFromHostname(rr.value()).equals(loadBalancerDNSName)).findAny().isPresent() &&
                 (Util.isEmpty(currentLoadBalancerRuleSet) ||
                     (Util.size(currentLoadBalancerRuleSet) == 1 && currentLoadBalancerRuleSet.iterator().next().isDefault()))) {
@@ -593,9 +603,6 @@ public class LandscapeServiceImpl implements LandscapeService {
             } else {
                 logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped or still has rules.");
             }
-            // remove the DNS record if this replica set was a DNS-mapped one
-            logger.info("Removing DNS CNAME record "+applicationReplicaSet.getResourceRecordSet());
-            getLandscape().removeDNSRecord(applicationReplicaSet.getHostedZoneId(), applicationReplicaSet.getHostname(), RRType.CNAME, loadBalancerDNSName);
         } else {
             logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
