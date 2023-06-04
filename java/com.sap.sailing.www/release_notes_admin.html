@@ -29,10 +29,14 @@
                 was assigned a number of carried wins, but that competitor then did not compete in either of the semi-final fleets, an internal
                 error would keep the entire leaderboard from displaying. This is now ameliorated by logging a warning and sorting
                 such a competitor as "worse" than others with equal points/wins.</li>
-            <li>When archiving a DNS-mapped replica set, the DNS record was removed only after all infrastructure (processes,
-                instances, load balancer listener rules, target groups) were removed. This led to the unfortunate situation that
-                the reverse-proxy rule that was already active would not get triggered until the DNS record was finally removed.
-                Now, the DNS record is the first thing to remove for a replica set when deleting it.</li>
+            <li>When archiving a DNS-mapped replica set, the load balancer rules were removed only after even the master process
+                was stopped. Furthermore, all replicas were stopped even if the master was not part of the public target group, before
+                the load balancer rules were changed. This led to the unfortunate situation that
+                the reverse-proxy rule that was already active would not get triggered until the load balancer rules
+                for the replica set were finally removed, letting users receive error 500 status codes.
+                Now, the master is first added to the public target group if it wasn't already a part of it, then all replicas are stopped,
+                then the load balancer rules are removed, and then the master is stopped. This will increase availability, particularly
+                during a replica set archiving process.</li>
           </ul>
           <h2 class="articleSubheadline">May 2023</h2>
           <ul class="bulletList">
