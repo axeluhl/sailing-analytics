@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -67,6 +68,8 @@ import com.sap.sse.common.Util.Pair;
  * deciding a race's winner which shall happen based on lowest score (<em>not</em> score equaling 1.0) now.
  */
 public class LowPointFirstToWinThreeRaces extends LowPoint {
+    private static final Logger logger = Logger.getLogger(LowPointFirstToWinThreeRaces.class.getName());
+    
     private static final long serialVersionUID = 7072175334160798617L;
 
     @Override
@@ -141,11 +144,23 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                 } else {
                     // o1 and o2 scored in different fleets of the same medal series; compare as follows:
                     // - by their rank inside their fleet
-                    final int o1RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o1MedalFleet, totalPointsSupplier, o1,
-                            openingSeriesTotalRankComparator, firstNonCarryRaceColumnInMedalSeries, nullScoresAreBetter, leaderboard, timePoint, cache);
-                    final int o2RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o2MedalFleet, totalPointsSupplier, o2,
-                            openingSeriesTotalRankComparator, firstNonCarryRaceColumnInMedalSeries, nullScoresAreBetter, leaderboard, timePoint, cache);
-                    result = Integer.compare(o1RankInMedalSeriesFleet, o2RankInMedalSeriesFleet);
+                    // Special case: one of the competitors received a score for the medal series but is not assigned to
+                    // any of the fleets (o1MedalFleet==null || o2MedalFleet==null). In this case, consider a null fleet as worse:
+                    if (o1MedalFleet == null) {
+                        result = 1;
+                        logger.warning("Competitor "+o1.getName()+" has a score in medal series "+medalSeriesInWhichBothScored.getName()+
+                                " but is not assigned to a fleet; ranking worse than "+o2.getName());
+                    } else if (o2MedalFleet == null) {
+                        result = -1;
+                        logger.warning("Competitor "+o2.getName()+" has a score in medal series "+medalSeriesInWhichBothScored.getName()+
+                                " but is not assigned to a fleet; ranking worse than "+o1.getName());
+                    } else {
+                        final int o1RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o1MedalFleet, totalPointsSupplier, o1,
+                                openingSeriesTotalRankComparator, firstNonCarryRaceColumnInMedalSeries, nullScoresAreBetter, leaderboard, timePoint, cache);
+                        final int o2RankInMedalSeriesFleet = getRankInMedalSeriesFleet(medalSeriesInWhichBothScored, o2MedalFleet, totalPointsSupplier, o2,
+                                openingSeriesTotalRankComparator, firstNonCarryRaceColumnInMedalSeries, nullScoresAreBetter, leaderboard, timePoint, cache);
+                        result = Integer.compare(o1RankInMedalSeriesFleet, o2RankInMedalSeriesFleet);
+                    }
                     if (result == 0) {
                         // - then by opening series rank
                         result = openingSeriesTotalRankComparator.get().compare(o1, o2);
