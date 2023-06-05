@@ -560,6 +560,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         for (AwsShard<String> shard : applicationReplicaSet.getShards().keySet()) {
             applicationReplicaSet.removeShard(shard, getLandscape());
         }
+        // Before stopping all replicas, make sure the master is contained in the public target group.
+        // Sometimes, operators may manually remove it to keep the master from receiving too much pressure.
+        // In this case, stopping all replicas would make the replica set become unavailable for public read access:
+        logger.info("Adding the master "+applicationReplicaSet.getMaster().getHost().getId()+" to public target group "+
+                applicationReplicaSet.getMasterTargetGroup().getName()+" if it isn't already contained");
+        getLandscape().addTargetsToTargetGroup(applicationReplicaSet.getPublicTargetGroup(), Collections.singleton(applicationReplicaSet.getMaster().getHost()));
+        // Only then can we start terminating the replica processes:
         terminateReplicasNotManagedByAutoScalingGroup(applicationReplicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
         if (autoScalingGroup != null) {
             // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
@@ -572,10 +579,19 @@ public class LandscapeServiceImpl implements LandscapeService {
             autoScalingGroupRemoval = new CompletableFuture<>();
             autoScalingGroupRemoval.complete(null);
         }
-        autoScalingGroupRemoval.thenAccept(v->
-            applicationReplicaSet.getMaster().stopAndTerminateIfLast(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
-        // remove the load balancer rules
-        getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(applicationReplicaSet.getLoadBalancerRules(), new Rule[0]));
+        // important to obtain this before shutting down master because then master won't reply to the MONGODB_URI request anymore
+        final Database fromDatabase = applicationReplicaSet.getMaster().getDatabaseConfiguration(region,
+                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                passphraseForPrivateKeyDecryption);
+        autoScalingGroupRemoval.thenAccept(v->{
+            // remove the load balancer rules
+            try {
+                getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(applicationReplicaSet.getLoadBalancerRules(), new Rule[0]));
+                applicationReplicaSet.getMaster().stopAndTerminateIfLast(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
         // remove the target groups
         getLandscape().deleteTargetGroup(applicationReplicaSet.getMasterTargetGroup());
         getLandscape().deleteTargetGroup(applicationReplicaSet.getPublicTargetGroup());
@@ -599,10 +615,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
-        final Database fromDatabase = applicationReplicaSet.getMaster().getDatabaseConfiguration(region,
-                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
-                passphraseForPrivateKeyDecryption);
         if (moveDatabaseHere != null) {
+            // FIXME bug5849: don't archive into same DB again, so check for "equality" of fromDatabase and toDatabase somehow
             final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
             logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
             getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
