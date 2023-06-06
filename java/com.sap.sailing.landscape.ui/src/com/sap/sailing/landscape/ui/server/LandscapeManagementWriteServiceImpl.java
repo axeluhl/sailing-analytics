@@ -657,7 +657,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
                 new TypeRelativeObjectIdentifier(applicationReplicaSetToRemove.getReplicaSetName())));
         getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
-                new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), null, optionalKeyName, passphraseForPrivateKeyDecryption);
+                new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), getMongoEndpoint(moveDatabaseHere),
+                optionalKeyName, passphraseForPrivateKeyDecryption);
         return null;
     }
 

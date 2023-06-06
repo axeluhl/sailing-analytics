@@ -616,10 +616,14 @@ public class LandscapeServiceImpl implements LandscapeService {
             logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
         if (moveDatabaseHere != null) {
-            // FIXME bug5849: don't archive into same DB again, so check for "equality" of fromDatabase and toDatabase somehow
-            final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
-            logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
-            getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
+            if (moveDatabaseHere.equals(fromDatabase.getEndpoint())) {
+                logger.warning("Requested to move database "+fromDatabase+" to its own endpoint "+moveDatabaseHere+
+                        ". Not executing because this would kill the database.");
+            } else {
+                final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
+                logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
+                getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
+            }
         } else {
             logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
         }
