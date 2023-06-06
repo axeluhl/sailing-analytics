@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -21,16 +22,20 @@ import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter.RuleAdapter;
 
 public class LoadBalancerRuleInserterTest {
     private static final String RULE_NAME_PREFIX = "Rule ";
-    private static final String DEFAULT_RULE_NAME = "default";
+    private static final String DEFAULT_RULE_NAME = ApplicationLoadBalancer.DEFAULT_RULE_PRIORITY;
     private LoadBalancerAdapter<TestRuleAdapter> loadBalancerAdapter;
     private LoadBalancerRuleInserter<String, TestRuleAdapter> ruleInserter;
 
     private static class TestRuleAdapter implements RuleAdapter<TestRuleAdapter> {
         private final boolean isDefault;
-        private final int priority;
+        private final String priority;
         private final String ruleArn;
 
         public TestRuleAdapter(boolean isDefault, int priority, String ruleArn) {
+            this(isDefault, "" + priority, ruleArn);
+        }
+        
+        public TestRuleAdapter(boolean isDefault, String priority, String ruleArn) {
             super();
             this.isDefault = isDefault;
             this.priority = priority;
@@ -44,7 +49,7 @@ public class LoadBalancerRuleInserterTest {
 
         @Override
         public String priority() {
-            return "" + priority;
+            return priority;
         }
 
         @Override
@@ -99,6 +104,16 @@ public class LoadBalancerRuleInserterTest {
         addRules(1, true, 1);
         assertEquals(2, Util.size(getRulesSortedByPriority()));
         assertUniqueAscendingPriorities();
+    }
+    
+    @Test
+    public void defaultRuleGetSortedByPriority() {
+        assertEquals(1, Util.size(getRulesSortedByPriority()));
+        addRules(1, true, 1);
+        loadBalancerAdapter.addRules(Collections.singletonList(new TestRuleAdapter(true, DEFAULT_RULE_NAME, DEFAULT_RULE_NAME)));
+        assertEquals(2, Util.size(getRulesSortedByPriority()));
+        addRules(1, true, 1);
+        assertEquals(3, Util.size(getRulesSortedByPriority()));
     }
 
     @Test

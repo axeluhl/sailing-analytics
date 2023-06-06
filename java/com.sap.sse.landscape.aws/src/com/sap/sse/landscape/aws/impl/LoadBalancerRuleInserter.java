@@ -254,8 +254,12 @@ public class LoadBalancerRuleInserter<ShardingKey, RA extends com.sap.sse.landsc
         return priority;
     }
     
+    /**
+     * Returns the loadbalancer's rules, sorted by their priority. This list does not include the default rule.
+     * @return
+     */
     public Iterable<RA> getRulesSortedByPriority() {
-        return Util.stream(loadBalancerAdapter.getRules()).sorted((r1, r2)->Integer.compare(Integer.valueOf(r1.priority()), Integer.valueOf(r2.priority())))::iterator;
+        return Util.stream(loadBalancerAdapter.getRules()).filter(t -> !t.priority().equalsIgnoreCase(ApplicationLoadBalancer.DEFAULT_RULE_PRIORITY)).sorted((r1, r2)->Integer.compare(Integer.valueOf(r1.priority()), Integer.valueOf(r2.priority())))::iterator;
     }
 
     /**
