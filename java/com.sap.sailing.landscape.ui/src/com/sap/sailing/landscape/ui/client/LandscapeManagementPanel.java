@@ -1021,13 +1021,29 @@ public class LandscapeManagementPanel extends SimplePanel {
         assert replicaSetIterator.hasNext();
         final MongoEndpointDTO selectedMongoEndpointForDBArchiving = mongoEndpointsTable.getSelectionModel().getSelectedObject();
         final SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove = replicaSetIterator.next();
+        final ApplicationReplicaSetActionChainingCallback<String> applicationReplicaSetActionChainingCallback = new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, applicationReplicaSetToRemove,
+                (rId, rsi)->removeApplicationReplicaSet(rId, rsi, stringMessages), regionId,
+                replicaSetName->stringMessages.successfullyRemovedApplicationReplicaSet(replicaSetName));
         landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, selectedMongoEndpointForDBArchiving,
                 sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                         ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                        new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, applicationReplicaSetToRemove,
-                                (rId, rsi)->removeApplicationReplicaSet(rId, rsi, stringMessages), regionId,
-                                replicaSetName->stringMessages.successfullyRemovedApplicationReplicaSet(replicaSetName)));
+                        new AsyncCallback<Util.Pair<SailingApplicationReplicaSetDTO<String>, String>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                applicationReplicaSetActionChainingCallback.onFailure(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(Util.Pair<SailingApplicationReplicaSetDTO<String>, String> result) {
+                                applicationReplicaSetActionChainingCallback.onSuccess(result.getA());
+                                final String mongoDbArchivingErrorMessage = result.getB();
+                                if (mongoDbArchivingErrorMessage != null) {
+                                    errorReporter.reportError(stringMessages.errorArchivingMongoDBTo(
+                                            selectedMongoEndpointForDBArchiving.getReplicaSetName(), mongoDbArchivingErrorMessage));
+                                }
+                            }
+                        });
     }
     
     private static class ReplicaSetArchivingParameters {

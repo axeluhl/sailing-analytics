@@ -651,17 +651,17 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public SailingApplicationReplicaSetDTO<String> removeApplicationReplicaSet(String regionId,
+    public Pair<SailingApplicationReplicaSetDTO<String>, String> removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
         getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
                 new TypeRelativeObjectIdentifier(applicationReplicaSetToRemove.getReplicaSetName())));
-        getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
+        final String mongoDbArchivingErrorMessage = getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
                 new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), getMongoEndpoint(moveDatabaseHere),
                 optionalKeyName, passphraseForPrivateKeyDecryption);
-        return null;
+        return new Pair<>(applicationReplicaSetToRemove, mongoDbArchivingErrorMessage);
     }
 
     private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> convertFromApplicationReplicaSetDTO(
