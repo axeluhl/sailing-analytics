@@ -18,7 +18,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public interface LandscapeManagementWriteService extends RemoteService {
@@ -98,7 +98,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     ArrayList<ReleaseDTO> getReleases();
 
-    Pair<DataImportProgress, CompareServersResultDTO> archiveReplicaSet(String regionId,
+    Triple<DataImportProgress, CompareServersResultDTO, String> archiveReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,

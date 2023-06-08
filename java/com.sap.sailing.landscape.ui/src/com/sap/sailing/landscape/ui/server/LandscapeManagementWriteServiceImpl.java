@@ -69,6 +69,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -617,7 +618,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public Pair<DataImportProgress, CompareServersResultDTO> archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
+    public Triple<DataImportProgress, CompareServersResultDTO, String> archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers,
@@ -629,17 +630,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
                     new TypeRelativeObjectIdentifier(applicationReplicaSetToArchive.getReplicaSetName())));
         }
-        final Pair<DataImportProgress, CompareServersResult> result = getLandscapeService().archiveReplicaSet(regionId,
+        final Triple<DataImportProgress, CompareServersResult, String> result = getLandscapeService().archiveReplicaSet(regionId,
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId, getLandscape()), applicationReplicaSetToArchive),
                 bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
                 durationToWaitBeforeCompareServers, maxNumberOfCompareServerAttempts, removeApplicationReplicaSet,
                 getMongoEndpoint(moveDatabaseHere), optionalKeyName, passphraseForPrivateKeyDecryption);
+        final String mongoDBArchivingFailureReason = result.getC();
         final CompareServersResultDTO compareServersResultDTO = createCompareServersResultDTO(result);
-        return new Pair<>(result.getA(), compareServersResultDTO);
+        return new Triple<>(result.getA(), compareServersResultDTO, mongoDBArchivingFailureReason);
     }
 
     private CompareServersResultDTO createCompareServersResultDTO(
-            final Pair<DataImportProgress, CompareServersResult> compareServersResult) {
+            final Triple<DataImportProgress, CompareServersResult, String> compareServersResult) {
         return compareServersResult == null ?
                 null :
                 new CompareServersResultDTO(compareServersResult.getB()==null?null:compareServersResult.getB().getServerA(),

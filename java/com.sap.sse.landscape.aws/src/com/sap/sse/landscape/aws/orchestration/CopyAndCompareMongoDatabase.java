@@ -40,6 +40,12 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     private final Iterable<Database> additionalDatabasesToDelete;
     private final boolean dropTargetFirst;
     private final boolean dropSourceAfterSuccessfulCopy;
+    
+    /**
+     * Holds an error or exception message, not mapped through i18n, in case an exception was thrown while trying
+     * to archive the DB; {@code null} otherwise.
+     */
+    private String mongoDbArchivingErrorMessage;
 
     public static interface Builder<BuilderT extends AbstractAwsProcedureImpl.Builder<BuilderT, CopyAndCompareMongoDatabase<ShardingKey>, ShardingKey>, ShardingKey>
     extends AbstractAwsProcedureImpl.Builder<BuilderT, CopyAndCompareMongoDatabase<ShardingKey>, ShardingKey> {
@@ -128,6 +134,10 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         this.dropTargetFirst = builder.isDropTargetFirst();
         this.dropSourceAfterSuccessfulCopy = builder.isDropSourceAfterSuccessfulCopy();
     }
+    
+    public String getMongoDbArchivingErrorMessage() {
+        return mongoDbArchivingErrorMessage;
+    }
 
     @Override
     public void run() throws Exception {
@@ -140,7 +150,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         }
         final MongoDatabase result = targetDatabase.getEndpoint().importDatabase(sourceDatabase.getMongoDatabase());
         if (result == null) {
-            throw new IllegalStateException("This didn't work. No database resulted from importing "+sourceDatabase+" into "+targetDatabase);
+            mongoDbArchivingErrorMessage = "This didn't work. No database resulted from importing "+sourceDatabase+" into "+targetDatabase;
+            throw new IllegalStateException(mongoDbArchivingErrorMessage);
         }
         final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(2, "MongoDB MD5 Hasher "+UUID.randomUUID(),
                 /* executeExistingDelayedTasksAfterShutdownPolicy */ true);
@@ -156,8 +167,9 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
                 }
             }
         } else {
-            throw new IllegalStateException("Import failed; hashes are different. "+sourceDatabase+" has "+sourceMd5.get()+
-                    ", "+targetDatabase+" has "+targetMd5.get());
+            mongoDbArchivingErrorMessage = "Import failed; hashes are different. "+sourceDatabase+" has "+sourceMd5.get()+
+                    ", "+targetDatabase+" has "+targetMd5.get();
+            throw new IllegalStateException(mongoDbArchivingErrorMessage);
         }
         executor.shutdown();
     }
