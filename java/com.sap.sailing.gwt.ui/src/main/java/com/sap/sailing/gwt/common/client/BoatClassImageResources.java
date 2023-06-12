@@ -276,25 +276,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource JK20Icon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LASER_2.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ILCA.png")
     @ImageOptions(preventInlining = true)
-    ImageResource Laser2Icon();
-   
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LASER_SB3.png")
-    @ImageOptions(preventInlining = true)
-    ImageResource LaserSB3Icon();
-   
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LASER_INT.png")
-    @ImageOptions(preventInlining = true)
-    ImageResource LaserIcon();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LASER_RADIAL.png")
-    @ImageOptions(preventInlining = true)
-    ImageResource LaserRadialIcon();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LASER_4_7.png")
-    @ImageOptions(preventInlining = true)
-    ImageResource Laser47Icon();
+    ImageResource ILCAIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LAGO_26.png")
     @ImageOptions(preventInlining = true)
