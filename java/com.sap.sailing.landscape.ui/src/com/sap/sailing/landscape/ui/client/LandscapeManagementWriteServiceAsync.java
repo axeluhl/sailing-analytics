@@ -21,7 +21,6 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
@@ -119,7 +118,7 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
-            String optionalKeyName, byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Pair<SailingApplicationReplicaSetDTO<String>, String>> callback);
+            String optionalKeyName, byte[] passphraseForPrivateKeyDescryption, AsyncCallback<String> callback);
 
     void createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,

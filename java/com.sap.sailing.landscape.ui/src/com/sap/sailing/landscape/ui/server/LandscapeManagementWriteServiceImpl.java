@@ -651,7 +651,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public Pair<SailingApplicationReplicaSetDTO<String>, String> removeApplicationReplicaSet(String regionId,
+    public String removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
@@ -661,7 +661,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final String mongoDbArchivingErrorMessage = getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
                 new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), getMongoEndpoint(moveDatabaseHere),
                 optionalKeyName, passphraseForPrivateKeyDecryption);
-        return new Pair<>(applicationReplicaSetToRemove, mongoDbArchivingErrorMessage);
+        return mongoDbArchivingErrorMessage;
     }
 
     private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> convertFromApplicationReplicaSetDTO(

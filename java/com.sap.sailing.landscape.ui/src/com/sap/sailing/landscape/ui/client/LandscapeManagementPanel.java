@@ -1028,16 +1028,15 @@ public class LandscapeManagementPanel extends SimplePanel {
                 sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                         ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                        new AsyncCallback<Util.Pair<SailingApplicationReplicaSetDTO<String>, String>>() {
+                        new AsyncCallback<String>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 applicationReplicaSetActionChainingCallback.onFailure(caught);
                             }
 
                             @Override
-                            public void onSuccess(Util.Pair<SailingApplicationReplicaSetDTO<String>, String> result) {
-                                applicationReplicaSetActionChainingCallback.onSuccess(result.getA());
-                                final String mongoDbArchivingErrorMessage = result.getB();
+                            public void onSuccess(String mongoDbArchivingErrorMessage) {
+                                applicationReplicaSetActionChainingCallback.onSuccess(/* application replica set (removed) */ null);
                                 if (mongoDbArchivingErrorMessage != null) {
                                     errorReporter.reportError(stringMessages.errorArchivingMongoDBTo(
                                             selectedMongoEndpointForDBArchiving.getReplicaSetName(), mongoDbArchivingErrorMessage));
