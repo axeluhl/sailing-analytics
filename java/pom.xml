@@ -94,6 +94,7 @@
         <module>com.sap.sse.landscape.aws</module>
         <module>com.sap.sse.landscape.aws.common</module>
         <module>com.sap.sse.landscape.aws.common.test</module>
+        <module>com.sap.sse.landscape.test</module>
         <module>com.sap.sse.landscape.aws.test</module>
         <module>com.sap.sse.landscape.aws.persistence</module>
         <module>com.sap.sailing.landscape</module>

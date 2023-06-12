@@ -25,6 +25,12 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
     private static final Logger logger = Logger.getLogger(MongoEndpointImpl.class.getName());
     
     @Override
+    public abstract boolean equals(Object o);
+    
+    @Override
+    public abstract int hashCode();
+    
+    @Override
     public Iterable<MongoDatabase> getMongoDatabases() throws URISyntaxException {
         final MongoClient client = getClient();
         return Util.map(client.listDatabaseNames(), dbName->client.getDatabase(dbName));
