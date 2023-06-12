@@ -124,6 +124,12 @@ tls-auth pfs.key
 
 Here, ``{name-of-the-certificate}.crt`` and ``{name-of-the-key}.key`` need to be replaced by the names of the files corresponding with the host to connect to the OpenVPN. The "B" configuration only differs in the ``remote`` specification, using a different IP address for the OpenVPN server, namely ``52.59.130.167``. It is useful to copy the ``.ovpn`` file and the other ``.key`` and ``.crt`` files into one directory.
 
+If you don't want the default route to be changed to the OpenVPN connection, add this to the .ovpn file:
+
+```
+pull-filter ignore "route-gateway"
+```
+
 Under Windows download the latest OpenVPN client from [https://openvpn.net/client-connect-vpn-for-windows/](https://openvpn.net/client-connect-vpn-for-windows/). After installation, use the ``.ovpn`` file, adjusted with your personalized key/certificate, to establish the connection.
 
 On Linux, go to the global settings through Gnome, node "Network" and press the "+" button next to VPN. Import the ``.ovpn`` file, then enable the OpenVPN connection by flicking the switch. The connection will show in the output of
