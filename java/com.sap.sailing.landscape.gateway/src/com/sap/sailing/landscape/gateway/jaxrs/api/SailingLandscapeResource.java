@@ -38,7 +38,6 @@ import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.serialization.impl.CompareServersResultJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DataImportProgressJsonSerializer;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
@@ -80,6 +79,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS_IN_MILLISECONDS_FORM_PARAM = "durationToWaitBeforeCompareServersInMilliseconds";
     private static final String MDI_PROGRESS = "mdiProgress";
     private static final String COMPARE_SERVERS_RESULT = "compareServersResult";
+    private static final String ARCHIVE_MONGODB_RESULT = "archiveMongoDBResult";
     private static final String BEARER_TOKEN_FOR_REPLICA_SET_TO_ARCHIVE_FORM_PARAM = "bearerTokenForReplicaSetToArchive";
     private static final String BEARER_TOKEN_FOR_ARCHIVE_FORM_PARAM = "bearerTokenForArchive";
     private static final String MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM = "mongoUriToArchiveDbTo";
@@ -267,13 +267,14 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             if (applicationReplicaSetToArchive == null) {
                 response = badRequest("Application replica set with name " + replicaSetName + " not found in region "+regionId);
             } else {
-                final Pair<DataImportProgress, CompareServersResult> mdiProgressAndCompareServersResult = getLandscapeService().archiveReplicaSet(regionId, applicationReplicaSetToArchive,
+                final Triple<DataImportProgress, CompareServersResult, String> mdiProgressAndCompareServersResult = getLandscapeService().archiveReplicaSet(regionId, applicationReplicaSetToArchive,
                     bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
                     Duration.ofMillis(durationToWaitBeforeCompareServersInMillis), maxNumberOfCompareServerAttempts, removeApplicationReplicaSet,
                     moveDatabaseHere, optionalKeyName, passphraseForPrivateKeyDecryption);
                 final JSONObject result = new JSONObject();
                 result.put(MDI_PROGRESS, mdiProgressAndCompareServersResult.getA()==null?null:new DataImportProgressJsonSerializer().serialize(mdiProgressAndCompareServersResult.getA()));
                 result.put(COMPARE_SERVERS_RESULT, mdiProgressAndCompareServersResult.getB()==null?null:new CompareServersResultJsonSerializer().serialize(mdiProgressAndCompareServersResult.getB()));
+                result.put(ARCHIVE_MONGODB_RESULT, mdiProgressAndCompareServersResult.getC());
                 response = Response.ok(streamingOutput(result)).build();
             }
         } catch (Exception e) {
@@ -343,7 +344,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
                 new TypeRelativeObjectIdentifier(replicaSetName)));
         Response response;
-        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
+        final AwsLandscape<String> landscape = getLandscapeService().getLandscape();
+        final AwsRegion region = new AwsRegion(regionId, landscape);
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         try {
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove = getLandscapeService()
@@ -352,7 +354,10 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             if (applicationReplicaSetToRemove == null) {
                 response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
             } else {
-                getLandscapeService().removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, null, optionalKeyName, passphraseForPrivateKeyDecryption);
+                final MongoUriParser<String> mongoUriParser = new MongoUriParser<>(landscape, region);
+                final MongoEndpoint moveDatabaseHere = mongoUriToArchiveDbTo == null ? null : mongoUriParser.parseMongoUri(mongoUriToArchiveDbTo).getEndpoint();
+                getLandscapeService().removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, moveDatabaseHere,
+                        optionalKeyName, passphraseForPrivateKeyDecryption);
                 response = Response.ok().build();
             }
         } catch (Exception e) {

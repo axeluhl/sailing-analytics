@@ -17,7 +17,6 @@ import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
@@ -169,7 +168,7 @@ public interface LandscapeService {
     /**
      * @return the reports on the master data import and content comparison; 
      */
-    Pair<DataImportProgress, CompareServersResult> archiveReplicaSet(String regionId,
+    Triple<DataImportProgress, CompareServersResult, String> archiveReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive, String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers, int maxNumberOfCompareServerAttempts,
@@ -177,18 +176,20 @@ public interface LandscapeService {
             byte[] passphraseForPrivateKeyDecryption) throws Exception;
     
     /**
-     * If the replica set is mapped through DNS, the DNS record is removed first, before any attempts are made to shut down
-     * the processes and to remove the ALB rules and target groups. This way, this method can also be used at the end of
-     * an archiving process where a reverse proxy entry has already been set to direct traffic for the replica set
-     * to the archive from now on. It is then important that the DNS record is removed before starting to dismantle the
-     * replica set because only then the traffic will be routed to the archive before the replica set's infrastructure
-     * really becomes unresponsive.
+     * If the replica set is mapped through DNS, the DNS record is removed first, before any attempts are made to shut
+     * down the processes and to remove the ALB rules and target groups. This way, this method can also be used at the
+     * end of an archiving process where a reverse proxy entry has already been set to direct traffic for the replica
+     * set to the archive from now on. It is then important that the DNS record is removed before starting to dismantle
+     * the replica set because only then the traffic will be routed to the archive before the replica set's
+     * infrastructure really becomes unresponsive.
      * 
      * @param moveDatabaseHere
      *            if not {@code null}, the application replica set master's database will be moved to this MongoDB
      *            endpoint
+     * @return an error message string in case archiving the database was requested but failed for some reason;
+     *         {@code null} otherwise
      */
-    void removeApplicationReplicaSet(String regionId,
+    String removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove,
             MongoEndpoint moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption) throws Exception;
 
