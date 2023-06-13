@@ -164,4 +164,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String processOfReplicaSet(int portOfProcess, String replicaSetName);
     String successfullyMovedAllProcessesAwayFromHost(String hostname);
     String dnsNameAlreadyInUse();
+    String errorArchivingMongoDBTo(String replicaSetNameToArchiveTo, String mongoDBArchivingErrorMessage);
 }

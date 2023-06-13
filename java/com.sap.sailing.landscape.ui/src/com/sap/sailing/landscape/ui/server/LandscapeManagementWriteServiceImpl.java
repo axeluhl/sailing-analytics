@@ -69,6 +69,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -102,8 +103,8 @@ import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -617,7 +618,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public Pair<DataImportProgress, CompareServersResultDTO> archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
+    public Triple<DataImportProgress, CompareServersResultDTO, String> archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers,
@@ -629,17 +630,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
                     new TypeRelativeObjectIdentifier(applicationReplicaSetToArchive.getReplicaSetName())));
         }
-        final Pair<DataImportProgress, CompareServersResult> result = getLandscapeService().archiveReplicaSet(regionId,
+        final Triple<DataImportProgress, CompareServersResult, String> result = getLandscapeService().archiveReplicaSet(regionId,
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId, getLandscape()), applicationReplicaSetToArchive),
                 bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
                 durationToWaitBeforeCompareServers, maxNumberOfCompareServerAttempts, removeApplicationReplicaSet,
                 getMongoEndpoint(moveDatabaseHere), optionalKeyName, passphraseForPrivateKeyDecryption);
+        final String mongoDBArchivingFailureReason = result.getC();
         final CompareServersResultDTO compareServersResultDTO = createCompareServersResultDTO(result);
-        return new Pair<>(result.getA(), compareServersResultDTO);
+        return new Triple<>(result.getA(), compareServersResultDTO, mongoDBArchivingFailureReason);
     }
 
     private CompareServersResultDTO createCompareServersResultDTO(
-            final Pair<DataImportProgress, CompareServersResult> compareServersResult) {
+            final Triple<DataImportProgress, CompareServersResult, String> compareServersResult) {
         return compareServersResult == null ?
                 null :
                 new CompareServersResultDTO(compareServersResult.getB()==null?null:compareServersResult.getB().getServerA(),
@@ -649,16 +651,17 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public SailingApplicationReplicaSetDTO<String> removeApplicationReplicaSet(String regionId,
+    public String removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
         getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
                 new TypeRelativeObjectIdentifier(applicationReplicaSetToRemove.getReplicaSetName())));
-        getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
-                new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), null, optionalKeyName, passphraseForPrivateKeyDecryption);
-        return null;
+        final String mongoDbArchivingErrorMessage = getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
+                new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), getMongoEndpoint(moveDatabaseHere),
+                optionalKeyName, passphraseForPrivateKeyDecryption);
+        return mongoDbArchivingErrorMessage;
     }
 
     private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> convertFromApplicationReplicaSetDTO(
