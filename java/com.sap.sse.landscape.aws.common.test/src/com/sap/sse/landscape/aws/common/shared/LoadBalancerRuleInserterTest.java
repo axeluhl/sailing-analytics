@@ -110,7 +110,8 @@ public class LoadBalancerRuleInserterTest {
     public void defaultRuleGetSortedByPriority() {
         assertEquals(1, Util.size(getRulesSortedByPriority()));
         addRules(1, true, 1);
-        loadBalancerAdapter.addRules(Collections.singletonList(new TestRuleAdapter(true, DEFAULT_RULE_NAME, DEFAULT_RULE_NAME)));
+        loadBalancerAdapter
+                .addRules(Collections.singletonList(new TestRuleAdapter(true, DEFAULT_RULE_NAME, DEFAULT_RULE_NAME)));
         assertEquals(2, Util.size(getRulesSortedByPriority()));
         addRules(1, true, 1);
         assertEquals(3, Util.size(getRulesSortedByPriority()));
