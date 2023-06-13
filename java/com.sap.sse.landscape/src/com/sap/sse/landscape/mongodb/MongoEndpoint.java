@@ -15,7 +15,10 @@ import com.sap.sse.landscape.mongodb.impl.SimpleMongoEndpointImpl;
 /**
  * A MongoDB endpoint that an application can connect to. It can produce a {@link URI} the client can use to connect to,
  * e.g., with a {@code ConnectionString}. The endpoint can be a standalone MongoDB instance, represented by a single
- * {@link MongoProcess}, or it may be a {@link MongoReplicaSet replica set}.
+ * {@link MongoProcess}, or it may be a {@link MongoReplicaSet replica set}.<p>
+ * 
+ * Two MongoDB endpoints are {@link Object#equals(Object) equal} if they are of the same type (e.g., both a replica set,
+ * or both a single instance) and have at least one instance in common.<p>
  * 
  * @author Axel Uhl (D043530)
  *
@@ -145,4 +148,8 @@ public interface MongoEndpoint {
     default Database getDatabase(String name) {
         return new DatabaseImpl(this, name);
     }
+    
+    boolean equals(Object o);
+    
+    int hashCode();
 }

@@ -412,7 +412,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     @Override
-    public Util.Pair<DataImportProgress, CompareServersResult> archiveReplicaSet(String regionId,
+    public Util.Triple<DataImportProgress, CompareServersResult, String> archiveReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,
@@ -458,6 +458,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
         final CompareServersResult compareServersResult;
+        final String mongoDbArchivingErrorMessage;
         if (mdiProgress != null && !mdiProgress.failed() && mdiProgress.getResult() != null) {
             logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Waiting "+durationToWaitBeforeCompareServers+" before starting to compare content...");
             if (Util.isEmpty(from.getLeaderboardGroupIds())) {
@@ -494,21 +495,14 @@ public class LandscapeServiceImpl implements LandscapeService {
                                     "; probably such a reference didn't exist");
                         }
                         logger.info("Removing the application replica set archived ("+from+") was requested");
-                        final SailingAnalyticsProcess<String> fromMaster = applicationReplicaSetToArchive.getMaster();
-                        final Database fromDatabase = fromMaster.getDatabaseConfiguration(region, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-                        removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, /* not using moveDatabaseHere at this place; see below */ null, optionalKeyName, passphraseForPrivateKeyDecryption);
-                        if (moveDatabaseHere != null) {
-                            final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
-                            logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
-                            getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
-                        } else {
-                            logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
-                        }
+                        mongoDbArchivingErrorMessage = removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, moveDatabaseHere, optionalKeyName, passphraseForPrivateKeyDecryption);
                     } else {
+                        mongoDbArchivingErrorMessage = null;
                         logger.info("Removing remote sailing server references to events on "+from+" with IDs "+eventIDs+" from archive server "+archive);
                         archive.removeRemoteServerEventReferences(from, eventIDs);
                     }
                 } else {
+                    mongoDbArchivingErrorMessage = null;
                     logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
                             durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)+
                             " there were the following differences between exporting server "+hostnameFromWhichToArchive+
@@ -517,6 +511,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                             "\nNot proceeding further. You need to resolve the issues manually.");
                 }
             } else {
+                mongoDbArchivingErrorMessage = null;
                 logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
                         durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)+
                         " the comparison of servers "+hostnameOfArchive+" and "+hostnameFromWhichToArchive+
@@ -526,10 +521,11 @@ public class LandscapeServiceImpl implements LandscapeService {
             logger.severe("The Master Data Import (MDI) from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive+
                     " did not work"+(mdiProgress != null ? mdiProgress.getErrorMessage() : " (no result at all)"));
             compareServersResult = null;
+            mongoDbArchivingErrorMessage = null;
         }
         sendMailToReplicaSetOwner(archiveReplicaSet, "FinishedToArchiveReplicaSetIntoSubject", "FinishedToArchiveReplicaSetIntoBody", Optional.of(ServerActions.CAN_IMPORT_MASTERDATA));
         sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "FinishedToArchiveReplicaSetSubject", "FinishedToArchiveReplicaSetBody", Optional.of(ServerActions.CAN_EXPORT_MASTERDATA));
-        return new Util.Pair<>(mdiProgress, compareServersResult);
+        return new Util.Triple<>(mdiProgress, compareServersResult, mongoDbArchivingErrorMessage);
     }
 
     private void terminateReplicasNotManagedByAutoScalingGroup(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
@@ -546,7 +542,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     @Override
-    public void removeApplicationReplicaSet(String regionId,
+    public String removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
             MongoEndpoint moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
@@ -615,16 +611,26 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
+        final String mongoDBArchivingErrorMessage;
         if (moveDatabaseHere != null) {
-            // FIXME bug5849: don't archive into same DB again, so check for "equality" of fromDatabase and toDatabase somehow
-            final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
-            logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
-            getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
+            if (moveDatabaseHere.equals(fromDatabase.getEndpoint())) {
+                mongoDBArchivingErrorMessage = "Requested to move database "+fromDatabase+" to its own endpoint "+moveDatabaseHere+
+                        ". Not executing because this would kill the database.";
+                logger.warning(mongoDBArchivingErrorMessage);
+            } else {
+                final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
+                logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
+                final CopyAndCompareMongoDatabase<String> copyAndCompareMongoDatabaseProcedure = getCopyAndCompareMongoDatabaseProcedure(fromDatabase, toDatabase);
+                copyAndCompareMongoDatabaseProcedure.run();
+                mongoDBArchivingErrorMessage = copyAndCompareMongoDatabaseProcedure.getMongoDbArchivingErrorMessage();
+            }
         } else {
+            mongoDBArchivingErrorMessage = null;
             logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
         }
         getSecurityService().deleteAllDataForRemovedObject(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
                 new TypeRelativeObjectIdentifier(applicationReplicaSet.getServerName())));
+        return mongoDBArchivingErrorMessage;
     }
 
     private boolean isAllAutoScalingReplicasShutDown(
@@ -647,7 +653,7 @@ public class LandscapeServiceImpl implements LandscapeService {
      * {@link IllegalStateException}. If the comparison succeeds, the {@code fromDatabase} will then be deleted.
      */
     private <BuilderT extends CopyAndCompareMongoDatabase.Builder<BuilderT, String>> CopyAndCompareMongoDatabase<String>
-    getCopyAndCompareMongoDatabaseBuilder(Database fromDatabase, Database toDatabase) throws Exception {
+    getCopyAndCompareMongoDatabaseProcedure(Database fromDatabase, Database toDatabase) throws Exception {
         BuilderT builder = CopyAndCompareMongoDatabase.<BuilderT, String>builder()
                 .dropTargetFirst(true)
                 .dropSourceAfterSuccessfulCopy(true)
