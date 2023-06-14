@@ -165,4 +165,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String successfullyMovedAllProcessesAwayFromHost(String hostname);
     String dnsNameAlreadyInUse();
     String errorArchivingMongoDBTo(String replicaSetNameToArchiveTo, String mongoDBArchivingErrorMessage);
+    String optionalSessionToken();
 }
