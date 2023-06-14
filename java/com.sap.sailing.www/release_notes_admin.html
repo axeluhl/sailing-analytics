@@ -37,6 +37,11 @@
                 Now, the master is first added to the public target group if it wasn't already a part of it, then all replicas are stopped,
                 then the load balancer rules are removed, and then the master is stopped. This will increase availability, particularly
                 during a replica set archiving process.</li>
+            <li>In the landscape management panel it is now also possible to provide an already existing AWS session token together with
+                access key and secret for logging in. This can help, e.g., when a corporate standard requires signing in with non-IAM
+                roles or accounts where the typical IAM MFA login is not supported. See your <tt>~/.aws/credentials</tt> file for a possible
+                session token and see, for example, the <tt>aadawscli</tt> tool for producing such session credentials from an Azure
+                Active Directory authentication scheme.</li>
           </ul>
           <h2 class="articleSubheadline">May 2023</h2>
           <ul class="bulletList">
