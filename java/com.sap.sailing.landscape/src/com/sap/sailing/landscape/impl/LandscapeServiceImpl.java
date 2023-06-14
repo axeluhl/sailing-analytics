@@ -748,6 +748,15 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
 
     @Override
+    public void createSessionCredentials(String awsKeyId, String awsKeySecret, String sessionToken) {
+        final AwsSessionCredentialsWithExpiryImpl result = new AwsSessionCredentialsWithExpiryImpl(
+                awsKeyId, awsKeySecret, sessionToken, TimePoint.now().plus(Duration.ONE_HOUR.times(12)));
+        final AwsSessionCredentialsFromUserPreference credentialsPreferences = new AwsSessionCredentialsFromUserPreference(result);
+        getSecurityService().setPreferenceObject(
+                getSecurityService().getCurrentUser().getName(), LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN, credentialsPreferences);
+    }
+
+    @Override
     public boolean hasValidSessionCredentials() {
         return getSessionCredentials() != null;
     }
