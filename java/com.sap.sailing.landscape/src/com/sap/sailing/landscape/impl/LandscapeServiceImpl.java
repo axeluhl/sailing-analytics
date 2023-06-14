@@ -750,7 +750,9 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public void createSessionCredentials(String awsKeyId, String awsKeySecret, String sessionToken) {
         final AwsSessionCredentialsWithExpiryImpl result = new AwsSessionCredentialsWithExpiryImpl(
-                awsKeyId, awsKeySecret, sessionToken, TimePoint.now().plus(Duration.ONE_HOUR.times(12)));
+                awsKeyId, awsKeySecret, sessionToken,
+                // for the expiry, guess that the creation of the session token passed here didn't happen more than five minutes ago
+                TimePoint.now().plus(Duration.ONE_HOUR.times(12).minus(Duration.ONE_MINUTE.times(5))));
         final AwsSessionCredentialsFromUserPreference credentialsPreferences = new AwsSessionCredentialsFromUserPreference(result);
         getSecurityService().setPreferenceObject(
                 getSecurityService().getCurrentUser().getName(), LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN, credentialsPreferences);
