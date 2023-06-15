@@ -54,6 +54,14 @@ public interface LandscapeService {
      * will be overwritten by this. Callers shall ensure that the current user has the {@code LANDSCAPE:MANAGE:AWS} permission.
      */
     void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode);
+
+    /**
+     * For a combination of an AWS access key ID, the corresponding secret plus a session token produces the session
+     * token and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. Callers shall ensure that the current user has the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    void createSessionCredentials(String awsKeyId, String awsKeySecret, String sessionToken);
     
     boolean hasValidSessionCredentials();
 

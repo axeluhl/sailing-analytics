@@ -103,7 +103,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         protected Set<ShardingKey> shardingKeys;
         protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
         protected Region region;
-        protected byte[] passphraseForPrivateKeyDecryption;
         private String pathPrefixForShardingKey;
         
         @Override
@@ -145,10 +144,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
 
         protected AwsLandscape<ShardingKey> getLandscape() {
             return (AwsLandscape<ShardingKey>) super.getLandscape();
-        }
-
-        byte[] getPassphrase() {
-            return passphraseForPrivateKeyDecryption;
         }
 
         Region region() {

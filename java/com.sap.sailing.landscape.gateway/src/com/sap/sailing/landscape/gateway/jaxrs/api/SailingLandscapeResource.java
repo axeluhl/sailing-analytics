@@ -86,6 +86,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String AWS_KEY_ID_FORM_PARAM = "awsKeyId";
     private static final String AWS_KEY_SECRET_FORM_PARAM = "awsKeySecret";
     private static final String AWS_MFA_TOKEN_FORM_PARAM = "awsMfaToken";
+    private static final String AWS_SESSION_TOKEN_FORM_PARAM = "awsSessionToken";
     private static final String SESSION_TOKEN_EXPIRY_UNIX_TIME_MILLIS = "sessionTokenExpiryMillis";
     private static final String SESSION_TOKEN_EXPIRY_ISO = "sessionTokenExpiryISO";
     private static final String RESPONSE_STATUS = "status";
@@ -101,11 +102,11 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     @Context
     UriInfo uriInfo;
     
-    @Path("/createsessioncredentials")
+    @Path("/createmfasessioncredentials")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response createSessionCredentials(
+    public Response createMfaSessionCredentials(
             @FormParam(AWS_KEY_ID_FORM_PARAM) String awsKeyId,
             @FormParam(AWS_KEY_SECRET_FORM_PARAM) String awsKeySecret,
             @FormParam(AWS_MFA_TOKEN_FORM_PARAM) String mfaToken
@@ -114,6 +115,26 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         Response response;
         try {
             getLandscapeService().createMfaSessionCredentials(awsKeyId, awsKeySecret, mfaToken);
+            response = Response.ok().build();
+        } catch (Exception e) {
+            response = Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        return response;
+    }
+    
+    @Path("/createsessioncredentials")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response createSessionCredentials(
+            @FormParam(AWS_KEY_ID_FORM_PARAM) String awsKeyId,
+            @FormParam(AWS_KEY_SECRET_FORM_PARAM) String awsKeySecret,
+            @FormParam(AWS_SESSION_TOKEN_FORM_PARAM) String sessionToken
+            ) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        try {
+            getLandscapeService().createSessionCredentials(awsKeyId, awsKeySecret, sessionToken);
             response = Response.ok().build();
         } catch (Exception e) {
             response = Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
