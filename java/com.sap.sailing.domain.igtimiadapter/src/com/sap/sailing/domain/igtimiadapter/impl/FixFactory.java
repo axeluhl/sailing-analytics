@@ -38,32 +38,38 @@ public class FixFactory {
         for (Entry<Object, Object> fixTypeAndFixesJson : typesJson.entrySet()) {
             final String fixTypeAndOptionalSensorId = (String) fixTypeAndFixesJson.getKey();
             final String[] fixTypeAndOptionalColonSeparatedSensorsSubId = fixTypeAndOptionalSensorId.split(":");
-            int fixType = Integer.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[0]);
-            JSONObject fixesJson = (JSONObject) fixTypeAndFixesJson.getValue();
-            JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
-            int fixIndex = 0;
-            for (Object timePointMillis : timePointsMillis) {
-                if (timePointMillis != null) {
-                    TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
-                    Map<Integer, Object> valuesPerSubindex = new HashMap<>();
-                    int i=1;
-                    JSONArray values;
-                    while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
-                        valuesPerSubindex.put(i, values.get(fixIndex));
-                        i++;
-                    }
-                    Sensor sensor = new SensorImpl(deviceSerialNumber,
-                            fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
-                                    : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
-                    final Type ft = Type.valueOf(fixType);
-                    if (ft != null) {
-                        final Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
-                        if (fix != null) {
-                            result.add(fix);
-                            fixIndex++;
+            try {
+                int fixType = Integer.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[0]);
+                JSONObject fixesJson = (JSONObject) fixTypeAndFixesJson.getValue();
+                JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
+                int fixIndex = 0;
+                for (Object timePointMillis : timePointsMillis) {
+                    if (timePointMillis != null) {
+                        TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
+                        Map<Integer, Object> valuesPerSubindex = new HashMap<>();
+                        int i=1;
+                        JSONArray values;
+                        while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
+                            valuesPerSubindex.put(i, values.get(fixIndex));
+                            i++;
+                        }
+                        Sensor sensor = new SensorImpl(deviceSerialNumber,
+                                fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
+                                        : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
+                        final Type ft = Type.valueOf(fixType);
+                        if (ft != null) {
+                            final Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
+                            if (fix != null) {
+                                result.add(fix);
+                                fixIndex++;
+                            }
                         }
                     }
                 }
+            } catch (NumberFormatException e) {
+                // maybe archived_resources?
+                logger.warning("Couldn't parse "+fixTypeAndOptionalColonSeparatedSensorsSubId[0]+
+                        " into a number; ignoring this record");
             }
         }
         return result;

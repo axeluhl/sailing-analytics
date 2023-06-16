@@ -42,6 +42,10 @@
                 roles or accounts where the typical IAM MFA login is not supported. See your <tt>~/.aws/credentials</tt> file for a possible
                 session token and see, for example, the <tt>aadawscli</tt> tool for producing such session credentials from an Azure
                 Active Directory authentication scheme.</li>
+            <li>Igtimi wind import now will trigger un-archiving of archived wind data. From the Igtimi web site: "All resources stored on the
+                Igtimi servers will be archived if they are older than 6 months and have not been accessed for 4 months. When data is archived
+                it is flagged as''“is_archived = true''". Note that when you hit archived data, while unarchiving is triggered, it will happen
+                in the background and take up to a few minutes. You will then have to try again to actually receive the unarchived data.</li>
           </ul>
           <h2 class="articleSubheadline">May 2023</h2>
           <ul class="bulletList">
