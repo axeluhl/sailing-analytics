@@ -2,9 +2,7 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -17,6 +15,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.FuzzyBoatClassNameMatcher;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -135,45 +134,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     private void sortOfficialResultsByRelevance(List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
-        final Set<String> lowercaseBoatClassNames = new HashSet<String>();
-        lowercaseBoatClassNames.add(boatClass.getName().toLowerCase());
-        Collections.sort(eventNameBoatClassNameCapturedWhen,
-                new Comparator<Util.Pair<String, Util.Pair<String, Date>>>() {
-                    @Override
-                    public int compare(Util.Pair<String, Util.Pair<String, Date>> o1, Util.Pair<String, Util.Pair<String, Date>> o2) {
-                        int result;
-                        if (isBoatClassMatch(lowercaseBoatClassNames, o1.getB().getA().toLowerCase())) {
-                            if (isBoatClassMatch(lowercaseBoatClassNames, o2.getB().getA().toLowerCase())) {
-                                // both don't seem to have the right boat class; compare by time stamp; newest first
-                                result = o2.getB().getB().compareTo(o1.getB().getB());
-                            } else {
-                                result = -1; // o1 scores "better", comes first, because it has the right boat class name
-                            }
-                        } else if (o2.getB().getA() != null
-                                && isBoatClassMatch(lowercaseBoatClassNames, o2.getB().getA().toLowerCase())) {
-                            result = 1;
-                        } else {
-                            // both don't seem to have the right boat class; compare by time stamp; newest first
-                            result = o2.getB().getB().compareTo(o1.getB().getB());
-                        }
-                        return result;
-                    }
-                });
-    }
-    
-    private boolean isBoatClassMatch(Set<String> lowercaseBoatClassNames, String lowercaseBoatClassName) {
-        // First try a quick match for the lowercase boat class name in the set:
-        boolean result = lowercaseBoatClassNames.contains(lowercaseBoatClassName);
-        if (!result) {
-            // Try for prefix matches the other way around:
-            for (String fromSet : lowercaseBoatClassNames) {
-                if (lowercaseBoatClassName.startsWith(fromSet)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
+        new FuzzyBoatClassNameMatcher().sortOfficialResultsByRelevance(boatClass.getName(), eventNameBoatClassNameCapturedWhen);
     }
 
     private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {
