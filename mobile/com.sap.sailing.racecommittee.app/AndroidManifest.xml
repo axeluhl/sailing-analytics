@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.sap.sailing.racecommittee.app">
-
     <uses-sdk />
 
     <permission
@@ -22,6 +21,13 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+
+    <!-- To make camera intents work starting with Android 11 -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
 
     <application
         android:name=".RaceApplication"

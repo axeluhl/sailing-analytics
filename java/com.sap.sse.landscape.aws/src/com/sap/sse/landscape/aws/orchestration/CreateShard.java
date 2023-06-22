@@ -86,7 +86,6 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
             assert shardingKeys != null;
             assert replicaSet != null;
             assert region != null;
-            assert passphraseForPrivateKeyDecryption != null;
             return new CreateShard<ShardingKey, MetricsT, ProcessT>(this);
         }
     }

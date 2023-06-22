@@ -18,7 +18,7 @@ public class BoatClassImageResolver {
     
     static {
         boatClassIconsMap = new HashMap<String, ImageResource>();
-
+    
         // handicap sailing icons
         boatClassIconsMap.put(BoatClassMasterdata.ORC.getDisplayName(), imageResources.ORCIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ORC_CLUB.getDisplayName(), imageResources.ORCClubIcon());

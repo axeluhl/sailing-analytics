@@ -36,6 +36,9 @@ import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
@@ -850,4 +853,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Tags addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
     
     String getAutoScalingGroupName(String replicaSetName);
+
+    /**
+     * If a {@link #sessionToken} was provided to this landscape, use it to create {@link AwsSessionCredentials}; otherwise
+     * an {@link AwsBasicCredentials} object will be produced from the {@link #accessKeyId} and the {@link #secretAccessKey}.
+     */
+    AwsCredentials getCredentials();
 }

@@ -852,9 +852,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     /**
      * If a {@link #sessionToken} was provided to this landscape, use it to create {@link AwsSessionCredentials}; otherwise
      * an {@link AwsBasicCredentials} object will be produced from the {@link #accessKeyId} and the {@link #secretAccessKey}.
-     * @return
      */
-    private AwsCredentials getCredentials() {
+    @Override
+    public AwsCredentials getCredentials() {
         return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, nonEmptySessionToken))
                 .orElse(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
     }
@@ -904,7 +904,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             // this didn't work; if it didn't work because a key by that name already exists, let's still try to import the
             // key into this Landscape, only making this Landscape aware of the key pair for which the public key had been
             // uploaded to AWS earlier.
-            if (e.getMessage().contains("The keypair '"+keyName+"' already exists")) {
+            if (e.getMessage().contains("The keypair ") && e.getMessage().contains("already exists")) {
                 logger.info("A key named " + keyName + " already exists in the AWS region " + region.getId()
                         + ". No problem; trying to import into this landscape.");
             } else {
