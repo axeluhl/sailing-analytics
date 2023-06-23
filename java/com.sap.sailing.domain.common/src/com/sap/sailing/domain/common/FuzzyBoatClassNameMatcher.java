@@ -50,19 +50,13 @@ public class FuzzyBoatClassNameMatcher {
                 new Comparator<Util.Pair<String, Util.Pair<String, Date>>>() {
                     @Override
                     public int compare(Util.Pair<String, Util.Pair<String, Date>> o1, Util.Pair<String, Util.Pair<String, Date>> o2) {
-                        int result;
-                        if (isBoatClassMatch(lowercaseBoatClassNameToMatch, o1.getB().getA().toLowerCase())) {
-                            if (isBoatClassMatch(lowercaseBoatClassNameToMatch, o2.getB().getA().toLowerCase())) {
-                                // both don't seem to have the right boat class; compare by time stamp; newest first
-                                result = o2.getB().getB().compareTo(o1.getB().getB());
-                            } else {
-                                result = -1; // o1 scores "better", comes first, because it has the right boat class name
-                            }
-                        } else if (o2.getB().getA() != null
-                                && isBoatClassMatch(lowercaseBoatClassNameToMatch, o2.getB().getA().toLowerCase())) {
-                            result = 1;
+                        final int result;
+                        final double quality1 = getQualityOfBoatClassMatch(lowercaseBoatClassNameToMatch, o1.getA());
+                        final double quality2 = getQualityOfBoatClassMatch(lowercaseBoatClassNameToMatch, o2.getA());
+                        if (Math.max(quality1, quality2) >= 0.5) {
+                            result = -Double.compare(quality1, quality2);
                         } else {
-                            // both don't seem to have the right boat class; compare by time stamp; newest first
+                            // both don't seem to have a reasonably qualified boat class; compare by time stamp; newest first
                             result = o2.getB().getB().compareTo(o1.getB().getB());
                         }
                         return result;
@@ -70,14 +64,14 @@ public class FuzzyBoatClassNameMatcher {
                 });
     }
     
-    private double getQualityOfBoatClassMatch(String lowercaseBoatClassNameCandidate) {
+    private double getQualityOfBoatClassMatch(String lowerBoatClassNameToMatch, String lowercaseBoatClassNameCandidate) {
         final SortedMap<String, BoatClassMasterdata> tailMap = boatClassMasterDataByLiteralAndDisplayNameAndAlternativeNames.tailMap(lowercaseBoatClassNameCandidate);
         double bestResultSoFar = 0.0;
         for (final Entry<String, BoatClassMasterdata> e : tailMap.entrySet()) {
             if (!e.getKey().startsWith(lowercaseBoatClassNameCandidate)) {
                 break;
             }
-            
+            final double result = 1; // TODO find longest common substring filtered to characters and numbers
         }
         return 0.0;
     }

@@ -216,7 +216,6 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     @Override
     protected Util.Triple<String, String, Util.Pair<String, Date>> getResult() {
          Util.Triple<String, String, Util.Pair<String, Date>> result = null; 
-
          int selectedProviderIndex = scoreCorrectionProviderListBox.getSelectedIndex();
          if (selectedProviderIndex > 0) {
              String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedProviderIndex);
