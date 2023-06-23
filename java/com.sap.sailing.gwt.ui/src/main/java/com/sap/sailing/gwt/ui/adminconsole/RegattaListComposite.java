@@ -124,8 +124,13 @@ public class RegattaListComposite extends Composite {
                 string.add(t.getName());
                 if (t.boatClass != null) {
                     string.add(t.boatClass.getName());
+                }             
+                if (t.courseAreas != null) {
+                    for (final CourseAreaDTO courseArea : t.courseAreas) {
+                        string.add(courseArea.getName());
+                    }
                 }
-                return string;
+                return string;          
             }
 
             @Override
