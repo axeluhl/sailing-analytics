@@ -1,13 +1,14 @@
 package com.sap.sailing.domain.common;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Set;
 
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sse.common.Util;
 
 /**
@@ -24,35 +25,20 @@ import com.sap.sse.common.Util;
  *
  */
 public class FuzzyBoatClassNameMatcher {
-    private static final TreeMap<String, BoatClassMasterdata> boatClassMasterDataByLiteralAndDisplayNameAndAlternativeNames;
-    
-    static {
-        boatClassMasterDataByLiteralAndDisplayNameAndAlternativeNames = new TreeMap<>();
-        for (final BoatClassMasterdata bcm : BoatClassMasterdata.values()) {
-            boatClassMasterDataByLiteralAndDisplayNameAndAlternativeNames.put(bcm.name().toLowerCase(), bcm);
-            boatClassMasterDataByLiteralAndDisplayNameAndAlternativeNames.put(bcm.getDisplayName().toLowerCase(), bcm);
-            for (final String alternativeName : bcm.getAlternativeNames()) {
-                boatClassMasterDataByLiteralAndDisplayNameAndAlternativeNames.put(alternativeName.toLowerCase(), bcm);
-            }
-        }
-    }
-    
     /**
      * Sorts the {@code eventNameBoatClassNameCapturedWhen} list as described in the class comment
      * 
-     * @param boatClassName
-     *            the boat class name to match; it may still contain whitespace and may be capitalized in any way; for
-     *            the purpose of comparing, whitespace and case will be ignored.
+     * @param boatClass
+     *            the boat class to match
      */
-    public void sortOfficialResultsByRelevance(final String boatClassName, List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
-        final String lowercaseBoatClassNameToMatch = boatClassName.toLowerCase();
+    public void sortOfficialResultsByRelevance(final BoatClassDTO boatClass, List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
         Collections.sort(eventNameBoatClassNameCapturedWhen,
                 new Comparator<Util.Pair<String, Util.Pair<String, Date>>>() {
                     @Override
                     public int compare(Util.Pair<String, Util.Pair<String, Date>> o1, Util.Pair<String, Util.Pair<String, Date>> o2) {
                         final int result;
-                        final double quality1 = getQualityOfBoatClassMatch(lowercaseBoatClassNameToMatch, o1.getA());
-                        final double quality2 = getQualityOfBoatClassMatch(lowercaseBoatClassNameToMatch, o2.getA());
+                        final double quality1 = getQualityOfBoatClassMatch(boatClass, o1.getB().getA());
+                        final double quality2 = getQualityOfBoatClassMatch(boatClass, o2.getB().getA());
                         if (Math.max(quality1, quality2) >= 0.5) {
                             result = -Double.compare(quality1, quality2);
                         } else {
@@ -64,23 +50,31 @@ public class FuzzyBoatClassNameMatcher {
                 });
     }
     
-    private double getQualityOfBoatClassMatch(String lowerBoatClassNameToMatch, String lowercaseBoatClassNameCandidate) {
-        final SortedMap<String, BoatClassMasterdata> tailMap = boatClassMasterDataByLiteralAndDisplayNameAndAlternativeNames.tailMap(lowercaseBoatClassNameCandidate);
-        double bestResultSoFar = 0.0;
-        for (final Entry<String, BoatClassMasterdata> e : tailMap.entrySet()) {
-            if (!e.getKey().startsWith(lowercaseBoatClassNameCandidate)) {
-                break;
-            }
-            final double result = 1; // TODO find longest common substring filtered to characters and numbers
+    private double getQualityOfBoatClassMatch(BoatClassDTO boatClassToMatch, String boatClassNameCandidate) {
+        final BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(boatClassToMatch.getName());
+        final Set<String> allNamesToMatchAgainst = new HashSet<>();
+        if (boatClassMasterdata != null) {
+            allNamesToMatchAgainst.add(boatClassMasterdata.getDisplayName());
+            allNamesToMatchAgainst.addAll(Arrays.asList(boatClassMasterdata.getAlternativeNames()));
+        } else {
+            allNamesToMatchAgainst.add(boatClassToMatch.getName());
         }
-        return 0.0;
+        double longestCommonSubstringShareSoFar = 0;
+        final String lowercaseBoatClassNameCandidate = boatClassNameCandidate.toLowerCase();
+        for (final String boatClassNameToMatch : allNamesToMatchAgainst) {
+            final String lowerClassBoatClassNameToMatch = boatClassNameToMatch.toLowerCase();
+            longestCommonSubstringShareSoFar = Math.max(
+                    ((double) getLengthOfLongestCommonSubstringBasedOnLettersAndNumbersOnly(
+                            lowerClassBoatClassNameToMatch, lowercaseBoatClassNameCandidate)) / (double) lowerClassBoatClassNameToMatch.length(),
+                    longestCommonSubstringShareSoFar);
+        }
+        return longestCommonSubstringShareSoFar;
     }
     
-    private boolean isBoatClassMatch(String lowercaseBoatClassNameCandidate, String lowercaseBoatClassName) {
-        // First try a quick match for the lowercase boat class name in the set:
-        boolean result = lowercaseBoatClassNameCandidate.equals(lowercaseBoatClassName) ||
-                // then try prefix match
-                lowercaseBoatClassName.startsWith(lowercaseBoatClassNameCandidate);
-        return result;
+    private int getLengthOfLongestCommonSubstringBasedOnLettersAndNumbersOnly(String lowerBoatClassNameToMatch,
+            String lowercaseBoatClassNameCandidate) {
+        final String lowerBoatClassNameToMatchLettersAndNumbersOnly = lowerBoatClassNameToMatch.replaceAll("[^a-zA-Z0-9]*", "");
+        final String lowercaseBoatClassNameCandidateLettersAndNumbersOnly = lowercaseBoatClassNameCandidate.replaceAll("[^a-zA-Z0-9]*", "");
+        return Util.getLengthOfLongestCommonSubsequence(lowerBoatClassNameToMatchLettersAndNumbersOnly, lowercaseBoatClassNameCandidateLettersAndNumbersOnly);
     }
 }

@@ -1187,4 +1187,73 @@ public class Util {
         return result;
     }
 
+    /**
+     * Find the longest common character sub-sequence shared by both strings. A sub-sequence does not
+     * have to be contiguous. For example "acd" is a sub-sequence of "abcde" and hence the longest common
+     * sub-sequence of "abcde" and "123a456dc789d0".
+     */
+    public static int getLengthOfLongestCommonSubsequence(String a, String b) {
+        final int[][] longestCommonSubstringStartingInAAndB = new int[a.length()][];
+        for (int i=0; i<a.length(); i++) {
+            longestCommonSubstringStartingInAAndB[i] = new int[b.length()];
+            for (int j=0; j<b.length(); j++) {
+                longestCommonSubstringStartingInAAndB[i][j] = -1;
+            }
+        }
+        return lcs(a, b, a.length(), b.length(), longestCommonSubstringStartingInAAndB);
+    }
+    
+    private static int lcs(String a, String b, int endOfSubstringInA, int endOfSubstringInB, int[][] longestCommonSubstringStartingInAAndB) {
+        final int result;
+        if (endOfSubstringInA == 0 || endOfSubstringInB == 0) {
+          result = 0;
+        } else if (longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] != -1) {
+          result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        } else if (a.charAt(endOfSubstringInA - 1) == b.charAt(endOfSubstringInB - 1)) {
+            longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] =
+                    1 + lcs(a, b, endOfSubstringInA - 1, endOfSubstringInB - 1, longestCommonSubstringStartingInAAndB);
+            result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        } else {
+            longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] =
+                    Math.max(lcs(a, b, endOfSubstringInA, endOfSubstringInB - 1, longestCommonSubstringStartingInAAndB),
+                             lcs(a, b, endOfSubstringInA - 1, endOfSubstringInB, longestCommonSubstringStartingInAAndB));
+            result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        }
+        return result;
+    }
+
+    /**
+     * Find the longest common character sub-sequence shared by both strings. A sub-sequence does not
+     * have to be contiguous. For example "acd" is a sub-sequence of "abcde" and hence the longest common
+     * sub-sequence of "abcde" and "123a456dc789d0".
+     */
+    public static int getLengthOfLongestCommonSubstring(String a, String b) {
+        final int[][] longestCommonSubstringStartingInAAndB = new int[a.length()][];
+        for (int i=0; i<a.length(); i++) {
+            longestCommonSubstringStartingInAAndB[i] = new int[b.length()];
+            for (int j=0; j<b.length(); j++) {
+                longestCommonSubstringStartingInAAndB[i][j] = -1;
+            }
+        }
+        return lccs(a, b, a.length(), b.length(), longestCommonSubstringStartingInAAndB);
+    }
+    
+    private static int lccs(String a, String b, int endOfSubstringInA, int endOfSubstringInB, int[][] longestCommonSubstringStartingInAAndB) {
+        final int result;
+        if (endOfSubstringInA == 0 || endOfSubstringInB == 0) {
+          result = 0;
+        } else if (longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] != -1) {
+          result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        } else if (a.charAt(endOfSubstringInA - 1) == b.charAt(endOfSubstringInB - 1)) {
+            longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] =
+                    1 + lcs(a, b, endOfSubstringInA - 1, endOfSubstringInB - 1, longestCommonSubstringStartingInAAndB);
+            result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        } else {
+            longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] =
+                    Math.max(lcs(a, b, endOfSubstringInA, endOfSubstringInB - 1, longestCommonSubstringStartingInAAndB),
+                             lcs(a, b, endOfSubstringInA - 1, endOfSubstringInB, longestCommonSubstringStartingInAAndB));
+            result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        }
+        return result;
+    }
 }

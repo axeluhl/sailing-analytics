@@ -134,7 +134,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     private void sortOfficialResultsByRelevance(List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
-        new FuzzyBoatClassNameMatcher().sortOfficialResultsByRelevance(boatClass.getName(), eventNameBoatClassNameCapturedWhen);
+        new FuzzyBoatClassNameMatcher().sortOfficialResultsByRelevance(boatClass, eventNameBoatClassNameCapturedWhen);
     }
 
     private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {
