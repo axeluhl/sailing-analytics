@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.FuzzyBoatClassNameMatcher;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -24,12 +25,17 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<String, String, Util.Pair<String, Date>>> {
+    private static final String USER_PREFERENCE_LAST_SCORE_CORRECTION_PROVIDER_USED = "ResultSelectionAndApplyDialog.lastScoreCorrectionProviderUsed";
     /**
      * a unique and human-readable string key for a eventNameBoatClassNameAndLastModfied pair
      */
@@ -45,7 +51,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final BoatClassDTO boatClass;
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
-            SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
+            SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter, UserService userService) {
         super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages),
                 new Callback(sailingServiceWrite, leaderboardPanel, errorReporter, stringMessages));
         this.sailingService = sailingServiceWrite;
@@ -53,34 +59,42 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
         this.errorReporter = errorReporter;
         boatClass = leaderboardPanel.getLeaderboard().getBoatClass();
         this.scoreCorrections = new LinkedHashMap<String, Util.Pair<String, Util.Pair<String, Date>>>();
-
         scoreCorrectionProviderListBox = createListBox(/* isMultipleSelect */ false);
         scoreCorrectionListBox = createListBox(/* isMultipleSelect */ false);
         scoreCorrectionListBox.setVisible(false);
         busyIndicator = new SimpleBusyIndicator();
-        
         scoreCorrectionProviderListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                int selectedIndex = scoreCorrectionProviderListBox.getSelectedIndex();
-                if (selectedIndex > 0) {
-                    String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedIndex);
-                    scoreCorrectionProviderChanged(selectedProviderName);
-                } else {
-                    scoreCorrectionProviderChanged(null);
-                }
+                onScoreCorrectionProviderListBoxSelectionChanged(userService);
             }
         });
-        
         List<String> sortedProviderNames = new ArrayList<String>();
         for(String providerName: scoreCorrectionProviderNames) {
             sortedProviderNames.add(providerName);
         }
+        final Map<String, Integer> indexOfProviderInList = new HashMap<>();
         Collections.sort(sortedProviderNames);
         scoreCorrectionProviderListBox.addItem(stringMessages.selectResultImportProvider());
         for(String providerName: sortedProviderNames) {
+            indexOfProviderInList.put(providerName, scoreCorrectionProviderListBox.getItemCount());
             scoreCorrectionProviderListBox.addItem(providerName);
         }
+        userService.getPreference(USER_PREFERENCE_LAST_SCORE_CORRECTION_PROVIDER_USED, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorFetchingUserPreference(USER_PREFERENCE_LAST_SCORE_CORRECTION_PROVIDER_USED, caught.getMessage()),
+                        NotificationType.WARNING);
+            }
+            
+            @Override
+            public void onSuccess(String result) {
+                if (result != null && indexOfProviderInList.containsKey(result)) {
+                    scoreCorrectionProviderListBox.setSelectedIndex(indexOfProviderInList.get(result));
+                    onScoreCorrectionProviderListBoxSelectionChanged(userService);
+                }
+            }
+        });
     }
 
     private void scoreCorrectionProviderChanged(String selectedProviderName) {
@@ -122,58 +136,31 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                     eventNameBoatClassNameAndLastModified.add(new Util.Pair<String, Util.Pair<String, Date>>(entry.getKey(), se));
                 }
             }
-            sortOfficialResultsByRelevance(eventNameBoatClassNameAndLastModified);
+            final Map<Util.Pair<String, Util.Pair<String, Date>>, Double> matchQualities = sortOfficialResultsByRelevance(eventNameBoatClassNameAndLastModified);
+            final Map<Util.Pair<String, Util.Pair<String, Date>>, Integer> indexOfResultInScoreCorrectionListBox = new HashMap<>();
             for (Util.Pair<String, Util.Pair<String, Date>> pair : eventNameBoatClassNameAndLastModified) {
                 String eventName = pair.getA();
                 Util.Pair<String, Date> boatClassAndLastModified = pair.getB();
-                
-                String scoreCorrectionName = eventName + ", " + boatClassAndLastModified.getA() + ", " + boatClassAndLastModified.getB(); 
+                String scoreCorrectionName = eventName + ", " + boatClassAndLastModified.getA() + ", " + boatClassAndLastModified.getB();
+                indexOfResultInScoreCorrectionListBox.put(pair, scoreCorrectionListBox.getItemCount());
                 scoreCorrections.put(scoreCorrectionName, pair);
                 scoreCorrectionListBox.addItem(scoreCorrectionName);
+            }
+            if (!eventNameBoatClassNameAndLastModified.isEmpty()
+                    && matchQualities.containsKey(eventNameBoatClassNameAndLastModified.get(0))
+                    && matchQualities.get(eventNameBoatClassNameAndLastModified.get(0)) > 0.5) {
+                // pre-select the result that seems most likely, if the likelihood exceeds 0.5:
+                final Integer indexInList = indexOfResultInScoreCorrectionListBox.get(eventNameBoatClassNameAndLastModified.get(0));
+                if (indexInList != null) {
+                    scoreCorrectionListBox.setSelectedIndex(indexInList);
+                    validateAndUpdate();
+                }
             }
         }
     }
 
-    private void sortOfficialResultsByRelevance(List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
-        final Set<String> lowercaseBoatClassNames = new HashSet<String>();
-        lowercaseBoatClassNames.add(boatClass.getName().toLowerCase());
-        Collections.sort(eventNameBoatClassNameCapturedWhen,
-                new Comparator<Util.Pair<String, Util.Pair<String, Date>>>() {
-                    @Override
-                    public int compare(Util.Pair<String, Util.Pair<String, Date>> o1, Util.Pair<String, Util.Pair<String, Date>> o2) {
-                        int result;
-                        if (isBoatClassMatch(lowercaseBoatClassNames, o1.getB().getA().toLowerCase())) {
-                            if (isBoatClassMatch(lowercaseBoatClassNames, o2.getB().getA().toLowerCase())) {
-                                // both don't seem to have the right boat class; compare by time stamp; newest first
-                                result = o2.getB().getB().compareTo(o1.getB().getB());
-                            } else {
-                                result = -1; // o1 scores "better", comes first, because it has the right boat class name
-                            }
-                        } else if (o2.getB().getA() != null
-                                && isBoatClassMatch(lowercaseBoatClassNames, o2.getB().getA().toLowerCase())) {
-                            result = 1;
-                        } else {
-                            // both don't seem to have the right boat class; compare by time stamp; newest first
-                            result = o2.getB().getB().compareTo(o1.getB().getB());
-                        }
-                        return result;
-                    }
-                });
-    }
-    
-    private boolean isBoatClassMatch(Set<String> lowercaseBoatClassNames, String lowercaseBoatClassName) {
-        // First try a quick match for the lowercase boat class name in the set:
-        boolean result = lowercaseBoatClassNames.contains(lowercaseBoatClassName);
-        if (!result) {
-            // Try for prefix matches the other way around:
-            for (String fromSet : lowercaseBoatClassNames) {
-                if (lowercaseBoatClassName.startsWith(fromSet)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
+    private Map<Pair<String, Pair<String, Date>>, Double> sortOfficialResultsByRelevance(List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
+        return new FuzzyBoatClassNameMatcher().sortOfficialResultsByRelevance(boatClass, eventNameBoatClassNameCapturedWhen);
     }
 
     private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {
@@ -255,7 +242,6 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     @Override
     protected Util.Triple<String, String, Util.Pair<String, Date>> getResult() {
          Util.Triple<String, String, Util.Pair<String, Date>> result = null; 
-
          int selectedProviderIndex = scoreCorrectionProviderListBox.getSelectedIndex();
          if (selectedProviderIndex > 0) {
              String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedProviderIndex);
@@ -266,5 +252,26 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
              }
          }
          return result;
+    }
+
+    private void onScoreCorrectionProviderListBoxSelectionChanged(UserService userService) {
+        int selectedIndex = scoreCorrectionProviderListBox.getSelectedIndex();
+        if (selectedIndex > 0) {
+            String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedIndex);
+            scoreCorrectionProviderChanged(selectedProviderName);
+            userService.setPreference(USER_PREFERENCE_LAST_SCORE_CORRECTION_PROVIDER_USED, selectedProviderName, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorSettingUserPreference(USER_PREFERENCE_LAST_SCORE_CORRECTION_PROVIDER_USED, caught.getMessage()),
+                            NotificationType.WARNING);
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                }
+            });
+        } else {
+            scoreCorrectionProviderChanged(null);
+        }
     }
 }

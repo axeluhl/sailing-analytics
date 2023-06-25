@@ -100,7 +100,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             case AP:
                 logFlag(flag);
                 state.setAborted(now, /* postponed */ true, flag);
-                if (flag != Flags.NONE) {
+                if (flag == Flags.ALPHA) {
                     setProtestTime();
                 }
                 state.setAdvancePass(now);
@@ -266,7 +266,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                     }
                 }
             }
-            if (!racesToAbort.isEmpty() && flag != Flags.NONE) {
+            if (!racesToAbort.isEmpty() && flag == Flags.ALPHA) {
                 setProtestTime();
             }
             for (final ActionWithNowTimePoint action : actions) {
