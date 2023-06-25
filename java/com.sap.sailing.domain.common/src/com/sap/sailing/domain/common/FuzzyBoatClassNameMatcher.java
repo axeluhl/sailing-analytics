@@ -4,12 +4,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Offers a comparator that ranks boat class names and time stamps by the quality of a match of the boat class names to
@@ -30,24 +33,28 @@ public class FuzzyBoatClassNameMatcher {
      * 
      * @param boatClass
      *            the boat class to match
+     * @return 
      */
-    public void sortOfficialResultsByRelevance(final BoatClassDTO boatClass, List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
+    public Map<Pair<String, Pair<String, Date>>, Double> sortOfficialResultsByRelevance(final BoatClassDTO boatClass, List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
+        final Map<Pair<String, Pair<String, Date>>, Double> qualityOfBoatClassMatch = new HashMap<>();
         Collections.sort(eventNameBoatClassNameCapturedWhen,
                 new Comparator<Util.Pair<String, Util.Pair<String, Date>>>() {
                     @Override
                     public int compare(Util.Pair<String, Util.Pair<String, Date>> o1, Util.Pair<String, Util.Pair<String, Date>> o2) {
-                        final int result;
-                        final double quality1 = getQualityOfBoatClassMatch(boatClass, o1.getB().getA());
-                        final double quality2 = getQualityOfBoatClassMatch(boatClass, o2.getB().getA());
+                        int result = 0;
+                        final double quality1 = qualityOfBoatClassMatch.computeIfAbsent(o1, o->getQualityOfBoatClassMatch(boatClass, o.getB().getA()));
+                        final double quality2 = qualityOfBoatClassMatch.computeIfAbsent(o2, o->getQualityOfBoatClassMatch(boatClass, o.getB().getA()));
                         if (Math.max(quality1, quality2) >= 0.5) {
                             result = -Double.compare(quality1, quality2);
-                        } else {
-                            // both don't seem to have a reasonably qualified boat class; compare by time stamp; newest first
+                        }
+                        if (result == 0) {
+                            // both don't seem to have a reasonably qualified boat class or compared equal; compare by time stamp; newest first
                             result = o2.getB().getB().compareTo(o1.getB().getB());
                         }
                         return result;
                     }
                 });
+        return qualityOfBoatClassMatch;
     }
     
     private double getQualityOfBoatClassMatch(BoatClassDTO boatClassToMatch, String boatClassNameCandidate) {
@@ -75,6 +82,6 @@ public class FuzzyBoatClassNameMatcher {
             String lowercaseBoatClassNameCandidate) {
         final String lowerBoatClassNameToMatchLettersAndNumbersOnly = lowerBoatClassNameToMatch.replaceAll("[^a-zA-Z0-9]*", "");
         final String lowercaseBoatClassNameCandidateLettersAndNumbersOnly = lowercaseBoatClassNameCandidate.replaceAll("[^a-zA-Z0-9]*", "");
-        return Util.getLengthOfLongestCommonSubsequence(lowerBoatClassNameToMatchLettersAndNumbersOnly, lowercaseBoatClassNameCandidateLettersAndNumbersOnly);
+        return Util.getLengthOfLongestCommonSubstring(lowerBoatClassNameToMatchLettersAndNumbersOnly, lowercaseBoatClassNameCandidateLettersAndNumbersOnly);
     }
 }

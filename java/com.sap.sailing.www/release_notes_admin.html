@@ -25,6 +25,13 @@
                 <div class="innerContent">
           <h2 class="articleSubheadline">June 2023</h2>
           <ul class="bulletList">
+            <li>When importing results, sorting of the result documents has been improved. The drop-down now puts those
+                result documents at the top that have the relatively longest match of their class name with the regatta's
+                class name, also now considering all alias names for the class known to the system. For equally likely
+                matches the newer result document is preferred. The score importer used last is remembered in the
+                user preferences now and suggested by default. The most likely result document from that "default"
+                score provider is suggested for import if the boat class name has sufficient overlap with the leaderboard's
+                boat class name.</li>
             <li>In the Admin Console Regattas section, the table now features a course area column. This was previously shown
                 in the Leaderboards table only. 
             <li>Handling an error condition more "gracefully:" when in the "Low Point, First to Win Three Races in Final" a competitor

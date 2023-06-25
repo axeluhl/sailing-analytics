@@ -2430,4 +2430,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointA82OnlyDescription();
     String scoringSchemeLowPointSystemFirstThreeWinsA82Only();
     String scoringSchemeLowPointSystemFirstThreeWinsA82OnlyDescription();
+    String errorFetchingUserPreference(String preferenceKey, String message);
+    String errorSettingUserPreference(String preferenceKey, String message);
 }
