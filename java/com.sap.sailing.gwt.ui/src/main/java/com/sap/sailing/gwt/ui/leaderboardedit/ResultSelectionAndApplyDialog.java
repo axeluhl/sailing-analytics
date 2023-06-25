@@ -153,6 +153,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                 final Integer indexInList = indexOfResultInScoreCorrectionListBox.get(eventNameBoatClassNameAndLastModified.get(0));
                 if (indexInList != null) {
                     scoreCorrectionListBox.setSelectedIndex(indexInList);
+                    validateAndUpdate();
                 }
             }
         }
