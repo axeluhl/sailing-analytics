@@ -154,6 +154,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                 if (indexInList != null) {
                     scoreCorrectionListBox.setSelectedIndex(indexInList);
                     validateAndUpdate();
+                    getOkButton().setFocus(true);
                 }
             }
         }
