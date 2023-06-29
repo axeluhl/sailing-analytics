@@ -330,22 +330,20 @@ Both ``/backup`` folders have been mirrored to a S3 bucket called ``backup-sap-p
 
 ### Monitoring and e-Mail Alerting
 
-To be able to use ``sendmail`` to send notifications via email it needs to be installed and configured to use the AWS SES as smtp relay:
+To be able to use ``mail`` to send notifications via email we use ``postfix`` which needs to be installed and configured to use the AWS SES as smtp relay:
 ```
-sudo apt install sendmail
+sudo apt install postfix
 ```
+During the installation process, select "Internet with smarthost", use ``sap-p1-[12].sapsailing.com`` as your system mail name, and for the SMTP relay host enter ``[email-smtp.eu-west-1.amazonaws.com]:588``.
 
-Follow the instructions on [https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-email-sendmail.html](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-email-sendmail.html) with one exception, the content that needs to be added to ``sendmail.mc`` looks like:
+The problem with AWS SES is that it seems to work reliably only when used from EC2 instances. Even a telnet connection from a non-EC2 instance will not work properly. Therefore, SES mail sending needs to work through another SSH port forward which points to ``email-smtp.eu-west-1.amazonaws.com:587``. Furthermore, the ``postfix`` mail transfer agent must be able to reach that port using the correct hostname because otherwise the certificate used for STARTTLS won't match. Therefore, we add a port forward from localhost 588 to email-smtp.eu-west-1.amazonaws.com:587 in our tunnel scripts.
+
+Follow the instructions on [https://docs.aws.amazon.com/ses/latest/dg/postfix.html](https://docs.aws.amazon.com/ses/latest/dg/postfix.html) with the exception of the port number where instead of ``587`` you have to use ``588``, and use ``email-smtp.eu-west-1.amazonaws.com`` as the SMTP host. Furthermore, an entry in ``/etc/hosts`` is required, like this:
+
 ```
-define(`SMART_HOST', `email-smtp.eu-west-1.amazonaws.com')dnl
-define(`RELAY_MAILER_ARGS', `TCP $h 587')dnl
-define(`confAUTH_MECHANISMS', `LOGIN PLAIN')dnl
-FEATURE(`authinfo', `hash -o /etc/mail/authinfo.db')dnl
-MASQUERADE_AS(`sapsailing.com')dnl
-FEATURE(masquerade_envelope)dnl
-FEATURE(masquerade_entire_domain)dnl
+127.0.0.1       localhost email-smtp.eu-west-1.amazonaws.com
 ```
-The authentication details can be fetched from the content of ``/root/mail.properties`` of any running sailing EC2 instance.
+The authentication details that are required during the configuration of postfix according to the AWS documentation can be fetched from the content of ``/root/mail.properties`` of any running sailing EC2 instance.
 
 Both laptops, ``sap-p1-1`` and ``sap-p1-2`` have monitoring scripts from the git folder ``configuration/on-site-scripts`` linked to ``/usr/local/bin``. These in particular include ``monitor-autossh-tunnels`` and ``monitor-mongo-replica-set-delay`` as well as a ``notify-operators`` script which contains the list of e-mail addresses to notify in case an alert occurs.
 
