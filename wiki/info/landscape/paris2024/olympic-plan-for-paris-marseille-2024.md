@@ -179,3 +179,8 @@ Combine the above scenarios: a failing production master (hardware or VM-only) w
 * Create LetsEncrypt certificates for the NGINX installations for paris2024.sapsailing.com and security-service.sapsailing.com and install to the two on-site laptops' NGINX environments
 * Ensure the MongoDB installations on both laptops use the ``paris2024`` replica set
 * Adjust Athena queries to include all ALB logging buckets from all regions
+
+## Open Questions
+
+* Shall we obtain the tunnel scripts via symbolic links from the respective git repo at /home/sailing/code, there then under configuration/on-site-scripts/paris2024/sap-p1-[12]? Currently, they are copies that evolve independently from the git repo.
+* make sure the autossh tunnel from paris-ssh.sapsailing.com to rabbit-eu-west-3.sapsailing.com is established upon re-boot by providing the ``/etc/systemd/system/autossh-port-forwards.service`` in ``paris-ssh.sapsailing.com`` that launches a ``tunnels`` script
