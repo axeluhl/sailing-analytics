@@ -35,5 +35,6 @@ public class SplittingStringsTest {
         assertEquals(Arrays.asList("abc"), splitAlongWhitespaceRespectingDoubleQuotedPhrases("  \"abc")); // ignore unterminated quote
         assertEquals(Arrays.asList("abc "), splitAlongWhitespaceRespectingDoubleQuotedPhrases("  \"abc ")); // ignore unterminated quote
         assertEquals(Arrays.asList("afd", "fsd", "fd\\"), splitAlongWhitespaceRespectingDoubleQuotedPhrases("afd fsd  fd\\")); // trailing escape character stands for itself
+        assertEquals(Arrays.asList("a "), splitAlongWhitespaceRespectingDoubleQuotedPhrases("\"a \"")); // trailing space preserved when within quotes
     }
 }

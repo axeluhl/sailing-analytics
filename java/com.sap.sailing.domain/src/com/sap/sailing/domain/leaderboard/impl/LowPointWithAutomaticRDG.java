@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.function.Supplier;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -21,7 +23,7 @@ public class LowPointWithAutomaticRDG extends LowPoint {
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
             Integer numberOfCompetitorsInRace,
             NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
-            Leaderboard leaderboard) {
+            Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
         final Double result;
         if (maxPointsReason == MaxPointsReason.RDG) {
             double scoreSum = 0;
@@ -43,7 +45,7 @@ public class LowPointWithAutomaticRDG extends LowPoint {
             }
         } else {
             result = super.getPenaltyScore(raceColumn, competitor, maxPointsReason, numberOfCompetitorsInRace,
-                    numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard);
+                    numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard, uncorrectedScoreProvider);
         }
         return result;
     }

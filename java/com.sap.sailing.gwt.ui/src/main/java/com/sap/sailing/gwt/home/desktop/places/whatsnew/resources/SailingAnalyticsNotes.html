@@ -4,6 +4,38 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">June 2023</h5>
+         <ul class="bulletList">
+           <li>Fixed an issue with the plans shown as subscribed to based on the plan
+               categories. For premium users it would have seemed they implicitly got
+               a data mining plan although they did not. Please note that currently
+               you still require to get in touch (support@sapsailing.com) in order
+               to upgrade from a Premium to a data mining plan. This is a known
+               issue that we are working on currently.</li>
+           <li>Replaced the old "Laser" boat class logo / icon with the new ILCA icon.
+               The boat classes internally continue using their original names, also
+               to keep the polar data consistent as the boat hardware hasn't changed,
+               but the new "ILCA" alias names are now available.</li>
+         </ul>
+         <h5 class="articleSubheadline">May 2023</h5>
+         <ul class="bulletList">
+            <li>An STP or SCP scoring code ("Standard Penalty" / "Scoring Penalty") now by default adds 1.0 to the competitor's score as calculated based on the ranking.
+                The STP / SCP code is shown already with the beginning of the race, but any official scoring result entered after the race will be
+                used during replay only once the competitor has finished the race. For the medal stages of the new Formula Kite scoring
+                (Low Point, First to Win Three Races, both, the A8.1 and A8.2 variants) an STP / SCP will add 1.1 to the competitor's score.</li>
+            <li>The "Low Point, First to Win Three Races" scoring schemes, which rank competitors in the medal series based on the number of
+                "races won" now count a win if the competitor has achieved the lowest score in that race. This changes the previous rule where
+                the competitor needed to score 1.0 points in order to be called the "winner" of that race. In particular, with this change
+                a competitor with, say, 2.0 points can be the "winner" of the race in case the competitor finishing first took a standard
+                penalty (STP) or scoring penalty (SCP) which adds 1.1 points to the 1.0 point awarded for finishing first, so a total of 2.1 points, thus worse
+                than the 2.0 points of the competitor finishing second. Should there still be a tie on points, the finishing order is
+                used to break that tie.</li>
+            <li>Average leg Velocity Made Good (VMG) is now available in <a href="/gwt/DataMining.html">data mining</a>.</li>
+         </ul>
+         <h5 class="articleSubheadline">April 2023</h5>
+         <ul class="bulletList">
+           <li>Added XTE (cross-track error) to data mining statistics on GPS fixes</li>
+         </ul>
          <h5 class="articleSubheadline">March 2023</h5>
          <ul class="bulletList">
            <li>Added VMG to data mining statistics on GPS fixes</li>
@@ -26,6 +58,9 @@
                solved this issue.</li>
            <li>Data mining now offers administrators with the necessary permissions to analyze role, permission,
                session and subscription data for administrative purposes.</li>
+           <li>The <tt>.../v2/leaderboards</tt> API now supports the <tt>LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS</tt> detail type,
+               also included when specifying <tt>ALL</tt>. It produces the field <tt>currentLegAverageSpeedOverGround-kts</tt>
+               in the <tt>data</tt> part of the result document.</li>
          </ul>
          <h5 class="articleSubheadline">January 2023</h5>
          <ul class="bulletList">

@@ -4748,7 +4748,7 @@ Replicator {
     public Map<Integer, Statistics> getLocalStatisticsByYear() {
         final Map<Integer, StatisticsCalculator> calculators = new HashMap<>();
         getAllEvents().forEach((event) -> {
-            if (getSecurityService().hasCurrentUserReadPermission(event)) {
+            if (getSecurityService().hasCurrentUserReadPermission(event) && event.isPublic()) {
                 final Integer eventYear = EventUtil.getYearOfEvent(event);
                 // The year may be null if the event has no start date set
                 // In this case the event is ignored for the yearly

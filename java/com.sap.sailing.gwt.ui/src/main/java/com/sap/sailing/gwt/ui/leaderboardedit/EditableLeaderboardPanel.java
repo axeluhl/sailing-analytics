@@ -98,6 +98,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
@@ -700,7 +701,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
             final SailingServiceWriteAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes, 
-            EditableLeaderboardSettings settings, WithSecurity sailingCF) {
+            EditableLeaderboardSettings settings, WithSecurity sailingCF, UserService userService) {
         super(null, context, sailingServiceWrite, asyncActionsExecutor, settings,
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
@@ -731,7 +732,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                     public void onSuccess(Iterable<String> providerNames) {
                         ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(
                                 EditableLeaderboardPanel.this, providerNames, getSailingService(), stringMessages,
-                                getErrorReporter());
+                                getErrorReporter(), userService);
                         dialog.show();
                     }
 

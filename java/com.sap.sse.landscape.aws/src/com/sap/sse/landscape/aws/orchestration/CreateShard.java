@@ -86,7 +86,6 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
             assert shardingKeys != null;
             assert replicaSet != null;
             assert region != null;
-            assert passphraseForPrivateKeyDecryption != null;
             return new CreateShard<ShardingKey, MetricsT, ProcessT>(this);
         }
     }
@@ -107,7 +106,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         logger.info(
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaSet.getName());
         final TargetGroup<ShardingKey> targetGroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
-                name.getTargetGroupName(), replicaSet.getMaster().getPort());
+                name.getTargetGroupName(), replicaSet.getMaster().getPort(), loadBalancer.getVpcId());
         getLandscape().addTargetGroupTag(targetGroup.getTargetGroupArn(), ShardTargetGroupName.TAG_KEY, name.getName(), region);
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "

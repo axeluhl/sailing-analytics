@@ -109,6 +109,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.ServerAdminRole;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -127,6 +128,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeServiceImpl implements LandscapeService {
@@ -168,6 +170,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             Integer optionalMemoryTotalSizeFactorOrNull, Optional<Integer> minimumAutoScalingGroupSize,
             Optional<Integer> maximumAutoScalingGroupSize) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
+        final String hostname = getHostname(name, optionalDomainName);
+        final Iterable<ResourceRecordSet> existingDNSRulesForHostname = landscape.getResourceRecordSets(hostname);
+        // Failing early in case DNS record already exists (see also bug 5826):
+        if (existingDNSRulesForHostname != null && !Util.isEmpty(existingDNSRulesForHostname)) {
+            throw new IllegalArgumentException("DNS record for "+hostname+" already exists");
+        }
         final AwsRegion region = new AwsRegion(regionId, landscape);
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
@@ -217,7 +225,6 @@ public class LandscapeServiceImpl implements LandscapeService {
         });
         // if an unmanaged replica process was launched, return a replica set that contains it; otherwise use the one we already have (without any replica)
         return unmanagedReplica.map(ur->{
-           
                 try {
                     return getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur));
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -318,6 +325,12 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalInstanceType,
                     Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
+        final String hostname = getHostname(replicaSetName, optionalDomainName);
+        final Iterable<ResourceRecordSet> existingDNSRulesForHostname = landscape.getResourceRecordSets(hostname);
+        // Failing early in case DNS record already exists (see also bug 5826):
+        if (existingDNSRulesForHostname != null && !Util.isEmpty(existingDNSRulesForHostname)) {
+            throw new IllegalArgumentException("DNS record for "+hostname+" already exists");
+        }
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSetName,
                 masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
@@ -388,7 +401,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalInstanceType,
             Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) throws Exception {
         final EligibleInstanceForReplicaSetFindingStrategy strategyForFindingOrLaunchingInstanceForUnmangedReplica =
-                new EligbleInstanceForReplicaSetFindingStrategyImpl(this, region, optionalKeyName,
+                new EligibleInstanceForReplicaSetFindingStrategyImpl(this, region, optionalKeyName,
                         privateKeyEncryptionPassphrase, /* master==false because we'd like to deploy a replica */ false,
                         /* mustBeDifferentAvailabilityZone */ true, optionalInstanceType,
                         optionalPreferredInstanceToDeployTo);
@@ -399,7 +412,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     @Override
-    public Util.Pair<DataImportProgress, CompareServersResult> archiveReplicaSet(String regionId,
+    public Util.Triple<DataImportProgress, CompareServersResult, String> archiveReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,
@@ -445,6 +458,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
         final CompareServersResult compareServersResult;
+        final String mongoDbArchivingErrorMessage;
         if (mdiProgress != null && !mdiProgress.failed() && mdiProgress.getResult() != null) {
             logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Waiting "+durationToWaitBeforeCompareServers+" before starting to compare content...");
             if (Util.isEmpty(from.getLeaderboardGroupIds())) {
@@ -481,21 +495,14 @@ public class LandscapeServiceImpl implements LandscapeService {
                                     "; probably such a reference didn't exist");
                         }
                         logger.info("Removing the application replica set archived ("+from+") was requested");
-                        final SailingAnalyticsProcess<String> fromMaster = applicationReplicaSetToArchive.getMaster();
-                        final Database fromDatabase = fromMaster.getDatabaseConfiguration(region, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-                        removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption);
-                        if (moveDatabaseHere != null) {
-                            final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
-                            logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
-                            getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
-                        } else {
-                            logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
-                        }
+                        mongoDbArchivingErrorMessage = removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, moveDatabaseHere, optionalKeyName, passphraseForPrivateKeyDecryption);
                     } else {
+                        mongoDbArchivingErrorMessage = null;
                         logger.info("Removing remote sailing server references to events on "+from+" with IDs "+eventIDs+" from archive server "+archive);
                         archive.removeRemoteServerEventReferences(from, eventIDs);
                     }
                 } else {
+                    mongoDbArchivingErrorMessage = null;
                     logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
                             durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)+
                             " there were the following differences between exporting server "+hostnameFromWhichToArchive+
@@ -504,6 +511,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                             "\nNot proceeding further. You need to resolve the issues manually.");
                 }
             } else {
+                mongoDbArchivingErrorMessage = null;
                 logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
                         durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)+
                         " the comparison of servers "+hostnameOfArchive+" and "+hostnameFromWhichToArchive+
@@ -513,10 +521,11 @@ public class LandscapeServiceImpl implements LandscapeService {
             logger.severe("The Master Data Import (MDI) from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive+
                     " did not work"+(mdiProgress != null ? mdiProgress.getErrorMessage() : " (no result at all)"));
             compareServersResult = null;
+            mongoDbArchivingErrorMessage = null;
         }
         sendMailToReplicaSetOwner(archiveReplicaSet, "FinishedToArchiveReplicaSetIntoSubject", "FinishedToArchiveReplicaSetIntoBody", Optional.of(ServerActions.CAN_IMPORT_MASTERDATA));
         sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "FinishedToArchiveReplicaSetSubject", "FinishedToArchiveReplicaSetBody", Optional.of(ServerActions.CAN_EXPORT_MASTERDATA));
-        return new Util.Pair<>(mdiProgress, compareServersResult);
+        return new Util.Triple<>(mdiProgress, compareServersResult, mongoDbArchivingErrorMessage);
     }
 
     private void terminateReplicasNotManagedByAutoScalingGroup(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
@@ -533,9 +542,9 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     @Override
-    public void removeApplicationReplicaSet(String regionId,
+    public String removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
+            MongoEndpoint moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         if (applicationReplicaSet.isLocalReplicaSet()) {
             throw new IllegalArgumentException("A replica set cannot remove itself. Current replica set: "+ServerInfo.getName());
@@ -547,6 +556,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         for (AwsShard<String> shard : applicationReplicaSet.getShards().keySet()) {
             applicationReplicaSet.removeShard(shard, getLandscape());
         }
+        // Before stopping all replicas, make sure the master is contained in the public target group.
+        // Sometimes, operators may manually remove it to keep the master from receiving too much pressure.
+        // In this case, stopping all replicas would make the replica set become unavailable for public read access:
+        logger.info("Adding the master "+applicationReplicaSet.getMaster().getHost().getId()+" to public target group "+
+                applicationReplicaSet.getMasterTargetGroup().getName()+" if it isn't already contained");
+        getLandscape().addTargetsToTargetGroup(applicationReplicaSet.getPublicTargetGroup(), Collections.singleton(applicationReplicaSet.getMaster().getHost()));
+        // Only then can we start terminating the replica processes:
         terminateReplicasNotManagedByAutoScalingGroup(applicationReplicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
         if (autoScalingGroup != null) {
             // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
@@ -559,10 +575,19 @@ public class LandscapeServiceImpl implements LandscapeService {
             autoScalingGroupRemoval = new CompletableFuture<>();
             autoScalingGroupRemoval.complete(null);
         }
-        autoScalingGroupRemoval.thenAccept(v->
-            applicationReplicaSet.getMaster().stopAndTerminateIfLast(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
-        // remove the load balancer rules
-        getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(applicationReplicaSet.getLoadBalancerRules(), new Rule[0]));
+        // important to obtain this before shutting down master because then master won't reply to the MONGODB_URI request anymore
+        final Database fromDatabase = applicationReplicaSet.getMaster().getDatabaseConfiguration(region,
+                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName),
+                passphraseForPrivateKeyDecryption);
+        autoScalingGroupRemoval.thenAccept(v->{
+            // remove the load balancer rules
+            try {
+                getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(applicationReplicaSet.getLoadBalancerRules(), new Rule[0]));
+                applicationReplicaSet.getMaster().stopAndTerminateIfLast(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
         // remove the target groups
         getLandscape().deleteTargetGroup(applicationReplicaSet.getMasterTargetGroup());
         getLandscape().deleteTargetGroup(applicationReplicaSet.getPublicTargetGroup());
@@ -586,6 +611,26 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
+        final String mongoDBArchivingErrorMessage;
+        if (moveDatabaseHere != null) {
+            if (moveDatabaseHere.equals(fromDatabase.getEndpoint())) {
+                mongoDBArchivingErrorMessage = "Requested to move database "+fromDatabase+" to its own endpoint "+moveDatabaseHere+
+                        ". Not executing because this would kill the database.";
+                logger.warning(mongoDBArchivingErrorMessage);
+            } else {
+                final Database toDatabase = moveDatabaseHere.getDatabase(fromDatabase.getName());
+                logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
+                final CopyAndCompareMongoDatabase<String> copyAndCompareMongoDatabaseProcedure = getCopyAndCompareMongoDatabaseProcedure(fromDatabase, toDatabase);
+                copyAndCompareMongoDatabaseProcedure.run();
+                mongoDBArchivingErrorMessage = copyAndCompareMongoDatabaseProcedure.getMongoDbArchivingErrorMessage();
+            }
+        } else {
+            mongoDBArchivingErrorMessage = null;
+            logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
+        }
+        getSecurityService().deleteAllDataForRemovedObject(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                new TypeRelativeObjectIdentifier(applicationReplicaSet.getServerName())));
+        return mongoDBArchivingErrorMessage;
     }
 
     private boolean isAllAutoScalingReplicasShutDown(
@@ -602,8 +647,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         return true;
     }
 
+    /**
+     * Returns a procedure that drops the {@link #toDatabase} first; then copies {@code fromDatabase} to {@code toDatabase} and starts comparing
+     * the result with the original. If the comparison fails, the {@link CopyAndCompareMongoDatabase#run()} method will throw an
+     * {@link IllegalStateException}. If the comparison succeeds, the {@code fromDatabase} will then be deleted.
+     */
     private <BuilderT extends CopyAndCompareMongoDatabase.Builder<BuilderT, String>> CopyAndCompareMongoDatabase<String>
-    getCopyAndCompareMongoDatabaseBuilder(Database fromDatabase, Database toDatabase) throws Exception {
+    getCopyAndCompareMongoDatabaseProcedure(Database fromDatabase, Database toDatabase) throws Exception {
         BuilderT builder = CopyAndCompareMongoDatabase.<BuilderT, String>builder()
                 .dropTargetFirst(true)
                 .dropSourceAfterSuccessfulCopy(true)
@@ -698,6 +748,17 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
 
     @Override
+    public void createSessionCredentials(String awsKeyId, String awsKeySecret, String sessionToken) {
+        final AwsSessionCredentialsWithExpiryImpl result = new AwsSessionCredentialsWithExpiryImpl(
+                awsKeyId, awsKeySecret, sessionToken,
+                // for the expiry, guess that the creation of the session token passed here didn't happen more than five minutes ago
+                TimePoint.now().plus(Duration.ONE_HOUR.times(12).minus(Duration.ONE_MINUTE.times(5))));
+        final AwsSessionCredentialsFromUserPreference credentialsPreferences = new AwsSessionCredentialsFromUserPreference(result);
+        getSecurityService().setPreferenceObject(
+                getSecurityService().getCurrentUser().getName(), LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN, credentialsPreferences);
+    }
+
+    @Override
     public boolean hasValidSessionCredentials() {
         return getSessionCredentials() != null;
     }
@@ -730,7 +791,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingServer securityServiceServer = sailingServerFactory.getSailingServer(
                 RemoteServerUtil.getBaseServerUrl(securityServiceHostname, securityServicePort==null?443:securityServicePort), bearerTokenUsedByReplicas);
         final UUID userGroupId = securityServiceServer.getUserGroupIdByName(serverGroupName);
+        final UUID groupId;
         if (userGroupId != null) {
+            groupId = userGroupId;
             final TypeRelativeObjectIdentifier serverGroupTypeRelativeObjectId = new TypeRelativeObjectIdentifier(userGroupId.toString());
             final Iterable<Pair<WildcardPermission, Boolean>> permissions = securityServiceServer.hasPermissions(Arrays.asList(
                     SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.CREATE, serverGroupTypeRelativeObjectId),
@@ -753,7 +816,37 @@ public class LandscapeServiceImpl implements LandscapeService {
             // security realm that the application replica set's master process will use if it existed already. Add the user to the group
             securityServiceServer.addCurrentUserToGroup(userGroupId);
         } else {
-            securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
+            groupId = securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
+            try {
+                securityServiceServer.addRoleToUser(ServerAdminRole.getInstance().getId(), securityServiceServer.getUsername(),
+                        /* qualified for server group: */ groupId, null, /* transitive */ true);
+            } catch (Exception e) {
+                // this didn't work, but it's not the end of the world if we cannot grant the requesting user the
+                // event_manager:{group-name} role; the user may end up not having SERVER:CREATE_OBJECT...
+                logger.warning("Couldn't grant role "+ServerAdminRole.getInstance().getName()+" to user "+securityServiceServer.getUsername()+": "+e.getMessage());
+            }
+            try {
+                // try to set the group owner of the new group to the group itself, allowing all users with role user:{group-name} to
+                // change / edit it.
+                securityServiceServer.setGroupAndUserOwner(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString()),
+                        Optional.empty() /* displayName */, Optional.of(groupId), Optional.empty() /* leave user owner unchanged */);
+            } catch (Exception e) {
+                // this didn't work, but it's not the end of the world if we cannot update the new group's ownership,
+                // although it's a bit surprising because the user identified by the bearerToken should be the group's
+                // owner...
+                logger.warning("Couldn't update user group ownership of user group "+serverGroupName+": "+e.getMessage());
+            }
+        }
+        ensureGroupMembersCanReadGroup(securityServiceServer, groupId);
+    }
+
+    private void ensureGroupMembersCanReadGroup(SailingServer securityServiceServer, UUID groupId) throws ClientProtocolException, IOException, ParseException {
+        // cleanly copy result as it may be unmodifiable
+        final Map<UUID, Set<String>> acls = new HashMap<>(securityServiceServer.getAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString())));
+        final Set<String> actionsForGroup = acls.computeIfAbsent(groupId, gid->new HashSet<>());
+        if (!actionsForGroup.contains(DefaultActions.READ.name()) && !actionsForGroup.contains("!"+DefaultActions.READ.name())) {
+            actionsForGroup.add(DefaultActions.READ.name());
+            securityServiceServer.setAccessControlLists(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(groupId.toString()), acls);
         }
     }
 
@@ -834,12 +927,12 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder =
                 dynamicLoadBalancerMapping ? CreateDynamicLoadBalancerMapping.builder() : CreateDNSBasedLoadBalancerMapping.builder();
-        final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
-        final String masterHostname = replicaSetName+"."+domainName;
+        final String masterHostname = getHostname(replicaSetName, optionalDomainName);
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
             .setHostname(masterHostname)
             .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setSecurityGroupForVpc(landscape.getDefaultSecurityGroupForApplicationHosts(region))
             .setLandscape(landscape)
             .build();
         createLoadBalancerMapping.run();
@@ -883,6 +976,13 @@ public class LandscapeServiceImpl implements LandscapeService {
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion,
                         autoScalingGroups, launchConfigurations, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
         return applicationReplicaSet;
+    }
+
+    @Override
+    public String getHostname(String replicaSetName, String optionalDomainName) {
+        final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
+        final String masterHostname = replicaSetName+"."+domainName;
+        return masterHostname;
     }
 
     @Override
@@ -1081,7 +1181,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             // old replica was on a shared instance; in this case we'll over-provision, but it won't be long.
             replicaConfigurationBuilder
                 .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
-                    .setMasterHostname(master.getHost().getPrivateAddress().getHostName())
+                    .setMasterHostname(master.getHost().getPrivateAddress().getHostAddress())
                     .setMasterHttpPort(master.getPort())
                     .setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken))
                     .build());
@@ -1096,6 +1196,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 .setLandscape(getLandscape())
                 .setRegion(region)
                 .setTags(Tags.with(UPGRADE_REPLICA_TAG_KEY, replicaSet.getName()));
+            optionalKeyName.ifPresent(replicaHostBuilder::setKeyName);
             final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
             logger.info("Launching dedicated replica host of type "+instanceType+" for replica "+replica);
             replicaHostStartProcedure.run();
@@ -1432,7 +1533,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         SailingAnalyticsHost<String> hostToDeployTo = null;
         if (useSharedInstance) {
             // determine new shared host before stopping old master; we want to *move* and not end up on the same instance again
-            hostToDeployTo = new EligbleInstanceForReplicaSetFindingStrategyImpl(this,
+            hostToDeployTo = new EligibleInstanceForReplicaSetFindingStrategyImpl(this,
                     region, optionalKeyName, privateKeyEncryptionPassphrase,
                     /* master */ true, /* mustBeDifferentAvailabilityZone */ true, optionalInstanceType,
                     optionalPreferredInstanceToDeployTo).getInstanceToDeployTo(replicaSet);
@@ -1694,7 +1795,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setRegion(region)
             .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardingKeys(shardingKeys)
-            .setReplicaset(applicationReplicaSet)
+            .setReplicaSet(applicationReplicaSet)
             .setShardName(shardName)
             .build()
             .run();
@@ -1716,7 +1817,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setRegion(region)
             .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardingKeys(shardingkeys)
-            .setReplicaset(applicationReplicaSet)
+            .setReplicaSet(applicationReplicaSet)
             .setShardName(shardName)
             .build()
             .run();
@@ -1749,7 +1850,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setLandscape(getLandscape())
             .setTargetGroupNamePrefix(LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX)
             .setShardingKeys(shardingkeys)
-            .setReplicaset(applicationReplicaSet)
+            .setReplicaSet(applicationReplicaSet)
             .setRegion(region)
             .setPathPrefixForShardingKey(RemoteServiceMappingConstants.pathPrefixForShardingKey)
             .setShardName(shardName)

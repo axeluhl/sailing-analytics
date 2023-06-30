@@ -216,9 +216,6 @@ public enum DetailType implements Serializable {
 
     private SortingOrder defaultSortingOrder;
     
-    /**
-     * TODO:
-     */
     private Action premiumAction;
 
     private final String[] oldNames;
@@ -238,6 +235,10 @@ public enum DetailType implements Serializable {
         return defaultSortingOrder;
     }
     
+    /**
+     * If not {@code null} then the user must have permission to execute the action returned on the
+     * leaderboard to which it is applied.
+     */
     public Action getPremiumAction() {
         return this.premiumAction;
     }
@@ -434,9 +435,6 @@ public enum DetailType implements Serializable {
         allowed.add(OVERALL_TIME_ON_TIME_FACTOR);
         allowed.add(OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
         allowed.add(OVERALL_TOTAL_SCORED_RACE_COUNT);
-        allowed.add(TOTAL_TIME_SAILED_UPWIND_IN_SECONDS);
-        allowed.add(TOTAL_TIME_SAILED_REACHING_IN_SECONDS);
-        allowed.add(TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS);
         return allowed;
     }
 

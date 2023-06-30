@@ -94,6 +94,7 @@
         <module>com.sap.sse.landscape.aws</module>
         <module>com.sap.sse.landscape.aws.common</module>
         <module>com.sap.sse.landscape.aws.common.test</module>
+        <module>com.sap.sse.landscape.test</module>
         <module>com.sap.sse.landscape.aws.test</module>
         <module>com.sap.sse.landscape.aws.persistence</module>
         <module>com.sap.sailing.landscape</module>
@@ -119,6 +120,7 @@
         <module>com.sap.sse.security.storemerging</module>
         <module>com.sap.sse.security.storemerging.test</module>
         <module>com.sap.sse.security.ui</module>
+        <module>com.sap.sse.security.ui.test</module>
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
         <module>com.sap.sse.replication</module>

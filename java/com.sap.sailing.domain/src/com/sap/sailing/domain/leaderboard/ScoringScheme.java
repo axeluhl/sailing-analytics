@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -75,7 +76,6 @@ public interface ScoringScheme extends Serializable {
      * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to
      * know the number of competitors in the race, some need to know the total number of competitors in the leaderboard
      * or regatta.
-     * 
      * @param numberOfCompetitorsInLeaderboardFetcher
      *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single
      *            race; otherwise, this parameter tells the number of competitors in the same race as
@@ -88,10 +88,11 @@ public interface ScoringScheme extends Serializable {
      *            may be required in case a "penalty" such as a redress needs to inspect the scores of other race
      *            columns as well; implementations need to take great care not to cause endless recursions by
      *            naively asking the leaderboard for scores which would recurse into this method
+     * @param uncorrectedScoreProvider TODO
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
             Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
-            TimePoint timePoint, Leaderboard leaderboard);
+            TimePoint timePoint, Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider);
 
     /**
      * @param competitor1Scores
@@ -167,14 +168,6 @@ public interface ScoringScheme extends Serializable {
     }
     
     /**
-     * Returning {@code true} makes the last medal race (having valid scores) a secondary ranking criteria for
-     * competitors that have an equal overall score.
-     */
-    default boolean isLastMedalRaceCriteria() {
-        return false;
-    }
-
-    /**
      * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
      * medal race column it usually counts double. Under certain circumstances, columns may also count with factors
      * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee
@@ -212,10 +205,9 @@ public interface ScoringScheme extends Serializable {
     }
     
     /**
-     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top
-     * for that column, considering any score corrections and penalties, too.
-     * @param totalPointsSupplier provides the 
+     * Returns true if a race column evaluates to be a win for the given competitor at the given timepoint. If the
+     * competitor is not scored for this race, {@code false} is returned. "Winning" means to be sorted to the top for
+     * that column, considering any score corrections and penalties, too.<p>
      */
     default boolean isWin(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Function<Competitor, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
@@ -317,6 +309,13 @@ public interface ScoringScheme extends Serializable {
         return new Pair<>(newNumberOfMedalRacesWonSoFar, newClearNumberOfMedalRacesWonUponNextValidMedalRaceScore);
     }
 
+    /**
+     * @param totalPointsSupplier
+     *            can supply the scores for the competitors in the {@code raceColumn}. In particular,
+     *            {@code totalPointsSupplier.apply(competitor).equals(totalPoints)} holds true, meaning that the total
+     *            points supplied are consistent for the race column and the {@code competitor} provided in the
+     *            {@code totalPoints} parameter.
+     */
     default int getWinCount(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn,
             final Double totalPoints, TimePoint timePoint, Function<Competitor, Double> totalPointsSupplier,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
@@ -348,5 +347,21 @@ public interface ScoringScheme extends Serializable {
             result = 0;
         }
         return result;
+    }
+    
+    /**
+     * Compares by the scores of a single race column. If only one of the competitors has a result this competitor is
+     * ranked better than the other one.
+     */
+    default int compareBySingleRaceColumnScore(Double o1Score, Double o2Score, boolean nullScoresAreBetter) {
+        return Comparator
+                .nullsLast((Double o1s, Double o2s) -> getScoreComparator(nullScoresAreBetter).compare(o1s, o2s))
+                .compare(o1Score, o2Score);
+    }
+
+    default int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        return 0;
     }
 }

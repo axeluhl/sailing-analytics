@@ -72,7 +72,7 @@ public abstract class DataEntryDialog<T> {
     private final FlowPanel rightButtonPanel;
     private final FlowPanel leftButtonPanel;
     private final AsyncActionsExecutor validationExecutor;
-    private static final String VALIDATION_ACTION_CATEGORY = "validation";
+    protected static final String VALIDATION_ACTION_CATEGORY = "validation";
     
     private boolean dialogInInvalidState = false;
 

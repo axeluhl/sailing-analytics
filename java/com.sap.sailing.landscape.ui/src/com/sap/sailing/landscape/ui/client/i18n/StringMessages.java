@@ -163,4 +163,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String moveTheFollowingMasterAndReplicaProcessesAway(String fromHostWithId, String masterProcesses, String replicaProcesses);
     String processOfReplicaSet(int portOfProcess, String replicaSetName);
     String successfullyMovedAllProcessesAwayFromHost(String hostname);
+    String dnsNameAlreadyInUse();
+    String errorArchivingMongoDBTo(String replicaSetNameToArchiveTo, String mongoDBArchivingErrorMessage);
+    String optionalSessionToken();
 }

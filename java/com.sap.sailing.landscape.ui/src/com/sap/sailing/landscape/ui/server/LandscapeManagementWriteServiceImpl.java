@@ -69,6 +69,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -103,6 +104,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -110,6 +112,7 @@ import com.sap.sse.util.ThreadPoolUtil;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
@@ -155,6 +158,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode) {
         checkLandscapeManageAwsPermission();
         getLandscapeService().createMfaSessionCredentials(awsAccessKey, awsSecret, mfaTokenCode);
+    }
+    
+    /**
+     * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
+     * credentials and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. The current user must have the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    @Override
+    public void createSessionCredentials(String awsAccessKey, String awsSecret, String awsSessionToken) {
+        checkLandscapeManageAwsPermission();
+        getLandscapeService().createSessionCredentials(awsAccessKey, awsSecret, awsSessionToken);
     }
     
     /**
@@ -615,7 +630,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public Pair<DataImportProgress, CompareServersResultDTO> archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
+    public Triple<DataImportProgress, CompareServersResultDTO, String> archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers,
@@ -623,17 +638,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
-        final Pair<DataImportProgress, CompareServersResult> result = getLandscapeService().archiveReplicaSet(regionId,
+        if (removeApplicationReplicaSet) {
+            getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                    new TypeRelativeObjectIdentifier(applicationReplicaSetToArchive.getReplicaSetName())));
+        }
+        final Triple<DataImportProgress, CompareServersResult, String> result = getLandscapeService().archiveReplicaSet(regionId,
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId, getLandscape()), applicationReplicaSetToArchive),
                 bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
                 durationToWaitBeforeCompareServers, maxNumberOfCompareServerAttempts, removeApplicationReplicaSet,
                 getMongoEndpoint(moveDatabaseHere), optionalKeyName, passphraseForPrivateKeyDecryption);
+        final String mongoDBArchivingFailureReason = result.getC();
         final CompareServersResultDTO compareServersResultDTO = createCompareServersResultDTO(result);
-        return new Pair<>(result.getA(), compareServersResultDTO);
+        return new Triple<>(result.getA(), compareServersResultDTO, mongoDBArchivingFailureReason);
     }
 
     private CompareServersResultDTO createCompareServersResultDTO(
-            final Pair<DataImportProgress, CompareServersResult> compareServersResult) {
+            final Triple<DataImportProgress, CompareServersResult, String> compareServersResult) {
         return compareServersResult == null ?
                 null :
                 new CompareServersResultDTO(compareServersResult.getB()==null?null:compareServersResult.getB().getServerA(),
@@ -643,13 +663,17 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public SailingApplicationReplicaSetDTO<String> removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
+    public String removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
-        getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
-                new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), optionalKeyName, passphraseForPrivateKeyDecryption);
-        return null;
+        getSecurityService().checkCurrentUserDeletePermission(SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(
+                new TypeRelativeObjectIdentifier(applicationReplicaSetToRemove.getReplicaSetName())));
+        final String mongoDbArchivingErrorMessage = getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
+                new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), getMongoEndpoint(moveDatabaseHere),
+                optionalKeyName, passphraseForPrivateKeyDecryption);
+        return mongoDbArchivingErrorMessage;
     }
 
     private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> convertFromApplicationReplicaSetDTO(
@@ -702,6 +726,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setProcess(master)
             .setHostname(masterHostname)
             .setTargetGroupNamePrefix(LandscapeService.SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setSecurityGroupForVpc(getLandscape().getDefaultSecurityGroupForApplicationHosts(new AwsRegion(regionId, getLandscape())))
             .setLandscape(getLandscape())
             .build();
         createLoadBalancerMapping.run();
@@ -949,5 +974,15 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 Optional.ofNullable(optionalInstanceTypeForNewInstance == null ? null
                         : InstanceType.valueOf(optionalInstanceTypeForNewInstance)),
                 optionalKeyName, privateKeyEncryptionPassphrase);
+    }
+    
+    @Override
+    public boolean hasDNSResourceRecordsForReplicaSet(String replicaSetName, String optionalDomainName) {
+        final AwsLandscape<String> landscape = getLandscape();
+        final LandscapeService landscapeService = getLandscapeService();
+        final String hostname = landscapeService.getHostname(replicaSetName, optionalDomainName);
+        final Iterable<ResourceRecordSet> existingDNSRulesForHostname = landscape.getResourceRecordSets(hostname);
+        // Failing early in case DNS record already exists (see also bug 5826):
+        return existingDNSRulesForHostname != null && !Util.isEmpty(existingDNSRulesForHostname);
     }
 }

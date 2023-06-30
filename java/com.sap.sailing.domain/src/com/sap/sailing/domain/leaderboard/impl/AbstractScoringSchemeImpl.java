@@ -180,9 +180,10 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * scored. This implements Racing Rules of Sailing (RRS) section A8.2:
      * <p>
      * 
-     * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last race.
-     * Any remaining ties shall be broken by using the tied boats' scores in the next-to-last race and so on until all
-     * ties are broken. These scores shall be used even if some of them are excluded scores."</em>
+     * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
+     * race. Any remaining ties shall be broken by using the tied boats' scores in the next-to-last race and so on until
+     * all ties are broken. These scores shall be used even if some of them are excluded scores."</em>
+     * 
      * @param o1ScoresIncludingDiscarded
      *            scores that include the points for those races that have been discarded (total points)
      * @param o2ScoresIncludingDiscarded
@@ -190,7 +191,9 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      */
     @Override
     public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,
-            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded, boolean nullScoresAreBetter, Competitor o1, Competitor o2, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded,
+            boolean nullScoresAreBetter, Competitor o1, Competitor o2, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int result = 0;
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         ListIterator<Pair<RaceColumn, Double>> o1Iter = o1ScoresIncludingDiscarded.listIterator(o1ScoresIncludingDiscarded.size());
@@ -201,7 +204,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         if (o1Iter.hasPrevious() != o2Iter.hasPrevious()) {
             // if, as may be allowed by some scoring scheme variants, competitors with different numbers of scored races are compared
             // and are equal for all races of the competitor who scored fewer races, the competitor who scored more races is preferred
-            result = o1Iter.hasNext() ? -1 : 1;
+            result = o1Iter.hasPrevious() ? -1 : 1;
         }
         return result;
     }

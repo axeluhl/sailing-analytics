@@ -1023,8 +1023,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 raceInfoDTO.startTime = startTime.asDate();
             }
             raceInfoDTO.lastStatus = state.getStatus();
-            if (raceLog.getLastRawFix() != null) {
-                raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
+            raceLog.lockForRead();
+            try {
+                if (!Util.isEmpty(raceLog.getRawFixes())) {
+                    // see also bug 5861: as the race log ordering is by pass first, then by author priority, and only then by time point,
+                    // we may not always get the newest event if we just go by the "natural ordering" of the log. So we need to fetch all
+                    // events and pick really the newest one.
+                    raceInfoDTO.lastUpdateTime = Util.stream(raceLog.getRawFixes())
+                            .sorted((rle1, rle2)->rle2.getTimePoint().compareTo(rle1.getTimePoint())) // reverse ordering, newest one first
+                            .findFirst().map(rle->rle.getTimePoint().asDate()).orElse(null);
+                }
+            } finally {
+                raceLog.unlockAfterRead();
             }
             TimePoint finishingTime = state.getFinishingTime();
             if (finishingTime != null) {
@@ -1062,8 +1072,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (abortingFlagEvent != null) {
                 raceInfoDTO.isRaceAbortedInPassBefore = true;
                 raceInfoDTO.abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint().asDate();
-
-                if (raceInfoDTO.lastStatus == RaceLogRaceStatus.UNSCHEDULED || raceInfoDTO.lastStatus == RaceLogRaceStatus.PRESCHEDULED) {
+                if (raceInfoDTO.lastStatus.isAbortingFlagFromPreviousPassValid()) {
                     raceInfoDTO.lastUpperFlag = abortingFlagEvent.getUpperFlag();
                     raceInfoDTO.lastLowerFlag = abortingFlagEvent.getLowerFlag();
                     raceInfoDTO.lastFlagsAreDisplayed = abortingFlagEvent.isDisplayed();
@@ -3402,7 +3411,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             for (Entry<Class<? extends OperationWithResult<?, ?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
-            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(),
+            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostAddress(),
                     replicaDescriptor.getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
                     replicaDescriptor.getReplicableIdsAsStrings(), replicaDescriptor.getAdditionalInformation(),
                     replicationCountByOperationClassName,

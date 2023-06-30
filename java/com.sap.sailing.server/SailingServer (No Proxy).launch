@@ -34,6 +34,7 @@
     <stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%false%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%true%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
     <stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
     <setAttribute key="selected_target_bundles">
+        <setEntry value="bcprov-ext@default:default"/>
         <setEntry value="com.amazon.aws.aws-java-api.source"/>
         <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
         <setEntry value="com.chargebee.chargebee-java@default:default"/>
@@ -45,9 +46,10 @@
         <setEntry value="com.github.haifengl.smile-graph@default:default"/>
         <setEntry value="com.github.haifengl.smile-math.source"/>
         <setEntry value="com.github.haifengl.smile-math@default:default"/>
+        <setEntry value="com.github.mwiede.jsch.source"/>
+        <setEntry value="com.github.mwiede.jsch@default:default"/>
         <setEntry value="com.google.gson.source"/>
         <setEntry value="com.google.gson@default:default"/>
-        <setEntry value="com.jcraft.jsch@default:default"/>
         <setEntry value="com.rabbitmq.client.source"/>
         <setEntry value="com.rabbitmq.client@default:default"/>
         <setEntry value="com.sap.db.jdbc.source"/>

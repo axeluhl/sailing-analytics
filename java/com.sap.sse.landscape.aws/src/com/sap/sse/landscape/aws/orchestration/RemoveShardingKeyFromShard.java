@@ -41,7 +41,6 @@ public class RemoveShardingKeyFromShard<ShardingKey, MetricsT extends Applicatio
             assert shardingKeys != null;
             assert replicaSet != null;
             assert region != null;
-            assert passphraseForPrivateKeyDecryption != null;
             return new RemoveShardingKeyFromShard<ShardingKey, MetricsT, ProcessT>(this);
         }
     }

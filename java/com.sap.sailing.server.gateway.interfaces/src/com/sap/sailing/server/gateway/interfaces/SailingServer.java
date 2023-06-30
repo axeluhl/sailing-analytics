@@ -122,6 +122,4 @@ public interface SailingServer extends SecuredServer {
      *         removed as a result of calling this method
      */
     RemoteSailingServerReference removeRemoteServerEventReferences(SailingServer referencedServer, Iterable<UUID> eventIds) throws Exception;
-
-    String getBearerToken();
 }

@@ -53,7 +53,6 @@ import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -128,6 +127,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     
     //Spacing for Setupbar (AWS/SSH/REGION)
     private static final int DEFAULT_SETUPBAR_HEIGHT = 300;
+    private static final int DEFAULT_AMOUNT_SSHKEYS_PER_PAGE = 3;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -155,7 +155,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         };
         sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
-                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel());
+                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel(), DEFAULT_AMOUNT_SSHKEYS_PER_PAGE);
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
         sshKeysCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         regionsTable.addColumn(new TextColumn<String>() {
@@ -257,7 +257,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return result;
             }
         };
-        applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name());
+        applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name(), (rs1, rs2)->rs1.getReplicaSetName().toLowerCase().compareTo(rs2.getReplicaSetName().toLowerCase()));
         final SafeHtmlCell versionCell = new SafeHtmlCell();
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> versionColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(versionCell) {
             @Override
@@ -1019,14 +1019,30 @@ public class LandscapeManagementPanel extends SimplePanel {
 
     private void removeApplicationReplicaSet(String regionId, final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
         assert replicaSetIterator.hasNext();
+        final MongoEndpointDTO selectedMongoEndpointForDBArchiving = mongoEndpointsTable.getSelectionModel().getSelectedObject();
         final SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove = replicaSetIterator.next();
-        landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove,
+        final ApplicationReplicaSetActionChainingCallback<String> applicationReplicaSetActionChainingCallback = new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, applicationReplicaSetToRemove,
+                (rId, rsi)->removeApplicationReplicaSet(rId, rsi, stringMessages), regionId,
+                replicaSetName->stringMessages.successfullyRemovedApplicationReplicaSet(replicaSetName));
+        landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, selectedMongoEndpointForDBArchiving,
                 sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                         ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                        new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, applicationReplicaSetToRemove,
-                                (rId, rsi)->removeApplicationReplicaSet(rId, rsi, stringMessages), regionId,
-                                replicaSetName->stringMessages.successfullyRemovedApplicationReplicaSet(replicaSetName)));
+                        new AsyncCallback<String>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                applicationReplicaSetActionChainingCallback.onFailure(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(String mongoDbArchivingErrorMessage) {
+                                applicationReplicaSetActionChainingCallback.onSuccess(/* application replica set (removed) */ null);
+                                if (mongoDbArchivingErrorMessage != null) {
+                                    errorReporter.reportError(stringMessages.errorArchivingMongoDBTo(
+                                            selectedMongoEndpointForDBArchiving.getReplicaSetName(), mongoDbArchivingErrorMessage));
+                                }
+                            }
+                        });
     }
     
     private static class ReplicaSetArchivingParameters {
@@ -1080,7 +1096,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 selectedMongoEndpointForDBArchiving, sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                     ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                new AsyncCallback<Pair<DataImportProgress, CompareServersResultDTO>>() {
+                                new AsyncCallback<Triple<DataImportProgress, CompareServersResultDTO, String>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 applicationReplicaSetsBusy.setBusy(false);
@@ -1088,8 +1104,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                             }
 
                             @Override
-                            public void onSuccess(Pair<DataImportProgress, CompareServersResultDTO> result) {
+                            public void onSuccess(Triple<DataImportProgress, CompareServersResultDTO, String> result) {
                                 applicationReplicaSetsBusy.setBusy(false);
+                                final String mongoDBArchivingErrorMessage = result.getC();
                                 if (result == null || result.getA() == null || result.getA().failed()) {
                                     errorReporter.reportError(stringMessages.errorDuringImport(result==null||result.getA()==null?"":result.getA().getErrorMessage()));
                                 } else if (result.getB() == null) {
@@ -1098,6 +1115,10 @@ public class LandscapeManagementPanel extends SimplePanel {
                                     errorReporter.reportError(stringMessages.differencesInServerContentFound(
                                             result.getB().getServerAName(), result.getB().getADiffs().toString(),
                                             result.getB().getServerBName(), result.getB().getBDiffs().toString()));
+                                } else if (mongoDBArchivingErrorMessage != null) {
+                                    errorReporter.reportError(stringMessages.errorArchivingMongoDBTo(
+                                            selectedMongoEndpointForDBArchiving != null ? selectedMongoEndpointForDBArchiving.getReplicaSetName() : "",
+                                            mongoDBArchivingErrorMessage));
                                 }
                                 if (result != null && result.getA() != null && !result.getA().failed()
                                  && result.getB() != null && !result.getB().hasDiffs()) {

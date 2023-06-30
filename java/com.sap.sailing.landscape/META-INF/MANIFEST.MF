@@ -9,7 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.landscape,
  com.sap.sse.landscape.aws,
  com.sap.sse.common,
- com.jcraft.jsch;bundle-version="0.1.54",
+ com.github.mwiede.jsch;bundle-version="0.2.8",
+ bcprov-ext;bundle-version="1.72.0",
  com.amazon.aws.aws-java-api;bundle-version="2.14.24",
  com.sap.sse.shared.android,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.0",
@@ -30,6 +31,7 @@ Export-Package: com.sap.sailing.landscape,
  com.sap.sailing.landscape.impl,
  com.sap.sailing.landscape.procedures
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.framework,
+Import-Package: com.sap.sailing.server.security,
+ org.osgi.framework,
  org.osgi.util.tracker;version="1.5.2"
 Bundle-Activator: com.sap.sailing.landscape.impl.Activator

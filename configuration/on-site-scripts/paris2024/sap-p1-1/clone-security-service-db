@@ -1,0 +1,16 @@
+#!/bin/bash
+logger -t sailing "Cloning security_service DB from eu-west-1 live replica set to local security_service replica set"
+logger -t sailing "Copying an existing local security_service DB to security_service_bak..."
+echo 'use security_service_bak
+db.dropDatabase()
+db.copyDatabase("security_service", "security_service_bak")
+quit()' | mongo "mongodb://localhost/security_service_bak?replicaSet=security_service&retryWrites=true&readPreference=nearest"
+cd /tmp
+rm -rf /tmp/dump
+ssh ec2-user@paris-ssh.sapsailing.com "cd /tmp; rm -rf /tmp/dump; mongodump --host live/mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203 --db security_service; tar czvpf - dump" | tar xzvpf -
+logger -t sailing "mongodump finished with $?. Restoring dump of security_service DB from eu-west-1 locally..."
+mongorestore --drop --host security_service/localhost
+mongorestore_exit=$?
+rm -rf /tmp/dump
+logger -t sailing "mongorestore finished with ${mongorestore_exit}. Done cloning security_service DB from eu-west-1 live replica set to local paris2024 replica set."
+

@@ -21,7 +21,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
@@ -92,6 +92,15 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<Void> callback);
 
     /**
+     * For a combination of an AWS access key ID, the corresponding secret plus a valid session token produces the session
+     * credentials and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. The current user must have the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    void createSessionCredentials(String awsAccessKey, String awsSecret, String awsSessionToken,
+            AsyncCallback<Void> callback);
+
+    /**
      * For the current user who has to have the {@code LANDSCAPE:MANAGE:AWS} permission, clears the preference in the
      * user's preference store which holds any session credentials created previously using
      * {@link #createMfaSessionCredentials(String, String, String)}.
@@ -117,8 +126,8 @@ public interface LandscapeManagementWriteServiceAsync {
             String passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
     void removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDescryption, AsyncCallback<String> callback);
 
     void createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
@@ -137,7 +146,7 @@ public interface LandscapeManagementWriteServiceAsync {
             Duration durationToWaitBeforeCompareServers, int maxNumberOfCompareServerAttempts,
             boolean removeApplicationReplicaSet, MongoEndpointDTO moveDatabaseHere, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption,
-            AsyncCallback<Pair<DataImportProgress, CompareServersResultDTO>> callback);
+            AsyncCallback<Triple<DataImportProgress, CompareServersResultDTO, String>> callback);
 
     void deployApplicationToExistingHost(String replicaSetName, AwsInstanceDTO hostToDeployTo,
             String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
@@ -300,4 +309,6 @@ public interface LandscapeManagementWriteServiceAsync {
      */
     void moveAllApplicationProcessesAwayFrom(AwsInstanceDTO host, String optionalInstanceTypeForNewInstance,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Void> callback);
+
+    void hasDNSResourceRecordsForReplicaSet(String replicaSetName, String optionalDomainName, AsyncCallback<Boolean> callback);
 }

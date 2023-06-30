@@ -18,7 +18,7 @@ public class BoatClassImageResolver {
     
     static {
         boatClassIconsMap = new HashMap<String, ImageResource>();
-
+    
         // handicap sailing icons
         boatClassIconsMap.put(BoatClassMasterdata.ORC.getDisplayName(), imageResources.ORCIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ORC_CLUB.getDisplayName(), imageResources.ORCClubIcon());
@@ -86,6 +86,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.HOBIE_TIGER.getDisplayName(), imageResources.HobieTigerIcon());
         boatClassIconsMap.put(BoatClassMasterdata.HOBIE_WILD_CAT.getDisplayName(), imageResources.HobieWildCatIcon());
         boatClassIconsMap.put(BoatClassMasterdata.INTERNATIONAL_14.getDisplayName(), imageResources.International14Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.IMOCA.getDisplayName(), imageResources.ImocaIcon());
         boatClassIconsMap.put(BoatClassMasterdata.IQFOIL_MEN.getDisplayName(), imageResources.IQFOilMenIcon());
         boatClassIconsMap.put(BoatClassMasterdata.IQFOIL_WOMEN.getDisplayName(), imageResources.IQFOilWoenIcon());
         boatClassIconsMap.put(BoatClassMasterdata.IQFOIL_YOUTH.getDisplayName(), imageResources.IQFOilYouthIcon());
@@ -159,6 +160,8 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.TRIAS.getDisplayName(), imageResources.TriasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VARIANTA.getDisplayName(), imageResources.VariantaIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VAURIEN.getDisplayName(), imageResources.VaurienIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.VO60.getDisplayName(), imageResources.VOIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.VO65.getDisplayName(), imageResources.VOIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VENT_D_OUEST.getDisplayName(), imageResources.VentdOuestIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VIPER_640.getDisplayName(), imageResources.Viper640Icon());
         boatClassIconsMap.put(BoatClassMasterdata.VX_ONE.getDisplayName(), imageResources.VXOneIcon());

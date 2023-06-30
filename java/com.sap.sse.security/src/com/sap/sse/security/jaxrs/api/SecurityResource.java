@@ -2,6 +2,7 @@ package com.sap.sse.security.jaxrs.api;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
@@ -28,12 +29,20 @@ import org.json.simple.JSONObject;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path(SecurityResource.RESTSECURITY)
@@ -63,6 +72,15 @@ public class SecurityResource extends AbstractSecurityResource {
     public static final String PERMISSION = "permission";
     public static final String GRANTED = "granted";
     public static final String ACCESS_TOKEN_METHOD = "/"+ACCESS_TOKEN;
+    public static final String ADD_ROLE_TO_USER_METHOD = "/add_role_to_user";
+    public static final String ROLE_DEFINITION_ID = "role_definition_id";
+    public static final String QUALIFYING_GROUP_ID = "qualifying_group_id";
+    public static final String QUALIFYING_USERNAME = "qualifying_username";
+    public static final String TRANSITIVE = "transitive";
+    public static final String GET_ROLES_FOR_USER_METHOD = "/get_roles_for_user";
+    public static final Object ROLE_NAME = "role_name";
+    public static final Object OWNING_GROUP_ID = "owning_group_id";
+    public static final Object OWNING_USER_NAME = "owning_user_name";
 
     /**
      * Can be used to figure out the current subject. Accepts the GET method. If the subject is
@@ -258,6 +276,86 @@ public class SecurityResource extends AbstractSecurityResource {
         } else {
             return Response.status(Status.PRECONDITION_FAILED).entity("unknown id").build();
         }
+    }
+    
+    @PUT
+    @Path(ADD_ROLE_TO_USER_METHOD)
+    @Produces("text/plain;charset=UTF-8")
+    public Response addRoleToUser(@QueryParam(USERNAME) String username, @QueryParam(ROLE_DEFINITION_ID) String roleDefinitionId,
+            @QueryParam(QUALIFYING_GROUP_ID) String qualifyingGroupId, @QueryParam(QUALIFYING_USERNAME) String qualifyingUserName,
+            @QueryParam(TRANSITIVE) Boolean transitive) {
+        final Response response;
+        try {
+            // get user for which to add a role
+            final User user = getService().getUserByName(username);
+            if (user == null) {
+                response = Response.status(Status.NOT_FOUND).entity("User not found").build();
+            } else {
+                // get user for which the role is qualified, if one exists
+                final User qualifiedForUser = qualifyingUserName == null ? null : getService().getUserByName(qualifyingUserName);
+                if (qualifyingUserName != null && qualifiedForUser == null) {
+                    response = Response.status(Status.NOT_FOUND).entity("Qualifying user not found").build();
+                } else {
+                    // get the group tenant the role is qualified for if one exists
+                    final UserGroup qualifyingGroup = qualifyingGroupId == null ? null : getService().getUserGroup(UUID.fromString(qualifyingGroupId));
+                    if (qualifyingGroupId != null && qualifyingGroup == null) {
+                        response = Response.status(Status.NOT_FOUND).entity("Qualifying group not found").build();
+                    } else {
+                        final Role role = getService().getOrThrowRoleFromIDsAndCheckMetaPermissions(
+                                roleDefinitionId == null ? null : UUID.fromString(roleDefinitionId),
+                                qualifyingGroup == null ? null : qualifyingGroup.getId(),
+                                qualifiedForUser == null ? null : qualifiedForUser.getName(), transitive);
+                        final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+                        final String message = "User "+SecurityUtils.getSubject().getPrincipal()+" added role " + role.getName() + " for user " + username;
+                        getService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
+                                SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
+                                associationTypeIdentifier.toString(), new Action() {
+                                    @Override
+                                    public void run() throws Exception {
+                                        final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                                        getService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
+                                                null, DefaultActions.READ.name());
+                                        getService().addRoleForUser(user, role);
+                                        logger.info(message);
+                                    }
+                                });
+                        response = Response.ok().build();
+                    }
+                }
+            }
+            return response;
+        } catch (UserManagementException e) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path(GET_ROLES_FOR_USER_METHOD)
+    @Produces("application/json;charset=UTF-8")
+    public Response getRoles(@QueryParam(USERNAME) String username) {
+        final JSONArray result = new JSONArray();
+        final User user = username == null ? getService().getCurrentUser() : getService().getUserByName(username);
+        if (user != null) {
+            getService().checkCurrentUserReadPermission(user);
+            for (final Role role : user.getRoles()) {
+                final JSONObject roleJson = new JSONObject();
+                result.add(roleJson);
+                final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+                final QualifiedObjectIdentifier qualifiedObjectIdentifierForRoleAssociation = SecuredSecurityTypes.ROLE_ASSOCIATION.getQualifiedObjectIdentifier(associationTypeIdentifier);
+                if (getService().hasCurrentUserAnyPermission(qualifiedObjectIdentifierForRoleAssociation.getPermission(DefaultActions.READ))) {
+                    final OwnershipAnnotation ownership = getService().getOwnership(qualifiedObjectIdentifierForRoleAssociation);
+                    roleJson.put(ROLE_DEFINITION_ID, role.getRoleDefinition().getIdAsString());
+                    roleJson.put(ROLE_NAME, role.getRoleDefinition().getName());
+                    roleJson.put(OWNING_GROUP_ID, ownership == null ? null : ownership.getAnnotation() == null ? null : ownership.getAnnotation().getTenantOwner() == null ? null : ownership.getAnnotation().getTenantOwner().getId().toString());
+                    roleJson.put(OWNING_USER_NAME, ownership == null ? null : ownership.getAnnotation() == null ? null : ownership.getAnnotation().getUserOwner() == null ? null : ownership.getAnnotation().getUserOwner().getName());
+                    roleJson.put(QUALIFYING_GROUP_ID, role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId().toString());
+                    roleJson.put(QUALIFYING_USERNAME, role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName());
+                    roleJson.put(TRANSITIVE, role.isTransitive());
+                }
+            }
+        }
+        return Response.ok(streamingOutput(result)).build();
     }
     
     @PUT

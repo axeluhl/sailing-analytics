@@ -1,18 +1,17 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -21,6 +20,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
+import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter.ALBRuleAdapter;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -32,7 +32,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActi
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 
 public class ApplicationLoadBalancerImpl<ShardingKey>
@@ -51,6 +50,11 @@ implements ApplicationLoadBalancer<ShardingKey> {
         this.region = region;
         this.loadBalancer = loadBalancer;
         this.landscape = landscape;
+    }
+    
+    @Override
+    public AwsLandscape<ShardingKey> getLandscape() {
+        return landscape;
     }
 
     @Override
@@ -72,6 +76,16 @@ implements ApplicationLoadBalancer<ShardingKey> {
     public Region getRegion() {
         return region;
     }
+    
+    @Override
+    public String getVpcId() {
+        return loadBalancer.vpcId();
+    }
+    
+    @Override
+    public List<String> getSecurityGroupIds() {
+        return loadBalancer.securityGroups();
+    }
 
     @Override
     public Iterable<Rule> getRules() {
@@ -92,51 +106,6 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public Iterable<Rule> addRules(Rule... rulesToAdd) {
         return landscape.createLoadBalancerListenerRules(region, getListener(ProtocolEnum.HTTPS), rulesToAdd);
-    }
-    
-    /**
-     * Returns the priority if the priority is not higher than {@code MAX_PRIORITY}
-     * @param priority
-     *          requested priority
-     * @return  
-     *          Priority if it's valid
-     * @throws IllegalStateException
-     *          If the requested priority is higher than {@code MAX_PRIORITY}
-     */
-    private int checkNewPriority(int priority) throws IllegalStateException {
-        if (priority < MAX_PRIORITY) {
-            return priority;
-        } else {
-            throw new IllegalStateException("Priority was greater than " + MAX_PRIORITY +"!");
-        }
-    }
-    
-    @Override
-    public void shiftRulesToMakeSpaceAt(int targetPrio) throws IllegalStateException {
-        final Iterable<Rule> rules = getRules();
-        final TreeMap<Integer, Rule> rulesSorted = getRulesSorted(rules);
-        int lastPrio = targetPrio;
-        boolean skipNext = false;
-        final Collection<RulePriorityPair> result = new ArrayList<>();
-        if (rulesSorted.get(targetPrio) != null) {// if there is a rule on prio
-            for (Entry<Integer, Rule> entry : rulesSorted.entrySet()) {
-                final Integer priority = entry.getKey();
-                if (priority >= targetPrio && !skipNext) {
-                    // if prio is higher than target prio and is not supposed to be skipped
-                    if (priority - lastPrio > 0) {
-                        // if there is a gap between current prio and the last one. -> so this one is not supposed to be
-                        // skipped and every rule after this
-                        skipNext = true;
-                        break;
-                    } else {
-                        lastPrio = priority + 1;
-                        result.add(RulePriorityPair.builder().ruleArn(entry.getValue().ruleArn())
-                                .priority(checkNewPriority(lastPrio)).build());
-                    }
-                }
-            }
-            landscape.updateLoadBalancerListenerRulePriorities(getRegion(), result);
-        }
     }
     
     @Override
@@ -192,65 +161,11 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
 
     @Override
-    public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules) {
-        final Iterable<Rule> existingRules = getRules();
-        if (Util.size(existingRules)-1 + rules.length > MAX_PRIORITY) { // -1 due to the default rule being part of existingRules
-            throw new IllegalArgumentException("The "+rules.length+" new rules won't find enough unused priority numbers because there are already "+
-                    (Util.size(existingRules)-1)+" of them and together they would exceed the maximum of "+MAX_PRIORITY+" by "+
-                    (Util.size(existingRules)-1 + rules.length - MAX_PRIORITY));
-        }
-        final List<Rule> result = new ArrayList<>(rules.length);
-        final List<Rule> sortedExistingNonDefaultRules = new ArrayList<>(Util.size(existingRules)-1);
-        Util.addAll(Util.filter(existingRules, r->!r.isDefault()), sortedExistingNonDefaultRules);
-        Collections.sort(sortedExistingNonDefaultRules, (r1, r2)->Integer.valueOf(r1.priority()).compareTo(Integer.valueOf(r2.priority())));
-        final int stepwidth;
-        if (forceContiguous) {
-            stepwidth = rules.length;
-        } else {
-            stepwidth = 1;
-        }
-        int rulesIndex = 0;
-        int previousPriority = 0;
-        final Iterator<Rule> existingRulesIter = sortedExistingNonDefaultRules.iterator();
-        while (rulesIndex < rules.length) {
-            // find next available slot
-            int nextPriority = MAX_PRIORITY+1; // if no further rule exists, the usable gap ends after MAX_PRIORITY
-            while (existingRulesIter.hasNext() && (nextPriority=Integer.valueOf(existingRulesIter.next().priority())) <= previousPriority+stepwidth) {
-                // not enough space for stepwidth many rules; keep on searching
-                previousPriority = nextPriority;
-                if (!existingRulesIter.hasNext()) {
-                    nextPriority = MAX_PRIORITY+1;
-                }
-            }
-            if (previousPriority+stepwidth > MAX_PRIORITY) {
-                if (forceContiguous) {
-                    previousPriority = squeezeExistingRulesAndReturnLastUsedPriority(sortedExistingNonDefaultRules);
-                    nextPriority = MAX_PRIORITY+1;
-                    // we previously checked already that there is enough room for the new set of rules
-                    assert previousPriority + rules.length <= MAX_PRIORITY;
-                } else {
-                    throw new IllegalStateException(
-                            "The " + rules.length + " new rules don't fit into the existing rule set of load balancer "
-                                    + getName() + " without exceeding the maximum priority of " + MAX_PRIORITY);
-                }
-            }
-            while (rulesIndex < rules.length && ++previousPriority < nextPriority) {
-                final int priorityToUseForNextRule = previousPriority;
-                result.add(rules[rulesIndex++].copy(b->b.priority(""+priorityToUseForNextRule)));
-            }
-        }
-        addRules(result.toArray(new Rule[0]));
-        return result;
-    }
-
-    private int squeezeExistingRulesAndReturnLastUsedPriority(final List<Rule> sortedExistingNonDefaultRules) {
-        final List<RulePriorityPair> newPrioritiesForExistingRules = new LinkedList<>();
-        int priority = 0;
-        for (final Rule existingRule : sortedExistingNonDefaultRules) {
-            newPrioritiesForExistingRules.add(RulePriorityPair.builder().ruleArn(existingRule.ruleArn()).priority(++priority).build());
-        }
-        landscape.updateLoadBalancerListenerRulePriorities(getRegion(), newPrioritiesForExistingRules);
-        return priority;
+    public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Optional<Rule> insertBefore, Rule... rules) {
+        final List<Rule> rulesAsList = Arrays.asList(rules);
+        return Util.map(LoadBalancerRuleInserter.create(this, MAX_PRIORITY, MAX_RULES_PER_LOADBALANCER).addRulesAssigningUnusedPriorities(
+                forceContiguous, insertBefore.map(LoadBalancerRuleInserter::createRuleAdapter),
+                Util.map(rulesAsList, LoadBalancerRuleInserter::createRuleAdapter)), ALBRuleAdapter::getRule);
     }
 
     @Override
@@ -304,10 +219,25 @@ implements ApplicationLoadBalancer<ShardingKey> {
         return Util.stream(getRules()).filter(r->isDefaultRedirectRule(r, hostname)).findAny()
             .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule.ruleArn(), hostname, pathWithLeadingSlash, query))
             .orElseGet(()->{
-                final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
-                addRulesAssigningUnusedPriorities(/* forceContiguous */ false, defaultRedirectRule);
-                return defaultRedirectRule;
+                return insertAndReturnDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
             });
+    }
+
+    /**
+     * Checks the load balancer rule set size. If already at its maximum, an {@link IllegalStateException} is thrown because
+     * adding a default rule is not possible, and this method does not handle moving an appplication replica set to a different
+     * load balancer. If there is space for at least one more rule, searches this load balancer's rule set for the first rule
+     * for hostname header {@code hostname}. It then uses {@link #shiftRulesToMakeSpaceAt(int)} for that position to make
+     * space for the new default redirect rule.
+     * 
+     * @return the new default redirect rule that was inserted into this load balancer's HTTPS listener's rule set
+     */
+    private Rule insertAndReturnDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
+        addRulesAssigningUnusedPriorities(/* forceContiguous */ false,
+                Util.stream(getRules()).filter(rule->rule.conditions().stream().anyMatch(condition->condition.field().equals("host-header") && condition.hostHeaderConfig().values().contains(hostname))).findFirst(),
+                defaultRedirectRule);
+        return defaultRedirectRule;
     }
     
     @Override

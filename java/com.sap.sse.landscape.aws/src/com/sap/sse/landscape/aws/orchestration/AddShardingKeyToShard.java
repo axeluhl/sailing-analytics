@@ -48,7 +48,6 @@ public class AddShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProc
             assert shardingKeys != null;
             assert replicaSet != null;
             assert region != null;
-            assert passphraseForPrivateKeyDecryption != null;
             return new AddShardingKeyToShard<ShardingKey, MetricsT, ProcessT>(this);
         }
     }
