@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -224,6 +225,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.displayName);
+                for (final CourseAreaDTO courseArea : t.courseAreas) {
+                    strings.add(courseArea.getName());
+                }
                 return strings;
             }
 
