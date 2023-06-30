@@ -182,6 +182,6 @@ Combine the above scenarios: a failing production master (hardware or VM-only) w
 
 ## Other TODOs, Open Questions
 
-* Install all openvpn stuff (certificates, config files) and test
+* master set-up on sap-p1-2 must be configured in "failover" mode by default; this means it sends to the local RabbitMQ and the security_service MongoDB replica set that does not replicate into the cloud, to keep traffic on the SSH tunnel to the cloud as low as possible
+* create a "primary master" configuration on sap-p1-2 in case sap-p1-1 fails for a longer time and we need to switch to sap-p1-2 for a longer time; in that case we would like to have DB replication into the cloud, so use the localhost:[10201|10202|10203] "paris2024" MongoDB replica set and send to the RabbitMQ in the cloud (rabbit-eu-west-3); these failover scenarios should be manageable by corresponding scripts
 * Shall we obtain the tunnel scripts via symbolic links from the respective git repo at /home/sailing/code, there then under configuration/on-site-scripts/paris2024/sap-p1-[12]? Currently, they are copies that evolve independently from the git repo.
-* make sure the autossh tunnel from paris-ssh.sapsailing.com to rabbit-eu-west-3.sapsailing.com is established upon re-boot by providing the ``/etc/systemd/system/autossh-port-forwards.service`` in ``paris-ssh.sapsailing.com`` that launches a ``tunnels`` script
