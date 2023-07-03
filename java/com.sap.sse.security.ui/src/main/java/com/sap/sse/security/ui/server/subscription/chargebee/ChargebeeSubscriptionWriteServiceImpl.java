@@ -138,11 +138,11 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
             if(planForPrice == null) {
                 throw new IllegalArgumentException("No matching subscription plan found for given price id");
-            }else if(planForPrice.getIsOneTimePlan() && user.hasAnySubscription(planForPrice.getId())) {
+            } else if(planForPrice.getIsOneTimePlan() && user.hasAnySubscription(planForPrice.getId())) {
                 throw new IllegalArgumentException("Plan can only be subscribed once");
-            }else if(isSubscribedToMutuallyExclusivePlan(user, planForPrice)) {
-                throw new IllegalArgumentException("User has already subscribed to mutually exclusive plan");
-            }else {
+            } else if(isNewPlanCompletelyIncludedInCurrentPlan(user, planForPrice)) {
+                throw new IllegalArgumentException("User has already subscribed to plan which covers the new one");
+            } else {
                 final Pair<String, String> usernames = getUserFirstAndLastName(user);
                 final String locale = user.getLocaleOrDefault().getLanguage();
                 final CheckoutNewForItemsRequest requestBuilder = HostedPage.checkoutNewForItems()

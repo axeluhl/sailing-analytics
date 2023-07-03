@@ -140,13 +140,14 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
         getSecurityService().updateUserSubscription(user.getName(), subscription);
     }
 
-    protected boolean isSubscribedToMutuallyExclusivePlan(User user, SubscriptionPlan newPlan) {
+    protected boolean isNewPlanCompletelyIncludedInCurrentPlan
+    (User user, SubscriptionPlan newPlan) {
         final Iterable<Subscription> subscriptions = user.getSubscriptions();
         if (subscriptions != null) {
             for (Subscription sub : subscriptions) {
                 SubscriptionPlan subscribedPlan = getSecurityService().getSubscriptionPlanById(sub.getPlanId());
                 if (subscribedPlan != null && isValidSubscription(sub) && !isSubscriptionCancelled(sub)
-                        && Util.containsAny(subscribedPlan.getPlanCategories(), newPlan.getPlanCategories())) {
+                        && Util.containsAll(subscribedPlan.getPlanCategories(), newPlan.getPlanCategories())) {
                     return true;
                 }
             }
