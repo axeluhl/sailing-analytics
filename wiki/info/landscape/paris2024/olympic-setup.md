@@ -176,7 +176,10 @@ For the server side on paris-ssh and on the both P1s the following parameters ha
 ```
 ClientAliveInterval 3
 ClientAliveCountMax 3
+GatewayPorts yes
 ```
+
+The ``GatewayPorts`` directive is required in order to get port forwards (including reverse port forwards) accept the "*" as bind address to bind to 0.0.0.0 instead of 127.0.0.1.
 
 ExitOnForwardFailure will force ssh to exit if one of the port forwards fails. ConnectTimeout manages the time in seconds until an initial connection fails. AliveInterval (client and server) manages the time in seconds after ssh/sshd are sending client and server alive probes. CountMax is the number of retries for those probes. 
 
@@ -475,7 +478,7 @@ In order to have a local copy of the ``security_service`` database, a CRON job e
 
 ### Master
 
-The master configuration is described in ``/home/sailing/servers/master/master.conf`` and can be used to produce a clean set-up like this:
+The master configuration on ``sap-p1-1`` is described in ``/home/sailing/servers/master/master.conf`` and can be used to produce a clean set-up like this:
 
 ```
       rm env.sh; cat master.conf | ./refreshInstance.sh auto-install-from-stdin
@@ -486,7 +489,7 @@ If the laptops cannot reach ``https://releases.sapsailing.com`` due to connectiv
 This way, a clean new ``env.sh`` file will be produced from the config file, including the download and installation of a release. The ``master.conf`` file looks approximately like this:
 
 ```
-INSTALL_FROM_RELEASE=build-202106012325
+INSTALL_FROM_RELEASE=build-202306271444
 SERVER_NAME=paris2024
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}?replicaSet=paris2024&retryWrites=true&readPreference=nearest"
 # RabbitMQ in eu-west-1 (rabbit.internal.sapsailing.com) is expected to be found through SSH tunnel on localhost:5675
@@ -500,8 +503,37 @@ REPLICATE_MASTER_BEARER_TOKEN="***"
 REPLICATION_HOST=localhost
 REPLICATION_PORT=5673
 USE_ENVIRONMENT=live-master-server
-ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
+ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true -Dpolardata.source.url=https://www.sapsailing.com:22443 -Dwindestimation.source.url=https://www.sapsailing.com:22443"
 ```
+
+### Secondary Master
+
+The secondary master configuration on ``sap-p1-2`` can be used to fail over quickly if the primary master on ``sap-p1-1`` fails for some reason. The configuration is described in ``/home/sailing/servers/secondary_master/secondary_master.conf`` and can be used to produce a clean set-up like this:
+
+```
+      rm env.sh; cat secondary_master.conf | ./refreshInstance.sh auto-install-from-stdin
+```
+
+This way, a clean new ``env.sh`` file will be produced from the config file, including the download and installation of a release. The ``secondary_master.conf`` file looks approximately like this:
+
+```
+INSTALL_FROM_RELEASE=build-202306271444
+SERVER_NAME=paris2024
+MONGODB_URI="mongodb://sap-p1-1:27017,sap-p1-2:27017/${SERVER_NAME}?replicaSet=security_service&retryWrites=true&readPreference=nearest"
+# RabbitMQ in eu-west-1 (rabbit.internal.sapsailing.com) is expected to be found through SSH tunnel on localhost:5675
+# Replication of shared services from central security-service.sapsailing.com through SSH tunnel 443:security-service.sapsailing.com:443
+# with a local /etc/hosts entry mapping security-service.sapsailing.com to 127.0.0.1
+REPLICATE_MASTER_QUEUE_HOST=localhost
+REPLICATE_MASTER_QUEUE_PORT=5675
+REPLICATE_MASTER_BEARER_TOKEN="***"
+# Outbound replication to RabbitMQ through SSH tunnel with port forward on port 5673, regularly to RabbitMQ on localhost,
+# can be re-mapped to the cloud RabbitMQ running on rabbit-eu-west-3.internal.sapsailing.com to make this the "primary" master
+REPLICATION_HOST=localhost
+REPLICATION_PORT=5673
+USE_ENVIRONMENT=live-master-server
+ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true -Dpolardata.source.url=https://www.sapsailing.com:22443 -Dwindestimation.source.url=https://www.sapsailing.com:22443"
+```
+
 
 ### Replicas
 
@@ -516,7 +548,7 @@ The file looks like this:
 ```
 # Regular operations; sap-p1-2 replicates sap-p1-1 using the rabbit-eu-west-3.sapsailing.com RabbitMQ in the cloud through SSH tunnel.
 # Outbound replication, though not expected to become active, goes to a local RabbitMQ
-INSTALL_FROM_RELEASE=build-202106012325
+INSTALL_FROM_RELEASE=build-202306271444
 SERVER_NAME=paris2024
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}-replica?replicaSet=paris2024&retryWrites=true&readPreference=nearest"
 # RabbitMQ in eu-west-3 is expected to be found locally on port 5673
@@ -533,29 +565,12 @@ USE_ENVIRONMENT=live-replica-server
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 ```
 
-Replicas in region ``eu-west-1`` can be launched using the following user data, making use of the established MongoDB live replica set in the region:
-
-```
-INSTALL_FROM_RELEASE=build-202106012325
-SERVER_NAME=paris2024
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203/paris2024-replica?replicaSet=live&retryWrites=true&readPreference=nearest"
-USE_ENVIRONMENT=live-replica-server
-REPLICATION_CHANNEL=paris2024-replica
-REPLICATION_HOST=rabbit-eu-west-3.sapsailing.com
-REPLICATE_MASTER_SERVLET_HOST=paris-ssh.internal.sapsailing.com
-REPLICATE_MASTER_SERVLET_PORT=8888
-REPLICATE_MASTER_EXCHANGE_NAME=paris2024
-REPLICATE_MASTER_QUEUE_HOST=rabbit-eu-west-3.sapsailing.com
-REPLICATE_MASTER_BEARER_TOKEN="***"
-ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
-```
-
 (Adjust the release accordingly, of course). (NOTE: During the first production days of the event we noticed that it was really a BAD IDEA to have all replicas use the same DB set-up, all writing to the MongoDB PRIMARY of the "live" replica set in eu-west-1. With tens of replicas running concurrently, this led to a massive block-up based on MongoDB not writing fast enough. This gave rise to a new application server AMI which now has a MongoDB set-up included, using "replica" as the MongoDB replica set name. Now, each replica hence can write into its own MongoDB instance, isolated from all others and scaling linearly.)
 
 In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
 
 ```
-INSTALL_FROM_RELEASE=build-202106012325
+INSTALL_FROM_RELEASE=build-202306271444
 SERVER_NAME=paris2024
 MONGODB_URI="mongodb://localhost/paris2024-replica?replicaSet=replica&retryWrites=true&readPreference=nearest"
 USE_ENVIRONMENT=live-replica-server
