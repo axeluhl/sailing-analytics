@@ -139,9 +139,9 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
     if [[ ${SERVER_STARTUP_NOTIFY} != "" ]]; then
         if [[ ! -z "$ON_AMAZON" ]]; then
-            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" $MAIL_ATTACH_OPTION env.sh $SERVER_STARTUP_NOTIFY
         else
-            echo "OK" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" -a env.sh ${SERVER_STARTUP_NOTIFY}
+            echo "OK" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" $MAIL_ATTACH_OPTION env.sh ${SERVER_STARTUP_NOTIFY}
         fi
     fi
 elif [[ $PARAM == "debug" ]]; then

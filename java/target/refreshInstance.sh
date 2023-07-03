@@ -257,12 +257,12 @@ deploy ()
     if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
         if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
-          echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" ${BUILD_COMPLETE_NOTIFY}
+          echo "OK - check the attachment for more information." | mail $MAIL_ATTACH_OPTION $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" ${BUILD_COMPLETE_NOTIFY}
         fi
     else
         echo "Deployment Failed"
         if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
-          echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
+          echo "ERROR - check the attachment for more information." | mail $MAIL_ATTACH_OPTION $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
         fi
     fi 
 }
