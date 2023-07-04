@@ -258,7 +258,7 @@ On sap-p1-2 two SSH connections are maintained, with the following default port 
 
 So the essential change is that the reverse forward from ``paris-ssh.sapsailing.com:8888`` now targets ``sap-p1-2:8888`` where we now assume the failover master to be running.
 
-#### Operations with Internet failing
+#### Operations with Internet Failing
 
 When the Internet connection fails, replicating the security service from ``security-service.sapsailing.com`` / ``rabbit.internal.sapsailing.com`` will no longer be possible. Neither will outbound replication to ``rabbit-eu-west-3.sapsailing.com`` be possible, and cloud replicas won't be able to reach the on-site master anymore through the ``paris-ssh.sapsailing.com:8888`` reverse port forward. This also has an effect on the local on-site replica which no longer will be able to reach ``rabbit-eu-west-3.sapsailing.com`` which provides the on-site replica with the operation stream under regular circumstances.
 
@@ -294,6 +294,9 @@ server {
     ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
+    # set client body size to 100MB
+    client_max_body_size 100M;
+
     location / {
         proxy_pass http://127.0.0.1:8888;
     }
@@ -315,13 +318,14 @@ server {
     ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
+    # set client body size to 100MB
+    client_max_body_size 100M;
+
     location / {
         proxy_pass http://127.0.0.1:8888;
     }
 }
 ```
-
-
 
 ### Backup
 
@@ -383,7 +387,7 @@ I added the EPEL repository like this:
 
 Our "favorite" Availability Zone (AZ) in eu-west-3 is "1a" / "eu-west-3a".
 
-The same host ``paris-ssh.sapsailing.com`` also runs a MongoDB 3.6 instance on port 10203.
+The same host ``paris-ssh.sapsailing.com`` also runs a MongoDB 4.4 instance on port 10203.
 
 For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rabbitmq-server`` package with it (version 3.8.2 on Erlang 22.2.7), and we'll install it with default settings, except for the following change: In the new file ``/etc/rabbitmq/rabbitmq.conf`` we enter the line
 
@@ -537,7 +541,7 @@ ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true -Dpo
 
 ### Replicas
 
-The on-site replica on ``sap-p1-2`` can be configured with a ``replica.conf`` file in ``/home/sailing/servers/replica``, using
+We plan to run with two master nodes on premise ("primary" vs. "failover"). So it is not considered a standard use case to run a replica on site. If an on-site replica is still desired on ``sap-p1-2`` it can be configured with a ``replica.conf`` file in ``/home/sailing/servers/replica``, using
 
 ```
 	rm env.sh; cat replica.conf | ./refreshInstance auto-install-from-stdin
@@ -567,7 +571,7 @@ ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 
 (Adjust the release accordingly, of course). (NOTE: During the first production days of the event we noticed that it was really a BAD IDEA to have all replicas use the same DB set-up, all writing to the MongoDB PRIMARY of the "live" replica set in eu-west-1. With tens of replicas running concurrently, this led to a massive block-up based on MongoDB not writing fast enough. This gave rise to a new application server AMI which now has a MongoDB set-up included, using "replica" as the MongoDB replica set name. Now, each replica hence can write into its own MongoDB instance, isolated from all others and scaling linearly.)
 
-In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
+In the EC2 regions, instead an instance-local MongoDB is used for each replica, not interfering with each other or with other databases:
 
 ```
 INSTALL_FROM_RELEASE=build-202306271444
@@ -606,22 +610,21 @@ The ``Event`` object is owned by ``paris2024-moderators``, and that group grants
 
 ## Landscape Upgrade Procedure
 
-In the ``configuration/on-site-scripts`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
+In the ``configuration/on-site-scripts/paris2024`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
 ```
 	configuration/on-site-scripts/upgrade-landscape.sh -R {release-name} -b {replication-bearer-token}
 ```
 will upgrade the entire landscape to the release ``{release-name}`` (e.g., build-202107210711). The ``{replication-bearer-token}`` must be provided such that the user authenticated by that token will have the permission to stop replication and to replicate the ``paris2024`` master.
 
 The script will proceed in the following steps:
- - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]`` so
+ - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[secondary_master|replica|master|security_service]`` so
    their ``INSTALL_FROM_RELEASE`` points to the new ``${RELEASE}``
- - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]``
+ - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[secondary_master|replica|master|security_service]``
  - Update all launch configurations and auto-scaling groups in the cloud (``update-launch-configuration.sh``)
  - Tell all replicas in the cloud to stop replicating (``stop-all-cloud-replicas.sh``)
- - Tell ``sap-p1-2`` to stop replicating
+ - Tell ``sap-p1-2:servers/secondary_master`` to restart (./stop; ./start)
  - on ``sap-p1-1:servers/master`` run ``./stop; ./start`` to bring the master to the new release
  - wait until master is healthy
- - on ``sap-p1-2:servers/replica`` run ``./stop; ./start`` to bring up on-site replica again
  - launch upgraded cloud replicas and replace old replicas in target group (``launch-replicas-in-all-regions.sh``)
  - terminate all instances named "SL Paris2024 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
  - manually inspect the health of everything and terminate the "SL Paris2024 (Upgrade Replica)" instances when enough new instances
