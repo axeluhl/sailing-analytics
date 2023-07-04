@@ -24,7 +24,7 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
             Boolean isOneTimePlan, PlanGroup group, SubscriptionPlanRole... roles) {
         super(id, prices, planCategories, isOneTimePlan, group, roles);
         plansById.put(id, this);
-    }
+    } 
     
     public static Map<Serializable, SubscriptionPlan> getAllInstances(){
         return Collections.unmodifiableMap(plansById);
