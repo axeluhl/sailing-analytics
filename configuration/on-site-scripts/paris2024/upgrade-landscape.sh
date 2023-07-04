@@ -62,6 +62,7 @@ RELEASE_FILE=${RELEASE}.tar.gz
 function patch_conf_and_install () {
   HOST=$1
   SERVER_DIR=$2
+  echo " * Patching config of $2 on $1 to release ${RELEASE}"
   ssh sailing@$1 "bash --login -c 'cd servers/'${SERVER_DIR}'; sed -i -e s/^INSTALL_FROM_RELEASE=.*$/INSTALL_FROM_RELEASE=${RELEASE}/ '${SERVER_DIR}'.conf; rm env.sh; cat '${SERVER_DIR}'.conf | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin'"
 }
 

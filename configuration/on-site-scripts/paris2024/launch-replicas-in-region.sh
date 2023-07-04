@@ -51,7 +51,7 @@ do
 done
 export AWS_DEFAULT_REGION=${REGION}
 if [ -z "$IMAGE_ID" ]; then
-  IMAGE_ID=$( `dirname $0`/../aws-automation/getLatestImageOfType.sh sailing-analytics-server )
+  IMAGE_ID=$( `dirname $0`/../../aws-automation/getLatestImageOfType.sh sailing-analytics-server )
 fi
 SECURITY_GROUP_ID=$( aws ec2 describe-security-groups --filters Name=tag:Name,Values="Sailing Analytics App" | jq -r '.SecurityGroups[].GroupId' )
 echo "Found security group ${SECURITY_GROUP_ID} with name \"Sailing Analytics App\""
