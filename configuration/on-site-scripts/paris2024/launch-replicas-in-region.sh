@@ -1,5 +1,5 @@
 #!/bin/bash
-INSTANCE_TYPE=c5.2xlarge
+INSTANCE_TYPE=c5.4xlarge
 REPLICA_SET_NAME=replica
 REPLICA_SET_PRIMARY=localhost
 KEY_NAME=Axel
@@ -25,7 +25,7 @@ if [ $# -eq 0 ]; then
     echo
     echo "Will launch one or more (see -c) new replicas in the AWS region specified with -g  with the release specified with -R"
     echo "which will register at the master proxy paris-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
-    echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-paris2024"
+    echo "rabbit-eu-west-3.sapsailing.com:5672, then when healthy get added to target group S-paris2024"
     echo "in that region, with all auto-replicas registered before removed from the target group."
     echo "Specify -r and -p if you are launching in eu-west-1 because it has a special non-default environment."
     exit 2
@@ -79,7 +79,7 @@ REPLICATE_MASTER_SERVLET_PORT=8888
 REPLICATE_MASTER_EXCHANGE_NAME=paris2024
 REPLICATE_MASTER_QUEUE_HOST=rabbit-eu-west-3.sapsailing.com
 REPLICATE_MASTER_BEARER_TOKEN=${BEARER_TOKEN}
-ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Paris2024 (Upgrade Replica)},{Key=sailing-analytics-server,Value=paris2024}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Paris2024 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress + " " + .Instances[].InstanceId' )
+ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=false\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Paris2024 (Upgrade Replica)},{Key=sailing-analytics-server,Value=paris2024}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Paris2024 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress + " " + .Instances[].InstanceId' )
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" != "0" ]; then
     echo "Error launching instance in region ${REGION}. Exiting with status ${EXIT_CODE}"

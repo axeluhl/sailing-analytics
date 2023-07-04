@@ -294,6 +294,9 @@ server {
     ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
+    # set client body size to 100MB
+    client_max_body_size 100M;
+
     location / {
         proxy_pass http://127.0.0.1:8888;
     }
@@ -314,6 +317,9 @@ server {
     ssl_certificate_key /etc/ssl/private/paris2024-master.sapsailing.com.privkey.pem;
     ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    # set client body size to 100MB
+    client_max_body_size 100M;
 
     location / {
         proxy_pass http://127.0.0.1:8888;
@@ -604,22 +610,21 @@ The ``Event`` object is owned by ``paris2024-moderators``, and that group grants
 
 ## Landscape Upgrade Procedure
 
-In the ``configuration/on-site-scripts`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
+In the ``configuration/on-site-scripts/paris2024`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
 ```
 	configuration/on-site-scripts/upgrade-landscape.sh -R {release-name} -b {replication-bearer-token}
 ```
 will upgrade the entire landscape to the release ``{release-name}`` (e.g., build-202107210711). The ``{replication-bearer-token}`` must be provided such that the user authenticated by that token will have the permission to stop replication and to replicate the ``paris2024`` master.
 
 The script will proceed in the following steps:
- - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]`` so
+ - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[secondary_master|replica|master|security_service]`` so
    their ``INSTALL_FROM_RELEASE`` points to the new ``${RELEASE}``
- - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]``
+ - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[secondary_master|replica|master|security_service]``
  - Update all launch configurations and auto-scaling groups in the cloud (``update-launch-configuration.sh``)
  - Tell all replicas in the cloud to stop replicating (``stop-all-cloud-replicas.sh``)
- - Tell ``sap-p1-2`` to stop replicating
+ - Tell ``sap-p1-2:servers/secondary_master`` to restart (./stop; ./start)
  - on ``sap-p1-1:servers/master`` run ``./stop; ./start`` to bring the master to the new release
  - wait until master is healthy
- - on ``sap-p1-2:servers/replica`` run ``./stop; ./start`` to bring up on-site replica again
  - launch upgraded cloud replicas and replace old replicas in target group (``launch-replicas-in-all-regions.sh``)
  - terminate all instances named "SL Paris2024 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
  - manually inspect the health of everything and terminate the "SL Paris2024 (Upgrade Replica)" instances when enough new instances

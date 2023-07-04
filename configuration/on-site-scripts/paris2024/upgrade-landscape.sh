@@ -3,20 +3,19 @@
 # The procedure works in the following steps:
 #  - patch *.conf files in sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|replica|master|security_service] so
 #    their INSTALL_FROM_RELEASE points to the new ${RELEASE}
-#  - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[replica|master|security_service]
+#  - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|replica|master|security_service]
 #  - Update all launch configurations and auto-scaling groups in the cloud (update-launch-configuration.sh)
 #  - Tell all replicas in the cloud to stop replicating (stop-all-cloud-replicas.sh)
-#  - Tell sap-p1-2 to stop replicating
+#  - Tell sap-p1-2 secondary_master to restart (./stop; ./start)
 #  - on sap-p1-1:servers/master run ./stop; ./start to bring the master to the new release
 #  - wait until master is healthy
-#  - on sap-p1-2:servers/replica run ./stop; ./start to bring up on-site replica again
 #  - launch upgraded cloud replicas and replace old replicas in target group (launch-replicas-in-all-regions.sh)
-#  - terminate all instances named "SL Paris2024 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
+#  - terminate all instances named "SL paris2024 (Auto-Replica)"; this should cause the auto-scaling group to launch new instances as required
 #  - manually inspect the health of everything and terminate the "SL Paris2024 (Upgrade Replica)" instances when enough new instances
-#    named "SL Paris2024 (auto-replica)" are available
+#    named "SL paris2024 (Auto-Replica)" are available
 #
 KEY_NAME=Axel
-INSTANCE_NAME_TO_TERMINATE="SL Paris2024 (auto-replica)"
+INSTANCE_NAME_TO_TERMINATE="SL paris2024 (Auto-Replica)"
 if [ $# -eq 0 ]; then
     echo "$0 -R <release-name> -b <replication-bearer-token> [-t <instance-type>] [-i <ami-id>] [-k <key-pair-name>] [-s]"
     echo ""
@@ -35,14 +34,13 @@ if [ $# -eq 0 ]; then
     echo " - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|replica|master|security_service]"
     echo " - Update all launch configurations and auto-scaling groups in the cloud (update-launch-configuration.sh)"
     echo " - Tell all replicas in the cloud to stop replicating (stop-all-cloud-replicas.sh)"
-    echo " - Tell sap-p1-2 to stop replicating"
+    echo " - Tell sap-p1-2 secondary_master to restart (./stop; ./start)"
     echo " - on sap-p1-1:servers/master run ./stop; ./start to bring the master to the new release"
     echo " - wait until master is healthy"
-    echo " - on sap-p1-2:servers/replica run ./stop; ./start to bring up on-site replica again"
     echo " - launch upgraded cloud replicas and replace old replicas in target group (launch-replicas-in-all-regions.sh)"
-    echo " - terminate all instances named \"SL Paris2024 (auto-replica)\"; this should cause the auto-scaling group to launch new instances as required"
+    echo " - terminate all instances named \"${INSTANCE_NAME_TO_TERMINATE}\"; this should cause the auto-scaling group to launch new instances as required"
     echo " - manually inspect the health of everything and terminate the \"SL Paris2024 (Upgrade Replica)\" instances when enough new instances"
-    echo "   named \"SL Paris2024 (auto-replica)\" are available"
+    echo "   named \"${INSTANCE_NAME_TO_TERMINATE}\" are available"
     exit 2
 fi
 options='R:b:t:i:k:s'
@@ -104,11 +102,11 @@ if [ "${EXIT_CODE}" != "0" ]; then
   echo "Telling cloud replicas to stop replicating failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
-echo " * Telling replica on sap-p1-2 to stop replicating"
-ssh sailing@sap-p1-2 "cd servers/replica; ./stopReplicating.sh ${BEARER_TOKEN}"
+echo " * Re-launching secondary master on sap-p1-2 to new release ${RELEASE}"
+ssh sailing@sap-p1-2 "bash --login -c 'cd servers/secondary_master; ./stop; ./start'"
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" != "0" ]; then
-  echo "Telling sap-p1-2 replica to stop replicating failed with exit code ${EXIT_CODE}"
+  echo "Re-launching secondary master on sap-p1-2 failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
 echo " * Re-launching master on sap-p1-1 to new release ${RELEASE} and waiting for it to become healthy"
@@ -116,13 +114,6 @@ ssh sailing@sap-p1-1 "bash --login -c 'cd servers/master; ./stop; ./start; while
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" != "0" ]; then
   echo "Re-launching master on sap-p1-1 failed with exit code ${EXIT_CODE}"
-  exit ${EXIT_CODE}
-fi
-echo " * Re-launching replica on sap-p1-2 to new release ${RELEASE}"
-ssh sailing@sap-p1-2 "bash --login -c 'cd servers/replica; ./stop; ./start'"
-EXIT_CODE=$?
-if [ "${EXIT_CODE}" != "0" ]; then
-  echo "Re-launching replica on sap-p1-2 failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
 echo " * Launching upgraded replicas SL Paris2024 (Upgrade Replica) in the regions"
