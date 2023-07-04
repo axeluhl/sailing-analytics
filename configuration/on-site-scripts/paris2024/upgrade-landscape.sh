@@ -62,7 +62,7 @@ RELEASE_FILE=${RELEASE}.tar.gz
 function patch_conf_and_install () {
   HOST=$1
   SERVER_DIR=$2
-  ssh sailing@$1 "cd servers/${SERVER_DIR}; sed -i -e 's/^INSTALL_FROM_RELEASE=.*$/INSTALL_FROM_RELEASE='${RELEASE}'/' ${SERVER_DIR}.conf; rm env.sh; cat ${SERVER_DIR}.conf | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin"
+  ssh sailing@$1 "bash --login -c 'cd servers/'${SERVER_DIR}'; sed -i -e s/^INSTALL_FROM_RELEASE=.*$/INSTALL_FROM_RELEASE=${RELEASE}/ '${SERVER_DIR}'.conf; rm env.sh; cat '${SERVER_DIR}'.conf | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin'"
 }
 
 if [ "${SKIP_DOWNLOAD}" = "1" ]; then
