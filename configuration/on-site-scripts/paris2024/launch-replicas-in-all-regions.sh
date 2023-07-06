@@ -15,7 +15,7 @@ if [ $# -eq 0 ]; then
     echo "Will launch as many new replicas in regions $( cat `dirname $0`/regions.txt ) with the release specified with -R"
     echo "as there are currently healthy auto-replicas registered with the S-paris2024 target group in the region (at least one)"
     echo "which will register at the master proxy paris-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
-    echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-paris2024"
+    echo "rabbit-eu-west-3.sapsailing.com:5672, then when healthy get added to target group S-paris2024"
     echo "in that region, with all auto-replicas registered before removed from the target group."
     exit 2
 fi
