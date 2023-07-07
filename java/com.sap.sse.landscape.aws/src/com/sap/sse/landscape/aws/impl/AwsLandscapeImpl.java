@@ -351,6 +351,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .subnets().iterator().next();
     }
     
+    @Override
+    public Iterable<AwsAvailabilityZone> getAvailabilityZones(AwsRegion region, Optional<String> vpcId) {
+        final Ec2Client ec2Client = getEc2Client(getRegion(region));
+        // filter for the VPC ID if present; otherwise list all subnets in the region
+        return Util.map(ec2Client.describeSubnets(b->vpcId.ifPresent(theVpcId->b.filters(
+                    Filter.builder().name("vpc-id").values(theVpcId).build()))).subnets(), subnet->
+                            getAvailabilityZoneByName(region, subnet.availabilityZone()));
+    }
+    
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpListener(ApplicationLoadBalancer<ShardingKey> alb) {
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1139,14 +1148,36 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public SecurityGroup getSecurityGroup(String securityGroupId, com.sap.sse.landscape.Region region) {
-        return ()->getEc2Client(getRegion(region)).describeSecurityGroups(sg->sg.groupIds(securityGroupId)).securityGroups().iterator().next().groupId();
+        final software.amazon.awssdk.services.ec2.model.SecurityGroup securityGroup =
+                getEc2Client(getRegion(region)).describeSecurityGroups(sg->sg.groupIds(securityGroupId)).securityGroups().iterator().next();
+        return new SecurityGroup() {
+            @Override
+            public String getId() {
+                return securityGroup.groupId();
+            }
+
+            @Override
+            public String getVpcId() {
+                return securityGroup.vpcId();
+            }
+        };
     }
 
     @Override
     public Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, com.sap.sse.landscape.Region region) {
         final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> securityGroups = getEc2Client(getRegion(region)).describeSecurityGroups(
                 sg->sg.filters(Filter.builder().name("tag:Name").values(securityGroupName).build())).securityGroups();
-        return securityGroups.stream().findFirst().map(sg->()->sg.groupId());
+        return securityGroups.stream().findFirst().map(sg->new SecurityGroup() {
+            @Override
+            public String getId() {
+                return sg.groupId();
+            }
+
+            @Override
+            public String getVpcId() {
+                return sg.vpcId();
+            }
+        });
     }
 
     @Override

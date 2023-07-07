@@ -859,4 +859,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * an {@link AwsBasicCredentials} object will be produced from the {@link #accessKeyId} and the {@link #secretAccessKey}.
      */
     AwsCredentials getCredentials();
+
+    /**
+     * Lists the availability zones (AZs) in the {@code region}; if {@code vpcId} is {@link Optional#isPresent() present},
+     * it is used to filter for only those AZs that have a subnet configured in the VPC.
+     */
+    Iterable<AwsAvailabilityZone> getAvailabilityZones(AwsRegion region, Optional<String> vpcId);
 }
