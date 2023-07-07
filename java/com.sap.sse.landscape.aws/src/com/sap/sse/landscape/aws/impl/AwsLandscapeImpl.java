@@ -351,15 +351,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .subnets().iterator().next();
     }
     
-    @Override
-    public Iterable<AwsAvailabilityZone> getAvailabilityZones(AwsRegion region, Optional<String> vpcId) {
-        final Ec2Client ec2Client = getEc2Client(getRegion(region));
-        // filter for the VPC ID if present; otherwise list all subnets in the region
-        return Util.map(ec2Client.describeSubnets(b->vpcId.ifPresent(theVpcId->b.filters(
-                    Filter.builder().name("vpc-id").values(theVpcId).build()))).subnets(), subnet->
-                            getAvailabilityZoneByName(region, subnet.availabilityZone()));
-    }
-    
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpListener(ApplicationLoadBalancer<ShardingKey> alb) {
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1020,10 +1011,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
-        return Util.map(getEc2Client(getRegion(awsRegion)).describeAvailabilityZones().availabilityZones(),
-                az->new AwsAvailabilityZoneImpl(az, this));
+        return getAvailabilityZones(awsRegion, /* VPC ID filter */ Optional.empty());
     }
 
+    @Override
+    public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion, Optional<String> vpcId) {
+        final Ec2Client ec2Client = getEc2Client(getRegion(awsRegion));
+        // filter for the VPC ID if present; otherwise list all subnets in the region
+        return Util.map(ec2Client.describeSubnets(b->vpcId.ifPresent(theVpcId->b.filters(
+                    Filter.builder().name("vpc-id").values(theVpcId).build()))).subnets(), subnet->
+                            getAvailabilityZoneByName(awsRegion, subnet.availabilityZone()));
+    }
+    
     @Override
     public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, String loadBalancerArn) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));

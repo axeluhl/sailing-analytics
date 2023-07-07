@@ -864,5 +864,5 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Lists the availability zones (AZs) in the {@code region}; if {@code vpcId} is {@link Optional#isPresent() present},
      * it is used to filter for only those AZs that have a subnet configured in the VPC.
      */
-    Iterable<AwsAvailabilityZone> getAvailabilityZones(AwsRegion region, Optional<String> vpcId);
+    Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region region, Optional<String> vpcId);
 }
