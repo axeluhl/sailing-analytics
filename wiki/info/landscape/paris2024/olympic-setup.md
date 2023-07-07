@@ -270,12 +270,14 @@ On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the follow
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-eu-west-3.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for paris2024.sapsailing.com, security-service.sapsailing.com and paris2024-master.sapsailing.com
+### Letsencrypt Certificate for paris2024.sapsailing.com, security-service.sapsailing.com, paris2024-master.sapsailing.com, and paris2024-secondary-master.sapsailing.com
 
 In order to allow us to access ``paris2024.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
 ```
 /usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024.sapsailing.com
+/usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024-master.sapsailing.com
+/usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024-secondary-master.sapsailing.com
 /usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d security-service.sapsailing.com
 ```
 
@@ -291,7 +293,7 @@ server {
     server_name         paris2024.sapsailing.com;
     ssl_certificate     /etc/ssl/certs/paris2024.sapsailing.com.crt;
     ssl_certificate_key /etc/ssl/private/paris2024.sapsailing.com.key;
-    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
     # set client body size to 100MB
@@ -359,6 +361,8 @@ The ``monitor-autossh-tunnels`` script checks all running ``autossh`` processes 
 The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.printSecondaryReplicationInfo()`` and logs it to ``/tmp/mongo-replica-set-delay``. The average of the last ten values is compared to a threshold (currently 3s), and an alert is sent using ``notify-operators`` if the threshold is exceeded.
 
 The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
+
+On ``sap-p1-2`` we run a script ``compare-secondary-to-primary-master`` every five minutes which basically does a ``compareServers -ael`` which uses the REST API for comparing server contents. If a difference is reported by the tool then an e-mail notification is sent out to the list of operators.
 
 ### Time Synchronizing
 Setup chronyd service on desktop machine, in order to regurlary connect via VPN and relay the time towards the two P1s. Added
