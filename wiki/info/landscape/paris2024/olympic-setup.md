@@ -10,7 +10,9 @@ For the Olympic Summer Games 2024 Paris/Marseille we use a dedicated hardware se
 
 The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
-Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this.
+Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this. Installing an older version of ``libssl`` may be required on newer Ubuntu versions (starting with 22.04) to be able to install MongoDB 4.4.
+
+An installation of Python (e.g., ``python3``) will be required for the Manage2Sail update notification script (see ``configuration/on-site-scripts/paris2024/sap-p1-2/notifyAboutOSG2024TEV2023Updates``).
 
 RabbitMQ is part of the distribution natively. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently our own fork, 2.11.0) is installed from [https://static.sapsailing.com/wt-2.11.0.zip](https://static.sapsailing.com/wt-2.11.0.zip) under ``/opt/gwt-2.11.0`` in case any development work would need to be done on these machines.
 
