@@ -326,8 +326,12 @@ implements ReplicatingSharedSailingData, ClearStateTestSupport {
     public Void internalSetPositioningInformationForMarkProperties(UUID markPropertiesId,
             Positioning positioningInformation) {
         final MarkProperties markProperties = markPropertiesById.get(markPropertiesId);
-        markProperties.setPositioningInformation(positioningInformation);
-        mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+        if (markProperties == null) {
+            logger.warning("Could not find mark properties for ID "+markPropertiesId+"; not setting positioning information");
+        } else {
+            markProperties.setPositioningInformation(positioningInformation);
+            mongoObjectFactory.storeMarkProperties(deviceIdentifierServiceFinder, markProperties);
+        }
         return null;
     }
 
