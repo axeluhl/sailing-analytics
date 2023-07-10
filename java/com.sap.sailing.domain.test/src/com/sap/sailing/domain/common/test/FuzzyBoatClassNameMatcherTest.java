@@ -18,12 +18,36 @@ public class FuzzyBoatClassNameMatcherTest {
     private final FuzzyBoatClassNameMatcher matcher = new FuzzyBoatClassNameMatcher();
     
     @Test
+    public void testFKMenVsWomenBasedOnLeaderboardName() {
+        final List<Pair<String, Pair<String, Date>>> results = Arrays.asList(
+                r("Kieler Woche 2023", "ILCA7", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "470, Mixed", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "FK, Women", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "FK, Men", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "ILCA6", TimePoint.now().asDate()));
+        matcher.sortOfficialResultsByRelevance(bc("FK"), results, /* leaderboardName */ "Women's Kite");
+        assertEquals("FK, Women", results.get(0).getB().getA());
+    }
+
+    @Test
+    public void testFKMenVsWomenBasedOnLeaderboardName2() {
+        final List<Pair<String, Pair<String, Date>>> results = Arrays.asList(
+                r("Kieler Woche 2023", "ILCA7", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "470, Mixed", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "FK, Women", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "FK, Men", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "ILCA6", TimePoint.now().asDate()));
+        matcher.sortOfficialResultsByRelevance(bc("FK"), results, /* leaderboardName */ "Men's Kite");
+        assertEquals("FK, Men", results.get(0).getB().getA());
+    }
+
+    @Test
     public void simpleFullMatchTest() {
         final List<Pair<String, Pair<String, Date>>> results = Arrays.asList(
                 r("Kieler Woche 2023", "49er", TimePoint.now().asDate()),
                 r("Kieler Woche 2023", "N17F", TimePoint.now().asDate()),
                 r("Kieler Woche 2023", "ILCA6", TimePoint.now().asDate()));
-        matcher.sortOfficialResultsByRelevance(bc("N17F"), results);
+        matcher.sortOfficialResultsByRelevance(bc("N17F"), results, /* leaderboardName */ null);
         assertEquals("N17F", results.get(0).getB().getA());
     }
 
@@ -33,7 +57,7 @@ public class FuzzyBoatClassNameMatcherTest {
                 r("Kieler Woche 2023", "49er", TimePoint.now().asDate()),
                 r("Kieler Woche 2023", "N17 Foiling", TimePoint.now().asDate()),
                 r("Kieler Woche 2023", "ILCA6", TimePoint.now().asDate()));
-        matcher.sortOfficialResultsByRelevance(bc("N17F"), results);
+        matcher.sortOfficialResultsByRelevance(bc("N17F"), results, /* leaderboardName */ null);
         assertEquals("N17 Foiling", results.get(0).getB().getA());
     }
 
@@ -46,7 +70,7 @@ public class FuzzyBoatClassNameMatcherTest {
                 r("Kieler Woche 2023", "49er", TimePoint.now().asDate()),
                 r("Kieler Woche 2023", "N17 Foiling", TimePoint.now().asDate()),
                 r("Kieler Woche 2023", "ILCA6", TimePoint.now().asDate()));
-        matcher.sortOfficialResultsByRelevance(bc("Europe Int."), results);
+        matcher.sortOfficialResultsByRelevance(bc("Europe Int."), results, /* leaderboardName */ null);
         assertEquals("Europe", results.get(0).getB().getA());
     }
 
