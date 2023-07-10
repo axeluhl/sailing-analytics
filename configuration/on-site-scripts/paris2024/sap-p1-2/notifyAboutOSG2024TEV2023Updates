@@ -1,0 +1,35 @@
+#!/bin/sh
+YESFILE="/tmp/osg2024tev2023results.json"
+YESFILE_OLD="${YESFILE}.old"
+MAILINGLIST="/home/sailing/mailinglists/osg2024tev2023updatemailinglist"
+URL="http://10.1.33.40/info/api/public/links/event/1be7a4cb-4537-44d6-88b3-646b308c2dbf?accesstoken=bDAv8CwsTM94ujZ&mediaType=json"
+dosendmail=false
+wget -O "$YESFILE" "$URL"
+if [ -f "$YESFILE_OLD" ]; then
+  # results previously downloaded; now compare
+  YESFILE_FORMATTED="${YESFILE}.formatted"
+  YESFILE_OLD_FORMATTED="${YESFILE_OLD}.formatted"
+  cat "$YESFILE" | python3 -mjson.tool >"$YESFILE_FORMATTED"
+  cat "$YESFILE_OLD" | python3 -mjson.tool >"$YESFILE_OLD_FORMATTED"
+  diff -q "$YESFILE_OLD_FORMATTED" "$YESFILE_FORMATTED"
+  if [ "$?" != "0" ]; then
+    echo "Found diff between $YESFILE_OLD and $YESFILE
+
+`diff -q "$YESFILE_OLD_FORMATTED" "$YESFILE_FORMATTED"`
+
+Sending mail."
+    dosendmail=true
+  fi
+fi
+if [ "$dosendmail" = "true" ]; then
+  echo "`date` Sending mail to `cat "$MAILINGLIST"`"
+  echo "$YESFILE has changed. Consider re-importing results for Olympic Test Event Marseille 2023. Differences:
+
+------------------
+`diff -U 10 "$YESFILE_OLD_FORMATTED" "$YESFILE_FORMATTED"`
+------------------
+
+To unsubscribe, change $MAILINGLIST on `hostname`." | mail -s "$YESFILE was updated" `cat "$MAILINGLIST" | grep -v "^#"`
+fi
+mv "$YESFILE" "$YESFILE_OLD"
+

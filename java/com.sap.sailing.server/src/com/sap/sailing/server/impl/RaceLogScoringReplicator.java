@@ -129,12 +129,18 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
                         rankByRaceCommittee, positionedCompetitor.getScore(), positionedCompetitor.getMaxPointsReason());
                 setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor.getMaxPointsReason(), competitor);
             }
-            // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
-            // be triggered, even though no score correction may have been performed
-            String comment = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())
-                    ? String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_SINGLE_FLEET, raceColumn.getName())
-                    : String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET, raceColumn.getName(), fleet.getName());
-            applyMetadataUpdate(leaderboard, timePoint, comment);
+            // Update the metadata only if it is newer than any previous score correction update.
+            // This helps if "mechanical" updates are received out of order and will converge towards
+            // the latest update time point:
+            if (leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ||
+                    (timePoint != null && leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity().before(timePoint))) {
+                // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
+                // be triggered, even though no score correction may have been performed
+                String comment = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())
+                        ? String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_SINGLE_FLEET, raceColumn.getName())
+                        : String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET, raceColumn.getName(), fleet.getName());
+                applyMetadataUpdate(leaderboard, timePoint, comment);
+            }
         }
     }
 

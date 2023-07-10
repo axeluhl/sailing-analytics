@@ -138,7 +138,9 @@ extends StartHost<ShardingKey, HostT> {
         }
 
         protected AwsAvailabilityZone getAvailabilityZone() {
-            return availabilityZone == null ? getRandomAvailabilityZone(getRegion(), getLandscape()) : availabilityZone;
+            return availabilityZone == null ?
+                    getRandomAvailabilityZone(getRegion(), getLandscape(), Util.stream(getSecurityGroups()).findFirst().map(sg->sg.getVpcId())) :
+                    availabilityZone;
         }
 
         @Override
@@ -260,10 +262,12 @@ extends StartHost<ShardingKey, HostT> {
             this.userData.add(ud);
         }
         this.instanceType = builder.getInstanceType();
+        this.securityGroups = builder.getSecurityGroups();
+        // FIXME the AZ must be from the same VPC as the security group; but how to find out?
+        
         this.availabilityZone = builder.getAvailabilityZone();
         this.keyName = builder.getKeyName();
         this.tags = Optional.of(builder.getTags().orElse(Tags.empty()).and(NAME_TAG_NAME, builder.getInstanceName()));
-        this.securityGroups = builder.getSecurityGroups();
         this.hostSupplier = builder.getHostSupplier();
         this.privateKeyEncryptionPassphrase = builder.getPrivateKeyEncryptionPassphrase();
     }
@@ -275,11 +279,17 @@ extends StartHost<ShardingKey, HostT> {
         return landscape.getLatestImageWithType(region, imageType);
     }
     
+    /**
+     * @param vpcId
+     *            If a VPC ID is provided here then it will be used to restrict the availability zones to those for
+     *            which a subnet exists in the VPC identified by the {@code vpcId}; otherwise, any randomly-picked AZ
+     *            from the {@code region} will be used.
+     */
     protected static <ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsAvailabilityZone getRandomAvailabilityZone(AwsRegion region, AwsLandscape<ShardingKey> landscape) {
-        final Iterable<AwsAvailabilityZone> azs = landscape.getAvailabilityZones(region);
+    AwsAvailabilityZone getRandomAvailabilityZone(AwsRegion region, AwsLandscape<ShardingKey> awsLandscape, Optional<String> vpcId) {
+        final Iterable<AwsAvailabilityZone> azs = awsLandscape.getAvailabilityZones(region, vpcId);
         return (AwsAvailabilityZone) Util.get(azs, new Random().nextInt(Util.size(azs)));
     }
 

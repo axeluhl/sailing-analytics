@@ -6,7 +6,6 @@ autossh -M 20500 -f -A -N \
   -L 22443:sapsailing.com:443 \
   -L 22222:sapsailing.com:22 \
   -R 9443:localhost:9443 \
-  -R '*:8888:localhost:8888' \
   -L 443:security-service.sapsailing.com:443 \
   -R 10201:localhost:10201 \
   -L 10203:localhost:10203 \

@@ -2,17 +2,23 @@
 killall autossh
 sleep 2
 # No point in trying to reach paris-ssh.sapsailing.com without Internet connection;
-# Instead, sap-p1-1 and sap-p1-2 are expected to use sap-p1-2's RabbitMQ through port 5673;
-# Local port 443 which is expected to reach security-service.sapsailing.com:443 needs to be
-# diverted to a non-existing port so that outbound replication operations will fail.
-# If this server (sap-p1-2) needs to run as master in this scenario it cannot replicate
-# the SecurityService successfully anymore. If the application then has to be restarted,
-# it requires a configuration that loads the relevant security information locally.
-#autossh -M 20504 -f -A -N -L 443:security-service.sapsailing.com:443 -R 10202:localhost:10202 -L 10203:localhost:10203 -L 5673:rabbit-eu-west-3.sapsailing.com:5672 -L 15673:localhost:15673 -L 5675:rabbit.internal.sapsailing.com:5672 -L 15675:rabbit.internal.sapsailing.com:15672 -R 18222:localhost:22 ec2-user@paris-ssh.sapsailing.com
+# Instead, sap-p1-1 and sap-p1-2 are expected to use their local RabbitMQ through port 5673,
+# and sap-p1-2 obtains the security-service replication from sap-p1-1's RabbitMQ tunneled
+# through port 5675.
+#
+# TODO Regarding HTTPS to security-service.sapsailing.com:443, couldn't we forward
+# localhost:443 to sap-p1-1:9443 such that access goes through NGINX on sap-p1-1?
+#
 # The tunnel connection to sap-p1-1 is expected to be established from the sap-p1-1 side by a reverse port forward
 # However, the RabbitMQ forwards to emulate rabbit.internal.sapsailing.com (eu-west-1) and rabbit-eu-west-3.sapsailing.com
 # with the local RabbitMQ need to go through a localhost port forward. Furthermore, the security-service.sapsailing.com tunnel
 # is re-directed to sap-p1-1's NGINX, assuming it has a replacement running if Internet fails.
-autossh -M 21504 -f -A -N -L 5673:sap-p1-1:5672 -L 15673:sap-p1-1:15672 -L 5675:sap-p1-1:5672 -L 15675:sap-p1-1:15672 sap-p1-1
+autossh -M 21504 -f -A -N \
+  -L 5673:localhost:5672 \
+  -L 15673:localhost:15672 \
+  -L 5675:sap-p1-1:5672 \
+  -L 15675:sap-p1-1:15672 \
+  -L 443:sap-p1-1:9443 \
+  sap-p1-1
 # Tunnel to localhost for TracTrac port forwards
 tractrac-A
