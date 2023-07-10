@@ -26,15 +26,15 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     @Override
     public void addSubscriptionGroup(final SubscriptionGroupDTO group, final SubscriptionCard.Type type,
             final EventBus eventBus) {
+        final AuthenticationContext authenticationContext = presenter.getAuthenticationContext();
         switch (type) {
         case HIGHLIGHT:
         case DEFAULT:
             container.addSubscription(new SubscriptionCard(group, type, (price) -> {
-                final AuthenticationContext authenticationContext = presenter.getAuthenticationContext();
                 if (!authenticationContext.isLoggedIn()) {
                     onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
                     presenter.toggleAuthenticationFlyout();
-                } else if(presenter.isMailVerificationRequired() && !authenticationContext.getCurrentUser().isEmailValidated()) {
+                } else if(!this.isEmailValidated(authenticationContext)) {
                     onOpenCheckoutError(StringMessages.INSTANCE.mailNotValidated());
                     presenter.toggleAuthenticationFlyout();
                 }else {
@@ -42,23 +42,28 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
                         presenter.startSubscription(price.getPriceId());
                     }
                 }
-            }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
+            }, eventBus, presenter.getAuthenticationContext().isLoggedIn(), this.isEmailValidated(authenticationContext)));
             break;
         case OWNER:
             container.addSubscription(new SubscriptionCard(group, type, price -> presenter.manageSubscriptions(),
-                    eventBus, presenter.getAuthenticationContext().isLoggedIn()));
+                    eventBus, presenter.getAuthenticationContext().isLoggedIn(), this.isEmailValidated(authenticationContext)));
             break;
         case ONETIMELOCK:
             container.addSubscription(new SubscriptionCard(group, type, price -> {},
-                    eventBus, presenter.getAuthenticationContext().isLoggedIn()));
+                    eventBus, presenter.getAuthenticationContext().isLoggedIn(), this.isEmailValidated(authenticationContext)));
             break;
         case FREE:
             container.addSubscription(new SubscriptionCard(group, type, price -> presenter.toggleAuthenticationFlyout(),
-                    eventBus, presenter.getAuthenticationContext().isLoggedIn()));
+                    eventBus, presenter.getAuthenticationContext().isLoggedIn(), this.isEmailValidated(authenticationContext)));
             break;
         default:
             break;
         }
+    }
+    
+    private boolean isEmailValidated(final AuthenticationContext authenticationContext) {
+        return !presenter.isMailVerificationRequired() ||
+                authenticationContext.getCurrentUser().isEmailValidated();
     }
 
     @Override
