@@ -265,6 +265,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                             || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(
                                     startOfLatestRace) > 0)) {
                         delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
+                        startOfLatestRace = trackedRace.getStartOfRace();
                     }
                 }
             }
