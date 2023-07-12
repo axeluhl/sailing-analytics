@@ -1,0 +1,18 @@
+#!/bin/bash
+FOUND=$( echo "db.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.find({type: \"TRAC_TRAC\", useOfficialEventsToUpdateRaceLog: false})" | \
+  mongo --quiet "mongodb://localhost:10201,localhost:10202,localhost:10203/paris2024?replicaSet=paris2024&retryWrites=true&readPreference=nearest" )
+if [ -n "${FOUND}" ]; then
+  PARAM_URL=$( echo "db.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.find({type: \"TRAC_TRAC\", useOfficialEventsToUpdateRaceLog: false}, {_id: 0, paramURL: 1})" | \
+    mongo --quiet "mongodb://localhost:10201,localhost:10202,localhost:10203/paris2024?replicaSet=paris2024&retryWrites=true&readPreference=nearest" )
+  echo "The following TracTrac race URL has been connected to without
+ticking the \"Automatically update from "official" results published by TracTrac\"
+check-box.
+
+Race params URL:
+  ${PARAM_URL}
+
+Please consider removing the tracked race and re-connecting with the corresponding
+check-box ticked.
+" | notify-operators "Found TRAC_TRAC race in DB without \"official\" checkbox ticked"
+  logger -t "sailing" "Found TRAC_TRAC race without \"official\" checkbox: ${PARAM_URL}"
+fi
