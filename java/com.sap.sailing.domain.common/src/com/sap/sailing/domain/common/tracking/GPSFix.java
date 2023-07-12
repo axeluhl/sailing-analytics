@@ -12,7 +12,7 @@ public interface GPSFix extends Positioned, Timed, WithValidityCache, WithEstima
      * For example, when trying to tell whether an object was on the one or the other side of some other object,
      * this typical level of accuracy can be used as a default margin of error.
      */
-    Distance TYPICAL_HDOP = new MeterDistance(5);
+    Distance TYPICAL_HDOP = new MeterDistance(2);
     
     /**
      * Reaches <code>to</code> at <code>to</code>'s {@link GPSFix#getTimePoint() time point} starting at this fix,
