@@ -225,9 +225,9 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 final Iterable<MetadataParser.ControlPointMetaData> controlPointMetadata = getMetadataParser().parseControlPointMetadata(controlPoint);
-                List<Mark> marks = new ArrayList<Mark>();
+                final List<Mark> marks = new ArrayList<Mark>();
                 for (ControlPointMetaData markMetadata : controlPointMetadata) {
-                    Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
+                    final Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
                             /* no separate short name; use name as short name, too */ markMetadata.getName(),
                             markMetadata.getType(), markMetadata.getColor(),
                             markMetadata.getShape(), markMetadata.getPattern());

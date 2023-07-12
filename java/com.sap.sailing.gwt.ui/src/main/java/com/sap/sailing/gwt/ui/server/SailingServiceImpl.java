@@ -1816,7 +1816,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             try {
                 estimatedDuration = trackedRace.getEstimatedTimeToComplete(new MillisecondsTimePoint(time)).getExpectedDuration();
             } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
-                logger.log(Level.WARNING, "Problem computing the estimated race duration", e);
+                logger.log(Level.WARNING, "Problem computing the estimated race duration for "+
+                        trackedRace.getRace().getName()+" / "+trackedRace.getTrackedRegatta().getRegatta().getName()+
+                        ": "+e.getMessage(), e);
             }
         }
         return estimatedDuration;
