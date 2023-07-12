@@ -29,6 +29,7 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiverAdapter;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
+import com.sap.sailing.domain.igtimiadapter.datatypes.BatteryLevel;
 import com.sap.sailing.domain.igtimiadapter.datatypes.COG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
@@ -69,6 +70,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     private final Map<String, DynamicTrack<SOG>> sogTracks;
     private final Map<String, DynamicTrack<HDG>> hdgTracks;
     private final Map<String, DynamicTrack<HDGM>> hdgmTracks;
+    private final Map<String, DynamicTrack<BatteryLevel>> batteryLevelTracks;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
     private final ConcurrentMap<IgtimiWindListener, IgtimiWindListener> listeners;
@@ -108,6 +110,12 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         public void received(HDGM fix) {
             getHdgmTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
+
+        @Override
+        public void received(BatteryLevel fix) {
+            getBatteryLevelTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
+        }
+        
     }
 
     public IgtimiWindReceiver(DeclinationService declinationService) {
@@ -121,6 +129,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         sogTracks = new HashMap<>();
         hdgTracks = new HashMap<>();
         hdgmTracks = new HashMap<>();
+        batteryLevelTracks = new HashMap<>();
     }
     
     private <T extends Fix> DynamicTrack<T> getTrack(String deviceSerialNumber, Map<String, DynamicTrack<T>> tracksByDeviceSerialNumber) {
@@ -179,9 +188,18 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
     
+    /**
+     * Returns a wind fix produced out of an AWS/AWA and other fixes, as well as the fixes used for this, including a {@link BatteryLevel}
+     * fix, if any was found, although this did technically not contribute to the production of the {@link Wind} object.
+     */
     private Pair<Wind, Set<Fix>> getWind(final TimePoint timePoint, String deviceSerialNumber) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
         final Set<Fix> fixesUsed = new HashSet<>();
+        final DynamicTrack<BatteryLevel> batteryLevelTrack = getBatteryLevelTrack(deviceSerialNumber);;
+        final BatteryLevel lastBatteryLevel = batteryLevelTrack.getLastFixAtOrBefore(timePoint);
+        if (lastBatteryLevel != null) {
+            fixesUsed.add(lastBatteryLevel);
+        }
         final DynamicTrack<AWA> awaTrack = getAwaTrack(deviceSerialNumber);
         Bearing awaFrom = awaTrack.getInterpolatedValue(timePoint, a->new ScalableBearing(a.getApparentWindAngle()));
         addFixUsedIfNotNull(awaTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
@@ -306,6 +324,10 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
 
     private DynamicTrack<HDGM> getHdgmTrack(String deviceSerialNumber) {
         return getTrack(deviceSerialNumber, hdgmTracks);
+    }
+    
+    private DynamicTrack<BatteryLevel> getBatteryLevelTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, batteryLevelTracks);
     }
 
     /**

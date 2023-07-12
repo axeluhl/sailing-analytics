@@ -25,7 +25,8 @@ public enum Type {
     AWS(12, AWS.class),
     ant_hrm(13, AntHrm.class),
     ant_cbst(14, AntCbst.class),
-    File(16, File.class);
+    File(16, File.class),
+    battery_level(50, BatteryLevel.class);
 
     public static Type valueOf(int code) {
         return typeByCode.get(code);
