@@ -74,8 +74,8 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
 
         @Override
         public Pair<CompetitorResult, TimePoint> getRaceLogResultAndCreationTimePointForCompetitor(
-                TrackedRace trackedRace, Competitor competitor) {
-            return super.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+                RaceLog raceLog, Competitor competitor) {
+            return super.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
         }
     }
     
@@ -251,9 +251,10 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         final TimePoint resultTimePoint = startOfPass.plus(Duration.ONE_SECOND);
         when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(resultTimePoint.asMillis());
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.BFD);
+        final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(resultTimePoint, raceLogBasedResult.getB());
             assertEquals(MaxPointsReason.BFD, raceLogBasedResult.getA().getMaxPointsReason());
@@ -264,7 +265,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.DNF);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(resultTimePoint, raceLogBasedResult.getB()); // still expecting to see the result from the later time point
             assertEquals(MaxPointsReason.BFD, raceLogBasedResult.getA().getMaxPointsReason());
@@ -275,7 +276,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.DNC);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(newerResultTimePoint, raceLogBasedResult.getB()); // expecting to see the result from the newer time point
             assertEquals(MaxPointsReason.DNC, raceLogBasedResult.getA().getMaxPointsReason());
@@ -286,7 +287,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.NO_DATA);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(yetNewerResultTimePoint, raceLogBasedResult.getB()); // expecting to see the result from the yet newer time point
             assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
@@ -302,7 +303,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.NO_DATA);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(resultTimePoint, raceLogBasedResult.getB());
             assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
@@ -314,7 +315,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getOfficialRank()).thenReturn(43);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(resultTimePoint, raceLogBasedResult.getB());
             assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
@@ -326,7 +327,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getOfficialRank()).thenReturn(44);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(newerResultTimePoint, raceLogBasedResult.getB());
             assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
@@ -338,7 +339,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(tractracRaceCompetitor.getOfficialRank()).thenReturn(0);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
-            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final Pair<CompetitorResult, TimePoint> raceLogBasedResult = reconciler.getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
             assertNotNull(raceLogBasedResult);
             assertEquals(yetNewerResultTimePoint, raceLogBasedResult.getB());
             assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
