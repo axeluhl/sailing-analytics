@@ -398,46 +398,51 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             // there is an official result for the competitor on TracTrac's side
             // find out if we already have this information represented in the race log(s) and if not if the TracTrac information is newer:
             final Competitor competitor = domainFactory.resolveCompetitor(raceCompetitor.getCompetitor());
-            final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
-            final MaxPointsReason officialMaxPointsReason = getMaxPointsReason(competitorStatus);
-            final MillisecondsTimePoint officialResultTime = new MillisecondsTimePoint(timePointForStatusEvent);
-            for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
-            final Pair<CompetitorResult, TimePoint> resultFromRaceLogAndItsCreationTimePoint = getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
-                if (resultFromRaceLogAndItsCreationTimePoint == null
-                        || ((resultFromRaceLogAndItsCreationTimePoint.getA().getOneBasedRank() != officialRank
-                         || ((resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime() == null) ? 0
-                                : resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime().asMillis()) != officialFinishingTime
-                         || resultFromRaceLogAndItsCreationTimePoint.getA().getMaxPointsReason() != officialMaxPointsReason)
-                        && resultFromRaceLogAndItsCreationTimePoint.getB().before(officialResultTime))) {
-                    logger.info("Applying official competitor result because its time point "+officialResultTime
-                            +" is newer than the latest result for that competitor from the race log "+
-                            (resultFromRaceLogAndItsCreationTimePoint==null?"null":resultFromRaceLogAndItsCreationTimePoint.getB()));
-                    // We have received an update from TracTrac, rank or finishing time or penalty varies and is newer
-                    // than the last thing we see in the race log (including we may not have anything in the race
-                    // log for the results of that competitor at all yet).
-                    // --> Write the TracTrac result to the race log, where 0 for the "official rank" maps to 0 of our
-                    // one-based rank; and 0 as official finishing time maps to null as the official finishing time:
-                    final CompetitorResult resultForRaceLog = new CompetitorResultImpl(competitor.getId(), competitor.getName(),
-                            competitor.getShortName(),
-                            /* boat name: */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getName() : competitor.getShortInfo())),
-                            /* boatSailId */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getSailID() : competitor.getShortInfo())),
-                            officialRank, officialMaxPointsReason, /* score null means let the scoring system calculate it */ null,
-                            officialFinishingTime == 0 ? null : new MillisecondsTimePoint(officialFinishingTime),
-                                    "Official results from TracTrac connector", MergeState.OK);
-                    final CompetitorResults resultsForRaceLog = new CompetitorResultsImpl();
-                    resultsForRaceLog.add(resultForRaceLog);
-                    final RaceLogFinishPositioningConfirmedEventImpl raceLogEvent = new RaceLogFinishPositioningConfirmedEventImpl(
-                            officialResultTime, officialResultTime, raceLogEventAuthor,
-                            UUID.randomUUID(), raceLog.getCurrentPassId(), resultsForRaceLog);
-                    // Avoid an endless recursion in case this event triggers this reconciler's race log listener; see bug 5565
-                    addRaceLogEventAndPreventRecursion(raceLog, raceLogEvent);
-                    logger.info("Added the following result to the race log of " + trackedRace.getRaceIdentifier()
-                            + " for competitor " + raceCompetitor + ": " + resultForRaceLog);
-                } else {
-                    logger.info("Did not produce a new competitor result for competitor " + raceCompetitor + " in race "
-                            + trackedRace.getRaceIdentifier() + " because existing result "
-                            + resultFromRaceLogAndItsCreationTimePoint + " was not older than status time "
-                            + officialResultTime + " or was an equal result");
+            if (competitor == null) {
+                logger.warning("Received a competitor status update from TracTrac for a competitor in race "+raceCompetitor.getRace()+
+                        " we don't know: "+ raceCompetitor.getCompetitor()+"; ignoring.");
+            } else {
+                final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
+                final MaxPointsReason officialMaxPointsReason = getMaxPointsReason(competitorStatus);
+                final MillisecondsTimePoint officialResultTime = new MillisecondsTimePoint(timePointForStatusEvent);
+                for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+                final Pair<CompetitorResult, TimePoint> resultFromRaceLogAndItsCreationTimePoint = getRaceLogResultAndCreationTimePointForCompetitor(raceLog, competitor);
+                    if (resultFromRaceLogAndItsCreationTimePoint == null
+                            || ((resultFromRaceLogAndItsCreationTimePoint.getA().getOneBasedRank() != officialRank
+                             || ((resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime() == null) ? 0
+                                    : resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime().asMillis()) != officialFinishingTime
+                             || resultFromRaceLogAndItsCreationTimePoint.getA().getMaxPointsReason() != officialMaxPointsReason)
+                            && resultFromRaceLogAndItsCreationTimePoint.getB().before(officialResultTime))) {
+                        logger.info("Applying official competitor result because its time point "+officialResultTime
+                                +" is newer than the latest result for that competitor from the race log "+
+                                (resultFromRaceLogAndItsCreationTimePoint==null?"null":resultFromRaceLogAndItsCreationTimePoint.getB()));
+                        // We have received an update from TracTrac, rank or finishing time or penalty varies and is newer
+                        // than the last thing we see in the race log (including we may not have anything in the race
+                        // log for the results of that competitor at all yet).
+                        // --> Write the TracTrac result to the race log, where 0 for the "official rank" maps to 0 of our
+                        // one-based rank; and 0 as official finishing time maps to null as the official finishing time:
+                        final CompetitorResult resultForRaceLog = new CompetitorResultImpl(competitor.getId(), competitor.getName(),
+                                competitor.getShortName(),
+                                /* boat name: */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getName() : competitor.getShortInfo())),
+                                /* boatSailId */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getSailID() : competitor.getShortInfo())),
+                                officialRank, officialMaxPointsReason, /* score null means let the scoring system calculate it */ null,
+                                officialFinishingTime == 0 ? null : new MillisecondsTimePoint(officialFinishingTime),
+                                        "Official results from TracTrac connector", MergeState.OK);
+                        final CompetitorResults resultsForRaceLog = new CompetitorResultsImpl();
+                        resultsForRaceLog.add(resultForRaceLog);
+                        final RaceLogFinishPositioningConfirmedEventImpl raceLogEvent = new RaceLogFinishPositioningConfirmedEventImpl(
+                                officialResultTime, officialResultTime, raceLogEventAuthor,
+                                UUID.randomUUID(), raceLog.getCurrentPassId(), resultsForRaceLog);
+                        // Avoid an endless recursion in case this event triggers this reconciler's race log listener; see bug 5565
+                        addRaceLogEventAndPreventRecursion(raceLog, raceLogEvent);
+                        logger.info("Added the following result to the race log of " + trackedRace.getRaceIdentifier()
+                                + " for competitor " + raceCompetitor + ": " + resultForRaceLog);
+                    } else {
+                        logger.info("Did not produce a new competitor result for competitor " + raceCompetitor + " in race "
+                                + trackedRace.getRaceIdentifier() + " because existing result "
+                                + resultFromRaceLogAndItsCreationTimePoint + " was not older than status time "
+                                + officialResultTime + " or was an equal result");
+                    }
                 }
             }
         } else {
