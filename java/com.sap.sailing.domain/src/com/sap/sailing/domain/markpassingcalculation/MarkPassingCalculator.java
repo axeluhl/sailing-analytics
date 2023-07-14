@@ -200,13 +200,14 @@ public class MarkPassingCalculator {
      */
     public void waitUntilStopped(final long timeoutInMillis) throws InterruptedException {
         final long start = System.currentTimeMillis();
-        if (listenerThread != null) {
-            synchronized (listenerThread) {
+        final Thread theListenerThread = listenerThread;
+        if (theListenerThread != null) {
+            synchronized (theListenerThread) {
                 while (!listenerThreadStarted && System.currentTimeMillis() - start < timeoutInMillis) {
-                    listenerThread.wait(timeoutInMillis);
+                    theListenerThread.wait(timeoutInMillis);
                 }
             }
-            listenerThread.join(timeoutInMillis);
+            theListenerThread.join(timeoutInMillis);
         }
     }
 
