@@ -311,7 +311,10 @@ public class MarkPassingCalculator {
                                 if (isEndMarker(fixInsertion)) {
                                     logger.fine("Stopping " + MarkPassingCalculator.this + "'s listener for race "
                                             + raceName);
-                                    finished = true;
+                                    synchronized (MarkPassingCalculator.this) {
+                                        finished = true;
+                                        listenerThread = null;
+                                    }
                                     break;
                                 } else {
                                     try {
