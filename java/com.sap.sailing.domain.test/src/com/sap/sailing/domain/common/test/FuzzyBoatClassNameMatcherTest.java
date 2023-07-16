@@ -42,6 +42,20 @@ public class FuzzyBoatClassNameMatcherTest {
     }
 
     @Test
+    public void testIQFWomen() {
+        final List<Pair<String, Pair<String, Date>>> results = Arrays.asList(
+                r("Kieler Woche 2023", "ILCA7", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "470, Mixed", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "FK, Women", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "IQF, Women", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "IQF, Men", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "FK, Men", TimePoint.now().asDate()),
+                r("Kieler Woche 2023", "ILCA6", TimePoint.now().asDate()));
+        matcher.sortOfficialResultsByRelevance(bc("iQFOil Women"), results, /* leaderboardName */ "Women's Windsurfing");
+        assertEquals("IQF, Women", results.get(0).getB().getA());
+    }
+
+    @Test
     public void simpleFullMatchTest() {
         final List<Pair<String, Pair<String, Date>>> results = Arrays.asList(
                 r("Kieler Woche 2023", "49er", TimePoint.now().asDate()),
