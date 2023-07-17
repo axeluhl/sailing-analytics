@@ -44,6 +44,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
@@ -243,7 +244,18 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         final MongoEndpoint mongoEndpoint = landscape.getMongoEndpoints(region).iterator().next();
         final AwsInstance<String> host = landscape.launchHost(
                 getLatestSailingImage(),
-                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"),
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(
+                        new SecurityGroup() {
+                            @Override
+                            public String getId() {
+                                return "sg-0b2afd48960251280";
+                            }
+
+                            @Override
+                            public String getVpcId() {
+                                return "abc";
+                            }
+                        }),
                 Optional.of(Tags.with("Name", "MyHost").and("Hello", "World")),
                 "MONGODB_URI=\""+mongoEndpoint.getURI(Optional.of(new DatabaseImpl(mongoEndpoint, "winddbTest")))+"\"",
                 "INSTALL_FROM_RELEASE="+SailingReleaseRepository.INSTANCE.getLatestMasterRelease().getName(),
@@ -408,7 +420,18 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
 
     private void testSshConnectWithKey(final String keyName) throws Exception {
         final AwsInstance<String> host = landscape.launchHost(getLatestSailingImage(),
-                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"), /* tags */ Optional.empty());
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(
+                        new SecurityGroup() {
+                            @Override
+                            public String getId() {
+                                return "sg-0b2afd48960251280";
+                            }
+
+                            @Override
+                            public String getVpcId() {
+                                return "abc";
+                            }
+                        }), /* tags */ Optional.empty());
         try {
             assertNotNull(host);
             logger.info("Created instance with ID "+host.getInstanceId());

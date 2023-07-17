@@ -10,7 +10,9 @@ For the Olympic Summer Games 2024 Paris/Marseille we use a dedicated hardware se
 
 The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
-Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this.
+Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this. Installing an older version of ``libssl`` may be required on newer Ubuntu versions (starting with 22.04) to be able to install MongoDB 4.4.
+
+An installation of Python (e.g., ``python3``) will be required for the Manage2Sail update notification script (see ``configuration/on-site-scripts/paris2024/sap-p1-2/notifyAboutOSG2024TEV2023Updates``).
 
 RabbitMQ is part of the distribution natively. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently our own fork, 2.11.0) is installed from [https://static.sapsailing.com/wt-2.11.0.zip](https://static.sapsailing.com/wt-2.11.0.zip) under ``/opt/gwt-2.11.0`` in case any development work would need to be done on these machines.
 
@@ -58,6 +60,34 @@ replication:
 
 For "Paris 2024" we configured yet another MongoDB replica set that consisted only of the two on-site nodes and where we stored the backup copy of the ``security_service`` database. We should, however, be able to store the ``security_service`` DB backup in the same replica set of which the two local nodes with their MongoDB processes listening on ports ``10201/10202``. The ``security_service`` database is used as the target for a backup script for the ``security_service`` database. See below. We increased the priority of the ``sap-p1-1`` node from 1 to 2.
 
+For log rotation, the following file must be created at ``/etc/logrotate.d/mongodb``:
+
+```
+compress
+/var/log/mongodb/mongod.log
+{
+   rotate 5
+   weekly
+   postrotate
+       /usr/bin/killall -SIGUSR1 mongod
+   endscript
+}
+```
+
+and likewise, if a second MongoDB replica set is running producing, e.g., ``/var/log/mongodb/mongod-security-service.log`` then you need to add a second file, e.g., at ``/etc/logrotate.d/mongodb-security-service`` like this:
+
+```
+compress
+/var/log/mongodb/mongod-security-service.log
+{
+   rotate 5
+   weekly
+   postrotate
+       /usr/bin/killall -SIGUSR1 mongod
+   endscript
+}
+```
+
 ### User Accounts
 
 The essential user account on both laptops is ``sailing``. The account is intended to be used for running the Java VM that executes the SAP Sailing Analytics server software. The account is currently still protected by a password that our on-site team should know. On both laptops the ``sailing`` account has a password-less SSH key installed under ``/home/sailing/.ssh`` that is contained in the ``known_hosts`` file of ``paris-ssh.sapsailing.com`` as well as the mutually other P1 laptop. This way, all tunnels can easily be created once logged on to this ``sailing`` account.
@@ -90,10 +120,14 @@ TracTrac Dev Jorge (Linux)		10.1.3.228	10.8.0.135
 TracTrac Dev Chris (Linux)		10.1.3.233	10.8.0.136	
 ```
 
-The OpenVPN connection is set up with the GUI of the Linux Desktop. Therefore the management is done through Network Manager. Network Manager has a CLI, ``nmcli``. With that more properties of connections can be modified. The ``connection.secondaries`` property defines the UUID of a connection that will be established as soon as the initial connection is working. With ``nmcli connection show`` you will get the list of connections with the corresponding UUIDs. For the Medemblik Event the OpenVPN connection to the A server is bound to the wired interface that is used with 
+The OpenVPN connection is set up with the GUI of the Linux Desktop. Therefore the management is done through Network Manager. Network Manager has a CLI, ``nmcli``. With that more properties of connections can be modified. The ``connection.secondaries`` property defines the UUID of a connection that will be established as soon as the initial connection is working. With ``nmcli connection show`` you will get the list of connections with the corresponding UUIDs. For the Medemblik Event the OpenVPN connection to the A server is bound to the wired interface and made "persistent" (meaning it will retry connecting after being disconnected) that is used with
 
 ```
 sudo nmcli connection modify <Wired Connection 2> +connection.secondaries <UUID-of-OpenVPN-A>
+nmcli connection modify <Name-of-OpenVPN-A> connection.autoconnect-retries 0
+nmcli connection modify <Name-of-OpenVPN-A> vpn.persistent yes
+nmcli connection modify <Name-of-OpenVPN-B> connection.autoconnect-retries 0
+nmcli connection modify <Name-of-OpenVPN-B> vpn.persistent yes
 ```
 
 For the OpenVPN connections we have received two alternative configuration files together with keys and certificates for our server and work laptops, as well as the certificates for the OpenVPN server (``ca.crt``, ``dh.pem``, ``pfs.key``). The "A" configuration, e.g., provided in a file named ``st-soft-aws_A.ovpn``, looks like this:
@@ -270,12 +304,14 @@ On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the follow
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-eu-west-3.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for paris2024.sapsailing.com, security-service.sapsailing.com and paris2024-master.sapsailing.com
+### Letsencrypt Certificate for paris2024.sapsailing.com, security-service.sapsailing.com, paris2024-master.sapsailing.com, and paris2024-secondary-master.sapsailing.com
 
 In order to allow us to access ``paris2024.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
 ```
 /usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024.sapsailing.com
+/usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024-master.sapsailing.com
+/usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024-secondary-master.sapsailing.com
 /usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d security-service.sapsailing.com
 ```
 
@@ -291,7 +327,7 @@ server {
     server_name         paris2024.sapsailing.com;
     ssl_certificate     /etc/ssl/certs/paris2024.sapsailing.com.crt;
     ssl_certificate_key /etc/ssl/private/paris2024.sapsailing.com.key;
-    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
     # set client body size to 100MB
@@ -359,6 +395,10 @@ The ``monitor-autossh-tunnels`` script checks all running ``autossh`` processes 
 The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.printSecondaryReplicationInfo()`` and logs it to ``/tmp/mongo-replica-set-delay``. The average of the last ten values is compared to a threshold (currently 3s), and an alert is sent using ``notify-operators`` if the threshold is exceeded.
 
 The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
+
+On ``sap-p1-2`` we run a script ``compare-secondary-to-primary-master`` every five minutes which basically does a ``compareServers -ael`` which uses the REST API for comparing server contents. If a difference is reported by the tool then an e-mail notification is sent out to the list of operators.
+
+On ``paris-ssh.sapsailing.com`` we run ``monitor-on-site-servers`` every minute. Like other scripts it is installed as a symbolic link from ``/usr/local/bin`` to ``/root/code/configuration/on-site-scripts/paris2024/paris-ssh`` and that is called by a cron job from the ``root`` user's ``crontab`` file. The file checks that the primary and secondary master can be reached through HTTPS (localhost port 9443/9444, respectively), and the primary through HTTP, port 8888. This verifies that the SSH tunnels from the on-site laptops to the ``paris-ssh`` jump host are in place, up and running. Indirectly, this also verifies that the OpenVPN connections on the on-site laptops are working alright.
 
 ### Time Synchronizing
 Setup chronyd service on desktop machine, in order to regurlary connect via VPN and relay the time towards the two P1s. Added
@@ -741,3 +781,28 @@ The key to the Athena set-up is to have a table definition per bucket, with a de
     group by date_trunc('day', parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'))
 </pre>
 It defines a ``union_table`` which unites all contents from all buckets scanned.
+
+## Dismantling the Set-Up and Moving to the Cloud
+
+The MongoDB on ``paris-ssh.sapsailing.com:10203`` needs to be made primary, setting its ``priority`` in the replica set configuration from 0 to 1:
+
+```
+  cfg=rs.config()
+  cfg.members[0].priority=1
+  rs.reconfig(cfg)
+```
+
+Then the local replicas need to be unregistered:
+
+```
+  rs.remove("localhost:10201")
+  rs.remove("localhost:10202")
+```
+
+The MongoDB cloud replica should then become the sole instance and hence primary of the replica set.
+
+From some instance in the ``eu-west-1`` region we can then do a ``mongodump`` of the ``paris2024`` database and subsequently a ``mongorestore`` into the ``live`` replica set at ``mongodb://dbserver.internal.sapsailing.com:10203,mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/paris2024?replicaSet=live&retryWrites=true&readPreference=nearest``. Then, a new replica ``paris2024`` set can be launched using our automated tools. Use the dynamic load balancer set-up to go without a DNS entry. Once the set-up is up and running, remove the DNS entry for ``paris2024.sapsailing.com`` so the traffic no longer goes to the global accelerator but to the dynamic ALB in ``eu-west-1``. See how the global accelerator traffic drains and start removing regions from it one by one. Finally, disable and remove the entire global accelerator.
+
+Clean up the regions, setting all Auto-Scaling Groups to 0 instances, terminate all instances, remove the ALBs in the regions, then remove the ``paris2024`` target groups in the regions.
+
+Later you may want to use the regular "Archive Replica Set" functionality to move the content to the archive server.

@@ -1475,7 +1475,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             if (instruction == PassingInstruction.FixedBearing) {
                 b = w.getFixedBearing();
             } else {
-                // If the first of last waypoint is a single mark, check the passing instructions and create a "beam"
+                // If the first or last waypoint is a single mark, check the passing instructions and create a "beam"
                 // emerging orthogonal to the adjacent leg's direction from the mark to the side indicated by the
                 // passing instructions. If no passing instructions are given, construct two lines, one to each direction
                 // orthogonally to the adjacent leg:

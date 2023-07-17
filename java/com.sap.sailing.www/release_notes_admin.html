@@ -23,6 +23,23 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">July 2023</h2>
+          <ul class="bulletList">
+            <li>Score updates received through the race log, e.g., from the SAP Sailing Race Manager app or from the
+                SwissTiming tablets through a TracTrac race connection, will update a leaderboard's "last update"
+                time point only if it is newer than the already existing latest score correction time point.
+                This way, if updates are received out of order it will be the latest update defining the
+                last score correction time point.</li>
+            <li>Bugfix: when computing a leaderboard's live delay, not the last race with a valid start time but the
+                "rightmost" race connected to a column in the leaderboard was considered. For example, when the current
+                live race "R3" has a live delay of 2s and there is another race "R4" already connected to the leaderboard
+                with a live delay of 30s then the live delay for the leaderboard will end up being considered to be 30s,
+                not 2s. This is now fixed.</li>
+            <li>The <tt>/sailingserver/windStatus</tt> page now also shows battery levels if received.</li>
+            <li>Tolerate TracTrac competitor status and result updates for unknown competitors (e.g., hidden ones such
+                as jury boats that are tracked). This avoid issues with making race results official, too.</li>
+            <li>"IQF" is now an alias name for "iQFOil"</li>
+          </ul>
           <h2 class="articleSubheadline">June 2023</h2>
           <ul class="bulletList">
             <li>When importing results, sorting of the result documents has been improved. The drop-down now puts those

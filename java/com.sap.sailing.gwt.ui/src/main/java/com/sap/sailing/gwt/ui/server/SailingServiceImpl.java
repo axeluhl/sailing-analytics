@@ -1816,7 +1816,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             try {
                 estimatedDuration = trackedRace.getEstimatedTimeToComplete(new MillisecondsTimePoint(time)).getExpectedDuration();
             } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
-                logger.log(Level.WARNING, "Problem computing the estimated race duration", e);
+                logger.log(Level.WARNING, "Problem computing the estimated race duration for "+
+                        trackedRace.getRace().getName()+" / "+trackedRace.getTrackedRegatta().getRegatta().getName()+
+                        ": "+e.getMessage(), e);
             }
         }
         return estimatedDuration;
@@ -2344,8 +2346,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private void fillLeaderboardData(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData,
             StrippedLeaderboardDTO leaderboardDTO) {
-        TimePoint startOfLatestRace = null;
-        Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<>();
         leaderboardDTO.competitorsCount = Util.size(leaderboard.getCompetitors());
@@ -2366,7 +2366,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         leaderboardDTO.courseAreas = new ArrayList<>();
         Util.addAll(Util.map(leaderboard.getCourseAreas(), this::convertToCourseAreaDTO), leaderboardDTO.courseAreas);
-        leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
+        leaderboardDTO.setDelayToLiveInMillisForLatestRace(leaderboard.getDelayToLiveInMillis());
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
         if (leaderboard.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
             leaderboardDTO.discardThresholds = ((ThresholdBasedResultDiscardingRule) leaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
@@ -2379,12 +2379,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
-                    if (startOfLatestRace == null || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
-                        delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
-                    }
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                     raceDTO = baseDomainFactory.createRaceDTO(getService(), withGeoLocationData, raceIdentifier, trackedRace);
-                    if(withStatisticalData) {
+                    if (withStatisticalData) {
                         Iterable<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
                         raceDTO.trackedRaceStatistics = baseDomainFactory.createTrackedRaceStatisticsDTO(trackedRace, leaderboard, raceColumn, fleet, mediaTracksForRace);
                     }

@@ -374,7 +374,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         dateLabel.setText(getDateLabelText(newTime));
         timeLabel.setText(getTimeLabelText(newTime));
         String timeToStartLabelText = getTimeToStartLabelText(newTime);
-        if(timeToStartLabelText != null && !timeToStartLabelText.isEmpty()) {
+        if (timeToStartLabelText != null && !timeToStartLabelText.isEmpty()) {
             timeToStartControlPanel.setVisible(true);
             timeToStartLabel.setText(getTimeToStartLabelText(newTime));
         } else {

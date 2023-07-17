@@ -4,6 +4,18 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">July 2023</h5>
+         <ul class="bulletList">
+           <li>Flipped default ordering of the "GPS Lag" column. When sorting by that column for
+               the first time now the greatest lag is displayed at the top.</li>
+           <li>The mark passing / split times detection has been adjusted for overall improved
+               accuracy of most tracking devices. This will in particular reduce the tolerance
+               for passing a mark on the wrong side, hence more likely suppressing passing candidates
+               on the wrong side of a mark even if the passing happened very near to the mark.</li>
+           <li>Bug fix: tracked races connected to more than one leaderboard column at the same time
+               will now send their competitor and race status updates to all those column's race logs.
+               This in particular fixes the special iQFOil set-up with their marathon races.</li>
+         </ul>
          <h5 class="articleSubheadline">June 2023</h5>
          <ul class="bulletList">
            <li>Fixed an issue with the plans shown as subscribed to based on the plan
