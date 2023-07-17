@@ -24,6 +24,15 @@ public interface SubscriptionWriteService<C, P, F> extends SubscriptionService {
      * @return {@code true} if and only if canceling the subscription worked
      */
     public boolean cancelSubscription(String planId);
+
+    /**
+     * Set current user subscription to non renewing
+     * 
+     * @param planId
+     *            id of non renewal plan
+     * @return {@code true} if and only if setting the subscription to non renewing worked
+     */
+    public boolean nonRenewingSubscription(String planId);
     
     boolean isMailVerificationRequired();
     

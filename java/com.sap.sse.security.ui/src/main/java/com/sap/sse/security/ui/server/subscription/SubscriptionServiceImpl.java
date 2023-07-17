@@ -138,10 +138,10 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
         logger.info(() -> "Update user subscription, user " + user.getName() + ", new subsription "
                 + subscription.toString());
         getSecurityService().updateUserSubscription(user.getName(), subscription);
+        
     }
 
-    protected boolean isNewPlanCompletelyIncludedInCurrentPlan
-    (User user, SubscriptionPlan newPlan) {
+    protected boolean isNewPlanCompletelyIncludedInCurrentPlan(User user, SubscriptionPlan newPlan) {
         final Iterable<Subscription> subscriptions = user.getSubscriptions();
         if (subscriptions != null) {
             for (Subscription sub : subscriptions) {

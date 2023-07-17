@@ -2723,7 +2723,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         return newUserSubscriptions;
     }
-    
+
     /**
      * Add or remove subscription plan's roles for user
      */

@@ -24,6 +24,10 @@ public interface SubscriptionApiService extends SubscriptionApiBaseService {
         void onCancelResult(SubscriptionCancelResult cancelResult);
     }
     
+    public static interface OnNonRenewingSubscriptionResultListener{
+        void onNonRenewingResult(SubscriptionNonRenewingResult nonRenewingResult);
+    }
+    
     public static interface OnSelfServicePortalSessionResultListener{
         void onSessionResult(PortalSession sessionResult);
     }
@@ -50,6 +54,13 @@ public interface SubscriptionApiService extends SubscriptionApiBaseService {
      * @param listener will be notified once result is available
      */
     void cancelSubscription(String subscriptionId, OnCancelSubscriptionResultListener listener);
+
+    /**
+     * Set user subscription to non renewing by its {@link Subscription#getSubscriptionId() id}
+     * 
+     * @param listener will be notified once result is available
+     */
+    void nonRenewingSubscription(String subscriptionId, OnNonRenewingSubscriptionResultListener listener);
 
     /**
      * Check if the service is active
