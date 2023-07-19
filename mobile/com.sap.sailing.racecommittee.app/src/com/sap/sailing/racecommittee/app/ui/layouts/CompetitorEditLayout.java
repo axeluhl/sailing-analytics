@@ -218,7 +218,7 @@ public class CompetitorEditLayout extends ScrollView
 
     private String[] getAllMaxPointsReasons() {
         List<String> result = new ArrayList<>();
-        for (MaxPointsReason reason : MaxPointsReason.values()) {
+        for (MaxPointsReason reason : MaxPointsReason.getLexicographicalValues()) {
             result.add(reason.name());
         }
         return result.toArray(new String[result.size()]);
