@@ -33,7 +33,8 @@ public class LowPointWithAutomaticRDG extends LowPoint {
                 if (rc == raceColumn && maxPointsReason == MaxPointsReason.SCA) {
                     break; // RRS A9b says to include only the scores of the races up to and excluding the race with the SCA
                 }
-                if (rc != raceColumn && leaderboard.getMaxPointsReason(competitor, rc, timePoint) != maxPointsReason) {
+                if (rc != raceColumn && leaderboard.getMaxPointsReason(competitor, rc, timePoint) != MaxPointsReason.RDG
+                        && leaderboard.getMaxPointsReason(competitor, rc, timePoint) != MaxPointsReason.SCA) {
                     final Double totalPointsInRC = leaderboard.getTotalPoints(competitor, rc, timePoint);
                     if (totalPointsInRC != null) {
                         scoreSum += totalPointsInRC;
