@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sse.common.Util;
 
 public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends LowPoint {
@@ -32,6 +33,11 @@ public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends L
         this.numberOfPromotedCompetitorsIntoLastMedalRaces = numberOfPromotedCompetitorsIntoLastMedalRaces;
     }
     
+    @Override
+    public ScoringSchemeType getType() {
+        return super.getType();
+    }
+
     public int getNumberOfCompetitorsBetterThanThoseSailingInRace(RaceColumnInSeries medalRace) {
         final List<? extends RaceColumnInSeries> allMedalRacesInSeries = Util.asList(medalRace.getSeries().getRaceColumns());
         int result = 0;
