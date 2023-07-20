@@ -392,11 +392,9 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
             result = compareByA81TieBreak(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
                     discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
         } else {
-            final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
-            // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
-            // to speed up / save the total points (re-)calculation
-            result = new LeaderboardTotalRankComparator(leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns, totalPointsSupplier, cache)
-                    .compare(o1, o2);
+            final LeaderboardTotalRankComparator openingSeriesRankComparator = getOpeningSeriesRankComparator(
+                    nullScoresAreBetter, timePoint, leaderboard, totalPointsSupplier, cache);
+            result = openingSeriesRankComparator.compare(o1, o2);
         }
         return result;
     }
@@ -416,13 +414,6 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return super.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
                 discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
-    }
-
-    /**
-     * Merge non-medal series columns, preserving order across {@code raceColumnsO1} and {@code raceColumnsO2}.
-     */
-    private Iterable<RaceColumn> getOpeningSeriesRaceColumns(Leaderboard leaderboard) {
-        return Util.filter(leaderboard.getRaceColumns(), rc->!rc.isMedalRace());
     }
 
     private boolean hasMedalScores(List<Pair<RaceColumn, Double>> o1Scores) {

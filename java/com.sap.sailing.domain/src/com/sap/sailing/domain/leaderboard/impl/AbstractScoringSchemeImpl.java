@@ -176,6 +176,26 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     /**
+     * Returns a filtered view on the {@link Leaderboard#getRaceColumns() leaderboard's race columns}, removing
+     * all {@link RaceColumn#isMedalRace() medal races} from the filtered view.
+     */
+    protected Iterable<RaceColumn> getOpeningSeriesRaceColumns(Leaderboard leaderboard) {
+        return Util.filter(leaderboard.getRaceColumns(), rc->!rc.isMedalRace());
+    }
+
+    protected LeaderboardTotalRankComparator getOpeningSeriesRankComparator(boolean nullScoresAreBetter,
+            TimePoint timePoint, Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
+        // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
+        // to speed up / save the total points (re-)calculation
+        final LeaderboardTotalRankComparator openingSeriesRankComparator =
+                new LeaderboardTotalRankComparator(leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns, totalPointsSupplier, cache);
+        return openingSeriesRankComparator;
+    }
+
+    /**
      * Looks backwards starting at the last race until the first score difference is found, including the discarded
      * scored. This implements Racing Rules of Sailing (RRS) section A8.2:
      * <p>

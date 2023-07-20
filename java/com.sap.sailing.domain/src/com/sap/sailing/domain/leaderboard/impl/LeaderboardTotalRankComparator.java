@@ -249,7 +249,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 }
             }
         }
-        int result = compareByMedalRaceParticipation(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
+        // TODO bug5877: pass leaderboard and competitors and a totalPointsSupplier (based on totalPointsCache, see call to compareByBetterScore below) to allow for identifying competitors promoted through to later medal race
+        int result = scoringScheme.compareByMedalRaceParticipation(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
         if (result == 0) {
             result = defaultFleetBasedComparisonResult;
             if (result == 0) {
@@ -464,15 +465,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             }
         }
         return result;
-    }
-
-    /**
-     * Having scored in a later medal series than the other is considered better. -1 means no medal series score at all.
-     * With a lesser result encoding "better" the direction of default integer comparison between the two parameters is
-     * reversed.
-     */
-    private int compareByMedalRaceParticipation(int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored) {
-        return -Integer.compare(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
     }
 
     /**
