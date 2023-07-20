@@ -256,7 +256,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 // now count the races in which they scored; if they scored in a different number of races, prefer the
                 // competitor who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
                 // break tie by sorting scores and looking for the first score difference.
-                result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
+                result = scoringScheme.compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
                 if (result == 0) {
                     if (scoringScheme.isMedalWinAmountCriteria()) {
                         // if one reaches the target amount of races won then this has priority, else proceed with normal
@@ -278,7 +278,12 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                                 if (result == 0) {
                                     result = scoringScheme.compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore, nullScoresAreBetter);
                                     if (result == 0) {
-                                        result = compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints), o2, Collections.unmodifiableList(o2TotalPoints), timePoint);
+                                        result = scoringScheme.compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints),
+                                                                                    o2, Collections.unmodifiableList(o2TotalPoints),
+                                                                                    nullScoresAreBetter, timePoint, leaderboard,
+                                                                                    Collections.unmodifiableMap(discardedRaceColumnsPerCompetitor),
+                                                                                    (competitor1, raceColumn1) -> totalPointsCache.get(new Pair<>(competitor1, raceColumn1)),
+                                                                                    cache);
                                         if (result == 0) {
                                             // compare by last race:
                                             result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2, timePoint, cache);
@@ -471,27 +476,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Assuming both competitors scored in the same number of races, and assuming they scored the same net score, break
-     * the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
-     * 
-     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)
-     * 
-     * @param o1Scores
-     *            the scores of each race for competitor {@code o1}, including the scores of races that may be
-     *            discarded, with their original score
-     * @param o2Scores
-     *            the scores of each race for competitor {@code o2}, including the scores of races that may be
-     *            discarded, with their original score
-     */
-    protected int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
-            List<Util.Pair<RaceColumn, Double>> o2Scores, TimePoint timePoint) {
-        return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
-                Collections.unmodifiableMap(discardedRaceColumnsPerCompetitor),
-                (competitor, raceColumn)->totalPointsCache.get(new Pair<>(competitor, raceColumn)),
-                cache);
-    }
-    
-    /**
      * Returns a comparator for comparing individual scores. This implementation returns a comparator for the usual ISAF
      * scheme where lesser scores compare "better" which again means "lesser." Therefore, the comparator retunred compares
      * the integer numbers by their natural ordering.
@@ -505,12 +489,5 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      */
     protected int compareByScoreSum(double o1ScoreSum, double o2ScoreSum) {
         return getScoreComparator().compare(o1ScoreSum, o2ScoreSum);
-    }
-
-    /**
-     * Compares a competitor better (lesser) if it has the greater number of races scored
-     */
-    protected int compareByNumberOfRacesScored(int o1NumberOfRacesScored, int o2NumberOfRacesScored) {
-        return scoringScheme.compareByNumberOfRacesScored(o1NumberOfRacesScored, o2NumberOfRacesScored);
     }
 }
