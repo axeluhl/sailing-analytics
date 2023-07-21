@@ -145,11 +145,20 @@ public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends L
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final int result;
         final Pair<RaceColumn, Double> lastColumnO1ScoredIn = Util.last(Util.filter(o1Scores, o1s->o1s.getB() != null));
-        if (lastColumnO1ScoredIn != null && lastColumnO1ScoredIn.getA().isMedalRace()) {
+        final Pair<RaceColumn, Double> lastColumnO2ScoredIn = Util.last(Util.filter(o1Scores, o2s->o2s.getB() != null));
+        final RaceColumnInSeries lastMedalRaceColumnScored;
+        if ((lastColumnO1ScoredIn != null && lastColumnO1ScoredIn.getA().isMedalRace()) && lastColumnO1ScoredIn.getA() instanceof RaceColumnInSeries) {
+            lastMedalRaceColumnScored = (RaceColumnInSeries) lastColumnO1ScoredIn.getA();
+        } else if ((lastColumnO2ScoredIn != null && lastColumnO2ScoredIn.getA().isMedalRace()) && lastColumnO2ScoredIn.getA() instanceof RaceColumnInSeries) {
+            lastMedalRaceColumnScored = (RaceColumnInSeries) lastColumnO2ScoredIn.getA();
+        } else {
+            lastMedalRaceColumnScored = null;
+        }
+        if (lastMedalRaceColumnScored != null) {
             final List<RaceColumn> raceColumnsToConsiderWithoutThoseOfLastMedalSeriesToConsider = new ArrayList<>();
             for (final RaceColumn raceColumnToConsider : raceColumnsToConsider) {
-                if (raceColumnToConsider instanceof RaceColumnInSeries && lastColumnO1ScoredIn.getA() instanceof RaceColumnInSeries
-                   && ((RaceColumnInSeries) raceColumnToConsider).getSeries() == ((RaceColumnInSeries) lastColumnO1ScoredIn.getA()).getSeries()) {
+                if (raceColumnToConsider instanceof RaceColumnInSeries
+                        && ((RaceColumnInSeries) raceColumnToConsider).getSeries() == lastMedalRaceColumnScored.getSeries()) {
                     break;
                 }
                 raceColumnsToConsiderWithoutThoseOfLastMedalSeriesToConsider.add(raceColumnToConsider);
