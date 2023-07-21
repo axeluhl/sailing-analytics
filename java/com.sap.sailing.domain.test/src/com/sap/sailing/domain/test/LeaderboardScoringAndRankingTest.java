@@ -1398,9 +1398,10 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         leaderboard.getScoreCorrection().setMaxPointsReason(c[1], sfSeries.getRaceColumns().iterator().next(), MaxPointsReason.BFD);
         Iterable<Competitor> rankedCompetitorsAfterSF = leaderboard.getCompetitorsFromBestToWorst(afterSF);
         assertEquals(Arrays.asList(/* Winner of Opening Series, advanced to Grand Final: */ c[3],
-                                   /* Semi Finalist not penalized */ c[1],
+                                   /* Semi Finalist not penalized */ c[2],
                                    /* Tied Semi Finalist who did not have to sail Quarter Final: */ c[1],
                                    /* Tied Semi Finalists also tied in Quarter Final, ranked by Opening Series: */ c[11], c[6],
+                                   /* Remaining Quarter Finalists: */ c[0], c[4], c[7], c[5], c[12],
                                    /* Not qualified to QF: */ c[10], c[8], c[9]), Util.asList(rankedCompetitorsAfterSF));
     }
 

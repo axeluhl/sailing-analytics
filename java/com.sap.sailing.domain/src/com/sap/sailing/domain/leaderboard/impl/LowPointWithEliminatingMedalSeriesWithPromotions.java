@@ -1,15 +1,23 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A special low-point scoring scheme that uses one or more medal series to eliminate some competitors
@@ -112,4 +120,48 @@ public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends L
                 ((openingSeriesRank = competitorsRankedByOpeningSeries.get().get(competitor)) != null &&
                  openingSeriesRank <= getNumberOfCompetitorsAdvancingFromOpeningSeriesToOrThroughSeries(medalRaceColumn.getSeries()));
     }
+    
+    /**
+     * The sum of medal race scores is not of interest to ranking when using this scoring scheme. Instead, the previous
+     * medal series, or if already at the first medal series, the opening series will be used for tie-breaking.
+     */
+    @Override
+    public int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore, boolean nullScoresAreBetter) {
+        return 0;
+    }
+
+    /**
+     * If two competitors are tied, check if the tie is in a medal series, and if so, compare again with a new
+     * {@link LeaderboardTotalRankComparator}, but with all races from that medal series removed from the race columns
+     * to consider. If the tie was in the first medal series then this will resort to comparing by the opening series
+     * rank. If the tie was not in a medal series, use the default implementation from the superclass.
+     */
+    @Override
+    public int compareByBetterScore(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, Iterable<RaceColumn> raceColumnsToConsider,
+            boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard,
+            Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final int result;
+        final Pair<RaceColumn, Double> lastColumnO1ScoredIn = Util.last(Util.filter(o1Scores, o1s->o1s.getB() != null));
+        if (lastColumnO1ScoredIn != null && lastColumnO1ScoredIn.getA().isMedalRace()) {
+            final List<RaceColumn> raceColumnsToConsiderWithoutThoseOfLastMedalSeriesToConsider = new ArrayList<>();
+            for (final RaceColumn raceColumnToConsider : raceColumnsToConsider) {
+                if (raceColumnToConsider instanceof RaceColumnInSeries && lastColumnO1ScoredIn.getA() instanceof RaceColumnInSeries
+                   && ((RaceColumnInSeries) raceColumnToConsider).getSeries() == ((RaceColumnInSeries) lastColumnO1ScoredIn.getA()).getSeries()) {
+                    break;
+                }
+                raceColumnsToConsiderWithoutThoseOfLastMedalSeriesToConsider.add(raceColumnToConsider);
+            }
+            result = new LeaderboardTotalRankComparator(leaderboard, timePoint, this, nullScoresAreBetter,
+                    raceColumnsToConsiderWithoutThoseOfLastMedalSeriesToConsider, totalPointsSupplier, cache).compare(o1, o2);
+        } else {
+            result = super.compareByBetterScore(o1, o1Scores, o2, o2Scores, raceColumnsToConsider, nullScoresAreBetter,
+                    timePoint, leaderboard, discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
+        }
+        return result;
+    }
+    
+    
 }
