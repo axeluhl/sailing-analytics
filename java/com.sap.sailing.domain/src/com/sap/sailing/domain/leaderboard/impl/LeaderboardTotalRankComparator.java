@@ -166,8 +166,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         List<Util.Pair<RaceColumn, Double>> o2TotalPoints = new ArrayList<>();
         double o1ScoreSum = getLeaderboard().getCarriedPoints(o1);
         double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
-        Double o1MedalRaceScore = 0.0;
-        Double o2MedalRaceScore = 0.0;
+        Double o1MedalRaceScore = 0.0; // "blindly" adds them all up, regardless of "series starts with zero score"
+        Double o2MedalRaceScore = 0.0; // "blindly" adds them all up, regardless of "series starts with zero score"
         Double o1CarryForwardScoreInMedals = null;
         Double o2CarryForwardScoreInMedals = null;
         // When a column has isStartsWithZeroScore, the competitor's score only need to be reset to zero if from there on
