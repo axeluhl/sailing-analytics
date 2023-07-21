@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -63,6 +64,26 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache;
     
     /**
+     * An on-demand map of competitors with their opening series rank, 1-based.<p>
+     * 
+     * Some scoring schemes that support medal series may need to break ties or determine promotions to
+     * later rounds/stages based on the "opening series" results. The opening series then is considered
+     * to contain all races excluding {@link RaceColumn#isMedalRace() medal races}.<p>
+     * 
+     * When using this comparator in multiple comparisons, the opening series ranking may then be required
+     * in many of these comparisons. It would be unnecessarily expensive to compute that ranking upon each
+     * such comparison. Instead, once requested by this comparator, it is cached and can be re-used by later
+     * comparisons performed by this comparator's {@link #compare(Competitor, Competitor)} method.<p>
+     * 
+     * The implementation of the {@link Supplier} synchronizes on itself when {@link Supplier#get() asked}
+     * for its value. If the opening series ranking has not been computed yet then this happens while
+     * holding the supplier's monitor locked. This way, other threads waiting for the opening series
+     * ranking will wait for the computation to complete. If the ranking has already been computed it
+     * is returned immediately and the monitor is released quickly.
+     */
+    private final Supplier<Map<Competitor, Integer>> competitorsRankedByOpeningSeries;
+    
+    /**
      * Considers only the race columns specified in <code>raceColumnsToConsider</code> and behaves as if the other columns
      * were filled with <code>null</code> values. Those columns not considered do not count for determining the discards either.
      * For example, if the first race may be discarded when five races have been completed, and only four {@link RaceColumn}s are
@@ -114,6 +135,21 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 totalPointsCache.put(key, totalPoints);
             }
         }
+        competitorsRankedByOpeningSeries = new Supplier<Map<Competitor, Integer>>() {
+            private volatile Map<Competitor, Integer> openingSeriesRanking = null;
+            @Override
+            public synchronized Map<Competitor, Integer> get() {
+                if (openingSeriesRanking == null) {
+                    final List<Competitor> result = Util.asList(leaderboard.getCompetitors());
+                    Collections.sort(result, scoringScheme.getOpeningSeriesRankComparator(nullScoresAreBetter, timePoint, leaderboard, totalPointsSupplier, cache));
+                    openingSeriesRanking = new HashMap<>();
+                    for (int i=0; i<result.size(); i++) {
+                        openingSeriesRanking.put(result.get(i), i+1);
+                    }
+                }
+                return openingSeriesRanking;
+            }
+        };
     }
     
     protected Leaderboard getLeaderboard() {
@@ -208,10 +244,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         o1CarryForwardScoreInMedals = o1Score;
                         o2CarryForwardScoreInMedals = o2Score;
                     }
-                    if (o1Score != null && raceColumn instanceof RaceColumnInSeries) {
+                    if (raceColumn instanceof RaceColumnInSeries && scoringScheme.isParticipatingInMedalRace(o1, o1Score, (RaceColumnInSeries) raceColumn, competitorsRankedByOpeningSeries)) {
                         zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
                     }
-                    if (o2Score != null && raceColumn instanceof RaceColumnInSeries) {
+                    if (raceColumn instanceof RaceColumnInSeries && scoringScheme.isParticipatingInMedalRace(o2, o2Score, (RaceColumnInSeries) raceColumn, competitorsRankedByOpeningSeries)) {
                         zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = getZeroBasedIndexOfSeries((RaceColumnInSeries) raceColumn);
                     }
                     // similar to compareByFleet, however, tracking is not required; having medal race column points

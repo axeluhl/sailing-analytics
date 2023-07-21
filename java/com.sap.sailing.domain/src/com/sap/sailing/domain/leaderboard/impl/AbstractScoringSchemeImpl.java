@@ -183,7 +183,8 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         return Util.filter(leaderboard.getRaceColumns(), rc->!rc.isMedalRace());
     }
 
-    protected LeaderboardTotalRankComparator getOpeningSeriesRankComparator(boolean nullScoresAreBetter,
+    @Override
+    public LeaderboardTotalRankComparator getOpeningSeriesRankComparator(boolean nullScoresAreBetter,
             TimePoint timePoint, Leaderboard leaderboard,
             BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {

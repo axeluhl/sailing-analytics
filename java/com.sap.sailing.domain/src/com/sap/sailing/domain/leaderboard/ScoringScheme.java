@@ -13,12 +13,14 @@ import java.util.function.Supplier;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardTotalRankComparator;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
@@ -121,7 +123,8 @@ public interface ScoringScheme extends Serializable {
      * With a lesser result encoding "better" the direction of default integer comparison between the two parameters is
      * reversed.
      */
-    default int compareByMedalRaceParticipation(int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored) {
+    default int compareByMedalRaceParticipation(int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored,
+            int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored) {
         return -Integer.compare(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
     }
 
@@ -372,5 +375,18 @@ public interface ScoringScheme extends Serializable {
             List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
             BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         return 0;
+    }
+
+    LeaderboardTotalRankComparator getOpeningSeriesRankComparator(boolean nullScoresAreBetter, TimePoint timePoint,
+            Leaderboard leaderboard, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * This default implementation decides competitor participation in a medal race by having scored a non-{@code null}
+     * score.
+     */
+    default boolean isParticipatingInMedalRace(Competitor competitor, Double competitorMedalRaceScore,
+            RaceColumnInSeries medalRaceColumn, Supplier<Map<Competitor, Integer>> competitorsRankedByOpeningSeries) {
+        return competitorMedalRaceScore != null;
     }
 }
