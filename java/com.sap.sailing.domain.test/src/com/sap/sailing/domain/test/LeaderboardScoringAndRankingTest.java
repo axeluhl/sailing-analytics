@@ -68,6 +68,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
+import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -1199,6 +1200,50 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         Iterable<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getNetPoints(c[0], later), leaderboard.getNetPoints(c[2], later), 0.000000001);
         assertTrue(Util.indexOf(rankedCompetitors, c[0]) < Util.indexOf(rankedCompetitors, c[2]));
+    }
+
+    /**
+     * Tests the {@link LowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal} scoring scheme's
+     * advancement rule. c[0] and c[2] have equal scores after excluding their worst score each. They both exclude a
+     * score from the final series. c[1]'s and c[3]'s net points sum is worse than that of c[0] and c[2], so c[1] is not
+     * tied. Comparing c[0]'s and c[2]'s final series <em>including the excluded ones</em> breaks the tie because both
+     * have won one race in the final series, and c[0] scores a 3.0 in F1, c[2] only scores a 4.0 in F2, so c[0] wins.
+     */
+    @Test
+    public void testRankingSurfersAdvancedToSemiAndGrandFinalBetterThanQuarterFinalists() throws NoWindException {
+        Competitor[] c = createCompetitors(13).toArray(new Competitor[0]);
+        Competitor[] o1 = new Competitor[] { c[3], c[1], c[2], /* QF START */ c[0], c[5], c[7], c[4], c[6], c[12], c[11] /* QF END */ , c[10], c[8], c[9] }; // a somewhat random order at the end of the opening series
+        Competitor[] qf = new Competitor[] { c[11], c[6], c[0], c[4], c[7], c[5], c[12] }; // seven competitors sail the quarter final
+        Competitor[] sf = new Competitor[] { c[2], c[11], c[6], c[1] }; // the best two quarter-finalists meet the second and third from the opening series
+        Competitor[] gf = new Competitor[] { c[11], c[3], c[2] }; // the two best-ranking from the semi-final meet the winner of the opening series
+        Regatta regatta = createRegatta(/* opening */3, new String[] { "Default" }, /* final */ 0, /* no final fleets */ null,
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTieBreakBasedOnLastNonMedalSeriesNoMedal",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_ONE_TO_FINAL_AND_TWO_TO_SEMIFINAL));
+        final SeriesImpl qfSeries = new SeriesImpl("Quarter Final", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, Collections.singleton(new FleetImpl("Default")), /* raceColumnNames */ Collections.singleton("QF"), /* trackedRegattaRegistry */ null);
+        qfSeries.setStartsWithZeroScore(true);
+        regatta.addSeries(qfSeries);
+        series.add(qfSeries);
+        final SeriesImpl sfSeries = new SeriesImpl("Semi Final", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, Collections.singleton(new FleetImpl("Default")), /* raceColumnNames */ Collections.singleton("SF"), /* trackedRegattaRegistry */ null);
+        sfSeries.setStartsWithZeroScore(true);
+        regatta.addSeries(sfSeries);
+        series.add(sfSeries);
+        final SeriesImpl gfSeries = new SeriesImpl("Grand Final", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, Collections.singleton(new FleetImpl("Default")), /* raceColumnNames */ Collections.singleton("GF"), /* trackedRegattaRegistry */ null);
+        gfSeries.setStartsWithZeroScore(true);
+        regatta.addSeries(gfSeries);
+        series.add(gfSeries);
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, o1);
+        assertEquals(Arrays.asList(o1), leaderboard.getCompetitorsFromBestToWorst(TimePoint.now()));
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, qf);
+        Iterable<Competitor> rankedCompetitorsAfterQF = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(Arrays.asList(/* ADVANCED BEYOND QF: */ c[3], c[1], c[2], /* Quarter Finalists: */ c[11], c[6], c[0], c[4], c[7], c[5], c[12], /* Not qualified to QF: */ c[10], c[8], c[9]), Util.asList(rankedCompetitorsAfterQF));
+        TimePoint evenLater = createAndAttachTrackedRaces(series.get(2), "Default", /* withScores */ true, sf);
+        Iterable<Competitor> rankedCompetitorsAfterSF = leaderboard.getCompetitorsFromBestToWorst(evenLater);
+        assertEquals(Arrays.asList(/* ADVANCED BEYOND SF: */ c[3], /* Semi Finalists */ c[2], c[11], c[6], c[1], /* Quarter Finalists not in SF: */ c[0], c[4], c[7], c[5], c[12], /* Not qualified to QF: */ c[10], c[8], c[9]), Util.asList(rankedCompetitorsAfterSF));
+        TimePoint atEnd = createAndAttachTrackedRaces(series.get(3), "Default", /* withScores */ true, gf);
+        Iterable<Competitor> rankedCompetitorsAfterGF = leaderboard.getCompetitorsFromBestToWorst(atEnd);
+        assertEquals(Arrays.asList(c[11], c[3], c[2], /* Semi Finalists not in GF*/ c[6], c[1], /* Quarter Finalists not in SF: */ c[0], c[4], c[7], c[5], c[12], /* Not qualified to QF: */ c[10], c[8], c[9]), Util.asList(rankedCompetitorsAfterGF));
     }
 
     /**

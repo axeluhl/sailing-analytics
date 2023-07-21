@@ -191,7 +191,6 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
             Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, /* isFleetsCanRunInParallel */ true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(medalSeries);
         }
-
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, series, 
                 /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new,

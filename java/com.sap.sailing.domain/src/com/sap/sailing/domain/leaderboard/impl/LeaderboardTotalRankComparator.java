@@ -61,6 +61,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor;
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
+    private final Iterable<RaceColumn> raceColumnsToConsider;
     private final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache;
     
     /**
@@ -111,7 +112,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * constructed here.
      */
     public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, ScoringScheme scoringScheme,
-            boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider,
+            boolean nullScoresAreBetter, final Iterable<RaceColumn> raceColumnsToConsider,
             BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         super();
@@ -123,6 +124,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         netPointsCache = new HashMap<>();
         totalPointsCache = new HashMap<>();
         discardedRaceColumnsPerCompetitor = new HashMap<>();
+        this.raceColumnsToConsider = raceColumnsToConsider;
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(
                     competitor, leaderboard, raceColumnsToConsider, timePoint, leaderboard.getScoringScheme());
@@ -141,7 +143,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             public synchronized Map<Competitor, Integer> get() {
                 if (openingSeriesRanking == null) {
                     final List<Competitor> result = Util.asList(leaderboard.getCompetitors());
-                    Collections.sort(result, scoringScheme.getOpeningSeriesRankComparator(nullScoresAreBetter, timePoint, leaderboard, totalPointsSupplier, cache));
+                    Collections.sort(result, scoringScheme.getOpeningSeriesRankComparator(raceColumnsToConsider, nullScoresAreBetter, timePoint, leaderboard, totalPointsSupplier, cache));
                     openingSeriesRanking = new HashMap<>();
                     for (int i=0; i<result.size(); i++) {
                         openingSeriesRanking.put(result.get(i), i+1);
@@ -187,7 +189,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         int numberOfMedalRacesWonO2 = 0;
         int zeroBasedIndexOfLastMedalSeriesInWhichO1Scored = -1;
         int zeroBasedIndexOfLastMedalSeriesInWhichO2Scored = -1;
-        for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
+        for (RaceColumn raceColumn : raceColumnsToConsider) {
             needToResetO1ScoreUponNextValidResult = needToResetO1ScoreUponNextValidResult || raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = needToResetO2ScoreUponNextValidResult || raceColumn.isStartsWithZeroScore();
             final boolean o1ValidInNetScore = getLeaderboard().getScoringScheme().isValidInNetScore(getLeaderboard(), raceColumn, o1, timePoint);
@@ -310,17 +312,17 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                             }
                             if (result == 0) {
                                 result = scoringScheme.compareByLastMedalRacesCriteria(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, leaderboard,
-                                        (competitor, raceColumn)->totalPointsCache.get(new Pair<>(competitor, raceColumn)),
-                                        cache, timePoint, zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
+                                        raceColumnsToConsider,
+                                        (competitor, raceColumn)->totalPointsCache.get(new Pair<>(competitor, raceColumn)), cache, timePoint, zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
                                 if (result == 0) {
                                     result = scoringScheme.compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore, nullScoresAreBetter);
                                     if (result == 0) {
                                         result = scoringScheme.compareByBetterScore(o1, Collections.unmodifiableList(o1TotalPoints),
                                                                                     o2, Collections.unmodifiableList(o2TotalPoints),
-                                                                                    nullScoresAreBetter, timePoint, leaderboard,
+                                                                                    raceColumnsToConsider, nullScoresAreBetter, timePoint,
+                                                                                    leaderboard,
                                                                                     Collections.unmodifiableMap(discardedRaceColumnsPerCompetitor),
-                                                                                    (competitor1, raceColumn1) -> totalPointsCache.get(new Pair<>(competitor1, raceColumn1)),
-                                                                                    cache);
+                                                                                    (competitor1, raceColumn1) -> totalPointsCache.get(new Pair<>(competitor1, raceColumn1)), cache);
                                         if (result == 0) {
                                             // compare by last race:
                                             result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2, timePoint, cache);

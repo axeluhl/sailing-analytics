@@ -101,6 +101,7 @@ public interface ScoringScheme extends Serializable {
      *            scores of the first competitor, in the order of race columns in the leaderboard
      * @param competitor2Scores
      *            scores of the second competitor, in the order of race columns in the leaderboard
+     * @param raceColumnsToConsider TODO
      * @param discardedRaceColumnsPerCompetitor
      *            for each competitor holds the result of {@link Leaderboard#getResultDiscardingRule()
      *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
@@ -108,8 +109,8 @@ public interface ScoringScheme extends Serializable {
      *            for each competitor again.
      */
     int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2,
-            List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
-            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+            List<Util.Pair<RaceColumn, Double>> competitor2Scores, Iterable<RaceColumn> raceColumnsToConsider, boolean nullScoresAreBetter,
+            TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -373,13 +374,13 @@ public interface ScoringScheme extends Serializable {
 
     default int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
-            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+            Iterable<RaceColumn> raceColumnsToConsider, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         return 0;
     }
 
-    LeaderboardTotalRankComparator getOpeningSeriesRankComparator(boolean nullScoresAreBetter, TimePoint timePoint,
-            Leaderboard leaderboard, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    LeaderboardTotalRankComparator getOpeningSeriesRankComparator(Iterable<RaceColumn> raceColumnsToConsider, boolean nullScoresAreBetter,
+            TimePoint timePoint, Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * This default implementation decides competitor participation in a medal race by having scored a non-{@code null}

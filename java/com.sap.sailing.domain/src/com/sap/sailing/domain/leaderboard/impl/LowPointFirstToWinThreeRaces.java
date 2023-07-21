@@ -83,10 +83,10 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * based on wins, then based on last race, second-to-last, ..., and then lastly by the opening series rank, and only
      * then are the two semi-final fleets merged one by one, with two equal ranks in fleets A/B decided based on the
      * opening series rank again. This all happens in
-     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, Iterable, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
      * Yet, we have to respond with {@code true} here in order to <em>count</em> the medal races won. We will then
      * ignore that result in {@link #compareByMedalRacesWon(int, int)} and instead do it all in
-     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, Iterable, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
      */
     @Override
     public boolean isMedalWinAmountCriteria() {
@@ -95,7 +95,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
 
     /**
      * Always returns {@code 0}; the heavy lifting is done by
-     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, Iterable, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)}.
      */
     @Override
     public int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
@@ -115,9 +115,9 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
     @Override
     public int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
-            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint,
-            int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+            Iterable<RaceColumn> raceColumnsToConsider,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache,
+            TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         int result;
         if (zeroBasedIndexOfLastMedalSeriesInWhichBothScored < 0) {
             result = 0; // neither scored in a medal series, so nothing to compare
@@ -132,12 +132,10 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
                         rc->!rc.isCarryForward()));
                 final Fleet o1MedalFleet = firstNonCarryRaceColumnInMedalSeries.getFleetOfCompetitor(o1);
                 final Fleet o2MedalFleet = firstNonCarryRaceColumnInMedalSeries.getFleetOfCompetitor(o2);
-                final Iterable<RaceColumn> openingSeriesRaceColumns = getOpeningSeriesRaceColumns(leaderboard);
                 // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
                 // to speed up / save the total points (re-)calculation
-                final Supplier<LeaderboardTotalRankComparator> openingSeriesTotalRankComparator = ()->new LeaderboardTotalRankComparator(
-                        leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumns,
-                        totalPointsSupplier, cache); // TODO turn into supplier for lazy evaluation; it may not be needed in all cases
+                final Supplier<LeaderboardTotalRankComparator> openingSeriesTotalRankComparator =
+                        ()->getOpeningSeriesRankComparator(raceColumnsToConsider, nullScoresAreBetter, timePoint, leaderboard, totalPointsSupplier, cache);
                 if (o1MedalFleet == o2MedalFleet) {
                     result = compareByInMedalSeriesFleetRules(o1, o2, totalPointsSupplier, medalSeriesInWhichBothScored, openingSeriesTotalRankComparator,
                             nullScoresAreBetter, leaderboard, timePoint, cache);
@@ -343,7 +341,7 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
     /**
      * When the competitors have valid medal race scores, this scoring scheme ignores the score sums altogether and
      * assumes that
-     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)} 
+     * {@link #compareByLastMedalRacesCriteria(Competitor, List, Competitor, List, boolean, Leaderboard, Iterable, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache, TimePoint, int, int, int)} 
      * handles the medal series ranking altogether.
      */
     @Override
@@ -379,21 +377,23 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * series, scored the same number of wins (including wins carried forward) and were also tied on the scores in their
      * respective last medal race. Then, the decision is to be made based on the opening series rank, which in itself
      * includes the entire tie-breaking rule set with
-     * {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
+     * {@link #compareByBetterScore(Competitor, List, Competitor, List, Iterable, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
      * etc., only up to the end of the opening series.
      */
     @Override
     public int compareByBetterScore(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
-            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
-            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
-            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            List<Pair<RaceColumn, Double>> o2Scores, Iterable<RaceColumn> raceColumnsToConsider,
+            boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard,
+            Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final int result;
         if (!hasMedalScores(o1Scores)) {
-            result = compareByA81TieBreak(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
-                    discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
+            result = compareByA81TieBreak(o1, o1Scores, o2, o2Scores, raceColumnsToConsider, nullScoresAreBetter, timePoint,
+                    leaderboard, discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
         } else {
             final LeaderboardTotalRankComparator openingSeriesRankComparator = getOpeningSeriesRankComparator(
-                    nullScoresAreBetter, timePoint, leaderboard, totalPointsSupplier, cache);
+                    raceColumnsToConsider, nullScoresAreBetter, timePoint, leaderboard, totalPointsSupplier, cache);
             result = openingSeriesRankComparator.compare(o1, o2);
         }
         return result;
@@ -408,12 +408,12 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * usually then default to a comparison based on A8.2 (last race).
      */
     protected int compareByA81TieBreak(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
-            List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint,
-            Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
-            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return super.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint, leaderboard,
-                discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
+            List<Pair<RaceColumn, Double>> o2Scores, Iterable<RaceColumn> raceColumnsToConsider, boolean nullScoresAreBetter,
+            TimePoint timePoint, Leaderboard leaderboard,
+            Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return super.compareByBetterScore(o1, o1Scores, o2, o2Scores, raceColumnsToConsider, nullScoresAreBetter, timePoint,
+                leaderboard, discardedRaceColumnsPerCompetitor, totalPointsSupplier, cache);
     }
 
     private boolean hasMedalScores(List<Pair<RaceColumn, Double>> o1Scores) {
