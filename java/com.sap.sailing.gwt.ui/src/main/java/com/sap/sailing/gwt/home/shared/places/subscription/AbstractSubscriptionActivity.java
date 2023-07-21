@@ -79,6 +79,8 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                     type = Type.ONETIMELOCK;
                                 } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getSubscriptionPlanId())) {
                                     type = Type.HIGHLIGHT;
+                                } else if (checkIfPlanWouldBeAnUpgrade(plan)) {
+                                    type = Type.UPGRADE;
                                 } else {
                                     type = Type.DEFAULT;
                                 }
@@ -152,6 +154,10 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     
     private boolean checkIfUserWasAlreadySubscripedToOneTimePlan(final SubscriptionPlanDTO plan) {
         return plan.isUserWasAlreadySubscribedToOneTimePlan();
+    }
+    
+    private boolean checkIfPlanWouldBeAnUpgrade(final SubscriptionPlanDTO plan) {
+        return plan.isOneOfTheUserSubscriptionsIsCoveredByPlan();
     }
 
     private void onInvalidSubscriptionProviderError(final InvalidSubscriptionProviderException exc) {

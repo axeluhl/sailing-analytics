@@ -104,6 +104,9 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             updateUserSubscription(user, subscription);
             cancelOldSubscriptionIfCoveredByNewOne(user.getSubscriptions(), subscription);
             subscriptionDto = getSubscriptions(true);
+        } catch(UserManagementException e) {
+            logger.log(Level.FINE, "No user is logged in.");
+            subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in saving subscription", e);
             subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
@@ -165,15 +168,15 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
         try {
             final User user = getCurrentUser();
             if(!ServerStartupConstants.SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED && !user.isEmailValidated()) {
-                throw new IllegalArgumentException("User mail must be validated");
+                throw new IllegalArgumentException("User mail must be validated.");
             }
             final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
             if(planForPrice == null) {
-                throw new IllegalArgumentException("No matching subscription plan found for given price id");
+                throw new IllegalArgumentException("No matching subscription plan found for given price id.");
             } else if(planForPrice.getIsOneTimePlan() && user.hasAnySubscription(planForPrice.getId())) {
-                throw new IllegalArgumentException("Plan can only be subscribed once");
+                throw new IllegalArgumentException("Plan can only be subscribed once.");
             } else if(isNewPlanCompletelyIncludedInCurrentPlan(user, planForPrice)) {
-                throw new IllegalArgumentException("User has already subscribed to plan which covers the new one");
+                throw new IllegalArgumentException("User has already subscribed to plan which covers the new one.");
             } else {
                 final Pair<String, String> usernames = getUserFirstAndLastName(user);
                 final String locale = user.getLocaleOrDefault().getLanguage();
@@ -190,9 +193,15 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                 final Result result = requestBuilder.request();
                 response.setHostedPageJSONString(result.hostedPage().toJson());
             }
+        } catch(final UserManagementException e) {
+            logger.log(Level.FINE, "No user is logged in.");
+            response.setError("You have to login as user to use this function.");
+        } catch(final IllegalArgumentException e) {
+            logger.log(Level.SEVERE, "Error occured while preparing Chargebee checkout. " + e.getMessage());
+            response.setError("Error occured while preparing Chargebee checkout. " + e.getMessage());
         } catch (final Exception e) {
             logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
-            response.setError("Error in generating Chargebee hosted page");
+            response.setError("Unexpected error occurred while generating Chargebee hosted page.");
         }
         return response;
     }
@@ -242,6 +251,9 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                 logger.info(() -> "Invalid subscription");
                 result = false;
             }
+        } catch(UserManagementException e) {
+            logger.log(Level.FINE, "No user is logged in.");
+            result = false;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in cancel subscription ", e);
             result = false;
@@ -286,6 +298,9 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                 logger.info(() -> "Invalid subscription");
                 result = false;
             }
+        } catch(UserManagementException e) {
+            logger.log(Level.FINE, "No user is logged in.");
+            result = false;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in setting subscription to non renewing ", e);
             result = false;

@@ -96,7 +96,7 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
             TRIAL_DATA_MINING_ALL_PLAN_ID,
             Stream.of(new SubscriptionPrice(TRIAL_DATA_MINING_ALL_PLAN_ITEMPRICE_ID, new BigDecimal(0),
                     USD_CURRENCY_CODE, PaymentInterval.DAY, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING_ALL, PlanCategory.DATA_MINING_ARCHIVE, PlanCategory.PREMIUM)
+            Stream.of(PlanCategory.TRIAL)
                     .collect(Collectors.toSet()),
             true, PlanGroup.TRIAL, new SubscriptionPlanRole(PremiumRole.getRoleId()),
             new SubscriptionPlanRole(AllDataMiningRole.getRoleId()));

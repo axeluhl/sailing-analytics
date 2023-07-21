@@ -318,3 +318,7 @@
  text-transform: capitalize;
  margin: 0 1em;
 }
+
+.buttonWarning {
+ background-color: #c9caca;
+}

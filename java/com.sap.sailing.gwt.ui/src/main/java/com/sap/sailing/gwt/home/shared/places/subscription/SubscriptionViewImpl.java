@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.subscription;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard;
@@ -7,6 +8,8 @@ import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardCo
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class SubscriptionViewImpl extends Composite implements SubscriptionView {
@@ -37,9 +40,24 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
                 } else if(!this.isEmailValidated(authenticationContext)) {
                     onOpenCheckoutError(StringMessages.INSTANCE.mailNotValidated());
                     presenter.toggleAuthenticationFlyout();
-                }else {
+                } else {
                     if (price != null) {
                         presenter.startSubscription(price.getPriceId());
+                    }
+                }
+            }, eventBus, presenter.getAuthenticationContext().isLoggedIn(), this.isEmailValidated(authenticationContext)));
+            break;
+        case UPGRADE:
+            container.addSubscription(new SubscriptionCard(group, type, (price) -> {
+                if (!authenticationContext.isLoggedIn()) {
+                    onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
+                    presenter.toggleAuthenticationFlyout();
+                } else if(!this.isEmailValidated(authenticationContext)) {
+                    onOpenCheckoutError(StringMessages.INSTANCE.mailNotValidated());
+                    presenter.toggleAuthenticationFlyout();
+                } else {
+                    if (price != null) {
+                        openConfirmationDialog(price);
                     }
                 }
             }, eventBus, presenter.getAuthenticationContext().isLoggedIn(), this.isEmailValidated(authenticationContext)));
@@ -61,6 +79,13 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
         }
     }
     
+    private void openConfirmationDialog(SubscriptionPrice price) {
+        final StringMessages i18n = StringMessages.INSTANCE;
+        ConfirmationDialog.create(i18n.upgrade(),
+                i18n.upgradeInfo(), i18n.subscribe(), i18n.cancel(),
+                () -> presenter.startSubscription(price.getPriceId())).center();
+    }
+    
     private boolean isEmailValidated(final AuthenticationContext authenticationContext) {
         return !presenter.isMailVerificationRequired() ||
                 authenticationContext.getCurrentUser().isEmailValidated();
@@ -68,7 +93,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
 
     @Override
     public void onCloseCheckoutModal() {
-        // FIXME Is any action required in this case?
+        GWT.log("checkout module is closed");
     }
 
     @Override

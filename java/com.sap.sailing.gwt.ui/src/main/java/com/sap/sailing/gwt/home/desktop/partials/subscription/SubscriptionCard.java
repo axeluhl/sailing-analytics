@@ -34,7 +34,7 @@ import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConsta
 public class SubscriptionCard extends Composite {
 
     public static enum Type {
-        FREE, OWNER, HIGHLIGHT, DEFAULT, ONETIMELOCK
+        FREE, OWNER, HIGHLIGHT, DEFAULT, UPGRADE, ONETIMELOCK
     }
 
     private static SubscriptionUiBinder uiBinder = GWT.create(SubscriptionUiBinder.class);
@@ -47,6 +47,7 @@ public class SubscriptionCard extends Composite {
     private static final String PRICE_DISABLED_STYLE = SubscriptionCardResources.INSTANCE.css().priceDisabled();
     private static final String PRICE_INFO_STYLE = SubscriptionCardResources.INSTANCE.css().priceInfo();
     private static final String SELECTED_STYLE = SubscriptionCardResources.INSTANCE.css().selected();
+    private static final String BUTTON_WARNING = SubscriptionCardResources.INSTANCE.css().buttonWarning();
 
     interface SubscriptionUiBinder extends UiBinder<Widget, SubscriptionCard> {
     }
@@ -92,7 +93,6 @@ public class SubscriptionCard extends Composite {
         } else {
             currentPrice = null;
         }
-        button.setEnabled(true);
         final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
         if (priceList != null && !priceList.isEmpty()) {
             for (SubscriptionPrice subscriptionPrice: priceList) {
@@ -144,11 +144,20 @@ public class SubscriptionCard extends Composite {
             button.setText(i18n.subscribe());
             break;
         case DEFAULT:
+            GWT.log("email validated: " + emailValidated);
             if (emailValidated) {
                 button.setText(i18n.subscribe());
             } else {
-                button.setText(i18n.emailNotValidated());
-                button.setEnabled(false);
+                button.setText(i18n.emailNotValidated() + "1");
+                button.addStyleName(BUTTON_WARNING);
+            }
+            break;
+        case UPGRADE:
+            if (emailValidated) {
+                button.setText(i18n.upgrade());
+            } else {
+                button.setText(i18n.emailNotValidated() + "2");
+                button.addStyleName(BUTTON_WARNING);
             }
             break;
         case OWNER:
