@@ -44,6 +44,7 @@ public class SubscriptionCard extends Composite {
     private static final String SUBSCRIPTION_STYLE = SubscriptionCardResources.INSTANCE.css().subscription();
     private static final String FREE_STYLE = SubscriptionCardResources.INSTANCE.css().free();
     private static final String PRICE_STYLE = SubscriptionCardResources.INSTANCE.css().price();
+    private static final String PRICE_DISABLED_STYLE = SubscriptionCardResources.INSTANCE.css().priceDisabled();
     private static final String PRICE_INFO_STYLE = SubscriptionCardResources.INSTANCE.css().priceInfo();
     private static final String SELECTED_STYLE = SubscriptionCardResources.INSTANCE.css().selected();
 
@@ -72,7 +73,7 @@ public class SubscriptionCard extends Composite {
     private SubscriptionPrice currentPrice;
     private final SubscriptionGroupDTO subscriptionGroupDTO;
 
-    public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionGroupDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
+    public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionGroupDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn, boolean emailValidated) {
         this.subscriptionCallback = subscriptionCallback;
         this.subscriptionGroupDTO = subscriptionGroupDTO;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
@@ -91,6 +92,7 @@ public class SubscriptionCard extends Composite {
         } else {
             currentPrice = null;
         }
+        button.setEnabled(true);
         final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
         if (priceList != null && !priceList.isEmpty()) {
             for (SubscriptionPrice subscriptionPrice: priceList) {
@@ -142,12 +144,18 @@ public class SubscriptionCard extends Composite {
             button.setText(i18n.subscribe());
             break;
         case DEFAULT:
-            button.setText(i18n.subscribe());
+            if (emailValidated) {
+                button.setText(i18n.subscribe());
+            } else {
+                button.setText(i18n.emailNotValidated());
+                button.setEnabled(false);
+            }
             break;
         case OWNER:
             addStyleName(OWNED_STYLE);
             highlightHeader.add(new Label(i18n.subscriptionOwnerHeaderText()));
             button.setText(i18n.userManagement());
+            prices.addStyleName(PRICE_DISABLED_STYLE);
             break;
         case ONETIMELOCK:
             addStyleName(OWNED_STYLE);
@@ -173,7 +181,7 @@ public class SubscriptionCard extends Composite {
             });
         default:
             break;
-        }       
+        }
         title.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupNameMessageKey()));
         description.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupDescMessageKey()));
         info.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupInfoMessageKey()));

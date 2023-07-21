@@ -155,6 +155,14 @@
  color: #fff;
 }
 
+.priceDisabled .price {
+ background-color: #f2f2f2;
+}
+
+.priceDisabled .price.selected {
+ background-color: #ddd;;
+}
+
 .priceInfo {
  width: fit-content;
  border: solid;
