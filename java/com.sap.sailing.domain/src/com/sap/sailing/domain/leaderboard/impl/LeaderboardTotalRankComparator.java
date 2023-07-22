@@ -303,8 +303,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         result = scoringScheme.compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
                     }
                     if (result == 0) {
-                        result = scoringScheme.compareByScoreSum(o1ScoreSum, o2ScoreSum, nullScoresAreBetter,
-                                zeroBasedIndexOfLastMedalSeriesInWhichO1Scored>=0 || zeroBasedIndexOfLastMedalSeriesInWhichO2Scored>=0);
+                        result = scoringScheme.compareByScoreSum(o1, o1Scores, o1ScoreSum, o2, o2Scores, o2ScoreSum, nullScoresAreBetter,
+                                zeroBasedIndexOfLastMedalSeriesInWhichO1Scored >= 0 || zeroBasedIndexOfLastMedalSeriesInWhichO2Scored >= 0,
+                                competitorsRankedByOpeningSeries);
                         if (result == 0) {
                             if (scoringScheme.isCarryForwardInMedalsCriteria()) {
                                 result = scoringScheme.compareBySingleRaceColumnScore(o1CarryForwardScoreInMedals,

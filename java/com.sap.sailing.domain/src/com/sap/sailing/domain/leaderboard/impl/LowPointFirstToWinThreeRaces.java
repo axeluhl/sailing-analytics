@@ -345,9 +345,9 @@ public class LowPointFirstToWinThreeRaces extends LowPoint {
      * handles the medal series ranking altogether.
      */
     @Override
-    public int compareByScoreSum(double o1ScoreSum, double o2ScoreSum, boolean nullScoresAreBetter,
-            boolean haveValidMedalRaceScores) {
-        return haveValidMedalRaceScores ? 0 : super.compareByScoreSum(o1ScoreSum, o2ScoreSum, nullScoresAreBetter, haveValidMedalRaceScores);
+    public int compareByScoreSum(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, double o1ScoreSum,
+            Competitor o2, List<Pair<RaceColumn, Double>> o2Scores, double o2ScoreSum, boolean nullScoresAreBetter, boolean haveValidMedalRaceScores, Supplier<Map<Competitor, Integer>> competitorsRankedByOpeningSeries) {
+        return haveValidMedalRaceScores ? 0 : super.compareByScoreSum(o1, o1Scores, o1ScoreSum, o2, o2Scores, o2ScoreSum, nullScoresAreBetter, haveValidMedalRaceScores, competitorsRankedByOpeningSeries);
     }
 
     /**

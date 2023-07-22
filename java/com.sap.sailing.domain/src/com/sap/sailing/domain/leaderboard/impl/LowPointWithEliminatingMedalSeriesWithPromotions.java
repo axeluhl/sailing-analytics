@@ -131,6 +131,65 @@ public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends L
     }
 
     /**
+     * Both competitors competed in or were advanced through/to the same medal series. If during the last medal series
+     * in which one of them scored they both raced, their scores can be compared in the regular way, as implemented by
+     * the superclass. If one of the two did not race because they were advanced already to the next medal series, and
+     * the other one scored in the medal series, the one advanced through to the next series already will rank better.
+     * If both did not sail / score in the last series they are compared by the previous series.
+     * 
+     * @param haveValidMedalRaceScores
+     *            if {@code true} then this means that both raced in or were advanced to a medal series
+     */
+    @Override
+    public int compareByScoreSum(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, double o1ScoreSum,
+            Competitor o2, List<Pair<RaceColumn, Double>> o2Scores, double o2ScoreSum, boolean nullScoresAreBetter,
+            boolean haveValidMedalRaceScores, Supplier<Map<Competitor, Integer>> competitorsRankedByOpeningSeries) {
+        final int result;
+        final Series lastSeriesO1ScoredIn = getLastSeriesCompetitorScoredIn(o1Scores);
+        final Series lastSeriesO2ScoredIn = getLastSeriesCompetitorScoredIn(o2Scores);
+        if (lastSeriesO1ScoredIn == lastSeriesO2ScoredIn) {
+            result = super.compareByScoreSum(o1, o1Scores, o1ScoreSum, o2, o2Scores, o2ScoreSum, nullScoresAreBetter, haveValidMedalRaceScores, competitorsRankedByOpeningSeries);
+        } else {
+            final int o1ZeroBasedLastScoredSeriesIndex = lastSeriesO1ScoredIn == null ? -1 :
+                Util.indexOf(lastSeriesO1ScoredIn.getRegatta().getSeries(), lastSeriesO1ScoredIn);
+            final int o2ZeroBasedLastScoredSeriesIndex = lastSeriesO2ScoredIn == null ? -1 :
+                Util.indexOf(lastSeriesO2ScoredIn.getRegatta().getSeries(), lastSeriesO2ScoredIn);
+            final int openingSeriesRankO1 = competitorsRankedByOpeningSeries.get().get(o1);
+            final int openingSeriesRankO2 = competitorsRankedByOpeningSeries.get().get(o2);
+            final int numberOfCompetitorsBetterThanThoseSailingInLastSeriesAnyOfTheTwoCompetitorsScoredIn;
+            assert o1ZeroBasedLastScoredSeriesIndex != o2ZeroBasedLastScoredSeriesIndex;
+            if (o1ZeroBasedLastScoredSeriesIndex > o2ZeroBasedLastScoredSeriesIndex) {
+                numberOfCompetitorsBetterThanThoseSailingInLastSeriesAnyOfTheTwoCompetitorsScoredIn = getNumberOfCompetitorsBetterThanThoseSailingInSeries(lastSeriesO1ScoredIn);
+                if (openingSeriesRankO2 <= numberOfCompetitorsBetterThanThoseSailingInLastSeriesAnyOfTheTwoCompetitorsScoredIn) {
+                    result = 1; // o2 is better than o1 because their opening series rank has promoted them through the series o1 scored in last
+                } else {
+                    result = -1; // o1 is better because o2 hasn't sailed in that series, but not because promoted through but not qualified
+                }
+            } else {
+                numberOfCompetitorsBetterThanThoseSailingInLastSeriesAnyOfTheTwoCompetitorsScoredIn = getNumberOfCompetitorsBetterThanThoseSailingInSeries(lastSeriesO2ScoredIn);
+                if (openingSeriesRankO1 <= numberOfCompetitorsBetterThanThoseSailingInLastSeriesAnyOfTheTwoCompetitorsScoredIn) {
+                    result = -1; // o1 is better than o2 because their opening series rank has promoted them through the series o2 scored in last
+                } else {
+                    result = 1; // o2 is better because o1 hasn't sailed in that series, but not because promoted through but not qualified
+                }
+            }
+        }
+        return result;
+    }
+
+    private Series getLastSeriesCompetitorScoredIn(List<Pair<RaceColumn, Double>> o2Scores) {
+        Series result = null;
+        for (final ListIterator<Pair<RaceColumn, Double>> i=o2Scores.listIterator(o2Scores.size()); i.hasPrevious(); ) {
+            final Pair<RaceColumn, Double> score = i.previous();
+            if (score.getB() != null && score.getA() instanceof RaceColumnInSeries) {
+                result = ((RaceColumnInSeries) score.getA()).getSeries();
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
      * If two competitors are tied, check if the tie is in a medal series, and if so, compare again with a new
      * {@link LeaderboardTotalRankComparator}, but with all races from that medal series removed from the race columns
      * to consider. If the tie was in the first medal series then this will resort to comparing by the opening series
@@ -171,6 +230,4 @@ public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends L
         }
         return result;
     }
-    
-    
 }

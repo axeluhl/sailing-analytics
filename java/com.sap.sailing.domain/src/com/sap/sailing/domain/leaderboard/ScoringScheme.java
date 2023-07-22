@@ -343,7 +343,8 @@ public interface ScoringScheme extends Serializable {
         return Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
     }
 
-    default int compareByScoreSum(double o1ScoreSum, double o2ScoreSum, boolean nullScoresAreBetter, boolean haveValidMedalRaceScores) {
+    default int compareByScoreSum(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, double o1ScoreSum, Competitor o2,
+            List<Pair<RaceColumn, Double>> o2Scores, double o2ScoreSum, boolean nullScoresAreBetter, boolean haveValidMedalRaceScores, Supplier<Map<Competitor, Integer>> competitorsRankedByOpeningSeries) {
         return getScoreComparator(nullScoresAreBetter).compare(o1ScoreSum, o2ScoreSum);
     }
 
