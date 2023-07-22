@@ -1237,7 +1237,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         series.add(gfSeries);
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         createAndAttachTrackedRaces(series.get(0), "Default", /* withScores */ true, o1);
-        assertEquals(Arrays.asList(o1), leaderboard.getCompetitorsFromBestToWorst(TimePoint.now()));
+        assertEquals(Arrays.asList(o1), Util.asList(leaderboard.getCompetitorsFromBestToWorst(TimePoint.now())));
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, qf);
         Iterable<Competitor> rankedCompetitorsAfterQF = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(Arrays.asList(/* ADVANCED BEYOND QF: */ c[3], c[1], c[2], /* Quarter Finalists: */ c[11], c[6], c[0], c[4], c[7], c[5], c[12], /* Not qualified to QF: */ c[10], c[8], c[9]), Util.asList(rankedCompetitorsAfterQF));
