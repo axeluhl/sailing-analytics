@@ -177,9 +177,9 @@ public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends L
         return result;
     }
 
-    private Series getLastSeriesCompetitorScoredIn(List<Pair<RaceColumn, Double>> o2Scores) {
+    private Series getLastSeriesCompetitorScoredIn(List<Pair<RaceColumn, Double>> competitorScores) {
         Series result = null;
-        for (final ListIterator<Pair<RaceColumn, Double>> i=o2Scores.listIterator(o2Scores.size()); i.hasPrevious(); ) {
+        for (final ListIterator<Pair<RaceColumn, Double>> i=competitorScores.listIterator(competitorScores.size()); i.hasPrevious(); ) {
             final Pair<RaceColumn, Double> score = i.previous();
             if (score.getB() != null && score.getA() instanceof RaceColumnInSeries) {
                 result = ((RaceColumnInSeries) score.getA()).getSeries();
