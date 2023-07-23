@@ -45,7 +45,7 @@ public class LowPointForLeagueOverallLeaderboard extends LowPoint {
      */
     @Override
     public int compareByBetterScore(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores,
-            Competitor o2, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            Competitor o2, List<Pair<RaceColumn, Double>> o2Scores, Iterable<RaceColumn> raceColumnsToConsider, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Double o1ScoreSum = o1Scores.stream().collect(Collectors.summingDouble(rcAndScore->rcAndScore.getB()));
         final Double o2ScoreSum = o2Scores.stream().collect(Collectors.summingDouble(rcAndScore->rcAndScore.getB()));
         assert Math.abs(o1ScoreSum - o2ScoreSum) < 0.00001;
