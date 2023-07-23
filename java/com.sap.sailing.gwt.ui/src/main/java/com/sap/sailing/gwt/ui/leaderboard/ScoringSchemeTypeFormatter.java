@@ -56,6 +56,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointA82Only();
         case LOW_POINT_FIRST_TO_WIN_THREE_RACES_A82_ONLY:
             return stringMessages.scoringSchemeLowPointSystemFirstThreeWinsA82Only();
+        case LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_ONE_TO_FINAL_AND_TWO_TO_SEMIFINAL:
+            return stringMessages.scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal();
         }
         return null;
     }
@@ -92,6 +94,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointA82OnlyDescription();
         case LOW_POINT_FIRST_TO_WIN_THREE_RACES_A82_ONLY:
             return stringMessages.scoringSchemeLowPointSystemFirstThreeWinsA82OnlyDescription();
+        case LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_ONE_TO_FINAL_AND_TWO_TO_SEMIFINAL:
+            return stringMessages.scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

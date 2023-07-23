@@ -42,6 +42,11 @@
             <li>Introduced "SCA" as a new invalid result marker (IRM). When used together with the scoring scheme "LowPointWithAutomaticRDG",
                 a default score is computed based on average of the competitor's scores in all races prior to the one for
                 which the SCA has been given. This implements RRS A9b.</li>
+            <li>Introduced a new scoring scheme: "Low point system; Medal races as quarter final, semi final and grand final."
+                It is well-suited for the iQFOil format as seen in the years 2022/2023. Model each of the Quarter Final,
+                Semi Final, and Grand Final as a separate "Medal Series" with one race each. The scoring scheme understands
+                that the best competitor of the opening series advances to the last medal series (e.g., "Grand Final"), and
+                the second and third of the Opening Series advance straight to the Semi Final (last-but-one medal series).</li>
           </ul>
           <h2 class="articleSubheadline">June 2023</h2>
           <ul class="bulletList">
