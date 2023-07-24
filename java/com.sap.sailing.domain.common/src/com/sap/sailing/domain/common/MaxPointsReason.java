@@ -54,7 +54,13 @@ public enum MaxPointsReason {
     /** Retired after causing a tangle */
     RCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Did not sail the course */
-    NSC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false)
+    NSC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
+    /**
+     * Scoring adjustment; originally from the German Sailing League / Bundesliga; Scores to be computed based on RRS
+     * A9b: "points equal to the average, to the nearest tenth of a point (0.05 to be rounded upward), of her points in
+     * all the races before the race in question"
+     */
+    SCA(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false)
     ;
     
     private final boolean discardable;

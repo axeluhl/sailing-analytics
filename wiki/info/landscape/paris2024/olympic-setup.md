@@ -781,3 +781,28 @@ The key to the Athena set-up is to have a table definition per bucket, with a de
     group by date_trunc('day', parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'))
 </pre>
 It defines a ``union_table`` which unites all contents from all buckets scanned.
+
+## Dismantling the Set-Up and Moving to the Cloud
+
+The MongoDB on ``paris-ssh.sapsailing.com:10203`` needs to be made primary, setting its ``priority`` in the replica set configuration from 0 to 1:
+
+```
+  cfg=rs.config()
+  cfg.members[0].priority=1
+  rs.reconfig(cfg)
+```
+
+Then the local replicas need to be unregistered:
+
+```
+  rs.remove("localhost:10201")
+  rs.remove("localhost:10202")
+```
+
+The MongoDB cloud replica should then become the sole instance and hence primary of the replica set.
+
+From some instance in the ``eu-west-1`` region we can then do a ``mongodump`` of the ``paris2024`` database and subsequently a ``mongorestore`` into the ``live`` replica set at ``mongodb://dbserver.internal.sapsailing.com:10203,mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/paris2024?replicaSet=live&retryWrites=true&readPreference=nearest``. Then, a new replica ``paris2024`` set can be launched using our automated tools. Use the dynamic load balancer set-up to go without a DNS entry. Once the set-up is up and running, remove the DNS entry for ``paris2024.sapsailing.com`` so the traffic no longer goes to the global accelerator but to the dynamic ALB in ``eu-west-1``. See how the global accelerator traffic drains and start removing regions from it one by one. Finally, disable and remove the entire global accelerator.
+
+Clean up the regions, setting all Auto-Scaling Groups to 0 instances, terminate all instances, remove the ALBs in the regions, then remove the ``paris2024`` target groups in the regions.
+
+Later you may want to use the regular "Archive Replica Set" functionality to move the content to the archive server.

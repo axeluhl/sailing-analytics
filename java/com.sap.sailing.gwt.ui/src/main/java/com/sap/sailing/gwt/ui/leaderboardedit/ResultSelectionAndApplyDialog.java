@@ -49,6 +49,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final ErrorReporter errorReporter;
 
     private final BoatClassDTO boatClass;
+    private final String leaderboardName;
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
             SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter, UserService userService) {
@@ -57,7 +58,8 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
         this.sailingService = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        boatClass = leaderboardPanel.getLeaderboard().getBoatClass();
+        this.boatClass = leaderboardPanel.getLeaderboard().getBoatClass();
+        this.leaderboardName = leaderboardPanel.getLeaderboard().getName();
         this.scoreCorrections = new LinkedHashMap<String, Util.Pair<String, Util.Pair<String, Date>>>();
         scoreCorrectionProviderListBox = createListBox(/* isMultipleSelect */ false);
         scoreCorrectionListBox = createListBox(/* isMultipleSelect */ false);
@@ -161,7 +163,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     private Map<Pair<String, Pair<String, Date>>, Double> sortOfficialResultsByRelevance(List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
-        return new FuzzyBoatClassNameMatcher().sortOfficialResultsByRelevance(boatClass, eventNameBoatClassNameCapturedWhen);
+        return new FuzzyBoatClassNameMatcher().sortOfficialResultsByRelevance(boatClass, eventNameBoatClassNameCapturedWhen, leaderboardName);
     }
 
     private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {

@@ -821,7 +821,7 @@ public class TrackingListFragment extends BaseFragment
 
     private CharSequence[] getAllMaxPointsReasons() {
         List<CharSequence> result = new ArrayList<>();
-        for (MaxPointsReason reason : MaxPointsReason.values()) {
+        for (MaxPointsReason reason : MaxPointsReason.getLexicographicalValues()) {
             result.add(reason.name());
         }
         return result.toArray(new CharSequence[result.size()]);

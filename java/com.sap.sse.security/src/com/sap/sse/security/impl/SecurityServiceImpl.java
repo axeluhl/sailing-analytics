@@ -2322,7 +2322,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             boolean setServerGroupAsOwner, final String displayName) {
         boolean wasNecessaryToMigrate = false;
         final OwnershipAnnotation owner = this.getOwnership(identifier);
-        // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
+        // initialize ownerships on migration and fix objects that were orphaned by setting the owning user/group
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
             final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getServerGroup() : null;

@@ -51,7 +51,7 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
     @Override
     public int compareByLastMedalRacesCriteria(Competitor o1, List<Pair<RaceColumn, Double>> o1Scores, Competitor o2,
             List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Leaderboard leaderboard,
-            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+            Iterable<RaceColumn> raceColumnsToConsider, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache, TimePoint timePoint, int zeroBasedIndexOfLastMedalSeriesInWhichBothScored, int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         final Pair<RaceColumn, Double> o1LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o1Scores);
         final Pair<RaceColumn, Double> o2LastNonNullMedalRaceScore = getLastNonNullMedalRaceScore(o2Scores);
         final int result;

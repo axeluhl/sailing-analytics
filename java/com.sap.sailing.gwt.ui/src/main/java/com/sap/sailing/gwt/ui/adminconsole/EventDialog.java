@@ -72,14 +72,12 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         @Override
         public String getErrorMessage(EventDTO eventToValidate) {
             String errorMessage = null;
-
             boolean emptyName = eventToValidate.getName() == null
                     || eventToValidate.getName().isEmpty();
             boolean emptyVenue = eventToValidate.venue.getName() == null
                     || eventToValidate.venue.getName().isEmpty();
             boolean emptyCourseArea = eventToValidate.venue.getCourseAreas() == null
                     || eventToValidate.venue.getCourseAreas().isEmpty();
-
             if (!emptyCourseArea) {
                 for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
                     emptyCourseArea = courseArea.getName() == null || courseArea.getName().isEmpty();
@@ -88,7 +86,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                     }
                 }
             }
-
             boolean unique = true;
             for (EventDTO event : existingEvents) {
                 if (event.getName().equals(eventToValidate.getName())) {
@@ -96,7 +93,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                     break;
                 }
             }
-
             Date startDate = eventToValidate.startDate;
             Date endDate = eventToValidate.endDate;
             String datesErrorMessage = null;
@@ -108,7 +104,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
-
             if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
             } else if (emptyName) {
