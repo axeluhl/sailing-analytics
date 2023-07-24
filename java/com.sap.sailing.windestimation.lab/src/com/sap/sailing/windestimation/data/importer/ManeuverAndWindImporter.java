@@ -175,8 +175,8 @@ public class ManeuverAndWindImporter {
                 + " competitor tracks\n\t" + importStatistics.maneuversCount
                 + " complete maneuver curves with estimation data\n\t" + importStatistics.racesWithHighQualityWindData
                 + " races with high quality wind data\n\t" + importStatistics.ignoredRegattas
-                + " ignored regatta due to error\n\t" + importStatistics.ingoredRaces
-                + " ingored races due to error\n--------------------------------------------\nTime passed: "
+                + " ignored regatta due to error\n\t" + importStatistics.ignoredRaces
+                + " ignored races due to error\n--------------------------------------------\nTime passed: "
                 + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
                 + (duration.get(ChronoUnit.SECONDS) % 60) + "s");
     }
@@ -216,7 +216,7 @@ public class ManeuverAndWindImporter {
                                 importRace(regattaName, trackedRaceName, importStatistics, bearerToken);
                             } catch (Exception e) {
                                 synchronized (importStatistics) {
-                                    importStatistics.ingoredRaces += 1;
+                                    importStatistics.ignoredRaces += 1;
                                 }
                                 String extraLog = "";
                                 if (e instanceof HttpClientException) {
@@ -415,7 +415,7 @@ public class ManeuverAndWindImporter {
         private int competitorTracksCount = 0;
         private int maneuversCount = 0;
         private int ignoredRegattas = 0;
-        private int ingoredRaces = 0;
+        private int ignoredRaces = 0;
         private int racesWithHighQualityWindData = 0;
     }
 
