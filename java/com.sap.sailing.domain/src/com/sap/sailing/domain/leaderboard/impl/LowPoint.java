@@ -66,7 +66,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
             NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
             Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
         Double result;
-        if (maxPointsReason == MaxPointsReason.STP) {
+        if (maxPointsReason == MaxPointsReason.STP) { // TODO bug5873: this is where other incremental IRMs need to be considered, too, with configurable increments
             final Double uncorrectedScore = uncorrectedScoreProvider.get();
             result = uncorrectedScore == null ? null : uncorrectedScore + 1.0;
         } else if (numberOfCompetitorsInRace == null || raceColumn.hasSplitFleetContiguousScoring()) {
