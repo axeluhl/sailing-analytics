@@ -5,6 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardContainer;
+import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -81,9 +82,15 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     
     private void openConfirmationDialog(SubscriptionPrice price) {
         final StringMessages i18n = StringMessages.INSTANCE;
-        ConfirmationDialog.create(i18n.upgrade(),
+        ConfirmationDialog upgradeDialog = ConfirmationDialog.create(i18n.upgrade(),
                 i18n.upgradeInfo(), i18n.subscribe(), i18n.cancel(),
-                () -> presenter.startSubscription(price.getPriceId())).center();
+                () -> presenter.startSubscription(price.getPriceId()));
+        upgradeDialog.setAnimationEnabled(true);
+        upgradeDialog.setGlassEnabled(true);
+        upgradeDialog.setModal(true);
+        upgradeDialog.setStyleName(SubscriptionCardResources.INSTANCE.css().confirmationDialog());
+        upgradeDialog.setGlassStyleName(SubscriptionCardResources.INSTANCE.css().popupGlass());
+        upgradeDialog.center();
     }
     
     private boolean isEmailValidated(final AuthenticationContext authenticationContext) {
