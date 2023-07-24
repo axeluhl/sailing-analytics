@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
@@ -470,7 +471,16 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         Integer result;
         final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         if (trackedRace == null) {
-            result = numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard();
+            final int estimatedSizeOfLargestFleet;
+            final int numberOfCompetitorsInLeaderboard = numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard();
+            if (raceColumn instanceof RaceColumnInSeries) {
+                final int numberOfFleets = Util.size(((RaceColumnInSeries) raceColumn).getSeries().getFleets());
+                estimatedSizeOfLargestFleet = numberOfCompetitorsInLeaderboard / numberOfFleets
+                        + (int) Math.signum(numberOfCompetitorsInLeaderboard % numberOfFleets); // round up
+            } else {
+                estimatedSizeOfLargestFleet = numberOfCompetitorsInLeaderboard;
+            }
+            result = estimatedSizeOfLargestFleet;
         } else {
             result = Util.size(trackedRace.getRace().getCompetitors());
         }
