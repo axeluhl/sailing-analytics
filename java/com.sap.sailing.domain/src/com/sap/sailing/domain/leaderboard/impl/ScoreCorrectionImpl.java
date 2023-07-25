@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -470,10 +471,15 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             final Double correctedNonMaxedScore;
             if ((maxPointsReason.isCalculateScoreDuringRace() && isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor))
             || (correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor))) == null) {
-                result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
-                        getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
-                        numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard,
-                        /* uncorrectedScoreProvider */ ()->getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache));
+                final Supplier<Double> uncorrectedScoreProvider = ()->getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
+                final Double incrementalScoreCorrectionForCompetitorInColumn = incrementalScoreCorrection.get(raceColumn.getKey(competitor));
+                if (incrementalScoreCorrectionForCompetitorInColumn != null) {
+                    result = uncorrectedScoreProvider.get() + incrementalScoreCorrectionForCompetitorInColumn;
+                } else {
+                    result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
+                            getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
+                            numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard, uncorrectedScoreProvider);
+                }
             } else {
                 result = correctedNonMaxedScore;
             }
