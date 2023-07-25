@@ -62,10 +62,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * correction may apply.
      * <p>
      * 
-     * Incremental score corrections are added to (for {@link LowPoint} schemes) or subtracted from (for
-     * {@link HighPoint} schemes) the score derived from the ranking at the given point in time, after applying a column
-     * factor. For example, an {@link MaxPointsReason#STP} penalty of 1.0 point for a tracker not returned will be added
-     * to a medal race score <em>after</em> it has been doubled.
+     * Incremental score corrections are added to the score derived from the ranking at the given point in time, before
+     * applying a column factor. This is independent of the use of {@link LowPoint} or {@link HighPoint} scoring scheme
+     * variants, so for penalties in {@link HighPoint} schemes values should probably be negative. Column factor
+     * application may be contradicting the Notice of Race / Sailing Instructions for a specific event where it may
+     * read, e.g., that {@link MaxPointsReason#STP} penalties shall be applied <em>after</em> doubling a medal race's
+     * score. In such cases values divided by the column factor must be used so that the final result matches the
+     * expected incremental offset again.
      * <p>
      * 
      * @since 2023-07-25; this means that de-serializing an object written by an older version of this class will lead
