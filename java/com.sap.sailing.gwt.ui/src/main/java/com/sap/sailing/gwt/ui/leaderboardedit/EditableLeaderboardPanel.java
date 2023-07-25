@@ -482,6 +482,36 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         }
     }
 
+    private class IncrementalScoreCorrectionViewProvider
+            extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final String raceColumnName;
+        
+        protected IncrementalScoreCorrectionViewProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
+        }
+
+        @Override
+        public Cell<String> getCell() {
+            return new TextCell();
+        }
+
+        @Override
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            return null;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            final LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
+            String result = "";
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.incrementalScoreCorrectionInPoints != null) {
+                final char sign = Math.signum(leaderboardEntryDTO.incrementalScoreCorrectionInPoints) >= 0 ? '+' : '-';
+                result=" ["+sign+scoreFormat.format(leaderboardEntryDTO.incrementalScoreCorrectionInPoints)+"]";
+            }
+            return result;
+        }
+    }
+
     private class TotalPointsEditCellProvider
             extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final EditTextCell totalPointsEditCell;
@@ -1237,13 +1267,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider = new MaxPointsDropDownCellProvider(
                 race.getRaceColumnName());
-        // list.add(maxPointsDropDownCellProvider);
         final TotalPointsEditCellProvider totalPointsEditCellProvider = new TotalPointsEditCellProvider(
                 race.getRaceColumnName());
         list.add(totalPointsEditCellProvider);
-        final ReasonForMaxPointsTextViewProvider testViewProvider = new ReasonForMaxPointsTextViewProvider(
+        final ReasonForMaxPointsTextViewProvider maxPointsReasonViewProvider = new ReasonForMaxPointsTextViewProvider(
                 race.getRaceColumnName());
-        list.add(testViewProvider);
+        list.add(maxPointsReasonViewProvider);
+        final IncrementalScoreCorrectionViewProvider incrementalScoreCorrectionViewProvider = new IncrementalScoreCorrectionViewProvider(
+                race.getRaceColumnName());
+        list.add(incrementalScoreCorrectionViewProvider);
         final UncorrectedTotalPointsViewProvider uncorrectedViewProvider = new UncorrectedTotalPointsViewProvider(
                 race.getRaceColumnName());
         list.add(uncorrectedViewProvider);
