@@ -27,6 +27,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Implements the basic logic of assigning a maximum score to a competitor in a race if that competitor was
@@ -44,12 +45,32 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
      */
-    private final ConcurrentMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
+    private final ConcurrentMap<Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
 
     /**
      * If no score correction is provided here, the uncorrected points are the default.
      */
-    private final ConcurrentMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
+    private final ConcurrentMap<Pair<Competitor, RaceColumn>, Double> correctedScores;
+    
+    /**
+     * If a {@link #correctedScores fixed corrected score} exists, it is used in
+     * {@link #getCorrectedScore(Callable, Competitor, RaceColumn, Leaderboard, TimePoint, NumberOfCompetitorsInLeaderboardFetcher, ScoringScheme, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}
+     * if any {@link #maxPointsReasons} suggests that the correction shall be applied (e.g., after the end of the race
+     * only). If no absolute {@link #correctedScores corrected score} is set for a competitor in a race column or the
+     * {@link #maxPointsReasons} suggests that it doesn't apply at the time point in question, an incremental score
+     * correction may apply.
+     * <p>
+     * 
+     * Incremental score corrections are added to (for {@link LowPoint} schemes) or subtracted from (for
+     * {@link HighPoint} schemes) the score derived from the ranking at the given point in time, after applying a column
+     * factor. For example, an {@link MaxPointsReason#STP} penalty of 1.0 point for a tracker not returned will be added
+     * to a medal race score <em>after</em> it has been doubled.
+     * <p>
+     * 
+     * @since 2023-07-25; this means that de-serializing an object written by an older version of this class will lead
+     *        to serious problems, e.g., to {@link NullPointerException}s when trying to access this field.
+     */
+    private final ConcurrentMap<Pair<Competitor, RaceColumn>, Double> incrementalScoreCorrection;
 
     /**
      * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the
@@ -73,6 +94,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         this.leaderboard = leaderboard;
         this.maxPointsReasons = new ConcurrentHashMap<>();
         this.correctedScores = new ConcurrentHashMap<>();
+        this.incrementalScoreCorrection = new ConcurrentHashMap<>();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
     }
 
@@ -104,6 +126,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     protected void notifyListeners(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
             listener.correctedScoreChanged(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
+        }
+    }
+    
+    protected void notifyListenersAboutIncrementalScoreChange(Competitor competitor, RaceColumn raceColumn, Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.incrementalScoreCorrectionChanged(competitor, raceColumn, oldScoreOffsetInPoints, newScoreOffsetInPoints);
         }
     }
 
@@ -145,7 +173,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason) {
-        com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
+        Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         MaxPointsReason oldMaxPointsReason;
         if (reason == null) {
             oldMaxPointsReason = maxPointsReasons.remove(key);
@@ -163,15 +191,39 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
+        final Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         return (correctedScores.containsKey(key) && !isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor))
                 || (maxPointsReasons.containsKey(key) && isMaxPointsReasonApplicable(maxPointsReasons.get(key), timePoint, raceColumn, competitor));
     }
 
     @Override
     public void uncorrectScore(Competitor competitor, RaceColumn raceColumn) {
-        Double oldScore = correctedScores.remove(raceColumn.getKey(competitor));
+        final Double oldScore = correctedScores.remove(raceColumn.getKey(competitor));
         notifyListeners(competitor, raceColumn, oldScore, null);
+    }
+    
+    @Override
+    public void correctScoreIncrementally(Competitor competitor, RaceColumn raceColumn, double scoreOffsetInPoints) {
+        final Double oldScoreOffsetInPoints = incrementalScoreCorrection.put(raceColumn.getKey(competitor), scoreOffsetInPoints);
+        notifyListenersAboutIncrementalScoreChange(competitor, raceColumn, oldScoreOffsetInPoints, scoreOffsetInPoints);
+    }
+
+    @Override
+    public boolean isScoreCorrectedIncrementally(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        final Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
+        return (incrementalScoreCorrection.containsKey(key) && !isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor))
+                || (maxPointsReasons.containsKey(key) && isMaxPointsReasonApplicable(maxPointsReasons.get(key), timePoint, raceColumn, competitor));
+    }
+
+    @Override
+    public Double getIncementalScoreCorrectionInPoints(Competitor competitor, RaceColumn raceColumn) {
+        return incrementalScoreCorrection.get(raceColumn.getKey(competitor));
+    }
+
+    @Override
+    public void uncorrectScoreIncrementally(Competitor competitor, RaceColumn raceColumn) {
+        final Double oldScoreOffsetInPoints = incrementalScoreCorrection.remove(raceColumn.getKey(competitor));
+        notifyListenersAboutIncrementalScoreChange(competitor, raceColumn, oldScoreOffsetInPoints, null);
     }
     
     /**
@@ -439,8 +491,18 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             }
 
             @Override
+            public Double getIncrementalScoreCorrectionInPoints() {
+                return incrementalScoreCorrection.get(raceColumn.getKey(competitor));
+            }
+
+            @Override
             public boolean isCorrected() {
                 return isScoreCorrected(competitor, raceColumn, getTimePoint());
+            }
+
+            @Override
+            public boolean isCorrectedIncrementally() {
+                return isScoreCorrectedIncrementally(competitor, raceColumn, getTimePoint());
             }
 
             @Override
@@ -543,13 +605,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     private boolean internalHasScoreCorrectionFor(RaceColumn raceInLeaderboard, boolean considerOnlyUntrackedRaces) {
-        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
             if (correctedScoresKey.getB() == raceInLeaderboard &&
                     (!considerOnlyUntrackedRaces || raceInLeaderboard.getTrackedRace(correctedScoresKey.getA()) == null)) {
                 return true;
             }
         }
-        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
             if (maxPointsReasonsKey.getB() == raceInLeaderboard &&
                     (!considerOnlyUntrackedRaces || raceInLeaderboard.getTrackedRace(maxPointsReasonsKey.getA()) == null)) {
                 return true;
@@ -598,10 +660,10 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public Iterable<RaceColumn> getRaceColumnsThatHaveCorrections() {
         Set<RaceColumn> result = new HashSet<>();
-        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
             result.add(correctedScoresKey.getB());
         }
-        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
             result.add(maxPointsReasonsKey.getB());
         }
         return result;
@@ -610,12 +672,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public Iterable<Competitor> getCompetitorsThatHaveCorrectionsIn(RaceColumn raceColumn) {
         Set<Competitor> result = new HashSet<>();
-        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
             if (raceColumn == correctedScoresKey.getB()) {
                 result.add(correctedScoresKey.getA());
             }
         }
-        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
             if (raceColumn == maxPointsReasonsKey.getB()) {
                 result.add(maxPointsReasonsKey.getA());
             }

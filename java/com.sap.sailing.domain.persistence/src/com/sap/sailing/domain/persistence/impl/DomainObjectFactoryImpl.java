@@ -769,6 +769,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             dbScoreCorrectionForCompetitorInRaceAsNumber.doubleValue();
                         correctionsToUpdate.correctScoreByID(competitorId, raceColumn, leaderboardCorrectedScore);
                     }
+                    if (dbScoreCorrectionForCompetitorInRace
+                            .containsKey(FieldNames.LEADERBOARD_INCREMENTAL_SCORE_CORRECTION_IN_POINTS.name())) {
+                        final Number dbIncrementalScoreCorrectionForCompetitorInRaceAsNumberInPoints = (Number) dbScoreCorrectionForCompetitorInRace
+                                        .get(FieldNames.LEADERBOARD_INCREMENTAL_SCORE_CORRECTION_IN_POINTS.name());
+                        final Double leaderboardIncrementalCorrectedScoreInPoints = dbIncrementalScoreCorrectionForCompetitorInRaceAsNumberInPoints == null ? null :
+                            dbIncrementalScoreCorrectionForCompetitorInRaceAsNumberInPoints.doubleValue();
+                        correctionsToUpdate.correctScoreIncrementallyByID(competitorId, raceColumn, leaderboardIncrementalCorrectedScoreInPoints);
+                    }
                 }
             } else {
                 logger.warning("Couldn't find race column " + MongoUtils.unescapeDollarAndDot(escapedRaceColumnName)

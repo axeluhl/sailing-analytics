@@ -345,9 +345,12 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
-    com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
+    Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
             String competitorIdAsString, String columnName, Double correctedScore, Date date) throws NoWindException;
 
+    Triple<Double, Double, Boolean> updateLeaderboardIncrementalScoreCorrection(
+            String leaderboardName, String competitorIdAsString, String columnName, Double scoringOffsetInPoints, Date date);
+    
     void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints);
 
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName)

@@ -14,6 +14,12 @@ public abstract class AbstractScoreCorrectionListenerWithDefaultAction implement
     }
 
     @Override
+    public void incrementalScoreCorrectionChanged(Competitor competitor, RaceColumn raceColumn,
+            Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints) {
+        defaultAction();
+    }
+
+    @Override
     public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason,
             MaxPointsReason newMaxPointsReason) {
         defaultAction();

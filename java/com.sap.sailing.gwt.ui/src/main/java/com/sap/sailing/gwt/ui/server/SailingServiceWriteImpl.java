@@ -344,6 +344,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryValue;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardColumnFactor;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardIncrementalScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
@@ -1142,7 +1143,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(
+    public Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(
             String leaderboardName, String competitorIdAsString, String raceColumnName, MaxPointsReason maxPointsReason,
             Date date) throws NoWindException {
         SecurityUtils.getSubject().checkPermission(
@@ -1153,9 +1154,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(
-            String leaderboardName, String competitorIdAsString, String columnName, Double correctedScore, Date date)
-            throws NoWindException {
+    public Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(
+            String leaderboardName, String competitorIdAsString, String columnName, Double correctedScore, Date date) {
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
@@ -1164,8 +1164,17 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
-            String comment) {
+    public Triple<Double, Double, Boolean> updateLeaderboardIncrementalScoreCorrection(
+            String leaderboardName, String competitorIdAsString, String columnName, Double scoringOffsetInPoints, Date date) {
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
+        return getService().apply(new UpdateLeaderboardIncrementalScoreCorrection(leaderboardName, columnName,
+                competitorIdAsString, scoringOffsetInPoints, new MillisecondsTimePoint(date)));
+    }
+
+    @Override
+    public void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
@@ -2407,19 +2416,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
+    public void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
             throws NotFoundException {
         final LeaderboardThatHasRegattaLike fromLeaderboard = (LeaderboardThatHasRegattaLike) getLeaderboardByName(fromTriple.getA());
         getSecurityService().checkCurrentUserReadPermission(fromLeaderboard);
         LeaderboardThatHasRegattaLike toLeaderboard = null;
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             toLeaderboard = (LeaderboardThatHasRegattaLike) getLeaderboardByName(toTriple.getA()); // they should all be the same
             getSecurityService().checkCurrentUserUpdatePermission(toLeaderboard);
         }
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
         getRaceLogTrackingAdapter().copyCourse(fromRaceLog, fromLeaderboard, toRaceLogs, toLeaderboard,
@@ -2427,15 +2436,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void copyCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
+    public void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples) throws NotFoundException {
         getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(fromTriple.getA()));
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(toTriple.getA()));
         }
         final RaceColumn raceColumn = getRaceColumn(fromTriple.getA(), fromTriple.getB());
         final Set<Pair<RaceColumn, Fleet>> toRaces = new HashSet<>();
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             final RaceColumn toRaceColumn = getRaceColumn(toTriple.getA(), toTriple.getB());
             final Fleet toFleet = getFleetByName(toRaceColumn, toTriple.getC());
             toRaces.add(new Pair<>(toRaceColumn, toFleet));
