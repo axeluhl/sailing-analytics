@@ -2336,6 +2336,12 @@ Replicator {
         }
 
         @Override
+        public void incrementalScoreCorrectionChanged(Competitor competitor, RaceColumn raceColumn,
+                Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints) {
+            notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(competitor, raceColumn);
+        }
+
+        @Override
         public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }

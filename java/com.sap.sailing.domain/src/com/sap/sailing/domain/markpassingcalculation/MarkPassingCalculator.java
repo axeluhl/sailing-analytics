@@ -587,6 +587,7 @@ public class MarkPassingCalculator {
                     // creation matches that of this mark passing calculator's race; load instead of compute
                     updateMarkPassingsFromRegistry();
                     queue.clear();
+                    stop(); // ensures an end marker is written to queue to the queue.take() call in Listen.run() will always get unblocked after the queue.clear() above
                     suspended = false;
                 } else {
                     suspended = false;

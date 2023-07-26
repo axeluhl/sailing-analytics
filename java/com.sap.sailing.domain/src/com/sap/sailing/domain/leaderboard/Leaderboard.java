@@ -74,6 +74,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     public interface Entry {
         int getTrackedRank();
         Double getTotalPoints();
+        Double getIncrementalScoreCorrectionInPoints();
         Double getTotalPointsUncorrected();
         Double getNetPoints();
         MaxPointsReason getMaxPointsReason();
