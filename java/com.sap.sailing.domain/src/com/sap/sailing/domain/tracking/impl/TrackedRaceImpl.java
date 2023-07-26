@@ -26,6 +26,7 @@ import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -3214,6 +3215,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         return result;
+    }
+    
+    @Override
+    public UUID getCourseAreaId() {
+        for (final RaceLog raceLog : getAttachedRaceLogs()) {
+            final ReadonlyRaceState raceStateForRaceLog = getRaceState(raceLog);
+            final UUID courseAreaId = raceStateForRaceLog.getCourseAreaId();
+            if (courseAreaId != null) {
+                return courseAreaId;
+            }
+        }
+        return null;
     }
 
     @Override

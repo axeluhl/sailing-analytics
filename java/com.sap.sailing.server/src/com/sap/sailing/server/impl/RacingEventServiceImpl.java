@@ -1362,14 +1362,7 @@ Replicator {
 
     @Override
     public CourseArea getCourseArea(Serializable courseAreaId) {
-        for (Event event : getAllEvents()) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (courseArea.getId().equals(courseAreaId)) {
-                    return courseArea;
-                }
-            }
-        }
-        return null;
+        return getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
     }
 
     @Override

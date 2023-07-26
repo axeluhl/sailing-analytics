@@ -102,6 +102,7 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
     
     /**
      * Gets the {@link CourseArea} with passed id; if there is no such {@link CourseArea} <code>null</code> will be returned.
+     * This also applies when {@code null} is being passed as the {@code courseAreaId}.
      */
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
     

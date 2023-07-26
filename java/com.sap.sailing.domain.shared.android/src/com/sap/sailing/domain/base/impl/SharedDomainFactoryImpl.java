@@ -380,7 +380,7 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
 
     @Override
     public CourseArea getExistingCourseAreaById(Serializable courseAreaId) {
-        return courseAreaCache.get(courseAreaId);
+        return courseAreaId == null ? null : courseAreaCache.get(courseAreaId);
     }
 
     @Override

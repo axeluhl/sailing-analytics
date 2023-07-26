@@ -13,7 +13,6 @@ import com.sap.sse.shared.json.JsonDeserializer;
 import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> {
-
     private SharedDomainFactory<?> factory;
 
     public CourseAreaJsonDeserializer(SharedDomainFactory<?> factory) {
@@ -24,8 +23,6 @@ public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> 
             throws JsonDeserializationException {
         String name = (String) object.get(CourseAreaJsonSerializer.FIELD_NAME);
         Serializable id = (Serializable) object.get(CourseAreaJsonSerializer.FIELD_ID);
-
         return factory.getOrCreateCourseArea((UUID) UUIDHelper.tryUuidConversion(id), name);
     }
-
 }
