@@ -160,7 +160,6 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.json.JsonSerializer;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -476,25 +475,29 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private void storeScoreCorrections(Leaderboard leaderboard, Document dbScoreCorrections) {
-        TimePoint now = MillisecondsTimePoint.now();
-        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        for (RaceColumn raceColumn : scoreCorrection.getRaceColumnsThatHaveCorrections()) {
-            BasicDBList dbCorrectionForRace = new BasicDBList();
+        final TimePoint now = TimePoint.now();
+        final SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        for (final RaceColumn raceColumn : scoreCorrection.getRaceColumnsThatHaveCorrections()) {
+            final BasicDBList dbCorrectionForRace = new BasicDBList();
             for (Competitor competitor : scoreCorrection.getCompetitorsThatHaveCorrectionsIn(raceColumn)) {
                 // TODO bug 655: make score corrections time dependent
                 if (scoreCorrection.isScoreCorrected(competitor, raceColumn, now)) {
-                    Document dbCorrectionForCompetitor = new Document();
+                    final Document dbCorrectionForCompetitor = new Document();
                     dbCorrectionForCompetitor.put(FieldNames.COMPETITOR_ID.name(), competitor.getId());
-                    MaxPointsReason maxPointsReason = scoreCorrection.getMaxPointsReason(competitor, raceColumn, now);
+                    final MaxPointsReason maxPointsReason = scoreCorrection.getMaxPointsReason(competitor, raceColumn, now);
                     if (maxPointsReason != MaxPointsReason.NONE) {
                         dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(),
                                 maxPointsReason.name());
                     }
-                    Double explicitScoreCorrection = scoreCorrection
+                    final Double explicitScoreCorrection = scoreCorrection
                             .getExplicitScoreCorrection(competitor, raceColumn);
                     if (explicitScoreCorrection != null) {
                         dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(),
                                 explicitScoreCorrection);
+                    }
+                    final Double incrementalScoreCorrectionInPoints = scoreCorrection.getIncementalScoreCorrectionInPoints(competitor, raceColumn);
+                    if (incrementalScoreCorrectionInPoints != null) {
+                        dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_INCREMENTAL_SCORE_CORRECTION_IN_POINTS.name(), incrementalScoreCorrectionInPoints);
                     }
                     dbCorrectionForRace.add(dbCorrectionForCompetitor);
                 }

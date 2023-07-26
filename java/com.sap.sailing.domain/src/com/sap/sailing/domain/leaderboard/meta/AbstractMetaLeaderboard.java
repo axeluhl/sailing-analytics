@@ -79,6 +79,13 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
 
         @Override
+        public void incrementalScoreCorrectionChanged(Competitor competitor, RaceColumn raceColumn,
+                Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints) {
+            getScoreCorrection().notifyListenersAboutIncrementalScoreChange(competitor, raceColumn,
+                    oldScoreOffsetInPoints, newScoreOffsetInPoints);
+        }
+
+        @Override
         public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn,
                 MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);

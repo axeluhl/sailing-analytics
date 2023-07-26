@@ -47,6 +47,18 @@
                 Semi Final, and Grand Final as a separate "Medal Series" with one race each. The scoring scheme understands
                 that the best competitor of the opening series advances to the last medal series (e.g., "Grand Final"), and
                 the second and third of the Opening Series advance straight to the Semi Final (last-but-one medal series).</li>
+            <li>The invalid result markers (IRMs) <tt>SCP</tt>, <tt>STP</tt>, <tt>DPI</tt>, and <tt>RDG</tt> can now consider
+                optional incremental score corrections which are added to the points determined based on the competitor's rank
+                in the race and the scoring scheme that applied to the race. For example, a <tt>DPI</tt> penalty with <tt>+2.5</tt>
+                points may now be specified which applied during tracking the race. Absolute score corrections will be considered
+                for these IRMs at the end of the race, regardless the incremental score correction. Note that the increments
+                are subject to any column factors being applied; this may contradict an event's rules that may state that certain
+                penalties, such as <tt>STP</tt> are <em>not</em> subject to doubling for a medal race. In such cases, specify half
+                the penalty when editing the increment. Specifying and incremental penalties can be done on the <tt>/gwt/LeaderboardEdit.html</tt>
+                reachable from the administration console's Leaderboards/Leaderboards tab (red dice symbol). They are displayed there
+                in brackets behind the score and an optional IRM code, as in "17 DPI [+1.5]". Clearing the corresponding field
+                in the editing popup dialog removes the incremental scoring offset, just like clearing the IRM code drop-down
+                or the absolute score correction removes the values there, respectively.</li>
           </ul>
           <h2 class="articleSubheadline">June 2023</h2>
           <ul class="bulletList">

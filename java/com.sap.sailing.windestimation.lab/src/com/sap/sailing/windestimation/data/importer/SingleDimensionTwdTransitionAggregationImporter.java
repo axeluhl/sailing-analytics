@@ -70,7 +70,7 @@ public class SingleDimensionTwdTransitionAggregationImporter {
             aggregates.add(aggregate);
             totalValuesCount += entries.size();
         }
-        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates  for dimension " + dimensionType);
+        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates for dimension " + dimensionType);
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager aggregatedDurationBasedTwdTransitionPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 dimensionType);
         aggregatedDurationBasedTwdTransitionPersistenceManager.dropCollection();

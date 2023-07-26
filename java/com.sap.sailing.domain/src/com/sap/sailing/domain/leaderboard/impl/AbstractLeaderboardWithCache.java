@@ -665,6 +665,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         if (fillTotalPointsUncorrected) {
             entryDTO.totalPointsUncorrected = entry.getTotalPointsUncorrected();
         }
+        entryDTO.incrementalScoreCorrectionInPoints = entry.getIncrementalScoreCorrectionInPoints();
         entryDTO.totalPointsCorrected = entry.isTotalPointsCorrected();
         entryDTO.netPoints = entry.getNetPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
