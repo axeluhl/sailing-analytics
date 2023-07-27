@@ -139,7 +139,9 @@ public class SimpleModelsTrainingPart1 {
             if (aggregate.getZeroMeanStd() >= previousZeroMeanSigma) {
                 previousZeroMeanSigma = aggregate.getZeroMeanStd();
             } else {
-                logger.info("Removing aggregate for dimension value "+aggregate.getDimensionValue()+" (dimension "+dimensionType.name()+") to achieve monotonic growth");
+                logger.info("Removing aggregate for dimension value "+aggregate.getDimensionValue()+" (dimension "+dimensionType.name()+
+                        ") to achieve monotonic growth. The previous zeroMeanSigma value was "+previousZeroMeanSigma+
+                        "; the aggregate for "+aggregate.getDimensionValue()+" has "+aggregate.getZeroMeanStd());
                 persistenceManager.remove(aggregate);
             }
         }
