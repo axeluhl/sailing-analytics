@@ -37,13 +37,17 @@ public final class DistanceBasedTwdTransitionRegressorModelContext
      * Input value intervals with corresponding model configurations for the distance dimension which is treated in
      * meters. For each enum element, a separate model will be trained with polynomial degree and bias as specified by
      * the enum element. Feel free to add/delete/modify enum elements as it is desired. The model training and discovery
-     * will still work. However, make sure that the specified intervals do not include holes between its transitions.
+     * will still work. However, make sure that the specified intervals do not include holes between its transitions.<p>
+     * 
+     * Should you make changes here, also keep in mind that test cases and their test resources contains model files
+     * that must match these ranges. See {@code IncrementalMstHmmWindEstimationForTrackedRaceTest.modelFilesNames} for
+     * details.
      * 
      * @author Vladislav Chumak (D069712)
      *
      */
     public enum DistanceValueRange {
-        BEGINNING(0, 10, 1, false), MIDDLE1(10, 912, 1, true), MIDDLE2(912, 1368, 1, true), REMAINDER(1368,
+        BEGINNING(0, 10, 1, false), MIDDLE1(10, 912, 1, true), MIDDLE2(912, 20000, 1, true), REMAINDER(20000,
                 SupportedDimensionValueRange.MAX_VALUE, 1, true);
 
         private final SupportedDimensionValueRange supportedDimensionValueRange;
@@ -77,7 +81,5 @@ public final class DistanceBasedTwdTransitionRegressorModelContext
         public SupportedDimensionValueRange getSupportedDimensionValueRange() {
             return supportedDimensionValueRange;
         }
-
     }
-
 }
