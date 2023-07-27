@@ -99,7 +99,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
                 /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
-                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
+                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false,
+                /* defaultForTailLengthInMilliseconds */ 1l);
         settings = SERIALIZER.deserializeFromCurrentLocation(new EmbeddedMapAndWindChartSettings());
         RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false);
         Set<HelpLineTypes> helpLineTypes = new HashSet<>();
@@ -134,8 +135,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                 } else {
                     getSailingService().getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                         @Override
-                        public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
-                            createEmbeddedMap(selectedRaceIdentifier, result, raceboardPerspectiveSettings, raceMapSettings, raceDTOProxy);
+                        public void onSuccess(Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
+                            createEmbeddedMap(selectedRaceIdentifier, competitorsAndTheirBoats, raceboardPerspectiveSettings, raceMapSettings, raceDTOProxy);
                         }
                         
                         @Override
