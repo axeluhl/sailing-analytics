@@ -52,6 +52,8 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 import com.sap.sailing.windestimation.model.store.ClassPathReadOnlyModelStoreImpl;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
@@ -74,6 +76,16 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
 
     private static final double PERCENT_QUANTILE = 0.8;
 
+    /**
+     * These model file names must match up with the boundaries defined in the {@link DistanceValueRange} and {@link DurationValueRange}
+     * enumeration types. The files themselves are obtained by executing the training runs, particularly the launch configurations
+     * {@code AggregatedDurationBasedTwdTransitionImporter} and {@code AggregatedDistanceBasedTwdTransitionImporter} which, when provided
+     * with the argument {@code ../com.sap.sailing.windestimation.test/resources/trained_wind_estimation_models} will store the serialized
+     * versions of the wind regressor models there, using the boundaries as defined in the two enumeration types.<p>
+     * 
+     * Failing to update these files and their names after making changes to either of the enumeration types will lead to exceptions
+     * during test runs.
+     */
     public static final String[] modelFilesNames = {
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom0.0To10.0.clf",
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom10.0To912.0.clf",
