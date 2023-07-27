@@ -116,16 +116,12 @@ public class SimpleModelsTrainingPart1 {
         final boolean showCharts = args.length > 4 && Boolean.valueOf(args[4]);
         if (showCharts) {
             AggregatedDurationDimensionPlot.main(args);
-            AggregatedDistanceDimensionPlot.main(args);
-        }
-        enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DURATION);
-        enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DISTANCE);
-        // The following code would open pop-up windows that display charts of original and "cleansed" TWD regressions:
-        if (showCharts) {
-            AggregatedDurationDimensionPlot.main(args);
             showInfoAboutIntervalAdjustments(DurationBasedTwdTransitionRegressorModelContext.class, DurationValueRange.class);
             AggregatedDistanceDimensionPlot.main(args);
             showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class, DistanceValueRange.class);
+        } else {
+            enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DURATION);
+            enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DISTANCE);
         }
         DurationBasedTwdTransitionStdRegressorTrainer.train(modelStore);
         DistanceBasedTwdTransitionStdRegressorTrainer.train(modelStore);
