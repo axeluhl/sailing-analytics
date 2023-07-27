@@ -22,7 +22,7 @@ before:
 after:  
 `TXT sapsailing.com "v=spf1 mx ip4:54.229.94.254 include:amazonses.com include:mail.zendesk.com include:servers.mcsv.net -all"`
 
-There is a user created in WorkMail, ``support@sapsailing.com`` (simple username ``support``). For this user we created a redirect for all incoming emails, using the [webmail access](https://sapsailing.awsapps.com/mail) and following the instructions provided here [Working with email rules](https://docs.aws.amazon.com/workmail/latest/userguide/email-rules.html).
+There is a user created in WorkMail, ``support@sapsailing.com`` (simple username ``support``). For this user we created a redirect for all incoming emails, using the [webmail access](https://sapsailing.awsapps.com/mail) and following the instructions provided here [Working with email rules](https://docs.aws.amazon.com/workmail/latest/userguide/email-rules.html). Note that in order to modify an existing rule you have to double-click it. This will open the edit dialog. After confirming your changes with two OK buttons you still have to click on the "Save Changes" button at the top to make your changes take effect.
 
 #### Create new user or change existing
 Simply follow the instructions here: [Managing user accounts](https://docs.aws.amazon.com/workmail/latest/adminguide/manage-users.html).
