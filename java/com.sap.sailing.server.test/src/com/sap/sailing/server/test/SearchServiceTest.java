@@ -353,16 +353,18 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server
                 .search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Buhl" })));
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
+        final CourseAreaJsonSerializer courseAreaSerializer = new CourseAreaJsonSerializer();
         LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(
-                new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new EventBaseJsonSerializer(new VenueJsonSerializer(courseAreaSerializer),
                         leaderboardGroupBaseJsonSerializer, new TrackingConnectorInfoJsonSerializer()),
-                leaderboardGroupBaseJsonSerializer);
+                leaderboardGroupBaseJsonSerializer, courseAreaSerializer);
         LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+        final CourseAreaJsonDeserializer courseAreaJsonDeserializer = new CourseAreaJsonDeserializer(DomainFactory.INSTANCE);
         LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
                 new EventBaseJsonDeserializer(
-                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                        new VenueJsonDeserializer(courseAreaJsonDeserializer),
                         leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
-                leaderboardGroupBaseJsonDeserializer);
+                leaderboardGroupBaseJsonDeserializer, courseAreaJsonDeserializer);
         final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();
         LeaderboardSearchResultBase deserialized = deserializer.deserialize(serializer.serialize(expected));
         assertEquals("Pfingstbusch (470)", deserialized.getRegattaName());
@@ -371,6 +373,7 @@ public class SearchServiceTest {
         assertEquals(expected.getEvents().iterator().next().getStartDate(), deserialized.getEvents().iterator().next().getStartDate());
         assertEquals(expected.getEvents().iterator().next().getEndDate(), deserialized.getEvents().iterator().next().getEndDate());
         assertEquals(expected.getEvents().iterator().next().getVenue().getName(), deserialized.getEvents().iterator().next().getVenue().getName());
+        assertEquals(Util.asNewSet(expected.getLeaderboard().getCourseAreas()), Util.asNewSet(deserialized.getLeaderboard().getCourseAreas()));
         Iterator<LeaderboardGroup> expectedLGs = expected.getLeaderboardGroups().iterator();
         Iterator<? extends LeaderboardGroupBase> deserializedLGs = deserialized.getLeaderboardGroups().iterator();
         while (expectedLGs.hasNext()) {

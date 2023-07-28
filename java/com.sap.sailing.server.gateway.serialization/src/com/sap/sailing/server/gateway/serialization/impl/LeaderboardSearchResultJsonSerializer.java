@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
@@ -20,15 +21,20 @@ public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<Lea
     public static final String FIELD_LEADERBOARD_NAME = "name";
     public static final String FIELD_LEADERBOARD_DISPLAY_NAME = "displayName";
     public static final String FIELD_LEADERBOARD_BOAT_CLASS_NAME = "boatClassName";
+    public static final String FIELD_LEADERBOARD_COURSE_AREAS = "courseAreas";
     public static final String FIELD_LEADERBOARD_REGATTA_NAME = "regattaName";
     public static final String FIELD_LEADERBOARD_IN_LEADERBOARD_GROUPS = "inLeaderboardGroups";
     
     private final JsonSerializer<EventBase> eventBaseJsonSerializer;
     private final JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer;
+    private final JsonSerializer<CourseArea> courseAreaJsonSerializer;
 
-    public LeaderboardSearchResultJsonSerializer(JsonSerializer<EventBase> eventBaseJsonSerializer, JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer) {
+    public LeaderboardSearchResultJsonSerializer(JsonSerializer<EventBase> eventBaseJsonSerializer,
+            JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer,
+            JsonSerializer<CourseArea> courseAreaJsonSerializer) {
         this.eventBaseJsonSerializer = eventBaseJsonSerializer;
         this.leaderboardGroupBaseJsonSerializer = leaderboardGroupBaseJsonSerializer;
+        this.courseAreaJsonSerializer = courseAreaJsonSerializer;
     }
 
     @Override
@@ -55,6 +61,12 @@ public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<Lea
         }
         leaderboardJson.put(FIELD_LEADERBOARD_BOAT_CLASS_NAME, boatClassName);
         leaderboardJson.put(FIELD_LEADERBOARD_REGATTA_NAME, regatta == null ? null : regatta.getName());
+        final JSONArray courseAreasJson = new JSONArray();
+        leaderboardJson.put(FIELD_LEADERBOARD_COURSE_AREAS, courseAreasJson);
+        for (final CourseArea courseArea : leaderboard.getCourseAreas()) {
+            final JSONObject courseAreaJson = courseAreaJsonSerializer.serialize(courseArea);
+            courseAreasJson.add(courseAreaJson);
+        }
         JSONArray leaderboardGroupsJson = new JSONArray();
         leaderboardJson.put(FIELD_LEADERBOARD_IN_LEADERBOARD_GROUPS, leaderboardGroupsJson);
         for (LeaderboardGroup lg : leaderboardSearchResult.getLeaderboardGroups()) {

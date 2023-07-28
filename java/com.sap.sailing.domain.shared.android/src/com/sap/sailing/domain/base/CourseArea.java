@@ -9,7 +9,10 @@ import com.sap.sse.common.NamedWithID;
 
 /**
  * A named area in a sailing {@link Venue} where races take place. Usually, the areas carry names according to the NATO
- * alphabet, such as "Alpha", "Bravo" or "Charly".
+ * alphabet, such as "Alpha", "Bravo" or "Charly".<p>
+ * 
+ * Equality and with it the {@link #hashCode()} are defined based on the fields, so in particular the {@link #getId() ID},
+ * the {@link #getName() name}, {@link #getCenterPosition() center position} and {@link #getRadius() radius}.
  * 
  * @author Axel Uhl (D043530)
  *

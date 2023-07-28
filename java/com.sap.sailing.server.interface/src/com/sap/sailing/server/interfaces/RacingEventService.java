@@ -167,6 +167,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * tracked race to appear.
      */
     DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
+    
+    /**
+     * Traverses through the event's {@link Event#getLeaderboardGroups() leaderboard groups} and from there on to the
+     * {@link Leaderboard}s and finds }
+     * 
+     * @param at
+     *            the time point that must be between a {@link TrackedRace}'s {@link TrackedRace#getStartOfTracking()
+     *            start of tracking} and {@link TrackedRace#getEndOfTracking() end of tracking} for the tracked race to
+     *            be returned
+     */
+    Iterable<TrackedRace> getAllTrackedRacesForEventTrackingAt(Event event, TimePoint at);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.

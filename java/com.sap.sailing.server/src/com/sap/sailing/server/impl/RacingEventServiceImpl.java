@@ -4511,11 +4511,12 @@ Replicator {
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+                    final CourseAreaJsonDeserializer courseAreaDeserializer = new CourseAreaJsonDeserializer(DomainFactory.INSTANCE);
                     LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
                             new EventBaseJsonDeserializer(
-                                    new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                                    new VenueJsonDeserializer(courseAreaDeserializer),
                                     leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
-                            leaderboardGroupBaseJsonDeserializer);
+                            leaderboardGroupBaseJsonDeserializer, courseAreaDeserializer);
                     result = new ResultImpl<LeaderboardSearchResultBase>(query,
                             new LeaderboardSearchResultBaseRanker<LeaderboardSearchResultBase>());
                     JSONArray hitsAsJsonArray = (JSONArray) eventsAsObject;
@@ -5371,4 +5372,17 @@ Replicator {
                 racesInCollision.substring(0, Math.max(0, racesInCollision.length()-2)));
     }
 
+    @Override
+    public Iterable<TrackedRace> getAllTrackedRacesForEventTrackingAt(Event event, TimePoint at) {
+        final Set<TrackedRace> result = new HashSet<>();
+        for (final Leaderboard leaderboard : event.getLeaderboards()) {
+            for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                if (trackedRace.getStartOfTracking() != null && !trackedRace.getStartOfTracking().after(at)
+                        && (trackedRace.getEndOfTracking() == null || !trackedRace.getEndOfTracking().before(at))) {
+                    result.add(trackedRace);
+                }
+            }
+        }
+        return result;
+    }
 }
