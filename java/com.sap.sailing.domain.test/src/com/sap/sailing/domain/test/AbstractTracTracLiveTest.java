@@ -62,7 +62,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
      */
     @Rule
     public TestRule getTimeoutRule() {
-        return Timeout.millis(3 * 60 * 1000);
+        return Timeout.millis(5 * 60 * 1000);
     }
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
