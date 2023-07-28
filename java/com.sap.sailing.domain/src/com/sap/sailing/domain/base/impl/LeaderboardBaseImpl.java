@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -12,13 +11,11 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
     private static final long serialVersionUID = -5332972141344617372L;
     private final String name;
     private final String displayName;
-    private final Iterable<CourseArea> courseAreas;
     
-    public LeaderboardBaseImpl(String name, String displayName, Iterable<CourseArea> courseAreas) {
+    public LeaderboardBaseImpl(String name, String displayName) {
         super();
         this.name = name;
         this.displayName = displayName;
-        this.courseAreas = courseAreas;
     }
 
     @Override
@@ -31,11 +28,6 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
         return displayName;
     }
 
-    @Override
-    public Iterable<CourseArea> getCourseAreas() {
-        return courseAreas;
-    }
-    
     @Override
     public void addLeaderboardChangeListener(LeaderboardChangeListener listener) {
     }

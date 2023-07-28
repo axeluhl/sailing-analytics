@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -692,6 +693,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
             Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider);
 
     TimePoint getNowMinusDelay();
+
+    /**
+     * Gets the course areas that the races of this leaderboard are expected to be run on. This can, e.g., be used to
+     * implement a filter when retrieving leaderboards from an event.
+     *
+     * @return the {@link CourseArea} objects on which races of this leaderboard may run; always valid, never
+     *         {@code null}, but may be empty
+     */
+    Iterable<CourseArea> getCourseAreas();
 
     /**
      * Must be called when the leaderboard is removed from its server, becoming inaccessible. This will give the leaderboard

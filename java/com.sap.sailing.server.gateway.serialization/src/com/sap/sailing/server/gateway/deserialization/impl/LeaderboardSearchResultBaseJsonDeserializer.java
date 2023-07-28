@@ -8,7 +8,6 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
@@ -23,14 +22,11 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
     
     private final LeaderboardGroupBaseJsonDeserializer leaderboardGroupDeserializer;
 
-    private final CourseAreaJsonDeserializer courseAreaJsonDeserializer;
-
     public LeaderboardSearchResultBaseJsonDeserializer(EventBaseJsonDeserializer eventDeserializer,
-            LeaderboardGroupBaseJsonDeserializer leaderboardGroupDeserializer, CourseAreaJsonDeserializer courseAreaDeserializer) {
+            LeaderboardGroupBaseJsonDeserializer leaderboardGroupDeserializer) {
         super();
         this.eventDeserializer = eventDeserializer;
         this.leaderboardGroupDeserializer = leaderboardGroupDeserializer;
-        this.courseAreaJsonDeserializer = courseAreaDeserializer;
     }
 
     @Override
@@ -54,11 +50,6 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
         final JSONObject leaderboardJson = Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD);
         final String leaderboardName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_NAME);
         final String leaderboardDisplayName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_DISPLAY_NAME);
-        final JSONArray courseAreasJson = (JSONArray) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_COURSE_AREAS);
-        final List<CourseArea> courseAreas = new ArrayList<>();
-        for (final Object courseAreaJson : courseAreasJson) {
-            courseAreas.add(courseAreaJsonDeserializer.deserialize((JSONObject) courseAreaJson));
-        }
         final String boatClassName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_BOAT_CLASS_NAME);
         final String regattaName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_REGATTA_NAME);
         final JSONArray leaderboardGroupsJson = Helpers.getNestedArraySafe(leaderboardJson, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_IN_LEADERBOARD_GROUPS);
@@ -66,7 +57,7 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
         for (final Object leaderboardGroupJson : leaderboardGroupsJson) {
             leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) leaderboardGroupJson));
         }
-        return new LeaderboardSearchResultBaseImpl(new LeaderboardBaseImpl(leaderboardName, leaderboardDisplayName, courseAreas),
+        return new LeaderboardSearchResultBaseImpl(new LeaderboardBaseImpl(leaderboardName, leaderboardDisplayName),
                 regattaName, boatClassName, leaderboardGroups, events);
     }
 

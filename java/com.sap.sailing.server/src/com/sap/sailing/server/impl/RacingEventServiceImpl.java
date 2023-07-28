@@ -4516,7 +4516,7 @@ Replicator {
                             new EventBaseJsonDeserializer(
                                     new VenueJsonDeserializer(courseAreaDeserializer),
                                     leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
-                            leaderboardGroupBaseJsonDeserializer, courseAreaDeserializer);
+                            leaderboardGroupBaseJsonDeserializer);
                     result = new ResultImpl<LeaderboardSearchResultBase>(query,
                             new LeaderboardSearchResultBaseRanker<LeaderboardSearchResultBase>());
                     JSONArray hitsAsJsonArray = (JSONArray) eventsAsObject;
