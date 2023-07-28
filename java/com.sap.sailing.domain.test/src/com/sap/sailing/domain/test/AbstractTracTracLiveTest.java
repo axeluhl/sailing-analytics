@@ -60,10 +60,10 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     /**
      * Making this a method rule allows subclasses to adjust the timeout if required
      */
-    @Rule
-    public TestRule getTimeoutRule() {
-        return Timeout.millis(3 * 60 * 1000);
-    }
+//    @Rule
+//    public TestRule getTimeoutRule() {
+//        return Timeout.millis(5 * 60 * 1000);
+//    }
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();

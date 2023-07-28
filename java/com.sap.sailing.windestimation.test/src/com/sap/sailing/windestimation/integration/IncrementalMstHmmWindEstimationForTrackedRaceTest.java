@@ -89,13 +89,20 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
     public static final String[] modelFilesNames = {
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom0.0To10.0.clf",
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom10.0To912.0.clf",
-            "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom1368.0ToMaximum.clf",
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom912.0To1368.0.clf",
+            "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom1368.0ToMaximum.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom0.0To1.0.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom1.0To140.0.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom140.0To5394.0.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom5394.0ToMaximum.clf",
             "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Basic-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Marks-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Polars-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-PolarsMarks-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-PolarsScaledSpeed-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-PolarsScaledSpeedMarks-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-ScaledSpeed-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-ScaledSpeedMarks-5O5.clf",
             "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Basic-All.clf" };
 
     protected final SimpleDateFormat dateFormat;
@@ -223,14 +230,16 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 foundCount++;
             }
         }
-        assertTrue((double) foundCount / (double) estimatedWindFixes.size() > PERCENT_QUANTILE);
+        assertTrue("Expected ratio of matching fixes to be at least "+PERCENT_QUANTILE+" but was only "+(double) foundCount / (double) estimatedWindFixes.size(),
+                (double) foundCount / (double) estimatedWindFixes.size() > PERCENT_QUANTILE);
         foundCount = 0;
         for (Wind wind : targetWindFixes) {
             if (findWithinTolerance(estimatedWindFixesMap, new Pair<>(wind.getPosition(), wind.getTimePoint())) != null) {
                 foundCount++;
             }
         }
-        assertTrue((double) foundCount / (double) targetWindFixes.size() > PERCENT_QUANTILE);
+        assertTrue("Expected ratio of matching fixes to be at least "+PERCENT_QUANTILE+" but was only "+(double) foundCount / (double) estimatedWindFixes.size(),
+                (double) foundCount / (double) targetWindFixes.size() > PERCENT_QUANTILE);
     }
 
     /**
