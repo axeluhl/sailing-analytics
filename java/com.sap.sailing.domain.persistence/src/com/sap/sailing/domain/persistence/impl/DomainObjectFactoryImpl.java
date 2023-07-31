@@ -206,6 +206,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -1292,9 +1293,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private CourseArea loadCourseArea(Document courseAreaDBObject) {
-        String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
-        UUID id = (UUID) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
-        return baseDomainFactory.getOrCreateCourseArea(id, name);
+        final String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
+        final UUID id = (UUID) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
+        final CourseArea result = baseDomainFactory.getOrCreateCourseArea(id, name);
+        final Document centerPosition = (Document) courseAreaDBObject.get(FieldNames.COURSE_AREA_CENTER_POSITION.name());
+        if (centerPosition != null) {
+            result.setCenterPosition(loadPosition(centerPosition));
+        }
+        final Number radius = (Number) courseAreaDBObject.get(FieldNames.COURSE_AREA_RADIUS_IN_METERS.name());
+        if (radius != null) {
+            result.setRadius(new MeterDistance(radius.doubleValue()));
+        }
+        return result;
     }
 
     @Override

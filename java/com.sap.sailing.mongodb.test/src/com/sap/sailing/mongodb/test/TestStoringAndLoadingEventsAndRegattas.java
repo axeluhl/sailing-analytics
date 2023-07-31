@@ -51,6 +51,7 @@ import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.EventImpl;
@@ -219,12 +220,17 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreSimpleEventAndRegattaWithCourseArea() {
         final String eventName = "Event Name";
         final String venueName = "Venue Name";
-        final String courseAreaName = "Alpha";
         final Venue venue = new VenueImpl(venueName);
-        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
-        courseArea.setCenterPosition(new DegreePosition(49, 8));
-        courseArea.setRadius(new NauticalMileDistance(2.5));
-        venue.addCourseArea(courseArea);
+        final String courseAreaAlphaName = "Alpha";
+        final CourseArea courseAreaAlpha = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaAlphaName);
+        final DegreePosition alphaCenter = new DegreePosition(49, 8);
+        courseAreaAlpha.setCenterPosition(alphaCenter);
+        final NauticalMileDistance alphaRadius = new NauticalMileDistance(2.5);
+        courseAreaAlpha.setRadius(alphaRadius);
+        venue.addCourseArea(courseAreaAlpha);
+        final String courseAreaBravoName = "Bravo";
+        final CourseArea courseAreaBravo = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaBravoName);
+        venue.addCourseArea(courseAreaBravo);
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
         mof.storeEvent(event);
@@ -232,16 +238,21 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         Regatta regatta = createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, regattaStartDate, regattaEndDate, /* persistent */ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), courseArea, OneDesignRankingMetric::new);
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), courseAreaAlpha, OneDesignRankingMetric::new);
         mof.storeRegatta(regatta);
-        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), new DomainFactoryImpl(/* raceLogResolver */ null));
+        final Event loadedEvent = dof.loadEvent(eventName); // load event first to establish course areas in DomainFactory
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertNotNull(loadedRegatta);
         assertEquals(regatta.getName(), loadedRegatta.getName());
         assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));
         assertFalse(Util.isEmpty(loadedRegatta.getCourseAreas()));
-        assertTrue(Util.contains(Util.map(loadedRegatta.getCourseAreas(), CourseArea::getId), courseArea.getId()));
-        assertTrue(Util.contains(Util.map(loadedRegatta.getCourseAreas(), CourseArea::getName), courseArea.getName()));
+        assertTrue(Util.contains(Util.map(loadedRegatta.getCourseAreas(), CourseArea::getId), courseAreaAlpha.getId()));
+        assertTrue(Util.contains(Util.map(loadedRegatta.getCourseAreas(), CourseArea::getName), courseAreaAlpha.getName()));
+        assertEquals(alphaCenter, Util.first(Util.filter(loadedRegatta.getCourseAreas(), courseArea->courseArea.getName().equals(courseAreaAlphaName))).getCenterPosition());
+        assertEquals(alphaRadius, Util.first(Util.filter(loadedRegatta.getCourseAreas(), courseArea->courseArea.getName().equals(courseAreaAlphaName))).getRadius());
+        assertNull(Util.first(Util.filter(loadedEvent.getVenue().getCourseAreas(), courseArea->courseArea.getName().equals(courseAreaBravoName))).getCenterPosition());
+        assertNull(Util.first(Util.filter(loadedEvent.getVenue().getCourseAreas(), courseArea->courseArea.getName().equals(courseAreaBravoName))).getRadius());
         assertEquals(loadedRegatta.getStartDate(), regattaStartDate);
         assertEquals(loadedRegatta.getEndDate(), regattaEndDate);
         assertTrue(loadedRegatta.getCompetitorRegistrationType() == CompetitorRegistrationType.CLOSED);

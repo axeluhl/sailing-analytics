@@ -149,6 +149,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJ
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Speed;
@@ -721,7 +722,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 courseAreaCenterPosition = null;
             }
             dbCourseArea.put(FieldNames.COURSE_AREA_CENTER_POSITION.name(), courseAreaCenterPosition);
-            
+            final Distance courseAreaRadius = courseArea.getRadius();
+            if (courseAreaRadius != null) {
+                dbCourseArea.put(FieldNames.COURSE_AREA_RADIUS_IN_METERS.name(), courseAreaRadius.getMeters());
+            }
         }
         return result;
     }
