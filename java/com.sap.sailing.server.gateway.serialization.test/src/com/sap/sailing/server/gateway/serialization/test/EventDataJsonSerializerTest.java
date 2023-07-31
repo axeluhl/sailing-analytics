@@ -18,10 +18,13 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -86,6 +89,12 @@ public class EventDataJsonSerializerTest {
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
+        final CourseArea alpha = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Alpha");
+        alpha.setCenterPosition(new DegreePosition(49, 8));
+        alpha.setRadius(new NauticalMileDistance(2));
+        expectedVenue.addCourseArea(alpha);
+        final CourseArea bravo= DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Bravo");
+        expectedVenue.addCourseArea(bravo);
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         when(event.getImages()).thenReturn(Collections.<ImageDescriptor>singleton(expectedLogoImageDescriptor));
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
@@ -153,6 +162,17 @@ public class EventDataJsonSerializerTest {
         JSONObject result = serializer.serialize(event);
         EventBase event = deserializer.deserialize(result);
         assertEquals(expectedVenue.getName(), event.getVenue().getName());
+        final Map<UUID, CourseArea> expectedCourseAreasByUUID = new HashMap<>();
+        for (final CourseArea expectedCourseArea : expectedVenue.getCourseAreas()) {
+            expectedCourseAreasByUUID.put(expectedCourseArea.getId(), expectedCourseArea);
+        }
+        assertEquals(Util.size(expectedVenue.getCourseAreas()), Util.size(event.getVenue().getCourseAreas()));
+        for (final CourseArea courseArea : event.getVenue().getCourseAreas()) {
+            final CourseArea expectedCourseArea = expectedCourseAreasByUUID.get(courseArea.getId());
+            assertEquals(expectedCourseArea.getName(), courseArea.getName());
+            assertEquals(expectedCourseArea.getCenterPosition(), courseArea.getCenterPosition());
+            assertEquals(expectedCourseArea.getRadius(), courseArea.getRadius());
+        }
     }
 
 }

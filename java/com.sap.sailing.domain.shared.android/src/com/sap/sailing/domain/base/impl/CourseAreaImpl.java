@@ -31,10 +31,20 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
     }
 
     @Override
+    public void setCenterPosition(Position centerPosition) {
+        this.centerPosition = centerPosition;
+    }
+
+    @Override
     public Distance getRadius() {
         return radius;
     }
 
+    @Override
+    public void setRadius(Distance radius) {
+        this.radius = radius;
+    }
+    
     @Override
     public CourseArea resolve(SharedDomainFactory<?> domainFactory) {
         return domainFactory.getOrCreateCourseArea(id, getName());
