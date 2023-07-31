@@ -127,8 +127,6 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                     // check if old subscription is covered by new one
                     if (Util.containsAll(newSubscribedPlan.getPlanCategories(), oldSubscribedPlan.getPlanCategories())) {
                         logger.info("An old subscription is totally covered by new one. We can cancel the old one: " + oldSubscribedPlan.toString());
-                        logger.fine("Old categories: " + oldSubscribedPlan.getPlanCategories());
-                        logger.fine("new cagegories: " + newSubscribedPlan.getPlanCategories());
                         cancelSubscription(oldSubscribedPlan.getId());
                     }
                 }
