@@ -165,7 +165,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         infoText.getElement().getStyle().setMargin(1, Unit.EM);
         vp.add(infoText);
         // TODO: Styling of error page slightly differs from the other usages of SAPSailingHeaderWithAuthentication
-        // because of the root font-size. Adjustments are postponed because they might affect the hole page content.
+        // because of the root font-size. Adjustments are postponed because they might affect the whole page content.
     }
 
     private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier,
