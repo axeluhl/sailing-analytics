@@ -1593,14 +1593,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         backgroundExecutor.shutdown();
         final Set<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         final DNSCache dnsCache = getNewDNSCache();
-        for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
-            final String serverName = serverNameAndMaster.getKey();
-            final ProcessT master = serverNameAndMaster.getValue();
-            final Set<ProcessT> replicas = replicasByServerName.get(serverName);
-            final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = getApplicationReplicaSet(
-                    serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
-                    allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
-            result.add(replicaSet);
+        synchronized (mastersByServerName) {
+            for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
+                final String serverName = serverNameAndMaster.getKey();
+                final ProcessT master = serverNameAndMaster.getValue();
+                final Set<ProcessT> replicas = replicasByServerName.get(serverName);
+                final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = getApplicationReplicaSet(
+                        serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
+                        allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
+                result.add(replicaSet);
+            }
         }
         return result;
     }
