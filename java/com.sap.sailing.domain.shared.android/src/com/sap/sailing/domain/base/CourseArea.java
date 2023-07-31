@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Positioned;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.NamedWithID;
@@ -14,8 +15,13 @@ import com.sap.sse.common.NamedWithID;
  * @author Axel Uhl (D043530)
  *
  */
-public interface CourseArea extends NamedWithID, IsManagedByCache<SharedDomainFactory<?>> {
+public interface CourseArea extends Positioned, NamedWithID, IsManagedByCache<SharedDomainFactory<?>> {
     UUID getId();
+    
+    @Override
+    default Position getPosition() {
+        return getCenterPosition();
+    }
     
     /**
      * An optional position specifying the center of a course area assumed to be of circular shape.

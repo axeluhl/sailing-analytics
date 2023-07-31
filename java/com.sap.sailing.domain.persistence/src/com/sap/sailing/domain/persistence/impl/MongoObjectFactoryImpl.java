@@ -713,6 +713,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             courseAreaList.add(dbCourseArea);
             dbCourseArea.put(FieldNames.COURSE_AREA_NAME.name(), courseArea.getName());
             dbCourseArea.put(FieldNames.COURSE_AREA_ID.name(), courseArea.getId());
+            final Document courseAreaCenterPosition;
+            if (courseArea.getCenterPosition() != null) {
+                courseAreaCenterPosition = new Document();
+                storePositioned(courseArea, courseAreaCenterPosition);
+            } else {
+                courseAreaCenterPosition = null;
+            }
+            dbCourseArea.put(FieldNames.COURSE_AREA_CENTER_POSITION.name(), courseAreaCenterPosition);
+            
         }
         return result;
     }

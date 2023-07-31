@@ -67,6 +67,8 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -220,6 +222,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String courseAreaName = "Alpha";
         final Venue venue = new VenueImpl(venueName);
         CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
+        courseArea.setCenterPosition(new DegreePosition(49, 8));
+        courseArea.setRadius(new NauticalMileDistance(2.5));
         venue.addCourseArea(courseArea);
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
