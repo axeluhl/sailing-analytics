@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.settings.client.settingtypes.DistanceSetting;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -34,6 +35,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     public static final String PARAM_TAIL_LENGTH_IN_MILLISECONDS = "tailLengthInMilliseconds";
     
     public static final Distance DEFAULT_BUOY_ZONE_RADIUS = new MeterDistance(15);
+    
+    private static final long DEFAULT_TAIL_LENGTH_IN_MILLISECONDS = Duration.ONE_SECOND.times(100l).asMillis();
 
     private BooleanSetting showSatelliteLayer;
 
@@ -101,7 +104,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         zoomSettings = new RaceMapZoomSettings("zoomSettings", this);
         transparentHoverlines = new BooleanSetting("transparentHoverlines", this, false);
         hoverlineStrokeWeight = new IntegerSetting("hoverlineStrokeWeight", this, 15);
-        tailLengthInMilliseconds = new LongSetting("tailLengthInMilliseconds", this, 100000l);
+        tailLengthInMilliseconds = new LongSetting("tailLengthInMilliseconds", this, DEFAULT_TAIL_LENGTH_IN_MILLISECONDS);
         showOnlySelectedCompetitors = new BooleanSetting("showOnlySelectedCompetitors", this, false);
         showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
         maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
@@ -167,7 +170,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 helpLineSettings,
                 /* transparentHoverlines as discussed with Stefan on 2015-12-08 */ false,
                 /* hoverlineStrokeWeight as discussed with Stefan on 2015-12-08 */ 15,
-                tailLengthInMilliseconds == null ? 100000l : tailLengthInMilliseconds,
+                tailLengthInMilliseconds == null ? DEFAULT_TAIL_LENGTH_IN_MILLISECONDS : tailLengthInMilliseconds,
                 /* windUp */ windUp,
                 /* buoyZoneRadius */ buoyZoneRadius,
                 /* showOnlySelectedCompetitors */ false,
