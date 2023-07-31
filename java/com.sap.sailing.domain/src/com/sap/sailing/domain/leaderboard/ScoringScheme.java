@@ -90,7 +90,6 @@ public interface ScoringScheme extends Serializable {
      *            may be required in case a "penalty" such as a redress needs to inspect the scores of other race
      *            columns as well; implementations need to take great care not to cause endless recursions by
      *            naively asking the leaderboard for scores which would recurse into this method
-     * @param uncorrectedScoreProvider TODO
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
             Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,

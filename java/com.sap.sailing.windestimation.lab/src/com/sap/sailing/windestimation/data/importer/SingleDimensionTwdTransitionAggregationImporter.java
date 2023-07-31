@@ -44,10 +44,14 @@ public class SingleDimensionTwdTransitionAggregationImporter {
                 .getIteratorSorted(); iterator.hasNext();) {
             SingleDimensionBasedTwdTransition entry = iterator.next();
             while (entry.getDimensionValue() > finalBucketThreshold) {
+                LoggingUtil.logInfo("Closing aggrgate for value "+currentBucketThreshold+
+                        " because we arrived at a value outside the bucket: "+entry.getDimensionValue()+" > "+finalBucketThreshold);
                 if (entries.size() >= MIN_NUMBER_OF_VALUES_PER_BUCKET) {
                     AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(currentBucketThreshold,
                             entries);
                     aggregates.add(aggregate);
+                } else {
+                    LoggingUtil.logInfo("Not writing aggregate because it has too few samples: "+entries.size()+" < "+MIN_NUMBER_OF_VALUES_PER_BUCKET);
                 }
                 currentBucketThreshold = nextBucketThreshold;
                 nextBucketThreshold = thresholdCalculator.getNextThresholdValue(nextBucketThreshold);
@@ -60,7 +64,7 @@ public class SingleDimensionTwdTransitionAggregationImporter {
                 twdChange = Math.abs(twdChange);
             }
             entries.add(twdChange);
-            if (entries.size() % 10000 == 0) {
+            if (entries.size() % 100000 == 0) {
                 LoggingUtil.logInfo(
                         (entries.size() + totalValuesCount) + " Entries aggregated for dimension " + dimensionType);
             }
@@ -70,7 +74,7 @@ public class SingleDimensionTwdTransitionAggregationImporter {
             aggregates.add(aggregate);
             totalValuesCount += entries.size();
         }
-        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates  for dimension " + dimensionType);
+        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates for dimension " + dimensionType);
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager aggregatedDurationBasedTwdTransitionPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 dimensionType);
         aggregatedDurationBasedTwdTransitionPersistenceManager.dropCollection();

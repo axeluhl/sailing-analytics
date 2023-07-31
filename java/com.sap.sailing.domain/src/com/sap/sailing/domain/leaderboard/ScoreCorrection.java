@@ -39,8 +39,12 @@ public interface ScoreCorrection extends Serializable {
         Double getUncorrectedScore();
 
         MaxPointsReason getMaxPointsReason();
+        
+        Double getIncrementalScoreCorrectionInPoints();
 
         boolean isCorrected();
+        
+        boolean isCorrectedIncrementally();
         
         /**
          * @return the time point for which this result is valid
@@ -102,6 +106,10 @@ public interface ScoreCorrection extends Serializable {
      */
     boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
+    boolean isScoreCorrectedIncrementally(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
+    
+    Double getIncementalScoreCorrectionInPoints(Competitor competitor, RaceColumn raceColumn);
+    
     /**
      * Checks if this score correction object has any score corrections for any competitor valid at any time point for
      * the race column specified by <code>raceInLeaderboard</code>.

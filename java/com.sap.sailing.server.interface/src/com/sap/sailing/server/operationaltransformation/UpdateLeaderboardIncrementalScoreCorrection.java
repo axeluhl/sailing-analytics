@@ -6,17 +6,17 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
 
-public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardScoreCorrectionUpdate {
-    private static final long serialVersionUID = 697705655733594367L;
-    private final Double correctedScore;
+public class UpdateLeaderboardIncrementalScoreCorrection extends AbstractLeaderboardScoreCorrectionUpdate {
+    private static final long serialVersionUID = 9064307077124881657L;
+    private final Double scoreOffsetInPoints;
     
     /**
      * @param timePoint the time point for which to deliver leaderboard results as the result of this operation
      */
-    public UpdateLeaderboardScoreCorrection(String leaderboardName, String columnName, String competitorIdAsString,
-            Double correctedScore, TimePoint timePoint) {
+    public UpdateLeaderboardIncrementalScoreCorrection(String leaderboardName, String columnName, String competitorIdAsString,
+            Double scoreOffsetInPoints, TimePoint timePoint) {
         super(leaderboardName, columnName, competitorIdAsString, timePoint);
-        this.correctedScore = correctedScore;
+        this.scoreOffsetInPoints = scoreOffsetInPoints;
     }
 
     @Override
@@ -31,16 +31,16 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardScoreCo
         return null;
     }
 
+
     @Override
     protected Double updateScoreCorrection(Leaderboard leaderboard, Competitor competitor, RaceColumn raceColumn) {
         final Double newTotalPoints;
-        if (correctedScore == null) {
-            leaderboard.getScoreCorrection().uncorrectScore(competitor, raceColumn);
-            newTotalPoints = leaderboard.getTotalPoints(competitor, raceColumn, getTimePoint());
+        if (scoreOffsetInPoints == null) {
+            leaderboard.getScoreCorrection().uncorrectScoreIncrementally(competitor, raceColumn);
         } else {
-            leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, correctedScore);
-            newTotalPoints = correctedScore;
+            leaderboard.getScoreCorrection().correctScoreIncrementally(competitor, raceColumn, scoreOffsetInPoints);
         }
+        newTotalPoints = leaderboard.getTotalPoints(competitor, raceColumn, getTimePoint());
         return newTotalPoints;
     }
 }

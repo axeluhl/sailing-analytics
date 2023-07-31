@@ -15,6 +15,18 @@
            <li>Bug fix: tracked races connected to more than one leaderboard column at the same time
                will now send their competitor and race status updates to all those column's race logs.
                This in particular fixes the special iQFOil set-up with their marathon races.</li>
+           <li>Added speed in full knots (rounded) as a dimension to the GPS fixes in Data Mining.
+               This can be used, e.g., to filter for outliers such as capsized or towed boats.</li>
+           <li>The invalid result markers (IRMs) <tt>SCP</tt>, <tt>STP</tt>, <tt>DPI</tt>, and <tt>RDG</tt> can now consider
+               optional incremental score corrections which are added to the points determined based on the competitor's rank
+               in the race and the scoring scheme that applied to the race. For example, a <tt>DPI</tt> penalty with <tt>+2.5</tt>
+               points may now be specified which applied during tracking the race. Absolute score corrections will be considered
+               for these IRMs at the end of the race, regardless the incremental score correction. Note that the increments
+               are subject to any column factors being applied; this may contradict an event's rules that may state that certain
+               penalties, such as <tt>STP</tt> are <em>not</em> subject to doubling for a medal race. In such cases, specify half
+               the penalty when editing the increment.</li>
+            <li>
+               Bug fix: It is now possible to subscribe to a plan and set a VAT number if previously subscribed to another plan.</li>
          </ul>
          <h5 class="articleSubheadline">June 2023</h5>
          <ul class="bulletList">

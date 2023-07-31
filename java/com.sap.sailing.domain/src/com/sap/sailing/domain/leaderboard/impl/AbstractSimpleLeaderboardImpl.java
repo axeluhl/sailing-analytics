@@ -101,6 +101,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         private final Callable<Integer> trackedRankProvider;
         private final Double totalPoints;
         private final Callable<Double> totalPointsUncorrectedProvider;
+        private final Double incrementalScoreCorrectionInPoints;
         private final boolean isTotalPointsCorrected;
         private final Double netPoints;
         private final MaxPointsReason maxPointsReason;
@@ -109,12 +110,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
         private EntryImpl(Callable<Integer> trackedRankProvider, Double totalPoints,
                 Callable<Double> totalPointsUncorrectedProvider, boolean isTotalPointsCorrected, Double netPoints,
-                MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
+                MaxPointsReason maxPointsReason, Double incrementalScoreCorrectionInPoints, boolean discarded, Fleet fleet) {
             super();
             this.trackedRankProvider = trackedRankProvider;
             this.totalPoints = totalPoints;
             this.totalPointsUncorrectedProvider = totalPointsUncorrectedProvider;
             this.isTotalPointsCorrected = isTotalPointsCorrected;
+            this.incrementalScoreCorrectionInPoints = incrementalScoreCorrectionInPoints;
             this.netPoints = netPoints;
             this.maxPointsReason = maxPointsReason;
             this.discarded = discarded;
@@ -133,6 +135,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         @Override
         public Double getTotalPoints() {
             return totalPoints;
+        }
+
+        @Override
+        public Double getIncrementalScoreCorrectionInPoints() {
+            return incrementalScoreCorrectionInPoints;
         }
 
         @Override
@@ -678,7 +685,8 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return new EntryImpl(trackedRankProvider, correctedScoreScaledByColumnFactor, () -> correctedResults.getUncorrectedScore(),
                 correctedResults.isCorrected(),
                 discarded ? DOUBLE_0 : correctedScoreScaledByColumnFactor,
-                correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
+                correctedResults.getMaxPointsReason(), correctedResults.getIncrementalScoreCorrectionInPoints(),
+                discarded, race.getFleetOfCompetitor(competitor));
     }
 
     @Override
@@ -753,7 +761,8 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                 Entry entry = new EntryImpl(trackedRankProvider, correctedScoreScaledByColumnFactor,
                         () -> correctedResults.getUncorrectedScore(), correctedResults.isCorrected(),
                         discarded ? DOUBLE_0 : correctedScoreScaledByColumnFactor,
-                        correctedResults.getMaxPointsReason(), discarded, raceColumn.getFleetOfCompetitor(competitor));
+                        correctedResults.getMaxPointsReason(), correctedResults.getIncrementalScoreCorrectionInPoints(),
+                        discarded, raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
         }
