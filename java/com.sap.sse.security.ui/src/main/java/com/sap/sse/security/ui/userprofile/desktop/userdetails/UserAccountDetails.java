@@ -51,6 +51,7 @@ public class UserAccountDetails extends AbstractUserDetails {
     
     @UiHandler("changeEmailUi")
     public void onChangeEmailClicked(ClickEvent event) {
+        super.onChangeEmailClicked(event);
         validationStatus.setText(StringMessages.INSTANCE.emailNotValidated());
     }
 }
