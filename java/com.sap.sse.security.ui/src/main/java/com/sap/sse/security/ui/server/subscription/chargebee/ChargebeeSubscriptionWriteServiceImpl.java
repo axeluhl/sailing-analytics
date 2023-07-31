@@ -149,9 +149,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                         .subscriptionItemItemPriceId(0, priceId)
                         .subscriptionItemQuantity(0,1)
                         .customerId(user.getName()).customerEmail(user.getEmail())
-                        .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
-                        .billingAddressFirstName(usernames.getA())
-                        .billingAddressLastName(usernames.getB());
+                        .customerFirstName(usernames.getA()).customerLastName(usernames.getB());
                 if (isChargebeeSupportedLocale(locale)) {
                     requestBuilder.customerLocale(locale);
                 }
