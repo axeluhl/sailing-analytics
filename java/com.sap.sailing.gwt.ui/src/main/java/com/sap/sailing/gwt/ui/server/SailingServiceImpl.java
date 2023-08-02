@@ -3721,8 +3721,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
-        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
-        courseAreaDTO.id = courseArea.getId();
+        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getId(), courseArea.getName(), courseArea.getCenterPosition(), courseArea.getRadius());
         return courseAreaDTO;
     }
 

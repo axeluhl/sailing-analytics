@@ -89,11 +89,9 @@ public class EventDataJsonSerializerTest {
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        final CourseArea alpha = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Alpha");
-        alpha.setCenterPosition(new DegreePosition(49, 8));
-        alpha.setRadius(new NauticalMileDistance(2));
+        final CourseArea alpha = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Alpha", new DegreePosition(49, 8), new NauticalMileDistance(2));
         expectedVenue.addCourseArea(alpha);
-        final CourseArea bravo= DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Bravo");
+        final CourseArea bravo= DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Bravo", /* centerPosition */ null, /* radius */ null);
         expectedVenue.addCourseArea(bravo);
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         when(event.getImages()).thenReturn(Collections.<ImageDescriptor>singleton(expectedLogoImageDescriptor));

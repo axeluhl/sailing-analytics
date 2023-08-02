@@ -155,7 +155,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final Venue venue = new VenueImpl(venueName);
 
         for (String courseAreaName : courseAreaNames) {
-            CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
+            CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName, /* centerPosition */ null, /* radius */ null);
             venue.addCourseArea(courseArea);
         }
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
@@ -222,14 +222,12 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String venueName = "Venue Name";
         final Venue venue = new VenueImpl(venueName);
         final String courseAreaAlphaName = "Alpha";
-        final CourseArea courseAreaAlpha = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaAlphaName);
         final DegreePosition alphaCenter = new DegreePosition(49, 8);
-        courseAreaAlpha.setCenterPosition(alphaCenter);
         final NauticalMileDistance alphaRadius = new NauticalMileDistance(2.5);
-        courseAreaAlpha.setRadius(alphaRadius);
+        final CourseArea courseAreaAlpha = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaAlphaName, alphaCenter, alphaRadius);
         venue.addCourseArea(courseAreaAlpha);
         final String courseAreaBravoName = "Bravo";
-        final CourseArea courseAreaBravo = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaBravoName);
+        final CourseArea courseAreaBravo = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaBravoName, /* centerPosition */ null, /* radius */ null);
         venue.addCourseArea(courseAreaBravo);
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
@@ -271,7 +269,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String venueName = "Venue Name";
         final String courseAreaName = "Alpha";
         final Venue venue = new VenueImpl(venueName);
-        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName, /* centerPosition */ null, /* radius */ null);
         venue.addCourseArea(courseArea);
 
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
@@ -324,7 +322,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String venueName = "Venue Name";
         final String courseAreaName = "Alpha";
         final Venue venue = new VenueImpl(venueName);
-        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName, /* centerPosition */ null, /* radius */ null);
         venue.addCourseArea(courseArea);
 
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
@@ -377,7 +375,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final TimePoint createdAt = MillisecondsTimePoint.now();
         final String eventName = "Event Name";
         final Venue venue = new VenueImpl("My Venue");
-        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Alfa");
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "Alfa", /* centerPosition */ null, /* radius */ null);
         venue.addCourseArea(courseArea);
 
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());

@@ -132,7 +132,7 @@ public class AutomaticRetrackUponCompetitorSetChangeTest {
                 /* start with no series */ Collections.emptySet(),
                 /* persistent */ true, new LowPoint(),
                 /* defaultCourseAreaId */ service.getBaseDomainFactory()
-                        .getOrCreateCourseArea(UUID.randomUUID(), "Course Area").getId(),
+                        .getOrCreateCourseArea(UUID.randomUUID(), "Course Area", /* centerPosition */ null, /* radius */ null).getId(),
                 /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ true, /* rankingMetricConstructor */ OneDesignRankingMetric::new);
         regattaIdentifier = new RegattaName(regatta.getName());

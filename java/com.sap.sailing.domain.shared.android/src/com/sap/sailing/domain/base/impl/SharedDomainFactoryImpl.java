@@ -31,7 +31,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
 
@@ -369,10 +371,10 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     }
     
     @Override
-    public CourseArea getOrCreateCourseArea(UUID courseAreaId, String name) {
+    public CourseArea getOrCreateCourseArea(UUID courseAreaId, String name, Position centerPosition, Distance radius) {
         CourseArea result = getExistingCourseAreaById(courseAreaId);
         if (result == null) {
-            result = new CourseAreaImpl(name, courseAreaId);
+            result = new CourseAreaImpl(name, courseAreaId, centerPosition, radius);
             courseAreaCache.put(courseAreaId, result);
         }
         return result;

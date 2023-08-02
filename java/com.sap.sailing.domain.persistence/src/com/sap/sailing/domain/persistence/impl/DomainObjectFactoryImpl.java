@@ -194,6 +194,7 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
@@ -1295,15 +1296,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private CourseArea loadCourseArea(Document courseAreaDBObject) {
         final String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
         final UUID id = (UUID) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
-        final CourseArea result = baseDomainFactory.getOrCreateCourseArea(id, name);
-        final Document centerPosition = (Document) courseAreaDBObject.get(FieldNames.COURSE_AREA_CENTER_POSITION.name());
-        if (centerPosition != null) {
-            result.setCenterPosition(loadPosition(centerPosition));
+        final Document centerPositionDoc = (Document) courseAreaDBObject.get(FieldNames.COURSE_AREA_CENTER_POSITION.name());
+        final Position centerPosition;
+        final Distance radius;
+        if (centerPositionDoc != null) {
+            centerPosition = loadPosition(centerPositionDoc);
+        } else {
+            centerPosition = null;
         }
-        final Number radius = (Number) courseAreaDBObject.get(FieldNames.COURSE_AREA_RADIUS_IN_METERS.name());
-        if (radius != null) {
-            result.setRadius(new MeterDistance(radius.doubleValue()));
+        final Number radiusNumber = (Number) courseAreaDBObject.get(FieldNames.COURSE_AREA_RADIUS_IN_METERS.name());
+        if (radiusNumber != null) {
+            radius = new MeterDistance(radiusNumber.doubleValue());
+        } else {
+            radius = null;
         }
+        final CourseArea result = baseDomainFactory.getOrCreateCourseArea(id, name, centerPosition, radius);
         return result;
     }
 

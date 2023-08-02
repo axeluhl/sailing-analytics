@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.UUID;
+
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sse.common.Util;
@@ -35,7 +37,7 @@ public class CourseAreaListInlineEditorComposite extends GenericStringListInline
 
     @Override
     protected CourseAreaDTO parse(String s) {
-        return new CourseAreaDTO(s);
+        return new CourseAreaDTO(UUID.randomUUID(), s);
     }
 
     @Override

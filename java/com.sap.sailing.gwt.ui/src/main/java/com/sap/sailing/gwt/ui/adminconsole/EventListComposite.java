@@ -647,12 +647,7 @@ public class EventListComposite extends Composite {
 
                     @Override
                     public void onSuccess(EventDTO result) {
-                        final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
-                        int i = 0;
-                        for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {
-                            namesOfCourseAreasToAdd[i++] = courseAreaToAdd.getName();
-                        }
-                        sailingServiceWrite.createCourseAreas(oldEvent.id, namesOfCourseAreasToAdd,
+                        sailingServiceWrite.createCourseAreas(oldEvent.id, courseAreasToAdd,
                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable t) {
@@ -665,7 +660,7 @@ public class EventListComposite extends Composite {
                                         final UUID[] idsOfCourseAreasToRemove = new UUID[courseAreasToRemove.size()];
                                         int j = 0;
                                         for (CourseAreaDTO courseAreaToRemove : courseAreasToRemove) {
-                                            idsOfCourseAreasToRemove[j++] = courseAreaToRemove.id;
+                                            idsOfCourseAreasToRemove[j++] = courseAreaToRemove.getId();
                                         }
                                         sailingServiceWrite.removeCourseAreas(oldEvent.id, idsOfCourseAreasToRemove,
                                                 new AsyncCallback<Void>() {
@@ -712,12 +707,8 @@ public class EventListComposite extends Composite {
     }
 
     private void createNewEvent(final EventDTO newEvent, final List<LeaderboardGroupDTO> existingLeaderboardGroups) {
-        List<String> courseAreaNames = new ArrayList<String>();
-        for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
-            courseAreaNames.add(courseAreaDTO.getName());
-        }
         sailingServiceWrite.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
+                newEvent.venue.getName(), newEvent.isPublic, newEvent.venue.getCourseAreas(), newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
                 newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos(), newEvent.getLeaderboardGroupIds(),
                 new AsyncCallback<EventDTO>() {
             @Override

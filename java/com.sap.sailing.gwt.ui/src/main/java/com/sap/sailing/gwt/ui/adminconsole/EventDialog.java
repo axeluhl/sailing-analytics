@@ -175,14 +175,14 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     @Override
     protected EventDTO getResult() {
         final List<LeaderboardGroupDTO> leaderboardGroups = new ArrayList<>();
-        List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
+        final List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
         for (final String lgName : leaderboardGroupNames) {
             final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
             if (lgDTO != null) {
                 leaderboardGroups.add(lgDTO);
             }
         }
-        EventDTO result = new EventDTO(nameEntryField.getText(), leaderboardGroups);
+        final EventDTO result = new EventDTO(nameEntryField.getText(), leaderboardGroups);
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
         result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
@@ -191,7 +191,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
         result.id = id;
-        List<CourseAreaDTO> courseAreas = courseAreaNameList.getValue();
+        final List<CourseAreaDTO> courseAreas = courseAreaNameList.getValue();
         for (ImageDTO image : imagesListComposite.getAllImages()) {
             result.addImage(image);
         }

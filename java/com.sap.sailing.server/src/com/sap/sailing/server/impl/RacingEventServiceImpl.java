@@ -3898,7 +3898,7 @@ Replicator {
     public CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames) {
         final CourseArea[] result = new CourseArea[courseAreaNames.length];
         for (int i=0; i<courseAreaIds.length; i++) {
-            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i]);
+            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i], /* centerPosition */ null, /* radius */ null);
             final Event event = eventsById.get(eventId);
             if (event == null) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");

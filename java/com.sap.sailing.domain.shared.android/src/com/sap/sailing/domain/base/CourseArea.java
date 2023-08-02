@@ -29,14 +29,10 @@ public interface CourseArea extends Positioned, NamedWithID, IsManagedByCache<Sh
      */
     Position getCenterPosition();
     
-    void setCenterPosition(Position centerPosition);
-    
     /**
      * If {@link #getCenterPosition()} delivers a non-{@code null} result, asking the radius of this course area, which
      * is assumed to be of circulare shape, can make sense. If may, however, not be defined in which case {@code null}
      * is returned.
      */
     Distance getRadius();
-
-    void setRadius(Distance radius);
 }

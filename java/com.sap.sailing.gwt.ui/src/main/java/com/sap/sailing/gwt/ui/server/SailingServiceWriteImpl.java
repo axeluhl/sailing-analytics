@@ -1517,7 +1517,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException {
         final UUID eventUuid = UUID.randomUUID();
-
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventUuid), eventName,
                 new Callable<EventDTO>() {
@@ -1536,20 +1535,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         getService().apply(new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint,
                                 venue, isPublic, eventUuid, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
                                 eventImages, eventVideos, leaderboardGroupIds));
-                        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
+                        createCourseAreas(eventUuid, Util.asList(Util.map(courseAreaNames, courseAreaName->new CourseAreaDTO(UUID.randomUUID(), courseAreaName))));
                         return getEventById(eventUuid, false);
                     }
                 });
     }
 
     @Override
-    public void createCourseAreas(UUID eventId, String[] courseAreaNames) {
+    public void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas) {
         getSecurityService().checkCurrentUserUpdatePermission(getService().getEvent(eventId));
-        final UUID[] courseAreaIDs = new UUID[courseAreaNames.length];
-        for (int i = 0; i < courseAreaNames.length; i++) {
-            courseAreaIDs[i] = UUID.randomUUID();
-        }
-        getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIDs));
+        getService().apply(new AddCourseAreas(eventId,
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getName), new String[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getId), new UUID[courseAreas.size()])));
     }
 
     @Override

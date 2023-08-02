@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -292,7 +293,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeCourseAreas(UUID eventId, UUID[] courseAreaIds) throws UnauthorizedException;
 
-    void createCourseAreas(UUID eventId, String[] courseAreaNames) throws UnauthorizedException;
+    void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas);
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,

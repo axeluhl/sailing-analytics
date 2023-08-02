@@ -12,12 +12,14 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
     private static final long serialVersionUID = 5912385360170509150L;
 
     private final UUID id;
-    private Position centerPosition; // no setter yet; TODO bug5867; clarify replication etc.
-    private Distance radius; // no setter yet; TODO bug5867; clarify replication etc.
+    private final Position centerPosition;
+    private final Distance radius;
 
-    public CourseAreaImpl(String name, UUID id) {
+    public CourseAreaImpl(String name, UUID id, Position centerPosition, Distance radius) {
         super(name);
         this.id = id;
+        this.centerPosition = centerPosition;
+        this.radius = radius;
     }
 
     @Override
@@ -31,22 +33,12 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
     }
 
     @Override
-    public void setCenterPosition(Position centerPosition) {
-        this.centerPosition = centerPosition;
-    }
-
-    @Override
     public Distance getRadius() {
         return radius;
     }
 
     @Override
-    public void setRadius(Distance radius) {
-        this.radius = radius;
-    }
-    
-    @Override
     public CourseArea resolve(SharedDomainFactory<?> domainFactory) {
-        return domainFactory.getOrCreateCourseArea(id, getName());
+        return domainFactory.getOrCreateCourseArea(id, getName(), /* centerPosition */ null, /* radius */ null);
     }
 }

@@ -159,9 +159,9 @@ public class SearchServiceTest {
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         kiel = pfingstbusch.getVenue();
-        final CourseArea kielAlpha = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Alpha");
+        final CourseArea kielAlpha = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Alpha", /* centerPosition */ null, /* radius */ null);
         kiel.addCourseArea(kielAlpha);
-        final CourseArea kielBravo = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Bravo");
+        final CourseArea kielBravo = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Bravo", /* centerPosition */ null, /* radius */ null);
         kiel.addCourseArea(kielBravo);
         final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         seriesCreationParams.put("Default",
@@ -208,7 +208,7 @@ public class SearchServiceTest {
                 "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /*sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         flensburg = aalEvent.getVenue();
-        final CourseArea flensburgStandard = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Standard");
+        final CourseArea flensburgStandard = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Standard", /* centerPosition */ null, /* radius */ null);
         flensburg.addCourseArea(flensburgStandard);
         aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,

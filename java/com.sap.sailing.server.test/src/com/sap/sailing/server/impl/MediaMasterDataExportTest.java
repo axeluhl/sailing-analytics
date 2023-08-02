@@ -57,7 +57,7 @@ public class MediaMasterDataExportTest {
     private static final ThresholdBasedResultDiscardingRule resultDiscardingRule = new ThresholdBasedResultDiscardingRuleImpl(new int[0]);
     private static final boolean isMedal = false;
     private static final ScoringScheme scoringScheme = new LowPoint();
-    private static final CourseArea courseArea = new CourseAreaImpl("Course Area", UUID.randomUUID());
+    private static final CourseArea courseArea = new CourseAreaImpl("Course Area", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null);
     
     @Test
     public void testTrackWithAssignedRaceButEmptyLeaderboardGroup() {
