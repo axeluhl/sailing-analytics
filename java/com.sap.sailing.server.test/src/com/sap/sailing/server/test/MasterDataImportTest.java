@@ -145,6 +145,7 @@ import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.testsupport.RacingEventServiceImplMock;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -1410,7 +1411,7 @@ public class MasterDataImportTest {
                 /* sailorsInfoWebsiteURL */null, /* videos */
                 /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
-                new UUID[] { UUID.randomUUID() })[0];
+                new UUID[] { UUID.randomUUID() }, /* centerPositions */ new Position[0], /* radiuses */ new Distance[0])[0];
 
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME),
@@ -1476,7 +1477,7 @@ public class MasterDataImportTest {
                 /* sailorsInfoWebsiteURL */null, /* videos */
                 /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
-                new UUID[] { UUID.randomUUID() })[0];
+                new UUID[] { UUID.randomUUID() }, /* TODO bug5866 centerPositions */ new Position[0], /* TODO bug5866 radiuses */ new Distance[0])[0];
 
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";

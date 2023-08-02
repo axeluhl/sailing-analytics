@@ -39,6 +39,6 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
 
     @Override
     public CourseArea resolve(SharedDomainFactory<?> domainFactory) {
-        return domainFactory.getOrCreateCourseArea(id, getName(), /* centerPosition */ null, /* radius */ null);
+        return domainFactory.getOrCreateCourseArea(id, getName(), getCenterPosition(), getRadius());
     }
 }

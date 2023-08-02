@@ -5,8 +5,10 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
+import com.sap.sse.common.Distance;
 
 /**
  * Adds a course area to an {@link Event}'s {@link Venue}.
@@ -20,17 +22,21 @@ public class AddCourseAreas extends AbstractRacingEventServiceOperation<CourseAr
     private final String[] courseAreaNames;
     private final UUID[] courseAreaIds;
     private final UUID eventId;
+    private final Position[] centerPositions;
+    private final Distance[] radiuses;
 
-    public AddCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds) {
+    public AddCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds, Position[] centerPositions, Distance[] radiuses) {
         super();
         this.eventId = eventId;
         this.courseAreaIds = courseAreaIds;
         this.courseAreaNames = courseAreaNames;
+        this.centerPositions = centerPositions;
+        this.radiuses = radiuses;
     }
 
     @Override
     public CourseArea[] internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames);
+        return toState.addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames, centerPositions, radiuses);
     }
 
     @Override

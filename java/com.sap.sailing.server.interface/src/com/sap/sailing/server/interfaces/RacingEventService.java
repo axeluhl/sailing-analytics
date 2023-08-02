@@ -105,6 +105,7 @@ import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -509,7 +510,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeRemoteSailingServerReference(String name);
 
     
-    CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds);
+    CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds, Position[] centerPositions, Distance[] radiuses);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
@@ -595,7 +596,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
-    CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames);
+    CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames, Position[] centerPositions, Distance[] radiuses);
 
     CourseArea[] removeCourseAreaWithoutReplication(UUID eventId, UUID[] courseAreaIds);
 

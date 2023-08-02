@@ -356,6 +356,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Speed;
@@ -1546,7 +1547,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         getSecurityService().checkCurrentUserUpdatePermission(getService().getEvent(eventId));
         getService().apply(new AddCourseAreas(eventId,
                 Util.toArray(Util.map(courseAreas, CourseAreaDTO::getName), new String[courseAreas.size()]),
-                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getId), new UUID[courseAreas.size()])));
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getId), new UUID[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getCenterPosition), new Position[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getRadius), new Distance[courseAreas.size()])));
     }
 
     @Override
