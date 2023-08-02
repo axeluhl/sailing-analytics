@@ -51,7 +51,12 @@ if [ "${useRestApi}" = "1" ]; then
     AUTH=""
   fi
   HEADERS=$( mktemp )
-  CURL_OUTPUT=$( curl -sL --dump-header "${HEADERS}" -H 'Content-Type: multipart/form-data' "${NEWSERVER}/sailingserver/api/v1/compareservers" -d "server2=${OLDSERVER}" ${AUTH} 2>${WGET_ERR} )
+  LEADERBOARD_GROUPS=""
+  while [ -n "$3" ]; do
+    LEADERBOARD_GROUPS="${LEADERBOARD_GROUPS} -d leaderboardgroupUUID[]=$3"
+    shift
+  done
+  CURL_OUTPUT=$( curl -sL --dump-header "${HEADERS}" -H 'Content-Type: multipart/form-data' "${NEWSERVER}/sailingserver/api/v1/compareservers" -d "server2=${OLDSERVER}" ${AUTH} ${LEADERBOARD_GROUPS} 2>${WGET_ERR} )
   echo "${CURL_OUTPUT}" | jq
   HTTP_STATUS=$( cat "${HEADERS}" | grep "^HTTP\/[0-9.]* [0-9]\{3\}" | tail -1 | sed -e 's/^HTTP\/[0-9.]* \([0-9]\{3\}\).*$/\1/' )
   rm -f "${HEADERS}"

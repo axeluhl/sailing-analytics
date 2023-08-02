@@ -210,5 +210,4 @@ public class MediaDBImpl implements MediaDB {
         updateCommand.append("$set", new Document(DbNames.Fields.ASSIGNED_RACES.name(), assignedRacesDb));
         getVideoCollection().updateOne(updateQuery, updateCommand);
     }
-
 }

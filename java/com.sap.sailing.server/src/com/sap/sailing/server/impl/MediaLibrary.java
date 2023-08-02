@@ -73,7 +73,6 @@ class MediaLibrary {
     }
 
     Collection<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
-
         LockUtil.lockForRead(lock);
         try {
             List<MediaTrack> result = new ArrayList<MediaTrack>();
@@ -302,5 +301,4 @@ class MediaLibrary {
     public MediaTrack lookupMediaTrack(MediaTrack mediaTrack) {
         return resolveClone(mediaTrack);
     }
-
 }

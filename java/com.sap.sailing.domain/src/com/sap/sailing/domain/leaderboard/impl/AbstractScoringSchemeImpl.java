@@ -191,7 +191,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
 
     /**
      * Looks backwards starting at the last race until the first score difference is found, including the discarded
-     * scored. This implements Racing Rules of Sailing (RRS) section A8.2:
+     * scores. This implements Racing Rules of Sailing (RRS) section A8.2:
      * <p>
      * 
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
