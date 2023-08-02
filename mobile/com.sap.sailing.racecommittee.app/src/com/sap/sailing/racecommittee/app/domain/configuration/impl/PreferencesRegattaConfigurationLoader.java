@@ -47,26 +47,26 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
 
     @Override
     public RegattaConfiguration load() {
-
+        // Default
         configuration.setDefaultRacingProcedureType(preferences.getDefaultRacingProcedureType());
         configuration.setDefaultCourseDesignerMode(preferences.getDefaultCourseDesignerMode());
         configuration.setDefaultProtestTimeDuration(
                 Duration.ONE_MINUTE.times(preferences.getProtestTimeDurationInMinutes()));
-
+        // RRS26
         RRS26ConfigurationImpl rrs26 = new RRS26ConfigurationImpl();
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
         rrs26.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.RRS26));
         rrs26.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.RRS26));
         rrs26.setStartModeFlags(new ArrayList<>(preferences.getRRS26StartmodeFlags()));
         configuration.setRRS26Configuration(rrs26);
-
+        // SWC
         SWCStartConfigurationImpl swcStart = new SWCStartConfigurationImpl();
         swcStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.SWC));
         swcStart.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.SWC));
         swcStart.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.SWC));
         swcStart.setStartModeFlags(new ArrayList<>(preferences.getSWCStartmodeFlags()));
         configuration.setSWCStartConfiguration(swcStart);
-
+        // Gate Start
         GateStartConfigurationImpl gateStart = new GateStartConfigurationImpl();
         gateStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.GateStart));
         gateStart.setHasIndividualRecall(
@@ -76,25 +76,25 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         gateStart.setHasPathfinder(preferences.getGateStartHasPathfinder());
         gateStart.setHasAdditionalGolfDownTime(preferences.getGateStartHasAdditionalGolfDownTime());
         configuration.setGateStartConfiguration(gateStart);
-
+        // Extreme Sailing Series
         ESSConfigurationImpl ess = new ESSConfigurationImpl();
         ess.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.ESS));
         ess.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.ESS));
         ess.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.ESS));
         configuration.setESSConfiguration(ess);
-
+        // Basic
         RacingProcedureConfigurationImpl basic = new RacingProcedureConfigurationImpl();
         basic.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.BASIC));
         basic.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.BASIC));
         basic.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.BASIC));
         configuration.setBasicConfiguration(basic);
-
+        // League Start
         LeagueConfigurationImpl league = new LeagueConfigurationImpl();
         league.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.LEAGUE));
         league.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.LEAGUE));
         league.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.LEAGUE));
         configuration.setLeagueConfiguration(league);
-
+        // clone the result
         return configuration.clone();
     }
 

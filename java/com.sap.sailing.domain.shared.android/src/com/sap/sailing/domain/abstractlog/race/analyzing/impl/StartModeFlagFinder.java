@@ -1,10 +1,15 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
@@ -32,7 +37,9 @@ public class StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
     @Override
     protected Flags performAnalysis() {
         RacingProcedureType type = procedureAnalyzer.analyze();
-        if (!(RacingProcedureType.RRS26.equals(type) || RacingProcedureType.RRS26_3MIN.equals(type) || RacingProcedureType.SWC.equals(type))) {
+        if (type == RacingProcedureType.UNKNOWN ||
+                !(new RacingProcedureFactoryImpl(/* author */ null, new EmptyRegattaConfiguration()).createRacingProcedure(type, new RaceLogImpl(UUID.randomUUID()), /* raceLogResolver */ null)
+                        instanceof ConfigurableStartModeFlagRacingProcedure)) {
             return null;
         }
         for (RaceLogEvent event : getPassEventsDescending()) {
