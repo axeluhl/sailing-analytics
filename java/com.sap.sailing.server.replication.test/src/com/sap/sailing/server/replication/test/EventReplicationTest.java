@@ -103,7 +103,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()},
-                /* TODO bug5866 centerPositions */ new Position[0], /* TODO bug5866 radiuses */ new Distance[0])[0];
+                new Position[] {null}, new Distance[] {null})[0];
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
         assertNotNull(replicatedEvent);

@@ -1411,8 +1411,7 @@ public class MasterDataImportTest {
                 /* sailorsInfoWebsiteURL */null, /* videos */
                 /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
-                new UUID[] { UUID.randomUUID() }, /* centerPositions */ new Position[0], /* radiuses */ new Distance[0])[0];
-
+                new UUID[] { UUID.randomUUID() }, /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null})[0];
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME),
                 TEST_BOAT_CLASS_NAME, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -1477,14 +1476,13 @@ public class MasterDataImportTest {
                 /* sailorsInfoWebsiteURL */null, /* videos */
                 /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
-                new UUID[] { UUID.randomUUID() }, /* TODO bug5866 centerPositions */ new Position[0], /* TODO bug5866 radiuses */ new Distance[0])[0];
-
+                new UUID[] { UUID.randomUUID() }, /* centerPositions */ new Position[] {null},
+                /* radiuses */ new Distance[] {null})[0];
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
         List<String> emptyRaceColumnNamesList = Collections.emptyList();
-
         List<Series> series = new ArrayList<>();
         List<Fleet> fleets = new ArrayList<>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
@@ -1492,7 +1490,6 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,

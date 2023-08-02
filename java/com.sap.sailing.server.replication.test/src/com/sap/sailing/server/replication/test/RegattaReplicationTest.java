@@ -108,8 +108,9 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
-        master.addCourseAreas(event.getId(), new String[] {"Alpha"}, new UUID[] {alphaCourseAreaId}, /* centerPositions */ new Position[0], /* radiuses */ new Distance[0]);
-        master.addCourseAreas(event.getId(), new String[] {"TV"}, new UUID[] {tvCourseAreaId}, /* centerPositions */ new Position[0], /* radiuses */ new Distance[0]);
+        master.addCourseAreas(event.getId(), new String[] {"Alpha"}, new UUID[] {alphaCourseAreaId},
+                /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null});
+        master.addCourseAreas(event.getId(), new String[] {"TV"}, new UUID[] {tvCourseAreaId}, /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null});
         UUID currentCourseAreaId = null;
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName("Kiel Week 2012", "49er"), "49er",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -344,7 +345,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
-        CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()}, /* centerPositions */ new Position[0], /* radiuses */ new Distance[0])[0];
+        CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()},
+                /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null})[0];
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(eventName, boatClassName),
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(), series,

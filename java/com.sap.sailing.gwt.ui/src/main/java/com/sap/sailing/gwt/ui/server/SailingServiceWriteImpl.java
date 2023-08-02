@@ -1513,7 +1513,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
+            boolean isPublic, List<CourseAreaDTO> courseAreas, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException {
@@ -1536,7 +1536,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         getService().apply(new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint,
                                 venue, isPublic, eventUuid, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
                                 eventImages, eventVideos, leaderboardGroupIds));
-                        createCourseAreas(eventUuid, Util.asList(Util.map(courseAreaNames, courseAreaName->new CourseAreaDTO(UUID.randomUUID(), courseAreaName))));
+                        createCourseAreas(eventUuid, courseAreas);
                         return getEventById(eventUuid, false);
                     }
                 });
