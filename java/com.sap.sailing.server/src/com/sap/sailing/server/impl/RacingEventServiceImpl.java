@@ -3985,7 +3985,6 @@ Replicator {
         mediaDB.updateRace(mediaTrack.dbId, mediaTrack.assignedRaces);
         mediaLibrary.assignedRacesChanged(mediaTrack);
         replicate(new UpdateMediaTrackRacesOperation(mediaTrack));
-
     }
 
     @Override
