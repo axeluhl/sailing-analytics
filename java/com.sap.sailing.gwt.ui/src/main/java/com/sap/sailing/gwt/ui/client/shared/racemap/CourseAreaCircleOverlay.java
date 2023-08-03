@@ -51,14 +51,14 @@ public class CourseAreaCircleOverlay extends CanvasOverlayV3 {
             context2d.closePath();
             context2d.stroke();
             context2d.setLineWidth(1.0); // draw only a fine 1px center cross
-            context2d.moveTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH-CENTER_CROSS_SIZE_IN_PIXELS/2, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH);
-            context2d.lineTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH+CENTER_CROSS_SIZE_IN_PIXELS/2, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH);
-            context2d.moveTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH-CENTER_CROSS_SIZE_IN_PIXELS/2);
-            context2d.lineTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH+CENTER_CROSS_SIZE_IN_PIXELS/2);
+            context2d.moveTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2-CENTER_CROSS_SIZE_IN_PIXELS/2, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2);
+            context2d.lineTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2+CENTER_CROSS_SIZE_IN_PIXELS/2, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2);
+            context2d.moveTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2-CENTER_CROSS_SIZE_IN_PIXELS/2);
+            context2d.lineTo(courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2, courseAreaRadiusInPixel+(int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2+CENTER_CROSS_SIZE_IN_PIXELS/2);
             context2d.stroke();
             context2d.setTextAlign(TextAlign.CENTER);
             context2d.setFont("16px arial");
-            context2d.fillText(courseArea.getName(), courseAreaRadiusInPixel+ (int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH, courseAreaRadiusInPixel+ (int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH+2*CENTER_CROSS_SIZE_IN_PIXELS);
+            context2d.fillText(courseArea.getName(), courseAreaRadiusInPixel+ (int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2, courseAreaRadiusInPixel+ (int) DEFAULT_COURSE_AREA_CIRCLE_LINE_WIDTH/2+2*CENTER_CROSS_SIZE_IN_PIXELS);
             Point courseAreaPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(getPosition()));
             setCanvasPosition(courseAreaPositionInPx.getX() - courseAreaRadiusInPixel, courseAreaPositionInPx.getY() - courseAreaRadiusInPixel);
         }
