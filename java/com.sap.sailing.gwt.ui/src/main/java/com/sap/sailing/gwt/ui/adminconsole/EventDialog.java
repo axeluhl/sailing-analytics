@@ -34,7 +34,6 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
-import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -134,7 +133,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
             availableLeaderboardGroupsByName.put(lgDTO.getName(), lgDTO);
         }
-        getDialogBox().getWidget().setWidth("730px");
+        getDialogBox().getWidget().setWidth("800px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
@@ -148,8 +147,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             }
         };
         courseAreaNameList = new CourseAreaListInlineEditorComposite(Collections.<CourseAreaDTO> emptyList(),
-                new GenericStringListInlineEditorComposite.ExpandedUi<CourseAreaDTO>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
+                new CourseAreaListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 30));
         courseAreaNameList.addValueChangeHandler(courseAreaValueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
         for (LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
