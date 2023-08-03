@@ -798,6 +798,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+    
+    @Override
+    public List<CourseAreaDTO> getCourseAreaForEventOfLeaderboard(String leaderboardName) {
+        final List<CourseAreaDTO> result = new ArrayList<>();
+        for (final EventDTO event : getEventsForLeaderboard(leaderboardName)) {
+            Util.addAll(event.venue.getCourseAreas(), result);
+        }
+        return result;
+    }
 
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardForRace(final RegattaAndRaceIdentifier race,
@@ -3721,7 +3730,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
-        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getId(), courseArea.getName(), courseArea.getCenterPosition(), courseArea.getRadius());
+        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getId(), courseArea.getName(),
+                 courseArea.getCenterPosition(), courseArea.getRadius());
         return courseAreaDTO;
     }
 

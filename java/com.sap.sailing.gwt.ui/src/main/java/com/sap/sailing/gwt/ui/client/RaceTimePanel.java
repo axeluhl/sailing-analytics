@@ -43,7 +43,7 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     
-    private RegattaAndRaceIdentifier selectedRace;
+    private final RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
     private boolean hasCanReplayDuringLiveRacesPermission = false;
@@ -91,7 +91,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.listeners = new HashSet<>();
-        selectedRace = null;
         autoAdjustPlayMode = true;
         selectedRace = selectedRaceIdentifier;
         this.initialTimeAfterRaceStartInReplayMode = initialTimeAfterRaceStartInReplayMode;

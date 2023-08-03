@@ -118,19 +118,15 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
     
     protected void drawCourseArea(String name, Context2d context2d, Point centerPoint, Point borderPoint,
             String color, String colorText, double pxStroke) {
-
         Point diffPoint = Point.newInstance(centerPoint.getX() - borderPoint.getX(),
                 centerPoint.getY() - borderPoint.getY());
         double pxRadius = Math.sqrt(diffPoint.getX() * diffPoint.getX() + diffPoint.getY() * diffPoint.getY());
-
         String bgColor;
-        
         if (simulatorMap.getWindParams().isShowStreamlets()) {
-        	bgColor = "#505050";
+            bgColor = "#505050";
         } else {
-        	bgColor = "#DEDEDE";
+            bgColor = "#DEDEDE";
         }
-        
         context2d.setGlobalAlpha(1.0f);
         context2d.setFillStyle(bgColor);
         context2d.beginPath();
