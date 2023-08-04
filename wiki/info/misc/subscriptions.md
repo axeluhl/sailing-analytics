@@ -119,16 +119,13 @@ This is only done after the new plan is subscribed successfully. It will cancel 
 
 	end_of_term = false (1)
 	credit_option_for_current_term_charges = PRORATE (2)
-	account_receivables_handling = SCHEDULE_PAYMENT_COLLECTION (3)
-	refundable_credits_handling = SCHEDULE_REFUND (4)
+	refundable_credits_handling = SCHEDULE_REFUND (3)
 
 1. The contract will be canceled immediately
 [chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_end_of_term)
 2. The refund will be calculated out of the remaining days 
 [chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_credit_option_for_current_term_charges)
-3. All credits will be refunded on the available payment method 
-[chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_account_receivables_handling)
-4. Remaining refundable credits will be refunded asynchronously 
+3Remaining refundable credits will be refunded asynchronously 
 [chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_refundable_credits_handling)
 
 The result is that the old subscription state is set to `cancel`

@@ -74,6 +74,9 @@ public class ChargebeeNonRenewingSubscriptionTask
     }
 
     private void onDone(SubscriptionNonRenewingResult result) {
+        logger.info("Setting subscription to non renewing is done with success = " + result.isSuccess() + 
+            ", deleted = " + result.isDeleted() + 
+            ", subscription = " + result.getSubscription());
         if (listener != null) {
             listener.onNonRenewingResult(result);
         }
