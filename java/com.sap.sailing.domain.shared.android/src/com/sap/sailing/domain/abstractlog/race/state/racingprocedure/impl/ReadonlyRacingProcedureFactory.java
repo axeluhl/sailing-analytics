@@ -15,6 +15,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.impl
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.RRS26RacingProcedureImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.RRS26ThreeMinutesRacingProcedureImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.SWCRacingProcedureImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.ShortSWCRacingProcedureImpl;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -53,6 +54,8 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
             return new RRS26ThreeMinutesRacingProcedureImpl(raceLog, author, loadedConfiguration.getRRS26Configuration(), raceLogResolver);
         case SWC:
             return new SWCRacingProcedureImpl(raceLog, author, loadedConfiguration.getSWCStartConfiguration(), raceLogResolver);
+        case SWC_4MIN:
+            return new ShortSWCRacingProcedureImpl(raceLog, author, loadedConfiguration.getSWCStartConfiguration(), raceLogResolver);
         case BASIC:
             return new BasicRacingProcedureImpl(raceLog, author, loadedConfiguration.getBasicConfiguration(), raceLogResolver);
         case LEAGUE:

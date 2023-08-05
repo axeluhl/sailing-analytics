@@ -3053,6 +3053,15 @@ Replicator {
                 // race list became empty by the removal performed here.
                 final boolean oldTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
                 try {
+                    /*
+                     * The following enqueues a task which calls RegattaListener.raceRemoved(...) which transitively
+                     * invokes RegattaLogFixTrackerRegattaListener.trackerStopped (WHY? The dataTracker entry should
+                     * already have been removed by the stopAllTrackersForWhichRaceIsLastReachable(...) above; maybe a
+                     * Java memory model idiosyncrasy with the queue thread not "seeing" the change to dataTrackers?).
+                     * We must make sure to not block its execution, e.g., by synchronization, because otherwise
+                     * the the removedTrackedRegatta(regatta) call below may not return, either, as it waits for
+                     * tasks it may enqueue after the task enqueued here. See bug 5879.
+                     */
                     trackedRegatta.removeTrackedRace(trackedRace, Optional.of(
                             getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
                     final boolean newTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
@@ -3064,6 +3073,16 @@ Replicator {
                 isTrackedRacesBecameEmpty = false;
             }
             if (isTrackedRacesBecameEmpty) {
+                /*
+                 * The following call to removeTrackedRegatta(regatta) can transitively invoke the synchronized
+                 * RegattaLogFixTrackerRegattaListener.regattaRemoved(...) and from there .stop() and from there
+                 * TrackedRegattaImpl.removeRaceListener which waits for a CompletableFuture; The CompletableFuture will
+                 * only be completed once the trackedRegatta.removeTrackedRace(...) call above completes because the
+                 * task completing the CompletableFuture is next in the queue. So we have to ensure that
+                 * RegattaListener.raceRemoved(...) will not block.
+                 * 
+                 * See also bug5879 (DEADLOCK).
+                 */
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta
@@ -3966,7 +3985,6 @@ Replicator {
         mediaDB.updateRace(mediaTrack.dbId, mediaTrack.assignedRaces);
         mediaLibrary.assignedRacesChanged(mediaTrack);
         replicate(new UpdateMediaTrackRacesOperation(mediaTrack));
-
     }
 
     @Override

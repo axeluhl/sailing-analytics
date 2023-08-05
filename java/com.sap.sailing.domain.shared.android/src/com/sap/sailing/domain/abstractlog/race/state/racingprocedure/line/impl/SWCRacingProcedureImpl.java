@@ -23,12 +23,12 @@ import java.util.List;
 public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements SWCRacingProcedure {
 
     private final static Duration CLASS_AND_STARTMODE_UP_INTERVAL = Duration.ONE_MINUTE.times(6); // 6 minutes before start
-    private final static Duration CLASS_AND_STARTMODE_DOWN_INTERVAL = Duration.ONE_MINUTE; // 1 minute after start
-    private final static Duration FIVE_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(5); // 5 minutes before start
-    private final static Duration FOUR_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(4); // 4 minutes before start
-    private final static Duration THREE_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(3); // 3 minutes before start
-    private final static Duration TWO_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(2); // 2 minutes before start
-    private final static Duration ONE_MINUTE_FLAG_UP_INTERVAL = Duration.ONE_MINUTE; // 1 minutes before start
+    protected final static Duration CLASS_AND_STARTMODE_DOWN_INTERVAL = Duration.ONE_MINUTE; // 1 minute after start
+    protected final static Duration FIVE_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(5); // 5 minutes before start
+    protected final static Duration FOUR_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(4); // 4 minutes before start
+    protected final static Duration THREE_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(3); // 3 minutes before start
+    protected final static Duration TWO_MINUTES_FLAG_UP_INTERVAL = Duration.ONE_MINUTE.times(2); // 2 minutes before start
+    protected final static Duration ONE_MINUTE_FLAG_UP_INTERVAL = Duration.ONE_MINUTE; // 1 minutes before start
 
     public SWCRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
                                   SWCStartConfiguration configuration, RaceLogResolver raceLogResolver) {

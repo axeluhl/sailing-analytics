@@ -58,10 +58,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     
     /**
      * These are the {@link RaceListener RaceListeners} attached to this {@link TrackedRegatta}. There are listeners
-     * registered for synchronous callback execution and such registered for asynchonous callback execution. For every
-     * {@link RaceListener} registered for asynchronous callback execution there is a {@link AsynchronousRunnableExecutor} to do all event
-     * related work for the specific listener. This ensures that e.g. events are received in order. The following cases
-     * need to be handled through this queue:
+     * registered for synchronous callback execution and such registered for asynchronous callback execution. For every
+     * {@link RaceListener} registered for asynchronous callback execution there is an
+     * {@link AsynchronousRunnableExecutor} to do all event related work for the specific listener. This ensures that
+     * e.g. events are received in order. The following cases need to be handled through this queue:
      * <ul>
      * <li>Firing events when adding/removing {@link TrackedRace} instances (see {@link #enqueEvent}). The list of
      * listeners to fire the event to need to be the list of listeners existing when enqueuing the event. This ensures

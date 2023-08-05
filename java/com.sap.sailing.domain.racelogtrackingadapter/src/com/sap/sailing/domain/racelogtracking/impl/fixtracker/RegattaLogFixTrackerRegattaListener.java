@@ -34,15 +34,17 @@ import com.sap.sse.replication.ReplicationService;
 
 /**
  * This is the main entry point of the {@link SensorFixStore} based fix tracking.
+ * <p>
  * 
  * This listener is informed about every {@link TrackedRegatta} by {@link RacingEventService} via the implemented
  * {@link TrackedRegattaListener}. For every known {@link TrackedRegatta}, a {@link RegattaLogFixTrackerRaceListener} is
  * started.
+ * <p>
  * 
  * In addition this is a {@link ReplicableWithObjectInputStream} because we need to know if the current node is a
  * replica. Replicas must not do any fix tracking because fixes are being loaded on the master and transferred to the
- * replicas through the replication mechanism. That's why in replication state, no
- * {@link RegattaLogFixTrackerRaceListener} instances are created at all.
+ * replicas through the replication mechanism. That's why in replica state, no {@link RegattaLogFixTrackerRaceListener}
+ * instances are created at all.
  */
 public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaAndRaceObserver implements TrackedRegattaListener,
         ReplicableWithObjectInputStream<RegattaLogFixTrackerRegattaListener, OperationWithResult<RegattaLogFixTrackerRegattaListener, ?>> {
@@ -79,40 +81,36 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     }
     
     @Override
-    protected void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
-            DynamicTrackedRace trackedRace) {
-            try {
-                racingEventServiceTracker.getInitializedService(0).getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, (raceTracker) -> {
-                    try {
-                        if (raceTracker != null) {
-                            boolean added = raceTracker.add(new RaceTracker.Listener() {
-                                @Override
-                                public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
-                                    raceTracker.remove(this);
-                                    removeRaceLogSensorDataTracker(raceIdentifier, preemptive, willBeRemoved);
-                                }
-                            });
-                            // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
-                            if (added) {
-                                RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager(
-                                        (DynamicTrackedRace) trackedRace, racingEventServiceTracker.getInitializedService(0).getSensorFixStore(),
-                                        sensorFixMapperFactory, /* removeOutliersFromCompetitorTracks */ true);
-                                RaceLogFixTrackerManager oldInstance = null;
-                                synchronized (this) {
-                                    oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
-                                }
-                                if (oldInstance != null) {
-                                    oldInstance.stop(/* preemptive */ true, /* willBeRemoved */ false);
-                                }
+    protected void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta, DynamicTrackedRace trackedRace) {
+        try {
+            racingEventServiceTracker.getInitializedService(0).getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, (raceTracker) -> {
+                try {
+                    if (raceTracker != null) {
+                        boolean added = raceTracker.add(new RaceTracker.Listener() {
+                            @Override
+                            public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
+                                raceTracker.remove(this);
+                                removeRaceLogSensorDataTracker(raceIdentifier, preemptive, willBeRemoved);
+                            }
+                        });
+                        // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
+                        if (added) {
+                            RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager(
+                                    (DynamicTrackedRace) trackedRace, racingEventServiceTracker.getInitializedService(0).getSensorFixStore(),
+                                    sensorFixMapperFactory, /* removeOutliersFromCompetitorTracks */ true);
+                            RaceLogFixTrackerManager oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
+                            if (oldInstance != null) {
+                                oldInstance.stop(/* preemptive */ true, /* willBeRemoved */ false);
                             }
                         }
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
                     }
-                });
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override
@@ -132,7 +130,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
         }
     }
     
-    private synchronized void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogFixTrackerManager trackerManager) {
+    private void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogFixTrackerManager trackerManager) {
         dataTrackers.remove(raceIdentifier, trackerManager);
     }
     
