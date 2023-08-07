@@ -21,6 +21,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
+import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailServiceResolver;
@@ -115,7 +116,14 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
 
     @Override
     public void sendMail(String toAddress, String subject, String body) throws MailException {
-        apply(new SendMailOperation(toAddress, subject, body));
+        if (ServerStartupConstants.EMAIL_DEACTIVATED) {
+            logger.warning("would send email, currently disabled.");
+            logger.info("toAddress: " + toAddress);
+            logger.info("subject: " + subject);
+            logger.info("body: " + body);
+        } else {
+            apply(new SendMailOperation(toAddress, subject, body));
+        }
     }
 
     @Override
@@ -131,7 +139,14 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
 
     @Override
     public void sendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
-        apply(new SendMailWithMultipartSupplierOperation(toAddress, subject, multipartSupplier));
+        if (ServerStartupConstants.EMAIL_DEACTIVATED) {
+            logger.warning("would send email, currently disabled.");
+            logger.info("toAddress: " + toAddress);
+            logger.info("subject: " + subject);
+            logger.info("multipartSupplier");
+        } else {
+            apply(new SendMailWithMultipartSupplierOperation(toAddress, subject, multipartSupplier));
+        }
     }
 
     // ----------------- Replication -------------

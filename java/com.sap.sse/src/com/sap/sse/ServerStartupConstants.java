@@ -12,4 +12,6 @@ public interface ServerStartupConstants {
      * Used to disable the need for mail verification to purchase a subscription on a local test setup.
      */
     final static boolean SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED = Boolean.valueOf(System.getProperty("subscriptions.disableMailVerificationRequirement"));
+
+    final static boolean EMAIL_DEACTIVATED = Boolean.valueOf(System.getProperty("sapsailing.email.deactivated"));
 }

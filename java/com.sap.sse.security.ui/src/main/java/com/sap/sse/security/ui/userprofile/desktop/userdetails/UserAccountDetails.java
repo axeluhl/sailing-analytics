@@ -2,10 +2,8 @@ package com.sap.sse.security.ui.userprofile.desktop.userdetails;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.common.CommonSharedResources;
@@ -47,11 +45,5 @@ public class UserAccountDetails extends AbstractUserDetails {
             validationStatus.setText(StringMessages.INSTANCE.emailNotValidated());
         }
         editImageLinkUi.getStyle().setBackgroundImage("url('" + SharedAuthenticationResources.INSTANCE.userdefault().getSafeUri().asString() + "')");
-    }
-    
-    @UiHandler("changeEmailUi")
-    public void onChangeEmailClicked(ClickEvent event) {
-        super.onChangeEmailClicked(event);
-        validationStatus.setText(StringMessages.INSTANCE.emailNotValidated());
     }
 }
