@@ -21,7 +21,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
-import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailServiceResolver;
@@ -58,6 +57,21 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
     
     private boolean canSendMail() {
         return mailProperties != null && mailProperties.containsKey("mail.transport.protocol");
+    }
+
+    /**
+     * Get the configuration state of mail.enabled property from mail.properties.
+     * 
+     * @return true if mail.enabled is set and is true (case insensitive)
+     */
+    private boolean isSendMailActive() {
+        final boolean mailActive;
+        if (mailProperties != null && mailProperties.get("mail.enabled") != null) {
+            mailActive = Boolean.valueOf(String.valueOf(mailProperties.get("mail.enabled")));
+        } else {
+            mailActive = false;
+        }
+        return mailActive;
     }
 
     // protected for testing purposes
@@ -116,13 +130,13 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
 
     @Override
     public void sendMail(String toAddress, String subject, String body) throws MailException {
-        if (ServerStartupConstants.EMAIL_DEACTIVATED) {
+        if (isSendMailActive()) {
+            apply(new SendMailOperation(toAddress, subject, body));
+        } else {
             logger.warning("would send email, currently disabled.");
             logger.info("toAddress: " + toAddress);
             logger.info("subject: " + subject);
             logger.info("body: " + body);
-        } else {
-            apply(new SendMailOperation(toAddress, subject, body));
         }
     }
 
@@ -139,13 +153,13 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
 
     @Override
     public void sendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
-        if (ServerStartupConstants.EMAIL_DEACTIVATED) {
+        if (isSendMailActive()) {
+            apply(new SendMailWithMultipartSupplierOperation(toAddress, subject, multipartSupplier));
+        } else {
             logger.warning("would send email, currently disabled.");
             logger.info("toAddress: " + toAddress);
             logger.info("subject: " + subject);
             logger.info("multipartSupplier");
-        } else {
-            apply(new SendMailWithMultipartSupplierOperation(toAddress, subject, multipartSupplier));
         }
     }
 
