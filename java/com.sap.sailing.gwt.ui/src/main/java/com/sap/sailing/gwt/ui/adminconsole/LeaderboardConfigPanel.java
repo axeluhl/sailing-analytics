@@ -151,7 +151,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         final Button createFlexibleLeaderboardBtn = buttonPanel
                 .addCreateAction(stringMessages.createFlexibleLeaderboard() + " ...", this::createFlexibleLeaderboard);
         createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
-
         final Supplier<Boolean> leaderboardCreateAndRegattaReadPermission = () -> userService
                 .hasCurrentUserPermissionToCreateObjectOfType(LEADERBOARD)
                 && userService.hasCurrentUserAnyPermission(REGATTA.getPermission(READ), null);
@@ -873,9 +872,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 canDeleteAllSelected = false;
             }
         }
-
         leaderboardRemoveButton.setEnabled(!selectedLeaderboards.isEmpty() && canDeleteAllSelected);
-
         final StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
