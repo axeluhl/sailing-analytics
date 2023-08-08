@@ -108,7 +108,7 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
     URL getSailorsInfoWebsiteURLOrFallback(Locale locale);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
-
+    
     /** 
      * Sets and converts all event images and videos from the old URL based format to the new richer format 
      * */ 

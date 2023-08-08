@@ -143,7 +143,7 @@ public class BravoFixTrackFoiledDistanceCacheTest {
     
     @Before
     public void setUp() {
-        final CourseAreaImpl courseArea = new CourseAreaImpl("Test", UUID.randomUUID());
+        final CourseAreaImpl courseArea = new CourseAreaImpl("Test", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null);
         gpsTrack = new DynamicGPSFixMovingTrackImpl<>(courseArea, /* millisecondsOverWhichToAverage */ 15000);
         track = new BravoFixTrackImpl<CourseArea>(courseArea, "test", /* hasExtendedFixes */ true, gpsTrack) {
             private static final long serialVersionUID = 1473560197177750211L;

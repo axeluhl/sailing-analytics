@@ -356,6 +356,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Speed;
@@ -1512,12 +1513,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
+            boolean isPublic, List<CourseAreaDTO> courseAreas, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException {
         final UUID eventUuid = UUID.randomUUID();
-
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventUuid), eventName,
                 new Callable<EventDTO>() {
@@ -1536,20 +1536,20 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         getService().apply(new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint,
                                 venue, isPublic, eventUuid, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
                                 eventImages, eventVideos, leaderboardGroupIds));
-                        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
+                        createCourseAreas(eventUuid, courseAreas);
                         return getEventById(eventUuid, false);
                     }
                 });
     }
 
     @Override
-    public void createCourseAreas(UUID eventId, String[] courseAreaNames) {
+    public void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas) {
         getSecurityService().checkCurrentUserUpdatePermission(getService().getEvent(eventId));
-        final UUID[] courseAreaIDs = new UUID[courseAreaNames.length];
-        for (int i = 0; i < courseAreaNames.length; i++) {
-            courseAreaIDs[i] = UUID.randomUUID();
-        }
-        getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIDs));
+        getService().apply(new AddCourseAreas(eventId,
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getName), new String[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getId), new UUID[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getCenterPosition), new Position[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getRadius), new Distance[courseAreas.size()])));
     }
 
     @Override

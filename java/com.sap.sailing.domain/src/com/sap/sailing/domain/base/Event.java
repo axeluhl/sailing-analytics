@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.base;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -79,4 +82,22 @@ public interface Event extends EventBase {
      * that no such position can be obtained in which case this method returns {@code null}.
      */
     Position getLocation();
+
+    /**
+     * Obtains the leaderboards of this event. The "link" is made through the {@link #getLeaderboardGroups() leaderboard
+     * groups} and from there to their {@link LeaderboardGroup#getLeaderboards() leaderboards}, filtering only those
+     * whose {@link Leaderboard#getCourseAreas() course areas} have a non-empty intersection with this event
+     * {@link #getVenue() venue}'s {@link Venue#getCourseAreas() course areas}.
+     */
+    default Iterable<Leaderboard> getLeaderboards() {
+        final Set<Leaderboard> result = new HashSet<>();
+        for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (leaderboard.isPartOfEvent(this)) {
+                    result.add(leaderboard);
+                }
+            }
+        }
+        return result;
+    }
 }

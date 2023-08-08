@@ -96,6 +96,7 @@ import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -743,7 +744,7 @@ public class ExpeditionAllInOneImporter {
     private UUID addDefaultCourseArea(final Event event) {
         final String courseAreaName = "Default";
         final UUID courseAreaId = UUID.randomUUID();
-        service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
+        service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId }, /* centerPositions */ new Position[0], /* radiuses */ new Distance[0]);
         return courseAreaId;
     }
 

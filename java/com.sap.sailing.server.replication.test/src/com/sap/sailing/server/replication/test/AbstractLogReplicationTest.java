@@ -109,7 +109,7 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
                 /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true, new LowPoint(),
                 /* a single default course area ID */ Collections.singleton(master.getBaseDomainFactory()
-                        .getOrCreateCourseArea(UUID.randomUUID(), "Course Area").getId()),
+                        .getOrCreateCourseArea(UUID.randomUUID(), "Course Area", /* centerPosition */ null, /* radius */ null).getId()),
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN);

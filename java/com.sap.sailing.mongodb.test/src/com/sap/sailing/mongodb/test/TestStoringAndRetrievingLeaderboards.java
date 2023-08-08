@@ -145,7 +145,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     public void testStoreAndRetrieveSimpleLeaderboard() {
         final String leaderboardName = "TestLeaderboard";
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
-        final CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "My Course Area");
+        final CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), "My Course Area", /* centerPosition */ null, /* radius */ null);
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), courseArea);
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);

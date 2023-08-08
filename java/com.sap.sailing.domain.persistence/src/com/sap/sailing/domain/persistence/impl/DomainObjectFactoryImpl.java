@@ -194,6 +194,7 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
@@ -206,6 +207,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -1292,9 +1294,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private CourseArea loadCourseArea(Document courseAreaDBObject) {
-        String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
-        UUID id = (UUID) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
-        return baseDomainFactory.getOrCreateCourseArea(id, name);
+        final String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
+        final UUID id = (UUID) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
+        final Document centerPositionDoc = (Document) courseAreaDBObject.get(FieldNames.COURSE_AREA_CENTER_POSITION.name());
+        final Position centerPosition;
+        final Distance radius;
+        if (centerPositionDoc != null) {
+            centerPosition = loadPosition(centerPositionDoc);
+        } else {
+            centerPosition = null;
+        }
+        final Number radiusNumber = (Number) courseAreaDBObject.get(FieldNames.COURSE_AREA_RADIUS_IN_METERS.name());
+        if (radiusNumber != null) {
+            radius = new MeterDistance(radiusNumber.doubleValue());
+        } else {
+            radius = null;
+        }
+        final CourseArea result = baseDomainFactory.getOrCreateCourseArea(id, name, centerPosition, radius);
+        return result;
     }
 
     @Override

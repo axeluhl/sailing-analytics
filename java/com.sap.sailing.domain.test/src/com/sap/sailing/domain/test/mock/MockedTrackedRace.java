@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
@@ -1387,5 +1388,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public boolean hasFinishedLoading() {
         return false;
+    }
+
+    @Override
+    public UUID getCourseAreaId() {
+        return null;
     }
 }

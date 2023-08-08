@@ -18,7 +18,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class BravoFixTrackInterpolationWithNullTest {
     @Test
     public void testFixesWithNonNullFieldsAreSelected() {
-        DynamicBravoFixTrack<CourseArea> track = new BravoFixTrackImpl<>(new CourseAreaImpl("Test", UUID.randomUUID()),
+        DynamicBravoFixTrack<CourseArea> track = new BravoFixTrackImpl<>(new CourseAreaImpl("Test", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null),
                 "test", /* hasExtendedFixes */ true);
         track.add(createFix(10l, 5., null));
         track.add(createFix(20l, null, 7.));
@@ -28,7 +28,7 @@ public class BravoFixTrackInterpolationWithNullTest {
 
     @Test
     public void testFixesWithNonNullFieldsAreSelectedForMultipleNullsInARow() {
-        DynamicBravoFixTrack<CourseArea> track = new BravoFixTrackImpl<>(new CourseAreaImpl("Test", UUID.randomUUID()),
+        DynamicBravoFixTrack<CourseArea> track = new BravoFixTrackImpl<>(new CourseAreaImpl("Test", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null),
                 "test", /* hasExtendedFixes */ true);
         track.add(createFix(10l, 5., null));
         track.add(createFix(20l, null, 7.));

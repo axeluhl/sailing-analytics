@@ -73,7 +73,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
     @Before
     public void setUp() {
         final CourseAreaImpl courseArea = new CourseAreaImpl(
-                "Test Course Area", UUID.randomUUID());
+                "Test Course Area", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null);
         flexibleLeaderboard = new FlexibleLeaderboardImpl("Test Flexible Leaderboard",
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), courseArea);
         competitorProviderFlexibleLeaderboard = new CompetitorProviderFromRaceColumnsAndRegattaLike(flexibleLeaderboard);

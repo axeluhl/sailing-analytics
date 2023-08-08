@@ -53,10 +53,8 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
     public ListEditorComposite(Iterable<ValueType> initialValues, ListEditorUiStrategy<ValueType> activeUi) {
         this.values = new ArrayList<ValueType>();
         Util.addAll(initialValues, this.values);
-
         this.activeUi = activeUi;
         this.activeUi.setContext(this);
-
         initWidget(activeUi.initWidget());
         activeUi.refresh();
     }
