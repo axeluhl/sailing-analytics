@@ -150,7 +150,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         initWidget(panel);
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
-        
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
@@ -158,7 +157,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable = raceTableWrapper.getTable();
         raceTable.setPageSize(1000);
         raceTable.ensureDebugId("TrackedRacesCellTable");
-        
         Label lblFilterRaces = new Label(stringMessages.filterRaces()+":");
         lblFilterRaces.setWordWrap(false);
         lblFilterRaces.getElement().getStyle().setFontWeight(FontWeight.BOLD);
@@ -201,21 +199,18 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 return "TrackedRacesByRegattaFilter";
             }
         });
-
         Label lblFilterRacesByName = new Label(stringMessages.filterByNameOrBoatClass() + ":");
         lblFilterRacesByName.setWordWrap(false);
         filterablePanelRaces.add(lblFilterRacesByName);
         filterablePanelRaces.addDefaultTextBox();
         filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
-        
         filterPanel.add(filterablePanelRaces);
         filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         filterablePanelRaces.setUpdatePermissionFilterForCheckbox(race -> userService.hasPermission(race, DefaultActions.UPDATE));
-
+        // selection model wiring
         refreshableSelectionModel = raceTableWrapper.getSelectionModel();
         setupTableColumns(stringMessages, raceTableWrapper.getColumnSortHandler());
-        raceTable.setWidth("300px");
-
+        raceTable.setWidth("100%");
         raceTable.setVisible(false);
         panel.add(raceTableWrapper);
         refreshableSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -225,11 +220,9 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 makeControlsReactToSelectionChange(selectedRaces);
             }
         });
-        
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
-
         btnRefresh = new Button(stringMessages.refresh());
         btnRefresh.ensureDebugId("RefreshButton");
         btnRefresh.addClickHandler(new ClickHandler() {
