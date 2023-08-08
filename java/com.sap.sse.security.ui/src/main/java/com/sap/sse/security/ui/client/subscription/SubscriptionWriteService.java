@@ -34,8 +34,6 @@ public interface SubscriptionWriteService<C, P, F> extends SubscriptionService {
      */
     public boolean nonRenewingSubscription(String planId);
     
-    boolean isMailVerificationRequired();
-    
     /**
      * Return provider configuration that will be required for client to setup
      */

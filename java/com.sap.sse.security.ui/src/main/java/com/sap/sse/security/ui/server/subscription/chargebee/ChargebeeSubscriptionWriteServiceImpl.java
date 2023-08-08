@@ -144,11 +144,6 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
     }
     
     @Override
-    public boolean isMailVerificationRequired() {
-        return !ServerStartupConstants.SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED;
-    }
-    
-    @Override
     public ChargebeeConfigurationDTO getConfiguration() {
         final ChargebeeConfiguration configuration = ChargebeeConfiguration.getInstance();
         final ChargebeeConfigurationDTO result;

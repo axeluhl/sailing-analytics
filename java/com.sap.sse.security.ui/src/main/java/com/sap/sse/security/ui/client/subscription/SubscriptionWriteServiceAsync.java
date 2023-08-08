@@ -13,6 +13,4 @@ public interface SubscriptionWriteServiceAsync<C, P, F> extends SubscriptionServ
     public void getConfiguration(AsyncCallback<C> callback);
 
     public void prepareCheckout(String planId, AsyncCallback<P> data);
-
-    void isMailVerificationRequired(AsyncCallback<Boolean> callback);
 }

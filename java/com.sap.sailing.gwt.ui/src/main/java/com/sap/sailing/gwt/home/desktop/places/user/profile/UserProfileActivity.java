@@ -57,7 +57,6 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
         panel.setWidget(currentView);
         currentView.navigateTabsTo(currentPlace);
         currentView.setAuthenticationContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
-
         eventBus.addHandler(AuthenticationContextEvent.TYPE,
                 event -> currentView.setAuthenticationContext(event.getCtx()));
     }

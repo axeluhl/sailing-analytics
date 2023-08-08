@@ -38,7 +38,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
                 if (!authenticationContext.isLoggedIn()) {
                     onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
                     presenter.toggleAuthenticationFlyout();
-                } else if(!this.isEmailValidated(authenticationContext)) {
+                } else if (!this.isEmailValidated(authenticationContext)) {
                     onOpenCheckoutError(StringMessages.INSTANCE.mailNotValidated());
                     presenter.toggleAuthenticationFlyout();
                 } else {
@@ -53,7 +53,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
                 if (!authenticationContext.isLoggedIn()) {
                     onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
                     presenter.toggleAuthenticationFlyout();
-                } else if(!this.isEmailValidated(authenticationContext)) {
+                } else if (!this.isEmailValidated(authenticationContext)) {
                     onOpenCheckoutError(StringMessages.INSTANCE.mailNotValidated());
                     presenter.toggleAuthenticationFlyout();
                 } else {
@@ -94,8 +94,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     }
     
     private boolean isEmailValidated(final AuthenticationContext authenticationContext) {
-        return !presenter.isMailVerificationRequired() ||
-                authenticationContext.getCurrentUser().isEmailValidated();
+        return !presenter.isMailVerificationRequired();
     }
 
     @Override
