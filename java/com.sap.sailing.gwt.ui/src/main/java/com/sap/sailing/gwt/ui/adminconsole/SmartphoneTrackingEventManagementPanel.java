@@ -325,7 +325,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());
         racesTable.addColumn(courseStateColumn, stringMessages.courseStatus());
         racesTable.addColumn(raceActionColumn, stringMessages.actions());
-        racesTable.setWidth("600px");
     }
 
     private void handleCopy(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
