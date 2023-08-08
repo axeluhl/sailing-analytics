@@ -144,11 +144,10 @@ public class SubscriptionCard extends Composite {
             button.setText(i18n.subscribe());
             break;
         case DEFAULT:
-            GWT.log("email validated: " + emailValidated);
             if (emailValidated) {
                 button.setText(i18n.subscribe());
             } else {
-                button.setText(i18n.emailNotValidated() + "1");
+                button.setText(i18n.emailNotValidated());
                 button.addStyleName(BUTTON_WARNING);
             }
             break;
@@ -156,7 +155,7 @@ public class SubscriptionCard extends Composite {
             if (emailValidated) {
                 button.setText(i18n.upgrade());
             } else {
-                button.setText(i18n.emailNotValidated() + "2");
+                button.setText(i18n.emailNotValidated());
                 button.addStyleName(BUTTON_WARNING);
             }
             break;
