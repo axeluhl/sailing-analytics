@@ -39,6 +39,7 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
         if (authenticationManager.getAuthenticationContext().isLoggedIn()) {
             view.setUser(authenticationManager.getAuthenticationContext().getCurrentUser());
         }
+        this.userService.addUserStatusEventHandler((user, preAuthenticated)->view.setUser(user));
     }
     
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
