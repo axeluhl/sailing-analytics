@@ -42,6 +42,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
             renderSubscriptions(eventBus);
         });
         panel.setWidget(view);
+        renderSubscriptions(eventBus);
     }
     
     private void renderSubscriptions(final EventBus eventBus) {

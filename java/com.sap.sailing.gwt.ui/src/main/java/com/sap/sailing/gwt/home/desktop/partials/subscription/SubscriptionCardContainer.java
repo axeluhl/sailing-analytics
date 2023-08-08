@@ -199,5 +199,4 @@ public class SubscriptionCardContainer extends Composite {
         popup.addAutoHidePartner(businessModelInfoButton.getElement());
         popup.center();
     }
-
 }
