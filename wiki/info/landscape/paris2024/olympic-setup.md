@@ -475,6 +475,21 @@ For requests blocked by the rule, the response code, response headers and messag
 
 In each region supported, a dedicated load balancer for the Global Accelerator-based event setup has been set up (``Paris2024ALB`` or simply ``ALB``). A single target group with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-paris2024`` (public).
 
+Remember to activate *logging* for all Application Load Balancers. Each region requires its own S3 bucket. You may choose to re-use the tokyo2020 buckets. Once you need to create one or more new buckets for new regions, make sure to add them to the two Athena queries we use, copying the pattern you'll see for the ``tokyo2020`` log file buckets. Use the stored query "Create partitioned table for eu-west-1 logs" and modify accordingly to create a separate partitioned table for each new bucket you created for your regions, then add those tables to the cascade of ``select`` statements in those Athena queries:
+
+```
+select *
+    from alb_log_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_ap_northeast_1_partition_projection
+    ...
+    union all
+    select *
+    from alb_log_{your-event-name}_{region-name}_partition_projection,
+    ...
+```
+
 Note that no dedicated ``-m`` master target group is established. The reason is that the AWS Global Accelerator judges an ALB's health by looking at _all_ its target groups; should only a single target group not have a healthy target, the Global Accelerator considers the entire ALB unhealthy. With this, as soon as the on-site master server is unreachable, e.g., during an upgrade, all those ALBs would enter the "unhealthy" state from the Global Accelerator's perspective, and all public replicas which are still healthy would no longer receive traffic; the site would go "black." Therefore, we must ensure that the ALBs targeted by the Global Accelerator only have a single target group which only has the public replicas in that region as its targets.
 
 Each ALB has an HTTP and an HTTPS listener. The HTTP listener has only a single rule redirecting all traffic permanently (301) to the corresponding HTTPS request. The HTTPS listener has three rules: the ``/`` path for ``paris2024.sapsailing.com`` is re-directed to the Olympic event with ID ``TODO``. All other traffic for ``paris2024.sapsailing.com`` goes to the public target group holding the regional replica(s). A default rule returns a 404 status with a static ``Not found`` text.
