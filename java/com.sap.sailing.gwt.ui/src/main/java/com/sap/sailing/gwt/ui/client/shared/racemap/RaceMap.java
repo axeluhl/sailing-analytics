@@ -713,6 +713,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     RaceMapImageManager getRaceMapImageManager() {
         return raceMapImageManager;
     }
+    
+    protected Set<RegattaAndRaceIdentifier> getOtherRacesToShow() {
+        return Collections.unmodifiableSet(otherRacesToShow);
+    }
 
     public void setQuickRanksDTOProvider(QuickFlagDataProvider newQuickRanksDTOProvider) {
         if (this.quickFlagDataProvider != null) {
