@@ -34,7 +34,6 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
-import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -134,7 +133,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
             availableLeaderboardGroupsByName.put(lgDTO.getName(), lgDTO);
         }
-        getDialogBox().getWidget().setWidth("730px");
+        getDialogBox().getWidget().setWidth("800px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
@@ -148,8 +147,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             }
         };
         courseAreaNameList = new CourseAreaListInlineEditorComposite(Collections.<CourseAreaDTO> emptyList(),
-                new GenericStringListInlineEditorComposite.ExpandedUi<CourseAreaDTO>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
+                new CourseAreaListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 30));
         courseAreaNameList.addValueChangeHandler(courseAreaValueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
         for (LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
@@ -175,14 +174,14 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     @Override
     protected EventDTO getResult() {
         final List<LeaderboardGroupDTO> leaderboardGroups = new ArrayList<>();
-        List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
+        final List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
         for (final String lgName : leaderboardGroupNames) {
             final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
             if (lgDTO != null) {
                 leaderboardGroups.add(lgDTO);
             }
         }
-        EventDTO result = new EventDTO(nameEntryField.getText(), leaderboardGroups);
+        final EventDTO result = new EventDTO(nameEntryField.getText(), leaderboardGroups);
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
         result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
@@ -191,7 +190,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
         result.id = id;
-        List<CourseAreaDTO> courseAreas = courseAreaNameList.getValue();
+        final List<CourseAreaDTO> courseAreas = courseAreaNameList.getValue();
         for (ImageDTO image : imagesListComposite.getAllImages()) {
             result.addImage(image);
         }

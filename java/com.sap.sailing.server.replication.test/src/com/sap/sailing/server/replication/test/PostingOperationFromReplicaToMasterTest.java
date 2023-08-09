@@ -41,10 +41,10 @@ public class PostingOperationFromReplicaToMasterTest extends AbstractServerRepli
     @Test
     public void testPostOperationToMaster() throws InterruptedException, URISyntaxException {
         final String leaderboardName = "My Leaderboard";
-        final CourseArea courseArea = replica.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Course Area");
+        final CourseArea courseArea = replica.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Course Area", /* centerPosition */ null, /* radius */ null);
         // in production, backward replication of a course area would happen by a backward
         // replication of an event with that course area; here, we have to "emulate" this explicitly
-        master.getBaseDomainFactory().getOrCreateCourseArea(courseArea.getId(), courseArea.getName());
+        master.getBaseDomainFactory().getOrCreateCourseArea(courseArea.getId(), courseArea.getName(), /* centerPosition */ null, /* radius */ null);
         final CreateFlexibleLeaderboard operation = new CreateFlexibleLeaderboard(/* leaderboardName */ leaderboardName,
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0], /* scoringScheme */ new LowPoint(),
                 /* courseAreaId */ Collections.singleton(courseArea.getId()));

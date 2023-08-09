@@ -59,6 +59,24 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
         return mailProperties != null && mailProperties.containsKey("mail.transport.protocol");
     }
 
+    /**
+     * Get the mail sending state based on 'mail.enabled' property from mail.properties. 
+     * Replica disablement is not controlled by this key. 
+     * Default if not set is false. 
+     * 
+     * @return true if mail.enabled is set to false (case insensitive)
+     */
+    private boolean isSendMailSetInactive() {
+        final boolean mailInactive;
+        if (mailProperties != null && mailProperties.get("mail.enabled") != null) {
+            mailInactive = "false".equals(String.valueOf(mailProperties.get("mail.enabled")).toLowerCase());
+        } else {
+            // only disable mailing if explicit set to false, e.g. in testing cases this code need to be accessible
+            mailInactive = false;
+        }
+        return mailInactive;
+    }
+
     // protected for testing purposes
     protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter) throws MailException {
         if (canSendMail()) {
@@ -115,7 +133,14 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
 
     @Override
     public void sendMail(String toAddress, String subject, String body) throws MailException {
-        apply(new SendMailOperation(toAddress, subject, body));
+        if (isSendMailSetInactive()) {
+            logger.warning("would send email, currently disabled.");
+            logger.info("toAddress: " + toAddress);
+            logger.info("subject: " + subject);
+            logger.info("body: " + body);
+        } else {
+            apply(new SendMailOperation(toAddress, subject, body));
+        }
     }
 
     @Override
@@ -131,7 +156,14 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
 
     @Override
     public void sendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
-        apply(new SendMailWithMultipartSupplierOperation(toAddress, subject, multipartSupplier));
+        if (isSendMailSetInactive()) {
+            logger.warning("would send email, currently disabled.");
+            logger.info("toAddress: " + toAddress);
+            logger.info("subject: " + subject);
+            logger.info("multipartSupplier");
+        } else {
+            apply(new SendMailWithMultipartSupplierOperation(toAddress, subject, multipartSupplier));
+        }
     }
 
     // ----------------- Replication -------------

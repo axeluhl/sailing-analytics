@@ -24,9 +24,10 @@ public class UserProfileDetailsActivity extends AbstractUserProfileActivity impl
         currentView.setAuthenticationContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
 
         userDetailsPresenter = new UserDetailsPresenter(currentView.getUserDetailsView(),
-                clientFactory.getAuthenticationManager(), clientFactory.getUserManagementWriteService(), clientFactory
-                        .getNavigator().getMailVerifiedConfirmationNavigation().getTargetUrl());
-        
+                clientFactory.getAuthenticationManager(), clientFactory.getUserManagementWriteService(),
+                clientFactory.getUserService(),
+                clientFactory.getNavigator().getMailVerifiedConfirmationNavigation().getTargetUrl());
+
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
@@ -35,5 +36,4 @@ public class UserProfileDetailsActivity extends AbstractUserProfileActivity impl
             }
         });
     }
-    
 }

@@ -9,6 +9,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -24,18 +25,21 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     private final AuthenticationManager authenticationManager;
 
     private final UserManagementWriteServiceAsync userManagementService;
+    private final UserService userService;
     private final String mailVerifiedConfirmationUrlToken;
     private final UserDetailsView view;
 
-    public UserDetailsPresenter(UserDetailsView view, AuthenticationManager authenticationManager, UserManagementWriteServiceAsync userManagementService, String mailVerifiedConfirmationUrlToken) {
+    public UserDetailsPresenter(UserDetailsView view, AuthenticationManager authenticationManager, UserManagementWriteServiceAsync userManagementService, UserService userService, String mailVerifiedConfirmationUrlToken) {
         this.view = view;
         this.authenticationManager = authenticationManager;
         this.userManagementService = userManagementService;
+        this.userService = userService;
         this.mailVerifiedConfirmationUrlToken = mailVerifiedConfirmationUrlToken;
         view.setPresenter(this);
         if (authenticationManager.getAuthenticationContext().isLoggedIn()) {
             view.setUser(authenticationManager.getAuthenticationContext().getCurrentUser());
         }
+        this.userService.addUserStatusEventHandler((user, preAuthenticated)->view.setUser(user));
     }
     
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
@@ -70,6 +74,7 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
                     @Override
                     public void onSuccess(Void result) {
                         Notification.notify(i18n_sec.successfullyUpdatedEmail(username, email), NotificationType.INFO);
+                        userService.updateUser(true);
                     }
                     
                     @Override

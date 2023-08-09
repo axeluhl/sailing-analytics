@@ -360,11 +360,18 @@ public abstract class CanvasOverlayV3 {
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
         Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(centerPosition));
-        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
-        Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
-        double diffX = Math.abs(pointX.getX() - pointCenter.getX());
-        double diffY = Math.abs(pointY.getY() - pointCenter.getY());
+        Point pointX = projection.fromLatLngToDivPixel(posWithDistanceX);
+        Point pointY = projection.fromLatLngToDivPixel(posWithDistanceY);
+        double diffX = getPointDistance(pointX, pointCenter);
+        double diffY = getPointDistance(pointY, pointCenter);
         return Math.min(diffX, diffY);  
+    }
+    
+    /**
+     * Computes the Euklidian distance between the two points in their coordinate system
+     */
+    private double getPointDistance(Point a, Point b) {
+        return Math.sqrt((b.getX()-a.getX())*(b.getX()-a.getX()) + (b.getY()-a.getY())*(b.getY()-a.getY()));
     }
 
     protected double calculateDistanceAlongX(MapCanvasProjection projection, Position pos, Distance distanceX) {

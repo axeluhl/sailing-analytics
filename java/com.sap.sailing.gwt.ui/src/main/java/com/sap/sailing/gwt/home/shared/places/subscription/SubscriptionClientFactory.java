@@ -5,6 +5,5 @@ import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.client.WithSecurity;
 
 public interface SubscriptionClientFactory extends ErrorAndBusyClientFactory, WithSecurity, WithAuthenticationManager {
-
     SubscriptionView createSubscriptionsView();
 }

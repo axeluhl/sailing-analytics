@@ -34,7 +34,6 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -234,12 +233,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createEvent(final EventDTO newEvent) {
-        List<String> courseAreaNames = new ArrayList<String>();
-        for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
-            courseAreaNames.add(courseAreaDTO.getName());
-        }
         sailingServiceWrite.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
+                newEvent.venue.getName(), newEvent.isPublic, newEvent.venue.getCourseAreas(), newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
                 newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(),
                 newEvent.getVideos(), newEvent.getLeaderboardGroupIds(), new AsyncCallback<EventDTO>() {
                     @Override

@@ -45,6 +45,14 @@
   font-size: 1rem;
   display: inline-block;
 }
+.useraccountdetails_content_hint {
+  padding-left: 1.333333333333333em;
+  margin: 1.333333333333333em;
+  overflow: hidden;
+  font-size: 1rem;
+  display: inline-block;
+  font-family: auto;
+ }
 .useraccountdetails_content_detail_label {
   display: block;
   width: 100%;
@@ -68,4 +76,11 @@
 .useraccountdetails_content_spacer {
   height: 2rem;
   display: inline-block;
+}
+.useraccountdetails_status_text {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  margin-bottom: 0.4em;
+  text-align: right;
 }
