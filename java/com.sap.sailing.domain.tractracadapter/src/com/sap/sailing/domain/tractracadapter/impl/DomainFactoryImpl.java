@@ -869,7 +869,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         // because CompetitorImpl.hashCode/equals are based solely on Java object identity
                         competitorsCurrentlyBeingMigrated.remove(existingCompetitor);
                     } else {
-                        competitorToUse = existingCompetitor;
+                        competitorToUse = getOrCreateCompetitor(rc.getCompetitor(), raceTrackingHandler);
                     }
                 } else {
                     competitorToUse = getOrCreateCompetitor(rc.getCompetitor(), raceTrackingHandler);
