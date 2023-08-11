@@ -99,7 +99,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("ESTONIA", "EE", "EST", "ee", "EST", "EST", "233", "372"));
         add(new CountryCodeImpl("ETHIOPIA", "ET", "ETH", "et", "ETH", "ETH", "231", "251"));
         add(new CountryCodeImpl("EUROPEAN UNION", null, null, "eu", null, null, null, null));
-        add(new CountryCodeImpl("FAEROE ISLANDS", "FO", "FRO", "fo", "FR", null, "234", "298"));
+        add(new CountryCodeImpl("FAEROE ISLANDS", "FO", "FRO", "fo", "FR", "FRO", "234", "298"));
         add(new CountryCodeImpl("FALKLAND ISLANDS (MALVINAS)", "FK", "FLK", "fk", null, null, "238", "500"));
         add(new CountryCodeImpl("FIJI", "FJ", "FJI", "fj", "FJI", "FIJ", "242", "679"));
         add(new CountryCodeImpl("FINLAND", "FI", "FIN", "fi", "FIN", "FIN", "246", "358"));
