@@ -159,7 +159,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("LIECHTENSTEIN (Fürstentum Liechtenstein)", "LI", "LIE", "li", "FL", "LIE", "438", "423"));
         add(new CountryCodeImpl("LITHUANIA", "LT", "LTU", "lt", "LT", "LTU", "440", "370"));
         add(new CountryCodeImpl("LUXEMBOURG", "LU", "LUX", "lu", "L", "LUX", "442", "352"));
-        add(new CountryCodeImpl("MACAO (Special Administrative Region of China)", "MO", "MAC", "mo", null, null, "446", "853"));
+        add(new CountryCodeImpl("MACAO (Special Administrative Region of China)", "MO", "MAC", "mo", null, "MAC", "446", "853"));
         add(new CountryCodeImpl("MACEDONIA (Former Yugoslav Republic of Macedonia)", "MK", "MKD", "mk", "MK", "MKD", "807", "389"));
         add(new CountryCodeImpl("MADAGASCAR", "MG", "MDG", "mg", "RM", "MAD", "450", "261"));
         add(new CountryCodeImpl("MALAWI", "MW", "MWI", "mw", "MW", "MAW", "454", "265"));

@@ -364,7 +364,7 @@ public class DomainFactoryImpl implements DomainFactory {
             DynamicTeam team = createTeam(name, nationality, competitorId);
             domainCompetitor = raceTrackingHandler.getOrCreateCompetitor(competitorStore, competitorId, name, shortName,
                     null /* displayColor */,
-                    null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
+                    null /* email */, null /* flagImage */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
         return domainCompetitor;
