@@ -71,9 +71,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     
     public MaxSpeedCache(GPSFixTrackImpl<ItemType, FixType> track) {
         this.track = track;
-        track.addListener(this);
         cache = new HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>>();
         lock = new NamedReentrantReadWriteLock(MaxSpeedCache.class.getSimpleName()+" for track of "+track.getTrackedItem(), /* fair */ false);
+        track.addListener(this);
     }
     
     /**
