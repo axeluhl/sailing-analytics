@@ -1102,7 +1102,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         raceInfoDTO.protestFinishTime = protestEndTime.asDate();
                         raceInfoDTO.lastUpperFlag = Flags.BRAVO;
                         raceInfoDTO.lastLowerFlag = Flags.NONE;
-                        raceInfoDTO.lastFlagsAreDisplayed = true;
+                        raceInfoDTO.lastFlagsAreDisplayed = !protestEndTime.after(now);
                         raceInfoDTO.lastFlagsDisplayedStateChanged = true;
                     }
                 }
