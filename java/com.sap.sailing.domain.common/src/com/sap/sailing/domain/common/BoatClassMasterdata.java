@@ -123,6 +123,7 @@ public enum BoatClassMasterdata {
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman", "RS:X Women"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
     RS_TERA ("RS Tera", true, 2.87, 1.23, BoatHullType.MONOHULL, true, "RSTera"),
+    RS_VENTURE ("RS Venture", true, 4.9, 2.0, BoatHullType.MONOHULL, true, "RSVenture"),
     SCAN_KAP_99 ("Scan-kap 99", true, 9.86, 2.61, BoatHullType.MONOHULL,true, "Scan Kap 99"),
     SK_22 ("SK 22", true, 12, 2, BoatHullType.MONOHULL, true, "22er Schärenkreuzer", "22", "SK22", "22 sq.m."),
     SKUD_18 ("SKUD 18", true, 5.8, 2.29, BoatHullType.MONOHULL, true),
