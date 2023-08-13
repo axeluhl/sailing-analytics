@@ -815,17 +815,28 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port, String vpcId);
     
     /**
-     * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the auto-scaling group
-     * based on the {@code shareName}, configuring it to create its instances into {@code targetGroup} instead of the
-     * {@code autoScalingParent}'s target group, and optionally adding the {@code tags} to those copied anyhow from
-     * the {@code autoScalingParent}. The minimum size is copied from the {@code autoScalingParent} unless it is less than two;
-     * in that case, the new auto-scaling group will be configured with a minimum size of two, ensuring availability in case
-     * one target fails.
+     * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the
+     * auto-scaling group based on the {@code shareName}, configuring it to create its instances into
+     * {@code targetGroup} instead of the {@code autoScalingParent}'s target group, and optionally adding the
+     * {@code tags} to those copied anyhow from the {@code autoScalingParent}. The minimum size is the current amount of
+     * the {@code autoScalingParent} unless it is less than two; in that case, the new auto-scaling group will be
+     * configured with a minimum size of two, ensuring availability in case one target fails.
+     * 
+     * @return Returns the new autoscaling group's name.
      */
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
-            String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags);
-    
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> String createAutoScalingGroupFromExisting(
+            AwsAutoScalingGroup autoScalingParent, String shardName, TargetGroup<ShardingKey> targetGroup,
+            Optional<Tags> tags);
+
+    /**
+     * Changes the autoscaling group with {@code autoscalinggroupName} as name in {@code region}. It sets the minSize of
+     * this autoscalingGroup to {@code ShardProdecure.defaultMinAutoscalingSize}.
+     * 
+     * @param autoScalingGroupName
+     * @param region
+     */
+    public void resetShardMinAutoscalingSize(String autoscalinggroupName, Region region);
+
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(
             int instanceWarmupTimeInSeconds, String shardname, TargetGroup<ShardingKey> targetgroup, int maxRequestPerTarget, com.sap.sse.landscape.Region region);

@@ -111,7 +111,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
                 + autoScalingGroup.getName());
-        getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
+        final String newAutoscalingGroupName = getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
         // create one rule to path unused by any application for linking ALB to target group.
         if (loadBalancer != null) {
             final Iterable<Rule> rules = loadBalancer.getRules();
@@ -169,6 +169,9 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     }
                     // change ALB rules to new ones
                     addShardingRules(loadBalancer, shardingKeysToUse, targetGroup);
+                    // restore default minCapacity of shard's autoscalinggroup
+                    getLandscape().resetShardMinAutoscalingSize(newAutoscalingGroupName, region);
+
                 } else {
                     throw new Exception("Unexpected Error - No prio left?");
                 }

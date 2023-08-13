@@ -2068,7 +2068,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
+    String createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
             String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoScalingParent.getRegion()));
         final String launchConfigurationName = autoScalingParent.getAutoScalingGroup().launchConfigurationName();
@@ -2106,6 +2106,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             });
             b.tags(awsTags);
         });
+        autoScalingClient.close();
+        return autoScalingGroupName;
+    }
+    
+    @Override
+    public void resetShardMinAutoscalingSize(String autoscalinggroupName, com.sap.sse.landscape.Region region) {
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        autoScalingClient.updateAutoScalingGroup(t -> t.autoScalingGroupName(autoscalinggroupName)
+                .minSize(ShardProcedure.defaultMinAutoscalingSize).build());
+        autoScalingClient.close();
     }
 
     @Override
