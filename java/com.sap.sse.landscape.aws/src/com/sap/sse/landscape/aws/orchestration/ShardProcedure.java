@@ -53,6 +53,7 @@ extends AbstractAwsProcedureImpl<ShardingKey>
 implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
+    public static final int defaultMinAutoscalingSize = 2;
     @SuppressWarnings("unchecked") // this silently assumes that a String can be cast to a ShardingKey without problems
     protected final ShardingKey SHARDING_KEY_UNUSED_BY_ANY_APPLICATION = (ShardingKey) "lauycaluy3cla3yrclaurlIYQL8";
     protected final String shardName;

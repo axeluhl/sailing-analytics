@@ -63,6 +63,7 @@ import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
+import com.sap.sse.landscape.aws.orchestration.ShardProcedure;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -2074,10 +2075,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String autoScalingGroupName = getAutoScalingGroupName(shardName);
         final List<String> availabilityZones = autoScalingParent.getAutoScalingGroup().availabilityZones();
         final int instanceWarmupTimeInSeconds = autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
-        logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoScalingParent.getName());
+        final int currentMinSize = autoScalingParent.getAutoScalingGroup().instances().size();
+        final int newMinSize = (currentMinSize < ShardProcedure.defaultMinAutoscalingSize)
+                ? ShardProcedure.defaultMinAutoscalingSize
+                : currentMinSize; // ensure that the minsize is at least 2
+        logger.info(
+                "Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoScalingParent.getName() + ". Starting with " + newMinSize + " instances.");
         autoScalingClient.createAutoScalingGroup(b->{
             b
-                .minSize(autoScalingParent.getAutoScalingGroup().minSize() > 1 ? autoScalingParent.getAutoScalingGroup().minSize() : 2)
+                .minSize(newMinSize)
                 .maxSize(autoScalingParent.getAutoScalingGroup().maxSize())
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
