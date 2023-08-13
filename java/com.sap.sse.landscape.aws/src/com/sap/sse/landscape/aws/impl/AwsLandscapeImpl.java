@@ -2076,8 +2076,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final List<String> availabilityZones = autoScalingParent.getAutoScalingGroup().availabilityZones();
         final int instanceWarmupTimeInSeconds = autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
         final int currentMinSize = autoScalingParent.getAutoScalingGroup().instances().size();
-        final int newMinSize = (currentMinSize < ShardProcedure.defaultMinAutoscalingSize)
-                ? ShardProcedure.defaultMinAutoscalingSize
+        final int newMinSize = (currentMinSize < ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE)
+                ? ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE
                 : currentMinSize; // ensure that the minsize is at least 2
         logger.info(
                 "Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoScalingParent.getName() + ". Starting with " + newMinSize + " instances.");
@@ -2114,7 +2114,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public void resetShardMinAutoscalingGroupSize(String autoscalinggroupName, com.sap.sse.landscape.Region region) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
         autoScalingClient.updateAutoScalingGroup(t -> t.autoScalingGroupName(autoscalinggroupName)
-                .minSize(ShardProcedure.defaultMinAutoscalingSize).build());
+                .minSize(ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE).build());
         autoScalingClient.close();
     }
 

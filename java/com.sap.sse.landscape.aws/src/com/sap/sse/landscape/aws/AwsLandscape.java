@@ -821,7 +821,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * {@code targetGroup} instead of the {@code autoScalingParent}'s target group, and optionally adding the
      * {@code tags} to those copied anyhow from the {@code autoScalingParent}. The minimum size is the current size of
      * the {@code autoScalingParent} unless it is less than two; in that case, the new auto-scaling group will be
-     * configured with a minimum size of two (see {@link ShardProcedure#defaultMinAutoscalingSize}), ensuring
+     * configured with a minimum size of two (see {@link ShardProcedure#DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE}), ensuring
      * availability in case one target fails.
      * 
      * @return the new auto-scaling group's name.
@@ -832,10 +832,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     /**
      * Changes the autoscaling group with {@code autoscalinggroupName} as name in {@code region}. It sets the minSize of
-     * this autoscalingGroup to {@code ShardProdecure.defaultMinAutoscalingSize}.
-     * 
-     * @param autoScalingGroupName
-     * @param region
+     * this autoscalingGroup to {@link ShardProcedure#DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE}.
      */
     public void resetShardMinAutoscalingGroupSize(String autoscalinggroupName, Region region);
 
