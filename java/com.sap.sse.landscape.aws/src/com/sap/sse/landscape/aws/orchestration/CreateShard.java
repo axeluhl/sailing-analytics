@@ -109,7 +109,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                 name.getTargetGroupName(), replicaSet.getMaster().getPort(), loadBalancer.getVpcId());
         getLandscape().addTargetGroupTag(targetGroup.getTargetGroupArn(), ShardTargetGroupName.TAG_KEY, name.getName(), region);
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
-        logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
+        logger.info("Creating Auto-Scaling Group for Shard " + shardName + ". Inheriting from Auto-Scaling Group: "
                 + autoScalingGroup.getName());
         final int minAutoscalingSize = getMinShardingStartInstanceNumber(autoScalingGroup);
         final String newAutoscalingGroupName = getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, minAutoscalingSize, Optional.empty());

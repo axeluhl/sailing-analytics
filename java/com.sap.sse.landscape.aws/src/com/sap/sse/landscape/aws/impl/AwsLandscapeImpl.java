@@ -2069,14 +2069,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     String createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
-            String shardName, TargetGroup<ShardingKey> targetGroup,int minSize, Optional<Tags> tags) {
+            String shardName, TargetGroup<ShardingKey> targetGroup, int minSize, Optional<Tags> tags) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoScalingParent.getRegion()));
         final String launchConfigurationName = autoScalingParent.getAutoScalingGroup().launchConfigurationName();
         final String autoScalingGroupName = getAutoScalingGroupName(shardName);
         final List<String> availabilityZones = autoScalingParent.getAutoScalingGroup().availabilityZones();
         final int instanceWarmupTimeInSeconds = autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
         logger.info(
-                "Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoScalingParent.getName() + ". Starting with " + minSize + " instances.");
+                "Creating Auto-Scaling Group " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Auto-Scaling Group: " +
+                        autoScalingParent.getName() + ". Starting with " + minSize + " instances.");
         autoScalingClient.createAutoScalingGroup(b->{
             b
                 .minSize(minSize)
