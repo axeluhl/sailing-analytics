@@ -170,7 +170,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     // change ALB rules to new ones
                     addShardingRules(loadBalancer, shardingKeysToUse, targetGroup);
                     // restore default minCapacity of shard's autoscalinggroup
-                    getLandscape().resetShardMinAutoscalingSize(newAutoscalingGroupName, region);
+                    getLandscape().resetShardMinAutoscalingGroupSize(newAutoscalingGroupName, region);
 
                 } else {
                     throw new Exception("Unexpected Error - No prio left?");
