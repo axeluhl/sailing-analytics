@@ -111,8 +111,8 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
                 + autoScalingGroup.getName());
-        final int minAutosclaingSize = getMinShardingStartInstanceNumber(autoScalingGroup);
-        final String newAutoscalingGroupName = getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup,minAutosclaingSize, Optional.empty());
+        final int minAutoscalingSize = getMinShardingStartInstanceNumber(autoScalingGroup);
+        final String newAutoscalingGroupName = getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, minAutoscalingSize, Optional.empty());
         // create one rule to path unused by any application for linking ALB to target group.
         if (loadBalancer != null) {
             final Iterable<Rule> rules = loadBalancer.getRules();
@@ -142,13 +142,11 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, getLandscape().getAutoScalingGroupName(shardName), targetGroup,
                             AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET, region);
                     // wait until instances are running
-                    // FIXME bug5886 this waits only for some positive number of healthy instances as long as all instances that have been added to the target group so far are healthy;
-                    // FIXME bug5886 it doesn't necessarily wait for as many targets being registered with the target group as have been requested
                     Wait.wait(()->{
                         boolean ret = true;
                         final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
                                 .getTargetHealthDescriptions(targetGroup);
-                        if (healths.isEmpty() || healths.size() < minAutosclaingSize) {
+                        if (healths.isEmpty() || healths.size() < minAutoscalingSize) {
                             ret = false; // if there is no Aws in target
                         } else {
                             for (Map.Entry<AwsInstance<ShardingKey>, TargetHealth> instance : healths.entrySet()) {
