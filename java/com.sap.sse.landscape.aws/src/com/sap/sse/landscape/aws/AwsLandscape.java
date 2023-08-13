@@ -27,6 +27,7 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.aws.impl.DNSCache;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
+import com.sap.sse.landscape.aws.orchestration.ShardProcedure;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -818,11 +819,12 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the
      * auto-scaling group based on the {@code shareName}, configuring it to create its instances into
      * {@code targetGroup} instead of the {@code autoScalingParent}'s target group, and optionally adding the
-     * {@code tags} to those copied anyhow from the {@code autoScalingParent}. The minimum size is the current amount of
+     * {@code tags} to those copied anyhow from the {@code autoScalingParent}. The minimum size is the current size of
      * the {@code autoScalingParent} unless it is less than two; in that case, the new auto-scaling group will be
-     * configured with a minimum size of two, ensuring availability in case one target fails.
+     * configured with a minimum size of two (see {@link ShardProcedure#defaultMinAutoscalingSize}), ensuring
+     * availability in case one target fails.
      * 
-     * @return Returns the new autoscaling group's name.
+     * @return the new auto-scaling group's name.
      */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> String createAutoScalingGroupFromExisting(
             AwsAutoScalingGroup autoScalingParent, String shardName, TargetGroup<ShardingKey> targetGroup,

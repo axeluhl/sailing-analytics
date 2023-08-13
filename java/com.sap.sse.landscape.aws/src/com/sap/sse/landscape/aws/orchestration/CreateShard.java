@@ -141,6 +141,8 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, getLandscape().getAutoScalingGroupName(shardName), targetGroup,
                             AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET, region);
                     // wait until instances are running
+                    // FIXME bug5886 this waits only for some positive number of healthy instances as long as all instances that have been added to the target group so far are healthy;
+                    // FIXME bug5886 it doesn't necessarily wait for as many targets being registered with the target group as have been requested
                     Wait.wait(()->{
                         boolean ret = true;
                         final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
