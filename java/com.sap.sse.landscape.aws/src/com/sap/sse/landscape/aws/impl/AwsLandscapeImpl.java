@@ -2111,7 +2111,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public void resetShardMinAutoscalingSize(String autoscalinggroupName, com.sap.sse.landscape.Region region) {
+    public void resetShardMinAutoscalingGroupSize(String autoscalinggroupName, com.sap.sse.landscape.Region region) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
         autoScalingClient.updateAutoScalingGroup(t -> t.autoScalingGroupName(autoscalinggroupName)
                 .minSize(ShardProcedure.defaultMinAutoscalingSize).build());

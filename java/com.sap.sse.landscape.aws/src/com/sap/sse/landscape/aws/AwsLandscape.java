@@ -835,7 +835,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * @param autoScalingGroupName
      * @param region
      */
-    public void resetShardMinAutoscalingSize(String autoscalinggroupName, Region region);
+    public void resetShardMinAutoscalingGroupSize(String autoscalinggroupName, Region region);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(
