@@ -111,7 +111,8 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
         logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
                 + autoScalingGroup.getName());
-        final String newAutoscalingGroupName = getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
+        final int minAutosclaingSize = getMinShardingStartInstanceNumber(autoScalingGroup);
+        final String newAutoscalingGroupName = getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup,minAutosclaingSize, Optional.empty());
         // create one rule to path unused by any application for linking ALB to target group.
         if (loadBalancer != null) {
             final Iterable<Rule> rules = loadBalancer.getRules();
@@ -147,7 +148,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                         boolean ret = true;
                         final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
                                 .getTargetHealthDescriptions(targetGroup);
-                        if (healths.isEmpty()) {
+                        if (healths.isEmpty() || healths.size() < minAutosclaingSize) {
                             ret = false; // if there is no Aws in target
                         } else {
                             for (Map.Entry<AwsInstance<ShardingKey>, TargetHealth> instance : healths.entrySet()) {
@@ -181,6 +182,13 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                 throw new Exception("Unexpected Error - Loadbalancer was null!");
             }
         }
+    }
+
+    protected int getMinShardingStartInstanceNumber(AwsAutoScalingGroup autoscalingGroupParent) {
+        final int currentMinSize = autoscalingGroupParent.getAutoScalingGroup().instances().size();
+        return (currentMinSize < ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE)
+                ? ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE
+                : currentMinSize; // ensure that the minsize is at least 2
     }
 
     public static <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {

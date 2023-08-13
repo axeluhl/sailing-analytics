@@ -827,7 +827,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * @return the new auto-scaling group's name.
      */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> String createAutoScalingGroupFromExisting(
-            AwsAutoScalingGroup autoScalingParent, String shardName, TargetGroup<ShardingKey> targetGroup,
+            AwsAutoScalingGroup autoScalingParent, String shardName, TargetGroup<ShardingKey> targetGroup, int minSize,
             Optional<Tags> tags);
 
     /**
