@@ -31,6 +31,7 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String data_mining_archive_price_info();
     String data_mining_archive_info();
     String data_mining_archive_features();
+    String data_mining_all_trial_name();
     String data_mining_all_name();
     String data_mining_all_description();
     String data_mining_all_price_info();
@@ -78,4 +79,6 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String features_scoring_description();
     String features_data_mining_title();
     String features_data_mining_description();
+    String features_data_mining_all_title();
+    String features_data_mining_all_description();
 }
