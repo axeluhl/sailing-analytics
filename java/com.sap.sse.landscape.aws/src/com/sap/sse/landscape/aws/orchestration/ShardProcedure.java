@@ -28,6 +28,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter;
+import com.sap.sse.landscape.aws.impl.ShardingRuleManagementHelper;
 import com.sap.sse.landscape.aws.impl.ShardingRulePathConditionBuilder;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
@@ -53,7 +54,7 @@ public abstract class ShardProcedure<ShardingKey,
 extends AbstractAwsProcedureImpl<ShardingKey>
 implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
-    final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
+    public final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
     public static final int DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE = 2;
     @SuppressWarnings("unchecked") // this silently assumes that a String can be cast to a ShardingKey without problems
     protected final ShardingKey SHARDING_KEY_UNUSED_BY_ANY_APPLICATION = (ShardingKey) "lauycaluy3cla3yrclaurlIYQL8";
@@ -61,7 +62,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     final protected Set<ShardingKey> shardingKeys;
     final protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
     final protected Region region;
-    private final String pathPrefixForShardingKey;
 
     protected ShardProcedure(BuilderImpl<?,?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
@@ -69,7 +69,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         this.replicaSet = builder.getReplicaSet();
         this.shardingKeys = builder.getShardingKeys();
         this.region = builder.getRegion();
-        this.pathPrefixForShardingKey = builder.getPathPrefixForShardingKey();
     }
 
     public static interface Builder<
@@ -215,6 +214,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         final Set<RuleCondition> ruleConditionsForConsumption = new HashSet<>();
         Util.addAll(ruleConditions, ruleConditionsForConsumption);
+        ArrayList<software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule.Builder> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys()
         while (!ruleConditionsForConsumption.isEmpty()) {
             LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY,
                     ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
@@ -238,16 +238,28 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         }
         return alb.addRules(Util.toArray(rules, new Rule[0]));
     }
-        
+//        
     protected Iterable<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Iterable<ShardingKey> shardingKeys,
             TargetGroup<ShardingKey> targetGroup) throws Exception {
+        final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         // change ALB rules to new ones
         // construct all conditions for all shardingkeys because one sharding key needs more than one condition
-        final ArrayList<RuleCondition> conditions = new ArrayList<>();
-        for (ShardingKey k : shardingKeys) {
-            conditions.addAll((new ShardingRulePathConditionBuilder<>().ShardingKey(k).build()));
+        Iterable<Rule.Builder> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys(shardingKeys);
+        ArrayList<Rule> rulesToAdd = new ArrayList<>();
+        for (Rule.Builder builder : ruleBuilders) {
+            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY,
+                    ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
+            // finish rule with priority and action
+            rulesToAdd.add(builder.priority("" + ruleIdx)
+                    .actions(Action.builder()
+                            .forwardConfig(ForwardActionConfig.builder()
+                                    .targetGroups(TargetGroupTuple.builder()
+                                            .targetGroupArn(targetGroup.getTargetGroupArn()).build())
+                                    .build())
+                            .type(ActionTypeEnum.FORWARD).build())
+                    .build());
         }
-        return addNewRulesFromPathConditions(conditions, alb, targetGroup);
+        return alb.addRules(Util.toArray(rulesToAdd, new Rule[0]));
     }
 
     /**
