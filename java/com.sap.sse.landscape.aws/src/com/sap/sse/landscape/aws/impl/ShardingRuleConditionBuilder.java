@@ -7,17 +7,39 @@ import com.sap.sse.common.Builder;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 public class ShardingRuleConditionBuilder<ShardingKey> implements Builder<ShardingRuleConditionBuilder<ShardingKey>,Collection<RuleCondition>>{
     
-    // two dimensional array with keys [condition][beforeKey(0)/Afterkey(1)]
-    static final String[][] construction = {
-            {"*/leaderboard/", ""},
-            {"*/v?/leaderboards/",""},
-            {"*/v?/leaderboards/", "/*"},
-            {"*/v?/regattas/", ""},
-            {"*/v?/regattas/","/*"}
+    // two dimensional array with keys [patterns][beforeKey(0)/Afterkey(1)]
+     private static final String[][] patterns = {
+            {"*/leaderboard/", ""},             //0
+            {"*/v?/leaderboards/",""},          //1
+            {"*/v?/leaderboards/", "/*"},       //2
+            {"*/v?/regattas/", ""},             //3
+            {"*/v?/regattas/","/*"}             //4
     };
     public static int numberOfShardConditionsPerShard() {
-        return construction.length;
+        return patterns.length;
     }
+    
+    public static String getShardingKeyFromCondition(String condition) {
+        for (int i = 0;i < patterns.length; i++) {
+            if (condition.startsWith(patterns[i][0]) && condition.endsWith(patterns[i][1])) {
+                // found correct pattern. Now adapting to every pattern.
+                switch(i) {
+                case 0:
+                case 1:
+                case 3:
+                    return condition.substring(condition.lastIndexOf('/') + 1);
+                case 2:
+                case 4:
+                    int idxLastSlash = condition.lastIndexOf('/');
+                    return condition.substring(condition.lastIndexOf('/', idxLastSlash - 1) + 1, condition.lastIndexOf('/'));
+                default:
+                    throw new IllegalArgumentException(condition + " matches an pattern but no case has been assiged to it's index!");
+                }
+            }
+        }
+        throw new IllegalArgumentException("In " + condition + " could be no shardingkey be found.");
+    }
+    
     private ShardingKey shardingKey;
     
     public ShardingRuleConditionBuilder<ShardingKey> ShardingKey(ShardingKey key) {
@@ -45,7 +67,7 @@ public class ShardingRuleConditionBuilder<ShardingKey> implements Builder<Shardi
     // returns every required path condition
     Collection<String> getPathsForShardingKey(ShardingKey shardingKey) {
         ArrayList<String> c = new ArrayList<>();
-        for (String[] i : construction) {
+        for (String[] i : patterns) {
             c.add(i[0] + shardingKey + i[1]);
         }
         return c;
