@@ -496,6 +496,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return res;
     }
 
+    @SuppressWarnings("unchecked")
     private Set<ShardingKey> getShardingKeys(Map<Listener, Iterable<Rule>> listenersAndTheirRules,
             TargetGroup<ShardingKey> shardTargetGroupCandidate) {
         final String publicTargetGroupCandidateArn = shardTargetGroupCandidate.getTargetGroupArn();
@@ -516,7 +517,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                                                         HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())) {
                                             for (final RuleCondition ruleCondition : rule.conditions()) {
                                                 if (Util.equalsWithNull(ruleCondition.field(), "path-pattern")) {
-                                                    Util.addAll(Util.map(ruleCondition.values(), path->ShardProcedure.getShardingKeyFromPathCondition(path)), shardingKeys);
+                                                    Util.addAll(Util.map(ruleCondition.values(), path->((ShardingKey)ShardProcedure.getShardingKeyFromPathCondition(path))), shardingKeys);
                                                 }
                                             }
                                         }
