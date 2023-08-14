@@ -64,9 +64,7 @@ public class AddShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProc
         logger.info("Appending " + Util.joinStrings(", ", shardingKeys) + " to " + shardName);
         final TargetGroup<ShardingKey> targetgroup = shard.getTargetGroup();
         final ApplicationLoadBalancer<ShardingKey> loadBalancer = shard.getLoadBalancer();
-//        final Collection<TargetGroup<ShardingKey>> t = new ArrayList<>();
-//        t.add(targetgroup);
-        
+        // building every condition for every shardingkey
         ArrayList<RuleCondition> ruleConditionToBeInserted = new ArrayList<>();
         for (ShardingKey k : shardingKeys) {
             ruleConditionToBeInserted.addAll((new ShardingRulePathConditionBuilder<>().ShardingKey(k).build()));

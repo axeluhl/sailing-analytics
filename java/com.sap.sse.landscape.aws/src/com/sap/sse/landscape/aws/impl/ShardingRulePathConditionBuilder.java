@@ -19,6 +19,9 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
         return patterns.length;
     }
     
+    public static String unsedPathConditionValue = "gwt/*/leaderboard/lauycaluy3cla3yrclaurlIYQL8";
+    
+    
     public static String getShardingKeyFromCondition(String condition) {
         for (int i = 0;i < patterns.length; i++) {
             if (condition.startsWith(patterns[i][0]) && condition.endsWith(patterns[i][1])) {
@@ -33,7 +36,7 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
                     int idxLastSlash = condition.lastIndexOf('/');
                     return condition.substring(condition.lastIndexOf('/', idxLastSlash - 1) + 1, condition.lastIndexOf('/'));
                 default:
-                    throw new IllegalArgumentException(condition + " matches an pattern but no case has been assiged to it's index!");
+                    throw new IllegalArgumentException(condition + " matches pattern " + i + " but there is no case for extracting the Shardingkey it!");
                 }
             }
         }
@@ -52,7 +55,7 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
         final Collection<RuleCondition> ruleConditions = new ArrayList<>();
         final Collection<String> paths = getPathsForShardingKey(shardingKey);
         ruleConditions.add(
-                RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(paths)).build());
+                RuleCondition.builder().field("path-pattern").values(paths).build());
         return ruleConditions;
     }
     

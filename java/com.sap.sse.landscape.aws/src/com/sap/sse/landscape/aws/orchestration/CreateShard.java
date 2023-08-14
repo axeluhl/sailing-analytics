@@ -18,6 +18,7 @@ import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.ShardTargetGroupName;
+import com.sap.sse.landscape.aws.impl.ShardingRulePathConditionBuilder;
 import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
@@ -130,7 +131,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                                                             .getB()))
                                             .build(),
                                     RuleCondition.builder().field("path-pattern")
-                                            .pathPatternConfig(ppc -> ppc.values(getPathConditionForShardingKey(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION))).build())
+                                            .pathPatternConfig(ppc -> ppc.values(ShardingRulePathConditionBuilder.unsedPathConditionValue)).build())
                             .actions(Action.builder()
                                     .forwardConfig(ForwardActionConfig.builder()
                                             .targetGroups(TargetGroupTuple.builder()
