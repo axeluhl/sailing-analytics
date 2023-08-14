@@ -9,11 +9,11 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
     
     // two dimensional array with keys [patterns][beforeKey(0)/Afterkey(1)]
      private static final String[][] patterns = {
-            {"*/leaderboard/", ""},             //0
-            {"*/v?/leaderboards/",""},          //1
-            {"*/v?/leaderboards/", "/*"},       //2
-            {"*/v?/regattas/", ""},             //3
-            {"*/v?/regattas/","/*"}             //4
+            {"gwt/*/leaderboard/", ""},                 //0
+            {"*/api/*/v?/leaderboards/",""},            //1
+            {"*/api/*/v?/leaderboards/", "/*"},         //2
+            {"*/api/*/v?/regattas/", ""},               //3
+            {"*/api/*/v?/regattas/","/*"}               //4
     };
     public static int numberOfShardConditionsPerShard() {
         return patterns.length;
