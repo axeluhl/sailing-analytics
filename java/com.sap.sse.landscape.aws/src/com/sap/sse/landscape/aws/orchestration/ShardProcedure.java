@@ -28,7 +28,6 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter;
-import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter.ALBRuleAdapter;
 import com.sap.sse.landscape.aws.impl.ShardingRuleConditionBuilder;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
@@ -212,8 +211,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         final Set<RuleCondition> ruleConditionsForConsumption = new HashSet<>();
         Util.addAll(ruleConditions, ruleConditionsForConsumption);
         while (!ruleConditionsForConsumption.isEmpty()) {
-            LoadBalancerRuleInserter<ShardingKey, ALBRuleAdapter> rulesInserter = LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY, ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER);
-            rulesInserter.shiftRulesToMakeSpaceAt(ruleIdx, 1);
+            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY, ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
             final Collection<RuleCondition> conditionsForNextRule = new ArrayList<>();
             for (final Iterator<RuleCondition> i=ruleConditionsForConsumption.iterator();
                     conditionsForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {
@@ -462,13 +460,10 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         return pathPrefixForShardingKey+shardingKey.toString();
     }
 
-    public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path, String pathPrefixForShardingKey) {
-        if (!path.startsWith(pathPrefixForShardingKey)) {
-            throw new IllegalStateException("path condition \""+path+"\" does not start with \""+pathPrefixForShardingKey+"\" which is unexpected");
-        }
-        @SuppressWarnings("unchecked") // this silently assumes that a String casts into a ShardingKey without problems
-        final ShardingKey result = (ShardingKey) path.substring(pathPrefixForShardingKey.length());
-        return result;
+    // this silently assumes that a String casts into a ShardingKey without problems
+    @SuppressWarnings("unchecked")
+    public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path) {
+        return (ShardingKey) ShardingRuleConditionBuilder.getShardingKeyFromCondition(path);
     }
 
     /**
@@ -478,8 +473,4 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         return getPathConditionForShardingKey(shardingKey, pathPrefixForShardingKey);
     }
 
-    protected ShardingKey getShardingKeyFromPathCondition(String path) {
-        // TODO change because we've got more than one condition per Sharding key
-        return getShardingKeyFromPathCondition(path, pathPrefixForShardingKey);
-    }
 }
