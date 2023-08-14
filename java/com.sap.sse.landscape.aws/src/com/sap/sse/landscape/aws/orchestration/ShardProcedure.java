@@ -28,7 +28,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter;
-import com.sap.sse.landscape.aws.impl.ShardingRuleConditionBuilder;
+import com.sap.sse.landscape.aws.impl.ShardingRulePathConditionBuilder;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -237,7 +237,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         // construct all conditions for all shardingkeys because one sharding key needs more than one condition
         final ArrayList<RuleCondition> conditions = new ArrayList<>();
         for (ShardingKey k : shardingKeys) {
-            conditions.addAll((new ShardingRuleConditionBuilder<>().ShardingKey(k).build()));
+            conditions.addAll((new ShardingRulePathConditionBuilder<>().ShardingKey(k).build()));
         }
         return addNewRulesFromPathConditions(conditions, alb, targetGroup);
     }
@@ -463,7 +463,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     // this silently assumes that a String casts into a ShardingKey without problems
     @SuppressWarnings("unchecked")
     public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path) {
-        return (ShardingKey) ShardingRuleConditionBuilder.getShardingKeyFromCondition(path);
+        return (ShardingKey) ShardingRulePathConditionBuilder.getShardingKeyFromCondition(path);
     }
 
     /**

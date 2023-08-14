@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import com.sap.sse.common.Builder;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
-public class ShardingRuleConditionBuilder<ShardingKey> implements Builder<ShardingRuleConditionBuilder<ShardingKey>,Collection<RuleCondition>>{
+public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<ShardingRulePathConditionBuilder<ShardingKey>,Collection<RuleCondition>>{
     
     // two dimensional array with keys [patterns][beforeKey(0)/Afterkey(1)]
      private static final String[][] patterns = {
@@ -42,7 +42,7 @@ public class ShardingRuleConditionBuilder<ShardingKey> implements Builder<Shardi
     
     private ShardingKey shardingKey;
     
-    public ShardingRuleConditionBuilder<ShardingKey> ShardingKey(ShardingKey key) {
+    public ShardingRulePathConditionBuilder<ShardingKey> ShardingKey(ShardingKey key) {
         shardingKey = key;
         return this;
     }

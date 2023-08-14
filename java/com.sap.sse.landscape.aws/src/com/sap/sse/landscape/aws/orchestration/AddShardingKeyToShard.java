@@ -11,7 +11,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.landscape.aws.impl.ShardingRuleConditionBuilder;
+import com.sap.sse.landscape.aws.impl.ShardingRulePathConditionBuilder;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
@@ -69,7 +69,7 @@ public class AddShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProc
         
         ArrayList<RuleCondition> ruleConditionToBeInserted = new ArrayList<>();
         for (ShardingKey k : shardingKeys) {
-            ruleConditionToBeInserted.addAll((new ShardingRuleConditionBuilder<>().ShardingKey(k).build()));
+            ruleConditionToBeInserted.addAll((new ShardingRulePathConditionBuilder<>().ShardingKey(k).build()));
         }
         
         // check if there is a rule with space left for one or more additional conditions:
