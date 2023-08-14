@@ -29,6 +29,8 @@ public class WindFieldTrackedRaceImpl extends WindFieldGeneratorImpl implements 
     private TrackedRace race;
     private final ConcurrentMap<TimedPosition, Wind> cache;
     private TimePoint startSimulationTime = null;
+    private int cacheHits;
+    private int cacheMisses;
 
     public WindFieldTrackedRaceImpl(TrackedRace race) {
         super(null, null);
@@ -58,8 +60,11 @@ public class WindFieldTrackedRaceImpl extends WindFieldGeneratorImpl implements 
         TimedPosition qTimedPosition = new TimedPositionImpl(qTime, qPosition);
         Wind wind = cache.get(qTimedPosition);
         if (wind == null) {
+            cacheMisses++;
             wind = this.race.getWind(qPosition, qTime);
             cache.put(qTimedPosition, wind);
+        } else {
+            cacheHits++;
         }
         return wind;
     }
