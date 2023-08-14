@@ -15,8 +15,29 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
             {"*/api/*/v?/regattas/", ""},               //3
             {"*/api/*/v?/regattas/","/*"}               //4
     };
+     private static char[] wildcards = {'*', '?'};
     public static int numberOfShardConditionsPerShard() {
         return patterns.length;
+    }
+    
+    
+    //expects an entry like patterns
+    static public int countOfWildcards(String pattern) {
+        int nrOfWildcards = 0;
+        for(char wildcard : wildcards) {            
+            nrOfWildcards += countChars(pattern, wildcard);
+        }
+        return nrOfWildcards;
+    }
+    
+    static public int countChars(String s, char x) {
+        int count = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == x) {
+                count++;
+            }
+        }
+        return count;
     }
     
     public static String unsedPathConditionValue = "gwt/*/leaderboard/lauycaluy3cla3yrclaurlIYQL8";
@@ -56,14 +77,6 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
         final Collection<String> paths = getPathsForShardingKey(shardingKey);
         ruleConditions.add(
                 RuleCondition.builder().field("path-pattern").values(paths).build());
-        return ruleConditions;
-    }
-    
-    protected Collection<RuleCondition> getPathConditionsForOneShardingKey(ShardingKey shardingKey) throws InterruptedException, ExecutionException {
-        final Collection<RuleCondition> ruleConditions = new ArrayList<>();
-        final Collection<String> paths = getPathsForShardingKey(shardingKey);
-        ruleConditions.add(
-                RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(paths)).build());
         return ruleConditions;
     }
     
