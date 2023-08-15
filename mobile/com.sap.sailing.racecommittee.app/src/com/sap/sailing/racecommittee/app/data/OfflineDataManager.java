@@ -89,9 +89,9 @@ public class OfflineDataManager extends DataManager {
                 UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet(), Collections.emptySet()));
         EventBase newEvent = new StrippedEventImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat",
                 true, UUID.randomUUID(), Collections.<LeaderboardGroupBase>emptySet(), Collections.emptySet());
-        final CourseAreaImpl offshore = new CourseAreaImpl("Offshore", UUID.randomUUID());
+        final CourseAreaImpl offshore = new CourseAreaImpl("Offshore", UUID.randomUUID(), /* centerPoint */ null, /* radius */ null);
         newEvent.getVenue().addCourseArea(offshore);
-        final CourseAreaImpl stadium = new CourseAreaImpl("Stadium", UUID.randomUUID());
+        final CourseAreaImpl stadium = new CourseAreaImpl("Stadium", UUID.randomUUID(), /* centerPoint */ null, /* radius */ null);
         newEvent.getVenue().addCourseArea(stadium);
         dataStore.addEvent(newEvent);
 

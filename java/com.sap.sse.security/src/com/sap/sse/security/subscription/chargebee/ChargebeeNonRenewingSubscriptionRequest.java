@@ -6,25 +6,24 @@ import java.util.logging.Logger;
 import com.chargebee.Result;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.CancelForItemsRequest;
-import com.chargebee.models.enums.CreditOptionForCurrentTermCharges;
-import com.chargebee.models.enums.RefundableCreditsHandling;
 import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
- * Cancel Chargebee subscription request
+ * Non Renewing Chargebee subscription request.
+ * Sets the subscription to non renewing.
  */
-public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
-    private static final Logger logger = Logger.getLogger(ChargebeeCancelSubscriptionRequest.class.getName());
+public class ChargebeeNonRenewingSubscriptionRequest extends ChargebeeApiRequest {
+    private static final Logger logger = Logger.getLogger(ChargebeeNonRenewingSubscriptionRequest.class.getName());
 
     public static interface OnResultListener {
-        void onSubscriptionCancelResult(Subscription subscription);
+        void onSubscriptionNonRenewingResult(Subscription subscription);
     }
 
     private final String subscriptionId;
     private final OnResultListener listener;
 
-    public ChargebeeCancelSubscriptionRequest(String subscriptionId, OnResultListener listener,
+    public ChargebeeNonRenewingSubscriptionRequest(String subscriptionId, OnResultListener listener,
             SubscriptionApiRequestProcessor requestProcessor, SubscriptionApiBaseService chargebeeApiServiceParams) {
         super(requestProcessor, chargebeeApiServiceParams);
         this.subscriptionId = subscriptionId;
@@ -33,11 +32,8 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
 
     @Override
     protected ChargebeeInternalApiRequestWrapper createRequest() {
-        logger.info(() -> "Cancel Chargebee subscription, subscription id: " + subscriptionId);
-        CancelForItemsRequest request = Subscription.cancelForItems(subscriptionId)
-                .creditOptionForCurrentTermCharges(CreditOptionForCurrentTermCharges.PRORATE)
-                .refundableCreditsHandling(RefundableCreditsHandling.SCHEDULE_REFUND)
-                .endOfTerm(false);
+        logger.info(() -> "Set Chargebee subscription to non renewing, subscription id: " + subscriptionId);
+        CancelForItemsRequest request = Subscription.cancelForItems(subscriptionId).endOfTerm(true);
         return new ChargebeeInternalApiRequestWrapper(request);
     }
 
@@ -53,13 +49,13 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
 
     @Override
     protected void handleError(Exception e) {
-        logger.log(Level.SEVERE, "Cancel Chargebee subscription failed, subscription id: " + subscriptionId, e);
+        logger.log(Level.SEVERE, "Setting Chargebee subscription to non renewing failed, subscription id: " + subscriptionId, e);
         onDone(null);
     }
 
     private void onDone(Subscription subscription) {
         if (listener != null) {
-            listener.onSubscriptionCancelResult(subscription);
+            listener.onSubscriptionNonRenewingResult(subscription);
         }
     }
 }

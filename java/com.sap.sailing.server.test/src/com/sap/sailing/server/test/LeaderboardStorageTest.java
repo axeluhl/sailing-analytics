@@ -52,7 +52,7 @@ public class LeaderboardStorageTest extends TestCase {
         RacingEventService service = new RacingEventServiceImpl();
         int[] dicardingThresholds = {};
         Leaderboard leaderboard = service.addFlexibleLeaderboard(LEADERBOARD_NAME, "testIt", dicardingThresholds,
-                new LowPoint(), Collections.singleton(service.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "maaap").getId()));
+                new LowPoint(), Collections.singleton(service.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "maaap", /* centerPosition */ null, /* radius */ null).getId()));
         List<DynamicPerson> sailorList = new ArrayList<DynamicPerson>();
         sailorList.add(new PersonImpl("sailor", new NationalityImpl("GER"), null, ""));
         DynamicTeam team = new TeamImpl("team", sailorList, null);

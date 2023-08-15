@@ -798,6 +798,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+    
+    @Override
+    public List<CourseAreaDTO> getCourseAreaForEventOfLeaderboard(String leaderboardName) {
+        final List<CourseAreaDTO> result = new ArrayList<>();
+        for (final EventDTO event : getEventsForLeaderboard(leaderboardName)) {
+            Util.addAll(event.venue.getCourseAreas(), result);
+        }
+        return result;
+    }
 
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardForRace(final RegattaAndRaceIdentifier race,
@@ -1093,7 +1102,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         raceInfoDTO.protestFinishTime = protestEndTime.asDate();
                         raceInfoDTO.lastUpperFlag = Flags.BRAVO;
                         raceInfoDTO.lastLowerFlag = Flags.NONE;
-                        raceInfoDTO.lastFlagsAreDisplayed = true;
+                        raceInfoDTO.lastFlagsAreDisplayed = !protestEndTime.before(now);
                         raceInfoDTO.lastFlagsDisplayedStateChanged = true;
                     }
                 }
@@ -3721,8 +3730,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
-        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
-        courseAreaDTO.id = courseArea.getId();
+        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getId(), courseArea.getName(),
+                 courseArea.getCenterPosition(), courseArea.getRadius());
         return courseAreaDTO;
     }
 

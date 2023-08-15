@@ -364,7 +364,7 @@ public class DomainFactoryImpl implements DomainFactory {
             DynamicTeam team = createTeam(name, nationality, competitorId);
             domainCompetitor = raceTrackingHandler.getOrCreateCompetitor(competitorStore, competitorId, name, shortName,
                     null /* displayColor */,
-                    null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
+                    null /* email */, null /* flagImage */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
         return domainCompetitor;
@@ -869,7 +869,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         // because CompetitorImpl.hashCode/equals are based solely on Java object identity
                         competitorsCurrentlyBeingMigrated.remove(existingCompetitor);
                     } else {
-                        competitorToUse = existingCompetitor;
+                        competitorToUse = getOrCreateCompetitor(rc.getCompetitor(), raceTrackingHandler);
                     }
                 } else {
                     competitorToUse = getOrCreateCompetitor(rc.getCompetitor(), raceTrackingHandler);

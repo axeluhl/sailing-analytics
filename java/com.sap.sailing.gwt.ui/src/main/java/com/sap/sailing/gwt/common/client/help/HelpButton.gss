@@ -2,7 +2,6 @@
 
 .help-icon {
     width: 17px;
-    position: absolute;
     height: auto;
     margin: 3px;
     box-shadow: 0 0 5px SHADOW_COLOR;

@@ -77,7 +77,7 @@ public class AbstractMockedRaceMarkPassingTest {
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, Arrays.asList(new SeriesImpl("Series", true, /* isFleetsCanRunInParallel */ true, Arrays.asList(new FleetImpl("fleet")),
                         new ArrayList<String>(), null)),
-                true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)), OneDesignRankingMetric::new,
+                true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5), /* centerPosition */ null, /* radius */ null), OneDesignRankingMetric::new,
                 /* registrationLinkSecret */ UUID.randomUUID().toString());
         Course course = new CourseImpl("course", waypoints);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();

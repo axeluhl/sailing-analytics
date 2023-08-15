@@ -24,7 +24,7 @@ public class BravoFixTrackAverageRideHeightTest {
     
     @Before
     public void setUp() {
-        track = new BravoFixTrackImpl<>(new CourseAreaImpl("Test", UUID.randomUUID()),
+        track = new BravoFixTrackImpl<>(new CourseAreaImpl("Test", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null),
                 "test", /* hasExtendedFixes */ true);
         track.add(createFix(10l, /* rideHeightPort */ 0.6, /* rideHeightStarboard */ 0.6, /* heel */ 10., /* pitch */ 5.));
         track.add(createFix(20l, /* rideHeightPort */ 0.6, /* rideHeightStarboard */ 0.6, /* heel */ 10., /* pitch */ 5.));

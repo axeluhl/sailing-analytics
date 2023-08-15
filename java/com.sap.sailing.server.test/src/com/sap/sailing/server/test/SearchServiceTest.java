@@ -159,9 +159,9 @@ public class SearchServiceTest {
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         kiel = pfingstbusch.getVenue();
-        final CourseArea kielAlpha = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Alpha");
+        final CourseArea kielAlpha = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Alpha", /* centerPosition */ null, /* radius */ null);
         kiel.addCourseArea(kielAlpha);
-        final CourseArea kielBravo = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Bravo");
+        final CourseArea kielBravo = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Bravo", /* centerPosition */ null, /* radius */ null);
         kiel.addCourseArea(kielBravo);
         final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         seriesCreationParams.put("Default",
@@ -208,7 +208,7 @@ public class SearchServiceTest {
                 "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /*sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         flensburg = aalEvent.getVenue();
-        final CourseArea flensburgStandard = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Standard");
+        final CourseArea flensburgStandard = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Standard", /* centerPosition */ null, /* radius */ null);
         flensburg.addCourseArea(flensburgStandard);
         aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -353,14 +353,16 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server
                 .search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Buhl" })));
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
+        final CourseAreaJsonSerializer courseAreaSerializer = new CourseAreaJsonSerializer();
         LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(
-                new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new EventBaseJsonSerializer(new VenueJsonSerializer(courseAreaSerializer),
                         leaderboardGroupBaseJsonSerializer, new TrackingConnectorInfoJsonSerializer()),
                 leaderboardGroupBaseJsonSerializer);
         LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+        final CourseAreaJsonDeserializer courseAreaJsonDeserializer = new CourseAreaJsonDeserializer(DomainFactory.INSTANCE);
         LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
                 new EventBaseJsonDeserializer(
-                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                        new VenueJsonDeserializer(courseAreaJsonDeserializer),
                         leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
                 leaderboardGroupBaseJsonDeserializer);
         final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();

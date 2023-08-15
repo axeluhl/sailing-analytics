@@ -105,6 +105,7 @@ import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -167,6 +168,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * tracked race to appear.
      */
     DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
+    
+    /**
+     * Traverses through the event's {@link Event#getLeaderboardGroups() leaderboard groups} and from there on to the
+     * {@link Leaderboard}s and finds }
+     * 
+     * @param at
+     *            the time point that must be between a {@link TrackedRace}'s {@link TrackedRace#getStartOfTracking()
+     *            start of tracking} and {@link TrackedRace#getEndOfTracking() end of tracking} for the tracked race to
+     *            be returned
+     */
+    Iterable<TrackedRace> getAllTrackedRacesForEventTrackingAt(Event event, TimePoint at);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
@@ -498,7 +510,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeRemoteSailingServerReference(String name);
 
     
-    CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds);
+    CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds, Position[] centerPositions, Distance[] radiuses);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
@@ -584,7 +596,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
-    CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames);
+    CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames, Position[] centerPositions, Distance[] radiuses);
 
     CourseArea[] removeCourseAreaWithoutReplication(UUID eventId, UUID[] courseAreaIds);
 
@@ -1052,7 +1064,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Identifies all Events, that use the given {@link Leaderboard}'s {@link CourseArea}s and contain it in their
      * {@link LeaderboardGroup}
      * 
-     * @param leaderboard
      * @return A Set of Events, may be empty, but never {@code null}
      */
     Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard, Iterable<Event> events);

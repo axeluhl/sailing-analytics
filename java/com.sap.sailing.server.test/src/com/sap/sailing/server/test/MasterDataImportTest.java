@@ -145,6 +145,7 @@ import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.testsupport.RacingEventServiceImplMock;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -270,7 +271,7 @@ public class MasterDataImportTest {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
-        CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -555,7 +556,7 @@ public class MasterDataImportTest {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         final UUID courseAreaUUID = UUID.randomUUID();
-        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -735,7 +736,7 @@ public class MasterDataImportTest {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
-        CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -882,7 +883,7 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
-        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "testArea");
+        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -1027,7 +1028,7 @@ public class MasterDataImportTest {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         final UUID courseAreaUUID = UUID.randomUUID();
-        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -1128,7 +1129,7 @@ public class MasterDataImportTest {
             venueNameNotToOverride = "doNotOverride";
             Event eventNotToOverride = destService.addEvent(TEST_EVENT_NAME, /* eventDescription */null,
                     eventStartDate, eventEndDate, venueNameNotToOverride, false, eventUUID);
-            courseAreaNotToOverride = destService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testAreaNotToOverride");
+            courseAreaNotToOverride = destService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testAreaNotToOverride", /* centerPosition */ null, /* radius */ null);
             eventNotToOverride.getVenue().addCourseArea(courseAreaNotToOverride);
             List<String> raceColumnNamesNotToOverride = new ArrayList<>();
             raceColumnNameNotToOveride = "T1nottooverride";
@@ -1209,7 +1210,7 @@ public class MasterDataImportTest {
             InterruptedException, ClassNotFoundException {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         final UUID courseAreaUUID = UUID.randomUUID();
-        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -1306,7 +1307,7 @@ public class MasterDataImportTest {
             String venueNameToOverride = "Override";
             Event eventToOverride = destService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate,
                     eventEndDate, venueNameToOverride, false, eventUUID);
-            courseAreaNotToOverride = destService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testAreaNotToOverride");
+            courseAreaNotToOverride = destService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testAreaNotToOverride", /* centerPosition */ null, /* radius */ null);
             eventToOverride.getVenue().addCourseArea(courseAreaNotToOverride);
             List<String> raceColumnNamesToOverride = new ArrayList<>();
             String raceColumnNameToOveride = raceColumnName;
@@ -1410,8 +1411,7 @@ public class MasterDataImportTest {
                 /* sailorsInfoWebsiteURL */null, /* videos */
                 /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
-                new UUID[] { UUID.randomUUID() })[0];
-
+                new UUID[] { UUID.randomUUID() }, /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null})[0];
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME),
                 TEST_BOAT_CLASS_NAME, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -1476,14 +1476,13 @@ public class MasterDataImportTest {
                 /* sailorsInfoWebsiteURL */null, /* videos */
                 /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
-                new UUID[] { UUID.randomUUID() })[0];
-
+                new UUID[] { UUID.randomUUID() }, /* centerPositions */ new Position[] {null},
+                /* radiuses */ new Distance[] {null})[0];
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
         List<String> emptyRaceColumnNamesList = Collections.emptyList();
-
         List<Series> series = new ArrayList<>();
         List<Fleet> fleets = new ArrayList<>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
@@ -1491,7 +1490,6 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
@@ -1605,7 +1603,7 @@ public class MasterDataImportTest {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         final UUID courseAreaUUID = UUID.randomUUID();
-        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -1850,7 +1848,7 @@ public class MasterDataImportTest {
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         final UUID courseAreaUUID = UUID.randomUUID();
-        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        final CourseArea courseArea = sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(courseArea);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
@@ -2067,7 +2065,7 @@ public class MasterDataImportTest {
     public void testMasterDataImportWithFlexibleLeaderboard() throws MalformedURLException, IOException,
             InterruptedException, ClassNotFoundException {
         final UUID courseAreaUUID = UUID.randomUUID();
-        sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea");
+        sourceService.getBaseDomainFactory().getOrCreateCourseArea(courseAreaUUID, "testArea", /* centerPosition */ null, /* radius */ null);
         List<String> raceColumnNames = new ArrayList<>();
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);

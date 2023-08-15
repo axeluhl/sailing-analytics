@@ -32,8 +32,9 @@ public class SearchResource extends AbstractSailingServerResource {
     
     public SearchResource() {
         final LeaderboardGroupBaseJsonSerializer leaderboardGroupSerializer = new LeaderboardGroupBaseJsonSerializer();
+        final CourseAreaJsonSerializer courseAreaSerializer = new CourseAreaJsonSerializer();
         serializer = new LeaderboardSearchResultJsonSerializer(
-                new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new EventBaseJsonSerializer(new VenueJsonSerializer(courseAreaSerializer),
                         leaderboardGroupSerializer, new TrackingConnectorInfoJsonSerializer()),
                 leaderboardGroupSerializer);
     }

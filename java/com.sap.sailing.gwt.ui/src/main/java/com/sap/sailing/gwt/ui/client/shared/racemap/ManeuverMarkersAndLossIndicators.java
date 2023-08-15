@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -138,11 +137,9 @@ public class ManeuverMarkersAndLossIndicators {
 
     private void showManeuvers(Map<CompetitorDTO, List<ManeuverDTO>> maneuvers) {
         if (raceMap.getMap() != null && maneuvers != null) {
-            Set<CompetitorDTO> keySet = maneuvers.keySet();
-            Iterator<CompetitorDTO> iter = keySet.iterator();
-            while (iter.hasNext()) {
-                CompetitorDTO competitorDTO = iter.next();
-                List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
+            for (final Entry<CompetitorDTO, List<ManeuverDTO>> e : maneuvers.entrySet()) {
+                final CompetitorDTO competitorDTO = e.getKey();
+                final List<ManeuverDTO> maneuversForCompetitor = e.getValue();
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (raceMap.getSettings().isShowManeuverType(maneuver.getType())) {
                         createAndAddMarkerOfManeuver(maneuver, competitorDTO);

@@ -37,7 +37,7 @@ class UserSubscriptionItem extends Composite {
     @UiField Button cancelControlUi;
 
     private final SubscriptionsValueProvider valueProvider;
-    private final Runnable cancelCallback;
+    private final Runnable nonRenewingCallback;
 
     UserSubscriptionItem(final SubscriptionDTO subscription, final UserSubscriptionsView.Presenter presenter) {
         final MobileSection mobileSection = uiBinder.createAndBindUi(this);
@@ -45,10 +45,10 @@ class UserSubscriptionItem extends Composite {
         initWidget(mobileSection);
         this.valueProvider = new SubscriptionsValueProvider(i18n);
         if (subscription.isCancelled() || !subscription.isRenewing()) {
-            this.cancelCallback = () -> {};
+            this.nonRenewingCallback = () -> {};
             cancelControlUi.setEnabled(false);
         } else {
-            this.cancelCallback = () -> presenter.cancelSubscription(subscription.getSubscriptionPlanId(),
+            this.nonRenewingCallback = () -> presenter.nonRenewingSubscription(subscription.getSubscriptionPlanId(),
                     subscription.getProvider());
         }
         sectionHeaderUi.setSectionTitle(valueProvider.getSubscriptionName(subscription));
@@ -67,7 +67,7 @@ class UserSubscriptionItem extends Composite {
 
     @UiHandler("cancelControlUi")
     void onCancelControlClicked(final ClickEvent event) {
-        this.cancelCallback.run();
+        this.nonRenewingCallback.run();
     }
 
     private void addInfo(final String label, final String value) {
