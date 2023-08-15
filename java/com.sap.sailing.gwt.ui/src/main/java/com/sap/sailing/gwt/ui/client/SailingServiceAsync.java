@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import org.apache.shiro.authz.AuthorizationException;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LegIdentifier;
@@ -669,4 +671,10 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void listYellowBrickRacesInEvent(YellowBrickConfigurationWithSecurityDTO configuration,
             AsyncCallback<Pair<String, List<YellowBrickRaceRecordDTO>>> callback);
+
+    /**
+     * Tries to find the connection between the leaderboard identified by the {@code leaderboardName} and one or more {@link Event}s and then
+     * from the {@link Event}s obtains their {@link CourseArea}s.
+     */
+    void getCourseAreaForEventOfLeaderboard(String leaderboardName, AsyncCallback<List<CourseAreaDTO>> callback);
 }

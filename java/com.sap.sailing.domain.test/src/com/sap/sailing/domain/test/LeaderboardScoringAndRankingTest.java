@@ -2110,7 +2110,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry,
                 new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345",
-                new CourseAreaImpl("Humba", UUID.randomUUID()),
+                new CourseAreaImpl("Humba", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null),
                 /* registrationLinkSecret */ UUID.randomUUID().toString());
         trackedRegattaRegistry.getOrCreateTrackedRegatta(dummyRegatta);
         Competitor[] competitors = createCompetitors(10).toArray(new Competitor[0]);

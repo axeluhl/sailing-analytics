@@ -22,6 +22,7 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String description();
         String info();
         String price();
+        String priceDisabled();
         String priceInfo();
         String selected();
         String prices();
@@ -42,5 +43,7 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String featureCheck();
         String featureNone();
         String featureHeader();
+        String buttonWarning();
+        String confirmationDialog();
     }
 }

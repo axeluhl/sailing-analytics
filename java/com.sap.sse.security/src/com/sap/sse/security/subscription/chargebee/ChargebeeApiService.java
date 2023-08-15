@@ -72,6 +72,12 @@ public class ChargebeeApiService implements SubscriptionApiService {
     }
 
     @Override
+    public void nonRenewingSubscription(String subscriptionId, OnNonRenewingSubscriptionResultListener listener) {
+        new ChargebeeNonRenewingSubscriptionTask(subscriptionId, requestProcessor, result -> listener.onNonRenewingResult(result),
+                this).run();
+    }
+
+    @Override
     public void getUserSelfServicePortalSession(String userId, OnSelfServicePortalSessionResultListener listener) {
         new ChargeBeeGetSelfServicePortalSessionTask(userId, requestProcessor,
                 result -> listener.onSessionResult(result), this).run();

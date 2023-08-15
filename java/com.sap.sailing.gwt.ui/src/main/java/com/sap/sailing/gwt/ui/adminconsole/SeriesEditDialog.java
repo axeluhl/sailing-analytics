@@ -374,18 +374,15 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         @Override
         protected Widget createAddWidget() {
             VerticalPanel vPanel = new VerticalPanel();
-
             HorizontalPanel addRacesPanel = new HorizontalPanel();
             addRacesPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
             addRacesPanel.setSpacing(5);
             addRacesPanel.add(new Label(getStringMessages().addRaces()));
-
             for(int i = 1; i <= 50; i++) {
                 addRacesFromListBox.addItem("" + i);
                 addRacesToListBox.addItem("" + i);
             }
             updateFromToListboxesSelection();
-
             addRacesFromListBox.addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {
@@ -396,28 +393,24 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 @Override
                 public void onChange(ChangeEvent event) {
                     updateHintLabel();
-            }
+                }
             });
-
             addRacesPanel.add(addRacesFromListBox);
             addRacesPanel.add(new Label(getStringMessages().to()));
             addRacesPanel.add(addRacesToListBox);
             addRacesPanel.add(new Label(getStringMessages().withNamePrefix()));
-
             raceNamePrefixTextBox.setWidth("20px");
             if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
                 raceNamePrefixTextBox.setText("R");
             } else {
                 raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
             }
-
             raceNamePrefixTextBox.addValueChangeHandler(new ValueChangeHandler<String>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<String> event) {
                     updateHintLabel();
                 }
             });
-
             addRacesPanel.add(raceNamePrefixTextBox);
             addRacesBtn.addStyleName("inlineButton");
             addRacesBtn.addClickHandler(new ClickHandler() {
@@ -436,14 +429,11 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 }
             });
             addRacesPanel.add(addRacesBtn);
-
             vPanel.add(addRacesPanel);
-
             addRacesHintLabel.getElement().getStyle().setColor("gray");
             vPanel.add(addRacesHintLabel);
             updateFromToListboxesSelection();
             updateHintLabel();
-
             return vPanel;
         }
 

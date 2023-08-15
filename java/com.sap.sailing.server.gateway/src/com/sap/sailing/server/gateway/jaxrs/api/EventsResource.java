@@ -59,6 +59,7 @@ import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NotFoundException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -101,6 +102,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -768,7 +770,9 @@ public class EventsResource extends AbstractSailingServerResource {
                 SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.UPDATE, event));
         String[] courseAreaNames = new String[] { courseAreaName };
         UUID[] courseAreaIds = new UUID[] { UUID.randomUUID() };
-        final CourseArea[] courseAreas = getService().apply(new AddCourseAreas(event.getId(), courseAreaNames, courseAreaIds));
+        final CourseArea[] courseAreas = getService().apply(
+                new AddCourseAreas(event.getId(), courseAreaNames, courseAreaIds,
+                        /* centerPositions */ new Position[] { null }, /* radiuses */ new Distance[] { null }));
         return courseAreas[0];
     }
 

@@ -22,7 +22,7 @@ public interface UserSubscriptionsView extends SubscriptionsView, IsWidget {
 
         void setView(UserSubscriptionsView view);
 
-        void cancelSubscription(String planId, String providerName);
+        void nonRenewingSubscription(String planId, String providerName);
 
         void navigateToSubscribe();
         

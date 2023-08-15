@@ -52,19 +52,19 @@ public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity
     }
 
     @Override
-    public void cancelSubscription(final String planId, final String providerName) {
-        ConfirmationDialog.create(StringMessages.INSTANCE.confirmCancelSubscriptionTitle(),
-                StringMessages.INSTANCE.confirmCancelSubscriptionText(), StringMessages.INSTANCE.confirm(),
+    public void nonRenewingSubscription(final String planId, final String providerName) {
+        ConfirmationDialog.create(StringMessages.INSTANCE.confirmNonRenewingSubscriptionTitle(),
+                StringMessages.INSTANCE.confirmNonRenewingSubscriptionText(), StringMessages.INSTANCE.confirm(),
                 StringMessages.INSTANCE.cancel(), (cancel) -> {
                     if (cancel) {
                         try {
                             final SubscriptionWriteServiceAsync<?, ?, ?> service = factory
                                     .getWriteAsyncServiceByProvider(providerName);
-                            service.cancelSubscription(planId, new AsyncCallback<Boolean>() {
+                            service.nonRenewingSubscription(planId, new AsyncCallback<Boolean>() {
                                 @Override
                                 public void onSuccess(final Boolean result) {
                                     if (!result) {
-                                        showError(StringMessages.INSTANCE.failedCancelSubscription());
+                                        showError(StringMessages.INSTANCE.failedNonRenewingSubscription());
                                     } else {
                                         userService.updateUser(true);
                                         fetchSubscription();
@@ -73,7 +73,7 @@ public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity
 
                                 @Override
                                 public void onFailure(final Throwable caught) {
-                                    showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
+                                    showError(StringMessages.INSTANCE.errorNonRenewingSubscription(caught.getMessage()));
                                 }
                             });
                         } catch (final InvalidSubscriptionProviderException e) {

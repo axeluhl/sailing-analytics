@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -44,6 +45,6 @@ public class EventCreateDialog extends EventDialog {
         imagesListComposite.fillImages(Collections.<ImageDTO>emptyList());
         videosListComposite.fillVideos(Collections.<VideoDTO>emptyList());
         // add default course area
-        courseAreaNameList.setValue(Collections.singletonList(new CourseAreaDTO("Default")));
+        courseAreaNameList.setValue(Collections.singletonList(new CourseAreaDTO(UUID.randomUUID(), "Default")));
     }
 }

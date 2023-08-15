@@ -47,14 +47,14 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
                 events = Collections.singleton(eventDeserializer.deserialize(deprecatedEventJson));
             }
         }
-        JSONObject leaderboardJson = Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD);
-        String leaderboardName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_NAME);
-        String leaderboardDisplayName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_DISPLAY_NAME);
-        String boatClassName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_BOAT_CLASS_NAME);
-        String regattaName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_REGATTA_NAME);
-        JSONArray leaderboardGroupsJson = Helpers.getNestedArraySafe(leaderboardJson, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_IN_LEADERBOARD_GROUPS);
-        List<LeaderboardGroupBase> leaderboardGroups = new ArrayList<LeaderboardGroupBase>();
-        for (Object leaderboardGroupJson : leaderboardGroupsJson) {
+        final JSONObject leaderboardJson = Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD);
+        final String leaderboardName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_NAME);
+        final String leaderboardDisplayName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_DISPLAY_NAME);
+        final String boatClassName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_BOAT_CLASS_NAME);
+        final String regattaName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_REGATTA_NAME);
+        final JSONArray leaderboardGroupsJson = Helpers.getNestedArraySafe(leaderboardJson, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_IN_LEADERBOARD_GROUPS);
+        final List<LeaderboardGroupBase> leaderboardGroups = new ArrayList<LeaderboardGroupBase>();
+        for (final Object leaderboardGroupJson : leaderboardGroupsJson) {
             leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) leaderboardGroupJson));
         }
         return new LeaderboardSearchResultBaseImpl(new LeaderboardBaseImpl(leaderboardName, leaderboardDisplayName),

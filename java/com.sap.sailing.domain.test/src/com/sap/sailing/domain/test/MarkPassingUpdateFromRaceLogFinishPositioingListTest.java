@@ -92,7 +92,7 @@ public class MarkPassingUpdateFromRaceLogFinishPositioingListTest extends Abstra
                 new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:02:00")),
                         new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(269))),
                 new WindSourceImpl(WindSourceType.WEB));
-        leaderboard = new FlexibleLeaderboardImpl("Test", new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), new CourseAreaImpl("Here", UUID.randomUUID()));
+        leaderboard = new FlexibleLeaderboardImpl("Test", new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), new CourseAreaImpl("Here", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
         final RaceColumn raceColumn = leaderboard.addRace(getTrackedRace(), "R", /* medalRace */ false);
         raceLog = raceColumn.getRaceLog(raceColumn.getFleets().iterator().next());
     }

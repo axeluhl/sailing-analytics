@@ -2335,6 +2335,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String subscriptions();
     String noSubscriptions();
     String subscribe();
+    String upgrade();
+    String upgradeInfo();
     String cancelSubscription();
     String subscriptionOwnerHeaderText();
     String subscriptionHighlightText();
@@ -2359,8 +2361,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String nextBillingAt();
     String currencyValue(double value, String currency);
     String errorLoadingUserSubscription(String errMessage);
-    String failedCancelSubscription();
-    String errorCancelSubscription(String errMessage);
+    String failedNonRenewingSubscription();
+    String errorNonRenewingSubscription(String errMessage);
     String errorInvalidSubscritionProvider(String errMessage);
     String unableToLoadCourseAreas(String message);
     String zoomCheckBoxLabel();
@@ -2410,8 +2412,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String timePointOfLastFix();
     String copyMarkDeviceMappings();
     String errorLoadingPolarDataForBoatClass(String boatClass, String message);
-    String confirmCancelSubscriptionTitle();
-    String confirmCancelSubscriptionText();
+    String confirmNonRenewingSubscriptionTitle();
+    String confirmNonRenewingSubscriptionText();
     String videoGuide();
     String orcExplanation();
     String subscriptionOneTimePlanLockedText();
@@ -2435,4 +2437,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal();
     String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
     String incrementalScoreCorrectionInPoints();
+    String errorObtainingCourseAreasForLeaderboard(String leaderboardName, String message);
 }

@@ -315,6 +315,7 @@ import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
@@ -1362,14 +1363,7 @@ Replicator {
 
     @Override
     public CourseArea getCourseArea(Serializable courseAreaId) {
-        for (Event event : getAllEvents()) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (courseArea.getId().equals(courseAreaId)) {
-                    return courseArea;
-                }
-            }
-        }
-        return null;
+        return getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
     }
 
     @Override
@@ -3895,17 +3889,17 @@ Replicator {
     }
 
     @Override
-    public CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds) {
-        final CourseArea[] courseAreas = addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames);
-        replicate(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds));
+    public CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds, Position[] centerPositions, Distance[] radiuses) {
+        final CourseArea[] courseAreas = addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames, centerPositions, radiuses);
+        replicate(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds, centerPositions, radiuses));
         return courseAreas;
     }
 
     @Override
-    public CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames) {
+    public CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames, Position[] centerPositions, Distance[] radiuses) {
         final CourseArea[] result = new CourseArea[courseAreaNames.length];
         for (int i=0; i<courseAreaIds.length; i++) {
-            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i]);
+            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i], centerPositions[i], radiuses[i]);
             final Event event = eventsById.get(eventId);
             if (event == null) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
@@ -4536,9 +4530,10 @@ Replicator {
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+                    final CourseAreaJsonDeserializer courseAreaDeserializer = new CourseAreaJsonDeserializer(DomainFactory.INSTANCE);
                     LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
                             new EventBaseJsonDeserializer(
-                                    new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                                    new VenueJsonDeserializer(courseAreaDeserializer),
                                     leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
                             leaderboardGroupBaseJsonDeserializer);
                     result = new ResultImpl<LeaderboardSearchResultBase>(query,
@@ -5396,4 +5391,17 @@ Replicator {
                 racesInCollision.substring(0, Math.max(0, racesInCollision.length()-2)));
     }
 
+    @Override
+    public Iterable<TrackedRace> getAllTrackedRacesForEventTrackingAt(Event event, TimePoint at) {
+        final Set<TrackedRace> result = new HashSet<>();
+        for (final Leaderboard leaderboard : event.getLeaderboards()) {
+            for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                if (trackedRace.getStartOfTracking() != null && !trackedRace.getStartOfTracking().after(at)
+                        && (trackedRace.getEndOfTracking() == null || !trackedRace.getEndOfTracking().before(at))) {
+                    result.add(trackedRace);
+                }
+            }
+        }
+        return result;
+    }
 }

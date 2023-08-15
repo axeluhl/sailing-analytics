@@ -11,6 +11,7 @@ Import-Package: net.bytebuddy;version="1.12.18",
  org.mockito;version="4.8.1",
  org.mockito.stubbing;version="4.8.1",
  org.objenesis;version="3.3.0"
-Require-Bundle: com.sap.sailing.domain.common
+Require-Bundle: com.sap.sailing.domain.common,
+ org.hamcrest;bundle-version="2.2.0"
 Automatic-Module-Name: com.sap.sse.security.ui.test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

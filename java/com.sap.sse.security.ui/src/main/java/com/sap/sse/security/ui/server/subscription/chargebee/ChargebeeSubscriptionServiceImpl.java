@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.chargebee.models.PortalSession;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
@@ -64,6 +65,9 @@ public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl im
                     subscriptionDto = new SubscriptionListDTO(itemList.toArray(new SubscriptionDTO[0]), null);
                 }
             }
+        } catch(final UserManagementException e) {
+            logger.log(Level.FINE, "No user is logged in.");
+            subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
         } catch (final Exception e) {
             logger.log(Level.SEVERE, "Error in getting subscription ", e);
             subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
@@ -100,6 +104,9 @@ public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl im
             }else {
                 return null;
             }
+        } catch (UserManagementException e) {
+            logger.log(Level.FINE, "No user is logged in.");
+            return null;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in getting session", e);
             return null;

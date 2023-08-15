@@ -32,7 +32,7 @@ public abstract class SubscriptionPlan implements Serializable {
      * Used to make Plans of the same category mutually exclusive.
      */
     public enum PlanCategory {
-        PREMIUM("premium"), DATA_MINING("data_mining");
+        PREMIUM("premium"), DATA_MINING_ARCHIVE("data_mining_archive"), DATA_MINING_ALL("data_mining_all"), TRIAL("trial");
         final String id;
         PlanCategory(String id) {
             this.id = id;

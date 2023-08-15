@@ -17,6 +17,16 @@ Additionally there is a detailed list of all features which are included in a pa
 	
 3. Group the plan by defining a (SubscriptionPlan.)PlanGroup and set the group to init of SailingSubscriptionPlan
 
+	A group will bundle the plans on one card. E.g. a premium weekly and premium yearly plan are in one group and
+	therefore shown on one (Premium) card.
+
+4. Add the plan to one or many categories. This helps to identify a content coverage of the plans. 
+
+	An example: Premium plan is in category PREMIUM. A data mining plan is build on premium and is therefore attached
+	to the PREMIUM and DATA_MINING category. If the user subscribe to premium we know because of the categories, that a 
+    data mining plan would include the premium plan (it is covering all categories from premium). So we can detect an
+	'update' which could follow up by an auto cancellation of an existing plan.
+
 4. Add following texts to class (and related property files)
 
 		com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants
@@ -77,6 +87,49 @@ Short names for the diff view can be defined with following keys
  
  They will be displayed in uppercase letters.
 
+## Cancellation
+
+### Non-renewing subscriptions
+
+A user can subscribe to a non-renewing plan, like weekly plans. They are marked on UI with a stamp 'one time payment'.
+The subscription is then directly canceled to the end of the subscription time.
+
+### Stop auto-renewing
+
+The opposite are the yearly plans, which are renewing Abonnements. They can be canceled in 
+
+	> user details > subscription
+
+This will trigger a cancel event by the chargebee API with the following settings 
+(see also `ChargebeeNonRenewingSubscriptionRequest.java`)
+
+	end_of_term = true (1)
+
+1. The contract will be canceled after the subscription is at the end of the current subscription billing cycle
+   [chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_end_of_term)
+
+The result is that the subscription changed the state from `active` -> `non_renewing`
+
+### Auto cancellation
+
+If we detect an update of an already active (`active` or `non_renewing`) plan, which means that the potential new one 
+is covering all features of the old one (detected by category comparison), we will cancel the old one automatically.
+This is only done after the new plan is subscribed successfully. It will cancel the old plan with following settings
+(see also `ChargebeeCancelSubscriptionRequest.java`)
+
+	end_of_term = false (1)
+	credit_option_for_current_term_charges = PRORATE (2)
+	refundable_credits_handling = SCHEDULE_REFUND (3)
+
+1. The contract will be canceled immediately
+[chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_end_of_term)
+2. The refund will be calculated out of the remaining days 
+[chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_credit_option_for_current_term_charges)
+3Remaining refundable credits will be refunded asynchronously 
+[chargebee docu](https://apidocs.chargebee.com/docs/api/subscriptions#cancel_subscription_for_items_refundable_credits_handling)
+
+The result is that the old subscription state is set to `cancel`
+
 ### Support Link
 
 The "service and information request" function is opening the default mail program (mailto:) to 
@@ -92,3 +145,7 @@ The subject text can be changed in `SubscriptionStringConstants.properties` with
 ### Further Resources
 
 	com.sap.sse.security.ui.client.i18n.StringMessages
+
+### Further Documentation
+
+[Chargebee-API Documentation](https://apidocs.chargebee.com/docs/api/subscriptions)

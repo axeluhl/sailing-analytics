@@ -52,7 +52,7 @@ public class LeaderboardWithEliminationTransitiveRemovalTest {
                 /* competitorRegistrationType */ CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
                 /* startDate */ null, /* endDate */ null, /* id */ UUID.randomUUID(),
                 regattaStructure, /* persistent */ true, new LowPoint(),
-                /* courseAreaIds */ Collections.singleton(server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Default").getId()),
+                /* courseAreaIds */ Collections.singleton(server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Default", /* centerPosition */ null, /* radius */ null).getId()),
                 /* buoyZoneRadiusInHullLengths */ null, /* useStartTimeInference */ false,
                 /* controlTrackingFromStartAndFinishTimes */ true, /* autoRestartTrackingUponCompetitorSetChange */ false,
                 RankingMetrics.ONE_DESIGN));

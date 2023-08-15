@@ -84,8 +84,8 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
         protected final MultiWordSuggestOracle inputOracle;
         protected final String placeholderTextForAddTextbox;
         protected final Integer inputBoxSize;
-        private Button addButton;
-        private SuggestBox suggestBox;
+        protected Button addButton;
+        protected SuggestBox suggestBox;
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues) {
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
@@ -138,6 +138,9 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             }
         }
 
+        /**
+         * Returns the suggest box created and assigns it to the {@link #suggestBox} field
+         */
         protected SuggestBox createSuggestBox() {
             suggestBox = new SuggestBox(inputOracle);
             if (placeholderTextForAddTextbox != null) {
@@ -148,6 +151,19 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
 
         @Override
         protected Widget createAddWidget() {
+            createAndWireAddButtonAndSuggestBox();
+            HorizontalPanel panel = new HorizontalPanel();
+            panel.add(suggestBox);
+            panel.add(addButton);
+            return panel;
+        }
+
+        /**
+         * The {@link #addButton} will be created and assigned to the {@link #addButton} field; an input suggest box is
+         * created using the {@link #createSuggestBox()} method which assigns it to the {@link #suggestBox} field. Both
+         * are "wired" with the each other for key event handling and enabling/disabling.
+         */
+        protected void createAndWireAddButtonAndSuggestBox() {
             final SuggestBox inputBox = createSuggestBox();
             inputBox.ensureDebugId("InputSuggestBox");
             if (inputBoxSize != null) {
@@ -159,7 +175,7 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             addButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    addValue(getContext().parse(inputBox.getValue()));
+                    addValue(createNewValue());
                     inputBox.setText("");
                     inputBox.setFocus(true);
                 }
@@ -186,10 +202,18 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
                     addButton.setEnabled(!inputBox.getValue().isEmpty());
                 }
             });
-            HorizontalPanel panel = new HorizontalPanel();
-            panel.add(inputBox);
-            panel.add(addButton);
-            return panel;
+        }
+        
+        /**
+         * Creates a new value from the contents of the {@link #suggestBox}, passing it to the {@link #getContext()
+         * enclosing editor's} {@link GenericStringListEditorComposite#parse(String)} method.
+         * <p>
+         * 
+         * Subclasses may choose to produce the value in other ways, e.g., including more input fields added
+         * in their {@link #createAddWidget()} specialization.
+         */
+        protected ValueType createNewValue() {
+            return getContext().parse(suggestBox.getValue());
         }
 
         @Override
