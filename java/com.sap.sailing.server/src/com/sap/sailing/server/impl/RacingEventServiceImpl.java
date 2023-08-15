@@ -4664,11 +4664,23 @@ Replicator {
             final Fleet fleet = raceColumn.getFleetByName(identifier.getFleetName());
             if (fleet != null) {
                 result = innerResolver.apply(raceColumn, fleet);
+                if (result == null) {
+                    logger.warning("Failed to resolve "+identifier+" because innerResolver couldn't find fleet "+
+                            fleet.getName()+" in race column "+
+                            raceColumn.getName()+" which has fleets "+
+                            Util.join(", ", raceColumn.getFleets())+
+                            " by race log resolver "+this);
+                }
             } else {
                 result = null;
+                logger.warning("Failed to resolve "+identifier+" because fleet wasn't found in race column "+
+                        raceColumn.getName()+" which has fleets "+
+                        Util.join(", ", raceColumn.getFleets())+
+                        " by race log resolver "+this);
             }
         } else {
             result = null;
+            logger.warning("Failed to resolve "+identifier+" because race column wasn't found by race log resolver "+this);
         }
         return result;
     }
@@ -4690,13 +4702,19 @@ Replicator {
                 regattaLike = (FlexibleLeaderboard) leaderboard;
             } else {
                 regattaLike = null;
+                logger.warning("Couldn't find race column "+identifier.getRaceColumnName()+
+                        " in "+this+" because regatta was not found and "+
+                        (leaderboard == null ? "leaderboard not found" : (identifier.getRegattaLikeParentName()+"not a flexible leaderboard")));
             }
         }
         if (regattaLike != null) {
             raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
-                } else {
+            if (raceColumn == null) {
+                logger.warning("Couldn't find race column "+identifier.getRaceColumnName()+" in regatta "+regattaLike);
+            }
+        } else {
             raceColumn = null;
-                }
+        }
         return raceColumn;
     }
 
