@@ -544,7 +544,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         actionsColumn.addAction(ACTION_SET_STARTTIME, UPDATE, object -> setStartTime(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_SET_FINISHING_AND_FINISH_TIME, UPDATE,
                 object -> setEndTime(object.getA(), object.getB()));
-        actionsColumn.addAction(ACTION_SHOW_RACELOG, UPDATE, object -> showRaceLog(object.getA(), object.getB()));
+        actionsColumn.addAction(ACTION_SHOW_RACELOG, READ, object -> showRaceLog(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, UPDATE,
                 object -> editCompetitorToBoatMappings(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_CERTIFICATE_ASSIGNMENT, READ, object -> assignCertificates(object));
