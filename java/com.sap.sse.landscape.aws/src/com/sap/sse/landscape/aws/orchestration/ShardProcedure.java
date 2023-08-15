@@ -177,22 +177,22 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         return Util.isEmpty(Util.filter(targetGroups, t -> t.getName().equals(name)));   
     }
 
-    protected Collection<RuleCondition> getFullConditionSetFromShardingConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer,
-            Collection<RuleCondition> shardRuleConditions) throws InterruptedException, ExecutionException {
-        if (shardRuleConditions.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) {
-            throw new IllegalArgumentException("Too many shardRuleConditions for a Rule. One ShardRule can contain a maximum of " + (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) + " Path conditions because we need" +
-                    NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE + " for matching these rules to a replicaset!");
-        }
-        final Collection<RuleCondition> ruleConditions = new ArrayList<>();
-        // add extra rules
-        ruleConditions.addAll(shardRuleConditions);
-        ruleConditions.add(RuleCondition.builder().field("http-header")
-                .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
-                        .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
-                .build());
-        ruleConditions.add(loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()));
-       return ruleConditions;
-    }
+//    protected Collection<RuleCondition> getFullConditionSetFromShardingConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer,
+//            Collection<RuleCondition> shardRuleConditions) throws InterruptedException, ExecutionException {
+//        if (shardRuleConditions.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) {
+//            throw new IllegalArgumentException("Too many shardRuleConditions for a Rule. One ShardRule can contain a maximum of " + (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) + " Path conditions because we need" +
+//                    NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE + " for matching these rules to a replicaset!");
+//        }
+//        final Collection<RuleCondition> ruleConditions = new ArrayList<>();
+//        // add extra rules
+//        ruleConditions.addAll(shardRuleConditions);
+//        ruleConditions.add(RuleCondition.builder().field("http-header")
+//                .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+//                        .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+//                .build());
+//        ruleConditions.add(loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()));
+//       return ruleConditions;
+//    }
     
     /**
      * This function constructs a number of new rules for given {@code ruleConditions}. They are constructed by creating
@@ -214,7 +214,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         final Set<RuleCondition> ruleConditionsForConsumption = new HashSet<>();
         Util.addAll(ruleConditions, ruleConditionsForConsumption);
-        ArrayList<software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule.Builder> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys()
+        //Iterable<software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule.Builder> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys(shardingKeys);
         while (!ruleConditionsForConsumption.isEmpty()) {
             LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY,
                     ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
@@ -244,13 +244,26 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         // change ALB rules to new ones
         // construct all conditions for all shardingkeys because one sharding key needs more than one condition
-        Iterable<Rule.Builder> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys(shardingKeys);
+        Iterable<Rule> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys(shardingKeys);
         ArrayList<Rule> rulesToAdd = new ArrayList<>();
-        for (Rule.Builder builder : ruleBuilders) {
+        
+        for (Rule ruleWithPathConditions : ruleBuilders) {
             LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY,
                     ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
-            // finish rule with priority and action
-            rulesToAdd.add(builder.priority("" + ruleIdx)
+            
+            // add two rules for mathing to the replicaset and only to a replica
+            //TODO move this to another function
+            ArrayList<RuleCondition> allConditions = new ArrayList<>(); 
+            allConditions.addAll(ruleWithPathConditions.conditions());
+            allConditions.add(RuleCondition.builder().field("http-header")
+                    .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                            .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+                    .build());
+            allConditions.add(alb.createHostHeaderRuleCondition(replicaSet.getHostname()));
+            Rule.Builder newBuilder = ruleWithPathConditions.toBuilder();
+           newBuilder.conditions(allConditions);
+            
+            rulesToAdd.add(ruleWithPathConditions.toBuilder().priority("" + ruleIdx)
                     .actions(Action.builder()
                             .forwardConfig(ForwardActionConfig.builder()
                                     .targetGroups(TargetGroupTuple.builder()

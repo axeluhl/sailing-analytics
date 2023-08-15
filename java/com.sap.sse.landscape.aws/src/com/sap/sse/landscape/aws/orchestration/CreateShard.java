@@ -143,6 +143,18 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     getLandscape().putScalingPolicy(DEFAULT_INSTANCE_STARTUP_TIME, getLandscape().getAutoScalingGroupName(shardName), targetGroup,
                             AwsAutoScalingGroup.DEFAULT_MAX_REQUESTS_PER_TARGET, region);
                     // wait until instances are running
+                  
+                  //---- moved for testing. Dest is below
+                    final Set<ShardingKey> shardingKeysToUse;
+                  if (shardingKeys.isEmpty()) {
+                      shardingKeysToUse = Collections.singleton(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION);
+                  } else {
+                      shardingKeysToUse = shardingKeys;
+                  }
+                  // change ALB rules to new ones
+                  addShardingRules(loadBalancer, shardingKeysToUse, targetGroup);
+                  // -- end of moved part
+                  
                     Wait.wait(()->{
                         boolean ret = true;
                         final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
@@ -163,14 +175,14 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     for (Rule r : newRuleSet) {
                         loadBalancer.deleteRules(r);
                     }
-                    final Set<ShardingKey> shardingKeysToUse;
-                    if (shardingKeys.isEmpty()) {
-                        shardingKeysToUse = Collections.singleton(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION);
-                    } else {
-                        shardingKeysToUse = shardingKeys;
-                    }
-                    // change ALB rules to new ones
-                    addShardingRules(loadBalancer, shardingKeysToUse, targetGroup);
+//                    final Set<ShardingKey> shardingKeysToUse;
+//                    if (shardingKeys.isEmpty()) {
+//                        shardingKeysToUse = Collections.singleton(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION);
+//                    } else {
+//                        shardingKeysToUse = shardingKeys;
+//                    }
+//                    // change ALB rules to new ones
+//                    addShardingRules(loadBalancer, shardingKeysToUse, targetGroup);
                     // restore default minCapacity of shard's autoscalinggroup
                     getLandscape().resetShardMinAutoscalingGroupSize(newAutoscalingGroupName, region);
 

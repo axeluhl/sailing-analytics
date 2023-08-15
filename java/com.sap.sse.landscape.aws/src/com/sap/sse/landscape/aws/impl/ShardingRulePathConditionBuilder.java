@@ -10,10 +10,10 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
     // two dimensional array with keys [patterns][beforeKey(0)/Afterkey(1)]
      private static final String[][] patterns = {
             {"gwt/*/leaderboard/", ""},                 //0
-            {"*/api/*/v?/leaderboards/",""},            //1
-            {"*/api/*/v?/leaderboards/", "/*"},         //2
-            {"*/api/*/v?/regattas/", ""},               //3
-            {"*/api/*/v?/regattas/","/*"}               //4
+            {"/sailingserver/api/v?/leaderboards/",""},            //1
+            {"/sailingserver/api/v?/leaderboards/", "/*"},         //2
+            {"/sailingserver/api/v?/regattas/", ""},               //3
+            {"/sailingserver/api/v?/regattas/","/*"}               //4
     };
      private static char[] wildcards = {'*', '?'};
     public static int numberOfShardConditionsPerShard() {
@@ -76,7 +76,7 @@ public class ShardingRulePathConditionBuilder<ShardingKey> implements Builder<Sh
         final Collection<RuleCondition> ruleConditions = new ArrayList<>();
         final Collection<String> paths = getPathsForShardingKey(shardingKey);
         ruleConditions.add(
-                RuleCondition.builder().field("path-pattern").values(paths).build());
+                RuleCondition.builder().pathPatternConfig(t -> t.values(paths)).build());
         return ruleConditions;
     }
     

@@ -94,12 +94,13 @@ public class AddShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProc
                     ruleConditionToBeInserted.remove(0); 
                     updateRule = true;
                 }
-                final Collection<RuleCondition> ruleConditions = getFullConditionSetFromShardingConditions(loadBalancer, conditionsForModThisRule);
-                // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
-                Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
-                if (updateRule) {
-                    getLandscape().modifyRuleConditions(region, proxyRuleWithNewConditions);
-                }
+                throw new Exception("Not yet implemented");
+//                final Collection<RuleCondition> ruleConditions = null;// getFullConditionSetFromShardingConditions(loadBalancer, conditionsForModThisRule);
+//                // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
+//                Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
+//                if (updateRule) {
+//                    getLandscape().modifyRuleConditions(region, proxyRuleWithNewConditions);
+//                }
             }
         }
         if (!ruleConditionToBeInserted.isEmpty()) {
