@@ -95,6 +95,7 @@ import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
+import software.amazon.awssdk.services.autoscaling.model.EnableMetricsCollectionRequest;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -2021,7 +2022,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 b.tags(awsTags);
             });
         });
+        enableAutoscalinggroupMetricCollection(autoScalingGroupName, autoScalingClient);
         putScalingPolicy(instanceWarmupTimeInSeconds, autoScalingGroupName, publicTargetGroup , maxRequestsPerTarget, region);
+    }
+    
+    private void enableAutoscalinggroupMetricCollection(String autoscalinggroupName, AutoScalingClient client) {
+        // see https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/autoscaling/model/EnableMetricsCollectionRequest.html
+        // If you specify Granularity and don't specify any metrics, all metrics are enabled.
+        EnableMetricsCollectionRequest request = EnableMetricsCollectionRequest.builder().autoScalingGroupName(autoscalinggroupName).build();
+        client.enableMetricsCollection(request);
     }
 
     private String getLaunchConfigurationName(String replicaSetName, final String releaseName) {
