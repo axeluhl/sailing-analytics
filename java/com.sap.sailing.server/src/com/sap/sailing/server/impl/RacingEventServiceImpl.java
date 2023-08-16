@@ -4665,22 +4665,24 @@ Replicator {
             if (fleet != null) {
                 result = innerResolver.apply(raceColumn, fleet);
                 if (result == null) {
-                    logger.warning("Failed to resolve "+identifier+" because innerResolver couldn't find fleet "+
+                    logger.log(Level.WARNING, "Failed to resolve "+identifier+" because innerResolver couldn't find fleet "+
                             fleet.getName()+" in race column "+
                             raceColumn.getName()+" which has fleets "+
                             Util.join(", ", raceColumn.getFleets())+
-                            " by race log resolver "+this);
+                            " by race log resolver "+this, new Exception("This is the call stack where this happened"));
                 }
             } else {
                 result = null;
-                logger.warning("Failed to resolve "+identifier+" because fleet wasn't found in race column "+
+                logger.log(Level.WARNING, "Failed to resolve "+identifier+" because fleet wasn't found in race column "+
                         raceColumn.getName()+" which has fleets "+
                         Util.join(", ", raceColumn.getFleets())+
-                        " by race log resolver "+this);
+                        " by race log resolver "+this, new Exception("This is the call stack where this happened"));
             }
         } else {
             result = null;
-            logger.warning("Failed to resolve "+identifier+" because race column wasn't found by race log resolver "+this);
+            logger.log(Level.WARNING, "Failed to resolve "+identifier+" because race column "+
+                    identifier.getRaceColumnName()+" wasn't found by race log resolver "+this,
+                    new Exception("This is the call stack where this happened"));
         }
         return result;
     }
@@ -4702,15 +4704,18 @@ Replicator {
                 regattaLike = (FlexibleLeaderboard) leaderboard;
             } else {
                 regattaLike = null;
-                logger.warning("Couldn't find race column "+identifier.getRaceColumnName()+
-                        " in "+this+" because regatta was not found and "+
-                        (leaderboard == null ? "leaderboard not found" : (identifier.getRegattaLikeParentName()+"not a flexible leaderboard")));
+                logger.log(Level.WARNING, "Couldn't find race column "+identifier.getRaceColumnName()+
+                        " in "+this+" because regatta was not found and leaderboard "+
+                        identifier.getRegattaLikeParentName() + 
+                        (leaderboard == null ? " not found" : " not a flexible leaderboard"),
+                        new Exception("This is the call stack where this happened"));
             }
         }
         if (regattaLike != null) {
             raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
             if (raceColumn == null) {
-                logger.warning("Couldn't find race column "+identifier.getRaceColumnName()+" in regatta "+regattaLike);
+                logger.log(Level.WARNING, "Couldn't find race column "+identifier.getRaceColumnName()+" in regatta "+regattaLike,
+                        new Exception("This is the call stack where this happened"));
             }
         } else {
             raceColumn = null;
