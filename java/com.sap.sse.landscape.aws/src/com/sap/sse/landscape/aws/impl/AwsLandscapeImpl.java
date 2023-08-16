@@ -2029,7 +2029,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private void enableAutoscalinggroupMetricCollection(String autoscalinggroupName, AutoScalingClient client) {
         // see https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/autoscaling/model/EnableMetricsCollectionRequest.html
         // If you specify Granularity and don't specify any metrics, all metrics are enabled.
-        EnableMetricsCollectionRequest request = EnableMetricsCollectionRequest.builder().autoScalingGroupName(autoscalinggroupName).build();
+        EnableMetricsCollectionRequest request = EnableMetricsCollectionRequest.builder().autoScalingGroupName(autoscalinggroupName).granularity("1Minute").build();
         client.enableMetricsCollection(request);
     }
 
@@ -2112,6 +2112,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             });
             b.tags(awsTags);
         });
+        enableAutoscalinggroupMetricCollection(autoScalingGroupName, autoScalingClient);
         autoScalingClient.close();
         return autoScalingGroupName;
     }
