@@ -95,6 +95,7 @@ import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
+import software.amazon.awssdk.services.autoscaling.model.EnableMetricsCollectionRequest;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -2021,7 +2022,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 b.tags(awsTags);
             });
         });
+        enableAutoScalingGroupMetricCollection(autoScalingGroupName, autoScalingClient);
         putScalingPolicy(instanceWarmupTimeInSeconds, autoScalingGroupName, publicTargetGroup , maxRequestsPerTarget, region);
+    }
+    
+    private void enableAutoScalingGroupMetricCollection(String autoscalinggroupName, AutoScalingClient client) {
+        // see https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/autoscaling/model/EnableMetricsCollectionRequest.html
+        // If you specify Granularity and don't specify any metrics, all metrics are enabled.
+        EnableMetricsCollectionRequest request = EnableMetricsCollectionRequest.builder().autoScalingGroupName(autoscalinggroupName).granularity("1Minute").build();
+        client.enableMetricsCollection(request);
     }
 
     private String getLaunchConfigurationName(String replicaSetName, final String releaseName) {
@@ -2075,9 +2084,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String autoScalingGroupName = getAutoScalingGroupName(shardName);
         final List<String> availabilityZones = autoScalingParent.getAutoScalingGroup().availabilityZones();
         final int instanceWarmupTimeInSeconds = autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
-        logger.info(
-                "Creating Auto-Scaling Group " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Auto-Scaling Group: " +
-                        autoScalingParent.getName() + ". Starting with " + minSize + " instances.");
+        logger.info("Creating Auto-Scaling Group " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Auto-Scalinggroup: " + 
+                autoScalingParent.getName() + ". Starting with " + minSize + " instances.");
         autoScalingClient.createAutoScalingGroup(b->{
             b
                 .minSize(minSize)
@@ -2103,6 +2111,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             });
             b.tags(awsTags);
         });
+        enableAutoScalingGroupMetricCollection(autoScalingGroupName, autoScalingClient);
         autoScalingClient.close();
         return autoScalingGroupName;
     }

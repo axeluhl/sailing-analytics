@@ -54,6 +54,4 @@ public interface ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc.targetGroups(
                 TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())) .build();
     }
-
-
 }
