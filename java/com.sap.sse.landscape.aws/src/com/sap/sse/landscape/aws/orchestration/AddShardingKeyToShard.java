@@ -1,12 +1,7 @@
 package com.sap.sse.landscape.aws.orchestration;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
@@ -15,6 +10,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.impl.ShardingRulePathConditionBuilder;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
@@ -65,61 +61,50 @@ public class AddShardingKeyToShard<ShardingKey, MetricsT extends ApplicationProc
             throw new Exception("Shard "+shardName+" not found in replica set "+replicaSet.getName());
         }
         logger.info("Appending " + Util.joinStrings(", ", shardingKeys) + " to " + shardName);
-        // list for manipulation -> elements are allowed to be removed!!
-        final List<ShardingKey> mutableShardingKeys = new LinkedList<>();
-        mutableShardingKeys.addAll(shardingKeys);
         final TargetGroup<ShardingKey> targetgroup = shard.getTargetGroup();
         final ApplicationLoadBalancer<ShardingKey> loadBalancer = shard.getLoadBalancer();
-        final Collection<TargetGroup<ShardingKey>> t = new ArrayList<>();
-        t.add(targetgroup);
+        // building every condition for every shardingkey
+        ArrayList<RuleCondition> ruleConditionToBeInserted = new ArrayList<>();
+        for (ShardingKey k : shardingKeys) {
+            ruleConditionToBeInserted.addAll((new ShardingRulePathConditionBuilder<>().ShardingKey(k).build()));
+        }
+        
         // check if there is a rule with space left for one or more additional conditions:
         for (Rule r : shard.getRules()) {
-            boolean updateRule = false;
-            final ArrayList<ShardingKey> shardingKeys = new ArrayList<>();
+            boolean ruleIsEmpty = true;
+            ArrayList<RuleCondition> conditionsForModThisRule = new ArrayList<>();
             for (RuleCondition con : r.conditions()) {
                 // if we find a 
-                if (con.pathPatternConfig() != null) {
-                    // eliminate PATH_UNUSED_BY_ANY_APPLICATION in case this proxy key was found;
-                    // it usually indicates an empty shard; when now adding one or more conditions
-                    // it can be replaced.
-                    Util.addAll(
-                            Util.filter(
-                                    Util.map(con.values(), this::getShardingKeyFromPathCondition),
-                                            shardingKey->!shardingKey.equals(SHARDING_KEY_UNUSED_BY_ANY_APPLICATION)),
-                            shardingKeys);
+                if (con.pathPatternConfig() != null && Util.size(Util.filter(con.values(), t -> getShardingKeyFromPathCondition(t) != SHARDING_KEY_UNUSED_BY_ANY_APPLICATION)) != 0) {
+                    // for rebuilding the conditions later, we need to add already existing conditions.
+                    conditionsForModThisRule.add(con);
+                    // if there are paths which are not SHARDING_KEY_UNUSED_BY_ANY_APPLICATION, than the rule is not empty.
+                    ruleIsEmpty = false;
                 }
             }
-            if (shardingKeys.isEmpty()) {
+            if (ruleIsEmpty) {
                 // the rule probably only has PATH_UNUSED_BY_ANY_APPLICATION and was a proxy rule, probably at the end of the list; remove
                 loadBalancer.deleteRules(r);
             } else { // update only non-empty rule because we assume it won't be at the end of the list
-                while (shardingKeys.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
-                        && !mutableShardingKeys.isEmpty()) {
-                    shardingKeys.add(mutableShardingKeys.get(0));
-                    mutableShardingKeys.remove(0);
-                    updateRule = true;
+                while (conditionsForModThisRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
+                        && !ruleConditionToBeInserted.isEmpty()) {
+                    conditionsForModThisRule.add(ruleConditionToBeInserted.get(0));
+                    ruleConditionToBeInserted.remove(0); 
                 }
-                final Collection<RuleCondition> ruleConditions = getShardingRuleConditions(loadBalancer, shardingKeys);
-                // construct a rule only for transporting the conditions; no forwarding target is required for modifyRuleConditions
-                Rule proxyRuleWithNewConditions = Rule.builder().ruleArn(r.ruleArn()).conditions(ruleConditions).build();
-                if (updateRule) {
-                    getLandscape().modifyRuleConditions(region, proxyRuleWithNewConditions);
-                }
+                throw new Exception("Not yet implemented");
             }
         }
-        if (!mutableShardingKeys.isEmpty()) {
+        if (!ruleConditionToBeInserted.isEmpty()) {
             // check number of rules
-            final Set<ShardingKey> keysCopy = new HashSet<>();
-            keysCopy.addAll(shardingKeys);
             if (Util.size(loadBalancer.getRules()) + numberOfRequiredRules(Util.size(shardingKeys))
                     < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
                 // enough rules
-                addShardingRules(loadBalancer, keysCopy, targetgroup);
+                addNewRulesFromPathConditions(ruleConditionToBeInserted, loadBalancer, targetgroup);
             } else {
                 // not enough rules
                 final ApplicationLoadBalancer<ShardingKey> alb = getFreeLoadBalancerAndMoveReplicaSet();
                 // set new rules
-                addShardingRules(alb, keysCopy, targetgroup);
+                addNewRulesFromPathConditions(ruleConditionToBeInserted, alb, targetgroup);
             }
         }
     }
