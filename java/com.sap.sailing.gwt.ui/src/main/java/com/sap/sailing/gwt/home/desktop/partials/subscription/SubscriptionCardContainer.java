@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.home.desktop.partials.subscription;
 import static com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan.DATA_MINING_ALL_YEARLY;
 import static com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan.DATA_MINING_ARCHIVE_YEARLY;
 import static com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan.PREMIUM_YEARLY;
+import static com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory.DATA_MINING_ALL;
+import static com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory.DATA_MINING_ARCHIVE;
 import static com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory.PREMIUM;
 
 import java.util.ArrayList;
@@ -40,10 +42,11 @@ public class SubscriptionCardContainer extends Composite {
     private static final String SUPPORT_EMAIL = "support@sapsailing.com";
     private static SubscriptionContainerUiBinder uiBinder = GWT.create(SubscriptionContainerUiBinder.class);
     private static final SubscriptionStringConstants i18n = SubscriptionStringConstants.INSTANCE;
+    private final static int TITLE_DESCRIPTION_ROW = 0;
     private final static int FREE_ROW = 1;
     private final static int PREMIUM_ROW = 2;
-    private final static int DATA_MINING_ARCHIVE = 3;
-    private final static int DATA_MINING_ALL = 4;
+    private final static int DATA_MINING_ARCHIVE_ROW = 3;
+    private final static int DATA_MINING_ALL_ROW = 4;
 
     @UiField
     Button businessModelInfoButton;
@@ -70,10 +73,10 @@ public class SubscriptionCardContainer extends Composite {
         featureGrid.setWidget(0, PREMIUM_ROW, premiumPlanTitle);
         final Label dataMiningArchivePlanTitle = new Label(i18n.data_mining_archive_name());
         dataMiningArchivePlanTitle.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
-        featureGrid.setWidget(0, DATA_MINING_ARCHIVE, dataMiningArchivePlanTitle);
+        featureGrid.setWidget(0, DATA_MINING_ARCHIVE_ROW, dataMiningArchivePlanTitle);
         final Label dataMiningAllPlanTitle = new Label(i18n.data_mining_all_trial_name());
         dataMiningAllPlanTitle.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
-        featureGrid.setWidget(0, DATA_MINING_ALL, dataMiningAllPlanTitle);
+        featureGrid.setWidget(0, DATA_MINING_ALL_ROW, dataMiningAllPlanTitle);
         addFeatureWithLink(i18n.features_organize_events_title(), i18n.features_organize_events_description(),
                 "https://support.sapsailing.com/hc/en-us/articles/360018169799-Create-a-simple-event-on-my-sapsailing-com");
         addFeature(i18n.features_events_with_more_regatta_title(), i18n.features_events_with_more_regatta_description());
@@ -90,8 +93,8 @@ public class SubscriptionCardContainer extends Composite {
         addFeature(i18n.features_advanced_leaderboard_info_title(), i18n.features_advanced_leaderboard_info_description(), PREMIUM);
         addFeature(i18n.features_simulator_title(), i18n.features_simulator_description(), PREMIUM);
         addFeature(i18n.features_map_analytics_title(), i18n.features_map_analytics_description(), PREMIUM);
-        addFeature(i18n.features_data_mining_title(), i18n.features_data_mining_description(), SubscriptionPlan.PlanCategory.DATA_MINING_ARCHIVE);
-        addFeature(i18n.features_data_mining_all_title(), i18n.features_data_mining_all_description(), SubscriptionPlan.PlanCategory.DATA_MINING_ALL);
+        addFeature(i18n.features_data_mining_title(), i18n.features_data_mining_description(), DATA_MINING_ARCHIVE);
+        addFeature(i18n.features_data_mining_all_title(), i18n.features_data_mining_all_description(), DATA_MINING_ALL);
 
         features.add(featureGrid);
         emailContact.addClickHandler(new ClickHandler() {
@@ -120,21 +123,21 @@ public class SubscriptionCardContainer extends Composite {
 
     private void addFeatureWithDescription(final String titleString, Widget description,
             final SubscriptionPlan.PlanCategory planCategory) {
-        // get size but index starts with 0 therefore row count is current index + 1
         int currentRowIndex = featureGrid.getRowCount();
+        // get size but index starts with 0 therefore row count is current index + 1
         featureGrid.resizeRows(currentRowIndex + 1);
         VerticalPanel line = new VerticalPanel();
         Label title = new Label(titleString);
         title.addStyleName(SubscriptionCardResources.INSTANCE.css().featureTitle());
         line.add(title);
         line.add(description);
-        featureGrid.setWidget(currentRowIndex, 0, line);
+        featureGrid.setWidget(currentRowIndex, TITLE_DESCRIPTION_ROW, line);
         createCheckMark(currentRowIndex, FREE_ROW, planCategory == null);
         createCheckMark(currentRowIndex, PREMIUM_ROW,
                 planCategory == null || PREMIUM_YEARLY.getPlanCategories().contains(planCategory));
-        createCheckMark(currentRowIndex, DATA_MINING_ARCHIVE,
+        createCheckMark(currentRowIndex, DATA_MINING_ARCHIVE_ROW,
                 planCategory == null || DATA_MINING_ARCHIVE_YEARLY.getPlanCategories().contains(planCategory));
-        createCheckMark(currentRowIndex, DATA_MINING_ALL,
+        createCheckMark(currentRowIndex, DATA_MINING_ALL_ROW,
                 planCategory == null || DATA_MINING_ALL_YEARLY.getPlanCategories().contains(planCategory));
     }
 

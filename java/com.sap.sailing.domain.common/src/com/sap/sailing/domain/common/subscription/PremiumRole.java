@@ -9,7 +9,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
- * Specifies a role that when associated to a user gives access to the streamlet Feature on the RaceMap
+ * Specifies a role that when associated to a user gives access to several premium features.
  */
 public class PremiumRole extends RolePrototype {
     private static final UUID ROLE_ID = UUID.fromString("7021e7a2-569a-11ec-bf63-0242ac130002");
