@@ -317,7 +317,10 @@
  font-weight: bold;
  font-size: 1.2em;
  text-transform: capitalize;
- margin: 0 1em;
+ margin: 0 auto;
+ -webkit-transform: rotate(-90deg);
+ -ff-transform: rotate(-90deg);
+ transform: rotate(-90deg);
 }
 
 .buttonWarning {
