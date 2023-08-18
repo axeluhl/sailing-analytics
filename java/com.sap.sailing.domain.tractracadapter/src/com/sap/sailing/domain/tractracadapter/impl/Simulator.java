@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -59,7 +60,11 @@ public class Simulator {
     }
 
     public synchronized void setTrackedRace(final DynamicTrackedRace trackedRace) {
+        if (trackedRace == null) {
+            throw new NullPointerException("Need a valid tracked race here");
+        }
         this.trackedRace = trackedRace;
+        notifyAll();
         trackedRace.getTrackedRegatta().addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
@@ -97,6 +102,15 @@ public class Simulator {
                     new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override
                 public void run() {
+                    synchronized (Simulator.this) {
+                        while (trackedRace == null) {
+                            try {
+                                Simulator.this.wait();
+                            } catch (InterruptedException e) {
+                                logger.log(Level.INFO, "Exception waiting for tracked race to arrive in simulator", e);
+                            }
+                        }
+                    }
                     final WindTrack windTrack = windSourceAndTrack.getValue();
                     windTrack.lockForRead();
                     try {
@@ -239,6 +253,15 @@ public class Simulator {
                     markPassing = null;
                 }
             }
+            synchronized (Simulator.this) {
+                while (trackedRace == null) {
+                    try {
+                        Simulator.this.wait();
+                    } catch (InterruptedException e) {
+                        logger.log(Level.INFO, "Exception waiting for tracked race to arrive in simulator", e);
+                    }
+                }
+            }
             trackedRace.updateMarkPassings(competitor, deliverTransformedNow);
             if (markPassing != null) {
                 // not consumed and delivered all mark passings now
@@ -263,7 +286,18 @@ public class Simulator {
     }
     
     public void scheduleCompetitorPosition(final Competitor competitor, GPSFixMoving competitorFix) {
-        final RecordGPSFix<Competitor> recorder = (c, f)->trackedRace.recordFix(c, f);
+        final RecordGPSFix<Competitor> recorder = (c, f)->{
+            synchronized (Simulator.this) {
+                while (trackedRace == null) {
+                    try {
+                        Simulator.this.wait();
+                    } catch (InterruptedException e) {
+                        logger.log(Level.INFO, "Exception waiting for tracked race to arrive in simulator", e);
+                    }
+                }
+            }
+            trackedRace.recordFix(c, f);
+        };
         scheduleFixRecording(competitor, competitorFix, recorder);
     }
     
@@ -273,7 +307,18 @@ public class Simulator {
     }
 
     public void scheduleMarkPosition(final Mark mark, GPSFixMoving markFix) {
-        final RecordGPSFix<Mark> recorder = (m, f)->trackedRace.recordFix(mark, f);
+        final RecordGPSFix<Mark> recorder = (m, f)->{
+            synchronized (Simulator.this) {
+                while (trackedRace == null) {
+                    try {
+                        Simulator.this.wait();
+                    } catch (InterruptedException e) {
+                        logger.log(Level.INFO, "Exception waiting for tracked race to arrive in simulator", e);
+                    }
+                }
+            }
+            trackedRace.recordFix(mark, f);
+        };
         scheduleFixRecording(mark, markFix, recorder);
     }
 

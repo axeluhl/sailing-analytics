@@ -31,6 +31,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTyp
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ResultsAreOfficialFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbstractFinishPositioningListFinder.CompetitorResultsAndTheirCreationTimePoints;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
@@ -395,6 +396,9 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public TimePoint getStartTime() {
+        if (cachedStartTimeFinderResult.getResolutionFailed() == ResolutionFailed.RACE_LOG_UNRESOLVED) {
+            updateStartTime(); // try to resolve the other race log; failure to resolve may have been caused, e.g.,
+        }                      // by a premature look-up while receiving the initial load; see bug 5860
         return cachedStartTimeFinderResult.getStartTime();
     }
     
@@ -541,11 +545,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedRacingProcedureType = null;
             cachedRacingProcedureTypeNoFallback = null;
         }
-        StartTimeFinderResult startTimeFinderResult = startTimeAnalyzer.analyze();
-        if (!Util.equalsWithNull(cachedStartTimeFinderResult, startTimeFinderResult)) {
-            cachedStartTimeFinderResult = startTimeFinderResult;
-            changedListeners.onStartTimeChanged(this);
-        }
+        StartTimeFinderResult startTimeFinderResult = updateStartTime();
         adjustObserverForRelativeStartTime(startTimeFinderResult, dependentRaceStates);
         TimePoint finishingTime = finishingTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {
@@ -595,6 +595,15 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedResultsAreOfficial = resultsAreOfficialEvent != null;
             changedListeners.onResultsAreOfficialChanged(this);
         }
+    }
+
+    private StartTimeFinderResult updateStartTime() {
+        StartTimeFinderResult startTimeFinderResult = startTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedStartTimeFinderResult, startTimeFinderResult)) {
+            cachedStartTimeFinderResult = startTimeFinderResult;
+            changedListeners.onStartTimeChanged(this);
+        }
+        return startTimeFinderResult;
     }
 
     /**
