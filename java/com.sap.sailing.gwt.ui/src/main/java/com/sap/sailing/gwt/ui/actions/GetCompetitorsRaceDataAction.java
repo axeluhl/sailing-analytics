@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -26,8 +27,8 @@ public class GetCompetitorsRaceDataAction implements TimeRangeAsyncAction<Compet
     private final Date toDate;
     private final long stepSizeInMs;
     private final DetailType detailType;
-    private final String leaderboarGroupName;
-    private final UUID leaderboarGroupId;
+    private final String leaderboardGroupName;
+    private final UUID leaderboardGroupId;
     private final String leaderboardName;
     
     public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
@@ -40,8 +41,8 @@ public class GetCompetitorsRaceDataAction implements TimeRangeAsyncAction<Compet
         this.toDate = toDate;
         this.stepSizeInMs = stepSizeInMs;
         this.detailType = detailType;
-        this.leaderboarGroupName = leaderboardGroupName;
-        this.leaderboarGroupId = leaderboardGroupId;
+        this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         this.leaderboardName = leaderboardName;
     }
 
@@ -52,8 +53,11 @@ public class GetCompetitorsRaceDataAction implements TimeRangeAsyncAction<Compet
             for (final Entry<CompetitorDTO, TimeRange> e : timeRanges.entrySet()) {
                 timeRange = timeRange == null ? e.getValue() : timeRange.extend(e.getValue());
             }
+            GWT.log("Calling getCompetitorsRaceData("+raceIdentifier+", "+new ArrayList<>(timeRanges.keySet())+
+                    ", "+timeRange.from()+", "+timeRange.to()+", "+stepSizeInMs+", "+detailType+", "+leaderboardGroupName+", "+
+                    leaderboardGroupId+", "+leaderboardName);
             sailingService.getCompetitorsRaceData(raceIdentifier, new ArrayList<>(timeRanges.keySet()), timeRange.from().asDate(),
-                    timeRange.to().asDate(), stepSizeInMs, detailType, leaderboarGroupName, leaderboarGroupId,
+                    timeRange.to().asDate(), stepSizeInMs, detailType, leaderboardGroupName, leaderboardGroupId,
                     leaderboardName, callback);
         }
     }
