@@ -28,8 +28,6 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter;
-import com.sap.sse.landscape.aws.impl.ShardingRuleManagementHelper;
-import com.sap.sse.landscape.aws.impl.ShardingRulePathConditionBuilder;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -54,7 +52,7 @@ public abstract class ShardProcedure<ShardingKey,
 extends AbstractAwsProcedureImpl<ShardingKey>
 implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
-    public final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
+    final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
     public static final int DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE = 2;
     @SuppressWarnings("unchecked") // this silently assumes that a String can be cast to a ShardingKey without problems
     protected final ShardingKey SHARDING_KEY_UNUSED_BY_ANY_APPLICATION = (ShardingKey) "lauycaluy3cla3yrclaurlIYQL8";
@@ -62,6 +60,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     final protected Set<ShardingKey> shardingKeys;
     final protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
     final protected Region region;
+    private final String pathPrefixForShardingKey;
 
     protected ShardProcedure(BuilderImpl<?,?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
@@ -69,6 +68,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         this.replicaSet = builder.getReplicaSet();
         this.shardingKeys = builder.getShardingKeys();
         this.region = builder.getRegion();
+        this.pathPrefixForShardingKey = builder.getPathPrefixForShardingKey();
     }
 
     public static interface Builder<
@@ -176,41 +176,53 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         final Iterable<TargetGroup<ShardingKey>> targetGroups = getLandscape().getTargetGroups(region);
         return Util.isEmpty(Util.filter(targetGroups, t -> t.getName().equals(name)));   
     }
-
+    
     /**
-     * This function constructs a number of new rules for given {@code ruleConditions}. They are constructed by creating
-     * rules and filling them with those conditions and the needed sharding (hostname and forward to replica) rules. And
-     * the forward to {@code targetGroup} gets also added.
+     * Produces conditions for a sharding load balancer rule based on the {@link #replicaSet}'s
+     * {@link AwsApplicationReplicaSet#getHostname() hostname}, a header-field condition that requires the request to be
+     * tagged for a replica, plus a path-pattern condition with the sharding keys as patterns.
      * 
-     * @param ruleConditions
-     *            are all condition, e.g. "paths", which are planned to be inserted.
-     * @param alb
-     *            automatic loadBalancer where these rules are planned to be added
-     * @param targetGroup
-     *            targetGroup where the forward of the rule points to
-     * @return all created rules which still need to be fed into the loadBalancer
-     * @throws Exception
+     * @param shardingKeys
+     *            their number must not exceed {@link ApplicationLoadBalancer#MAX_CONDITIONS_PER_RULE} -
+     *            {@link #NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE}; pass sharding keys (as the name suggests),
+     *            not full paths; the paths for the {@code path-pattern} condition will be constructed from the sharding
+     *            keys by this method. See also {@link #getPathConditionForShardingKey(String, String)}.
      */
-    protected Iterable<Rule> addNewRulesFromPathConditions(Iterable<RuleCondition> ruleConditions,
-            ApplicationLoadBalancer<ShardingKey> alb, TargetGroup<ShardingKey> targetGroup) throws Exception {
-        final ArrayList<Rule> rules = new ArrayList<>();
+    protected Collection<RuleCondition> getShardingRuleConditions(ApplicationLoadBalancer<ShardingKey> loadBalancer,
+            Collection<ShardingKey> shardingKeys) throws InterruptedException, ExecutionException {
+        if (shardingKeys.size() > ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE) {
+            throw new IllegalArgumentException("too many sharding keys for the conditions of a single load balancer rule: "+shardingKeys+
+                    "; a maximum of "+(ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE)+" is allowed");
+        }
+        final Collection<RuleCondition> ruleConditions = new ArrayList<>();
+        final Collection<String> paths = Util.mapToArrayList(shardingKeys, shardingKey->getPathConditionForShardingKey(shardingKey, pathPrefixForShardingKey));
+        ruleConditions.add(loadBalancer.createHostHeaderRuleCondition(replicaSet.getHostname()));
+        ruleConditions.add(RuleCondition.builder().field("http-header")
+                .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                        .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
+                .build());
+        ruleConditions.add(
+                RuleCondition.builder().field("path-pattern").pathPatternConfig(hhcb -> hhcb.values(paths)).build());
+        return ruleConditions;
+    }
+
+    protected Iterable<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Iterable<ShardingKey> shardingKeys,
+            TargetGroup<ShardingKey> targetGroup) throws Exception {
+        // change ALB rules to new ones
+        final Collection<Rule> rules = new ArrayList<Rule>();
+        final Set<ShardingKey> shardingKeyForConsumption = new HashSet<>();
+        Util.addAll(shardingKeys, shardingKeyForConsumption);
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
-        final Set<RuleCondition> ruleConditionsForConsumption = new HashSet<>();
-        Util.addAll(ruleConditions, ruleConditionsForConsumption);
-        //Iterable<software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule.Builder> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys(shardingKeys);
-        while (!ruleConditionsForConsumption.isEmpty()) {
-            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY,
-                    ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
-            final Collection<RuleCondition> conditionsForNextRule = new ArrayList<>();
-            for (final Iterator<RuleCondition> i = ruleConditionsForConsumption.iterator(); conditionsForNextRule
-                    .size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE
-                            - NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE
-                    && i.hasNext();) {
-                conditionsForNextRule.add(i.next());
+        while (!shardingKeyForConsumption.isEmpty()) {
+            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY, ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
+            final Set<ShardingKey> shardingKeysForNextRule = new HashSet<>();
+            for (final Iterator<ShardingKey> i=shardingKeyForConsumption.iterator();
+                    shardingKeysForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {
+                shardingKeysForNextRule.add(i.next());
                 i.remove();
             }
-            // Build rule with new conditions
-            rules.add(Rule.builder().priority("" + ruleIdx).conditions(conditionsForNextRule)
+            final Collection<RuleCondition> conditions = getShardingRuleConditions(alb, shardingKeysForNextRule);
+            rules.add(Rule.builder().priority("" + ruleIdx).conditions(conditions)
                     .actions(Action.builder()
                             .forwardConfig(ForwardActionConfig.builder()
                                     .targetGroups(TargetGroupTuple.builder()
@@ -220,39 +232,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                     .build());
         }
         return alb.addRules(Util.toArray(rules, new Rule[0]));
-    }
-
-    protected Iterable<Rule> addShardingRules(ApplicationLoadBalancer<ShardingKey> alb, Iterable<ShardingKey> shardingKeys,
-            TargetGroup<ShardingKey> targetGroup) throws Exception {
-        final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
-        // change ALB rules to new ones
-        // construct all conditions for all shardingkeys because one sharding key needs more than one condition
-        Iterable<Rule> ruleBuilders = ShardingRuleManagementHelper.getNewRulesBuildersForShardingKeys(shardingKeys);
-        ArrayList<Rule> rulesToAdd = new ArrayList<>();
-        for (Rule ruleWithPathConditions : ruleBuilders) {
-            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY,
-                    ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
-            // add two rules for mathing to the replicaset and only to a replica
-            // TODO move this to another function
-            ArrayList<RuleCondition> allConditions = new ArrayList<>(); 
-            allConditions.addAll(ruleWithPathConditions.conditions());
-            allConditions.add(RuleCondition.builder().field("http-header")
-                    .httpHeaderConfig(hhcb -> hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
-                            .values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB()))
-                    .build());
-            allConditions.add(alb.createHostHeaderRuleCondition(replicaSet.getHostname()));
-            Rule.Builder newBuilder = ruleWithPathConditions.toBuilder();
-            newBuilder.conditions(allConditions);
-            rulesToAdd.add(ruleWithPathConditions.toBuilder().priority("" + ruleIdx)
-                    .actions(Action.builder()
-                            .forwardConfig(ForwardActionConfig.builder()
-                                    .targetGroups(TargetGroupTuple.builder()
-                                            .targetGroupArn(targetGroup.getTargetGroupArn()).build())
-                                    .build())
-                            .type(ActionTypeEnum.FORWARD).build())
-                    .build());
-        }
-        return alb.addRules(Util.toArray(rulesToAdd, new Rule[0]));
     }
 
     /**
@@ -406,7 +385,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     }
     
     protected int numberOfRequiredRules(int numberOfShardingKeys) {
-        return (int) (numberOfShardingKeys * ShardingRulePathConditionBuilder.numberOfShardConditionsPerShard() / (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE))
+        return (int) (numberOfShardingKeys / (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE))
                 + (int) Math.signum(/* one more because casting to int rounds down */ numberOfShardingKeys %
                         (ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE));
     }
@@ -465,9 +444,30 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                         .min().getAsInt();
     }
 
-    // this silently assumes that a String casts into a ShardingKey without problems
-    @SuppressWarnings("unchecked")
-    public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path) {
-        return (ShardingKey) ShardingRulePathConditionBuilder.getShardingKeyFromCondition(path);
+    /**
+     * Path conditions are constructed by pre-pending a "*" to the sharding key.
+     */
+    public static <ShardingKey> String getPathConditionForShardingKey(ShardingKey shardingKey, String pathPrefixForShardingKey) {
+        return pathPrefixForShardingKey+shardingKey.toString();
+    }
+
+    public static <ShardingKey> ShardingKey getShardingKeyFromPathCondition(String path, String pathPrefixForShardingKey) {
+        if (!path.startsWith(pathPrefixForShardingKey)) {
+            throw new IllegalStateException("path condition \""+path+"\" does not start with \""+pathPrefixForShardingKey+"\" which is unexpected");
+        }
+        @SuppressWarnings("unchecked") // this silently assumes that a String casts into a ShardingKey without problems
+        final ShardingKey result = (ShardingKey) path.substring(pathPrefixForShardingKey.length());
+        return result;
+    }
+
+    /**
+     * Path conditions are constructed by pre-pending a "*" to the sharding key.
+     */
+    protected String getPathConditionForShardingKey(ShardingKey shardingKey) {
+        return getPathConditionForShardingKey(shardingKey, pathPrefixForShardingKey);
+    }
+
+    protected ShardingKey getShardingKeyFromPathCondition(String path) {
+        return getShardingKeyFromPathCondition(path, pathPrefixForShardingKey);
     }
 }

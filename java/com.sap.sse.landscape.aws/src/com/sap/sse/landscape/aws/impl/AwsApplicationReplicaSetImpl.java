@@ -78,6 +78,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private final CompletableFuture<TargetGroup<ShardingKey>> masterTargetGroup;
     private final CompletableFuture<TargetGroup<ShardingKey>> publicTargetGroup;
     private final CompletableFuture<ResourceRecordSet> resourceRecordSet;
+    private final String pathPrefixForShardingKey;
     
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master,
             Optional<Iterable<ProcessT>> replicas,
@@ -85,8 +86,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache, String pathPrefixForShardingKey) throws InterruptedException, ExecutionException, TimeoutException {
         super(replicaSetAndServerName, hostname, master, replicas);
+        this.pathPrefixForShardingKey = pathPrefixForShardingKey;
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
         hostedZoneId = new CompletableFuture<>();
@@ -129,7 +131,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     throws InterruptedException, ExecutionException, TimeoutException {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
                 allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations,
-                dnsCache);
+                dnsCache, pathPrefixForShardingKey);
     }
     
     /**
@@ -496,7 +498,6 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return res;
     }
 
-    @SuppressWarnings("unchecked")
     private Set<ShardingKey> getShardingKeys(Map<Listener, Iterable<Rule>> listenersAndTheirRules,
             TargetGroup<ShardingKey> shardTargetGroupCandidate) {
         final String publicTargetGroupCandidateArn = shardTargetGroupCandidate.getTargetGroupArn();
@@ -517,7 +518,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                                                         HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())) {
                                             for (final RuleCondition ruleCondition : rule.conditions()) {
                                                 if (Util.equalsWithNull(ruleCondition.field(), "path-pattern")) {
-                                                    Util.addAll(Util.map(ruleCondition.values(), path->((ShardingKey)ShardProcedure.getShardingKeyFromPathCondition(path))), shardingKeys);
+                                                    Util.addAll(Util.map(ruleCondition.values(), path->ShardProcedure.getShardingKeyFromPathCondition(path, pathPrefixForShardingKey)), shardingKeys);
                                                 }
                                             }
                                         }
