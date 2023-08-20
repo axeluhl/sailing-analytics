@@ -8,12 +8,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,14 +31,18 @@ import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class ReverseGeocoderImpl implements ReverseGeocoder {
 
+    private static final String DATES = "dates";
+    private static final String TIMEZONE_ID = "timezoneId";
     private static final String BASE_URL = "http://api.geonames.org";
     private static final String NEARBY_PLACE_SERVICE = BASE_URL+"/findNearbyPlaceNameJSON?";
     private static final String SEARCH_BY_NAME_SERVICE = BASE_URL+"/searchJSON?";
+    private static final String SEARCH_TIMEZONE_BY_POSITION = BASE_URL+"/timezoneJSON?";
     /**
      * Maximal distance in degree for the cache.<br />
      * The first number is the distance in kilometers and the second number is a needed calculation factor and mustn't
@@ -53,6 +59,62 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     
     private static final Logger logger = Logger.getLogger(ReverseGeocoderImpl.class.getName());
 
+    @Override
+    public TimeZone getTimeZone(Position position, TimePoint timePoint) throws MalformedURLException, IOException, ParseException {
+        TimeZone resolvedTimeZone = null;
+        final JSONObject timeZoneObject = callTimezoneService(position, timePoint);
+        if (timeZoneObject != null) {
+            if (timeZoneObject.containsKey(TIMEZONE_ID)) {
+                final String timeZoneId = timeZoneObject.get(TIMEZONE_ID).toString();
+                resolvedTimeZone = TimeZone.getTimeZone(timeZoneId);
+            }
+            if (resolvedTimeZone == null && timeZoneObject.containsKey(DATES)) {
+                final JSONArray dates = (JSONArray) timeZoneObject.get(DATES);
+                if (dates.size() > 1 && ((JSONObject) dates.get(1)).containsKey("offsetToGmt")) {
+                    final int offsetToGmtMillis = (int) (Double.parseDouble(((JSONObject) dates.get(1)).get("offsetToGmt").toString()) * 3600 * 1000);
+                    resolvedTimeZone = getTimeZoneWithOffsetAtTime(offsetToGmtMillis, timePoint);
+                }
+            }
+        }
+        return resolvedTimeZone;
+    }
+    
+    private TimeZone getTimeZoneWithOffsetAtTime(int offsetToGmtMillis, TimePoint timePoint) {
+        for (final String tzId : TimeZone.getAvailableIDs()) {
+            final TimeZone tz = TimeZone.getTimeZone(tzId);
+            if (tz.getOffset(timePoint.asMillis()) == offsetToGmtMillis) {
+                return tz;
+            }
+        }
+        return null;
+    }
+
+    private JSONObject callTimezoneService(Position position, TimePoint timePoint)
+            throws MalformedURLException, IOException, ParseException {
+        StringBuilder url = generateRequestUrlTimezoneService(position, timePoint);
+        JSONObject geonames = submitGeonamesRequestForJSONObjectResult(url);
+        return geonames;
+    }
+
+    private StringBuilder generateRequestUrlTimezoneService(Position position, TimePoint timePoint) {
+        StringBuilder url = new StringBuilder(SEARCH_TIMEZONE_BY_POSITION);
+        url.append("lat=" + Double.toString(position.getLatDeg()));
+        url.append("&lng=" + Double.toString(position.getLngDeg()));
+        url.append("&radius=10" /*km*/);
+        url.append("&date="+new SimpleDateFormat("yyyy-MM-dd").format(timePoint.asDate()));
+        return url;
+    }
+
+    private JSONObject submitGeonamesRequestForJSONObjectResult(StringBuilder url)
+            throws MalformedURLException, IOException, ParseException {
+        final URLConnection connection = addUsernameParameterAndConnect(url);
+        final BufferedReader in = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+        final JSONParser parser = new JSONParser();
+        final JSONObject obj = (JSONObject) parser.parse(in);
+        return obj;
+    }
+    
     @Override
     public Placemark getPlacemarkNearest(Position position) throws IOException, ParseException {
         Placemark p = null;
@@ -280,11 +342,8 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     }
     
     private JSONArray submitGeonamesRequestForJSONArrayResult(StringBuilder url) throws MalformedURLException, IOException, ParseException {
-        URLConnection connection = addUsernameParameterAndConnect(url);
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(in);
-        JSONArray geonames = (JSONArray) obj.get("geonames");
+        final JSONObject obj = submitGeonamesRequestForJSONObjectResult(url);
+        final JSONArray geonames = (JSONArray) obj.get("geonames");
         if (geonames == null) {
             logger.log(Level.WARNING, "Returning null value for geonames object: " + obj.toJSONString());
         }
