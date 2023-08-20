@@ -100,6 +100,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         StringBuilder url = new StringBuilder(SEARCH_TIMEZONE_BY_POSITION);
         url.append("lat=" + Double.toString(position.getLatDeg()));
         url.append("&lng=" + Double.toString(position.getLngDeg()));
+        url.append("&radius=10" /*km*/);
         url.append("&date="+new SimpleDateFormat("yyyy-MM-dd").format(timePoint.asDate()));
         return url;
     }

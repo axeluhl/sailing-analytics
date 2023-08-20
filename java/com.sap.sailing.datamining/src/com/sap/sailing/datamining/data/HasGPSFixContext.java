@@ -6,7 +6,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.datamining.annotations.Connector;
-import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasGPSFixContext {
@@ -30,7 +29,4 @@ public interface HasGPSFixContext {
 
     @Statistic(messageKey = "AbsoluteXTE", resultDecimals = 2)
     Distance getAbsoluteXTE();
-    
-    @Dimension(messageKey = "Day")
-    String getDayAsISO();
 }
