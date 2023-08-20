@@ -89,4 +89,10 @@ public class GPSFixWithContext implements HasGPSFixContext {
     public Distance getAbsoluteXTE() {
         return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getAbsoluteCrossTrackError(getTimePoint());
     }
+
+    @Override
+    public String getDayAsISO() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
