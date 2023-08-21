@@ -1,14 +1,17 @@
 package com.sap.sailing.geocoding;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
+import com.sap.sse.common.TimePoint;
 
 public interface ReverseGeocoder {
     final ReverseGeocoder INSTANCE = new ReverseGeocoderImpl();
@@ -72,4 +75,16 @@ public interface ReverseGeocoder {
      * and returning the first element in the sorting order or {@code null} if the result is empty.
      */
     Placemark getPlacemark(String name, Comparator<Placemark> comp) throws IOException, ParseException;
+
+    /**
+     * Tries to obtain a {@link TimeZone} for a given location and time point. The implementation will first look for a
+     * resolved GMT offset specific to the location/time point; if that is not found, the raw GMT offset will be looked
+     * up in the response, and from all {@link TimeZone#getAvailableIDs() available time zones} one that has this offset
+     * will be searched. If nothing is found, {@code null} is returned.
+     * 
+     * @param position for which location to look for a time zone
+     * @param timePoint for which time point to look up the time zone; this may help resolving DST offsets
+     */
+    TimeZone getTimeZone(Position position, TimePoint timePoint)
+            throws MalformedURLException, IOException, ParseException;
 }

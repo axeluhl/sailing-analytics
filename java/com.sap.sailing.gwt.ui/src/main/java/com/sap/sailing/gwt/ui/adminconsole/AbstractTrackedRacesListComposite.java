@@ -6,6 +6,7 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -284,42 +285,36 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
-
         TextColumn<RaceDTO> raceStartColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
+                final String result;
                 if (raceDTO.startOfRace != null) {
-                    return DateAndTimeFormatterUtil.defaultDateFormatter.render(raceDTO.startOfRace) + " " + 
-                            DateAndTimeFormatterUtil.defaultTimeFormatter.render(raceDTO.startOfRace);
+                    result = DateAndTimeFormatterUtil.defaultDateFormatter.render(raceDTO.startOfRace) + " " + 
+                             DateAndTimeFormatterUtil.defaultTimeFormatter.render(raceDTO.startOfRace);
+                } else {
+                    result = "";
                 }
-
-                return "";
+                return result;
             }
         };
         raceStartColumn.setSortable(true);
         columnSortHandler.setComparator(raceStartColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                if (r1.startOfRace != null && r2.startOfRace != null) {
-                    return r1.startOfRace.compareTo(r2.startOfRace);
-                }
-
-                return r1.startOfRace == null ? (r2.startOfRace == null ? 0 : -1) : 1;
+                return Comparator.nullsLast(Comparator.<Date>naturalOrder()).compare(r1.startOfRace, r2.startOfRace);
             }
         });
-
         TextColumn<RaceDTO> hasWindDataColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.trackedRace != null && raceDTO.trackedRace.hasWindData == true)
-                    return stringMessages.yes();
-                else
-                    return stringMessages.no();
+                return (raceDTO.trackedRace != null && raceDTO.trackedRace.hasWindData == true)
+                        ? stringMessages.yes()
+                        : stringMessages.no();
             }
         };
         hasWindDataColumn.setSortable(true);
         columnSortHandler.setComparator(hasWindDataColumn, new Comparator<RaceDTO>() {
-
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
                 return Boolean.valueOf(hasWindData(r1)).compareTo(hasWindData(r2));
@@ -328,22 +323,17 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             private boolean hasWindData(RaceDTO race) {
                 return race.trackedRace != null && race.trackedRace.hasWindData == true;
             }
-
         });
-
         TextColumn<RaceDTO> hasGPSDataColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.trackedRace != null && raceDTO.trackedRace.hasGPSData == true) {
-                    return stringMessages.yes();
-                } else {
-                    return stringMessages.no();
-                }
+                return (raceDTO.trackedRace != null && raceDTO.trackedRace.hasGPSData == true)
+                    ? stringMessages.yes()
+                    : stringMessages.no();
             }
         };
         hasGPSDataColumn.setSortable(true);
         columnSortHandler.setComparator(hasGPSDataColumn, new Comparator<RaceDTO>() {
-
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
                 return Boolean.valueOf(hasGPSData(r1)).compareTo(hasGPSData(r2));
@@ -352,9 +342,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             private boolean hasGPSData(RaceDTO race) {
                 return race.trackedRace != null && race.trackedRace.hasGPSData == true;
             }
-
         });
-
         TextColumn<RaceDTO> raceStatusColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
@@ -376,7 +364,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 return r1.status == null ? (r2.status == null ? 0 : -1) : 1;
             }
         });
-
         TextColumn<RaceDTO> raceLiveDelayColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {

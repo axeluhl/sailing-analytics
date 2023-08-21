@@ -477,7 +477,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                 final Supplier<Double> uncorrectedScoreProvider = ()->getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
                 final Double incrementalScoreCorrectionForCompetitorInColumn = incrementalScoreCorrection.get(raceColumn.getKey(competitor));
                 if (incrementalScoreCorrectionForCompetitorInColumn != null) {
-                    result = uncorrectedScoreProvider.get() + incrementalScoreCorrectionForCompetitorInColumn;
+                    final Double uncorrectedScore = uncorrectedScoreProvider.get();
+                    result = uncorrectedScore == null ? null : (uncorrectedScore + incrementalScoreCorrectionForCompetitorInColumn);
                 } else {
                     result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
                             getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),

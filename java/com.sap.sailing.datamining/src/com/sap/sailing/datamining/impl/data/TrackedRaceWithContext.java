@@ -1,10 +1,17 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
@@ -19,11 +26,13 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -38,6 +47,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * {@link #getFleet() fleet} are each equal.
  */
 public class TrackedRaceWithContext implements HasTrackedRaceContext {
+    private static final Logger logger = Logger.getLogger(TrackedRaceWithContext.class.getName());
+
     private final HasLeaderboardContext leaderboardContext;
     private final Regatta regatta;
     private final RaceColumn raceColumn;
@@ -46,6 +57,8 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     private Integer year;
     private boolean yearHasBeenInitialized;
+
+    private volatile String cachedDayAsISO;
 
     public TrackedRaceWithContext(HasLeaderboardContext leaderboardContext, Regatta regatta, RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         this.leaderboardContext = leaderboardContext;
@@ -437,5 +450,28 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
             return startLine.getAdvantage().getMeters();
         }
         return null;
+    }
+
+    @Override
+    public String getDayAsISO() {
+        if (cachedDayAsISO == null) {
+            final TimePoint timePoint = getTrackedRace().getStartOfRace() != null ? getTrackedRace().getStartOfRace()
+                    : getTrackedRace().getStartOfTracking();
+            if (timePoint != null) {
+                final Position courseCenter = getTrackedRace().getCenterOfCourse(timePoint);
+                if (courseCenter != null) {
+                    TimeZone timeZone;
+                    try {
+                        timeZone = ReverseGeocoder.INSTANCE.getTimeZone(courseCenter, timePoint);
+                        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                        df.setTimeZone(timeZone);
+                        cachedDayAsISO = df.format(timePoint.asDate());
+                    } catch (IOException | ParseException e) {
+                        logger.warning("Error trying to obtain time zone for race "+getTrackedRace()+": "+e.getMessage());
+                    }
+                }
+            }
+        }
+        return cachedDayAsISO;
     }
 }

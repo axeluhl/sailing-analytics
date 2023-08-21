@@ -147,9 +147,13 @@ public abstract class LowPointWithEliminatingMedalSeriesWithPromotions extends L
         final int result;
         final Series lastSeriesO1ScoredIn = getLastSeriesCompetitorScoredIn(o1Scores);
         final Series lastSeriesO2ScoredIn = getLastSeriesCompetitorScoredIn(o2Scores);
-        if (lastSeriesO1ScoredIn == lastSeriesO2ScoredIn) {
+        // do regular score comparison if both scored only in non-medal series or up to the same medal series:
+        if (lastSeriesO1ScoredIn == lastSeriesO2ScoredIn ||
+                ((lastSeriesO1ScoredIn == null || !lastSeriesO1ScoredIn.isMedal()) &&
+                 (lastSeriesO2ScoredIn == null || !lastSeriesO2ScoredIn.isMedal()))) {
             result = super.compareByScoreSum(o1, o1Scores, o1ScoreSum, o2, o2Scores, o2ScoreSum, nullScoresAreBetter, haveValidMedalRaceScores, competitorsRankedByOpeningSeries);
         } else {
+            // at least one competitor scored in a medal series that is assumed to come after all non-medal series;
             final int o1ZeroBasedLastScoredSeriesIndex = lastSeriesO1ScoredIn == null ? -1 :
                 Util.indexOf(lastSeriesO1ScoredIn.getRegatta().getSeries(), lastSeriesO1ScoredIn);
             final int o2ZeroBasedLastScoredSeriesIndex = lastSeriesO2ScoredIn == null ? -1 :

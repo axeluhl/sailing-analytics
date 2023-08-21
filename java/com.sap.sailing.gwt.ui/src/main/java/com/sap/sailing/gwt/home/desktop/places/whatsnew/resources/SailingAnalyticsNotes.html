@@ -11,6 +11,12 @@
             <li>If course areas have been modeled with their center position and radius they can now optionally
                 be displayed in the race viewer.</li>
             <li>Protest flag in regatta overview is displayed as lowered now after the end of the protest time.</li>
+            <li>Bug fix: when a replica starts up, reads a dependent start time from the primary instance and
+                a tracked race is already attached for the dependent race, resolving the dependent start time
+                while still reading the data from the primary instance fails and is erroneously cached. Now,
+                instead, a new attempt to resolve the race on which the other's start time depends, will be
+                made, then finding the race log searched for. This will fix the issue of unreliable
+                start time display for dependent start times in very dynamically scaling large events.</li>
          </ul>
          <h5 class="articleSubheadline">July 2023</h5>
          <ul class="bulletList">
