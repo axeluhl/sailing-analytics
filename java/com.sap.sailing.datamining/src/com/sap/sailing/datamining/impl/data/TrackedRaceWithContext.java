@@ -459,14 +459,16 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
                     : getTrackedRace().getStartOfTracking();
             if (timePoint != null) {
                 final Position courseCenter = getTrackedRace().getCenterOfCourse(timePoint);
-                TimeZone timeZone;
-                try {
-                    timeZone = ReverseGeocoder.INSTANCE.getTimeZone(courseCenter, timePoint);
-                    final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-                    df.setTimeZone(timeZone);
-                    cachedDayAsISO = df.format(timePoint.asDate());
-                } catch (IOException | ParseException e) {
-                    logger.warning("Error trying to obtain time zone for race "+getTrackedRace()+": "+e.getMessage());
+                if (courseCenter != null) {
+                    TimeZone timeZone;
+                    try {
+                        timeZone = ReverseGeocoder.INSTANCE.getTimeZone(courseCenter, timePoint);
+                        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                        df.setTimeZone(timeZone);
+                        cachedDayAsISO = df.format(timePoint.asDate());
+                    } catch (IOException | ParseException e) {
+                        logger.warning("Error trying to obtain time zone for race "+getTrackedRace()+": "+e.getMessage());
+                    }
                 }
             }
         }
