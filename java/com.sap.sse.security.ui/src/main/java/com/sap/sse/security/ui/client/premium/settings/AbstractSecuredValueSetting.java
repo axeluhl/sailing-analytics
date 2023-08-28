@@ -1,15 +1,11 @@
 package com.sap.sse.security.ui.client.premium.settings;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import com.google.gwt.core.client.GWT;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.generic.base.AbstractValueSetting;
 import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetting<T>{
@@ -32,9 +28,7 @@ public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetti
      */
     @Override
     public final T getValue() {
-        if(dtoContext != null 
-                && dtoContext.isPresent()
-                && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
+        if(hasPermission()) {
             return super.getValue();
         }else {
             return super.getDefaultValue();
@@ -47,7 +41,7 @@ public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetti
      */
     @Override
     public void setValue(T value) {
-        if(dtoContext != null && dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
+        if(hasPermission()) {
             super.setValue(value);
         }
     }
@@ -74,33 +68,16 @@ public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetti
      * Checks whether the paywallresolver and therefore the Setting is able to check the permission of the current user on the respective dto context. 
      * Default or Initial Seetings may not have a paywallresolver or dto context.
      */
-    public boolean isPermissionAware() {
-        return this.paywallResolver != null && this.dtoContext != null;
-    }
-    /*
-     * Will call the given callback with a list of all #SubscriptionPlan that would grant the permissions to perform the associated action.
-     */
-    public void getUnlockingSubscriptionPlans(Consumer<List<String>> callback) {
-        this.paywallResolver.getUnlockingSubscriptionPlans(action, dtoContext.getSecuredDTO(), callback);
+    private boolean isPermissionAware() {
+        return this.paywallResolver != null && this.dtoContext != null && this.dtoContext.isPresent();
     }
 
-    public boolean hasPermission() {
+    private boolean hasPermission() {
         if(isPermissionAware()) {
             return paywallResolver.hasPermission(this.action, this.dtoContext.getSecuredDTO());
         }else {
-            GWT.log("No Permission Awareness set for: " + settingName);
+            GWT.log("No Permission Awareness set for: " + settingName + ", only working with default values");
             return false;
-        }
-    }
-
-    /*
-     * Registers a #UserStatusEventHandler in the #PaywallResolver to be triggered when the user's permission change.
-     */
-    public void registerUserStatusEventHandler(UserStatusEventHandler handler) {
-        if(isPermissionAware()) {
-            paywallResolver.registerUserStatusEventHandler(handler);
-        }else {
-            GWT.log("No Permission Awareness set for: " + settingName);
         }
     }
 }
