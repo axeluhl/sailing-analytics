@@ -10,9 +10,9 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetting<T>{
 
-    private PaywallResolver paywallResolver;
-    private Action action;
-    private SecuredDTOProxy dtoContext;
+    private final PaywallResolver paywallResolver;
+    private final Action action;
+    private final SecuredDTOProxy dtoContext;
 
     protected AbstractSecuredValueSetting(String name, AbstractGenericSerializableSettings settings, T defaultValue,
             ValueConverter<T> valueConverter, PaywallResolver paywallResolver, Action action, SecuredDTOProxy dtoContext) {
@@ -76,7 +76,7 @@ public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetti
         if(isPermissionAware()) {
             return paywallResolver.hasPermission(this.action, this.dtoContext.getSecuredDTO());
         }else {
-            GWT.log("No Permission Awareness set for: " + settingName + ", only working with default values");
+            GWT.log("WARNING: No Permission Awareness set for: " + settingName + ", only working with default values");
             return false;
         }
     }
