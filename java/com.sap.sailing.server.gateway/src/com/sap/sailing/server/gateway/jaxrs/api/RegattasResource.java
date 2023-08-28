@@ -2111,7 +2111,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                         trackedRace.getBoatOfCompetitor(competitor).getSailID());
                                                 jsonCompetitorInLeg.put("color",
                                                         competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-                                                final Double averageSpeedOverGroundInKnots = legDetail.averageSpeedOverGroundInKnots;
+                                                final Double averageSpeedOverGroundInKnots = legDetail == null ? null : legDetail.averageSpeedOverGroundInKnots;
                                                 if (averageSpeedOverGroundInKnots != null) {
                                                     jsonCompetitorInLeg.put("averageSOG-kts", RoundingUtil.knotsDecimalFormatter
                                                             .format(averageSpeedOverGroundInKnots));
@@ -2142,9 +2142,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                 if (averageAbsolutXTE != null) {
                                                     jsonCompetitorInLeg.put("averageAbsolutXTE-m", averageAbsolutXTE.getMeters());
                                                 }
-                                                Integer numberOfTacks = legDetail.numberOfManeuvers.getOrDefault(ManeuverType.TACK, 0);
-                                                Integer numberOfJibes = legDetail.numberOfManeuvers.getOrDefault(ManeuverType.JIBE, 0);
-                                                Integer numberOfPenaltyCircles = legDetail.numberOfManeuvers.getOrDefault(ManeuverType.PENALTY_CIRCLE, 0);
+                                                Integer numberOfTacks = legDetail == null ? null : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.TACK, 0);
+                                                Integer numberOfJibes = legDetail == null ? null : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.JIBE, 0);
+                                                Integer numberOfPenaltyCircles = legDetail == null ? null : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.PENALTY_CIRCLE, 0);
                                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
@@ -2172,18 +2172,18 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                                         .format(distanceSinceGun.getMeters()));
                                                     }
                                                 }
-                                                final Double distanceTraveledInMeters = legDetail.distanceTraveledInMeters;
+                                                final Double distanceTraveledInMeters = legDetail == null ? null : legDetail.distanceTraveledInMeters;
                                                 if (distanceTraveledInMeters != null) {
                                                     jsonCompetitorInLeg.put("distanceTraveled-m",
                                                             RoundingUtil.distanceDecimalFormatter.format(distanceTraveledInMeters));
                                                 }
-                                                final Double distanceTraveledIncludingGateStartInMeters = legDetail.distanceTraveledIncludingGateStartInMeters;
+                                                final Double distanceTraveledIncludingGateStartInMeters = legDetail == null ? null : legDetail.distanceTraveledIncludingGateStartInMeters;
                                                 if (distanceTraveledIncludingGateStartInMeters != null) {
                                                     jsonCompetitorInLeg.put("distanceTraveledIncludingGateStart-m",
                                                             RoundingUtil.distanceDecimalFormatter.format(distanceTraveledIncludingGateStartInMeters));
                                                 }
                                                 try {
-                                                    final int rank = legDetail.rank;
+                                                    final int rank = legDetail == null ? 0 : legDetail.rank;
                                                     jsonCompetitorInLeg.put("rank", rank == 0 ? null : rank);
                                                 } catch (RuntimeException re) {
                                                     if (re.getCause() != null && re.getCause() instanceof NoWindException) {
@@ -2194,7 +2194,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                 }
                                                 // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
                                                 if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION, leaderboard))) {
-                                                    final Double gapToLeaderInSeconds = legDetail.gapToLeaderInSeconds;
+                                                    final Double gapToLeaderInSeconds = legDetail == null ? null : legDetail.gapToLeaderInSeconds;
                                                     jsonCompetitorInLeg.put("gapToLeader-s",
                                                             gapToLeaderInSeconds != null ? gapToLeaderInSeconds : 0.0);
                                                     final Distance gapToLeaderDistance = trackedLegOfCompetitor
