@@ -10,6 +10,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -19,6 +20,8 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.LeaderboardActions;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -106,6 +109,8 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
             final NavigableSet<MarkPassing> markPassingsForCompetitor = trackedRace.getMarkPassings(competitor);
             JSONArray markPassingsForCompetitorJson = new JSONArray();
             forCompetitorJson.put(MARKPASSINGS, markPassingsForCompetitorJson);
+            final boolean leaderboardValidAndSubjectMaySeePremiumInformation = leaderboard != null &&
+                    SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION, leaderboard));
             trackedRace.lockForRead(markPassingsForCompetitor);
             try {
                 for (MarkPassing markPassing : markPassingsForCompetitor) {
@@ -124,7 +129,8 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     }
                     markPassingJson.put(TRACKED_RANK_AT_MARK_PASSING, rank);
                     markPassingJson.put(ONE_BASED_PASSING_ORDER, passingOrder);
-                    if (leaderboard != null) {
+                    // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
+                    if (leaderboardValidAndSubjectMaySeePremiumInformation) {
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
                             final Double totalPoints = leaderboard.getScoreCorrection().getCorrectedScore(() -> passingOrder,

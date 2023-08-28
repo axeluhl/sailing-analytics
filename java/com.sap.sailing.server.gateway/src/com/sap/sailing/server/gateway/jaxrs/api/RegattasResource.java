@@ -94,6 +94,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.LeaderboardActions;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -2094,7 +2095,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                                         jsonLeg.put("upOrDownwindLeg", "false");
                                     }
                                     final JSONArray jsonCompetitors = new JSONArray();
-//                                    final Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
                                     for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                                         if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
                                                 SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
@@ -2152,8 +2152,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                 final TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
                                                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                                                 // between the start of the race and the start of the first leg we have no
-                                                // 'timeSinceGun'
-                                                // for the competitor
+                                                // 'timeSinceGun' for the competitor
                                                 if (startOfRace != null && startTime != null) {
                                                     long timeSinceGun = -1;
                                                     if (finishTime != null) {
@@ -2193,14 +2192,17 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                         throw re;
                                                     }
                                                 }
-                                                final Double gapToLeaderInSeconds = legDetail.gapToLeaderInSeconds;
-                                                jsonCompetitorInLeg.put("gapToLeader-s",
-                                                        gapToLeaderInSeconds != null ? gapToLeaderInSeconds : 0.0);
-                                                final Distance gapToLeaderDistance = trackedLegOfCompetitor
-                                                        .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
-                                                                WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
-                                                jsonCompetitorInLeg.put("gapToLeader-m", // TODO bug5899: is this really required? It's expensive to compute, and probably nobody is using it anyway
-                                                        gapToLeaderDistance != null ? gapToLeaderDistance.getMeters() : 0.0);
+                                                // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
+                                                if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION, leaderboard))) {
+                                                    final Double gapToLeaderInSeconds = legDetail.gapToLeaderInSeconds;
+                                                    jsonCompetitorInLeg.put("gapToLeader-s",
+                                                            gapToLeaderInSeconds != null ? gapToLeaderInSeconds : 0.0);
+                                                    final Distance gapToLeaderDistance = trackedLegOfCompetitor
+                                                            .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
+                                                                    WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
+                                                    jsonCompetitorInLeg.put("gapToLeader-m",
+                                                            gapToLeaderDistance != null ? gapToLeaderDistance.getMeters() : 0.0);
+                                                }
                                                 jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
                                                 jsonCompetitorInLeg.put("finished",
                                                         trackedLegOfCompetitor.hasFinishedLeg(timePoint));
