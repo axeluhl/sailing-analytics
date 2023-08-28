@@ -2049,6 +2049,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 final TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 final Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+                getSecurityService().checkCurrentUserReadPermission(trackedRace);
+                getSecurityService().checkCurrentUserReadPermission(leaderboard);
                 if (leaderboard == null) {
                     response = Response.status(Status.NOT_FOUND)
                             .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
@@ -2194,6 +2196,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                 }
                                                 // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
                                                 if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION, leaderboard))) {
+                                                    // TODO bug5899: check if for Subject a request for the same regattaName/raceName is already being computed; if so, wait for it and use it; otherwise register computation for other parallel requests to re-use; synchronization / atomicity!
                                                     final Double gapToLeaderInSeconds = legDetail == null ? null : legDetail.gapToLeaderInSeconds;
                                                     jsonCompetitorInLeg.put("gapToLeader-s",
                                                             gapToLeaderInSeconds != null ? gapToLeaderInSeconds : 0.0);

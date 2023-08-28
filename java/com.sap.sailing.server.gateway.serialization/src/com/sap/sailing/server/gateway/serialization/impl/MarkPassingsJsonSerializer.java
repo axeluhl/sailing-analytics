@@ -131,6 +131,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     markPassingJson.put(ONE_BASED_PASSING_ORDER, passingOrder);
                     // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
                     if (leaderboardValidAndSubjectMaySeePremiumInformation) {
+                        // TODO bug5899: check if for Subject a request for the same trackedRace and null live time point is already being computed; if so, wait for it and use it; otherwise register computation for other parallel requests to re-use; synchronization / atomicity!
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
                             final Double totalPoints = leaderboard.getScoreCorrection().getCorrectedScore(() -> passingOrder,
