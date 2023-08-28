@@ -43,13 +43,16 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.premium.SailingPremiumToggleButton;
 import com.sap.sailing.gwt.ui.client.shared.charts.HasAvailabilityCheck;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
-import com.sap.sse.security.ui.client.premium.uielements.PremiumToggleButton;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PremiumToggleButton;
 
 /**
  * A panel that adds user-positioned splitters between each of its child widgets. These splitters have draggers
@@ -237,7 +240,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
          *                      the splitters height will get less.
          */
         public Splitter(Widget target, Component<?> associatedComponent, boolean reverse,
-                SecuredBooleanSetting setting) {
+                PaywallResolverImpl paywallResolver, SecuredDTO dtoContext, Action action) {
             super();
             getElement().getStyle().setOverflow(Overflow.VISIBLE);
             // add dragger - style will be set by implementing classes
@@ -248,7 +251,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             this.associatedComponent = associatedComponent;
             this.hasToggleButtonsAssociated = false;
             this.splitterToggleButton = new SailingPremiumToggleButton(associatedComponent.getLocalizedShortName(),
-                    associatedComponent, setting);
+                    action, paywallResolver, dtoContext, associatedComponent);
         }
 
         public Component<?> getAssociatedComponent() {
@@ -398,8 +401,8 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      */
     class HSplitter extends Splitter {
         public HSplitter(Widget target, Component<?> associatedComponent, boolean reverse,
-                SecuredBooleanSetting setting) {
-            super(target, associatedComponent, reverse, setting);
+                PaywallResolverImpl paywallResolver, SecuredDTO dtoContext, Action action) {
+            super(target, associatedComponent, reverse, paywallResolver, dtoContext, action);
             addStyleName("SplitLayoutPanel-Divider-Horizontal");
             getDragger().getElement().getStyle().setPropertyPx("width", horizontalSplitterSize);
             if(!reverse) {                
@@ -460,8 +463,8 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      */
     class VSplitter extends Splitter {
         public VSplitter(final Widget target, final Component<?> associatedComponent, boolean reverse,
-                SecuredBooleanSetting setting) {
-            super(target, associatedComponent, reverse, setting);
+                PaywallResolverImpl paywallResolver, SecuredDTO dtoContext, Action action) {
+            super(target, associatedComponent, reverse, paywallResolver, dtoContext, action);
             addStyleName("SplitLayoutPanel-Divider-Vertical");
             getDragger().getElement().getStyle().setPropertyPx("height", verticalSplitterSize);
             getDragger().setStyleName("gwt-SplitLayoutPanel-VDragger");
@@ -519,12 +522,14 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
 
     private final int horizontalSplitterSize;
     private final int verticalSplitterSize;
+    private final PaywallResolverImpl paywallResolver;
+    private SecuredDTO dtoContext;
     
     /**
      * Construct a new {@link TouchSplitLayoutPanel} with the default splitter size of 8px.
      */
-    public TouchSplitLayoutPanel() {
-        this(DEFAULT_SPLITTER_SIZE, DEFAULT_SPLITTER_SIZE);
+    public TouchSplitLayoutPanel(PaywallResolverImpl paywallResolver, RaceDTO dtoContext) {
+        this(DEFAULT_SPLITTER_SIZE, DEFAULT_SPLITTER_SIZE, paywallResolver, dtoContext);
     }
 
     /**
@@ -532,10 +537,13 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * {@link Splitter}s can be of different sizes. 
      * 
      */
-    public TouchSplitLayoutPanel(int horizonatalSplitterSize, int verticalSplitterSize) {
+    public TouchSplitLayoutPanel(int horizonatalSplitterSize, int verticalSplitterSize, 
+            PaywallResolverImpl paywallResolver, SecuredDTO dtoContext) {
         super(Unit.PX);
         this.horizontalSplitterSize = horizonatalSplitterSize;
         this.verticalSplitterSize = verticalSplitterSize;
+        this.paywallResolver = paywallResolver;
+        this.dtoContext = dtoContext;
         setStyleName("gwt-SplitLayoutPanel");
 
         if (glassElem == null) {
@@ -586,11 +594,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * @param associatedComponent the {@link Component} that will be used to determine visibility
      * @param size the size of the widget. This will define the size of the split panel.
      */
-    public void insert(Widget child, Component<?> associatedComponent, Direction direction, double size, SecuredBooleanSetting setting) {
+    public void insert(Widget child, Component<?> associatedComponent, Direction direction, double size, Action action) {
         super.insert(child, direction, size, null);
         if (direction != Direction.CENTER) {
             super.insert(child, direction, size, null);
-            insertSplitter(child, associatedComponent, setting);
+            insertSplitter(child, associatedComponent, action);
             LayoutData widgetLayoutData = (LayoutData) child.getLayoutData();
             widgetLayoutData.oldSize = size;
         }
@@ -1050,22 +1058,22 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         return null;
     }
     
-    private Splitter insertSplitter(Widget widget, Component<?> associatedComponent, SecuredBooleanSetting setting) {
+    private Splitter insertSplitter(Widget widget, Component<?> associatedComponent, Action action) {
         assert getChildren().size() > 0 : "Can't add a splitter before any children";
         LayoutData layout = (LayoutData) widget.getLayoutData();
         Splitter splitter = null;
         switch (getResolvedDirection(layout.direction)) {
         case WEST:
-            splitter = new HSplitter(widget, associatedComponent, false, setting);
+            splitter = new HSplitter(widget, associatedComponent, false, paywallResolver, dtoContext, action);
             break;
         case EAST:
-            splitter = new HSplitter(widget, associatedComponent, true, setting);
+            splitter = new HSplitter(widget, associatedComponent, true, paywallResolver, dtoContext, action);
             break;
         case NORTH:
-            splitter = new VSplitter(widget, associatedComponent, false, setting);
+            splitter = new VSplitter(widget, associatedComponent, false, paywallResolver, dtoContext, action);
             break;
         case SOUTH:
-            splitter = new VSplitter(widget, associatedComponent, true, setting);
+            splitter = new VSplitter(widget, associatedComponent, true, paywallResolver, dtoContext, action);
             break;
         default:
             assert false : "Unexpected direction";

@@ -26,7 +26,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.replication.interfaces
 Bundle-ActivationPolicy: lazy
-Import-Package: com.sap.sse.security.shared.dto,
+Import-Package: com.sap.sse.security.paywall,
+ com.sap.sse.security.shared.dto,
  javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",

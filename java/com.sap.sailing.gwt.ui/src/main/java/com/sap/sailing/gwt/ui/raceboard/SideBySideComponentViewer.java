@@ -163,7 +163,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
         this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3,
-                /* vertical splitter height */ 25);
+                /* vertical splitter height */ 25, paywallResolver, dtoContext);
         this.mainPanel.add(splitLayoutPanel);
         // initialize components - they need to be added before other widgets to get the right width
         initializeComponents();
@@ -253,7 +253,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private void initializeComponents() {
         for (final Pair<Component<?>, Action> componentActionPair : components) {
-            splitLayoutPanel.insert(componentActionPair.getA().getEntryWidget(), componentActionPair.getA(), Direction.SOUTH, 200);
+            splitLayoutPanel.insert(componentActionPair.getA().getEntryWidget(), componentActionPair.getA(), Direction.SOUTH, 200, componentActionPair.getB());
         }
     }
 

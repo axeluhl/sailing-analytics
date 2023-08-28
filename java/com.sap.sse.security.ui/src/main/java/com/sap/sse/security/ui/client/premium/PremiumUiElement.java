@@ -1,12 +1,16 @@
-package com.sap.sse.security.ui.client.premium.uielements;
+package com.sap.sse.security.ui.client.premium;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Image;
-import com.sap.sse.security.ui.client.premium.settings.AbstractSecuredValueSetting;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
-public abstract class PremiumUiElement<T> extends Composite implements HasEnabled {
+public abstract class PremiumUiElement extends Composite implements HasEnabled {
 
+    protected final Action action;
+    protected final PaywallResolverImpl paywallResolver;
+    private final SecuredDTO contextDTO;
 
     /**
      * Flag to keep track of the actual enabled/disabled state of this UI component independent of the representing
@@ -14,11 +18,12 @@ public abstract class PremiumUiElement<T> extends Composite implements HasEnable
      * well as to disable sub-options if the top-level option is not enabled.
      */
     private boolean enabled = true;
-    protected AbstractSecuredValueSetting<T> setting;
 
-    protected PremiumUiElement(AbstractSecuredValueSetting<T> setting) {
-        this.setting = setting;
-        setting.registerUserStatusEventHandler((user, preAuth) -> updateUserPermission());
+    protected PremiumUiElement(final Action action, final PaywallResolverImpl paywallResolver, final SecuredDTO contextDTO) {
+        this.action = action;
+        this.paywallResolver = paywallResolver;
+        this.contextDTO = contextDTO;
+        paywallResolver.registerUserStatusEventHandler((user, preAuth) -> updateUserPermission());
     }
 
     @Override
@@ -32,7 +37,7 @@ public abstract class PremiumUiElement<T> extends Composite implements HasEnable
     }
 
     protected final boolean hasPermission() {
-        return setting.hasPermission();
+        return paywallResolver.hasPermission(action, contextDTO);
     }
 
     protected final void updateUserPermission() {

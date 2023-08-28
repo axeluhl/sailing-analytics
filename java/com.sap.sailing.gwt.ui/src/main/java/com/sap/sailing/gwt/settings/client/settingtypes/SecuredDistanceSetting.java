@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.settings.client.settingtypes;
 import com.sap.sailing.gwt.settings.client.settingtypes.converter.DistanceConverter;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.security.paywall.PaywallResolver;
+import com.sap.sse.security.paywall.SecuredDTOProxy;
+import com.sap.sse.security.paywall.settings.AbstractSecuredValueSetting;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
-import com.sap.sse.security.ui.client.premium.settings.AbstractSecuredValueSetting;
 
 public class SecuredDistanceSetting extends AbstractSecuredValueSetting<Distance> {
     public SecuredDistanceSetting(String name, AbstractGenericSerializableSettings settings,

@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.premium.uielements;
+package com.sap.sse.security.ui.client.premium;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

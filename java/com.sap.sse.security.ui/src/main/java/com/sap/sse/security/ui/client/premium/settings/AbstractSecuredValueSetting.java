@@ -7,10 +7,10 @@ import com.google.gwt.core.client.GWT;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.generic.base.AbstractValueSetting;
+import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 
 public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetting<T>{
 
@@ -32,7 +32,9 @@ public abstract class AbstractSecuredValueSetting<T>  extends AbstractValueSetti
      */
     @Override
     public final T getValue() {
-        if(dtoContext != null && dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
+        if(dtoContext != null 
+                && dtoContext.isPresent()
+                && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
             return super.getValue();
         }else {
             return super.getDefaultValue();

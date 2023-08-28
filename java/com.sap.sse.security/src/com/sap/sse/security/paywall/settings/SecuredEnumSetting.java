@@ -1,11 +1,11 @@
-package com.sap.sse.security.ui.client.premium.settings;
+package com.sap.sse.security.paywall.settings;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringToEnumConverter;
 import com.sap.sse.common.settings.generic.converter.EnumConverter;
+import com.sap.sse.security.paywall.PaywallResolver;
+import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 
 public class SecuredEnumSetting<T extends Enum<T>> extends AbstractSecuredValueSetting<T> {
 

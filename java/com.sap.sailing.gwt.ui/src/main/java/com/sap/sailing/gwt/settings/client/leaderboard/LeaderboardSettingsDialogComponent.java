@@ -29,9 +29,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
-import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
-import com.sap.sse.security.ui.client.premium.uielements.PremiumCheckBox;
+import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
 public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
     public static final String CHECK_BOX_DEBUGID_CONSTANT = "CheckBox";
@@ -280,11 +278,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         if (tooltip != null && !tooltip.isEmpty()) {
             premiumTooltip += ": " + tooltip;
         } 
-        //TODO 5774: Implement Procedure for AbstractValueCollectionSetting Implementations.
-        final SecuredBooleanSetting securedBooleanSetting = new SecuredBooleanSetting("DetailTypeProxySetting",
-                initialSettings, paywallResolver, detailType.getPremiumAction(), new SecuredDTOProxy(leaderboardDTO));
         PremiumCheckBox premiumCheckBox = createPremiumCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
-                premiumTooltip , securedBooleanSetting);
+                premiumTooltip , detailType.getPremiumAction());
         premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + CHECK_BOX_DEBUGID_CONSTANT);
         return premiumCheckBox;
     }
@@ -297,8 +292,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return checkbox;
     }
 
-    protected PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip, SecuredBooleanSetting setting) {
-        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, setting);
+    protected PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip, Action premiumAction) {
+        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, paywallResolver, leaderboardDTO);
         dialog.registerCheckbox(premiumCheckBox.getCheckBox());
         premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(label) + CHECK_BOX_DEBUGID_CONSTANT);
         premiumCheckBox.setValue(selected);
