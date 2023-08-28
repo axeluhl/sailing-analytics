@@ -77,6 +77,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -90,6 +91,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -2031,175 +2033,198 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response getCompetitorRanks(@PathParam("regattaname") String regattaName,
             @PathParam("racename") String raceName) {
         Response response;
-        Regatta regatta = findRegattaByName(regattaName);
+        final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = Response.status(Status.NOT_FOUND)
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
             getSecurityService().checkCurrentUserReadPermission(regatta);
-            RaceDefinition race = findRaceByName(regatta, raceName);
+            final RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
                         .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
                         .build();
             } else {
-                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
-                        : trackedRace.getTimePointOfNewestEvent();
-                final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
-                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
-                JSONObject jsonRaceResults = new JSONObject();
-                jsonRaceResults.put("name", trackedRace.getRace().getName());
-                jsonRaceResults.put("regatta", regatta.getName());
-                jsonRaceResults.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace
-                        .getStartOfRace().asMillis());
-                JSONArray jsonLegs = new JSONArray();
-                Course course = trackedRace.getRace().getCourse();
-                course.lockForRead();
-                try {
-                    for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
-                        JSONObject jsonLeg = new JSONObject();
-                        jsonLeg.put("from", leg.getLeg().getFrom().getName());
-                        jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId() != null ? leg.getLeg().getFrom().getId().toString() : null);
-                        jsonLeg.put("to", leg.getLeg().getTo().getName());
-                        jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId() != null ? leg.getLeg().getTo().getId().toString() : null);
+                final TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                final Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+                if (leaderboard == null) {
+                    response = Response.status(Status.NOT_FOUND)
+                            .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
+                            .build();
+                } else {
+                    final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
+                    if (raceColumnAndFleet == null) {
+                        response = Response.status(Status.NOT_FOUND)
+                                .entity("Could not find a race column for race "+StringEscapeUtils.escapeHtml(raceName)+
+                                        " in leaderboard with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
+                                .build();
+                    } else {
                         try {
-                            jsonLeg.put("upOrDownwindLeg", leg.isUpOrDownwindLeg(timePoint));
-                        } catch (NoWindException e) {
-                            // no wind, then it's simply no upwind or downwind leg
-                            jsonLeg.put("upOrDownwindLeg", "false");
-                        }
-                        JSONArray jsonCompetitors = new JSONArray();
-                        Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
-                        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                            if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
-                                    SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
-                                JSONObject jsonCompetitorInLeg = new JSONObject();
-                                TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
-                                if (trackedLegOfCompetitor != null) {
-                                    jsonCompetitorInLeg.put("id",
-                                            competitor.getId() != null ? competitor.getId().toString() : null);
-                                    jsonCompetitorInLeg.put("name", competitor.getName());
-                                    jsonCompetitorInLeg.put("sailNumber",
-                                            trackedRace.getBoatOfCompetitor(competitor).getSailID());
-                                    jsonCompetitorInLeg.put("color",
-                                            competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-                                    final Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
-                                    if (averageSpeedOverGround != null) {
-                                        jsonCompetitorInLeg.put("averageSOG-kts", RoundingUtil.knotsDecimalFormatter
-                                                .format(averageSpeedOverGround.getKnots()));
-                                    }
-                                    final Pair<GPSFixMoving, Speed> maxSpeedOverGround = trackedLegOfCompetitor.getMaximumSpeedOverGround(timePoint);
-                                    if (maxSpeedOverGround != null) {
-                                        jsonCompetitorInLeg.put("maxSOG-kts", RoundingUtil.knotsDecimalFormatter
-                                                .format(maxSpeedOverGround.getB().getKnots()));
-                                        jsonCompetitorInLeg.put("maxSOGTimePoint-millis", RoundingUtil.knotsDecimalFormatter
-                                                .format(maxSpeedOverGround.getA().getTimePoint().asMillis()));
-                                    }
-                                    final boolean hasFinishedLeg = trackedLegOfCompetitor.hasFinishedLeg(timePoint);
-                                    if (!hasFinishedLeg) {
-                                        final Distance currentSignedXTE = trackedLegOfCompetitor.getSignedCrossTrackError(timePoint);
-                                        if (currentSignedXTE != null) {
-                                            jsonCompetitorInLeg.put("currentSignedXTE-m", currentSignedXTE.getMeters());
-                                        }
-                                        final Distance currentAbsolutXTE = trackedLegOfCompetitor.getAbsoluteCrossTrackError(timePoint);
-                                        if (currentAbsolutXTE != null) {
-                                            jsonCompetitorInLeg.put("currentAbsolutXTE-m", currentAbsolutXTE.getMeters());
-                                        }
-                                    }
-                                    final Distance averageSignedXTE = trackedLegOfCompetitor.getAverageSignedCrossTrackError(timePoint, /* waitForLatest */ false);
-                                    if (averageSignedXTE != null) {
-                                        jsonCompetitorInLeg.put("averageSignedXTE-m", averageSignedXTE.getMeters());
-                                    }
-                                    final Distance averageAbsolutXTE = trackedLegOfCompetitor.getAverageAbsoluteCrossTrackError(timePoint, /* waitForLatest */ false);
-                                    if (averageAbsolutXTE != null) {
-                                        jsonCompetitorInLeg.put("averageAbsolutXTE-m", averageAbsolutXTE.getMeters());
-                                    }
-                                    try {
-                                        Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint, /* waitForLatest */ false);
-                                        Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint, /* waitForLatest */ false);
-                                        Integer numberOfPenaltyCircles = trackedLegOfCompetitor.getNumberOfPenaltyCircles(timePoint, /* waitForLatest */false);
-                                        jsonCompetitorInLeg.put("tacks", numberOfTacks);
-                                        jsonCompetitorInLeg.put("jibes", numberOfJibes);
-                                        jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
-                                    } catch (NoWindException e) {
-                                        logger.log(Level.FINE,
-                                                "No wind information while trying to determing maneuvers for competitor "
-                                                        + competitor.getName(), e);
-                                    }
-                                    TimePoint startTime = trackedLegOfCompetitor.getStartTime();
-                                    TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
-                                    TimePoint startOfRace = trackedRace.getStartOfRace();
-                                    // between the start of the race and the start of the first leg we have no
-                                    // 'timeSinceGun'
-                                    // for the competitor
-                                    if (startOfRace != null && startTime != null) {
-                                        long timeSinceGun = -1;
-                                        if (finishTime != null) {
-                                            timeSinceGun = finishTime.asMillis() - startOfRace.asMillis();
-                                        } else {
-                                            timeSinceGun = timePoint.asMillis() - startOfRace.asMillis();
-                                        }
-                                        if (timeSinceGun > 0) {
-                                            jsonCompetitorInLeg.put("timeSinceGun-ms", timeSinceGun);
-                                        }
-                                        Distance distanceSinceGun = trackedRace.getTrack(competitor)
-                                                .getDistanceTraveled(startOfRace,
-                                                        finishTime != null ? finishTime : timePoint);
-                                        if (distanceSinceGun != null) {
-                                            jsonCompetitorInLeg.put("distanceSinceGun-m",
-                                                    RoundingUtil.distanceDecimalFormatter
-                                                            .format(distanceSinceGun.getMeters()));
-                                        }
-                                    }
-                                    Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
-                                    if (distanceTraveled != null) {
-                                        jsonCompetitorInLeg.put("distanceTraveled-m",
-                                                RoundingUtil.distanceDecimalFormatter
-                                                        .format(distanceTraveled.getMeters()));
-                                    }
-                                    Distance distanceTraveledIncludingGateStart = trackedLegOfCompetitor
-                                            .getDistanceTraveledConsideringGateStart(timePoint);
-                                    if (distanceTraveledIncludingGateStart != null) {
-                                        jsonCompetitorInLeg.put("distanceTraveledIncludingGateStart-m",
-                                                RoundingUtil.distanceDecimalFormatter
-                                                        .format(distanceTraveledIncludingGateStart.getMeters()));
-                                    }
-                                    try {
-                                        Integer rank = ranks.get(competitor);
-                                        jsonCompetitorInLeg.put("rank", rank);
-                                    } catch (RuntimeException re) {
-                                        if (re.getCause() != null && re.getCause() instanceof NoWindException) {
-                                            // well, we don't know the wind direction, so we can't compute a ranking
-                                        } else {
-                                            throw re;
-                                        }
-                                    }
-                                    Duration gapToLeaderDuration = trackedLegOfCompetitor.getGapToLeader(timePoint,
-                                            WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
-                                    jsonCompetitorInLeg.put("gapToLeader-s",
-                                            gapToLeaderDuration != null ? gapToLeaderDuration.asSeconds() : 0.0);
-                                    Distance gapToLeaderDistance = trackedLegOfCompetitor
-                                            .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
-                                                    WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
-                                    jsonCompetitorInLeg.put("gapToLeader-m",
-                                            gapToLeaderDistance != null ? gapToLeaderDistance.getMeters() : 0.0);
-                                    jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
-                                    jsonCompetitorInLeg.put("finished",
-                                            trackedLegOfCompetitor.hasFinishedLeg(timePoint));
-                                    jsonCompetitors.add(jsonCompetitorInLeg);
-                                }
+                            final String raceColumnName = raceColumnAndFleet.getA().getName();
+                            final LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(/* live time point */ null,
+                                    Collections.singleton(raceColumnName), /* addOverallDetails */ false,
+                                    /* trackedRegattaRegistry */ getService(), getService().getBaseDomainFactory(), /* fillTotalPointsUncorrected */ false);
+                            final Map<String, CompetitorDTO> competitorDTOsByIdAsString = new HashMap<>();
+                            for (final CompetitorDTO competitorDTO : leaderboardDTO.rows.keySet()) {
+                                competitorDTOsByIdAsString.put(competitorDTO.getIdAsString(), competitorDTO);
                             }
+                            final TimePoint timePoint = TimePoint.of(leaderboardDTO.getTimePoint());
+                            final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+                            final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                            final JSONObject jsonRaceResults = new JSONObject();
+                            jsonRaceResults.put("name", trackedRace.getRace().getName());
+                            jsonRaceResults.put("regatta", regatta.getName());
+                            jsonRaceResults.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asMillis());
+                            final JSONArray jsonLegs = new JSONArray();
+                            final Course course = trackedRace.getRace().getCourse();
+                            course.lockForRead();
+                            try {
+                                int zeroBasedLegIndex = 0;
+                                for (final TrackedLeg leg : trackedRace.getTrackedLegs()) {
+                                    final JSONObject jsonLeg = new JSONObject();
+                                    jsonLeg.put("from", leg.getLeg().getFrom().getName());
+                                    jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId() != null ? leg.getLeg().getFrom().getId().toString() : null);
+                                    jsonLeg.put("to", leg.getLeg().getTo().getName());
+                                    jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId() != null ? leg.getLeg().getTo().getId().toString() : null);
+                                    try {
+                                        jsonLeg.put("upOrDownwindLeg", leg.isUpOrDownwindLeg(timePoint));
+                                    } catch (NoWindException e) {
+                                        // no wind, then it's simply no upwind or downwind leg
+                                        jsonLeg.put("upOrDownwindLeg", "false");
+                                    }
+                                    final JSONArray jsonCompetitors = new JSONArray();
+//                                    final Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
+                                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                                        if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
+                                                SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                                            final JSONObject jsonCompetitorInLeg = new JSONObject();
+                                            final TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
+                                            final LeaderboardRowDTO row = leaderboardDTO.rows.get(competitorDTOsByIdAsString.get(competitor.getId().toString()));
+                                            final LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(raceColumnName);
+                                            final LegEntryDTO legDetail = entry.legDetails.get(zeroBasedLegIndex);
+                                            if (trackedLegOfCompetitor != null) {
+                                                jsonCompetitorInLeg.put("id",
+                                                        competitor.getId() != null ? competitor.getId().toString() : null);
+                                                jsonCompetitorInLeg.put("name", competitor.getName());
+                                                jsonCompetitorInLeg.put("sailNumber",
+                                                        trackedRace.getBoatOfCompetitor(competitor).getSailID());
+                                                jsonCompetitorInLeg.put("color",
+                                                        competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+                                                final Double averageSpeedOverGroundInKnots = legDetail.averageSpeedOverGroundInKnots;
+                                                if (averageSpeedOverGroundInKnots != null) {
+                                                    jsonCompetitorInLeg.put("averageSOG-kts", RoundingUtil.knotsDecimalFormatter
+                                                            .format(averageSpeedOverGroundInKnots));
+                                                }
+                                                final Pair<GPSFixMoving, Speed> maxSpeedOverGround = trackedLegOfCompetitor.getMaximumSpeedOverGround(timePoint);
+                                                if (maxSpeedOverGround != null) {
+                                                    jsonCompetitorInLeg.put("maxSOG-kts", RoundingUtil.knotsDecimalFormatter
+                                                            .format(maxSpeedOverGround.getB().getKnots()));
+                                                    jsonCompetitorInLeg.put("maxSOGTimePoint-millis", RoundingUtil.knotsDecimalFormatter
+                                                            .format(maxSpeedOverGround.getA().getTimePoint().asMillis()));
+                                                }
+                                                final boolean hasFinishedLeg = trackedLegOfCompetitor.hasFinishedLeg(timePoint);
+                                                if (!hasFinishedLeg) {
+                                                    final Distance currentSignedXTE = trackedLegOfCompetitor.getSignedCrossTrackError(timePoint);
+                                                    if (currentSignedXTE != null) {
+                                                        jsonCompetitorInLeg.put("currentSignedXTE-m", currentSignedXTE.getMeters());
+                                                    }
+                                                    final Distance currentAbsolutXTE = trackedLegOfCompetitor.getAbsoluteCrossTrackError(timePoint);
+                                                    if (currentAbsolutXTE != null) {
+                                                        jsonCompetitorInLeg.put("currentAbsolutXTE-m", currentAbsolutXTE.getMeters());
+                                                    }
+                                                }
+                                                final Distance averageSignedXTE = trackedLegOfCompetitor.getAverageSignedCrossTrackError(timePoint, /* waitForLatest */ false);
+                                                if (averageSignedXTE != null) {
+                                                    jsonCompetitorInLeg.put("averageSignedXTE-m", averageSignedXTE.getMeters());
+                                                }
+                                                final Distance averageAbsolutXTE = trackedLegOfCompetitor.getAverageAbsoluteCrossTrackError(timePoint, /* waitForLatest */ false);
+                                                if (averageAbsolutXTE != null) {
+                                                    jsonCompetitorInLeg.put("averageAbsolutXTE-m", averageAbsolutXTE.getMeters());
+                                                }
+                                                Integer numberOfTacks = legDetail.numberOfManeuvers.getOrDefault(ManeuverType.TACK, 0);
+                                                Integer numberOfJibes = legDetail.numberOfManeuvers.getOrDefault(ManeuverType.JIBE, 0);
+                                                Integer numberOfPenaltyCircles = legDetail.numberOfManeuvers.getOrDefault(ManeuverType.PENALTY_CIRCLE, 0);
+                                                jsonCompetitorInLeg.put("tacks", numberOfTacks);
+                                                jsonCompetitorInLeg.put("jibes", numberOfJibes);
+                                                jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
+                                                final TimePoint startTime = trackedLegOfCompetitor.getStartTime();
+                                                final TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
+                                                final TimePoint startOfRace = trackedRace.getStartOfRace();
+                                                // between the start of the race and the start of the first leg we have no
+                                                // 'timeSinceGun'
+                                                // for the competitor
+                                                if (startOfRace != null && startTime != null) {
+                                                    long timeSinceGun = -1;
+                                                    if (finishTime != null) {
+                                                        timeSinceGun = finishTime.asMillis() - startOfRace.asMillis();
+                                                    } else {
+                                                        timeSinceGun = timePoint.asMillis() - startOfRace.asMillis();
+                                                    }
+                                                    if (timeSinceGun > 0) {
+                                                        jsonCompetitorInLeg.put("timeSinceGun-ms", timeSinceGun);
+                                                    }
+                                                    Distance distanceSinceGun = trackedRace.getTrack(competitor)
+                                                            .getDistanceTraveled(startOfRace,
+                                                                    finishTime != null ? finishTime : timePoint);
+                                                    if (distanceSinceGun != null) {
+                                                        jsonCompetitorInLeg.put("distanceSinceGun-m",
+                                                                RoundingUtil.distanceDecimalFormatter
+                                                                        .format(distanceSinceGun.getMeters()));
+                                                    }
+                                                }
+                                                final Double distanceTraveledInMeters = legDetail.distanceTraveledInMeters;
+                                                if (distanceTraveledInMeters != null) {
+                                                    jsonCompetitorInLeg.put("distanceTraveled-m",
+                                                            RoundingUtil.distanceDecimalFormatter.format(distanceTraveledInMeters));
+                                                }
+                                                final Double distanceTraveledIncludingGateStartInMeters = legDetail.distanceTraveledIncludingGateStartInMeters;
+                                                if (distanceTraveledIncludingGateStartInMeters != null) {
+                                                    jsonCompetitorInLeg.put("distanceTraveledIncludingGateStart-m",
+                                                            RoundingUtil.distanceDecimalFormatter.format(distanceTraveledIncludingGateStartInMeters));
+                                                }
+                                                try {
+                                                    final int rank = legDetail.rank;
+                                                    jsonCompetitorInLeg.put("rank", rank == 0 ? null : rank);
+                                                } catch (RuntimeException re) {
+                                                    if (re.getCause() != null && re.getCause() instanceof NoWindException) {
+                                                        // well, we don't know the wind direction, so we can't compute a ranking
+                                                    } else {
+                                                        throw re;
+                                                    }
+                                                }
+                                                final Double gapToLeaderInSeconds = legDetail.gapToLeaderInSeconds;
+                                                jsonCompetitorInLeg.put("gapToLeader-s",
+                                                        gapToLeaderInSeconds != null ? gapToLeaderInSeconds : 0.0);
+                                                final Distance gapToLeaderDistance = trackedLegOfCompetitor
+                                                        .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
+                                                                WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
+                                                jsonCompetitorInLeg.put("gapToLeader-m", // TODO bug5899: is this really required? It's expensive to compute, and probably nobody is using it anyway
+                                                        gapToLeaderDistance != null ? gapToLeaderDistance.getMeters() : 0.0);
+                                                jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
+                                                jsonCompetitorInLeg.put("finished",
+                                                        trackedLegOfCompetitor.hasFinishedLeg(timePoint));
+                                                jsonCompetitors.add(jsonCompetitorInLeg);
+                                            }
+                                        }
+                                    }
+                                    jsonLeg.put("competitors", jsonCompetitors);
+                                    jsonLegs.add(jsonLeg);
+                                    zeroBasedLegIndex++;
+                                }
+                                jsonRaceResults.put("legs", jsonLegs);
+                                response = Response.ok(streamingOutput(jsonRaceResults)).build();
+                            } finally {
+                                course.unlockAfterRead();
+                            }
+                        } catch (NoWindException | InterruptedException | ExecutionException e1) {
+                            logger.log(Level.WARNING, "Exception while trying to obtain leaderboard DTO", e1);
+                            response = Response.status(Status.INTERNAL_SERVER_ERROR)
+                                    .entity("Exception while trying to compute leaderboard '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
+                                    .build();
                         }
-                        jsonLeg.put("competitors", jsonCompetitors);
-                        jsonLegs.add(jsonLeg);
                     }
-                } finally {
-                    course.unlockAfterRead();
                 }
-                jsonRaceResults.put("legs", jsonLegs);
-                return Response.ok(streamingOutput(jsonRaceResults)).build();
             }
         }
         return response;
