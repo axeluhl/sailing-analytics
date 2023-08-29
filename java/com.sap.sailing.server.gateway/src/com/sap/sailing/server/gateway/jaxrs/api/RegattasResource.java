@@ -2332,19 +2332,23 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("distanceTraveledConsideringGateStart-m",
                                         roundDouble(distanceTraveledConsideringGateStart.getMeters(), 2));
                             }
-                            Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
-                                    WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
-                            if (gapToLeader != null) {
-                                final double gapToLeaderAsSeconds = gapToLeader.asSeconds();
-                                jsonCompetitorInLeg.put("gapToLeader-s",
-                                        Double.isFinite(gapToLeaderAsSeconds) ? roundDouble(gapToLeaderAsSeconds, 2) : null);
-                            }
-                            Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
-                                    .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
-                                            WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
-                            if (windwardDistanceToCompetitorFarthestAhead != null) {
-                                jsonCompetitorInLeg.put("gapToLeader-m",
-                                        roundDouble(windwardDistanceToCompetitorFarthestAhead.getMeters(), 2));
+                            // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
+                            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION, leaderboard))) {
+                                // TODO bug5899: check if for Subject a request for the same regattaName/raceName is already being computed; if so, wait for it and use it; otherwise register computation for other parallel requests to re-use; synchronization / atomicity!
+                                Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
+                                        WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
+                                if (gapToLeader != null) {
+                                    final double gapToLeaderAsSeconds = gapToLeader.asSeconds();
+                                    jsonCompetitorInLeg.put("gapToLeader-s",
+                                            Double.isFinite(gapToLeaderAsSeconds) ? roundDouble(gapToLeaderAsSeconds, 2) : null);
+                                }
+                                Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
+                                        .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
+                                                WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
+                                if (windwardDistanceToCompetitorFarthestAhead != null) {
+                                    jsonCompetitorInLeg.put("gapToLeader-m",
+                                            roundDouble(windwardDistanceToCompetitorFarthestAhead.getMeters(), 2));
+                                }
                             }
                             jsonCompetitorInLeg.put("finished", false);
                         } else {

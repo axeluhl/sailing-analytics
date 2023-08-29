@@ -8,18 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -37,13 +28,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.SingleCalculationPerSubjectCache;
 
 public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
-    private static final Logger logger = Logger.getLogger(MarkPassingsJsonSerializer.class.getName());
-
     public static final String ZERO_BASED_WAYPOINT_INDEX = "zeroBasedWaypointIndex";
     public static final String WAYPOINT_NAME = "waypointName";
     public static final String BYWAYPOINT = "bywaypoint";
@@ -54,7 +45,8 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public static final String NET_POINTS_BASED_ON_PASSING_ORDER = "netPointsBasedOnPassingOrder";
     public static final String MAX_POINTS_REASON = "maxPointsReason";
     private static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    private static ConcurrentMap<Pair<TrackedRace, String>, Future<JSONObject>> ongoingLiveCalculationsByRaceAndRequestingUsername = new ConcurrentHashMap<>();
+    private static SingleCalculationPerSubjectCache<Pair<Leaderboard, TrackedRace>, JSONObject> ongoingLiveCalculationsByRaceAndRequestingUsername =
+            new SingleCalculationPerSubjectCache<>(MarkPassingsJsonSerializer::serializeForLiveTimePointToJSON, /* 10min timeout */ Duration.ONE_MINUTE.times(10));
     
     /**
      * The time point for which to obtain the ranking information at the marks
@@ -83,38 +75,21 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
 
     @Override
     public JSONObject serialize(TrackedRace trackedRace) {
-        final Subject subject = SecurityUtils.getSubject();
-        final String username = subject == null ? null : subject.getPrincipal() == null ? null : subject.getPrincipal().toString();
-        final Pair<TrackedRace, String> cacheKey = new Pair<>(trackedRace, username);
-        JSONObject result;
-        final Future<JSONObject> ongoingLiveCalculationForTrackedRace;
-        if (timePoint == null && (ongoingLiveCalculationForTrackedRace = ongoingLiveCalculationsByRaceAndRequestingUsername.get(cacheKey)) != null) {
-            try {
-                result = ongoingLiveCalculationForTrackedRace.get(10, TimeUnit.MINUTES);
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException("Error obtaining results of ongoing mark passing serialization for live time point and tracked race "+trackedRace, e);
-            } catch (TimeoutException toe) {
-                logger.warning("Timeout waiting for ongoing mark passing serialization for live time point and race "+trackedRace+
-                        "; computing in place now");
-                result = serializeToJSON(trackedRace);
-            }
+        final JSONObject result;
+        if (timePoint == null) {
+            result = ongoingLiveCalculationsByRaceAndRequestingUsername.get(new Pair<>(leaderboard, trackedRace));
         } else {
-            final CompletableFuture<JSONObject> ongoingCalculation = new CompletableFuture<>();
-            ongoingLiveCalculationsByRaceAndRequestingUsername.put(cacheKey, ongoingCalculation);
-            try {
-                result = serializeToJSON(trackedRace);
-                ongoingCalculation.complete(result);
-            } catch (Exception e) {
-                ongoingCalculation.completeExceptionally(e);
-                throw e;
-            } finally {
-                ongoingLiveCalculationsByRaceAndRequestingUsername.remove(cacheKey);
-            }
+            result = serializeToJSON(leaderboard, trackedRace, timePoint);
         }
         return result;
     }
+    
+    private static JSONObject serializeForLiveTimePointToJSON(Pair<Leaderboard, TrackedRace> leaderboardAndTrackedRace) {
+        final TimePoint timePointForRanksAtMarks = MillisecondsTimePoint.now().minus(leaderboardAndTrackedRace.getB().getDelayToLiveInMillis());
+        return serializeToJSON(leaderboardAndTrackedRace.getA(), leaderboardAndTrackedRace.getB(), timePointForRanksAtMarks);
+    }
 
-    private JSONObject serializeToJSON(TrackedRace trackedRace) {
+    private static JSONObject serializeToJSON(Leaderboard leaderboard, TrackedRace trackedRace, TimePoint timePoint) {
         final JSONObject result;
         final Course course = trackedRace.getRace().getCourse();
         final TimePoint timePointForRanksAtMarks = timePoint != null ? timePoint :
@@ -176,7 +151,6 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     markPassingJson.put(ONE_BASED_PASSING_ORDER, passingOrder);
                     // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
                     if (leaderboardValidAndSubjectMaySeePremiumInformation) {
-                        // TODO bug5899: check if for Subject a request for the same trackedRace and null live time point is already being computed; if so, wait for it and use it; otherwise register computation for other parallel requests to re-use; synchronization / atomicity!
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
                             final Double totalPoints = leaderboard.getScoreCorrection().getCorrectedScore(() -> passingOrder,
@@ -231,12 +205,12 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
         return result;
     }
 
-    private void addMarkPassingTime(MarkPassing markPassing, JSONObject markPassingJson) {
+    private static void addMarkPassingTime(MarkPassing markPassing, JSONObject markPassingJson) {
         markPassingJson.put(TIMEASMILLIS, markPassing.getTimePoint().asMillis());
         markPassingJson.put(TIMEASISO, TIMEPOINT_FORMATTER.format(markPassing.getTimePoint().asDate()));
     }
 
-    private void addWaypoint(final Course course, Waypoint waypoint, JSONObject jsonToAddTo) {
+    private static void addWaypoint(final Course course, Waypoint waypoint, JSONObject jsonToAddTo) {
         jsonToAddTo.put(WAYPOINT_NAME, waypoint.getName());
         jsonToAddTo.put(ZERO_BASED_WAYPOINT_INDEX, course.getIndexOfWaypoint(waypoint));
     }
