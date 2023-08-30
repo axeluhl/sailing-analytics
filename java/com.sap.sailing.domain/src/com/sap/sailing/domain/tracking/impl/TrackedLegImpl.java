@@ -655,12 +655,12 @@ public class TrackedLegImpl implements TrackedLeg {
             result = reachSpeed.getObject().getDuration(distance);
             resultDistance = distance;
         } else {
-            SpeedWithBearingWithConfidence<Void> portSpeedAndBearing = polarDataService.getAverageSpeedWithBearing(
+            SpeedWithBearingWithConfidence<Void> portSpeedAndTrueWindAngle = polarDataService.getAverageSpeedWithTrueWindAngle(
                     boatClass, wind, legType, Tack.PORT);
-            SpeedWithBearingWithConfidence<Void> starboardSpeedAndBearing = polarDataService.getAverageSpeedWithBearing(
+            SpeedWithBearingWithConfidence<Void> starboardSpeedAndTrueWindAngle = polarDataService.getAverageSpeedWithTrueWindAngle(
                     boatClass, wind, legType, Tack.STARBOARD);
-            Pair<Distance, Duration> estimationPair = estimateTargetTimeTacking(from, to, portSpeedAndBearing,
-                    starboardSpeedAndBearing, wind);
+            Pair<Distance, Duration> estimationPair = estimateTargetTimeTacking(from, to, portSpeedAndTrueWindAngle,
+                    starboardSpeedAndTrueWindAngle, wind);
             result = estimationPair.getB();
             resultDistance = estimationPair.getA();
         }
@@ -669,18 +669,18 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     private Pair<Distance, Duration> estimateTargetTimeTacking(Position from, Position to,
-            SpeedWithBearingWithConfidence<Void> portSpeedAndBearing,
-            SpeedWithBearingWithConfidence<Void> starboardSpeedAndBearing, Wind wind) {
-        Bearing portBearing = portSpeedAndBearing.getObject().getBearing();
-        Bearing starboardBearing = starboardSpeedAndBearing.getObject().getBearing();
-        Position intersection = from.getIntersection(portBearing, to, starboardBearing);
+            SpeedWithBearingWithConfidence<Void> portSpeedAndTrueWindAngle,
+            SpeedWithBearingWithConfidence<Void> starboardSpeedAndTrueWindAngle, Wind wind) {
+        Bearing portCourseOverGround = portSpeedAndTrueWindAngle.getObject().getBearing().add(wind.getFrom());
+        Bearing starboardCourseOverGround = starboardSpeedAndTrueWindAngle.getObject().getBearing().add(wind.getFrom());
+        Position intersection = from.getIntersection(portCourseOverGround, to, starboardCourseOverGround);
         Distance fromToIntersection = from.getDistance(intersection);
-        Speed portSpeed = portSpeedAndBearing.getObject();
+        Speed portSpeed = portSpeedAndTrueWindAngle.getObject();
         Duration duration1 = portSpeed.getDuration(fromToIntersection);
-        Distance fromToTo = intersection.getDistance(to);
-        Speed starboardSpeed = starboardSpeedAndBearing.getObject();
-        Duration duration2 = starboardSpeed.getDuration(fromToTo);
-        return new Pair<Distance, Duration>(fromToIntersection.add(fromToTo), duration1.plus(duration2));
+        Distance intersectionToTo = intersection.getDistance(to);
+        Speed starboardSpeed = starboardSpeedAndTrueWindAngle.getObject();
+        Duration duration2 = starboardSpeed.getDuration(intersectionToTo);
+        return new Pair<Distance, Duration>(fromToIntersection.add(intersectionToTo), duration1.plus(duration2));
     }
 
     @Override

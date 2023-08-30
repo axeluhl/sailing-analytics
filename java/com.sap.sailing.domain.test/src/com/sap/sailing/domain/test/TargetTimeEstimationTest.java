@@ -131,11 +131,11 @@ public class TargetTimeEstimationTest {
 
         SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(-45));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidencePort = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingPort, 1, null);
-        when(mockedPolars.getAverageSpeedWithBearing(mockedBoatClass, wind, LegType.UPWIND, Tack.PORT)).thenReturn(boatSpeedWithBearingWithConfidencePort);
+        when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.UPWIND, Tack.PORT)).thenReturn(boatSpeedWithBearingWithConfidencePort);
 
         SpeedWithBearing speedWithBearingStarboard = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(45));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidenceStarboard = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingStarboard, 1, null);
-        when(mockedPolars.getAverageSpeedWithBearing(mockedBoatClass, wind, LegType.UPWIND, Tack.STARBOARD)).thenReturn(boatSpeedWithBearingWithConfidenceStarboard);
+        when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.UPWIND, Tack.STARBOARD)).thenReturn(boatSpeedWithBearingWithConfidenceStarboard);
         
         HashSet<Competitor> competitors = new HashSet<Competitor>();
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
@@ -183,11 +183,11 @@ public class TargetTimeEstimationTest {
 
         SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(11, new DegreeBearingImpl(150));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidencePort = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingPort, 1, null);
-        when(mockedPolars.getAverageSpeedWithBearing(mockedBoatClass, wind, LegType.DOWNWIND, Tack.PORT)).thenReturn(boatSpeedWithBearingWithConfidencePort);
+        when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.DOWNWIND, Tack.PORT)).thenReturn(boatSpeedWithBearingWithConfidencePort);
 
         SpeedWithBearing speedWithBearingStarboard = new KnotSpeedWithBearingImpl(11, new DegreeBearingImpl(-150));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidenceStarboard = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingStarboard, 1, null);
-        when(mockedPolars.getAverageSpeedWithBearing(mockedBoatClass, wind, LegType.DOWNWIND, Tack.STARBOARD)).thenReturn(boatSpeedWithBearingWithConfidenceStarboard);
+        when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.DOWNWIND, Tack.STARBOARD)).thenReturn(boatSpeedWithBearingWithConfidenceStarboard);
         
         HashSet<Competitor> competitors = new HashSet<Competitor>();
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
