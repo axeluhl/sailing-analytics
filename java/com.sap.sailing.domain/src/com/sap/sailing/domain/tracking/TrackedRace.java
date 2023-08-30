@@ -213,6 +213,9 @@ public interface TrackedRace
      * {@link Course} take place after this method has returned, then this won't be reflected in the result returned.
      * Callers should obtain the {@link Course#lockForRead() course's read lock} while using the result of this call if
      * they want to ensure that no course update is applied concurrently.
+     * 
+     * @return the tracked legs in the order in which their {@link TrackedLeg#getLeg() legs} appear in the
+     *         {@link Course}
      */
     Iterable<TrackedLeg> getTrackedLegs();
 

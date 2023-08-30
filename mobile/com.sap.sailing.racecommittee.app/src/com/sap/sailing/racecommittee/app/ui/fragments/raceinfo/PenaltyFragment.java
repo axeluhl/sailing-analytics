@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -379,19 +380,22 @@ public class PenaltyFragment extends BaseFragment
     }
 
     private void loadLeaderboardResult() {
-        ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
-        final Loader<?> leaderboardResultLoader = getLoaderManager().initLoader(LEADERBOARD_ORDER_LOADER, null,
-                dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
-                    @Override
-                    public void onLoadFailed(Exception reason) {
-                    }
+        final Activity activity = getActivity();
+        if (activity != null) {
+            ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+            final Loader<?> leaderboardResultLoader = getLoaderManager().initLoader(LEADERBOARD_ORDER_LOADER, null,
+                    dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
+                        @Override
+                        public void onLoadFailed(Exception reason) {
+                        }
 
-                    @Override
-                    public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
-                        onLoadLeaderboardResultSucceeded(data);
-                    }
-                }));
-        leaderboardResultLoader.forceLoad();
+                        @Override
+                        public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
+                            onLoadLeaderboardResultSucceeded(data);
+                        }
+                    }));
+            leaderboardResultLoader.forceLoad();
+        }
     }
 
     private void onLoadCompetitorsSucceeded(Map<Competitor, Boat> data) {

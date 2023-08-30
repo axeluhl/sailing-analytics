@@ -18,7 +18,8 @@ Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sse.replication,
  com.sap.sailing.shared.server,
  com.sap.sse.shared.android,
- com.sap.sailing.server.gateway.interfaces
+ com.sap.sailing.server.gateway.interfaces,
+ org.apache.shiro.core;bundle-version="1.7.1"
 Export-Package: com.sap.sailing.server.gateway.deserialization.impl,
  com.sap.sailing.server.gateway.dto,
  com.sap.sailing.server.gateway.serialization,
