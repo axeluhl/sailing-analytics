@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -41,6 +42,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPositionAtTimePointCacheImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -102,48 +104,48 @@ public class TargetTimeEstimationTest {
         BoatClass mockedBoatClass = mock(BoatClass.class);
         Position centerOfCourse = new DegreePosition(54.432800, 10.193655);
         TimePoint timepoint = new MillisecondsTimePoint(1431426491696l);
-        Bearing windBearing = new DegreeBearingImpl(-175);
+        Bearing windBearing = new DegreeBearingImpl(225); // wind from 045deg (NE)
         SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(10, windBearing);
         Wind wind = new WindImpl(centerOfCourse, timepoint, windSpeedWithBearing);
-        Position endOfLeg = new DegreePosition(54.434648, 10.193312);
+        Distance legLength = new NauticalMileDistance(1);
         Position startOfLeg = new DegreePosition(54.430454, 10.193226);
-        
+        Position endOfLeg = startOfLeg.translateGreatCircle(new DegreeBearingImpl(40), legLength); // leg end is 1NM approximately to the NE from start, so 5deg off perfect upwind
         DynamicTrackedRaceImpl trackedRace = mock(DynamicTrackedRaceImpl.class);
         when(trackedRace.getCenterOfCourse(timepoint)).thenReturn(centerOfCourse);
         when(trackedRace.getWind(any(Position.class), eq(timepoint))).thenReturn(wind);
         when(trackedRace.getWind(any(Position.class), eq(timepoint), any(Set.class))).thenReturn(wind);
-        
         RaceDefinition race = mock(RaceDefinition.class);
         when(race.getBoatClass()).thenReturn(mockedBoatClass);
-        
         when(trackedRace.getRace()).thenReturn(race);
-        
         Leg leg = mock(Leg.class);
         Waypoint from = mock(Waypoint.class);
         Waypoint to = mock(Waypoint.class);
         when(leg.getFrom()).thenReturn(from);
         when(leg.getTo()).thenReturn(to);
-        
         when(trackedRace.getApproximatePosition(eq(from), eq(timepoint))).thenReturn(startOfLeg);
         when(trackedRace.getApproximatePosition(eq(to), eq(timepoint))).thenReturn(endOfLeg);
         when(trackedRace.getApproximatePosition(eq(from), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(startOfLeg);
         when(trackedRace.getApproximatePosition(eq(to), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(endOfLeg);
-
-        SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(-45));
+        final double speedInKnots = 6.0;
+        SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(-45));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidencePort = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingPort, 1, null);
         when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.UPWIND, Tack.PORT)).thenReturn(boatSpeedWithBearingWithConfidencePort);
-
-        SpeedWithBearing speedWithBearingStarboard = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(45));
+        SpeedWithBearing speedWithBearingStarboard = new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(45));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidenceStarboard = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingStarboard, 1, null);
         when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.UPWIND, Tack.STARBOARD)).thenReturn(boatSpeedWithBearingWithConfidenceStarboard);
-        
         HashSet<Competitor> competitors = new HashSet<Competitor>();
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
-        
-        //Actual test of functionality
+        // Actual test of functionality
         Duration duration = trackedLeg.getEstimatedTimeAndDistanceToComplete(mockedPolars, timepoint,
                 new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint)).getExpectedDuration();
-        assertEquals(213513, duration.asMillis(), 100);
+        // redundantly calculate expected result as follows: sailing a certain, somewhat shorter, distance on STARBOARD tack (wind from starboard)
+        // at COG 355, then tacking to PORT tack, sailing COG 85deg for a bit longer to the end of the leg.
+        // This happens to be a right triangle with the hypothenusis being the 1NM leg's great circle segment.
+        // The one angle is 40deg, the other 50. So the length of the first tack is 1NM*sin(40/180*PI), the
+        // other 1NM*sin(50/180*PI). This distance is sailed at a speedInKnots.
+        Distance distanceToSail = legLength.scale(Math.sin(40./180.*Math.PI)).add(legLength.scale(Math.sin(50./180.*Math.PI)));
+        Duration durationToSail = distanceToSail.atSpeed(speedWithBearingPort);
+        assertEquals(durationToSail.asMillis(), duration.asMillis(), 200);
     }
     
     @SuppressWarnings("unchecked") // the problem here is any(Set.class) which cannot infer the type arguments
@@ -154,49 +156,55 @@ public class TargetTimeEstimationTest {
         BoatClass mockedBoatClass = mock(BoatClass.class);
         Position centerOfCourse = new DegreePosition(54.432800, 10.193655);
         TimePoint timepoint = new MillisecondsTimePoint(1431426491696l);
-        Bearing windBearing = new DegreeBearingImpl(5);
-        SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(10, windBearing);
+        Bearing windBearing = new DegreeBearingImpl(60);
+        SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(12, windBearing); // wind from 240deg
         Wind wind = new WindImpl(centerOfCourse, timepoint, windSpeedWithBearing);
-        Position endOfLeg = new DegreePosition(54.434648, 10.193312);
         Position startOfLeg = new DegreePosition(54.430454, 10.193226);
-        
+        Bearing legBearing = new DegreeBearingImpl(40); // 20deg off perfect downwind, off to the left
+        Distance legLength = new NauticalMileDistance(1);
+        Position endOfLeg = startOfLeg.translateGreatCircle(legBearing, legLength);
         DynamicTrackedRaceImpl trackedRace = mock(DynamicTrackedRaceImpl.class);
         when(trackedRace.getCenterOfCourse(timepoint)).thenReturn(centerOfCourse);
         when(trackedRace.getWind(any(Position.class), eq(timepoint))).thenReturn(wind);
         when(trackedRace.getWind(any(Position.class), eq(timepoint), any(Set.class))).thenReturn(wind);
-        
         RaceDefinition race = mock(RaceDefinition.class);
         when(race.getBoatClass()).thenReturn(mockedBoatClass);
-        
         when(trackedRace.getRace()).thenReturn(race);
-        
         Leg leg = mock(Leg.class);
         Waypoint from = mock(Waypoint.class);
         Waypoint to = mock(Waypoint.class);
         when(leg.getFrom()).thenReturn(from);
         when(leg.getTo()).thenReturn(to);
-        
         when(trackedRace.getApproximatePosition(eq(from), eq(timepoint))).thenReturn(startOfLeg);
         when(trackedRace.getApproximatePosition(eq(to), eq(timepoint))).thenReturn(endOfLeg);
         when(trackedRace.getApproximatePosition(eq(from), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(startOfLeg);
         when(trackedRace.getApproximatePosition(eq(to), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(endOfLeg);
-
-        SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(11, new DegreeBearingImpl(150));
+        final double speedInKnots = 11.0;
+        SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(150));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidencePort = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingPort, 1, null);
         when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.DOWNWIND, Tack.PORT)).thenReturn(boatSpeedWithBearingWithConfidencePort);
-
-        SpeedWithBearing speedWithBearingStarboard = new KnotSpeedWithBearingImpl(11, new DegreeBearingImpl(-150));
+        SpeedWithBearing speedWithBearingStarboard = new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(-150));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidenceStarboard = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingStarboard, 1, null);
         when(mockedPolars.getAverageSpeedWithTrueWindAngle(mockedBoatClass, wind, LegType.DOWNWIND, Tack.STARBOARD)).thenReturn(boatSpeedWithBearingWithConfidenceStarboard);
-        
         HashSet<Competitor> competitors = new HashSet<Competitor>();
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
-        
-        //Actual test of functionality
+        // Actual test of functionality
         Duration duration = trackedLeg.getEstimatedTimeAndDistanceToComplete(mockedPolars, timepoint,
                 new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint)).getExpectedDuration();
-        assertEquals(95090, duration.asMillis(), 100);
-        
+        // redundantly calculate expected result as follows: sailing a certain, somewhat shorter, distance on STARBOARD tack (wind from starboard)
+        // at COG 090deg, then gybing to PORT tack, sailing COG 030deg for a bit longer to the end of the leg.
+        // Short distance on starboard tack is "a", longer distance on port tack is "b".
+        // b*sin(10/180*PI) = a*sin(50/180*PI)
+        //   and
+        // b*cos(10/180*PI) + a*cos(50/180*PI) = legLength
+        //   with this:
+        // a = legLength / (sin(50/180*PI)*cos(10/180*PI)/sin(10/180*PI) + cos(50/180*PI))
+        //   and hence:
+        // b = legLength / (sin(50/180*PI)*cos(10/180*PI)/sin(10/180*PI) + cos(50/180*PI)) * sin(50/180*PI) / sin(10/180*PI)
+        Distance a = legLength.scale(1. / (Math.sin(50./180.*Math.PI)*Math.cos(10./180.*Math.PI)/Math.sin(10./180.*Math.PI) + Math.cos(50./180.*Math.PI)));
+        Distance b = a.scale(Math.sin(50./180.*Math.PI)/Math.sin(10./180.*Math.PI));
+        Distance distanceToSail = a.add(b);
+        Duration durationToSail = distanceToSail.atSpeed(speedWithBearingPort);
+        assertEquals(durationToSail.asMillis(), duration.asMillis(), 100);
     }
-
 }
