@@ -384,7 +384,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     private DynamicTeam createTeam(String name, Nationality nationality, UUID competitorId) {
         DynamicTeam result;
-        String[] sailorNames = name.split("\\b*\\+\\b*");
+        String[] sailorNames = name==null?new String[] { "" } : name.split("\\b*\\+\\b*");
         List<DynamicPerson> sailors = new ArrayList<DynamicPerson>();
         for (String sailorName : sailorNames) {
             sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
