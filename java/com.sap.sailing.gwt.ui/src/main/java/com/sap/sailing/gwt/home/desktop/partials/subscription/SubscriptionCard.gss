@@ -318,9 +318,25 @@
  font-size: 1.2em;
  text-transform: capitalize;
  margin: 0 auto;
- -webkit-transform: rotate(-90deg);
- -ff-transform: rotate(-90deg);
- transform: rotate(-90deg);
+ width: 140px;
+}
+
+/* Small screens */
+@media ( max-width: 400px) {
+ .featureCheck {
+  margin: 0 15px;
+ }
+ .featureNone {
+  margin: 0 15px;
+ }
+ .featureHeader {
+  -ms-writing-mode: tb-rl;
+  -webkit-writing-mode: vertical-rl;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  width: auto;
+ }
 }
 
 .buttonWarning {
@@ -356,7 +372,7 @@
 }
 
 .confirmationDialog button :hover {
-    background-color: #0081b8;
+ background-color: #0081b8;
 }
 
 .confirmationDialog button {
