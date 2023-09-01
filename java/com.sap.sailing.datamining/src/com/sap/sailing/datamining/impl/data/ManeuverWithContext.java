@@ -7,12 +7,14 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
@@ -247,4 +249,23 @@ public class ManeuverWithContext implements HasManeuverContext {
                 .getDegrees());
     }
 
+    @Override
+    public Speed getLowestSpeed() {
+        return getManeuver().getLowestSpeed();
+    }
+
+    @Override
+    public Speed getSpeedDifference() {
+        return new KnotSpeedImpl(getManeuver().getSpeedWithBearingAfter().getKnots() - getManeuver().getSpeedWithBearingBefore().getKnots());
+    }
+
+    @Override
+    public double getMaximimumTurningRateInDegreesPerSecond() {
+        return getManeuver().getMaxTurningRateInDegreesPerSecond();
+    }
+
+    @Override
+    public double getAverageTurningRateInDegreesPerSecond() {
+        return getManeuver().getAvgTurningRateInDegreesPerSecond();
+    }
 }
