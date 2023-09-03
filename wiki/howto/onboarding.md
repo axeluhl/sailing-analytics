@@ -66,7 +66,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 13. Configure Maven to use the correct JRE by following the instructions in the paragraph [maven-setup](#onboarding-information_sap-sailing-analytics-development-setup_maven-setup)
 14. Follow the instructions in the [development setup](#onboarding-information_sap-sailing-analytics-development-setup_sap-sailing-analytics-development-setup) to build the project.
 15. The steps for building the project for a deployment can be found in the [Build for deployment](#onboarding-information_sap-sailing-analytics-development-setup_build-for-deployment) section. This is not needed in the daily development workflow and should only be run when needed. 
-
+16. Install Ant: https://ant.apache.org/manual/install.html and makes sure to add to path: it is necessary for building gwt.
 ### Further optional but recommended installations
 
 1. Cygwin, [http://www.cygwin.com/](http://www.cygwin.com/)
