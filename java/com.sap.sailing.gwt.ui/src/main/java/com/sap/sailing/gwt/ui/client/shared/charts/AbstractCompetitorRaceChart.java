@@ -34,6 +34,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -289,6 +290,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 new TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO>() {
             @Override
             public void onSuccess(final CompetitorsRaceDataDTO result) {
+                GWT.log("Received complete result for getCompetitorsRaceData request "+
+                        selectedRaceIdentifier+", "+competitorsToLoad+", "+from+", "+to+", "+effectiveStepSize+", "+selectedDataTypeToRetrieve+", "+
+                        leaderboardGroupName+", "+leaderboardGroupId+", "+leaderboardName);
                 hideLoading();
                 AbstractCompetitorRaceChart.this.effectiveStepSize = effectiveStepSize;
                 if (result != null) {
@@ -448,6 +452,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      */
     private synchronized void updateChartSeries(CompetitorsRaceDataDTO chartData, DetailType retrievedDataType,
             boolean append, TimingHolder tholder) {
+        GWT.log("Received chart data for competitors "+chartData.getCompetitors()+" with, respectively, these many data points: "+
+                Util.joinStrings(", ", Util.map(chartData.getCompetitors(), c->""+chartData.getCompetitorData(c).getRaceData().size())));
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
@@ -585,19 +591,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         super.setVisible(visible);
         if (visible) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
                 @Override
                 public void execute() {
                     chart.setSizeToMatchContainer();
                     // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
-                    // positions
-                    // (nativeAdjustCheckboxPosition)
-                    // in the BaseChart class would not be called
+                    // positions (nativeAdjustCheckboxPosition) in the BaseChart class would not be called
                     chart.redraw();
                 }
             });
         }
-
     }
 
     private int yAxisIndex(DetailType seriesDetailType) {

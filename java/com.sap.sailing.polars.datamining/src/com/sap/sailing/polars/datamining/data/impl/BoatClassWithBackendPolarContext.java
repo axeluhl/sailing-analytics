@@ -30,7 +30,7 @@ public class BoatClassWithBackendPolarContext implements HasBackendPolarBoatClas
     
     public Double getTargetBeatAngle() {
         try {
-            return polarDataService.getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(12), LegType.UPWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
+            return polarDataService.getAverageSpeedWithTrueWindAngle(boatClass, new KnotSpeedImpl(12), LegType.UPWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
         } catch (NotEnoughDataHasBeenAddedException e) {
             return null;
         }
@@ -38,7 +38,7 @@ public class BoatClassWithBackendPolarContext implements HasBackendPolarBoatClas
     
     public Double getTargetRunawayAngle() {
         try {
-            return polarDataService.getAverageSpeedWithBearing(boatClass, new KnotSpeedImpl(12), LegType.DOWNWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
+            return polarDataService.getAverageSpeedWithTrueWindAngle(boatClass, new KnotSpeedImpl(12), LegType.DOWNWIND, Tack.STARBOARD).getObject().getBearing().getDegrees();
         } catch (NotEnoughDataHasBeenAddedException e) {
             return null;
         }

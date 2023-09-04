@@ -11,7 +11,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
     
     private final String competitorName;
     private final String sailID;
-    private final int points;
+    private final double points;
     private final MaxPointsReason maxPointsReason;
     private final boolean discarded;
     
@@ -24,7 +24,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
             discarded = false;
         } else {
             this.discarded = competitorEntry.isDiscarded();
-            points = (int) (competitorEntry.getScore() == null ? 0 : (double) competitorEntry.getScore());
+            points = competitorEntry.getScore() == null ? 0 : competitorEntry.getScore();
             MaxPointsReason mpe = null;
             if (competitorEntry.getMaxPointsReason() != null && competitorEntry.getMaxPointsReason().length() > 0) {
                 // no int; try parsing a MaxPointsReason
@@ -51,7 +51,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
 
     @Override
     public Double getPoints() {
-        return (double) points;
+        return points;
     }
 
     @Override
