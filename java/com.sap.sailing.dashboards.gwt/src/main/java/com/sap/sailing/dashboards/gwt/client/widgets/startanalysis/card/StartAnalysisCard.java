@@ -169,7 +169,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             zoomTypes.add(ZoomTypes.BUOYS);
         }
         final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
-        //TODO 5774 fill dtoContext
+        //TODO bug5774 fill dtoContext
         final SecuredDTOProxy dtoContext = new SecuredDTOProxy();
         final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();

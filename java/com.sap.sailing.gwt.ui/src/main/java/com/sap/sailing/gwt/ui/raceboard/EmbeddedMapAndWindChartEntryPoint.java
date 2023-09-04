@@ -85,6 +85,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
     @Override
     protected void doOnModuleLoad() {
         final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
+        //TODO: bug5774 get securedDTO later with callback
         final SecuredDTOProxy securedDTO = new SecuredDTOProxy();
         super.doOnModuleLoad();
         // read mandatory parameters
