@@ -94,7 +94,14 @@ public interface TrackedRegatta extends Serializable {
      * Events for synchronous listeners are processed in the calling thread. This implies that implementations must not
      * block for events triggered only by other callbacks to implementations of this interface, or else they risk a
      * deadlock. For example, trying a blocking wait for another {@link TrackedRace} to appear is a bad idea because the
-     * appearance of that other race may have to be signalled by a {@link #raceAdded(TrackedRace)} callback.
+     * appearance of that other race may have to be signalled by a {@link #raceAdded(TrackedRace)} callback.<p>
+     * 
+     * Note that for asynchronous listeners you have to ensure that callbacks in particular to their {@link RaceListener#raceAdded(TrackedRace)}
+     * and {@link RaceListener#raceRemoved(TrackedRace)} methods cannot block, either. A particular risk for them blocking
+     * is when {@link #removeRaceListener(RaceListener)} is invoked while holding any object monitors that any of the tasks
+     * enqueued for the {@link RaceListener} to be removed may be waiting for any of these monitors. Then, those pending tasks
+     * will not be able to complete, and conversely, {@link #removeRaceListener(RaceListener)} won't, either, because it
+     * will wait for all tasks enqueued for that listener to complete before returning. See also bug5879.
      * 
      * @param listener
      *            the listener to add

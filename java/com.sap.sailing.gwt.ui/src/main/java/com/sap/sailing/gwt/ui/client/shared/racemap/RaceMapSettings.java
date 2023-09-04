@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActio
 import com.sap.sailing.gwt.settings.client.settingtypes.DistanceSetting;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -48,8 +49,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     private static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
     private static final String PARAM_BUOY_ZONE_RADIUS_IN_METERS = "buoyZoneRadiusInMeters";
     private static final String PARAM_SHOW_WIND_LADDER = "showWindLadder";
-
+    public static final String PARAM_TAIL_LENGTH_IN_MILLISECONDS = "tailLengthInMilliseconds";
+    
     public static final Distance DEFAULT_BUOY_ZONE_RADIUS = new MeterDistance(15);
+    
+    private static final long DEFAULT_TAIL_LENGTH_IN_MILLISECONDS = Duration.ONE_SECOND.times(100l).asMillis();
 
     private BooleanSetting showSatelliteLayer;
 
@@ -121,7 +125,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         zoomSettings = new RaceMapZoomSettings(ZOOM_SETTINGS, this);
         transparentHoverlines = new BooleanSetting(TRANSPARENT_HOVERLINES, this, false);
         hoverlineStrokeWeight = new IntegerSetting(HOVERLINE_STROKE_WEIGHT, this, 15);
-        tailLengthInMilliseconds = new LongSetting(TAIL_LENGTH_IN_MILLISECONDS, this, 100000l);
+        tailLengthInMilliseconds = new LongSetting(TAIL_LENGTH_IN_MILLISECONDS, this, DEFAULT_TAIL_LENGTH_IN_MILLISECONDS);
         showOnlySelectedCompetitors = new BooleanSetting(SHOW_ONLY_SELECTED_COMPETITORS, this, false);
         showSelectedCompetitorsInfo = new BooleanSetting(SHOW_SELECTED_COMPETITORS_INFO, this, true);
         maneuverTypesToShow = new EnumSetSetting<>(MANEUVER_TYPES_TO_SHOW, this, getDefaultManeuvers(), ManeuverType::valueOf);
@@ -284,29 +288,25 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     public static RaceMapSettings readSettingsFromURL(boolean defaultForShowMapControls,
             boolean defaultForShowCourseGeometry, boolean defaultForMapOrientationWindUp,
             boolean defaultForViewShowStreamlets, boolean defaultForViewShowStreamletColors,
-            boolean defaultForViewShowSimulation, PaywallResolver paywallResolver, SecuredDTOProxy securedDTO) {
+            boolean defaultForViewShowSimulation, Long defaultForTailLengthInMilliseconds, PaywallResolver paywallResolver, SecuredDTOProxy securedDTO) {
         final boolean showSatelliteLayer = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_SATELLITE_LAYER, false /* default */);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, defaultForShowMapControls /* default */);
         final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COURSE_GEOMETRY, defaultForShowCourseGeometry /* default */);
+        final RaceMapHelpLinesSettings raceMapHelpLinesSettings = new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry));
         final boolean windUp = GwtHttpRequestUtils.getBooleanParameter(PARAM_MAP_ORIENTATION_WIND_UP, defaultForMapOrientationWindUp /* default */);
         final boolean showWindStreamletOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLETS, defaultForViewShowStreamlets /* default */);
         final boolean showWindStreamletColors = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLET_COLORS, defaultForViewShowStreamletColors /* default */);
         final boolean showSimulationOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, defaultForViewShowSimulation /* default */);
+        final Long tailLengthInMilliseconds = GwtHttpRequestUtils.getLongParameter(PARAM_TAIL_LENGTH_IN_MILLISECONDS, defaultForTailLengthInMilliseconds);
         final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(PARAM_BUOY_ZONE_RADIUS_IN_METERS,
                 DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */);
-        return new RaceMapSettings(new RaceMapZoomSettings(),
-                new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)),
-                /* transparentHoverlines as discussed with Stefan on 2015-12-08 */ false,
-                /* hoverlineStrokeWeight as discussed with Stefan on 2015-12-08 */ 15,
-                /* tailLengthInMilliseconds */ 100000l, /* windUp */ windUp,
-                /* buoyZoneRadius */ new MeterDistance(buoyZoneRadiusInMeters), /* showOnlySelectedCompetitors */ false,
-                /* showSelectedCompetitorsInfo */ true, /* showWindStreamletColors */ showWindStreamletColors,
-                /* showWindStreamletOverlay */ showWindStreamletOverlay,
-                /* showSimulationOverlay */ showSimulationOverlay, /* showMapControls */ showMapControls,
-                /* maneuverTypesToShow */ getDefaultManeuvers(), /* showDouglasPeuckerPoints */ false,
-                /* showEstimatedDuration */ false, /* startCountDownFontSizeScaling */ 1.0,
-                /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ showSatelliteLayer,
-                /* showWindLadder */ false, /* paywallResolver */ paywallResolver,         /* securedDTO */ securedDTO);
+        final MeterDistance meterDistance = new MeterDistance(buoyZoneRadiusInMeters);
+        return new RaceMapSettingsBuilder().withShowSatelliteLayer(showSatelliteLayer).withShowMapControls(showMapControls)
+                .withHelpLinesSettings(raceMapHelpLinesSettings).withWindUp(windUp).withBuoyZoneRadius(meterDistance)
+                .withShowWindStreamletOverlay(showWindStreamletOverlay)
+                .withShowWindStreamletColors(showWindStreamletColors).withShowSimulationOverlay(showSimulationOverlay)
+                .withTailLengthInMilliseconds(tailLengthInMilliseconds).withPaywallResolver(paywallResolver)
+                .withSecuredDTO(securedDTO).build();
     }
 
     public Set<ManeuverType> getManeuverTypesToShow() {

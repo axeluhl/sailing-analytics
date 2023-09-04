@@ -98,7 +98,6 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
     }
 
     private class PopupEditDialog extends DataEntryDialog<List<ValueType>> {
-
         private ListEditorComposite<ValueType> expandedComposite;
         
         public PopupEditDialog(Iterable<ValueType> initialValues, ExpandedListEditorUi<ValueType> ui, String dialogTitle,

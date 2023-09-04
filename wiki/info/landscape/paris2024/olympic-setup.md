@@ -10,7 +10,9 @@ For the Olympic Summer Games 2024 Paris/Marseille we use a dedicated hardware se
 
 The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
-Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this.
+Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this. Installing an older version of ``libssl`` may be required on newer Ubuntu versions (starting with 22.04) to be able to install MongoDB 4.4.
+
+An installation of Python (e.g., ``python3``) will be required for the Manage2Sail update notification script (see ``configuration/on-site-scripts/paris2024/sap-p1-2/notifyAboutOSG2024TEV2023Updates``).
 
 RabbitMQ is part of the distribution natively. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently our own fork, 2.11.0) is installed from [https://static.sapsailing.com/wt-2.11.0.zip](https://static.sapsailing.com/wt-2.11.0.zip) under ``/opt/gwt-2.11.0`` in case any development work would need to be done on these machines.
 
@@ -58,6 +60,34 @@ replication:
 
 For "Paris 2024" we configured yet another MongoDB replica set that consisted only of the two on-site nodes and where we stored the backup copy of the ``security_service`` database. We should, however, be able to store the ``security_service`` DB backup in the same replica set of which the two local nodes with their MongoDB processes listening on ports ``10201/10202``. The ``security_service`` database is used as the target for a backup script for the ``security_service`` database. See below. We increased the priority of the ``sap-p1-1`` node from 1 to 2.
 
+For log rotation, the following file must be created at ``/etc/logrotate.d/mongodb``:
+
+```
+compress
+/var/log/mongodb/mongod.log
+{
+   rotate 5
+   weekly
+   postrotate
+       /usr/bin/killall -SIGUSR1 mongod
+   endscript
+}
+```
+
+and likewise, if a second MongoDB replica set is running producing, e.g., ``/var/log/mongodb/mongod-security-service.log`` then you need to add a second file, e.g., at ``/etc/logrotate.d/mongodb-security-service`` like this:
+
+```
+compress
+/var/log/mongodb/mongod-security-service.log
+{
+   rotate 5
+   weekly
+   postrotate
+       /usr/bin/killall -SIGUSR1 mongod
+   endscript
+}
+```
+
 ### User Accounts
 
 The essential user account on both laptops is ``sailing``. The account is intended to be used for running the Java VM that executes the SAP Sailing Analytics server software. The account is currently still protected by a password that our on-site team should know. On both laptops the ``sailing`` account has a password-less SSH key installed under ``/home/sailing/.ssh`` that is contained in the ``known_hosts`` file of ``paris-ssh.sapsailing.com`` as well as the mutually other P1 laptop. This way, all tunnels can easily be created once logged on to this ``sailing`` account.
@@ -90,10 +120,14 @@ TracTrac Dev Jorge (Linux)		10.1.3.228	10.8.0.135
 TracTrac Dev Chris (Linux)		10.1.3.233	10.8.0.136	
 ```
 
-The OpenVPN connection is set up with the GUI of the Linux Desktop. Therefore the management is done through Network Manager. Network Manager has a CLI, ``nmcli``. With that more properties of connections can be modified. The ``connection.secondaries`` property defines the UUID of a connection that will be established as soon as the initial connection is working. With ``nmcli connection show`` you will get the list of connections with the corresponding UUIDs. For the Medemblik Event the OpenVPN connection to the A server is bound to the wired interface that is used with 
+The OpenVPN connection is set up with the GUI of the Linux Desktop. Therefore the management is done through Network Manager. Network Manager has a CLI, ``nmcli``. With that more properties of connections can be modified. The ``connection.secondaries`` property defines the UUID of a connection that will be established as soon as the initial connection is working. With ``nmcli connection show`` you will get the list of connections with the corresponding UUIDs. For the Medemblik Event the OpenVPN connection to the A server is bound to the wired interface and made "persistent" (meaning it will retry connecting after being disconnected) that is used with
 
 ```
 sudo nmcli connection modify <Wired Connection 2> +connection.secondaries <UUID-of-OpenVPN-A>
+nmcli connection modify <Name-of-OpenVPN-A> connection.autoconnect-retries 0
+nmcli connection modify <Name-of-OpenVPN-A> vpn.persistent yes
+nmcli connection modify <Name-of-OpenVPN-B> connection.autoconnect-retries 0
+nmcli connection modify <Name-of-OpenVPN-B> vpn.persistent yes
 ```
 
 For the OpenVPN connections we have received two alternative configuration files together with keys and certificates for our server and work laptops, as well as the certificates for the OpenVPN server (``ca.crt``, ``dh.pem``, ``pfs.key``). The "A" configuration, e.g., provided in a file named ``st-soft-aws_A.ovpn``, looks like this:
@@ -176,7 +210,10 @@ For the server side on paris-ssh and on the both P1s the following parameters ha
 ```
 ClientAliveInterval 3
 ClientAliveCountMax 3
+GatewayPorts yes
 ```
+
+The ``GatewayPorts`` directive is required in order to get port forwards (including reverse port forwards) accept the "*" as bind address to bind to 0.0.0.0 instead of 127.0.0.1.
 
 ExitOnForwardFailure will force ssh to exit if one of the port forwards fails. ConnectTimeout manages the time in seconds until an initial connection fails. AliveInterval (client and server) manages the time in seconds after ssh/sshd are sending client and server alive probes. CountMax is the number of retries for those probes. 
 
@@ -255,7 +292,7 @@ On sap-p1-2 two SSH connections are maintained, with the following default port 
 
 So the essential change is that the reverse forward from ``paris-ssh.sapsailing.com:8888`` now targets ``sap-p1-2:8888`` where we now assume the failover master to be running.
 
-#### Operations with Internet failing
+#### Operations with Internet Failing
 
 When the Internet connection fails, replicating the security service from ``security-service.sapsailing.com`` / ``rabbit.internal.sapsailing.com`` will no longer be possible. Neither will outbound replication to ``rabbit-eu-west-3.sapsailing.com`` be possible, and cloud replicas won't be able to reach the on-site master anymore through the ``paris-ssh.sapsailing.com:8888`` reverse port forward. This also has an effect on the local on-site replica which no longer will be able to reach ``rabbit-eu-west-3.sapsailing.com`` which provides the on-site replica with the operation stream under regular circumstances.
 
@@ -267,12 +304,14 @@ On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the follow
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-eu-west-3.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for paris2024.sapsailing.com, security-service.sapsailing.com and paris2024-master.sapsailing.com
+### Letsencrypt Certificate for paris2024.sapsailing.com, security-service.sapsailing.com, paris2024-master.sapsailing.com, and paris2024-secondary-master.sapsailing.com
 
 In order to allow us to access ``paris2024.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
 ```
 /usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024.sapsailing.com
+/usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024-master.sapsailing.com
+/usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d paris2024-secondary-master.sapsailing.com
 /usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d security-service.sapsailing.com
 ```
 
@@ -288,8 +327,11 @@ server {
     server_name         paris2024.sapsailing.com;
     ssl_certificate     /etc/ssl/certs/paris2024.sapsailing.com.crt;
     ssl_certificate_key /etc/ssl/private/paris2024.sapsailing.com.key;
-    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    # set client body size to 100MB
+    client_max_body_size 100M;
 
     location / {
         proxy_pass http://127.0.0.1:8888;
@@ -312,13 +354,14 @@ server {
     ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
+    # set client body size to 100MB
+    client_max_body_size 100M;
+
     location / {
         proxy_pass http://127.0.0.1:8888;
     }
 }
 ```
-
-
 
 ### Backup
 
@@ -353,6 +396,10 @@ The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.prin
 
 The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
 
+On ``sap-p1-2`` we run a script ``compare-secondary-to-primary-master`` every five minutes which basically does a ``compareServers -ael`` which uses the REST API for comparing server contents. If a difference is reported by the tool then an e-mail notification is sent out to the list of operators.
+
+On ``paris-ssh.sapsailing.com`` we run ``monitor-on-site-servers`` every minute. Like other scripts it is installed as a symbolic link from ``/usr/local/bin`` to ``/root/code/configuration/on-site-scripts/paris2024/paris-ssh`` and that is called by a cron job from the ``root`` user's ``crontab`` file. The file checks that the primary and secondary master can be reached through HTTPS (localhost port 9443/9444, respectively), and the primary through HTTP, port 8888. This verifies that the SSH tunnels from the on-site laptops to the ``paris-ssh`` jump host are in place, up and running. Indirectly, this also verifies that the OpenVPN connections on the on-site laptops are working alright.
+
 ### Time Synchronizing
 Setup chronyd service on desktop machine, in order to regurlary connect via VPN and relay the time towards the two P1s. Added
 ```
@@ -380,7 +427,7 @@ I added the EPEL repository like this:
 
 Our "favorite" Availability Zone (AZ) in eu-west-3 is "1a" / "eu-west-3a".
 
-The same host ``paris-ssh.sapsailing.com`` also runs a MongoDB 3.6 instance on port 10203.
+The same host ``paris-ssh.sapsailing.com`` also runs a MongoDB 4.4 instance on port 10203.
 
 For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rabbitmq-server`` package with it (version 3.8.2 on Erlang 22.2.7), and we'll install it with default settings, except for the following change: In the new file ``/etc/rabbitmq/rabbitmq.conf`` we enter the line
 
@@ -427,6 +474,21 @@ For requests blocked by the rule, the response code, response headers and messag
 ### Application Load Balancers (ALBs) and Target Groups
 
 In each region supported, a dedicated load balancer for the Global Accelerator-based event setup has been set up (``Paris2024ALB`` or simply ``ALB``). A single target group with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-paris2024`` (public).
+
+Remember to activate *logging* for all Application Load Balancers. Each region requires its own S3 bucket. You may choose to re-use the tokyo2020 buckets. Once you need to create one or more new buckets for new regions, make sure to add them to the two Athena queries we use, copying the pattern you'll see for the ``tokyo2020`` log file buckets. Use the stored query "Create partitioned table for eu-west-1 logs" and modify accordingly to create a separate partitioned table for each new bucket you created for your regions, then add those tables to the cascade of ``select`` statements in those Athena queries:
+
+```
+select *
+    from alb_log_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_ap_northeast_1_partition_projection
+    ...
+    union all
+    select *
+    from alb_log_{your-event-name}_{region-name}_partition_projection,
+    ...
+```
 
 Note that no dedicated ``-m`` master target group is established. The reason is that the AWS Global Accelerator judges an ALB's health by looking at _all_ its target groups; should only a single target group not have a healthy target, the Global Accelerator considers the entire ALB unhealthy. With this, as soon as the on-site master server is unreachable, e.g., during an upgrade, all those ALBs would enter the "unhealthy" state from the Global Accelerator's perspective, and all public replicas which are still healthy would no longer receive traffic; the site would go "black." Therefore, we must ensure that the ALBs targeted by the Global Accelerator only have a single target group which only has the public replicas in that region as its targets.
 
@@ -475,7 +537,7 @@ In order to have a local copy of the ``security_service`` database, a CRON job e
 
 ### Master
 
-The master configuration is described in ``/home/sailing/servers/master/master.conf`` and can be used to produce a clean set-up like this:
+The master configuration on ``sap-p1-1`` is described in ``/home/sailing/servers/master/master.conf`` and can be used to produce a clean set-up like this:
 
 ```
       rm env.sh; cat master.conf | ./refreshInstance.sh auto-install-from-stdin
@@ -486,7 +548,7 @@ If the laptops cannot reach ``https://releases.sapsailing.com`` due to connectiv
 This way, a clean new ``env.sh`` file will be produced from the config file, including the download and installation of a release. The ``master.conf`` file looks approximately like this:
 
 ```
-INSTALL_FROM_RELEASE=build-202106012325
+INSTALL_FROM_RELEASE=build-202306271444
 SERVER_NAME=paris2024
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}?replicaSet=paris2024&retryWrites=true&readPreference=nearest"
 # RabbitMQ in eu-west-1 (rabbit.internal.sapsailing.com) is expected to be found through SSH tunnel on localhost:5675
@@ -500,12 +562,41 @@ REPLICATE_MASTER_BEARER_TOKEN="***"
 REPLICATION_HOST=localhost
 REPLICATION_PORT=5673
 USE_ENVIRONMENT=live-master-server
-ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
+ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true -Dpolardata.source.url=https://www.sapsailing.com:22443 -Dwindestimation.source.url=https://www.sapsailing.com:22443"
 ```
+
+### Secondary Master
+
+The secondary master configuration on ``sap-p1-2`` can be used to fail over quickly if the primary master on ``sap-p1-1`` fails for some reason. The configuration is described in ``/home/sailing/servers/secondary_master/secondary_master.conf`` and can be used to produce a clean set-up like this:
+
+```
+      rm env.sh; cat secondary_master.conf | ./refreshInstance.sh auto-install-from-stdin
+```
+
+This way, a clean new ``env.sh`` file will be produced from the config file, including the download and installation of a release. The ``secondary_master.conf`` file looks approximately like this:
+
+```
+INSTALL_FROM_RELEASE=build-202306271444
+SERVER_NAME=paris2024
+MONGODB_URI="mongodb://sap-p1-1:27017,sap-p1-2:27017/${SERVER_NAME}?replicaSet=security_service&retryWrites=true&readPreference=nearest"
+# RabbitMQ in eu-west-1 (rabbit.internal.sapsailing.com) is expected to be found through SSH tunnel on localhost:5675
+# Replication of shared services from central security-service.sapsailing.com through SSH tunnel 443:security-service.sapsailing.com:443
+# with a local /etc/hosts entry mapping security-service.sapsailing.com to 127.0.0.1
+REPLICATE_MASTER_QUEUE_HOST=localhost
+REPLICATE_MASTER_QUEUE_PORT=5675
+REPLICATE_MASTER_BEARER_TOKEN="***"
+# Outbound replication to RabbitMQ through SSH tunnel with port forward on port 5673, regularly to RabbitMQ on localhost,
+# can be re-mapped to the cloud RabbitMQ running on rabbit-eu-west-3.internal.sapsailing.com to make this the "primary" master
+REPLICATION_HOST=localhost
+REPLICATION_PORT=5673
+USE_ENVIRONMENT=live-master-server
+ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true -Dpolardata.source.url=https://www.sapsailing.com:22443 -Dwindestimation.source.url=https://www.sapsailing.com:22443"
+```
+
 
 ### Replicas
 
-The on-site replica on ``sap-p1-2`` can be configured with a ``replica.conf`` file in ``/home/sailing/servers/replica``, using
+We plan to run with two master nodes on premise ("primary" vs. "failover"). So it is not considered a standard use case to run a replica on site. If an on-site replica is still desired on ``sap-p1-2`` it can be configured with a ``replica.conf`` file in ``/home/sailing/servers/replica``, using
 
 ```
 	rm env.sh; cat replica.conf | ./refreshInstance auto-install-from-stdin
@@ -516,7 +607,7 @@ The file looks like this:
 ```
 # Regular operations; sap-p1-2 replicates sap-p1-1 using the rabbit-eu-west-3.sapsailing.com RabbitMQ in the cloud through SSH tunnel.
 # Outbound replication, though not expected to become active, goes to a local RabbitMQ
-INSTALL_FROM_RELEASE=build-202106012325
+INSTALL_FROM_RELEASE=build-202306271444
 SERVER_NAME=paris2024
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}-replica?replicaSet=paris2024&retryWrites=true&readPreference=nearest"
 # RabbitMQ in eu-west-3 is expected to be found locally on port 5673
@@ -533,29 +624,12 @@ USE_ENVIRONMENT=live-replica-server
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 ```
 
-Replicas in region ``eu-west-1`` can be launched using the following user data, making use of the established MongoDB live replica set in the region:
-
-```
-INSTALL_FROM_RELEASE=build-202106012325
-SERVER_NAME=paris2024
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203/paris2024-replica?replicaSet=live&retryWrites=true&readPreference=nearest"
-USE_ENVIRONMENT=live-replica-server
-REPLICATION_CHANNEL=paris2024-replica
-REPLICATION_HOST=rabbit-eu-west-3.sapsailing.com
-REPLICATE_MASTER_SERVLET_HOST=paris-ssh.internal.sapsailing.com
-REPLICATE_MASTER_SERVLET_PORT=8888
-REPLICATE_MASTER_EXCHANGE_NAME=paris2024
-REPLICATE_MASTER_QUEUE_HOST=rabbit-eu-west-3.sapsailing.com
-REPLICATE_MASTER_BEARER_TOKEN="***"
-ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
-```
-
 (Adjust the release accordingly, of course). (NOTE: During the first production days of the event we noticed that it was really a BAD IDEA to have all replicas use the same DB set-up, all writing to the MongoDB PRIMARY of the "live" replica set in eu-west-1. With tens of replicas running concurrently, this led to a massive block-up based on MongoDB not writing fast enough. This gave rise to a new application server AMI which now has a MongoDB set-up included, using "replica" as the MongoDB replica set name. Now, each replica hence can write into its own MongoDB instance, isolated from all others and scaling linearly.)
 
-In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
+In the EC2 regions, instead an instance-local MongoDB is used for each replica, not interfering with each other or with other databases:
 
 ```
-INSTALL_FROM_RELEASE=build-202106012325
+INSTALL_FROM_RELEASE=build-202306271444
 SERVER_NAME=paris2024
 MONGODB_URI="mongodb://localhost/paris2024-replica?replicaSet=replica&retryWrites=true&readPreference=nearest"
 USE_ENVIRONMENT=live-replica-server
@@ -591,22 +665,21 @@ The ``Event`` object is owned by ``paris2024-moderators``, and that group grants
 
 ## Landscape Upgrade Procedure
 
-In the ``configuration/on-site-scripts`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
+In the ``configuration/on-site-scripts/paris2024`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
 ```
 	configuration/on-site-scripts/upgrade-landscape.sh -R {release-name} -b {replication-bearer-token}
 ```
 will upgrade the entire landscape to the release ``{release-name}`` (e.g., build-202107210711). The ``{replication-bearer-token}`` must be provided such that the user authenticated by that token will have the permission to stop replication and to replicate the ``paris2024`` master.
 
 The script will proceed in the following steps:
- - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]`` so
+ - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[secondary_master|replica|master|security_service]`` so
    their ``INSTALL_FROM_RELEASE`` points to the new ``${RELEASE}``
- - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]``
+ - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[secondary_master|replica|master|security_service]``
  - Update all launch configurations and auto-scaling groups in the cloud (``update-launch-configuration.sh``)
  - Tell all replicas in the cloud to stop replicating (``stop-all-cloud-replicas.sh``)
- - Tell ``sap-p1-2`` to stop replicating
+ - Tell ``sap-p1-2:servers/secondary_master`` to restart (./stop; ./start)
  - on ``sap-p1-1:servers/master`` run ``./stop; ./start`` to bring the master to the new release
  - wait until master is healthy
- - on ``sap-p1-2:servers/replica`` run ``./stop; ./start`` to bring up on-site replica again
  - launch upgraded cloud replicas and replace old replicas in target group (``launch-replicas-in-all-regions.sh``)
  - terminate all instances named "SL Paris2024 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
  - manually inspect the health of everything and terminate the "SL Paris2024 (Upgrade Replica)" instances when enough new instances
@@ -723,3 +796,28 @@ The key to the Athena set-up is to have a table definition per bucket, with a de
     group by date_trunc('day', parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'))
 </pre>
 It defines a ``union_table`` which unites all contents from all buckets scanned.
+
+## Dismantling the Set-Up and Moving to the Cloud
+
+The MongoDB on ``paris-ssh.sapsailing.com:10203`` needs to be made primary, setting its ``priority`` in the replica set configuration from 0 to 1:
+
+```
+  cfg=rs.config()
+  cfg.members[0].priority=1
+  rs.reconfig(cfg)
+```
+
+Then the local replicas need to be unregistered:
+
+```
+  rs.remove("localhost:10201")
+  rs.remove("localhost:10202")
+```
+
+The MongoDB cloud replica should then become the sole instance and hence primary of the replica set.
+
+From some instance in the ``eu-west-1`` region we can then do a ``mongodump`` of the ``paris2024`` database and subsequently a ``mongorestore`` into the ``live`` replica set at ``mongodb://dbserver.internal.sapsailing.com:10203,mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/paris2024?replicaSet=live&retryWrites=true&readPreference=nearest``. Then, a new replica ``paris2024`` set can be launched using our automated tools. Use the dynamic load balancer set-up to go without a DNS entry. Once the set-up is up and running, remove the DNS entry for ``paris2024.sapsailing.com`` so the traffic no longer goes to the global accelerator but to the dynamic ALB in ``eu-west-1``. See how the global accelerator traffic drains and start removing regions from it one by one. Finally, disable and remove the entire global accelerator.
+
+Clean up the regions, setting all Auto-Scaling Groups to 0 instances, terminate all instances, remove the ALBs in the regions, then remove the ``paris2024`` target groups in the regions.
+
+Later you may want to use the regular "Archive Replica Set" functionality to move the content to the archive server.

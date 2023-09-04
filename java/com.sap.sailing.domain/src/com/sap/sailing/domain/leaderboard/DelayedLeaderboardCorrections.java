@@ -34,6 +34,8 @@ public interface DelayedLeaderboardCorrections extends RaceColumnListener, Seria
 
     void correctScoreByID(Serializable competitorId, RaceColumn raceColumn, double correctedScore);
     
+    void correctScoreIncrementallyByID(Serializable competitorId, RaceColumn raceColumn, double incrementalScoreCorrectionOffsetInPoints);
+    
     void setCarriedPointsByID(Serializable competitorId, double carriedPoints);
 
     void setMaxPointsReasonByID(Serializable competitorId, RaceColumn raceColumn, MaxPointsReason maxPointsReason);

@@ -23,6 +23,70 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">August 2023</h2>
+          <ul class="bulletList">
+            <li>Added a new racing procedure <tt>SWC_4MIN</tt> for kites and windsurfers with a shortened four-minute
+                start sequence with green flag for one minute after start.</li>
+            <li>The layout regression in leaderboard configuration panels ("Leaderboards / Leaderboards" and
+                "Connectors / Smartphone Tracking") has been fixed. The help text has moved above the two
+                caption boxes, and action icon columns for the two bottom tables now resize in lock-step,
+                letting the rows of the two adjacent tables typically have similar, if not the same, height.</li>
+            <li>Course areas can now optionally be specified with a center point and radius for display on the map.</li>
+            <li>Bug fix: when allowing for competitor updates in combination with the TracTrac connector, the updates
+                were not applied properly to the Competitor records in case of a "league" setup where competitors
+                can change their boats in the context of their regatta.</li>
+            <li>Macao and Faroe three-letter IOC / Noational Paralympic Committee codes according to
+                <a href="https://en.wikipedia.org/wiki/List_of_IOC_country_codes">https://en.wikipedia.org/wiki/List_of_IOC_country_codes</a>
+                are now supported (MAC and FRO, respectively).</li>
+            <li>Added "303" as alias name for the "Hansa 303" class</li>
+            <li>Added "RS Venture" boat class with icon</li>
+            <li>The race logs for leaderboards to which the logged-in user has READ permission are now visible under
+                <a href="/gwt/AdminConsole.html#LeaderboardsPlace:">/gwt/AdminConsole.html#LeaderboardsPlace:</a>.</li>
+            <li>The TracTrac connector will now ignore mark positions from marks tagged with a course area that is different
+                from the non-empty course area with which the race is tagged (if any). If either the mark or the race or neither
+                are tagged with a course area on TracTrac's side the mark position will be processed.</li>
+            <li>Auto-Scaling Groups created by landscape management now have monitoring enabled by default.</li>
+            <li>Bug fix: selecting more than one shard for removal in the Landscape Management panel now works properly and
+                removes all shards selected, not only the first.</li>
+            <li>Tracked races without start time are now sorted towards the "later" end of the list.</li>
+          </ul>
+          <h2 class="articleSubheadline">July 2023</h2>
+          <ul class="bulletList">
+            <li>Score updates received through the race log, e.g., from the SAP Sailing Race Manager app or from the
+                SwissTiming tablets through a TracTrac race connection, will update a leaderboard's "last update"
+                time point only if it is newer than the already existing latest score correction time point.
+                This way, if updates are received out of order it will be the latest update defining the
+                last score correction time point.</li>
+            <li>Bugfix: when computing a leaderboard's live delay, not the last race with a valid start time but the
+                "rightmost" race connected to a column in the leaderboard was considered. For example, when the current
+                live race "R3" has a live delay of 2s and there is another race "R4" already connected to the leaderboard
+                with a live delay of 30s then the live delay for the leaderboard will end up being considered to be 30s,
+                not 2s. This is now fixed.</li>
+            <li>The <tt>/sailingserver/windStatus</tt> page now also shows battery levels if received.</li>
+            <li>Tolerate TracTrac competitor status and result updates for unknown competitors (e.g., hidden ones such
+                as jury boats that are tracked). This avoid issues with making race results official, too.</li>
+            <li>"IQF" is now an alias name for "iQFOil"</li>
+            <li>Introduced "SCA" as a new invalid result marker (IRM). When used together with the scoring scheme "LowPointWithAutomaticRDG",
+                a default score is computed based on average of the competitor's scores in all races prior to the one for
+                which the SCA has been given. This implements RRS A9b.</li>
+            <li>Introduced a new scoring scheme: "Low point system; Medal races as quarter final, semi final and grand final."
+                It is well-suited for the iQFOil format as seen in the years 2022/2023. Model each of the Quarter Final,
+                Semi Final, and Grand Final as a separate "Medal Series" with one race each. The scoring scheme understands
+                that the best competitor of the opening series advances to the last medal series (e.g., "Grand Final"), and
+                the second and third of the Opening Series advance straight to the Semi Final (last-but-one medal series).</li>
+            <li>The invalid result markers (IRMs) <tt>SCP</tt>, <tt>STP</tt>, <tt>DPI</tt>, and <tt>RDG</tt> can now consider
+                optional incremental score corrections which are added to the points determined based on the competitor's rank
+                in the race and the scoring scheme that applied to the race. For example, a <tt>DPI</tt> penalty with <tt>+2.5</tt>
+                points may now be specified which applied during tracking the race. Absolute score corrections will be considered
+                for these IRMs at the end of the race, regardless the incremental score correction. Note that the increments
+                are subject to any column factors being applied; this may contradict an event's rules that may state that certain
+                penalties, such as <tt>STP</tt> are <em>not</em> subject to doubling for a medal race. In such cases, specify half
+                the penalty when editing the increment. Specifying and incremental penalties can be done on the <tt>/gwt/LeaderboardEdit.html</tt>
+                reachable from the administration console's Leaderboards/Leaderboards tab (red dice symbol). They are displayed there
+                in brackets behind the score and an optional IRM code, as in "17 DPI [+1.5]". Clearing the corresponding field
+                in the editing popup dialog removes the incremental scoring offset, just like clearing the IRM code drop-down
+                or the absolute score correction removes the values there, respectively.</li>
+          </ul>
           <h2 class="articleSubheadline">June 2023</h2>
           <ul class="bulletList">
             <li>When importing results, sorting of the result documents has been improved. The drop-down now puts those

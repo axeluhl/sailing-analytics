@@ -91,7 +91,7 @@ public final class RegattaRaceStatesSettings extends AbstractGenericSerializable
         }
         Set<UUID> courseAreaIds = new HashSet<>();
         for (CourseAreaDTO courseArea : defaultCourseAreas) {
-            courseAreaIds.add(courseArea.id);
+            courseAreaIds.add(courseArea.getId());
         }
         visibleCourseAreas.setDefaultValues(courseAreaIds);
     }

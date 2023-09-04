@@ -109,9 +109,9 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      */
     @Override
     public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores,
-            Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter,
-            TimePoint timePoint, Leaderboard leaderboard, Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor,
-            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, Iterable<RaceColumn> raceColumnsToConsider,
+            boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard,
+            Map<Competitor, Set<RaceColumn>> discardedRaceColumnsPerCompetitor, BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Comparator<Pair<RaceColumn, Double>> ruleA8_1ScoreComparator = getRuleA8_1ScoreComparator(nullScoresAreBetter);
         final boolean includeDiscardedResults = isConsiderDiscardedScoresDuringBetterScoreTieBreak();
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
@@ -150,7 +150,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * Usually, RRS A8.1-based rules will eliminate discarded results before starting to compare the remaining scores.
      * Some specializations then consider final series scores before they consider qualification series scores (see
      * {@link #getRuleA8_1ScoreComparator(boolean)} for details). This method tells whether or not to consider
-     * discarded results in {@link #compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
+     * discarded results in {@link #compareByBetterScore(Competitor, List, Competitor, List, Iterable, boolean, TimePoint, Leaderboard, Map, BiFunction, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}.
      * This implementation returns {@code false}, thus implementing the default RRS A8.1 rule.
      */
     protected boolean isConsiderDiscardedScoresDuringBetterScoreTieBreak() {
@@ -175,9 +175,23 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         return 0;
     }
 
+    @Override
+    public LeaderboardTotalRankComparator getOpeningSeriesRankComparator(Iterable<RaceColumn> raceColumnsToConsider,
+            boolean nullScoresAreBetter, TimePoint timePoint,
+            Leaderboard leaderboard,
+            BiFunction<Competitor, RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        // as opening series we define everything that is not "medal race"
+        final Iterable<RaceColumn> openingSeriesRaceColumnsFromThoseToConsider = Util.filter(raceColumnsToConsider, rc->!rc.isMedalRace());
+        // pass on the totalPointsSupplier coming from the caller, most likely a LeaderboardTotalRankComparator,
+        // to speed up / save the total points (re-)calculation
+        final LeaderboardTotalRankComparator openingSeriesRankComparator =
+                new LeaderboardTotalRankComparator(leaderboard, timePoint, this, nullScoresAreBetter, openingSeriesRaceColumnsFromThoseToConsider, totalPointsSupplier, cache);
+        return openingSeriesRankComparator;
+    }
+
     /**
      * Looks backwards starting at the last race until the first score difference is found, including the discarded
-     * scored. This implements Racing Rules of Sailing (RRS) section A8.2:
+     * scores. This implements Racing Rules of Sailing (RRS) section A8.2:
      * <p>
      * 
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last

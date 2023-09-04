@@ -85,6 +85,9 @@ public interface HasTrackedRaceContext {
     @Statistic(messageKey="NumberOfWindFixes", resultDecimals=0, ordinal=1)
     public int getNumberOfWindFixes();
     
+    @Dimension(messageKey="Day")
+    public String getDayAsISO();
+
     // Convenience methods for race dependent calculation to avoid code duplication
     public Double getRelativeScoreForCompetitor(Competitor competitor);
     

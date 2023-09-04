@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -79,6 +81,17 @@ public class LeaderboardScoringAndRankingForLowPointsTest extends LeaderboardSco
                 false, CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
                 DomainFactory.INSTANCE
                         .createScoringScheme(ScoringSchemeType.HIGH_POINT_LAST_BREAKS_TIE),
+                "123", /* course area */null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
+        return regatta;
+    }
+
+    private Regatta setupRegattaWithLowPointWithAutomaticRDGSCA() {
+        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("J/70", /* typicallyStartsUpwind */ true);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
+                false, CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
+                DomainFactory.INSTANCE
+                        .createScoringScheme(ScoringSchemeType.LOW_POINT_WITH_AUTOMATIC_RDG),
                 "123", /* course area */null, OneDesignRankingMetric::new,
                 /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
@@ -158,11 +171,57 @@ public class LeaderboardScoringAndRankingForLowPointsTest extends LeaderboardSco
         assertSame(competitors.get(4), Util.get(leaderboard.getCompetitorsFromBestToWorst(later), 4));
     }
 
+    @Test
+    public void testMultipleRDGsAndSCAs() {
+        final TimePoint now = TimePoint.now();
+        final TimePoint later = now.plus(Duration.ONE_MINUTE);
+        series = new ArrayList<>();
+        final List<Fleet> fleets = new ArrayList<>();
+        final Fleet defaultFleet = new FleetImpl("Default");
+        fleets.add(defaultFleet);
+        List<String> raceColumnNames = Arrays.asList("R1", "R2", "R3", "R4", "R5");
+        Series qualificationSeries = new SeriesImpl("Default", /* isMedal */false,
+                /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames,
+                /* trackedRegattaRegistry */ null);
+        series.add(qualificationSeries);
+        final Regatta regatta = setupRegattaWithLowPointWithAutomaticRDGSCA();
+        final List<Competitor> competitors = createCompetitors(1);
+        final Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        setScore(leaderboard, competitors.get(0),
+                scoreAndIrm(4.0, null),
+                scoreAndIrm(7.0, null),
+                scoreAndIrm(null, MaxPointsReason.RDG),
+                scoreAndIrm(null, MaxPointsReason.SCA),
+                scoreAndIrm(6.0, null));
+        assertEquals(17.0/3.0, leaderboard.getTotalPoints(competitors.get(0), leaderboard.getRaceColumnByName("R3"), later), EPSILON);
+        assertEquals(11.0/2.0, leaderboard.getTotalPoints(competitors.get(0), leaderboard.getRaceColumnByName("R4"), later), EPSILON);
+    }
+
     private void setScore(Leaderboard leaderboard, Competitor competitor, double... scores) {
         int i=0;
         for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (i < scores.length) {
                 leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, scores[i++]);
+            }
+        }
+    }
+
+    private Pair<Double, MaxPointsReason> scoreAndIrm(Double score, MaxPointsReason irm) {
+        return new Pair<>(score, irm);
+    }
+    
+    @SafeVarargs
+    private final void setScore(Leaderboard leaderboard, Competitor competitor, Pair<Double, MaxPointsReason>... scores) {
+        int i=0;
+        for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (i < scores.length) {
+                if (scores[i].getA() != null) {
+                    leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, scores[i].getA());
+                }
+                if (scores[i].getB() != null) {
+                    leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, scores[i].getB());
+                }
+                i++;
             }
         }
     }

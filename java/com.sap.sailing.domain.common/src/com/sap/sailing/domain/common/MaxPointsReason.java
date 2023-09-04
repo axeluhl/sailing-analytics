@@ -32,7 +32,7 @@ public enum MaxPointsReason {
     /** Disqualification for gross misconduct not excludable under rule 90.3 (b) */
     DGM(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Redress given */
-    RDG(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
+    RDG(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ true, /* calculateScoreDuringRace */ true),
     /** Black Flag Disqualified */
     BFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ true),
     /** Did Not Compete */
@@ -40,7 +40,7 @@ public enum MaxPointsReason {
     /** Retired After Finishing */
     RAF(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Discretionary Penalty Imposed by the race committee */
-    DPI(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
+    DPI(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ true, /* calculateScoreDuringRace */ true),
     /** Retired */
     RET(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Uniform Flag Disqualification */
@@ -54,7 +54,13 @@ public enum MaxPointsReason {
     /** Retired after causing a tangle */
     RCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Did not sail the course */
-    NSC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false)
+    NSC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
+    /**
+     * Scoring adjustment; originally from the German Sailing League / Bundesliga; Scores to be computed based on RRS
+     * A9b: "points equal to the average, to the nearest tenth of a point (0.05 to be rounded upward), of her points in
+     * all the races before the race in question"
+     */
+    SCA(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ true)
     ;
     
     private final boolean discardable;

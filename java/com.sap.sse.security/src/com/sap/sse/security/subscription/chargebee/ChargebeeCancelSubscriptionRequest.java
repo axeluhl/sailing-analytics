@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 import com.chargebee.Result;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.CancelForItemsRequest;
+import com.chargebee.models.enums.CreditOptionForCurrentTermCharges;
+import com.chargebee.models.enums.RefundableCreditsHandling;
 import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
@@ -32,7 +34,10 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
     @Override
     protected ChargebeeInternalApiRequestWrapper createRequest() {
         logger.info(() -> "Cancel Chargebee subscription, subscription id: " + subscriptionId);
-        CancelForItemsRequest request = Subscription.cancelForItems(subscriptionId).endOfTerm(true);
+        CancelForItemsRequest request = Subscription.cancelForItems(subscriptionId)
+                .creditOptionForCurrentTermCharges(CreditOptionForCurrentTermCharges.PRORATE)
+                .refundableCreditsHandling(RefundableCreditsHandling.SCHEDULE_REFUND)
+                .endOfTerm(false);
         return new ChargebeeInternalApiRequestWrapper(request);
     }
 

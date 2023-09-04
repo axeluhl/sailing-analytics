@@ -4,6 +4,60 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">September 2023</h5>
+         <ul class="bulletList">
+            <li>Added statistics for maneuvers to Data Mining module to match capabilities of
+                maneuver table in the race viewer.</li>
+         </ul>
+         <h5 class="articleSubheadline">August 2023</h5>
+         <ul class="bulletList">
+            <li>Bug fix: When rotating the map wind-up, buoy zone circles were not drawn with their correct diameter.</li>
+            <li>Improved subscriptions page, indicating missing e-mail address validation early on.</li>
+            <li>If course areas have been modeled with their center position and radius they can now optionally
+                be displayed in the race viewer.</li>
+            <li>Protest flag in regatta overview is displayed as lowered now after the end of the protest time.</li>
+            <li>Bug fix: when a replica starts up, reads a dependent start time from the primary instance and
+                a tracked race is already attached for the dependent race, resolving the dependent start time
+                while still reading the data from the primary instance fails and is erroneously cached. Now,
+                instead, a new attempt to resolve the race on which the other's start time depends, will be
+                made, then finding the race log searched for. This will fix the issue of unreliable
+                start time display for dependent start times in very dynamically scaling large events.</li>
+            <li>Expensive to compute REST API properties no require the <tt>PREMIUM_LEADERBOARD_INFORMATION</tt>
+                permission on the respective leaderboard, as implied by the "premium" role. For now, the following
+                additional properties are affected: <tt>gapToLeader-s</tt> and <tt>gapToLeader-m</tt> in
+                end points <tt>/sailingserver/api/v1/regattas/{regatta}/races/{race}/competitors/legs</tt> and
+                <tt>/sailingserver/api/v1/regattas/{regatta}/races/{race}/competitors/live</tt>;
+                and <tt>pointsBasedOnPassingOrder</tt>, <tt>netPointsBasedOnPassingOrder</tt> and
+                <tt>maxPointsReason</tt> in <tt>/sailingserver/api/v1/regattas/{regatta}/races/{race}/markpassings</tt>.
+                These three endpoints additionally will combine time-wise overlapping calls for the same
+                race by the same user and return the same result for them all.</li>
+            <li>Fixed a bug in the calculation of estimated race durations where optimum TWAs as inferred from the
+                polar data was confused with the courses over ground to be sailed.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2023</h5>
+         <ul class="bulletList">
+           <li>Flipped default ordering of the "GPS Lag" column. When sorting by that column for
+               the first time now the greatest lag is displayed at the top.</li>
+           <li>The mark passing / split times detection has been adjusted for overall improved
+               accuracy of most tracking devices. This will in particular reduce the tolerance
+               for passing a mark on the wrong side, hence more likely suppressing passing candidates
+               on the wrong side of a mark even if the passing happened very near to the mark.</li>
+           <li>Bug fix: tracked races connected to more than one leaderboard column at the same time
+               will now send their competitor and race status updates to all those column's race logs.
+               This in particular fixes the special iQFOil set-up with their marathon races.</li>
+           <li>Added speed in full knots (rounded) as a dimension to the GPS fixes in Data Mining.
+               This can be used, e.g., to filter for outliers such as capsized or towed boats.</li>
+           <li>The invalid result markers (IRMs) <tt>SCP</tt>, <tt>STP</tt>, <tt>DPI</tt>, and <tt>RDG</tt> can now consider
+               optional incremental score corrections which are added to the points determined based on the competitor's rank
+               in the race and the scoring scheme that applied to the race. For example, a <tt>DPI</tt> penalty with <tt>+2.5</tt>
+               points may now be specified which applied during tracking the race. Absolute score corrections will be considered
+               for these IRMs at the end of the race, regardless the incremental score correction. Note that the increments
+               are subject to any column factors being applied; this may contradict an event's rules that may state that certain
+               penalties, such as <tt>STP</tt> are <em>not</em> subject to doubling for a medal race. In such cases, specify half
+               the penalty when editing the increment.</li>
+            <li>
+               Bug fix: It is now possible to subscribe to a plan and set a VAT number if previously subscribed to another plan.</li>
+         </ul>
          <h5 class="articleSubheadline">June 2023</h5>
          <ul class="bulletList">
            <li>Fixed an issue with the plans shown as subscribed to based on the plan

@@ -82,6 +82,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -161,6 +162,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
@@ -429,6 +432,23 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final RegattaAndRaceIdentifier raceIdentifier;
     
     /**
+     * While {@link #raceIdentifier} tells the race that this {@link RaceMap} uses as its "primary" context,
+     * users may be interested in seeing the course marks and/or competitor positions of other races (usually
+     * of the same event), too. This can, e.g., be used for safety reasons when the race committees want to
+     * see whether all sailors have made it back to shore after racing, or how the various course marks are
+     * aligned with the {@link #courseAreaCirclesToShow course area circles}.
+     */
+    private final Set<RegattaAndRaceIdentifier> otherRacesToShow;
+    
+    /**
+     * A course area can optionally define a {@link CourseAreaDTO#getCenterPosition() center position} and a
+     * {@link CourseAreaDTO#getRadius() radius}. The user may choose to display none of these, or a single one,
+     * e.g., the course area circle of the {@link #raceIdentifier primary race} shown on this map, but also
+     * other course areas, e.g., from the same venue, to see how mark positions align with those circles.
+     */
+    private final Map<CourseAreaDTO, CourseAreaCircleOverlay> courseAreaCirclesToShow;
+    
+    /**
      * When the user requests wind-up display this may happen at a point where no mark positions are known or when
      * no wind direction is known yet. In this case, this flag will be set, and when wind information or course mark
      * positions are received later, this flag is checked, and if set, a {@link #updateCoordinateSystemFromSettings()}
@@ -612,6 +632,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
             UUID leaderboardGroupId, Runnable shareLinkAction, PaywallResolverImpl paywallResolver) {
         super(parent, context);
+        this.otherRacesToShow = new HashSet<>();
+        this.courseAreaCirclesToShow = new HashMap<>();
         this.shareLinkAction = shareLinkAction;
         this.paywallResolver = paywallResolver;
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
@@ -690,6 +712,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     RaceMapImageManager getRaceMapImageManager() {
         return raceMapImageManager;
+    }
+    
+    protected Set<RegattaAndRaceIdentifier> getOtherRacesToShow() {
+        return Collections.unmodifiableSet(otherRacesToShow);
     }
 
     public void setQuickRanksDTOProvider(QuickFlagDataProvider newQuickRanksDTOProvider) {
@@ -803,8 +829,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 });
     }
 
-    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel,
-            final boolean showSatelliteLayer) {
+    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel, final boolean showSatelliteLayer) {
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
@@ -945,6 +970,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (settings.isShowWindStreamletOverlay() && paywallResolver.hasPermission(
                         SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                     streamletOverlay.setVisible(true);
+                }
+                if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEAREACIRCLES)) {
+                    getAndShowCourseAreaCircles();
                 }
                 // determine availability of polar diagram
                 setHasPolar();
@@ -1717,7 +1745,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
     }
-       
+    
     private void showCourseMarksOnMap(CoursePositionsDTO courseDTO, long transitionTimeInMillis) {
         if (zoomingAnimationsInProgress == 0 && !currentlyDragging) {
             if (map != null && courseDTO != null) {
@@ -1725,7 +1753,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (courseDTO.currentLegNumber > 0 && courseDTO.currentLegNumber <= courseDTO.totalLegsCount) {
                     endWaypointForCurrentLegNumber = courseDTO.getEndWaypointForLegNumber(courseDTO.currentLegNumber);
                 }
-
                 Map<String, CourseMarkOverlay> toRemoveCourseMarks = new HashMap<String, CourseMarkOverlay>(courseMarkOverlays);
                 if (courseDTO.marks != null) {
                     for (MarkDTO markDTO : courseDTO.marks) {
@@ -1755,7 +1782,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
                 for (String toRemoveMarkIdAsString : toRemoveCourseMarks.keySet()) {
-                    CourseMarkOverlay removedOverlay = courseMarkOverlays.remove(toRemoveMarkIdAsString);
+                    final CourseMarkOverlay removedOverlay = courseMarkOverlays.remove(toRemoveMarkIdAsString);
                     if (removedOverlay != null) {
                         removedOverlay.removeFromMap();
                     }
@@ -2133,7 +2160,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final StringBuilder windwardStartLineMarkToFirstMarkLineText = new StringBuilder();
     private final StringBuilder leewardStartLineMarkToFirstMarkLineText = new StringBuilder();
     
-    private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
+    private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO) {
         final List<Position> startMarkPositions = courseDTO.getStartMarkPositions();
         if (startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
             final Position windwardStartLinePosition = startMarkPositions.get(0);
@@ -2799,7 +2826,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), lastFix==null||lastFix.position==null ? "" : lastFix.position.getAsSignedDecimalDegrees()));
         vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropdown(competitorDTO)));
         if (raceIdentifier != null) {
-            RegattaAndRaceIdentifier race = raceIdentifier;
+            final RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
                 final Map<CompetitorDTO, TimeRange> timeRange = new HashMap<>();
                 final TimePoint from = new MillisecondsTimePoint(fixesAndTails.getFixes(competitorDTO)
@@ -3210,6 +3237,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
             requiresRedraw = true;
         }
+        if (newSettings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEAREACIRCLES) != settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEAREACIRCLES)) {
+            if (newSettings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEAREACIRCLES)) {
+                getAndShowCourseAreaCircles();
+            } else {
+                for (final CourseAreaCircleOverlay overlay : courseAreaCirclesToShow.values()) {
+                    overlay.removeFromMap();
+                }
+                courseAreaCirclesToShow.clear();
+            }
+        }
         this.settings = newSettings;
         if (maneuverTypeSelectionChanged || showManeuverLossChanged) {
             if (timer.getPlayState() != PlayStates.Playing) {
@@ -3222,6 +3259,32 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (requiresRedraw) {
             redraw();
         }
+    }
+
+    /**
+     * Obtains all course areas for the event of this map's {@link #raceIdentifier primary race} from the server,
+     * stores them in {@link #courseAreaCirclesToShow} and draws the corresponding overlays to the map.
+     */
+    private void getAndShowCourseAreaCircles() {
+        sailingService.getCourseAreaForEventOfLeaderboard(leaderboardName, new AsyncCallback<List<CourseAreaDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorObtainingCourseAreasForLeaderboard(leaderboardName, caught.getMessage()), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(List<CourseAreaDTO> result) {
+                for (final CourseAreaCircleOverlay overlayToRemove : courseAreaCirclesToShow.values()) {
+                    overlayToRemove.removeFromMap();
+                }
+                courseAreaCirclesToShow.clear();
+                for (final CourseAreaDTO courseArea : result) {
+                    final CourseAreaCircleOverlay overlayToAdd = new CourseAreaCircleOverlay(map, RaceMapOverlaysZIndexes.COURSEAREA_ZINDEX, courseArea, coordinateSystem, stringMessages);
+                    courseAreaCirclesToShow.put(courseArea, overlayToAdd);
+                    overlayToAdd.addToMap();
+                }
+            }
+        });
     }
 
     private void showSimulationOverlay(boolean visible) {

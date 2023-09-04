@@ -35,12 +35,12 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
         sailingEventsListBox = createSailingEventListBox();
         for (EventDTO event : existingEvents) {
             for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                if (Util.contains(leaderboard.getCourseAreaIds(), courseArea.id)) {
+                if (Util.contains(leaderboard.getCourseAreaIds(), courseArea.getId())) {
                     int index = existingEvents.indexOf(event) + 1; // + 1 because of the "Please select... item"
                     sailingEventsListBox.setSelectedIndex(index);
                     onEventSelectionChanged();
                     courseAreaSelection.setSelectedSet(Util.map(leaderboard.getCourseAreaIds(),
-                            id->Util.first(Util.filter(event.venue.getCourseAreas(), ca->ca.id.equals(id)))));
+                            id->Util.first(Util.filter(event.venue.getCourseAreas(), ca->ca.getId().equals(id)))));
                     break;
                 }
             }

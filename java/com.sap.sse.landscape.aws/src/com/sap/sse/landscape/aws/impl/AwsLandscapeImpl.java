@@ -63,6 +63,7 @@ import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
+import com.sap.sse.landscape.aws.orchestration.ShardProcedure;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -94,6 +95,7 @@ import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
+import software.amazon.awssdk.services.autoscaling.model.EnableMetricsCollectionRequest;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -1011,10 +1013,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
-        return Util.map(getEc2Client(getRegion(awsRegion)).describeAvailabilityZones().availabilityZones(),
-                az->new AwsAvailabilityZoneImpl(az, this));
+        return getAvailabilityZones(awsRegion, /* VPC ID filter */ Optional.empty());
     }
 
+    @Override
+    public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion, Optional<String> vpcId) {
+        final Ec2Client ec2Client = getEc2Client(getRegion(awsRegion));
+        // filter for the VPC ID if present; otherwise list all subnets in the region
+        return Util.map(ec2Client.describeSubnets(b->vpcId.ifPresent(theVpcId->b.filters(
+                    Filter.builder().name("vpc-id").values(theVpcId).build()))).subnets(), subnet->
+                            getAvailabilityZoneByName(awsRegion, subnet.availabilityZone()));
+    }
+    
     @Override
     public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, String loadBalancerArn) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
@@ -1139,14 +1149,36 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public SecurityGroup getSecurityGroup(String securityGroupId, com.sap.sse.landscape.Region region) {
-        return ()->getEc2Client(getRegion(region)).describeSecurityGroups(sg->sg.groupIds(securityGroupId)).securityGroups().iterator().next().groupId();
+        final software.amazon.awssdk.services.ec2.model.SecurityGroup securityGroup =
+                getEc2Client(getRegion(region)).describeSecurityGroups(sg->sg.groupIds(securityGroupId)).securityGroups().iterator().next();
+        return new SecurityGroup() {
+            @Override
+            public String getId() {
+                return securityGroup.groupId();
+            }
+
+            @Override
+            public String getVpcId() {
+                return securityGroup.vpcId();
+            }
+        };
     }
 
     @Override
     public Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, com.sap.sse.landscape.Region region) {
         final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> securityGroups = getEc2Client(getRegion(region)).describeSecurityGroups(
                 sg->sg.filters(Filter.builder().name("tag:Name").values(securityGroupName).build())).securityGroups();
-        return securityGroups.stream().findFirst().map(sg->()->sg.groupId());
+        return securityGroups.stream().findFirst().map(sg->new SecurityGroup() {
+            @Override
+            public String getId() {
+                return sg.groupId();
+            }
+
+            @Override
+            public String getVpcId() {
+                return sg.vpcId();
+            }
+        });
     }
 
     @Override
@@ -1563,14 +1595,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         backgroundExecutor.shutdown();
         final Set<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         final DNSCache dnsCache = getNewDNSCache();
-        for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
-            final String serverName = serverNameAndMaster.getKey();
-            final ProcessT master = serverNameAndMaster.getValue();
-            final Set<ProcessT> replicas = replicasByServerName.get(serverName);
-            final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = getApplicationReplicaSet(
-                    serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
-                    allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
-            result.add(replicaSet);
+        synchronized (mastersByServerName) {
+            for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
+                final String serverName = serverNameAndMaster.getKey();
+                final ProcessT master = serverNameAndMaster.getValue();
+                final Set<ProcessT> replicas = replicasByServerName.get(serverName);
+                final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = getApplicationReplicaSet(
+                        serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
+                        allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
+                result.add(replicaSet);
+            }
         }
         return result;
     }
@@ -1988,7 +2022,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 b.tags(awsTags);
             });
         });
+        enableAutoScalingGroupMetricCollection(autoScalingGroupName, autoScalingClient);
         putScalingPolicy(instanceWarmupTimeInSeconds, autoScalingGroupName, publicTargetGroup , maxRequestsPerTarget, region);
+    }
+    
+    private void enableAutoScalingGroupMetricCollection(String autoscalinggroupName, AutoScalingClient client) {
+        // see https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/autoscaling/model/EnableMetricsCollectionRequest.html
+        // If you specify Granularity and don't specify any metrics, all metrics are enabled.
+        final EnableMetricsCollectionRequest request = EnableMetricsCollectionRequest.builder().autoScalingGroupName(autoscalinggroupName).granularity("1Minute").build();
+        client.enableMetricsCollection(request);
     }
 
     private String getLaunchConfigurationName(String replicaSetName, final String releaseName) {
@@ -2035,17 +2077,19 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
-            String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags) {
+    String createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
+            String shardName, TargetGroup<ShardingKey> targetGroup, int minSize, Optional<Tags> tags) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoScalingParent.getRegion()));
         final String launchConfigurationName = autoScalingParent.getAutoScalingGroup().launchConfigurationName();
         final String autoScalingGroupName = getAutoScalingGroupName(shardName);
         final List<String> availabilityZones = autoScalingParent.getAutoScalingGroup().availabilityZones();
         final int instanceWarmupTimeInSeconds = autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
-        logger.info("Creating Autoscalinggroup " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Autoscalinggroup: " + autoScalingParent.getName());
+        logger.info(
+                "Creating Auto-Scaling Group " + autoScalingGroupName +" for Shard "+shardName + ". Inheriting from Auto-Scaling Group: " +
+                        autoScalingParent.getName() + ". Starting with " + minSize + " instances.");
         autoScalingClient.createAutoScalingGroup(b->{
             b
-                .minSize(autoScalingParent.getAutoScalingGroup().minSize() > 1 ? autoScalingParent.getAutoScalingGroup().minSize() : 2)
+                .minSize(minSize)
                 .maxSize(autoScalingParent.getAutoScalingGroup().maxSize())
                 .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
@@ -2068,6 +2112,17 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             });
             b.tags(awsTags);
         });
+        enableAutoScalingGroupMetricCollection(autoScalingGroupName, autoScalingClient);
+        autoScalingClient.close();
+        return autoScalingGroupName;
+    }
+    
+    @Override
+    public void resetShardMinAutoscalingGroupSize(String autoscalinggroupName, com.sap.sse.landscape.Region region) {
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        autoScalingClient.updateAutoScalingGroup(t -> t.autoScalingGroupName(autoscalinggroupName)
+                .minSize(ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE).build());
+        autoScalingClient.close();
     }
 
     @Override

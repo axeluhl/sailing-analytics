@@ -303,7 +303,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME,
                 DefaultActions.UPDATE, this::setEndTime);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SHOW_RACELOG,
-                DefaultActions.UPDATE, t -> showRaceLog(t.getA(), t.getB()));
+                DefaultActions.READ, t -> showRaceLog(t.getA(), t.getB()));
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_TRACKING_TIMES,
                 DefaultActions.UPDATE, this::showSetTrackingTimesDialog);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_START_TRACKING,
@@ -325,7 +325,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());
         racesTable.addColumn(courseStateColumn, stringMessages.courseStatus());
         racesTable.addColumn(raceActionColumn, stringMessages.actions());
-        racesTable.setWidth("600px");
     }
 
     private void handleCopy(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {

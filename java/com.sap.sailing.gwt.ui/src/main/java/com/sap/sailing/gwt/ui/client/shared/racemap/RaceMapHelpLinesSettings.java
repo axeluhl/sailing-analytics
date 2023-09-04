@@ -15,7 +15,7 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
      * Types of help lines on the map
      */
     public enum HelpLineTypes {
-        STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE, BUOYZONE, BOATTAILS, STARTLINETOFIRSTMARKTRIANGLE, COURSEGEOMETRY
+        STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE, BUOYZONE, BOATTAILS, STARTLINETOFIRSTMARKTRIANGLE, COURSEGEOMETRY, COURSEAREACIRCLES
     }
     
     private EnumSetSetting<HelpLineTypes> visibleHelpLines;

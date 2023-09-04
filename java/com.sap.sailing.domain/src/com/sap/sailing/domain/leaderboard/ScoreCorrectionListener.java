@@ -8,6 +8,8 @@ import com.sap.sse.common.TimePoint;
 public interface ScoreCorrectionListener {
     void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore);
 
+    void incrementalScoreCorrectionChanged(Competitor competitor, RaceColumn raceColumn, Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints);
+
     void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason);
     
     void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints);

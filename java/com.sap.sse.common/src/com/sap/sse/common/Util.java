@@ -358,6 +358,9 @@ public class Util {
         return result;
     }
     
+    /**
+     * @return {@code null} if the {@code iterable} is empty; its last element otherwise
+     */
     public static <T> T last(Iterable<T> iterable) {
         final T result;
         if (isEmpty(iterable)) {

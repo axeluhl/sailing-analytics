@@ -1128,7 +1128,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        logger.info("Changing e-mail address of user "+username+" to "+newEmail);
+        logger.info("Changing e-mail address of user " + username + " to " + newEmail);
         final String validationSecret = user.createRandomSecret();
         apply(new UpdateSimpleUserEmailOperation(username, newEmail, validationSecret));
         if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
@@ -2322,7 +2322,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             boolean setServerGroupAsOwner, final String displayName) {
         boolean wasNecessaryToMigrate = false;
         final OwnershipAnnotation owner = this.getOwnership(identifier);
-        // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
+        // initialize ownerships on migration and fix objects that were orphaned by setting the owning user/group
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
             final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getServerGroup() : null;
@@ -2723,7 +2723,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         return newUserSubscriptions;
     }
-    
+
     /**
      * Add or remove subscription plan's roles for user
      */

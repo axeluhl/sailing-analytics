@@ -10,11 +10,13 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.UUID;
 import java.util.function.BiFunction;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
@@ -27,6 +29,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -210,6 +213,9 @@ public interface TrackedRace
      * {@link Course} take place after this method has returned, then this won't be reflected in the result returned.
      * Callers should obtain the {@link Course#lockForRead() course's read lock} while using the result of this call if
      * they want to ensure that no course update is applied concurrently.
+     * 
+     * @return the tracked legs in the order in which their {@link TrackedLeg#getLeg() legs} appear in the
+     *         {@link Course}
      */
     Iterable<TrackedLeg> getTrackedLegs();
 
@@ -1442,4 +1448,16 @@ public interface TrackedRace
      * hypothetical "line" perpendicular to the first leg's bearing.
      */
     Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
+
+    /**
+     * Based on the {@link RaceLogStartTimeEvent}s found in any of the race logs {@link #getAttachedRaceLogs() attached},
+     * the {@link RaceLogStartTimeEvent#getCourseAreaId() course area ID} is extracted from those valid start time
+     * specification events, telling on which course area the latest start attempt was made. This ID is then returned,
+     * or {@code null} if no such ID is found, e.g., because no start time was provided in the race log(s), or the
+     * start time events did not specify any course area ID.<p>
+     * 
+     * A course area ID returned can be mapped to a {@link CourseArea} with a {@link SharedDomainFactory} using the
+     * {@link SharedDomainFactory#getExistingCourseAreaById(Serializable)} method.
+     */
+    UUID getCourseAreaId();
 }

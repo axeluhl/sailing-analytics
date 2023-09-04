@@ -70,7 +70,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
     public void setUp() throws Exception {
         event = service.addEvent("Test", "Test Event", TimePoint.now(), TimePoint.now().plus(Duration.ONE_WEEK), "Here",
                 /* isPublic */ true, UUID.randomUUID());
-        defaultCourseArea = new CourseAreaImpl("Default", UUID.randomUUID());
+        defaultCourseArea = new CourseAreaImpl("Default", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null);
         event.getVenue().addCourseArea(defaultCourseArea);
         leaderboardGroup = new LeaderboardGroupImpl("LG", "LGDesc", "The LG", /* displayGroupsInReverseOrder */ false,
                 Collections.emptyList());
@@ -112,7 +112,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup2.setOverallLeaderboard(overallLeaderboard2);
         leaderboardGroup2.addLeaderboard(new FlexibleLeaderboardImpl("FlexibleLeaderboard",
-                new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), new CourseAreaImpl("CA", UUID.randomUUID())));
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), new CourseAreaImpl("CA", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null)));
         event.addLeaderboardGroup(leaderboardGroup2);
         SailingHierarchyOwnershipUpdater.createOwnershipUpdater(/* createNewGroup */ true , /* existingGroupIdOrNull */ null,
                 THE_NEW_OWNING_GROUP_NAME,

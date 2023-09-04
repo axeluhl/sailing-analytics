@@ -85,6 +85,7 @@ public class SecuredServerImpl implements SecuredServer {
         final int statusCode = response.getStatusLine().getStatusCode();
         Object jsonParseResult;
         if (statusCode == Response.Status.NO_CONTENT.getStatusCode()
+                || Response.Status.fromStatusCode(statusCode) == null
                 || Response.Status.fromStatusCode(statusCode).getFamily() != Family.SUCCESSFUL) {
             jsonParseResult = null;
         } else {

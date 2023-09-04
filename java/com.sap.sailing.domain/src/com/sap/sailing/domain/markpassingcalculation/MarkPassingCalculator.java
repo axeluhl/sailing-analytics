@@ -200,13 +200,14 @@ public class MarkPassingCalculator {
      */
     public void waitUntilStopped(final long timeoutInMillis) throws InterruptedException {
         final long start = System.currentTimeMillis();
-        if (listenerThread != null) {
-            synchronized (listenerThread) {
+        final Thread theListenerThread = listenerThread;
+        if (theListenerThread != null) {
+            synchronized (theListenerThread) {
                 while (!listenerThreadStarted && System.currentTimeMillis() - start < timeoutInMillis) {
-                    listenerThread.wait(timeoutInMillis);
+                    theListenerThread.wait(timeoutInMillis);
                 }
             }
-            listenerThread.join(timeoutInMillis);
+            theListenerThread.join(timeoutInMillis);
         }
     }
 
@@ -311,7 +312,10 @@ public class MarkPassingCalculator {
                                 if (isEndMarker(fixInsertion)) {
                                     logger.fine("Stopping " + MarkPassingCalculator.this + "'s listener for race "
                                             + raceName);
-                                    finished = true;
+                                    synchronized (MarkPassingCalculator.this) {
+                                        finished = true;
+                                        listenerThread = null;
+                                    }
                                     break;
                                 } else {
                                     try {
@@ -583,6 +587,7 @@ public class MarkPassingCalculator {
                     // creation matches that of this mark passing calculator's race; load instead of compute
                     updateMarkPassingsFromRegistry();
                     queue.clear();
+                    stop(); // ensures an end marker is written to queue to the queue.take() call in Listen.run() will always get unblocked after the queue.clear() above
                     suspended = false;
                 } else {
                     suspended = false;

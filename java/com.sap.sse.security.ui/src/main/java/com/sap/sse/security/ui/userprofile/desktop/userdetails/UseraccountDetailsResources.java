@@ -14,8 +14,10 @@ public interface UseraccountDetailsResources extends SharedAuthenticationResourc
         String useraccountdetails();
         String useraccountdetails_image();
         String useraccountdetails_image_editbutton();
+        String useraccountdetails_status_text();
         String useraccountdetails_content();
         String useraccountdetails_content_detail();
+        String useraccountdetails_content_hint();
         String useraccountdetails_content_detail_label();
         String useraccountdetails_content_detail_input();
         String useraccountdetails_content_submit();

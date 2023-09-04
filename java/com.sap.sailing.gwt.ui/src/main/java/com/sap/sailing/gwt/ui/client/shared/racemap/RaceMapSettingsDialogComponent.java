@@ -232,6 +232,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEMIDDLELINE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
+        vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEAREACIRCLES));
         maneuverLossVisualizationCheckBox = dialog.createCheckbox(stringMessages.maneuverLoss());
         maneuverLossVisualizationCheckBox.setValue(initialSettings.isShowManeuverLossVisualization());
         vp.add(maneuverLossVisualizationCheckBox);

@@ -225,9 +225,9 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 final Iterable<MetadataParser.ControlPointMetaData> controlPointMetadata = getMetadataParser().parseControlPointMetadata(controlPoint);
-                List<Mark> marks = new ArrayList<Mark>();
+                final List<Mark> marks = new ArrayList<Mark>();
                 for (ControlPointMetaData markMetadata : controlPointMetadata) {
-                    Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
+                    final Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
                             /* no separate short name; use name as short name, too */ markMetadata.getName(),
                             markMetadata.getType(), markMetadata.getColor(),
                             markMetadata.getShape(), markMetadata.getPattern());
@@ -364,7 +364,7 @@ public class DomainFactoryImpl implements DomainFactory {
             DynamicTeam team = createTeam(name, nationality, competitorId);
             domainCompetitor = raceTrackingHandler.getOrCreateCompetitor(competitorStore, competitorId, name, shortName,
                     null /* displayColor */,
-                    null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
+                    null /* email */, null /* flagImage */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
         return domainCompetitor;
@@ -384,7 +384,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     private DynamicTeam createTeam(String name, Nationality nationality, UUID competitorId) {
         DynamicTeam result;
-        String[] sailorNames = name.split("\\b*\\+\\b*");
+        String[] sailorNames = name==null?new String[] { "" } : name.split("\\b*\\+\\b*");
         List<DynamicPerson> sailors = new ArrayList<DynamicPerson>();
         for (String sailorName : sailorNames) {
             sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
@@ -869,7 +869,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         // because CompetitorImpl.hashCode/equals are based solely on Java object identity
                         competitorsCurrentlyBeingMigrated.remove(existingCompetitor);
                     } else {
-                        competitorToUse = existingCompetitor;
+                        competitorToUse = getOrCreateCompetitor(rc.getCompetitor(), raceTrackingHandler);
                     }
                 } else {
                     competitorToUse = getOrCreateCompetitor(rc.getCompetitor(), raceTrackingHandler);

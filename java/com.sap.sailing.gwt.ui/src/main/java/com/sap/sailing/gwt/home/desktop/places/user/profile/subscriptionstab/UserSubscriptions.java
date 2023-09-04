@@ -138,7 +138,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             @Override
             public void update(final int index, final SubscriptionDTO object, final String value) {
                 if (!object.isCancelled()) {
-                    presenter.cancelSubscription(object.getSubscriptionPlanId(), object.getProvider());
+                    presenter.nonRenewingSubscription(object.getSubscriptionPlanId(), object.getProvider());
                 }
             }
         });

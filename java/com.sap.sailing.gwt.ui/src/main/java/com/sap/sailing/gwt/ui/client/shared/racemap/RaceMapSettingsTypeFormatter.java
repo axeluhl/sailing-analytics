@@ -5,40 +5,42 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.Hel
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class RaceMapSettingsTypeFormatter {
-    public static String formatZoomType(ZoomTypes zoomType, StringMessages stringConstants) {
+    public static String formatZoomType(ZoomTypes zoomType, StringMessages stringMessages) {
         switch (zoomType) {
         case NONE:
-            return stringConstants.autoZoomOff();
+            return stringMessages.autoZoomOff();
         case BOATS:
-            return stringConstants.autoZoomToBoats();
+            return stringMessages.autoZoomToBoats();
         case TAILS:
-            return stringConstants.autoZoomToTails();
+            return stringMessages.autoZoomToTails();
         case BUOYS:
-            return stringConstants.autoZoomToBuoys();
+            return stringMessages.autoZoomToBuoys();
         case WINDSENSORS:
-            return stringConstants.autoZoomToWindSensors();
+            return stringMessages.autoZoomToWindSensors();
         }
         return null;
     }
 
-    public static String formatHelpLineType(HelpLineTypes helpLineType, StringMessages stringConstants) {
+    public static String formatHelpLineType(HelpLineTypes helpLineType, StringMessages stringMessages) {
         switch (helpLineType) {
         case STARTLINE:
-            return stringConstants.startLine();
+            return stringMessages.startLine();
         case FINISHLINE:
-            return stringConstants.finishLine();
+            return stringMessages.finishLine();
         case ADVANTAGELINE:
-            return stringConstants.advantageLine();
+            return stringMessages.advantageLine();
         case COURSEMIDDLELINE:            
-            return stringConstants.courseMiddleLine();
+            return stringMessages.courseMiddleLine();
         case BUOYZONE:            
-            return stringConstants.buoyZone();
+            return stringMessages.buoyZone();
         case BOATTAILS:
-            return stringConstants.boatTails();
+            return stringMessages.boatTails();
         case STARTLINETOFIRSTMARKTRIANGLE:
-            return stringConstants.startFirstMarkTriangle();
+            return stringMessages.startFirstMarkTriangle();
         case COURSEGEOMETRY:
-            return stringConstants.courseGeometry();
+            return stringMessages.courseGeometry();
+        case COURSEAREACIRCLES:
+            return stringMessages.courseAreas();
         }
         return null;
     }

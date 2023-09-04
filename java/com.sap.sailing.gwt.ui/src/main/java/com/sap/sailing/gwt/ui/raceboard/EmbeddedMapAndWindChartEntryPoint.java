@@ -97,12 +97,13 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings = RaceBoardPerspectiveOwnSettings
                 .readSettingsFromURL(/* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ true,
                         /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
-                        /* defaultForCanReplayDuringLiveRaces */ false, /*defaultShowTags*/ false, /*defaultShowManeuverTable*/false,
+                        /* defaultForCanReplayDuringLiveRaces */ false, /* defaultShowTags */ false, /* defaultShowManeuverTable */false,
                         /* defaultForJumpToTag */ null, /* zoomStart */ null, /* zoomEnd */ null, false);
         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
                 /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
-                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false, paywallResolver, securedDTO);
+                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false,
+                /* defaultForTailLengthInMilliseconds */ 1l, paywallResolver, securedDTO);
         settings = SERIALIZER.deserializeFromCurrentLocation(new EmbeddedMapAndWindChartSettings());
         RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false);
         Set<HelpLineTypes> helpLineTypes = new HashSet<>();
@@ -118,7 +119,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                 defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
                 defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), true,
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), /* show estimated duration */ true,
                 defaultRaceMapSettings.getStartCountDownFontSizeScaling(),
                 defaultRaceMapSettings.isShowManeuverLossVisualization(),
                 defaultRaceMapSettings.isShowSatelliteLayer(),
@@ -141,8 +142,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                     securedDTO.setSecuredDTO(raceDTOProxy);
                     getSailingService().getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                         @Override
-                        public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
-                            createEmbeddedMap(selectedRaceIdentifier, result, raceboardPerspectiveSettings, raceMapSettings, raceDTOProxy);
+                        public void onSuccess(Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
+                            createEmbeddedMap(selectedRaceIdentifier, competitorsAndTheirBoats, raceboardPerspectiveSettings, raceMapSettings, raceDTOProxy);
                         }
                         
                         @Override
@@ -171,7 +172,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         infoText.getElement().getStyle().setMargin(1, Unit.EM);
         vp.add(infoText);
         // TODO: Styling of error page slightly differs from the other usages of SAPSailingHeaderWithAuthentication
-        // because of the root font-size. Adjustments are postponed because they might affect the hole page content.
+        // because of the root font-size. Adjustments are postponed because they might affect the whole page content.
     }
 
     private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier,
@@ -223,7 +224,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider, competitorsAndBoats); // show no competitors
         }
         final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
-        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages(), paywallResolver, raceDTOProxy),
+        final RaceMap raceMap = new RaceMap(/* parent */ null, /* context */ null, new RaceMapLifecycle(getStringMessages(), paywallResolver, raceDTOProxy),
                 raceMapSettings, getSailingService(), asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
                 raceMapResources, /* showHeaderPanel */ false, new DefaultQuickFlagDataProvider(), paywallResolver,

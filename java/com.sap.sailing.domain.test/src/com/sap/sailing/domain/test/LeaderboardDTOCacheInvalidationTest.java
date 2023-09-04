@@ -32,7 +32,7 @@ public class LeaderboardDTOCacheInvalidationTest {
         final String newName = "My New Leaderboard";
         FlexibleLeaderboard l = new FlexibleLeaderboardImpl(oldName,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
-                new CourseAreaImpl("My Course Area", UUID.randomUUID()));
+                new CourseAreaImpl("My Course Area", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
         final TimePoint now = MillisecondsTimePoint.now();
         LeaderboardDTO dto = l.getLeaderboardDTO(now, Collections.<String> emptySet(),
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
@@ -54,7 +54,7 @@ public class LeaderboardDTOCacheInvalidationTest {
         final TimePoint now = MillisecondsTimePoint.now();
         FlexibleLeaderboard l = new FlexibleLeaderboardImpl(name,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
-                new CourseAreaImpl("My Course Area", UUID.randomUUID()));
+                new CourseAreaImpl("My Course Area", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
         final LeaderboardGroup lg = new LeaderboardGroupImpl("LG", "LG", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Arrays.asList(l));
         final LeaderboardGroupMetaLeaderboard seriesLb = new LeaderboardGroupMetaLeaderboard(lg, new LowPoint(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         LeaderboardDTO seriesLbDtoBeforeDisplayNameIsSet = seriesLb.getLeaderboardDTO(now, Collections.<String> emptySet(),
@@ -87,7 +87,7 @@ public class LeaderboardDTOCacheInvalidationTest {
         final String name = "My Flexible Leaderboard";
         FlexibleLeaderboard l = new FlexibleLeaderboardImpl(name,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
-                new CourseAreaImpl("My Course Area", UUID.randomUUID()));
+                new CourseAreaImpl("My Course Area", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
         final String oldRaceColumnName = "Old";
         FlexibleRaceColumn rc = l.addRaceColumn(oldRaceColumnName, /* medalRace */ false);
         final TimePoint now = MillisecondsTimePoint.now();

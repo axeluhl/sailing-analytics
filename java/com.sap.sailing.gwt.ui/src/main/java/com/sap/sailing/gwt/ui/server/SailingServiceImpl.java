@@ -798,6 +798,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+    
+    @Override
+    public List<CourseAreaDTO> getCourseAreaForEventOfLeaderboard(String leaderboardName) {
+        final List<CourseAreaDTO> result = new ArrayList<>();
+        for (final EventDTO event : getEventsForLeaderboard(leaderboardName)) {
+            Util.addAll(event.venue.getCourseAreas(), result);
+        }
+        return result;
+    }
 
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardForRace(final RegattaAndRaceIdentifier race,
@@ -1093,7 +1102,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         raceInfoDTO.protestFinishTime = protestEndTime.asDate();
                         raceInfoDTO.lastUpperFlag = Flags.BRAVO;
                         raceInfoDTO.lastLowerFlag = Flags.NONE;
-                        raceInfoDTO.lastFlagsAreDisplayed = true;
+                        raceInfoDTO.lastFlagsAreDisplayed = !protestEndTime.before(now);
                         raceInfoDTO.lastFlagsDisplayedStateChanged = true;
                     }
                 }
@@ -1123,6 +1132,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         case RRS26:
         case RRS26_3MIN:
         case SWC:
+        case SWC_4MIN:
             ConfigurableStartModeFlagRacingProcedure linestart = state.getTypedReadonlyRacingProcedure();
             info = new LineStartInfoDTO(linestart.getStartModeFlag());
         case UNKNOWN:
@@ -1816,7 +1826,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             try {
                 estimatedDuration = trackedRace.getEstimatedTimeToComplete(new MillisecondsTimePoint(time)).getExpectedDuration();
             } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
-                logger.log(Level.WARNING, "Problem computing the estimated race duration", e);
+                logger.log(Level.WARNING, "Problem computing the estimated race duration for "+
+                        trackedRace.getRace().getName()+" / "+trackedRace.getTrackedRegatta().getRegatta().getName()+
+                        ": "+e.getMessage(), e);
             }
         }
         return estimatedDuration;
@@ -2344,8 +2356,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private void fillLeaderboardData(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData,
             StrippedLeaderboardDTO leaderboardDTO) {
-        TimePoint startOfLatestRace = null;
-        Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<>();
         leaderboardDTO.competitorsCount = Util.size(leaderboard.getCompetitors());
@@ -2366,7 +2376,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         leaderboardDTO.courseAreas = new ArrayList<>();
         Util.addAll(Util.map(leaderboard.getCourseAreas(), this::convertToCourseAreaDTO), leaderboardDTO.courseAreas);
-        leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
+        leaderboardDTO.setDelayToLiveInMillisForLatestRace(leaderboard.getDelayToLiveInMillis());
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
         if (leaderboard.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
             leaderboardDTO.discardThresholds = ((ThresholdBasedResultDiscardingRule) leaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
@@ -2379,12 +2389,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
-                    if (startOfLatestRace == null || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
-                        delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
-                    }
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                     raceDTO = baseDomainFactory.createRaceDTO(getService(), withGeoLocationData, raceIdentifier, trackedRace);
-                    if(withStatisticalData) {
+                    if (withStatisticalData) {
                         Iterable<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
                         raceDTO.trackedRaceStatistics = baseDomainFactory.createTrackedRaceStatisticsDTO(trackedRace, leaderboard, raceColumn, fleet, mediaTracksForRace);
                     }
@@ -3723,8 +3730,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
-        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
-        courseAreaDTO.id = courseArea.getId();
+        CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getId(), courseArea.getName(),
+                 courseArea.getCenterPosition(), courseArea.getRadius());
         return courseAreaDTO;
     }
 

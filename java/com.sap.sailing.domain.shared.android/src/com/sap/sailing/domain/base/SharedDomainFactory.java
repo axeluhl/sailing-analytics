@@ -7,7 +7,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 
 public interface SharedDomainFactory<RLR extends RaceLogResolver> extends CompetitorFactory, BoatFactory {
 
@@ -98,10 +100,11 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
      * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
      * is created.
      */
-    CourseArea getOrCreateCourseArea(UUID id, String name);
+    CourseArea getOrCreateCourseArea(UUID id, String name, Position centerPosition, Distance radius);
     
     /**
      * Gets the {@link CourseArea} with passed id; if there is no such {@link CourseArea} <code>null</code> will be returned.
+     * This also applies when {@code null} is being passed as the {@code courseAreaId}.
      */
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
     

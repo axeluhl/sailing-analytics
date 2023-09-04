@@ -309,7 +309,7 @@ public class JumpyTrackSmootheningTest {
                 /* canBoatsOfCompetitorsChangePerRace */ false, /* competitorRegistrationType */ CompetitorRegistrationType.CLOSED,
                 /* startDate */ null, /* endDate */ null, Collections.singleton(new SeriesImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                         Collections.singleton(new FleetImpl("Default", 0)), Collections.singleton("R1"), new DummyTrackedRegattaRegistry())), /* persistent */ false,
-                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Default", UUID.randomUUID()), OneDesignRankingMetric::new,
+                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Default", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null), OneDesignRankingMetric::new,
                 /* registrationLinkSecret */ null));
         final Boat boat = ((CompetitorWithBoat) gallagherZelenka).getBoat();
         final Map<Competitor, Boat> competitorsAndTheirBoats = Util.<Competitor, Boat>mapBuilder().put(gallagherZelenka, boat).build();

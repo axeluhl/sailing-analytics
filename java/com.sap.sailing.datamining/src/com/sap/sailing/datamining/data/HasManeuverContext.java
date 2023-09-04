@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.data;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.annotations.Connector;
@@ -72,6 +73,18 @@ public interface HasManeuverContext extends HasManeuver, HasTrackedLegOfCompetit
 
     @Statistic(messageKey = "AbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveEndInDegrees", ordinal = 25, resultDecimals = 2)
     Double getAbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveEndInDegrees();
+    
+    @Statistic(messageKey = "LowestSpeed", ordinal = 26, resultDecimals = 2)
+    Speed getLowestSpeed();
+    
+    @Statistic(messageKey = "SpeedChange", ordinal = 27, resultDecimals = 2)
+    Speed getSpeedDifference();
+    
+    @Statistic(messageKey = "MaximumTurningRate", ordinal = 28, resultDecimals = 2)
+    double getMaximimumTurningRateInDegreesPerSecond();
+    
+    @Statistic(messageKey = "AverageTurningRate", ordinal = 29, resultDecimals = 2)
+    double getAverageTurningRateInDegreesPerSecond();
     
     TimePoint getTimePointBeforeForAnalysis();
 

@@ -224,7 +224,7 @@ public abstract class TrackBasedTest {
         final boolean isMedal = false;
         final boolean persistent = false;
         final ScoringScheme scoringScheme = new LowPoint();
-        final CourseArea courseArea = new CourseAreaImpl("Course Area", UUID.randomUUID());
+        final CourseArea courseArea = new CourseAreaImpl("Course Area", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null);
         final Serializable regatteId = "regatta id";
         Iterable<? extends Fleet> regattaFleets = Collections.singleton(regattaFleet);
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);

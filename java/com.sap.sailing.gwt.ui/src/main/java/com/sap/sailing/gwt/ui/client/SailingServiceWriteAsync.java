@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -383,12 +384,34 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints,
             AsyncCallback<Void> callback);
 
+    /**
+     * @param asyncCallback
+     *            The result is a {@link Triple} with the new total points in {@link Triple#getA() a}, the new net
+     *            points in {@link Triple#getB() b}, and whether or not the result is obtained from the correction
+     *            ("isCorrected") as {@link Triple#getC() c}.
+     */
     void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
             MaxPointsReason maxPointsReason, Date date,
             AsyncCallback<Util.Triple<Double, Double, Boolean>> asyncCallback);
 
+    /**
+     * @param asyncCallback
+     *            The result is a {@link Triple} with the new total points in {@link Triple#getA() a}, the new net
+     *            points in {@link Triple#getB() b}, and whether or not the result is obtained from the correction
+     *            ("isCorrected") as {@link Triple#getC() c}.
+     */
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
             Double correctedScore, Date date, AsyncCallback<Util.Triple<Double, Double, Boolean>> asyncCallback);
+
+    /**
+     * @param asyncCallback
+     *            The result is a {@link Triple} with the new total points in {@link Triple#getA() a}, the new net
+     *            points in {@link Triple#getB() b}, and whether or not the result is obtained from the correction
+     *            ("isCorrected") as {@link Triple#getC() c}.
+     */
+    void updateLeaderboardIncrementalScoreCorrection(String leaderboardName, String competitorIdAsString,
+            String columnName, Double scoringOffsetInPoints, Date date,
+            AsyncCallback<Triple<Double, Double, Boolean>> callback);
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment, AsyncCallback<Void> callback);
@@ -456,7 +479,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String baseURL,
+            boolean isPublic, List<CourseAreaDTO> courseAreas, String officialWebsiteURL, String baseURL,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
@@ -481,7 +504,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds, AsyncCallback<EventDTO> callback);
 
-    void createCourseAreas(UUID eventId, String[] courseAreaNames, AsyncCallback<Void> callback);
+    void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas, AsyncCallback<Void> callback);
 
     void removeCourseAreas(UUID eventId, UUID[] idsOfCourseAreasToRemove, AsyncCallback<Void> callback);
 

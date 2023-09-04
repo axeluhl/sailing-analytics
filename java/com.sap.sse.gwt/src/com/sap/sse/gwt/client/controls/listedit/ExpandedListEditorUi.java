@@ -62,7 +62,6 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     public Widget initWidget() {
         expandedValuesGrid = new Grid(0, 2);
         expandedValuesGrid.ensureDebugId("ExpandedValuesGrid");
-        
         VerticalPanel panel = new VerticalPanel();
         panel.add(createAddWidget());
         panel.add(expandedValuesGrid);
