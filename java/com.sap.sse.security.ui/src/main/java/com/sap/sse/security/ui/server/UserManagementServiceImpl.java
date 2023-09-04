@@ -204,7 +204,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 getAllUser(), getServerInfo());
     }
 
-
     @Override
     public Map<String, String> getSettings() {
         Map<String, String> settings = new TreeMap<String, String>();

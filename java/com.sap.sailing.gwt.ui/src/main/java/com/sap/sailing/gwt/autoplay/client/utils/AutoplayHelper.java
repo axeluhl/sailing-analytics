@@ -299,7 +299,6 @@ public class AutoplayHelper {
                 paywallResolver, dtoContext);
         userService.createEssentialSecuredDTOByIdAndType(currentLiveRace.getPermissionType(), currentLiveRace.getName(),
                 currentLiveRace.getTypeRelativeObjectIdentifier(), new AsyncCallback<SecuredDTO>() {
-
                     @Override
                     public void onSuccess(SecuredDTO raceDtoProxy) {
                         dtoContext.setSecuredDTO(raceDtoProxy);
