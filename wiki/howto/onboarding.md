@@ -66,6 +66,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 13. Configure Maven to use the correct JRE by following the instructions in the paragraph [maven-setup](#onboarding-information_sap-sailing-analytics-development-setup_maven-setup)
 14. Follow the instructions in the [development setup](#onboarding-information_sap-sailing-analytics-development-setup_sap-sailing-analytics-development-setup) to build the project.
 15. The steps for building the project for a deployment can be found in the [Build for deployment](#onboarding-information_sap-sailing-analytics-development-setup_build-for-deployment) section. This is not needed in the daily development workflow and should only be run when needed. 
+16. Install Ant: https://ant.apache.org/manual/install.html and makes sure to add to path: it is necessary for building gwt.
 
 ### Further optional but recommended installations
 
@@ -87,10 +88,10 @@ Depending on the location of your local repository, it's filepaths might be too 
 
 ### Maven Setup
 
-Copy the settings.xml **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. 
+Copy the settings.xml (may be in $GIT_HOME/configuration/maven-settings.xml and $GIT_HOME/configuration/maven-settings.xml) **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. 
 
 ### Automatic Eclipse plugin installation
-The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2022-06.p2f` file. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2022-06.p2f`. 
+The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2022-06.p2f` file, found in the git repository cloned in _step 11_. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2022-06.p2f`. 
 Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
 
 Be also aware that with this p2f-file it's not possible to update the plugins to newer versions. 
@@ -115,11 +116,12 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
 - In "GWT ⇒ Errors/Warnings" set "Missing SDK" to "Ignore" 
 - In "GWT ⇒ GWT Settings ⇒ Add..." add the GWT SDK you downloaded and unpacked earlier
 - In "Java ⇒ Build Path ⇒ Classpath Variables" create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
-- In "Java ⇒ Code Style ⇒ Formatter" import the CodeFormatter.xml from $GIT_HOME/java 
+- In "Java ⇒ Code Style ⇒ Formatter" import the CodeFormatter.xml from $GIT_HOME/java (where$GIT_HOME is the directory cloned in _step 11_).
 - In "Java ⇒ Compiler" set the Compiler compliance level to 1.8
 - In "Java ⇒ Installed JREs" add the Java 8 sdk and activate it. 
 - In "Java ⇒ Installed JREs ⇒ Execution Environments" make sure that the Java 8 JRE is selected for JavaSE-1.8 (if the jre is not listed open and close the preference Window once) 
-- In "Web ⇒ Client-side JavaScript ⇒ Formatter" import the CodeFormatter_JavaScript.xml for JavaScript from $GIT_HOME/java to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
+- For the next step, you may need to go to "Help ⇒ Install"; type _web_; then select _webtools_; click _web tools platform_; and then install the plugins.
+- In "Web ⇒ Client-side JavaScript ⇒ Code Style ⇒ Formatter" import the CodeFormatter_JavaScript.xml for JavaScript from $GIT_HOME/java to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
 - In "Web ⇒ HTML Files ⇒ Editor" activate indent using Spaces
 - In "XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
 - Install Eclipse eGit (optional)
