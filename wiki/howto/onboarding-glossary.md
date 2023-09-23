@@ -1,7 +1,6 @@
-#A great starting point glossary...
+#Key tools and terms...
 A basic run down of *what's what*, so you can dive into the other documentation more easily. 
 ##The components of the project
-
 - Apache: This is the web server technology that acts as the reverse proxy and serves the content. You can serve multiple things from the same machine. It is configured using the httpd.conf file which can be found for this project in `${GIT_HOME}/configuration/httpd/conf`. Apache works by using directives, which are commands to control access, security, sources and direct traffic, to name but a few. Apache is modular so extra config can be found in conf.d (within the configuration directory). In this directory you can find the macros used, including those used for archiving.
 - EC2: This is the amazon web service that hosts the instances that the servers run on. We use load balancers to direct traffic, specifically Application Load Balancers, which routes at the HTTP/S level, making them very powerful. You might also want to read up on security groups, target groups and VPCs (virtual private clouds).
 - Expedition Connector: A software package that allows us to receive wind sensor data and forward it on.
@@ -20,6 +19,9 @@ A basic run down of *what's what*, so you can dive into the other documentation 
 - A **mark** is any position a boat must pass on a required side.
 - **kt** is of course knots.
 - **Velocity made good** is speed towards or from the wind direction.
-
+- A **Jibe** or **Gybe** is a manoeuvre whereby the boat points downwind (with the wind) during the turn.
+- A **Tack** is a manoeuvre where the boat turns into the headwind (pointing into the wind) and then through.
   
+Checkout [onboarding](onboarding.md)  
+
  
