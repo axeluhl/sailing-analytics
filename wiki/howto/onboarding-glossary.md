@@ -1,5 +1,6 @@
 # Key tools and terms...
 A basic rundown of *what's what*, so you can dive into the other documentation more easily. 
+
 ## The components of the project
 - Apache: This is the web server technology that acts as the reverse proxy and serves the content. You can serve multiple sites from the same Apache instance. It is configured using the `httpd.conf` file which can be found for this project in `${GIT_HOME}/configuration/httpd/conf`. Sometimes `.htaccess` files are used in a directory to affect the configuration; however, if you have sufficient permissions, try to place these in the main config file.  Apache works by using directives, which are commands to control access, security, sources and redirect traffic, to name but a few. Apache is modular and you can view all the modules compiled using `httpd -l`. The extra modules can be configured in conf.d (subdir of the configuration directory). In that directory, you can find the macros used, including those used for archiving.
 - EC2: This is the Amazon Web Service that hosts the instances that the servers run on. We use load balancers to direct traffic, specifically Application Load Balancers, which routes at the HTTP/S level, making them very powerful. You might also want to read up on security groups, target groups and VPCs (virtual private clouds).
@@ -22,6 +23,6 @@ A basic rundown of *what's what*, so you can dive into the other documentation m
 - A **tack** is a manoeuvre where the boat turns into the headwind (pointing into the wind) and then through.
 - **Velocity made good** is speed towards or from the wind direction.
 
-Checkout [onboarding](onboarding.md)  
+
 
  
