@@ -9,7 +9,12 @@ correct_file_path()
     fi
     
     if [ "$OSTYPE" == "cygwin" ]; then
-        echo $1 | sed 's/^\/cygdrive\/\([a-zA-Z]\)\//\1:\//'
+        echo $1 | grep -q '^/cygdrive/'
+	if [ "$?" = "0" ]; then
+            echo $1 | sed 's/^\/cygdrive\/\([a-zA-Z]\)\//\1:\//'
+        else
+	    echo "c:/cygwin64${1}"
+        fi
     elif [ "$OSTYPE" == "msys" ]; then
       echo $1 | sed 's/^\/\([a-zA-Z]\)\//\1:\//'
     else
