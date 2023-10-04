@@ -24,6 +24,10 @@ public interface MongoObjectFactory {
      */
     void createYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfiguration);
 
+    /**
+     * When the configuration has a {@code null} value for the {@link YellowBrickConfiguration#getPassword() password},
+     * the password in the DB will not be changed.
+     */
     void updateYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfiguration);
 
     void deleteYellowBrickConfiguration(String creatorName, String raceUrl);

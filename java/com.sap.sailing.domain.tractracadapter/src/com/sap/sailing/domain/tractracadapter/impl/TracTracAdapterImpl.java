@@ -97,7 +97,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
         }
         return null;
     }
-
+    
     @Override
     public TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
             String liveDataURI,

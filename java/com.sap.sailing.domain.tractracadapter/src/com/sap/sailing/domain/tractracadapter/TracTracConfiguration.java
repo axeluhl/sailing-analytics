@@ -25,7 +25,7 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
      * holds the path of Trac Trac to receive course updates triggered by the race committee
      * @return the TracTrac server path for course updates
      */
-    String getCourseDesignUpdateURI();
+    String getUpdateURI();
 
     /**
      * holds the Trac Trac username used to send course updates to TracTrac

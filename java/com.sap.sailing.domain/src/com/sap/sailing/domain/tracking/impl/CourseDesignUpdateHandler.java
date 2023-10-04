@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
@@ -22,7 +23,6 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sse.shared.json.JsonSerializer;
 
 public class CourseDesignUpdateHandler extends UpdateHandler implements CourseDesignChangedListener {
-    
     private final static String ACTION = "update_course";
     
     private final static Logger logger = Logger.getLogger(CourseDesignUpdateHandler.class.getName());
@@ -56,7 +56,7 @@ public class CourseDesignUpdateHandler extends UpdateHandler implements CourseDe
             try {
                 checkAndLogUpdateResponse(connection);
             } catch (ParseException e) {
-                e.printStackTrace();
+                logger.log(Level.SEVERE, "Error trying to send course update to TracTrac", e);
             }
         } finally {
             if (connection != null) {
