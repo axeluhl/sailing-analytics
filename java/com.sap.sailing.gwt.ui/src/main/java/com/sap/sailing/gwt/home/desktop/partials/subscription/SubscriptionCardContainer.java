@@ -108,7 +108,7 @@ public class SubscriptionCardContainer extends Composite {
         int columnIndex = 0;
         for (final SubscriptionPlan.PlanCategory category : SubscriptionPlan.PlanCategory.getCategoriesWithFeature()) {
             columnIndex++;
-            createCheckMark(currentRowIndex, columnIndex, category.getFeatureIds().contains(featureId));
+            createCheckMark(currentRowIndex, columnIndex, category.containsFeature(featureId));
         }
     }
 

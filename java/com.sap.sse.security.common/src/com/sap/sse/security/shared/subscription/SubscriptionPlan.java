@@ -2,6 +2,7 @@ package com.sap.sse.security.shared.subscription;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -98,24 +99,28 @@ public abstract class SubscriptionPlan implements Serializable {
         
         final String id;
         
-        final List<String> featureIds;
+        final Set<String> featureIds;
         
         PlanCategory(String id, String...featureIds) {
             this.id = id;
-            this.featureIds = Arrays.asList(featureIds);
+            this.featureIds = new HashSet<>(Arrays.asList(featureIds));
         }
         
         public String getId() {
             return id;
         }
         
-        public List<String> getFeatureIds() {
-            return featureIds;
+        public boolean containsFeature(String featureId) {
+            return featureIds.contains(featureId);
+        }
+        
+        private boolean hasFeature() {
+            return !featureIds.isEmpty();
         }
         
         public static List<PlanCategory> getCategoriesWithFeature() {
             return Stream.of(PlanCategory.values())
-                    .filter(c -> !c.getFeatureIds().isEmpty())
+                    .filter(c -> c.hasFeature())
                     .collect(Collectors.toList());
         }
         
