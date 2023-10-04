@@ -54,16 +54,15 @@ public class SubscriptionCardContainer extends Composite {
     public SubscriptionCardContainer() {
         initWidget(uiBinder.createAndBindUi(this));
         featureGrid = new Grid(2, 5);
-        
         int rowIndex = 0;
-        for (SubscriptionPlan.PlanCategory category: SubscriptionPlan.PlanCategory.getCategoriesWithFeature()) {
+        for (final SubscriptionPlan.PlanCategory category : SubscriptionPlan.PlanCategory.getCategoriesWithFeature()) {
             rowIndex++;
             final Label title = new Label(i18n.getString(category.getId() + "_name"));
             title.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
             featureGrid.setWidget(0, rowIndex, title);
         }
         // add features to list
-        for (String featureId: SubscriptionPlan.PlanCategory.getAllFeatureIds()) {
+        for (final String featureId : SubscriptionPlan.PlanCategory.getAllFeatureIds()) {
             addFeature(featureId);
         }
         features.add(featureGrid);
@@ -107,7 +106,7 @@ public class SubscriptionCardContainer extends Composite {
         featureGrid.setWidget(currentRowIndex, TITLE_DESCRIPTION_ROW, line);
         // create check marks
         int columnIndex = 0;
-        for (SubscriptionPlan.PlanCategory category: SubscriptionPlan.PlanCategory.getCategoriesWithFeature()) {
+        for (final SubscriptionPlan.PlanCategory category : SubscriptionPlan.PlanCategory.getCategoriesWithFeature()) {
             columnIndex++;
             createCheckMark(currentRowIndex, columnIndex, category.getFeatureIds().contains(featureId));
         }

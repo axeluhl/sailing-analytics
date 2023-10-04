@@ -95,18 +95,24 @@ public abstract class SubscriptionPlan implements Serializable {
                 "features_data_mining", 
                 "features_data_mining_all"), 
         TRIAL("trial");
+        
         final String id;
+        
         final List<String> featureIds;
-        PlanCategory(String id, String...features) {
+        
+        PlanCategory(String id, String...featureIds) {
             this.id = id;
-            this.featureIds = Arrays.asList(features);
+            this.featureIds = Arrays.asList(featureIds);
         }
+        
         public String getId() {
             return id;
         }
+        
         public List<String> getFeatureIds() {
             return featureIds;
         }
+        
         public static List<PlanCategory> getCategoriesWithFeature() {
             return Stream.of(PlanCategory.values())
                     .filter(c -> !c.getFeatureIds().isEmpty())
@@ -114,8 +120,8 @@ public abstract class SubscriptionPlan implements Serializable {
         }
         
         public static Set<String> getAllFeatureIds() {
-            Set<String> featureIds = new LinkedHashSet<>();
-            for (PlanCategory category: PlanCategory.values()) {
+            final Set<String> featureIds = new LinkedHashSet<>();
+            for (final PlanCategory category : PlanCategory.values()) {
                 featureIds.addAll(category.featureIds);
             }
             return featureIds;
