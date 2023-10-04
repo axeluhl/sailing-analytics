@@ -80,6 +80,7 @@ public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurat
         tracTracUpdateURITextBox = createTextBox("");
         tracTracUpdateURITextBox.ensureDebugId("TracTracUpdateURITextBox");
         tracTracUpdateURITextBox.setVisibleLength(100);
+        tracTracUpdateURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
         grid.setWidget(4, 0, tracTracUpdateURLLabel);
         grid.setWidget(4, 1, tracTracUpdateURITextBox);
         // TracTrac Username

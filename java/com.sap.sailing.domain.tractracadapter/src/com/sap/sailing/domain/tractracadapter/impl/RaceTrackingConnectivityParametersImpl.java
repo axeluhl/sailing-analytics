@@ -36,7 +36,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     private final URL paramURL;
     private final URI liveURI;
     private final URI storedURI;
-    private final URI courseDesignUpdateURI;
+    private final URI updateURI;
     private final TimePoint startOfTracking;
     private final TimePoint endOfTracking;
     private final transient RaceLogStore raceLogStore;
@@ -67,7 +67,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
      *            whether to use race and competitor status to create according race log entries that for official
      *            competitor results can then also lead to leaderboard updates
      */
-    public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
+    public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI updateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory,
@@ -90,7 +90,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
             this.liveURI = liveURI;
             this.storedURI = storedURI;
         }
-        this.courseDesignUpdateURI = courseDesignUpdateURI;
+        this.updateURI = updateURI;
         this.startOfTracking = startOfTracking;
         this.endOfTracking = endOfTracking;
         this.delayToLiveInMillis = delayToLiveInMillis;
@@ -168,8 +168,8 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
         return storedURI;
     }
 
-    public URI getCourseDesignUpdateURI() {
-        return courseDesignUpdateURI;
+    public URI getUpdateURI() {
+        return updateURI;
     }
 
     public TimePoint getStartOfTracking() {

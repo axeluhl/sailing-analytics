@@ -308,7 +308,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl<RaceTrackin
         final URL paramURL = connectivityParams.getParamURL();
         final URI liveURI = connectivityParams.getLiveURI();
         final URI storedURI = connectivityParams.getStoredURI();
-        final URI tracTracUpdateURI = connectivityParams.getCourseDesignUpdateURI();
+        final URI tracTracUpdateURI = connectivityParams.getUpdateURI();
         final TimePoint startOfTracking = connectivityParams.getStartOfTracking();
         final TimePoint endOfTracking = connectivityParams.getEndOfTracking();
         final long delayToLiveInMillis = connectivityParams.getDelayToLiveInMillis();

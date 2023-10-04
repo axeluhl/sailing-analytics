@@ -83,7 +83,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             IRace tractracRace, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, Simulator simulator,
-            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
+            URI updateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry) {
@@ -101,7 +101,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             this.windStore = simulator.simulatingWindStore(windStore);
         }
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
-        this.tracTracUpdateURI = courseDesignUpdateURI;
+        this.tracTracUpdateURI = updateURI;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;

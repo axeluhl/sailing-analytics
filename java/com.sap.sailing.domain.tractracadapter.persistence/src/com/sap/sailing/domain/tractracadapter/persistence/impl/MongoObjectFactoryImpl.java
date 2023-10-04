@@ -66,7 +66,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 Updates.set(FieldNames.TT_CONFIG_JSON_URL.name(), tracTracConfiguration.getJSONURL()),
                 Updates.set(FieldNames.TT_CONFIG_LIVE_DATA_URI.name(), tracTracConfiguration.getLiveDataURI()),
                 Updates.set(FieldNames.TT_CONFIG_STORED_DATA_URI.name(), tracTracConfiguration.getStoredDataURI()),
-                Updates.set(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name(), tracTracConfiguration.getCourseDesignUpdateURI()),
+                Updates.set(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name(), tracTracConfiguration.getUpdateURI()),
                 Updates.set(FieldNames.TT_CONFIG_TRACTRAC_USERNAME.name(), tracTracConfiguration.getTracTracUsername())));
         if (tracTracConfiguration.getTracTracPassword() != null) {
             updates.add(Updates.set(FieldNames.TT_CONFIG_TRACTRAC_PASSWORD.name(), tracTracConfiguration.getTracTracPassword()));

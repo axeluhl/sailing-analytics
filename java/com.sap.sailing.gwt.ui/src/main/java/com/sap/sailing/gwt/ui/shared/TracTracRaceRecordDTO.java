@@ -16,7 +16,8 @@ public class TracTracRaceRecordDTO extends AbstractRaceRecordDTO {
     public TracTracRaceRecordDTO() {}
     
     public TracTracRaceRecordDTO(String id, String regattaName, String name, Date trackingStartTime,
-            Date trackingEndTime, Date raceStartTime, Iterable<String> boatClassNames, String status, String visibility, String jsonUrl, boolean hasRememberedRegatta) {
+            Date trackingEndTime, Date raceStartTime, Iterable<String> boatClassNames, String status, String visibility, String jsonUrl,
+            boolean hasRememberedRegatta) {
         super(name, hasRememberedRegatta);
         this.regattaName = regattaName;
         this.id = id;

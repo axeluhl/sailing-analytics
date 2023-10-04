@@ -64,7 +64,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         assertEquals(delayToLiveInMillis, tracTracParamsReadFromDB.getDelayToLiveInMillis());
         assertEquals(paramURL, tracTracParamsReadFromDB.getParamURL());
         assertEquals(storedURI, tracTracParamsReadFromDB.getStoredURI());
-        assertEquals(courseDesignUpdateURI, tracTracParamsReadFromDB.getCourseDesignUpdateURI());
+        assertEquals(courseDesignUpdateURI, tracTracParamsReadFromDB.getUpdateURI());
         assertEquals(startOfTracking, tracTracParamsReadFromDB.getStartOfTracking());
         assertEquals(endOfTracking, tracTracParamsReadFromDB.getEndOfTracking());
         assertEquals(offsetToStartTimeOfSimulatedRace, tracTracParamsReadFromDB.getOffsetToStartTimeOfSimulatedRace());
