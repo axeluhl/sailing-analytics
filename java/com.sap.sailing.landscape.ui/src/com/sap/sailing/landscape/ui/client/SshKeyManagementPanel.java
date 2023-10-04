@@ -66,11 +66,11 @@ public class SshKeyManagementPanel extends VerticalPanel {
         final Button addButton = buttonPanel.addCreateAction(stringMessages.add(), ()->{
             openAddSshKeyDialog(stringMessages, awsAccessKeyProvider);
         });
-        addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+        addButton.setEnabled(regionSelectionModel.getSelectedObject() != null && awsAccessKeyProvider.hasValidSessionCredentials());
         final Button generateButton = buttonPanel.addCreateAction(stringMessages.generate(), ()->{
             openGenerateSshKeyDialog(stringMessages, awsAccessKeyProvider);
         });
-        generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+        generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null && awsAccessKeyProvider.hasValidSessionCredentials());
         sshKeyTable =
                 new TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources>(stringMessages, errorReporter, /* enablePager */ true,
                 Optional.of(new EntityIdentityComparator<SSHKeyPairDTO>() {
@@ -164,11 +164,12 @@ public class SshKeyManagementPanel extends VerticalPanel {
          });
         });
         regionSelectionModel.addSelectionChangeHandler(e->{
-            if (awsAccessKeyProvider.hasValidSessionCredentials()) {
+            boolean valid = awsAccessKeyProvider.hasValidSessionCredentials();
+            if (valid) {
                 showKeysInRegion(regionSelectionModel.getSelectedObject());
-                addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
-                generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
             }
+            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
+            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
         });
         addSshKeySelectionChangedHandler(event -> {
             boolean value = sshKeyTable.getSelectionModel().getSelectedObject() != null;
@@ -176,6 +177,13 @@ public class SshKeyManagementPanel extends VerticalPanel {
             passphraseText.setVisible(value);
             passphraseStatus.setVisible(value);
         } );
+        awsAccessKeyProvider.addListener(valid -> {
+            if (valid) {
+                showKeysInRegion(regionSelectionModel.getSelectedObject());
+            }
+            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
+            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
+        });
     }
     
     public void addSshKeySelectionChangedHandler(SelectionChangeEvent.Handler handler) {
