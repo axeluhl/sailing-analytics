@@ -321,8 +321,14 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
+    /**
+     * @param creatorUserName
+     *            together with the {@code raceUrl} this is used to identify the connection and obtain it's
+     *            username/password combination on the server; this is essential because we don't send those credentials
+     *            to the client
+     */
     void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs, boolean trackWind,
-            boolean correctWindByDeclination, String yellowBrickUsername, String yellowBrickPassword,
+            boolean correctWindByDeclination, String creatorUserName, String raceUrl,
             AsyncCallback<Void> callback);
 
     void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
@@ -667,7 +673,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      */
     void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
 
-
     void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
             ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
 
@@ -683,5 +688,10 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> selectedSet, AsyncCallback<Void> callback);
 
+    /**
+     * @param editedObject
+     *            if the {@link YellowBrickConfigurationWithSecurityDTO#getPassword() password} field of the
+     *            configuration object is {@code null}, this means that the original password is to be left unchanged.
+     */
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
 }

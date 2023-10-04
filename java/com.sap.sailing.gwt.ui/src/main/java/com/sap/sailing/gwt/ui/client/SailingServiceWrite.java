@@ -446,8 +446,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String jsonUrlAsKey) throws UnauthorizedException, Exception;
 
     void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
-            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
-            String yellowBrickPassword) throws Exception;
+            boolean trackWind, final boolean correctWindByDeclination, String creatorUsername,
+            String raceUrl) throws Exception;
 
     void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
             String yellowBrickPassword);

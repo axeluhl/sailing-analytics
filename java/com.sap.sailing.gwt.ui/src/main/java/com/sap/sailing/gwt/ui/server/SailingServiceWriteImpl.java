@@ -599,14 +599,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
-            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
-            String yellowBrickPassword) throws Exception {
+            boolean trackWind, final boolean correctWindByDeclination, String creatorUsername,
+            String raceUrl) throws Exception {
         logger.info(
                 "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
         for (YellowBrickRaceRecordDTO rr : rrs) {
             try {
                 getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.getRaceUrl(),
-                        getRaceLogStore(), getRegattaLogStore(), yellowBrickUsername, yellowBrickPassword, trackWind,
+                        getRaceLogStore(), getRegattaLogStore(), creatorUsername, raceUrl, trackWind,
                         correctWindByDeclination);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);

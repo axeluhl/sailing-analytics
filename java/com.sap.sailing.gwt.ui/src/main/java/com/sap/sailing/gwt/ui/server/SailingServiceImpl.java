@@ -6228,7 +6228,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 ybConfig -> {
                     final YellowBrickConfigurationWithSecurityDTO config = new YellowBrickConfigurationWithSecurityDTO(
                         ybConfig.getName(), ybConfig.getRaceUrl(),
-                        ybConfig.getUsername(), ybConfig.getPassword(), ybConfig.getCreatorName());
+                        ybConfig.getUsername(), /* don't sent password to client */ null, ybConfig.getCreatorName());
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
                     return config;
                 });
