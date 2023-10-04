@@ -67,7 +67,6 @@ public class TracTracConnectionTableWrapper extends
         this.stringMessagesClient = stringMessages;
         this.sailingServiceWriteAsync = sailingServiceWriteAsync;
         final ListHandler<TracTracConfigurationWithSecurityDTO> tracTracAccountColumnListHandler = getColumnSortHandler();
-
         // table
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountNameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getName(), tracTracAccountColumnListHandler);
@@ -110,7 +109,6 @@ public class TracTracConnectionTableWrapper extends
                 }
             }, userService, errorReporter).show();
         });
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
             sailingServiceWriteAsync.deleteTracTracConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
@@ -151,8 +149,7 @@ public class TracTracConnectionTableWrapper extends
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-        filterField
-                .setUpdatePermissionFilterForCheckbox(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
+        filterField.setUpdatePermissionFilterForCheckbox(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(tracTracAccountColumnListHandler);
         table.addColumn(tracTracAccountNameColumn, getStringMessages().name());

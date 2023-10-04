@@ -31,7 +31,6 @@ public class TracTracConnectionEditDialog extends TracTracConnectionDialog {
         jsonURLTextBox.setText(dtotoEdit.getJsonUrl());
         tracTracUpdateURITextBox.setText(dtotoEdit.getCourseDesignUpdateURI()==null?"":dtotoEdit.getCourseDesignUpdateURI());
         tractracUsernameTextBox.setText(dtotoEdit.getTracTracUsername());
-        tractracPasswordTextBox.setText(dtotoEdit.getTracTracPassword());
         super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty());
     }
 }

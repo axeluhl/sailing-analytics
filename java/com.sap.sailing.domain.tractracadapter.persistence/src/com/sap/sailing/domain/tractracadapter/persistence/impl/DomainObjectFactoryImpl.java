@@ -12,6 +12,7 @@ import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory;
+import com.sap.sse.security.interfaces.UserStore;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -44,22 +45,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private TracTracConfiguration loadTracTracConfiguration(Document object) {
-        Object courseDesignUpdateUriObject = object.get(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name());
-        Object tracTracUsernameObject = object.get(FieldNames.TT_CONFIG_TRACTRAC_USERNAME.name());
-        Object tracTracPasswordObject = object.get(FieldNames.TT_CONFIG_TRACTRAC_PASSWORD.name());
-        
-        String courseDesignUpdateUri = courseDesignUpdateUriObject == null ? "" : (String) courseDesignUpdateUriObject;
-        String tracTracUsername = tracTracUsernameObject == null ? "" : (String) tracTracUsernameObject;
-        String tracTracPassword = tracTracPasswordObject == null ? "" : (String) tracTracPasswordObject;
+        final Object courseDesignUpdateUriObject = object.get(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name());
+        final Object tracTracUsernameObject = object.get(FieldNames.TT_CONFIG_TRACTRAC_USERNAME.name());
+        final Object tracTracPasswordObject = object.get(FieldNames.TT_CONFIG_TRACTRAC_PASSWORD.name());
+        final String courseDesignUpdateUri = courseDesignUpdateUriObject == null ? "" : (String) courseDesignUpdateUriObject;
+        final String tracTracUsername = tracTracUsernameObject == null ? "" : (String) tracTracUsernameObject;
+        final String tracTracPassword = tracTracPasswordObject == null ? "" : (String) tracTracPasswordObject;
         String creatorName = (String) object.get(FieldNames.TT_CONFIG_CREATOR_NAME.name());
-        String jsonURL = (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name());
-        
+        final String jsonURL = (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name());
         final boolean needsUpdate = (creatorName == null);
         if (needsUpdate) {
             // No creator is set yet -> existing configurations are assumed to belong to the admin
-            creatorName = "admin";
+            creatorName = UserStore.ADMIN_USERNAME;
         }
-        
         final TracTracConfiguration loadedTracTracConfiguration = tracTracDomainFactory.createTracTracConfiguration(
                 creatorName,
                 (String) object.get(FieldNames.TT_CONFIG_NAME.name()),
@@ -69,7 +67,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 courseDesignUpdateUri,
                 tracTracUsername,
                 tracTracPassword);
-        
         if (needsUpdate) {
             // recreating the config on the DB because the composite key changed
             new MongoObjectFactoryImpl(database).deleteTracTracConfiguration(null, jsonURL);

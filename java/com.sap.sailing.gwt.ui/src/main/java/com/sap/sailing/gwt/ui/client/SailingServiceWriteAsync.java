@@ -329,6 +329,10 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations,
             AsyncCallback<Void> callback);
 
+    /**
+     * @param tracTracConfiguration when the {@link TracTracConfigurationWithSecurityDTO#getTracTracPassword() password}
+     * field of the configuration is {@code null}, the password will not be updated.
+     */
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
             AsyncCallback<Void> callback);
 
