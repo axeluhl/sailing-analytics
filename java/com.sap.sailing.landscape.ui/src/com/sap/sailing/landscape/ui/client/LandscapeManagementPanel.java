@@ -1367,6 +1367,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         refreshMachineImagesTable();
         sshKeyManagementPanel.showKeysInRegion(mfaLoginWidget.hasValidSessionCredentials() ?
                 regionsTable.getSelectionModel().getSelectedObject() : null);
+        
     }
 
     private void storeRegionSelection(UserService userService, String selectedRegion) {

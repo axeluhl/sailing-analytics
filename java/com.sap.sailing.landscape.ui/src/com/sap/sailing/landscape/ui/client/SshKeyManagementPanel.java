@@ -51,6 +51,9 @@ public class SshKeyManagementPanel extends VerticalPanel {
     private final RefreshableSingleSelectionModel<String> regionSelectionModel;
     private final Label passphraseStatus;
     private final Label passphraseText;
+    private final Button addButton;
+    private final Button generateButton;
+    private final AwsAccessKeyProvider awsAccessKeyProvider;
     
     public SshKeyManagementPanel(StringMessages stringMessages, UserService userService,
             LandscapeManagementWriteServiceAsync landscapeManagementService, AdminConsoleTableResources tableResources,
@@ -63,11 +66,12 @@ public class SshKeyManagementPanel extends VerticalPanel {
         this.passphraseStatus = new Label();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredLandscapeTypes.SSH_KEY);
         add(buttonPanel);
-        final Button addButton = buttonPanel.addCreateAction(stringMessages.add(), ()->{
+        this.awsAccessKeyProvider = awsAccessKeyProvider;
+        addButton = buttonPanel.addCreateAction(stringMessages.add(), ()->{
             openAddSshKeyDialog(stringMessages, awsAccessKeyProvider);
         });
         addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
-        final Button generateButton = buttonPanel.addCreateAction(stringMessages.generate(), ()->{
+        generateButton = buttonPanel.addCreateAction(stringMessages.generate(), ()->{
             openGenerateSshKeyDialog(stringMessages, awsAccessKeyProvider);
         });
         generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
@@ -163,6 +167,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
             }
          });
         });
+        
         regionSelectionModel.addSelectionChangeHandler(e->{
             if (awsAccessKeyProvider.hasValidSessionCredentials()) {
                 showKeysInRegion(regionSelectionModel.getSelectedObject());
@@ -245,6 +250,10 @@ public class SshKeyManagementPanel extends VerticalPanel {
     public void showKeysInRegion(String regionId) {
         sshKeyTable.getFilterPanel().removeAll();
         if (regionId != null) {
+            if (awsAccessKeyProvider.hasValidSessionCredentials()) {
+                addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+                generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+            }
             sshKeyLoadingBusy.setBusy(true);
             landscapeManagementService.getSshKeys(regionId, new AsyncCallback<ArrayList<SSHKeyPairDTO>>() {
                 @Override
@@ -259,6 +268,9 @@ public class SshKeyManagementPanel extends VerticalPanel {
                     sshKeyLoadingBusy.setBusy(false);
                 }
             });
+        } else {
+            addButton.setEnabled(false);
+            generateButton.setEnabled(false);
         }
     }
 
