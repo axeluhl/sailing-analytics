@@ -301,15 +301,17 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      * @param useInternalMarkPassingAlgorithm
      *            whether or not to ignore the TracTrac-provided mark passings; if <code>true</code>, a separate mark
      *            passing calculator is used, and the TracTrac-provided ones are ignored.
-     * @param storedURImay
-     *            be <code>null</code> or the empty string in which case the server will use the
+     * @param storedURI
+     *            may be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
+     * @param jsonUrlAsKey
+     *            identifies the TracTrac connection parameters which in particular can be used to obtain the
+     *            username/password combination for the update URI because we don't send these to the client
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
-            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
-            String tracTracPassword, AsyncCallback<Void> callback);
+            boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, List<SwissTimingRaceRecordDTO> rrs, String hostname,
             int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,

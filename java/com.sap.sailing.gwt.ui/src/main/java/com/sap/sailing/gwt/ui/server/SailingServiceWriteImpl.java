@@ -554,10 +554,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
             String courseDesignUpdateURI, boolean trackWind, final boolean correctWindByDeclination,
             final Duration offsetToStartTimeOfSimulatedRace, final boolean useInternalMarkPassingAlgorithm,
-            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername, String tracTracPassword)
+            boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey)
             throws Exception {
         logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURI
                 + " and storedURI " + storedURI);
+        final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
                 // reload JSON and load clientparams.php
@@ -587,8 +588,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                         new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()), getRaceLogStore(),
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                        offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
-                        tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
+                        offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, config == null ? null : config.getTracTracUsername(),
+                        config == null ? null : config.getTracTracPassword(), record.getRaceStatus(), record.getRaceVisibility(), trackWind,
                         correctWindByDeclination, useOfficialEventsToUpdateRaceLog);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
@@ -663,7 +664,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 getTracTracAdapter().createTracTracConfiguration(tracTracConfiguration.getCreatorName(),
                 tracTracConfiguration.getName(), tracTracConfiguration.getJsonUrl(),
                 tracTracConfiguration.getLiveDataURI(), tracTracConfiguration.getStoredDataURI(),
-                tracTracConfiguration.getCourseDesignUpdateURI(), tracTracConfiguration.getTracTracUsername(),
+                tracTracConfiguration.getUpdateURI(), tracTracConfiguration.getTracTracUsername(),
                         tracTracConfiguration.getTracTracPassword()));
     }
 

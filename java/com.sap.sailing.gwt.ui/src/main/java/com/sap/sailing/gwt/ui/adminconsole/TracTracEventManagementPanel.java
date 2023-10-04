@@ -132,7 +132,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
                                 sailingServiceWrite.createTracTracConfiguration(editedConnection.getName(),
                                         editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
                                         editedConnection.getStoredDataURI(),
-                                        editedConnection.getCourseDesignUpdateURI(),
+                                        editedConnection.getUpdateURI(),
                                         editedConnection.getTracTracUsername(), editedConnection.getTracTracPassword(),
                                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                             @Override
@@ -502,9 +502,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
                 .getSelectedSet().iterator().next();
         String liveURI = selectedConnection.getLiveDataURI();
         String storedURI = selectedConnection.getStoredDataURI();
-        String courseDesignUpdateURI = selectedConnection.getCourseDesignUpdateURI();
-        String tractracUsername = selectedConnection.getTracTracUsername();
-        String tractracPassword = selectedConnection.getTracTracPassword();
+        String updateURI = selectedConnection.getUpdateURI();
+        String jsonUrlAsKey = selectedConnection.getJsonUrl(); // key for the connection
         RegattaDTO selectedRegatta = getSelectedRegatta(); // null meaning "Default Regatta" selection
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
@@ -525,9 +524,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
             sailingServiceWrite.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
-                    courseDesignUpdateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings,
-                    useOfficialResultsToUpdateRaceLogs, tractracUsername,
-                    tractracPassword, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    updateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings,
+                    useOfficialResultsToUpdateRaceLogs, jsonUrlAsKey,
+                    new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             reportError(stringMessages.errorTryingToRegisterRacesForTracking(selectedRaces.toString(), caught.getMessage()));

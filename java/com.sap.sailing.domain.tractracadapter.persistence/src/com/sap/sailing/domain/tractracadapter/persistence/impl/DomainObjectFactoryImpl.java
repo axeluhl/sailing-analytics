@@ -29,7 +29,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Iterable<TracTracConfiguration> getTracTracConfigurations() {
-        List<TracTracConfiguration> result = new ArrayList<TracTracConfiguration>();
+        final List<TracTracConfiguration> result = new ArrayList<TracTracConfiguration>();
         try {
             MongoCollection<org.bson.Document> ttConfigs = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
             for (Document o : ttConfigs.find()) {
@@ -42,6 +42,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "getTracTracConfigurations", e);
         }
         return result;
+    }
+    
+    @Override
+    public TracTracConfiguration getTracTracConfiguration(String jsonUrl) {
+        MongoCollection<org.bson.Document> ttConfigs = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        return loadTracTracConfiguration(ttConfigs.find(MongoObjectFactoryImpl.getMongoQueryForJsonUrl(jsonUrl)).first());
     }
     
     private TracTracConfiguration loadTracTracConfiguration(Document object) {

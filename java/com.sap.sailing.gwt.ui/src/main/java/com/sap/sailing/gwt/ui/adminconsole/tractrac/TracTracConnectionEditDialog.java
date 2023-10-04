@@ -29,7 +29,7 @@ public class TracTracConnectionEditDialog extends TracTracConnectionDialog {
         storedURITextBox.setText(dtotoEdit.getStoredDataURI()==null?"":dtotoEdit.getStoredDataURI());
         liveURITextBox.setText(dtotoEdit.getLiveDataURI()==null?"":dtotoEdit.getLiveDataURI());
         jsonURLTextBox.setText(dtotoEdit.getJsonUrl());
-        tracTracUpdateURITextBox.setText(dtotoEdit.getCourseDesignUpdateURI()==null?"":dtotoEdit.getCourseDesignUpdateURI());
+        tracTracUpdateURITextBox.setText(dtotoEdit.getUpdateURI()==null?"":dtotoEdit.getUpdateURI());
         tractracUsernameTextBox.setText(dtotoEdit.getTracTracUsername());
         super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty());
     }

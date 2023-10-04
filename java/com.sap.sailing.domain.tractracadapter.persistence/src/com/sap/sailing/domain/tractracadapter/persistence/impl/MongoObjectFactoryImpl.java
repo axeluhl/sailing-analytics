@@ -54,7 +54,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return getMongoQueryForJsonUrl(jsonUrl);
     }
 
-    private Document getMongoQueryForJsonUrl(final String jsonUrl) {
+    static Document getMongoQueryForJsonUrl(final String jsonUrl) {
         final Document updateQuery = new Document(FieldNames.TT_CONFIG_JSON_URL.name(), jsonUrl);
         return updateQuery;
     }
