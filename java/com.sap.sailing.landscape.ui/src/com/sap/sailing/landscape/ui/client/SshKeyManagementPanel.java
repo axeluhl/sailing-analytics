@@ -164,25 +164,25 @@ public class SshKeyManagementPanel extends VerticalPanel {
          });
         });
         regionSelectionModel.addSelectionChangeHandler(e->{
-            boolean valid = awsAccessKeyProvider.hasValidSessionCredentials();
-            if (valid) {
+            final boolean validSessionCredentials = awsAccessKeyProvider.hasValidSessionCredentials();
+            if (validSessionCredentials) {
                 showKeysInRegion(regionSelectionModel.getSelectedObject());
             }
-            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
-            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
+            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null && validSessionCredentials);
+            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null && validSessionCredentials);
         });
         addSshKeySelectionChangedHandler(event -> {
             boolean value = sshKeyTable.getSelectionModel().getSelectedObject() != null;
             sshPrivateKeyPassphrase.setVisible(value);
             passphraseText.setVisible(value);
             passphraseStatus.setVisible(value);
-        } );
-        awsAccessKeyProvider.addListener(valid -> {
-            if (valid) {
+        });
+        awsAccessKeyProvider.addListener(validSessionCredentials -> {
+            if (validSessionCredentials) {
                 showKeysInRegion(regionSelectionModel.getSelectedObject());
             }
-            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
-            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null && valid);
+            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null && validSessionCredentials);
+            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null && validSessionCredentials);
         });
     }
     

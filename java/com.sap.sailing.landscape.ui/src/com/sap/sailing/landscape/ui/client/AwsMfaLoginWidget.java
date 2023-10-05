@@ -128,6 +128,7 @@ public class AwsMfaLoginWidget extends VerticalPanel implements AwsAccessKeyProv
         checkSessionCredentials();
     }
     
+    @Override
     public void addListener(AwsMfaLoginListener listener) {
         listeners.add(listener);
     }
