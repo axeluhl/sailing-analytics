@@ -131,6 +131,10 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
             AsyncCallback<Void> asyncCallback);
 
+    /**
+     * Passwords are erased from {@link TracTracConfigurationWithSecurityDTO#getTracTracPassword()} which will
+     * always return {@code null} for the objects sent to the callback's {@link AsyncCallback#onSuccess(Object)} method.
+     */
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationWithSecurityDTO>> callback);
 
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources,
