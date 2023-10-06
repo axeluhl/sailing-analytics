@@ -242,3 +242,6 @@ In such cases it might help to set AWT to headless mode (`-Djava.awt.headless=tr
 
 ### GWT Browser Plugin 
 Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work. The Plugin can be found on this page: [https://code.google.com/archive/p/google-web-toolkit/downloads](https://code.google.com/archive/p/google-web-toolkit/downloads)
+
+### Create Hudson Job
+If you want a hudson job to run when you push your branch then you can run a script in `configuration` called . Run options for a branch titled `createHudsonJobForBug.sh`. For you bug branch titled `bug<bug number>`, create a build job, which will create a release, by running the script like so: `./createHudsonJobForBug.sh <bug number>`.
