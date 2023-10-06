@@ -320,23 +320,26 @@
  margin: 0 auto;
  width: 140px;
 }
-
 /* Small screens */
 @media ( max-width: 400px) {
- .featureCheck {
-  margin: 0 15px;
- }
- .featureNone {
-  margin: 0 15px;
- }
- .featureHeader {
-  -ms-writing-mode: tb-rl;
-  -webkit-writing-mode: vertical-rl;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  white-space: nowrap;
-  width: auto;
- }
+	.featureCheck {
+		margin: 0 0 0 8px;
+	}
+	.featureNone {
+		margin: 0 0 0 8px;
+	}
+	.featureHeader {
+		-ms-writing-mode: tb-rl;
+		-webkit-writing-mode: vertical-rl;
+		writing-mode: vertical-rl;
+		transform: rotate(180deg);
+		white-space: nowrap;
+		width: auto;
+		text-align: left;
+	}
+	.featureCheck img {
+		width: 19px;
+	}
 }
 
 .buttonWarning {

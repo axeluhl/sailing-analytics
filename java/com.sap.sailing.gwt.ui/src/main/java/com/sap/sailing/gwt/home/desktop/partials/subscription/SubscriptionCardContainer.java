@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.partials.subscription;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.MissingResourceException;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -58,8 +59,8 @@ public class SubscriptionCardContainer extends Composite {
         for (final SubscriptionPlan.PlanCategory category : SubscriptionPlan.PlanCategory.getCategoriesWithFeature()) {
             rowIndex++;
             final Label title = new Label(i18n.getString(category.getId() + "_name"));
-            title.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
             featureGrid.setWidget(0, rowIndex, title);
+            featureGrid.getCellFormatter().addStyleName(0, rowIndex, SubscriptionCardResources.INSTANCE.css().featureHeader());
         }
         // add features to list
         for (final String featureId : SubscriptionPlan.PlanCategory.getAllFeatureIds()) {
@@ -76,23 +77,20 @@ public class SubscriptionCardContainer extends Composite {
     }
 
     private void addFeature(final String featureId) {
-        String titleString = i18n.getString(featureId + "_title");
-        String descriptionString = i18n.getString(featureId + "_description");
-        String urlString = i18n.getString(featureId + "_url");
         int currentRowIndex = featureGrid.getRowCount();
         // get size but index starts with 0 therefore row count is current index + 1
         featureGrid.resizeRows(currentRowIndex + 1);
         VerticalPanel line = new VerticalPanel();
+        String titleString = i18n.getString(featureId + "_title");
+        String descriptionString = i18n.getString(featureId + "_description");
         // title
         Label title = new Label(titleString);
         title.addStyleName(SubscriptionCardResources.INSTANCE.css().featureTitle());
         line.add(title);
         // description
-        if (urlString == null || urlString.trim().isEmpty()) {
-            Label description = new Label(descriptionString);
-            description.addStyleName(SubscriptionCardResources.INSTANCE.css().featureDescription());
-            line.add(description);
-        } else {
+        try {            
+            String urlString = i18n.getString(featureId + "_url");
+            // add a description with link
             SimplePanel descriptionWithLink = new SimplePanel();
             HTML exampleLink = new HTML(descriptionString + "&nbsp;<a href=\""
                     + new SafeHtmlBuilder().appendEscaped(urlString).toSafeHtml().asString() + "\" title=\""
@@ -102,6 +100,11 @@ public class SubscriptionCardContainer extends Composite {
             descriptionWithLink.addStyleName(SubscriptionCardResources.INSTANCE.css().featureDescription());
             descriptionWithLink.add(exampleLink);
             line.add(descriptionWithLink);
+        } catch (MissingResourceException e) {
+            // add a description without link
+            Label description = new Label(descriptionString);
+            description.addStyleName(SubscriptionCardResources.INSTANCE.css().featureDescription());
+            line.add(description);
         }
         featureGrid.setWidget(currentRowIndex, TITLE_DESCRIPTION_ROW, line);
         // create check marks
