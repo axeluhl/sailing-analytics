@@ -329,14 +329,18 @@
 		margin: 0 0 0 8px;
 	}
 	.featureHeader {
-		-ms-writing-mode: tb-rl;
-		-webkit-writing-mode: vertical-rl;
-		writing-mode: vertical-rl;
-		transform: rotate(180deg);
 		white-space: nowrap;
 		width: auto;
 		text-align: left;
+		vertical-align: bottom;
 	}
+	.featureHeader div {
+        -ms-writing-mode: tb-rl;
+        -webkit-writing-mode: vertical-rl;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+	}
+	.featureHeader
 	.featureCheck img {
 		width: 19px;
 	}
