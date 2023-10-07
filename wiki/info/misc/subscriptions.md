@@ -58,34 +58,24 @@ To edit text of business model description you can adjust the texts in resouce c
 
 To add, remove or edit a feature of the feature list
 
-1. Add following texts to class (and related property files)
+1. Add a feature to all plan categories it is included in. Therefore, add the feature id to the categories in
+
+		com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory
+
+2. Add the text keys to `SubscriptionStringConstants` and maintain related labels in the property files.
+
+	Text resource file:
 
 		com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants
+
+	Key pattern (all three keys are mandatory needed, but url can be empty, then the link element will not be rendered):
 
 	- `<FEATURE-ID>_title`
    		- Name or title of the feature
 	- `<FEATURE-ID>_description`
   		- A description of the feature
-	- `<FEATURE-ID>_link`
-  		- An __optional__ link to an external resource like picture, video or homepage
-
-2. Register feateure with the &lt;FEATURE-ID&gt; in class
-
-		com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardContainer
-	
-	as pure textual feature or feature with link. The boolean values activate or deactivate the checkboxes for the FREE and PREMIUM diff view.
-
-	    public SubscriptionCardContainer() {
-	        initWidget(uiBinder.createAndBindUi(this));
-	        addFeature("features_live_analytics", true, true);
-	        addFeatureWithLink("features_organize_events", false, true);
-
-Short names for the diff view can be defined with following keys
-
- - `free_subscription_plan_shortname`
- - `premium_subscription_plan_shortname`
- 
- They will be displayed in uppercase letters.
+	- `<FEATURE-ID>_url`
+  		- An __optional__ url to an external resource like picture, video or homepage
 
 ## Cancellation
 
