@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.desktop.places.qrcode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.MailInvitationType;
@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.AbstractBasePlace;
  *
  */
 public class QRCodePlace extends AbstractBasePlace {
-
+    private static final Logger logger = Logger.getLogger(QRCodePlace.class.getName());
     public static final String PARAM_REGATTA_NAME = "regatta_name";
     public static final String PARAM_REGATTA_SECRET = "secret";
     private static final String PARAM_MODE = "mode";
@@ -79,44 +79,44 @@ public class QRCodePlace extends AbstractBasePlace {
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
             targetServer = Window.Location.getParameter(PARAM_SERVER);
-            if (mode.isPublicInvite()) {
+            if (isPublicInviteRequest()) {
                 // alternative direct link version
                 publicRegattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
                 regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
                 if (publicRegattaName == null || regattaRegistrationLinkSecret == null || targetServer == null) {
-                    GWT.log("Missing parameter for regatta, secret or server");
+                    logger.severe("Missing parameter for regatta, secret or server");
                 }
             } else {
                 rawCheckInUrl = Window.Location.getParameter(DeviceMappingConstants.URL_CHECKIN_URL);
                 if (rawCheckInUrl != null) {
                     parseUrl(rawCheckInUrl);
                     if (leaderboardName == null) {
-                        GWT.log("No parameter " + DeviceMappingConstants.URL_LEADERBOARD_NAME + " found!");
+                        logger.severe("No parameter " + DeviceMappingConstants.URL_LEADERBOARD_NAME + " found!");
                     }
                     if (competitorId == null
                             && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                        GWT.log("No parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING + " found!");
+                        logger.severe("No parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING + " found!");
                     }
                     if (boatId == null && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                        GWT.log("No parameter " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING + " found!");
+                        logger.severe("No parameter " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING + " found!");
                     }
                     if (markId == null && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                        GWT.log("No parameter " + DeviceMappingConstants.URL_MARK_ID_AS_STRING + " found!");
+                        logger.severe("No parameter " + DeviceMappingConstants.URL_MARK_ID_AS_STRING + " found!");
                     }
                     if ((competitorId != null || boatId != null || markId != null)
                             && mode == InvitationMode.BOUY_TENDER) {
-                        GWT.log("Found parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING
+                        logger.warning("Found parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING
                                 + " will be ignored in bouy tender mode!");
                     }
                     if (eventId == null) {
-                        GWT.log("No parameter " + DeviceMappingConstants.URL_EVENT_ID + " found!");
+                        logger.severe("No parameter " + DeviceMappingConstants.URL_EVENT_ID + " found!");
                     }
                 } else {
-                    GWT.log("No parameter " + DeviceMappingConstants.URL_CHECKIN_URL + " found!");
+                    logger.severe("No parameter " + DeviceMappingConstants.URL_CHECKIN_URL + " found!");
                 }
             }
         } catch (Exception e) {
-            GWT.log("No parameter " + PARAM_MODE + " found, or value not valid");
+            logger.severe("No parameter " + PARAM_MODE + " found, or value not valid");
         }
     }
 
@@ -135,28 +135,28 @@ public class QRCodePlace extends AbstractBasePlace {
                 try {
                     eventId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid " + DeviceMappingConstants.URL_EVENT_ID);
+                    logger.severe("Invalid " + DeviceMappingConstants.URL_EVENT_ID);
                     eventId = null;
                 }
             } else if (DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING.equals(parameter.getA())) {
                 try {
                     competitorId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
+                    logger.severe("Invalid " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
                     competitorId = null;
                 }
             } else if (DeviceMappingConstants.URL_BOAT_ID_AS_STRING.equals(parameter.getA())) {
                 try {
                     boatId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING);
+                    logger.severe("Invalid " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING);
                     boatId = null;
                 }
             } else if (DeviceMappingConstants.URL_MARK_ID_AS_STRING.equals(parameter.getA())) {
                 try {
                     markId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid " + DeviceMappingConstants.URL_MARK_ID_AS_STRING);
+                    logger.severe("Invalid " + DeviceMappingConstants.URL_MARK_ID_AS_STRING);
                     boatId = null;
                 }
             } else if (DeviceMappingConstants.URL_LEADERBOARD_NAME.equals(parameter.getA())) {
@@ -175,7 +175,7 @@ public class QRCodePlace extends AbstractBasePlace {
 
         Collection<Pair<String, String>> pairs = new ArrayList<Pair<String, String>>();
         if (urlArguments.length < 2) {
-            GWT.log("No parameters found!");
+            logger.severe("No parameters found!");
         } else {
             String[] urlParams = urlArguments[1].split("&");
             for (String urlParam : urlParams) {
@@ -252,5 +252,25 @@ public class QRCodePlace extends AbstractBasePlace {
         public QRCodePlace getPlace(String token) {
             return new QRCodePlace(token);
         }
+    }
+
+    /**
+     * Check if available URL parameter are indicating a competitor/boat request.
+     * 
+     * @return true if it is a competitor request (former COMPETITOR, COMPETITOR_2 or COMPETITOR_3 mode)
+     */
+    static boolean isCompetitorOrBoatRequest() {
+        return Window.Location.getParameter(DeviceMappingConstants.URL_CHECKIN_URL) != null;
+    }
+
+    /**
+     * Check if available URL parameter are indicating a public invite request.
+     * 
+     * @return true if it is a public invite request (former PUBLIC_INVITE or PUBLIC_INVITE3 mode)
+     */
+    static boolean isPublicInviteRequest() {
+        return Window.Location.getParameter(QRCodePlace.PARAM_REGATTA_NAME) != null
+                && Window.Location.getParameter(QRCodePlace.PARAM_REGATTA_SECRET) != null
+                && Window.Location.getParameter(QRCodePlace.PARAM_SERVER) != null;
     }
 }
