@@ -22,6 +22,7 @@ A basic rundown of *what's what*, so you can dive into the other documentation m
 - A **mark** is any position a boat must pass on a required side.
 - A **tack** is a manoeuvre where the boat turns into the headwind (pointing into the wind) and then through.
 - **Velocity made good** is speed towards or from the wind direction.
+- Races, within a regatta, may be **discarded**. This is completely different to a penalty. If there is a discard, then each team's worst score is removed (if a team has two races with identical scores, the leaderboard will remove the earliest score). This typically only happens if there are 4 or more races. In the SAP Admin Console, in the Leaderboards panel, you can choose how many discards are allowed. We allow up to 15 discards! The Administrator types into the box next to the discard number, how many races are required to trigger the discard. This must increase for each discard.
 
 
 ## SuperDevMode vs DevMode (for GWT)
