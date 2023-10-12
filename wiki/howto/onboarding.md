@@ -245,3 +245,4 @@ Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Fi
 
 ### Create Hudson Job
 If you want a hudson job to run when you push your branch then you can run a script in `configuration` called . Run options for a branch titled `createHudsonJobForBug.sh`. For you bug branch titled `bug<bug number>`, create a build job, which will create a release, by running the script like so: `./createHudsonJobForBug.sh <bug number>`.
+If on Windows, you may need to disable any web shields in antivirus software, to allow `curl` to function.
