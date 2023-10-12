@@ -2,7 +2,7 @@
 
 I started out with a clean "Amazon Linux AMI 2015.03 (HVM), SSD Volume Type - ami-a10897d6" image from Amazon and added the existing Swap and Home snapshots as new volumes. The root/system volume I left as is, to start with. This requires having access to a user key that can be selected when launching the image.
 
-Enable the EPEL repository by issuing `yum-config-manager --enable epel/x86_64`.		
+Enable the EPEL repository by issuing `yum-config-manager --enable epel/x86_64` or `sudo amazon-linux-extras install epel -y`.		
 
 I then did a `yum update` and added the following packages:
 
@@ -23,7 +23,9 @@ I then did a `yum update` and added the following packages:
  - xterm
  - sendmail-cf
 
-In order to be able to connect to AWS DocumentDB instances, the corresponding certificate must be installed into the JVM's certificate store:
+I copied the JDK7/JDK8 installations, particularly the current sapjvm_8 VM, from an existing SL instance to /opt (using scp).
+
+In order to be able to connect to AWS DocumentDB instances, the corresponding certificate must be installed into the JVM's certificate store (2 separate commands):
 
 ```
    wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
@@ -77,7 +79,6 @@ MaxStartups 100
 to allow root shell login, and allow for several concurrent SSH connections (up to 100) starting up around the
 same time.
 
-I copied the JDK7/JDK8 installations, particularly the current sapjvm_8 VM, from an existing SL instance to /opt.
 
 I linked /etc/init.d/sailing to /home/sailing/code/configuration/sailing and added the following links to it:
 
