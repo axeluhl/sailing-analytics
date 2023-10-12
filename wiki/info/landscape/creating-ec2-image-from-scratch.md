@@ -2,7 +2,7 @@
 
 I started out with a clean "Amazon Linux AMI 2015.03 (HVM), SSD Volume Type - ami-a10897d6" image from Amazon and added the existing Swap and Home snapshots as new volumes. The root/system volume I left as is, to start with. This requires having access to a user key that can be selected when launching the image.
 
-Enable the EPEL repository by issuing `yum-config-manager --enable epel/x86_64`.		
+Enable the EPEL repository by issuing `yum-config-manager --enable epel/x86_64` or `sudo amazon-linux-extras install epel -y`.		
 
 I then did a `yum update` and added the following packages:
 
