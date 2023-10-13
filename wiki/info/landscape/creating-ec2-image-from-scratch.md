@@ -81,7 +81,8 @@ to allow root shell login, and allow for several concurrent SSH connections (up 
 same time.
 
 Furthermore, on recent AMIs, you may have to go to `/root/.ssh/authorized_keys` and remove the statements before the keys start, otherwise you might lock yourself out (because you can't access root but the new permissions block ec2-user access). If you are locked out, then you can use EC2 Instance Connect, which can be found by clicking on an instance and clicking connect.
-You may now logout.
+
+You may now _logout_.
 
 I linked /etc/init.d/sailing to /home/sailing/code/configuration/sailing and added the following links to it:
 
