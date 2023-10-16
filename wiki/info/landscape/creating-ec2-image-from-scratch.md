@@ -60,7 +60,7 @@ UUID=7d7e68a3-27a1-49ef-908f-a6ebadcc55bb       none    swap    sw      0       
 ```
 
 This will mount the swap space partition as well as the /home/sailing partition, /var/log/old and the Android SDK stuff required for local builds.
-
+Do the following steps (until it says otherwise) without logging out in between them:
 In `/etc/ssh/sshd_config` I commented the line
 
 ```
@@ -76,9 +76,13 @@ PermitRootLogin Yes
 MaxStartups 100
 ```
 
+
 to allow root shell login, and allow for several concurrent SSH connections (up to 100) starting up around the
 same time.
 
+Furthermore, on recent AMIs, you may have to go to `/root/.ssh/authorized_keys` and remove the statements before the keys start, otherwise you might lock yourself out (because you can't access root but the new permissions block ec2-user access). If you are locked out, then you can use EC2 Instance Connect, which can be found by clicking on an instance and clicking connect.
+
+You may now _logout_.
 
 I linked /etc/init.d/sailing to /home/sailing/code/configuration/sailing and added the following links to it:
 
