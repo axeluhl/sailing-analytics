@@ -99,6 +99,20 @@ Example link:
 `https://racemanager-app.sapsailing.com/invite?server_url=https://dev.sapsailing.com&device_config_identifier=Almere&device_config_uuid=1ea38a89-127c-41e5-aaee-b24e36ba0fa7&event_id=30b60b53-63b6-407b-8480-710ff5bf8aa6&priority=1&token=ZtKJq0TdC2EGPYM10jerQq5omp8U6EcoAmArs5J1sZg%3D`
 
 
-### Boye Pinger
+### Buoy Pinger
 
--- to be defined --
+#### Quick Link (branch.io)
+
+https://buoypinger-app.sapsailing.com/invite
+
+#### Create Link/QR-Code
+
+- goto `Admin Console -> Connectors - Smartphone Tracking`
+- select a leaderboard
+- click `Invite Buoy Tenders` action button
+- select an event and enter an email adress
+- send email which contains the QR-Code
+
+Example link:
+
+`https://buoypinger-app.sapsailing.com/invite?checkinUrl=https%3A%2F%2Fdev.sapsailing.com%2Fbuoy-tender%2Fcheckin%3Fevent_id%3D03b11a50-8446-43e9-878c-6cb60dc75715%26leaderboard_name%3DWorlds%2B2023%2B-%2BMen%2527s%2BKite%26secret%3D1MWDJFOO8NY4OWRR9UG9`
