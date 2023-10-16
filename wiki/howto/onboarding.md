@@ -124,6 +124,7 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
 - In "Web ⇒ Client-side JavaScript ⇒ Code Style ⇒ Formatter" import the CodeFormatter_JavaScript.xml for JavaScript from $GIT_HOME/java to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
 - In "Web ⇒ HTML Files ⇒ Editor" activate indent using Spaces
 - In "XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
+- For Eclipse-based debugging of GWT web applications with SDBG, make sure that Chrome is set as your default browser: "General ⇒ Web Browser". If missing, add a profile for Chrome and specify "%URL%" as the parameter.
 - Install Eclipse eGit (optional)
 
 
