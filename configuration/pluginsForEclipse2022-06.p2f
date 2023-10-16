@@ -149,5 +149,15 @@
         <repository location='http://aws.amazon.com/eclipse/site.xml'/>
       </repositories>
     </iu>
+    <iu id='org.eclipse.jst.ws.axis2tools.feature.feature.group' name='Axis2 Tools'>
+      <repositories size='1'>
+          <repository location='http://download.eclipse.org/webtools/updates/'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.wst.jsdt.feature.feature.group' name='JavaScript Developer Tools'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/webtools/updates/'/>
+      </repositories>
+    </iu>
   </ius>
 </p2f>
