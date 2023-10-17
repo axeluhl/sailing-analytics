@@ -91,8 +91,8 @@ Depending on the location of your local repository, it's filepaths might be too 
 Copy the settings.xml (may be in $GIT_HOME/configuration/maven-settings.xml and $GIT_HOME/configuration/maven-settings.xml) **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. 
 
 ### Automatic Eclipse plugin installation
-The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2022-06.p2f` file, found in the git repository cloned in _step 11_. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2022-06.p2f`. 
-Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
+The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2023-09.p2f` file, found in the git repository cloned in _step 11_. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2023-09.p2f`. 
+Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. In the pop-up dialog shown next, leave the top radio button selected ("Keep my installation the same and modify the items being installed to be compatible"). Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
 
 Be also aware that with this p2f-file it's not possible to update the plugins to newer versions. 
 
@@ -120,10 +120,11 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
 - In "Java ⇒ Compiler" set the Compiler compliance level to 1.8
 - In "Java ⇒ Installed JREs" add the Java 8 sdk and activate it. 
 - In "Java ⇒ Installed JREs ⇒ Execution Environments" make sure that the Java 8 JRE is selected for JavaSE-1.8 (if the jre is not listed open and close the preference Window once) 
-- For the next step, you may need to go to "Help ⇒ Install"; type _web_; then select _webtools_; click _web tools platform_; and then install the plugins.
+- For the next step, you may need to go to "Help ⇒ Install New Software"; type _web_; then select _webtools_; click _web tools platform_ (this may have changed since the time of writing, so use your best judgement); and then install the plugins.
 - In "Web ⇒ Client-side JavaScript ⇒ Code Style ⇒ Formatter" import the CodeFormatter_JavaScript.xml for JavaScript from $GIT_HOME/java to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
 - In "Web ⇒ HTML Files ⇒ Editor" activate indent using Spaces
 - In "XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
+- For Eclipse-based debugging of GWT web applications with SDBG, make sure that Chrome is set as your default browser: "General ⇒ Web Browser". If missing, add a profile for Chrome and specify "%URL%" as the parameter.
 - Install Eclipse eGit (optional)
 
 
@@ -245,3 +246,4 @@ Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Fi
 
 ### Create Hudson Job
 If you want a hudson job to run when you push your branch then you can run a script in `configuration` called . Run options for a branch titled `createHudsonJobForBug.sh`. For you bug branch titled `bug<bug number>`, create a build job, which will create a release, by running the script like so: `./createHudsonJobForBug.sh <bug number>`.
+If on Windows, you may need to disable any web shields in antivirus software, to allow `curl` to function.
