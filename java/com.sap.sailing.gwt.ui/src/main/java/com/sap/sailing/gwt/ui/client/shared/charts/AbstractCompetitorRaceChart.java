@@ -371,14 +371,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     /**
-     * Based on a time range and a {@link #getStepSizeInMillis() desired step size} computes an effective
-     * step size that observes a maximum number of fixes that may be queried in one request from the server
-     * ({@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY}). If the time range and the desired step
-     * size do not exceed this limit, the step size desired will be returned. Otherwise, the step size will be
-     * extended such that {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} fixes will be requested
-     * for the time range between {@code from} and {@code to}.
+     * Based on a time range and a {@link #getStepSizeInMillis() desired step size} computes an effective step size that
+     * observes a maximum number of fixes that may be queried in one request from the server
+     * ({@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY}). If the time range and the desired step size do
+     * not exceed this limit, the step size desired will be returned. Otherwise, the step size will be extended such
+     * that {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} fixes will be requested for the time range
+     * between {@code from} and {@code to}.
      * 
-     * @return the effective step size in milliseconds
+     * @return the effective step size in milliseconds; if {@code from} or {@code to} are {@code null}, 0 is returned,
+     *         assuming that then the server will compute a reasonable step size
      */
     private long getEffectiveStepSize(final Date from, final Date to) {
         return Math.max(getStepSizeInMillis(),
