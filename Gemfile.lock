@@ -218,6 +218,8 @@ DEPENDENCIES
   fastlane (> 0)
   fastlane-plugin-json
   fastlane-plugin-properties
+  highline (> 0)
+  json (> 0)
 
 BUNDLED WITH
    2.4.21
