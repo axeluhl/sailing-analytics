@@ -5,11 +5,11 @@
 trigger:
   branches:
     include:
-     - main
+     - hyperspace
 
 
 pr:
-- main
+- hyperspace
 
 #################################################################
 #################################################################
@@ -23,7 +23,7 @@ resources:
       name: SAPMobile/sap-mobile-pipeline
       endpoint: 'github.tools.sap'
       # Uncomment the line below this comment block if you want to pin a specific version
-      # By default, it will always take the latest commit on the main branch
+      # By default, it will always take the latest commit on the hyperspace branch
       # For available versions, please have a look here (use the tag, not the release name):
       # https://github.tools.sap/SAPMobile/sap-mobile-pipeline/releases
       # ----------
