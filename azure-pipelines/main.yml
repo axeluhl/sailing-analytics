@@ -1,0 +1,44 @@
+#################################################################
+####### Azure Pipeline for Android Applications #################
+#################################################################
+
+trigger:
+  branches:
+    include:
+     - main
+
+
+pr:
+- main
+
+#################################################################
+#################################################################
+#################################################################
+
+# Define yml templates for specific steps. They are hosted on an external GitHub repsitory.
+resources:
+  repositories:
+    - repository: sap-mobile-pipeline
+      type: githubenterprise
+      name: SAPMobile/sap-mobile-pipeline
+      endpoint: 'github.tools.sap'
+      # Uncomment the line below this comment block if you want to pin a specific version
+      # By default, it will always take the latest commit on the main branch
+      # For available versions, please have a look here (use the tag, not the release name):
+      # https://github.tools.sap/SAPMobile/sap-mobile-pipeline/releases
+      # ----------
+      # ref: 'refs/tags/1.0.0'
+
+#################################################################
+######################### Pipeline Start ########################
+#################################################################
+extends:
+  template: android.yml@sap-mobile-pipeline
+  parameters:
+    # Please check the pipeline documentation for available parameters:
+    #  https://pages.github.tools.sap/SAPMobile/Documentation/Pipelines/android-library/#configuration
+    repositoryName: 'sapsailing'
+    buildLaneName: 'releaseBuild'
+    testLaneName: 'test'
+    # requestAuthentication: true  # enable if fetching dependencies from Artifactory or Nexus
+    appCenterSlug: 'sapsailing/sapsailing-android-apps'
