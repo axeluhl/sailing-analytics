@@ -399,16 +399,16 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     public void addedToSelection(CompetitorDTO competitor) {
         if (isVisible()) {
             showLoading(stringMessages.loadingCompetitorData());
-            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<>();
+            final ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<>();
             competitorsToLoad.add(competitor);
             final TimeRange timeRangeToLoadForFirstMetric = TimeRange.create(
-                    TimePoint.of(primary.timeOfEarliestRequestInMillis),
-                    TimePoint.of(primary.timeOfLatestRequestInMillis));
+                    TimePoint.of(primary.timeOfEarliestRequestInMillis == null ? timeRangeWithZoomProvider.getFromTime() == null ? null : timeRangeWithZoomProvider.getFromTime().getTime() : primary.timeOfEarliestRequestInMillis),
+                    TimePoint.of(primary.timeOfLatestRequestInMillis == null ? timeRangeWithZoomProvider.getToTime() == null ? null : timeRangeWithZoomProvider.getToTime().getTime() : primary.timeOfLatestRequestInMillis));
             final TimeRange timeRangeToLoad;
             if (getSelectedSecondDetailType() != null) {
                 final TimeRange timeRangeToLoadForSecondMetric = TimeRange.create(
-                        TimePoint.of(secondary.timeOfEarliestRequestInMillis),
-                        TimePoint.of(secondary.timeOfLatestRequestInMillis));
+                        TimePoint.of(secondary.timeOfEarliestRequestInMillis == null ? timeRangeWithZoomProvider.getFromTime() == null ? null : timeRangeWithZoomProvider.getFromTime().getTime() : secondary.timeOfEarliestRequestInMillis),
+                        TimePoint.of(secondary.timeOfLatestRequestInMillis == null ? timeRangeWithZoomProvider.getToTime() == null ? null : timeRangeWithZoomProvider.getToTime().getTime() : secondary.timeOfLatestRequestInMillis));
                 timeRangeToLoad = timeRangeToLoadForFirstMetric.extend(timeRangeToLoadForSecondMetric);
             } else {
                 timeRangeToLoad = timeRangeToLoadForFirstMetric;
@@ -519,8 +519,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (tholder.timeOfEarliestRequestInMillis == null || tholder.timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
             tholder.timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
         }
-        if (tholder.timeOfLatestRequestInMillis == null || tholder.timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
-            tholder.timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        // FIXME bug5895: storing particularly the requestedToTime without knowing whether data up to there was delivered at all makes no sense
+        final Date oldestDateOfNewestData = chartData.getOldestDateOfNewestData();
+        if (tholder.timeOfLatestRequestInMillis == null || (oldestDateOfNewestData != null && tholder.timeOfLatestRequestInMillis < oldestDateOfNewestData.getTime())) {
+            tholder.timeOfLatestRequestInMillis = oldestDateOfNewestData == null ? null : oldestDateOfNewestData.getTime();
         }
         chart.redraw();
     }
@@ -534,8 +536,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     /**
-     * 
-     * @param competitor
      * @return A series in the chart, that can be used to show the data of a specific competitor.
      */
     protected Series getOrCreateCompetitorDataSeries(DetailType seriesDetailType, final CompetitorDTO competitor) {
@@ -544,7 +544,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         Series result = this.dataSeriesForDetailTypeAndCompetitor.get(coDePair);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.LINE);
-
             if (hasSecondYAxis()) {
                 result.setName(DetailTypeFormatter.format(seriesDetailType) + " " + competitor.getName());
             } else {
@@ -560,14 +559,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             result.setOption("turboThreshold", MAX_SERIES_POINTS);
             dataSeriesForDetailTypeAndCompetitor.put(coDePair, result);
         }
-
         result.setYAxis(yAxisIndex);
         return result;
     }
 
     /**
-     * 
-     * @param competitor
      * @return A series in the chart, that can be used to show the mark passings.
      */
     private Series getOrCreateCompetitorMarkPassingSeries(Series linkedCompetitorSeries, DetailType seriesDetailType, CompetitorDTO competitor) {
@@ -851,9 +847,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // is date before first cache entry or is cache empty?
             if (primary.timeOfEarliestRequestInMillis == null
                     || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
-                updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+                updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
             } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
-                updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */ true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
             break;
@@ -861,13 +857,13 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         case Replay: {
             if (primary.timeOfLatestRequestInMillis == null) {
                 // pure replay mode
-                updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
+                updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */ false);
             } else {
                 // replay mode during live play
                 if (primary.timeOfEarliestRequestInMillis == null || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
-                    updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+                    updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
                 } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
-                    updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                    updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */ true);
                 }
             }
             break;
