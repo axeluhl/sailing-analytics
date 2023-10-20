@@ -1,9 +1,9 @@
 #!/bin/bash
 BASE_URL=""
 BEARER_TOKEN=""
-
+CURRENT=$(cd /etc/httpd/conf && git rev-parse HEAD)
 cd /etc/httpd/conf && git fetch
-if [[ -n "$(git diff HEAD origin/main)" ]]
+if [[ $CURRENT != $(git rev-parse origin/main) ]]
 then
     echo "changing"
     cd /etc/httpd/conf && git merge origin/main #fastforward merge occurs
