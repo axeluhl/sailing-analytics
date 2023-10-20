@@ -16,8 +16,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * this class offers the UI components and validation rules that help in composing a UI that, among other things, allows a user
  * to configure the discarding thresholds.<p>
  * 
- * TODO produce error messages during validation
- * 
  * @author Axel Uhl (d043530)
  *
  */
