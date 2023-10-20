@@ -10,7 +10,13 @@ This is an add-on to the regular EC2 image set-up described [here](https://wiki.
 
 Then carry out these steps:
 
-* install additional packages: `yum install fail2ban git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel gcc-c++ ncurses-devel geoip-devel perl-autodie`
+* install additional packages:
+```
+  yum install fail2ban git mod24_perl perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL \
+              mod24_ssl php71 php71-mysqlnd mod24-ldap ruby24 ruby24-devel rubygems24 rubygems24-devel icu libicu-devel \
+              gcc-c++ ncurses-devel geoip-devel perl-autodie docker
+```
+
 * activate NFS by calling `chkconfig nfs on`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
 ```
 /var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
@@ -64,10 +70,10 @@ sinatra-2.0.0 depends on rack (~> 2.0)
 If you remove this gem, these dependencies will not be met.
 Continue with Uninstall? [yN]  y
 Successfully uninstalled rack-2.0.3
-
 ```
-* ensure there are users and groups for `wiki`, `scores`, `wordpress`, `trac` that match up with their /home directory owners / groups
+* ensure there are users and groups for `wiki`, `scores`, `trac` that match up with their /home directory owners / groups
 * ensure the Wiki startup script `serve.sh` configured for port 4567 and `config.ru` as well as the entire Gollum installation under /home/wiki are present, as well as the `users.yml` file
+* clone ``ssh://trac@sapsailing.com/home/trac/git`` into ``/home/wiki/gitwiki``
 * ensure there is a reasonable `/root/.goaccess` file
 * Configure goaccess by adjusting `/etc/goaccess.conf` such that it contains the following lines:
 ```
@@ -88,7 +94,49 @@ mv welcome.conf welcome.conf.org
 ```
 * install bugzilla to `/usr/share/bugzilla` and `/var/lib/bugzilla`
 * create `/etc/bugzilla/localconfig`
+* install scripts such as ``update_authorized_keys_for_landscape_managers_if_changed`` to ``/usr/local/bin``:
+```
+lrwxrwxrwx  1 root root       62 Jan 29  2022 awsmfalogon.sh -> /home/wiki/gitwiki/configuration/aws-automation/awsmfalogon.sh
+-r-xr-xr-x  1 root root     1465 Jan 11  2018 dbilogstrip
+-r-xr-xr-x  1 root root     6291 Jan 11  2018 dbiprof
+-r-xr-xr-x  1 root root     5479 Jan 11  2018 dbiproxy
+-rwxr-xr-x  1 root root 24707072 Jan 16  2022 docker-compose
+-r-xr-xr-x  1 root root    42043 Jan 11  2018 enc2xs
+-r-xr-xr-x  1 root root     3065 Jan 11  2018 encguess
+-rwxr-xr-x  1 root root      640 Jan 11  2018 github-markup
+-rwxr-xr-x  1 root root      598 Jan 11  2018 gollum
+-rwxr-xr-x  1 root root      613 Jan 11  2018 htmldiff
+-rwxr-xr-x  1 root root      610 Jan 11  2018 kramdown
+-rwxr-xr-x  1 root root      607 Jan 11  2018 ldiff
+-rwxr-xr-x  1 root root      352 Nov  1  2021 mail-events-on-my
+-rwxr-xr-x  1 root root      610 Jan 11  2018 mustache
+-rwxrwxr-x  1 trac trac    18992 Jun 16  2020 netio
+-rwxr-xr-x  1 root root      610 Jan 11  2018 nokogiri
+lrwxrwxrwx  1 root root       75 Oct 20 09:00 notify-operators -> /home/wiki/gitwiki/configuration/on-site-scripts/paris2024/notify-operators
+-r-xr-xr-x  1 root root     8356 Jan 11  2018 piconv
+-rwxr-xr-x  1 root root      648 Jan 11  2018 posix-spawn-benchmark
+-rwxr-xr-x  1 root root      590 Jan 11  2018 rackup
+-rwxr-xr-x  1 root root      596 Jan 11  2018 rougify
+-rwxr-xr-x  1 root root      616 Jan 11  2018 ruby-prof
+-rwxr-xr-x  1 root root      640 Jan 11  2018 ruby-prof-check-trace
+-rwxr-xr-x  1 root root      586 Jan 11  2018 tilt
+lrwxrwxrwx  1 root root       78 Feb  8  2021 update_authorized_keys_for_landscape_managers -> /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers
+lrwxrwxrwx  1 root root       89 Feb  8  2021 update_authorized_keys_for_landscape_managers_if_changed -> /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed
+```
+* set up ``crontab`` for ``root`` user (remove the symbolic link to ``/home/sailing/code/configuration/crontab`` if that had been created earlier)
+```
+0 10 1 * *  export PATH=/bin:/usr/bin:/usr/local/bin; mail-events-on-my >/dev/null 2>/dev/null
+* * * * *   export PATH=/bin:/usr/bin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); update_authorized_keys_for_landscape_managers_if_changed $( cat /root/ssh-key-reader.token ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
+0 7 2 * *   export PATH=/bin:/usr/bin:/usr/local/bin; docker exec -it registry-registry-1 registry garbage-collect /etc/docker/registry/config.yml
+```
 * set up crontab for user `wiki` as `*/10 * * * * /home/wiki/syncgit` and make sure the script is in place
+* ensure that ``/var/log/old/cache/docker`` makes it across from any previous installation to the new one; it contains the docker registry contents. See in particular ``/var/log/old/cache/docker/registry/docker/registry/v2/repositories``.
+* [install docker registry](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) so that the following containers are up and running:
+```
+CONTAINER ID   IMAGE                             COMMAND                  CREATED        STATUS        PORTS                                                 NAMES
+cd8086eb6361   joxit/docker-registry-ui:latest   "/docker-entrypoint.…"   6 months ago   Up 6 months   0.0.0.0:5000->80/tcp, :::5000->80/tcp                 registry-ui-1
+bcf1e278ecd7   registry:latest                   "/entrypoint.sh /etc…"   6 months ago   Up 6 months   5000/tcp, 0.0.0.0:5001->5001/tcp, :::5001->5001/tcp   registry-registry-1
+```
 * ensure that `https://git.sapsailing.com/git` delivers the git content, with password credentials defined in `/etc/httpd/conf/passwd.git`. Sasa Zivkov (sasa.zivkov@sap.com) has been our point of contact of the SAP Gerrit group helping us with replicating our Git repository to the SAP-internal git.wdf.sap.corp one.
 * comment `lbmethod_heartbeat_module` in /etc/httpd/conf.modules.d/00-proxy.conf because we don't need this sort of load balancing across origin servers and it causes a warning message in error_log
 * install awstats to `/usr/share/awstats`, establish `/etc/httpd/conf/passwd.awstats`, establish a configuration under `/etc/awstats`, establish AWStats data directory under `/var/lib/awstats` and create /etc/cron.weekly/awstats as follows:
@@ -99,7 +147,6 @@ su -l -c '/usr/share/awstats/tools/awstats_updateall.pl now         -configdir="
 exit 0
 ```
 * Follow the [mail setup](https://wiki.sapsailing.com/wiki/info/landscape/mail-relaying#setup-central-mail-server-instance-webserver) instructions
-* Install Wordpress
 * Install gollum Wiki
 * Copy git contents of ssh://trac@sapsailing.com/home/trac/git to /home/trac/git
 * Ensure there is a /home/scores directory with subdirectories `barbados`, `kiwo`, `sailwave`, `scores`, `velum`, and `xrrftp`.
@@ -120,7 +167,4 @@ logpath  = /var/log/secure
 maxretry = 5
 ```
 * Ensure that fail2ban will be started automatically when the instance starts: `chkconfig --level 23 fail2ban on` and start it right away with `service fail2ban start`. You can see which filters are active using `service fail2ban status`.
-
-## Appendix / Resources
-BACKUP_DIRECTORIES="/etc /home/trac/git /home/trac/mailinglists /home/trac/maven-repositories /home/trac/p2-repositories /home/trac/releases /home/trac/sapsailing_layouts.git /var/www/static /home/trac/crontab /home/scores /var/log/old"
-
+* Ensure you have EC2 / EBS snapshot backups for the volumes by tagging them as follows: ``WeeklySailingInfrastructureBackup=Yes`` for ``/var/www/static``, ``/var/log``, ``/var/log/old`` and ``/var/log/old/cache``, ``DailySailingBackup=Yes`` for ``/home``.
