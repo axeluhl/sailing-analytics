@@ -126,3 +126,42 @@ This will checkout the `android-xmake-release` branch, merge the `fa/rel-1.4` re
 Once this is done, a [Customer release build can be started](https://xmake-mobile-dev.wdf.sap.corp/job/sapsailingprogram/job/sapsailingcapture.android-SP-REL-common_directshipment/). Select "Build with Parameters" from the left, then select ``Stage`` as the build mode, then ``customer`` as the ``RELEASE_MODE`` and enter the ``fa/rel-1.4`` branch name in the "TREEISH" field and click the "Build" button. If the build succeeds, Final Assembly should be able to _promote_ the build artifact, such as the ``.apk`` files which should have been signed using the SAP certificate.
 
 If the build fails due to missing Nexus artifacts, check out the document describing [how to upload artifacts to Nexus](https://wiki.wdf.sap.corp/wiki/display/LeanDI/Uploading+Third+Party+Artifacts+to+Nexus#UploadingThirdPartyArtifactstoNexus-1.CreateaJiraTicket). You will have to create a JIRA ticked in this process and upload the artifact and its ``pom.xml`` file to Nexus. Usually, these requests get handled within less than 48 hours. Good luck...
+
+### Azure Pipelines Build for Android Apps
+
+As of January 2024, the xMake build infrastructure will be terminated. Projects have been requested to migrate their builds to Azure Pipelines. The creation of those pipelines is managed by an SAP-internal tool called [Hyperspace](https://hyperspace.tools.sap/). Pipelines are organized into "Groups" within Hyperspace. Those groups may share, e.g., secrets stored in a common Hashicorp Vault. But secrets may as well be managed separately per pipeline. As a prerequisite, all code must be made available in a Github repository that is owned by a Github "organization," not a personal user account. For this purpose, the SAP Sailing Analytics Git repository is now also available at [https://github.tools.sap/SAP-Sailing-Analytics/sapsailing](https://github.tools.sap/SAP-Sailing-Analytics/sapsailing). Furthermore, in order to use the Hyperspace templates for mobile projects, such as Android, the group responsible for Hyperspace needs to actively enable your user account for the use of those templates. Find more Hyperspace onboarding documentation [here](https://pages.github.tools.sap/SAPMobile/Documentation/GettingStarted/hyperspace/). Note that Hyperspace is accessible only from within the SAP network / VPN / Citrix Workplace; other elements of this, such as Github and Azure Pipelines can also be accessed from anywhere as long as you have your client certificate installed.
+
+When working with Hyperspace to prepare the creation of the actual Azure Pipeline, various credentials have to be provided or obtained, such as for the [Github Enterprise repository](https://github.tools.sap) and the [Microsoft AppCenter](https://appcenter.ms/) where a new organization must be created into which the apps get registered. Once all these steps have been completed successfully, the pipeline can be created:
+* Pipeline Name: ``sapsailing-android-apps``
+* Pipeline Description: Building the SAP Sailing Analytics Android Apps
+* Pipeline Group: ``SAP-Sailing-Analytics``
+Hyperspace produces a Git Pull Request (PR) for the main/master branch of the Github repository specified. As this was all experimental in the beginning, we cherry-picked some of the changes suggested by that PR into a new branch called ``hyperspace``, making the necessary adjustments to the "Fastlane" configuration so that when the build pipeline is actually invoked it will check out the ``hyperspace`` branch instead of ``main`` or ``master``. It was necessary to set the ``jdkVersion`` property in ``azure-pipelines/main.yml`` to ``11`` because with version 17 which is now used as default the build wouldn't run; and adjust the ``androidVersion`` in that same file to ``33``:
+
+```
+...
+#################################################################
+######################### Pipeline Start ########################
+#################################################################
+extends:
+  template: android.yml@sap-mobile-pipeline
+  parameters:
+    # Please check the pipeline documentation for available parameters:
+    #  https://pages.github.tools.sap/SAPMobile/Documentation/Pipelines/android-library/#configuration
+    repositoryName: 'sapsailing'
+    buildLaneName: 'releaseBuild'
+    testLaneName: 'test'
+    # requestAuthentication: true  # enable if fetching dependencies from Artifactory or Nexus
+    appCenterSlug: 'sapsailing/sapsailing-android-apps'
+    jdkVersion: 11
+    androidVersion: 33
+```
+
+The pipeline created by Hyperspace shows up [here](https://dev.azure.com/hyperspace-mobile/SAP-Sailing-Analytics/_build). Each push to the branch to which the configuration is bound will trigger a new build. The build processes and logs can then be seen [here](https://dev.azure.com/hyperspace-mobile/SAP-Sailing-Analytics/_build?definitionId=496).
+
+Our Gradle mobile build does not run any tests and hence does not produce any code coverage reports. Those, however, would be necessary in order to pass the build/quality step in the Azure Pipeline generated by Hyperspace. To overcome this problem, we committed a ``/dummy`` folder to the ``hyperspace`` branch in which we have an empty but valid ``TEST-dummy.xml`` test output file, and an empty yet valid Jacoco code coverage output file under ``jacoco/jacocoTestReport.xml``. This lets the "quality" stage of the Azure Pipeline pass without complaints.
+
+For code signing and release to the Google Play Store, further steps will be necessary. In ``fastlane/Appfile`` there is currently a single ``package_name`` declaration, and in ``fastlane/Fastfile`` there is a private "lane" definition ``generate_gav`` which is supposed to produce a file ``gav.json`` that seems to be required by the app signing process. It seems to come before the ``assembleRelease`` and the ``bundleRelease`` tasks for building, respectively, an ``.apk`` or ``.aab`` file. Maybe we would have to tune the ``releaseBuild`` lane definition in ``fastlane/Fastfile`` to accomodate for the fact that we'd like to build and sign at least two (if not three; in case we'd include the old "Sail InSight" app as well) ``.apk`` files.
+
+A [Hudson job](https://hudson.sapsailing.com/job/hyperspace/) currently exists that runs the regular build off the ``hyperspace`` branch. If this goes well, and once we have the entire Android build and release process including ``.apk`` signing and release into the store under control, we may consider merging ``hyperspace`` into ``master`` to minimize unnecessary differences and then push to the ``hyperspace`` branch particularly in order to trigger a mobile app build/release process.
+
+Our points of contact for the Hyperspace / Azure Pipeline migration are Marc Bormeth (marc.bormeth@sap.com), Maurice Breit (maurice.breit@sap.com) and Philipp Resch (philipp.resch@sap.com).
