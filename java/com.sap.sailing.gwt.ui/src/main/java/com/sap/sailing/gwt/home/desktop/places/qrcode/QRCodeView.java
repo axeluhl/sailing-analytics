@@ -93,6 +93,19 @@ public class QRCodeView extends Composite {
         showQrCodeForURL(publicInviteBranchIOUrl);
     }
 
+    public void showRaceManagerApp(String raceManagerAppBranchIOUrl) {
+        logger.info("Showing QR Code for race manager app");
+        if (raceManagerAppBranchIOUrl != null) {
+            // TODO: define translated text
+            titleDivUi.setInnerText("Scan this QR code on an Android device to use the Race Manager app");
+            showQrCodeForURL(raceManagerAppBranchIOUrl);
+        } else {
+            // TODO: define translated text
+            titleDivUi.setInnerText("Data is incorrect or out of date. Cannot create QR-Code.");
+        }
+        
+    }
+
     public void showBouyTender(QRCodeEvent event, String leaderboardName, String branchIoUrl) {
         logger.info("Showing QR Code for buoy tender");
         titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));

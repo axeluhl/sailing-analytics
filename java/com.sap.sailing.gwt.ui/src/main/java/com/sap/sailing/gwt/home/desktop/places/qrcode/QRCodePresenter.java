@@ -142,6 +142,10 @@ public class QRCodePresenter {
             // as the event is most likely displayed on a different server anyway, do not load additional data
             dataCollector = new DataCollector(view);
             dataCollector.proceedIfFinished();
+        } else if (QRCodePlace.isRaceManagerAppRequest()) {
+            logger.info("QR Code for race manager app to be shown");
+            dataCollector = new DataCollector(view);
+            dataCollector.proceedIfFinished();
         } else {
             logger.severe("QR Code cannot be created. Request type cannot be identified.");
         }
@@ -293,6 +297,9 @@ public class QRCodePresenter {
                 logger.info("About to show QR Code for public regatta invite");
                 view.showPublic(place.getPublicRegattaName(),
                         place.getPublicInviteBranchIOUrl(place.getMode().getMailInvitationType()));
+            } else if (QRCodePlace.isRaceManagerAppRequest()) {
+                logger.info("About to show QR Code for race manager app");
+                view.showRaceManagerApp(place.getRaceManagerAppUrl());
             } else {
                 logger.severe("Cannot identify request type.");
             }
