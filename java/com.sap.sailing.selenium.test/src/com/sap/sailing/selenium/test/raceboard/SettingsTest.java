@@ -23,7 +23,10 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetail
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardPageConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardUrlConfigurationDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetailsCompositePO;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegistrationLinkWithQRCodeDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
@@ -70,6 +73,8 @@ public class SettingsTest extends AbstractSeleniumTest {
     private static final String CUSTOM_COURSE_AREA = "Custom X";
 
     private static final String URL_PARAMETER_IGNORE_LOCAL_SETTINGS = "ignoreLocalSettings=true";
+    
+    private static final String INVITATION_URL_BASE = "https://sailinsight30-app.sapsailing.com/publicInvite?regatta_name=Audi+Business+Cup+(J70)+(J70)&secret=<secret>&server=http%3A%2F%2Flocalhost%3A8888&event_id=<event-id>";
 
     @Override
     @Before
@@ -692,6 +697,35 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         Assert.assertArrayEquals(newDetails, leaderboardSettingsPanel.getSelectedDetails());
         Assert.assertEquals(newRefreshInterval, leaderboardSettingsPanel.getRefreshInterval());
+    } 
+    
+    /**
+     * Test the creation of an invitation link.
+     */
+    @Test
+    public void testRegattaOverviewInvitationLinkCreation() {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false, CUSTOM_COURSE_AREA);
+        RegattaStructureManagementPanelPO regattas = adminConsole.goToRegattaStructure();
+        RegattaDescriptor regattaDescriptor = new RegattaDescriptor(AUDI_CUP_REGATTA, AUDI_CUP_BOAT_CLASS);
+        regattas.createRegattaAndAddToEvent(regattaDescriptor, BMW_CUP_EVENT,
+                new String[] { CUSTOM_COURSE_AREA });
+        
+        RegattaEditDialogPO editRegatta = regattas.getRegattaList().editRegatta(regattaDescriptor);
+        String secret = editRegatta.getSecret();
+        String selectedEventId = editRegatta.getSelectedEventId();
+        editRegatta.clickOkButtonOrThrow();
+        //regattas.getRegattaList().selectRegatta(regattaDescriptor);
+        RegattaDetailsCompositePO regattaDetails = regattas.getRegattaDetails();
+        RegistrationLinkWithQRCodeDialogPO registrationLinkWithQRCode = regattaDetails.configureRegistrationURL();
+        String invitationUrl = INVITATION_URL_BASE
+                .replace("<secret>", secret)
+                .replace("<event-id>", selectedEventId);
+        Assert.assertEquals(invitationUrl, registrationLinkWithQRCode.getRegistrationLinkUrl());
+        registrationLinkWithQRCode.clickOkButtonOrThrow();
     }
 
     /**

@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
@@ -54,7 +55,7 @@ public class RegattaStructureManagementPanelPO extends PageArea {
         // QUESTION: How do we handle an error (here or in the dialog)?
         createRegattaDialog.pressOk();
         DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboardDialog = createDefaultRegattaLeaderboard();
-        createDefaultRegattaLeaderboardDialog.pressCancel();
+        createDefaultRegattaLeaderboardDialog.pressOk();
     }
     
     public void createRegattaAndAddToEvent(RegattaDescriptor regatta, String event, String[] courseAreaNames) {
@@ -63,6 +64,7 @@ public class RegattaStructureManagementPanelPO extends PageArea {
         createRegattaDialog.setBoatClass(regatta.getBoatClass());
         createRegattaDialog.setCompetitorRegistrationType(regatta.getCompetitorRegistrationType());
         createRegattaDialog.setEventAndCourseArea(event, courseAreaNames);
+        createRegattaDialog.setCompetitorRegistrationType(CompetitorRegistrationType.OPEN_UNMODERATED);
         createRegattaDialog.pressOk();
         createDefaultRegattaLeaderboard().pressOk();
         waitForPO(ConfirmDialogPO::new, EventConfigurationPanelPO.ID_LINK_LEADERBORAD_TO_GROUP_DIALOG, 5).pressOk();
