@@ -56,7 +56,7 @@ Be aware that some of the Eclipse debugger features do NOT work with this kind o
 * Variable naming is not 1:1 what you expect in the Java world
 * Stacks look different but clicking on Stack elements should
 * [[Stack Traces logged in Chrome do not use source maps|https://code.google.com/p/chromium/issues/detail?id=357958]], so you see the JavaScript Stack Trace instead.
-If you wish to debug in a different language, go to the `.gwt.xml file` and add `<extend-property name="locale" values="en,de" />`. Next, run the setup, the same way you would to use the debugger. After launching in Chrome, add the following after the .html: `?locale=de`
+If you wish to debug in a different language, go to the `.gwt.xml file`, for the given page, and add `<extend-property name="locale" values="en,de" />`. Next, run the setup, the same way you would to use the debugger. After launching in Chrome, add the following after the .html: `?locale=de`
 
 ## Debugging SDM on Android devices
 
