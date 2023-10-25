@@ -1,0 +1,19 @@
+ProxyHCExpr ok2 {%{REQUEST_STATUS} =~ /^[2]/}
+
+Define ARCHIVE .....
+Define FAILOVER ....
+
+
+<!--new archive methods format?-->
+<Virtualhost *:80>
+ServerName $HOSTNAME
+<Proxy balancer://myset>
+    BalancerMember http://${ARCHIVE}:8888  hcmethod=GET hcexpr=ok2 hcuri=/gwt/status
+    BalancerMember http://${FAILOVER}:8880 status=+H
+    ProxySet lbmethod=bytraffic
+</Proxy>
+
+ProxyPass "/"  "balancer://myset/"
+ProxyPassReverse "/"  "balancer://myset/"
+
+</VirtualHost>
