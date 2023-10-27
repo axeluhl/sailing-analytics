@@ -44,7 +44,7 @@ public class RegattaStructureManagementPanelPO extends PageArea {
      * 
      * @param regatta
      */
-    public void createRegatta(RegattaDescriptor regatta) {
+    public void createRegatta(RegattaDescriptor regatta, boolean withDefaultLeaderboard) {
         RegattaCreateDialogPO createRegattaDialog = startRegattaCreation();
         createRegattaDialog.setRegattaName(regatta.getName()+" ("+regatta.getBoatClass()+")");
         createRegattaDialog.setBoatClass(regatta.getBoatClass());
@@ -55,7 +55,12 @@ public class RegattaStructureManagementPanelPO extends PageArea {
         // QUESTION: How do we handle an error (here or in the dialog)?
         createRegattaDialog.pressOk();
         DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboardDialog = createDefaultRegattaLeaderboard();
-        createDefaultRegattaLeaderboardDialog.pressOk();
+        if (withDefaultLeaderboard) {
+            createDefaultRegattaLeaderboardDialog.pressOk();
+        } else {
+            createDefaultRegattaLeaderboardDialog.pressCancel();
+        }
+        
     }
     
     public void createRegattaAndAddToEvent(RegattaDescriptor regatta, String event, String[] courseAreaNames) {
