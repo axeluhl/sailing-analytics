@@ -33,6 +33,7 @@ To start SDM debugging in Eclipse, do the following:
 * Start the backend as you would always do.
 * Start GWT Super Dev Mode by launching "SailingGWT sdm.launch" or "SailingGWT All SDM.launch".
 * Do not Click on the URLs provided in "Development view"!
+* Make sure that in the Debug Configuration chrome is the first browser used and not chromium. 
 * Run "Debug SailingGWT SDM on Chrome.launch"
 * A new instance of Chrome is started and you will see a debug session running in Eclipse
 * Your Eclipse break points will now work in the running debug session.
@@ -55,6 +56,7 @@ Be aware that some of the Eclipse debugger features do NOT work with this kind o
 * Variable naming is not 1:1 what you expect in the Java world
 * Stacks look different but clicking on Stack elements should
 * [[Stack Traces logged in Chrome do not use source maps|https://code.google.com/p/chromium/issues/detail?id=357958]], so you see the JavaScript Stack Trace instead.
+If you wish to debug in a different language, go to the `.gwt.xml file`, for the given page, and add `<extend-property name="locale" values="en,de" />`. Next, run the setup, the same way you would to use the debugger. After launching in Chrome, add the following after the .html: `?locale=de`
 
 ## Debugging SDM on Android devices
 
