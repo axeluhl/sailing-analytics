@@ -55,6 +55,10 @@ public class TestLinkCreation extends AbstractSeleniumTest {
 
     /**
      * Test the creation of an invitation link.
+     * <p>
+     * Please notice, that the test checks the created invitation link by calling it and checking over the 
+     * redirects from branch.io over production environment (my.sapsailing.com) back to localhost. The link back
+     * to localhost need an additional confirmation on production server.
      */
     @Test
     public void testRegattaOverviewInvitationLinkCreation() {
@@ -85,8 +89,10 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         registrationLinkWithQRCode.clickOkButtonOrThrow();
         HomePage.goToPage(getWebDriver(), createdInvitationUrl);
         Wait<WebDriver> wait = new WebDriverWait(getWebDriver(), 20);
+        // confirm dialog on my.sapsailing.com to redirect back to localhost
         wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//button[contains(text(), 'Yes')]"), 1)).get(0)
                 .click();
+        // here we are back on localhost (Home.html#QRCodePlace)
         wait.until(ExpectedConditions
                 .presenceOfElementLocated(By.xpath("//div[contains(text(), '" + EXPECTED_QR_CODE_TITLE + "')]")));
         WebElement qrCodeLink = wait.until(ExpectedConditions
