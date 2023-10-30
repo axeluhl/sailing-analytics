@@ -4,6 +4,9 @@ import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +19,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.racemanagementapp.DeviceConfigurationCreateDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.racemanagementapp.DeviceConfigurationDetailsAreaPO;
+import com.sap.sailing.selenium.pages.adminconsole.racemanagementapp.DeviceConfigurationQRCodeDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.racemanagementapp.RaceManagementAppPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetailsCompositePO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
@@ -29,6 +36,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
  */
 public class TestLinkCreation extends AbstractSeleniumTest {
 
+    private static final String DEVICE_CONFIG_NAME = "Test";
     private static final String BMW_CUP_EVENT = "BMW Cup";
     private static final String BMW_CUP_BOAT_CLASS = "J80";
     private static final String AUDI_CUP_BOAT_CLASS = "J70";
@@ -46,6 +54,11 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     private static final String EXPECTED_QR_CODE_TITLE = "Welcome to the public regatta Audi Business Cup (J70) (J70)!";
     private static final String EXPECTED_QR_CODE_LINK_TEXT = "Please scan this QR Code with your mobile device to proceed with the registration";
 
+    private static final String CHECK_RACE_APP_URL_REGEX = "^https:\\/\\/racemanager-app.sapsailing.com\\/invite\\"
+            + "?server_url=http:\\/\\/localhost(:\\d{0,5})?" 
+            + "&device_config_identifier=" + DEVICE_CONFIG_NAME
+            + "&device_config_uuid=(\\w|\\d|-)*";
+
     @Override
     @Before
     public void setUp() {
@@ -56,9 +69,9 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     /**
      * Test the creation of an invitation link.
      * <p>
-     * Please notice, that the test checks the created invitation link by calling it and checking over the 
-     * redirects from branch.io over production environment (my.sapsailing.com) back to localhost. The link back
-     * to localhost need an additional confirmation on production server.
+     * Please notice, that the test checks the created invitation link by calling it and checking over the redirects
+     * from branch.io over production environment (my.sapsailing.com) back to localhost. The link back to localhost need
+     * an additional confirmation on production server.
      */
     @Test
     public void testRegattaOverviewInvitationLinkCreation() {
@@ -100,5 +113,21 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         Assert.assertTrue(qrCodeLink.getAttribute("href").startsWith(INVITATION_QR_CODE_BASE));
         Assert.assertTrue(qrCodeLink.getAttribute("href").contains("secret=" + secret));
         Assert.assertTrue(qrCodeLink.getAttribute("href").contains("server=http%3A%2F%2Flocalhost%3A"));
+    }
+
+    /**
+     * Testing the generation of an invitation QR code for the Race Manager App.
+     */
+    @Test
+    public void testRaceManagerAppInvitationLink() {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        RaceManagementAppPanelPO raceManagerApp = adminConsole.goToRaceManagerApp();
+        DeviceConfigurationCreateDialogPO createDeviceConfiguration = raceManagerApp.createDeviceConfiguration();
+        createDeviceConfiguration.setDeviceName(DEVICE_CONFIG_NAME);
+        createDeviceConfiguration.clickOkButtonOrThrow();
+        DeviceConfigurationDetailsAreaPO deviceConfigurationDetails = raceManagerApp.getDeviceConfigurationDetails();
+        DeviceConfigurationQRCodeDialogPO qrCodeDialog = deviceConfigurationDetails.openQRCodeDialog();
+        Matcher<String> matcher = Matchers.matchesRegex(CHECK_RACE_APP_URL_REGEX);
+        MatcherAssert.assertThat("Check URL", matcher.matches(qrCodeDialog.getUrl()));
     }
 }
