@@ -1,0 +1,32 @@
+perl 
+httpd
+apachetop
+per-CGI
+postfix
+sendmail-cf
+ mod_proxy_html
+tmux
+nfs-utils
+amazon linux extras install php7.2 && yum update && yum install php
+
+
+root access
+num of connections trackable
+keyreader token
+
+amazon-efs-utils
+mounts
+
+mail -> I don't think anything is needed but I added the stuf to sendmail-cf   ///
+
+logrotate target
+
+chkconfig nfs on (half complete)
+fail2ban setup
+
+//I require help with nfs 
+//rename the welcome.conf file of the Apache configuration because it harms directory index presentation
+//comment lbmethod_heartbeat_module in /etc/httpd/conf.modules.d/00-proxy.conf because we don't need this sort of load balancing across origin servers and it causes a warning message in error_log
+//do we need a swap
+//tagging volumes
+//ssl
