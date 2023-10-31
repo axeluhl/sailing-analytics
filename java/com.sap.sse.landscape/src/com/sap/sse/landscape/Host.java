@@ -159,4 +159,23 @@ public interface Host extends WithID {
     default boolean isSharedHost() {
         return false;
     }
+    
+    /*
+     * Checks if there is a name tag and returns the value, if it exists.
+     * 
+     * @return name tag value
+     */
+    default String getNameTag() {
+        return "Name tag not found";
+    }
+    
+    
+    /**
+     * Fetches the AMI id value.
+     * 
+     * @return ami id
+     */
+    default String getImageId() {
+        return "No AMI found";
+    }
 }

@@ -491,6 +491,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         };
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getImageId(),stringMessages.id());
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
                new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
        proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_REMOVE, null); // To write.

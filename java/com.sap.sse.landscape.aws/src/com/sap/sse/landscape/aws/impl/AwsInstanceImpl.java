@@ -23,6 +23,7 @@ import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.ssh.JCraftLogAdapter;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
@@ -33,6 +34,7 @@ import com.sap.sse.shared.util.Wait;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.Tag;
 
 public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
@@ -43,6 +45,8 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private InetAddress publicAddress;
     private final TimePoint launchTimePoint;
     private final AwsLandscape<ShardingKey> landscape;
+    private String name;
+    private String imageId;
     
     public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
@@ -98,6 +102,35 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         }
         return publicAddress;
     }
+    
+    public String getNameTag() {
+        if (name == null) {
+            final Instance instance = getInstance();
+            for (Tag tag : instance.tags()) {
+                if (tag.key().equals(StartAwsHost.NAME_TAG_NAME)) {
+                    name = tag.value();
+                    return name;
+                }
+            }
+            return "No name tag found";
+        } else {
+            return name;
+        }
+    }
+    
+    public String getImageId() {
+        if (imageId == null) {
+            final Instance instance = getInstance();
+            imageId = instance.imageId();
+            return imageId;
+            
+        } else {
+            return imageId;
+        }
+    }
+   
+   
+   
     
     @Override
     public InetAddress getPrivateAddress() {
@@ -302,4 +335,6 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         final JSch jsch = new JSch();
         return keyPair.checkPassphrase(jsch, privateKeyEncryptionPassphrase);
     }
+    
+ 
 }

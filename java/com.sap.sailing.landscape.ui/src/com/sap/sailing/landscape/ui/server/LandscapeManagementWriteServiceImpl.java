@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -235,10 +236,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception  {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
+        final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
         final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
         for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape)).getHosts())  {
-            results.add(new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(), instance.getPrivateAddress().toString(), instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(), instance.isSharedHost(), "to do"));
+            results.add(new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(), instance.getPrivateAddress().toString(), instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),instance.getImageId()));
+            
         }
+       
         return results;
     }
     
