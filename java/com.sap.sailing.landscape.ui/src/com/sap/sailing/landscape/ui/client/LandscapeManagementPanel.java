@@ -47,6 +47,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
+import com.sap.sailing.landscape.ui.shared.ReverseProxyDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
@@ -114,6 +115,8 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final SimpleBusyIndicator applicationReplicaSetsBusy;
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
+    private TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources> proxiesTable;
+    private final BusyIndicator proxiesTableBusy;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
     
@@ -465,6 +468,45 @@ public class LandscapeManagementPanel extends SimplePanel {
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
         mainPanel.add(machineImagesCaptionPanel);
+        
+        
+        proxiesTable = new TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources>(
+                stringMessages, errorReporter, /* enablePager */ false,
+                /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
+                /* checkbox filter function */ Optional.empty(), /* filter label */ Optional.empty(),
+                /* filter checkbox label */ null) {
+            @Override
+            protected Iterable<String> getSearchableStrings(ReverseProxyDTO reverseProxyDTO) {
+                final Set<String> result = new HashSet<>();
+                if (reverseProxyDTO.getInstanceId() != null) {
+                    result.add(reverseProxyDTO.getInstanceId());
+                    result.add(reverseProxyDTO.getPrivateIpAddress());
+                    result.add(reverseProxyDTO.getPublicIpAddress());
+                    result.add(reverseProxyDTO.getRegion());
+                }
+               
+                   
+                
+                return result;
+            }
+        };
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
+       final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
+               new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_REMOVE, null); // To write.
+       proxiesTable.addColumn(proxiesActionColumn, stringMessages.actions());
+       final CaptionPanel proxiesTableCaptionPanel = new CaptionPanel(stringMessages.reverseProxies());
+       final VerticalPanel proxiesTableVerticalPanel = new VerticalPanel();
+       proxiesTableCaptionPanel.add(proxiesTableVerticalPanel);
+       proxiesTableBusy= new SimpleBusyIndicator();
+       proxiesTableVerticalPanel.add(proxiesTable);
+
+       proxiesTableVerticalPanel.add(proxiesTableBusy);
+       mainPanel.add(proxiesTableCaptionPanel);
+        
+        
+        
+        
         regionsTable.getSelectionModel().addSelectionChangeHandler(e->
         {
             final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
@@ -480,6 +522,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                     applicationReplicaSetsCaptionPanel.setVisible(result);
                     machineImagesCaptionPanel.setVisible(result);
                     mongoEndpointsCaptionPanel.setVisible(result);
+                    proxiesTableCaptionPanel.setVisible(result);
                     if (result) {
                         refreshApplicationReplicaSetsTable();
                     }
@@ -499,6 +542,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+     
     }
     
     private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
@@ -1365,8 +1409,30 @@ public class LandscapeManagementPanel extends SimplePanel {
         refreshMongoEndpointsTable();
         refreshApplicationReplicaSetsTable();
         refreshMachineImagesTable();
+        refreshProxiesTable();
         sshKeyManagementPanel.showKeysInRegion(mfaLoginWidget.hasValidSessionCredentials() ?
                 regionsTable.getSelectionModel().getSelectedObject() : null);
+    }
+
+    private void refreshProxiesTable() {
+        proxiesTable.getFilterPanel().removeAll();
+        if (mfaLoginWidget.hasValidSessionCredentials() && regionsTable.getSelectionModel().getSelectedObject() != null) {
+            proxiesTableBusy.setBusy(true);
+            landscapeManagementService.getReverseProxies(regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<ReverseProxyDTO>>() {
+               @Override
+               public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+                proxiesTableBusy.setBusy(false);
+               }
+      
+               @Override
+               public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
+                proxiesTable.refresh(reverseProxyDTOs);
+                proxiesTableBusy.setBusy(false);
+               }
+            });
+        }
+        
     }
 
     private void storeRegionSelection(UserService userService, String selectedRegion) {

@@ -59,6 +59,7 @@ import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
+import com.sap.sailing.landscape.ui.shared.ReverseProxyDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
@@ -228,6 +229,17 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             result.add(dto);
         }
         return result;
+    }
+    
+    @Override
+    public ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception  {
+        checkLandscapeManageAwsPermission();
+        final AwsLandscape<String> landscape = getLandscape();
+        final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
+        for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape)).getHosts())  {
+            results.add(new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(), instance.getPrivateAddress().toString(), instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(), instance.isSharedHost(), "to do"));
+        }
+        return results;
     }
     
     private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {

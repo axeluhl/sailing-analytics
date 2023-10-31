@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.ui.client;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
@@ -14,6 +15,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
+import com.sap.sailing.landscape.ui.shared.ReverseProxyDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
@@ -27,6 +29,9 @@ public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<String> getInstanceTypeNames();
 
     ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) throws Exception;
+    
+    ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception;
+
     
     MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) throws Exception;
 

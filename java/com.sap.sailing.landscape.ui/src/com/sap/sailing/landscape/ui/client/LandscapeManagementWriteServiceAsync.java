@@ -17,6 +17,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
+import com.sap.sailing.landscape.ui.shared.ReverseProxyDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
@@ -33,7 +34,9 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void getMongoEndpoint(String region, String replicaSetName,
             AsyncCallback<MongoEndpointDTO> callback);
-
+    
+    void getReverseProxies(String regionId, AsyncCallback<ArrayList<ReverseProxyDTO>> callback);
+    
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.
      */
