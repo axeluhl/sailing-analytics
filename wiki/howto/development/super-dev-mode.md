@@ -32,12 +32,14 @@ To start SDM debugging in Eclipse, do the following:
 
 * Start the backend as you would always do.
 * Start GWT Super Dev Mode by launching "SailingGWT sdm.launch" or "SailingGWT All SDM.launch".
-* Do not Click on the URLs provided in "Development view"!
-* Make sure that in the Debug Configuration chrome is the first browser used and not chromium. 
-* Run "Debug SailingGWT SDM on Chrome.launch"
+* Do not Click on the URLs provided in "Development view" (this is not essential for MAC users)!
+* Make sure that in the  _Debug Configurations..._ => *Launch Browser* tab, you set the correct browser search order: _chrome_ **must** be the first one for the SDBG to work correctly. 
+* Run "Debug AdminConsole"
 * A new instance of Chrome is started and you will see a debug session running in Eclipse
 * Your Eclipse break points will now work in the running debug session.
 * You are free to change the URL or navigate to other pages in the automatically openend browser window (debugging will go on)
+
+You may need to go to *Preferences => General => Web Browser*, and click _New_ to add Chrome.
 
 ### Noteworthy information & Troubleshooting
 
