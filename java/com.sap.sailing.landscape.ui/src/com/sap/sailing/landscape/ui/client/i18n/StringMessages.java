@@ -168,4 +168,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String errorArchivingMongoDBTo(String replicaSetNameToArchiveTo, String mongoDBArchivingErrorMessage);
     String optionalSessionToken();
     String reverseProxies();
+    String restartHttpd();
 }

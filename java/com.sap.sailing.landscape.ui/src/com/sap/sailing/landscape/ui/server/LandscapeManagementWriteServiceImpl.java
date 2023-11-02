@@ -86,6 +86,7 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
@@ -114,6 +115,9 @@ import com.sap.sse.util.ThreadPoolUtil;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
@@ -126,6 +130,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
     private final ServiceTracker<LandscapeService, LandscapeService> landscapeServiceTracker;
+    private String ALL_REVERSE_PROXIES = "allReverseProxies";
 
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
@@ -236,14 +241,52 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception  {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
-        final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
-        final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
-        for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape)).getHosts())  {
-            results.add(new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(), instance.getPrivateAddress().toString(), instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),instance.getImageId()));
-            
+        TargetGroup<String> targetGroupInQuestion = null;
+        for (TargetGroup<String> targetGroup : landscape.getTargetGroups(new AwsRegion(region, landscape))) {
+            for (TagDescription description : targetGroup.getTagDescriptions()) { // There should only be 1 tag
+                                                                                  // description.
+                if (!description.tags().isEmpty()) {
+                    for (Tag tag : description.tags()) {
+                        logger.log(Level.SEVERE,ALL_REVERSE_PROXIES);
+                        logger.log(Level.SEVERE, "TARGET GROUP"+targetGroup.getName()+ "tag" +tag.key() +"  " + tag.key().equals(ALL_REVERSE_PROXIES));
+                        
+                        if (tag.key().equals(ALL_REVERSE_PROXIES)) {
+                            targetGroupInQuestion = targetGroup;
+                        }
+                    }
+                }
+            }
         }
-       
+        Map<AwsInstance<String>, TargetHealth> healths = null;
+        if (targetGroupInQuestion != null) {
+            logger.log(Level.WARNING, "attempting to retrieve health descriptions");
+             healths = landscape.getTargetHealthDescriptions(targetGroupInQuestion);
+
+        }
+
+        final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
+        for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape))
+                .getHosts()) {
+            results.add(new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(),
+                    instance.getPrivateAddress().toString(), instance.getPublicAddress().toString(), region,
+                    instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),
+                    instance.getImageId(), extractHealth(healths, instance)));
+
+        }
+
         return results;
+    }
+    
+    public String extractHealth(Map<AwsInstance<String>, TargetHealth> healths, AwsInstance<String> instance) {
+        String no_health_value_found= "No health value found";
+        if (healths == null) {
+            return no_health_value_found;
+        } 
+        TargetHealth health = healths.get(instance);
+        if (health!= null) {
+            return health.state().toString();
+        }
+        return no_health_value_found;
     }
     
     private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {

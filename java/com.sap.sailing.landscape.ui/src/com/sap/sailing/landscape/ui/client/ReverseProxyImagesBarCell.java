@@ -11,8 +11,8 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class ReverseProxyImagesBarCell extends ImagesBarCell{
     static final String ACTION_REMOVE = DefaultActions.DELETE.name();
-    static final String ACTION_RESTART_INSTANCE = "Restart Instance";
     static final String ACTION_RESTART_HTTPD = "Restart Httpd";
+    static final String ACTION_RELOAD_HTTPD = "Reload Httpd"; 
 
     private final StringMessages stringMessages;
 
@@ -30,8 +30,8 @@ public class ReverseProxyImagesBarCell extends ImagesBarCell{
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(new ImageSpec(ACTION_REMOVE, stringMessages.remove(), IconResources.INSTANCE.removeIcon()),
-                new ImageSpec(ACTION_RESTART_INSTANCE, stringMessages.refresh(), IconResources.INSTANCE.refreshIcon())
-             
+                new ImageSpec(ACTION_RELOAD_HTTPD, stringMessages.refresh(), IconResources.INSTANCE.refreshIcon()),
+                new ImageSpec(ACTION_RESTART_HTTPD, stringMessages.restartHttpd(), IconResources.INSTANCE.unlinkIcon())
                 );
     }
 

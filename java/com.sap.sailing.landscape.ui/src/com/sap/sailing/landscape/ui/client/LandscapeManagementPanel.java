@@ -490,19 +490,33 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return result;
             }
         };
+        
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getImageId(),stringMessages.id());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
                new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
        proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_REMOVE, null); // To write.
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_RESTART_HTTPD, null);
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_RELOAD_HTTPD, null);
        proxiesTable.addColumn(proxiesActionColumn, stringMessages.actions());
        final CaptionPanel proxiesTableCaptionPanel = new CaptionPanel(stringMessages.reverseProxies());
        final VerticalPanel proxiesTableVerticalPanel = new VerticalPanel();
-       proxiesTableCaptionPanel.add(proxiesTableVerticalPanel);
-       proxiesTableBusy= new SimpleBusyIndicator();
+       final HorizontalPanel proxiesTableButtonPanel = new HorizontalPanel();
+       final Button proxiesTableRefreshButton = new Button(stringMessages.refresh());
+       final Button proxiesTableAddButton = new Button(stringMessages.add());
+       proxiesTableRefreshButton.addClickHandler(event -> refreshProxiesTable());
+       proxiesTableAddButton.addClickHandler(event -> {});
+       proxiesTableButtonPanel.add(proxiesTableRefreshButton);
+       proxiesTableButtonPanel.add(proxiesTableAddButton);
+       proxiesTableVerticalPanel.add(proxiesTableButtonPanel);
        proxiesTableVerticalPanel.add(proxiesTable);
+       proxiesTableBusy= new SimpleBusyIndicator();
 
        proxiesTableVerticalPanel.add(proxiesTableBusy);
+       
+       proxiesTableCaptionPanel.add(proxiesTableVerticalPanel);
+
        mainPanel.add(proxiesTableCaptionPanel);
         
         
