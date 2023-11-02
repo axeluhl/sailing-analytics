@@ -156,9 +156,14 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
    - In the list on the left, click on "Connectors"
    - For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL [http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php](http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php)(all other required information will be filled in automatically)
    - Press "List Races"
+
+
 6. Further useful launch configurations
    - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window ⇒ Perspective ⇒ Open Perspective ⇒ Profiling)
    - Debugging gwt: For further instructions please see [here](./development/super-dev-mode)
+
+If you want to use **breakpoints**, *avoid* clicking on the options in the Development Mode tab. Instead, within the _Debug Configurations_ menu, select the _Debug AdminConsole_ (found in the _Launch Browser_ tab); change the browser search order, such that chrome is the leftmost; and then launch. This is necessary because SDBG is compatible with Chrome. Further, details of how GWT Super Dev Mode (SDM) works, can be found in the link above.
+
 
 ### Build for deployment
 Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
