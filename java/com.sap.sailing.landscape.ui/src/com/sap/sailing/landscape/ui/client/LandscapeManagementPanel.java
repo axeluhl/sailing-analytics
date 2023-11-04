@@ -495,9 +495,14 @@ public class LandscapeManagementPanel extends SimplePanel {
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
                new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
-       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_REMOVE, null); // To write.
-       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_RESTART_HTTPD, null);
-       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_RELOAD_HTTPD, null);
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_REMOVE, reverseProxy -> {
+           if (reverseProxy.isDisposable()) {
+               removeReverseProxy(reverseProxy,reverseProxy.getRegion(),stringMessages); //TODO: should this get the selection model region?
+           } else {
+               errorReporter.reportError(stringMessages.invalidOperationForThisProxy());
+           }
+       }); // To write.
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_RESTART_HTTPD, reverseProxy -> restartHttpd(reverseProxy, stringMessages));
        proxiesTable.addColumn(proxiesActionColumn, stringMessages.actions());
        final CaptionPanel proxiesTableCaptionPanel = new CaptionPanel(stringMessages.reverseProxies());
        final VerticalPanel proxiesTableVerticalPanel = new VerticalPanel();
@@ -505,7 +510,7 @@ public class LandscapeManagementPanel extends SimplePanel {
        final Button proxiesTableRefreshButton = new Button(stringMessages.refresh());
        final Button proxiesTableAddButton = new Button(stringMessages.add());
        proxiesTableRefreshButton.addClickHandler(event -> refreshProxiesTable());
-       proxiesTableAddButton.addClickHandler(event -> {});
+       proxiesTableAddButton.addClickHandler(event -> addReverseProxyToCluster(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
        proxiesTableButtonPanel.add(proxiesTableRefreshButton);
        proxiesTableButtonPanel.add(proxiesTableAddButton);
        proxiesTableVerticalPanel.add(proxiesTableButtonPanel);
@@ -1428,8 +1433,41 @@ public class LandscapeManagementPanel extends SimplePanel {
                 regionsTable.getSelectionModel().getSelectedObject() : null);
     }
 
+    private void removeReverseProxy(ReverseProxyDTO instance, String regionId, StringMessages stringMessages) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            proxiesTableBusy.setBusy(true);
+            landscapeManagementService.removeReverseProxy(instance, regionId, new AsyncCallback<Boolean>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(caught.getMessage());
+                    proxiesTableBusy.setBusy(false);
+
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    proxiesTableBusy.setBusy(false);
+                    refreshProxiesTable();
+                }
+
+            });
+        }
+        
+    }
+    
+    private void addReverseProxyToCluster(StringMessages stringMessages, String selectedObject) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            //toWrite
+        }
+    }
     private void refreshProxiesTable() {
         proxiesTable.getFilterPanel().removeAll();
+        
         if (mfaLoginWidget.hasValidSessionCredentials() && regionsTable.getSelectionModel().getSelectedObject() != null) {
             proxiesTableBusy.setBusy(true);
             landscapeManagementService.getReverseProxies(regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<ReverseProxyDTO>>() {

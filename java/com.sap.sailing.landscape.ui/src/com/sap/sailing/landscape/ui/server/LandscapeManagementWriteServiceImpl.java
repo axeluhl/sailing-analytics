@@ -293,6 +293,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return no_health_value_found;
     }
     
+    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region) throws IllegalStateException, UnknownHostException {
+        checkLandscapeManageAwsPermission();
+        AwsRegion awsRegion = new AwsRegion(region, getLandscape());
+        AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(awsRegion, proxy.getInstanceId(), AwsInstanceImpl::new);
+        getLandscape().getCentralReverseProxy(awsRegion).removeHost(awsInstance);
+        return true;
+        
+    }
+    
+    public void addReverseProxy() {
+        
+    }
+    
+
+    
+    
     private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {
         final MongoEndpoint result;
         if (mongoEndpointDTO == null) {
