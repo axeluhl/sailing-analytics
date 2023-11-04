@@ -274,6 +274,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return results;
     }
     
+    public void restartHttpdOnProxyInstance(ReverseProxyDTO instanceDTO, String region, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDecryption) throws Exception {
+        checkLandscapeManageAwsPermission();
+        AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(new AwsRegion(region,getLandscape()), instanceDTO.getInstanceId(), AwsInstanceImpl::new);
+        new ApacheReverseProxy<>(getLandscape(), awsInstance).restart(Optional.ofNullable(optionalKeyName),passphraseForPrivateKeyDecryption);
+    }
+    
     private String extractHealth(Map<AwsInstance<String>, TargetHealth> healths, AwsInstance<String> instance) {
         String no_health_value_found= "No health value found";
         if (healths == null) {
