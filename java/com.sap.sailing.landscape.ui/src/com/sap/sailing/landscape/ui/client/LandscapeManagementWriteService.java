@@ -31,7 +31,10 @@ public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) throws Exception;
     
     ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception;
-
+    
+    boolean removeReverseProxy(ReverseProxyDTO instance, String region) throws Exception;
+    
+    void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)throws Exception;
     
     MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) throws Exception;
 

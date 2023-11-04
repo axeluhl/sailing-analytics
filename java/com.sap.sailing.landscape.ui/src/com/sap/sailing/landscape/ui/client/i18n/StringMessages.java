@@ -169,4 +169,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String optionalSessionToken();
     String reverseProxies();
     String restartHttpd();
+    String successfullyRestartedHttpdOnInstance(String instance);
+    String invalidOperationForThisProxy();
+    String pleaseProvideNonEmptyName();
 }

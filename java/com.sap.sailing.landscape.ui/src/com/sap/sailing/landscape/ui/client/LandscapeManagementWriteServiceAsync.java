@@ -37,6 +37,13 @@ public interface LandscapeManagementWriteServiceAsync {
     
     void getReverseProxies(String regionId, AsyncCallback<ArrayList<ReverseProxyDTO>> callback);
     
+    
+    void removeReverseProxy(ReverseProxyDTO instance, String region, AsyncCallback<Boolean> callback);
+    
+    
+    void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.
      */

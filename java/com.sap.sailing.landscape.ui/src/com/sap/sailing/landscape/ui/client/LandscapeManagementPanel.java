@@ -119,7 +119,6 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final BusyIndicator proxiesTableBusy;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
-    
     /**
      * The time to wait after archiving a replica set and before starting a "compare servers" run for the content
      * archived. This waiting period is owed to the process of loading the race content which is an asynchronous
@@ -1450,6 +1449,37 @@ public class LandscapeManagementPanel extends SimplePanel {
         
     }
 
+
+    
+    private void restartHttpd(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            landscapeManagementService.restartHttpdOnProxyInstance(reverseProxy, reverseProxy.getRegion(),
+                    sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
+                            : null,
+                    new AsyncCallback<Void>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            Notification.notify(
+                                    stringMessages.successfullyRestartedHttpdOnInstance(reverseProxy.getInstanceId()),
+                                    NotificationType.SUCCESS);
+
+                        }
+
+                    });
+        }
+
+    }
+    
     private void storeRegionSelection(UserService userService, String selectedRegion) {
         if (selectedRegion != null) {
             userService.setPreference(AWS_DEFAULT_REGION_USER_PREFERENCE, selectedRegion, new AsyncCallback<Void>() {

@@ -1146,7 +1146,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         return reverseProxyCluster;
     }
+    
 
+    
     @Override
     public SecurityGroup getSecurityGroup(String securityGroupId, com.sap.sse.landscape.Region region) {
         final software.amazon.awssdk.services.ec2.model.SecurityGroup securityGroup =

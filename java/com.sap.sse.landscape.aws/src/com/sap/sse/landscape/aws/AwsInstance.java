@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.sap.sse.landscape.Host;
@@ -65,4 +67,9 @@ public interface AwsInstance<ShardingKey> extends Host {
     }
     
     boolean verifySshKey(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase); 
+    
+    
+    default List<Tag> getTags() {
+        return new ArrayList<Tag>();
+    }
 }

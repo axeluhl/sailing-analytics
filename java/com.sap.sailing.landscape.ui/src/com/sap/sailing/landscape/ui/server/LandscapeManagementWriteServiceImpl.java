@@ -17,7 +17,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -81,6 +80,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -89,6 +89,7 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
+import com.sap.sse.landscape.aws.impl.ApacheReverseProxy;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -131,6 +132,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private final ServiceTracker<LandscapeService, LandscapeService> landscapeServiceTracker;
     private String ALL_REVERSE_PROXIES = "allReverseProxies";
+    private String DISPOSABLE_PROXY = "disposableProxy";
 
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
@@ -247,9 +249,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                                                                                   // description.
                 if (!description.tags().isEmpty()) {
                     for (Tag tag : description.tags()) {
-                        logger.log(Level.SEVERE,ALL_REVERSE_PROXIES);
-                        logger.log(Level.SEVERE, "TARGET GROUP"+targetGroup.getName()+ "tag" +tag.key() +"  " + tag.key().equals(ALL_REVERSE_PROXIES));
-                        
+
                         if (tag.key().equals(ALL_REVERSE_PROXIES)) {
                             targetGroupInQuestion = targetGroup;
                         }
@@ -259,25 +259,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
         Map<AwsInstance<String>, TargetHealth> healths = null;
         if (targetGroupInQuestion != null) {
-            logger.log(Level.WARNING, "attempting to retrieve health descriptions");
              healths = landscape.getTargetHealthDescriptions(targetGroupInQuestion);
-
         }
-
         final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
         for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape))
                 .getHosts()) {
-            results.add(new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(),
+            ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(),
                     instance.getPrivateAddress().toString(), instance.getPublicAddress().toString(), region,
                     instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),
-                    instance.getImageId(), extractHealth(healths, instance)));
-
+                    instance.getImageId(), extractHealth(healths, instance));
+            dto.setDisposable(instance.getTags().parallelStream().anyMatch(tag -> tag.key().equals(DISPOSABLE_PROXY)));
+            results.add(dto);
         }
-
         return results;
     }
     
-    public String extractHealth(Map<AwsInstance<String>, TargetHealth> healths, AwsInstance<String> instance) {
+    private String extractHealth(Map<AwsInstance<String>, TargetHealth> healths, AwsInstance<String> instance) {
         String no_health_value_found= "No health value found";
         if (healths == null) {
             return no_health_value_found;

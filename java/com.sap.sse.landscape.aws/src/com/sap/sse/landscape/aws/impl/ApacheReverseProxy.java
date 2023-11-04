@@ -226,4 +226,12 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             return false;
         }
     }
+
+    public void restart(Optional<String> optionalKeyName,byte[] privateKeyEncryptionPassphrase) throws Exception {
+        String command = "service httpd stop && service httpd start";
+        runCommandAndReturnStdoutAndStderr(command,
+                "Restarting Apache httpd server" ,
+                Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase);
+        
+    }
 }
