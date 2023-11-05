@@ -145,6 +145,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
 * [[Polars|wiki/howto/misc/polars]]
+* [[QR-Codes|wiki/howto/misc/qr-codes]]
 * [[Wind Estimation - Core concepts|wiki/misc/windestimation-core-concepts]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]

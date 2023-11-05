@@ -28,7 +28,6 @@ public class YellowBrickConfigurationEditDialog extends YellowBrickConfiguration
         nameTextBox.setText(dtotoEdit.getName());
         raceURLTextBox.setText(dtotoEdit.getRaceUrl());
         usernameTextBox.setText(dtotoEdit.getUsername());
-        passwordTextBox.setText(dtotoEdit.getPassword());
         super.getOkButton().setEnabled(!raceURLTextBox.getText().isEmpty());
     }
 }

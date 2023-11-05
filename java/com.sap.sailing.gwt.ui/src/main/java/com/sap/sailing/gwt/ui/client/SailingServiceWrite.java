@@ -443,11 +443,11 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, boolean useOfficialEventsToUpdateRaceLog,
-            String tracTracUsername, String tracTracPassword) throws UnauthorizedException, Exception;
+            String jsonUrlAsKey) throws UnauthorizedException, Exception;
 
     void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
-            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
-            String yellowBrickPassword) throws Exception;
+            boolean trackWind, final boolean correctWindByDeclination, String creatorUsername,
+            String raceUrl) throws Exception;
 
     void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
             String yellowBrickPassword);

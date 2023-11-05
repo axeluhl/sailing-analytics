@@ -10,4 +10,6 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
  */
 public interface DomainObjectFactory {
     Iterable<TracTracConfiguration> getTracTracConfigurations();
+
+    TracTracConfiguration getTracTracConfiguration(String jsonUrl);
 }

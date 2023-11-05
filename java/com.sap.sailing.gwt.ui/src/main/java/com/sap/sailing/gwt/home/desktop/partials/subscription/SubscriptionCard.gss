@@ -317,7 +317,33 @@
  font-weight: bold;
  font-size: 1.2em;
  text-transform: capitalize;
- margin: 0 1em;
+ margin: 0 auto;
+ width: 140px;
+}
+/* Small screens */
+@media ( max-width: 400px) {
+	.featureCheck {
+		margin: 0 0 0 8px;
+	}
+	.featureNone {
+		margin: 0 0 0 8px;
+	}
+	.featureHeader {
+		white-space: nowrap;
+		width: auto;
+		text-align: left;
+		vertical-align: bottom;
+	}
+	.featureHeader div {
+        -ms-writing-mode: tb-rl;
+        -webkit-writing-mode: vertical-rl;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+	}
+	.featureHeader
+	.featureCheck img {
+		width: 19px;
+	}
 }
 
 .buttonWarning {
@@ -353,7 +379,7 @@
 }
 
 .confirmationDialog button :hover {
-    background-color: #0081b8;
+ background-color: #0081b8;
 }
 
 .confirmationDialog button {

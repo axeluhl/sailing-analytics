@@ -25,19 +25,10 @@ public class JSONServiceImpl implements JSONService {
     private final List<RaceRecord> raceRecords;
     
     public JSONServiceImpl(URL jsonURL, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        final URLConnection connection = jsonURL.openConnection();
-        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
-        JSONObject jsonObject = parseJSONObject(connection.getInputStream(), charset);
-        raceRecords = new ArrayList<RaceRecord>();
-        regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
-        for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
-            JSONObject jsonRaceEntry = (JSONObject) raceEntry;
-            RaceRecord raceRecord = createRaceRecord(jsonURL, loadLiveAndStoredURI, jsonRaceEntry);
-            raceRecords.add(raceRecord);
-        }
+        this(jsonURL, /* race ID == null means load all race records */ null, loadLiveAndStoredURI);
     }
 
-    private RaceRecord createRaceRecord(URL jsonURL, boolean loadLiveAndStoredURI, JSONObject jsonRaceEntry)
+    private RaceRecord createRaceRecord(URL jsonURL, boolean loadLiveAndStoredURI, JSONObject jsonRaceEntry, String defaultUpdateURI)
             throws URISyntaxException, IOException {
         RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
                 (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url_html"),
@@ -50,20 +41,26 @@ public class JSONServiceImpl implements JSONService {
                 (String) jsonRaceEntry.get("status"), 
                 (String) jsonRaceEntry.get("visibility"), 
                 Boolean.valueOf((Boolean) jsonRaceEntry.get("has_replay")),
-                /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
+                /*loadLiveAndStoreURI*/ loadLiveAndStoredURI, defaultUpdateURI);
         return raceRecord;
     }
     
+    /**
+     * @param raceEntryId
+     *            if {@code null}, add all races found to the {@link #raceRecords}; otherwise, add only the race whose
+     *            ID matches
+     */
     public JSONServiceImpl(URL jsonURL, String raceEntryId, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         final URLConnection connection = jsonURL.openConnection();
         final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
         JSONObject jsonObject = parseJSONObject(connection.getInputStream(), charset);
         raceRecords = new ArrayList<RaceRecord>();
         regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
+        final String defaultUpdateURI = (String) ((JSONObject) jsonObject.get("event")).get("server_update_uri");
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
-            if (jsonRaceEntry.get("id").equals(raceEntryId)) {
-                RaceRecord raceRecord = createRaceRecord(jsonURL, loadLiveAndStoredURI, jsonRaceEntry);
+            if (raceEntryId == null || jsonRaceEntry.get("id").equals(raceEntryId)) {
+                RaceRecord raceRecord = createRaceRecord(jsonURL, loadLiveAndStoredURI, jsonRaceEntry, defaultUpdateURI);
                 raceRecords.add(raceRecord);
             }
         }
@@ -73,7 +70,7 @@ public class JSONServiceImpl implements JSONService {
     public String getEventName() {
         return regattaName;
     }
-
+    
     @Override
     public List<RaceRecord> getRaceRecords() {
         return Collections.unmodifiableList(raceRecords);

@@ -1,6 +1,6 @@
 #!/bin/bash
 SAILING_GIT_ROOT="${1}"
-if [ -n ${2} ]; then
+if [ -n "${2}" ]; then
   OUTPUT_FOLDER_FOR_GWT_ZIP="${2}"
 fi
 GWT_VERSION=2.11.0
@@ -18,7 +18,7 @@ git clone https://github.com/axeluhl/gwt-maven-plugin.git -b ${GWT_VERSION}
 cd ${GWT_ROOT}
 ant clean dist-dev -Dgwt.version=${GWT_VERSION}
 cp build/dist/gwt-${GWT_VERSION}.zip ${GWT}
-if [ -n ${OUTPUT_FOLDER_FOR_GWT_ZIP} ]; then
+if [ -n "${OUTPUT_FOLDER_FOR_GWT_ZIP}" ]; then
   cp build/dist/gwt-${GWT_VERSION}.zip ${OUTPUT_FOLDER_FOR_GWT_ZIP}
 fi
 cd ${GWT}

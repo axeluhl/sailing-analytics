@@ -552,43 +552,49 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
-            String courseDesignUpdateURI, boolean trackWind, final boolean correctWindByDeclination,
+            String updateURI, boolean trackWind, final boolean correctWindByDeclination,
             final Duration offsetToStartTimeOfSimulatedRace, final boolean useInternalMarkPassingAlgorithm,
-            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername, String tracTracPassword)
+            boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey)
             throws Exception {
         logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURI
                 + " and storedURI " + storedURI);
+        final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
                 // reload JSON and load clientparams.php
-                RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
+                final RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
                 logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() +
                         " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
                 // note that the live URI may be null for races that were put into replay mode
-                final String effectiveLiveURI;
+                final URI effectiveLiveURI;
                 if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
                     if (liveURI == null || liveURI.trim().length() == 0) {
-                        effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                        effectiveLiveURI = record.getLiveURI();
                     } else {
-                        effectiveLiveURI = liveURI;
+                        effectiveLiveURI = new URI(liveURI);
                     }
                 } else {
                     effectiveLiveURI = null;
                 }
-                final String effectiveStoredURI;
+                final URI effectiveStoredURI;
                 if (storedURI == null || storedURI.trim().length() == 0) {
-                    effectiveStoredURI = record.getStoredURI().toString();
+                    effectiveStoredURI = record.getStoredURI();
                 } else {
-                    effectiveStoredURI = storedURI;
+                    effectiveStoredURI = new URI(storedURI);
+                }
+                final URI effectiveUpdateURI;
+                if (updateURI == null || updateURI.trim().length() == 0) {
+                    effectiveUpdateURI = record.getDefaultUpdateURI();
+                } else {
+                    effectiveUpdateURI = new URI(updateURI);
                 }
                 getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
-                        record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
-                        new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
+                        record.getParamURL(), effectiveLiveURI, effectiveStoredURI, effectiveUpdateURI,
                         new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                         new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()), getRaceLogStore(),
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                        offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
-                        tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
+                        offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, config == null ? null : config.getTracTracUsername(),
+                        config == null ? null : config.getTracTracPassword(), record.getRaceStatus(), record.getRaceVisibility(), trackWind,
                         correctWindByDeclination, useOfficialEventsToUpdateRaceLog);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
@@ -598,14 +604,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
-            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
-            String yellowBrickPassword) throws Exception {
+            boolean trackWind, final boolean correctWindByDeclination, String creatorUsername,
+            String raceUrl) throws Exception {
         logger.info(
                 "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
         for (YellowBrickRaceRecordDTO rr : rrs) {
             try {
                 getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.getRaceUrl(),
-                        getRaceLogStore(), getRegattaLogStore(), yellowBrickUsername, yellowBrickPassword, trackWind,
+                        getRaceLogStore(), getRegattaLogStore(), creatorUsername, raceUrl, trackWind,
                         correctWindByDeclination);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
@@ -663,7 +669,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 getTracTracAdapter().createTracTracConfiguration(tracTracConfiguration.getCreatorName(),
                 tracTracConfiguration.getName(), tracTracConfiguration.getJsonUrl(),
                 tracTracConfiguration.getLiveDataURI(), tracTracConfiguration.getStoredDataURI(),
-                tracTracConfiguration.getCourseDesignUpdateURI(), tracTracConfiguration.getTracTracUsername(),
+                tracTracConfiguration.getUpdateURI(), tracTracConfiguration.getTracTracUsername(),
                         tracTracConfiguration.getTracTracPassword()));
     }
 

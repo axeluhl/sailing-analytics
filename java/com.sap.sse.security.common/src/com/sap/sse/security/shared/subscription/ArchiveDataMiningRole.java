@@ -7,7 +7,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
- * Specifies a role that when associated to a user gives access to the streamlet Feature on the RaceMap
+ * Specifies a role that when associated to a user gives access to the date mining functionality on archive server.
  */
 public class ArchiveDataMiningRole extends RolePrototype {
     private static final long serialVersionUID = 6671501683896115261L;

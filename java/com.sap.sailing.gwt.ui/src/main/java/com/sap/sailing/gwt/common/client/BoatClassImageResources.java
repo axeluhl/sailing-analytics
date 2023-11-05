@@ -224,6 +224,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource Hansa303Icon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/HANSE_418.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Hanse418Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/HOBIE_16.png")
     @ImageOptions(preventInlining = true)
     ImageResource Hobie16Icon(); 
@@ -371,6 +375,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_VENTURE.png")
     @ImageOptions(preventInlining = true)
     ImageResource RSVentureIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SALONA_46.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Salona46Icon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SCAN_KAP_99.png")
     @ImageOptions(preventInlining = true)

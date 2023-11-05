@@ -8,13 +8,19 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Creates a {@link TracTracConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link TracTracEventManagementPanel}
+ * {@link TracTracEventManagementPanel}<p>
+ * 
+ * When the password field is empty, {@code null} will be set as the value of the
+ * {@link TracTracConfigurationWithSecurityDTO#getTracTracPassword() password field} in the
+ * result which shall be interpreted as "don't update" because TracTrac does not support
+ * empty passwords.
  */
 public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
@@ -65,7 +71,6 @@ public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurat
         jsonURLTextBox = createTextBox("");
         jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
-        
         // validation: User should not create empty connections
         jsonURLTextBox.addKeyUpHandler(e -> super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty()));
         grid.setWidget(3, 0, jsonURLLabel);
@@ -75,6 +80,7 @@ public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurat
         tracTracUpdateURITextBox = createTextBox("");
         tracTracUpdateURITextBox.ensureDebugId("TracTracUpdateURITextBox");
         tracTracUpdateURITextBox.setVisibleLength(100);
+        tracTracUpdateURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
         grid.setWidget(4, 0, tracTracUpdateURLLabel);
         grid.setWidget(4, 1, tracTracUpdateURITextBox);
         // TracTrac Username
@@ -98,14 +104,12 @@ public class TracTracConnectionDialog extends DataEntryDialog<TracTracConfigurat
 
     @Override
     protected TracTracConfigurationWithSecurityDTO getResult() {
-
         final String jsonURL = jsonURLTextBox.getValue();
         final String liveDataURI = liveURITextBox.getValue();
         final String storedDataURI = storedURITextBox.getValue();
         final String courseDesignUpdateURI = tracTracUpdateURITextBox.getValue();
         final String tractracUsername = tractracUsernameTextBox.getValue();
-        final String tractracPassword = tractracPasswordTextBox.getValue();
-
+        final String tractracPassword = Util.hasLength(tractracPasswordTextBox.getValue()) ? tractracPasswordTextBox.getValue() : null;
         return new TracTracConfigurationWithSecurityDTO(name, jsonURL, liveDataURI, storedDataURI,
                 courseDesignUpdateURI, tractracUsername, tractracPassword, creatorName);
     }

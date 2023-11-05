@@ -10,13 +10,19 @@ import com.sap.sailing.gwt.ui.adminconsole.TracTracEventManagementPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Creates a {@link TracTracConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link TracTracEventManagementPanel}
+ * {@link TracTracEventManagementPanel}. We don't expect to see a password sent from the server
+ * to the client, so we won't even bother to insert any password into the password field as it is
+ * inherently insecure (see also bug 5907). Instead, a password field left empty will lead to
+ * a {@code null} value in the {@link #getResult() resulting} {@link YellowBrickConfigurationWithSecurityDTO}'s
+ * {@link YellowBrickConfigurationWithSecurityDTO#getPassword() password} field, and the server shall
+ * take this as an indication to not modify any existing password.
  */
 public class YellowBrickConfigurationDialog extends DataEntryDialog<YellowBrickConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
@@ -81,7 +87,9 @@ public class YellowBrickConfigurationDialog extends DataEntryDialog<YellowBrickC
     @Override
     protected YellowBrickConfigurationWithSecurityDTO getResult() {
         return new YellowBrickConfigurationWithSecurityDTO(nameTextBox.getValue(),
-                raceURLTextBox.getValue(), usernameTextBox.getValue(), passwordTextBox.getValue(), creatorName);
+                raceURLTextBox.getValue(), usernameTextBox.getValue(),
+                Util.hasLength(passwordTextBox.getValue()) ? passwordTextBox.getValue() : null,
+                creatorName);
     }
 
     @Override

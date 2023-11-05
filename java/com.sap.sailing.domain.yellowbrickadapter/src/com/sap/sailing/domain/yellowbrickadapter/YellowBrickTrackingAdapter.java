@@ -34,6 +34,11 @@ public interface YellowBrickTrackingAdapter {
     
     void removeYellowBrickConfiguration(String raceUrl, String creatorName);
 
+    /**
+     * @param password
+     *            if {@code null} and the configuration already exists within this adapter (as identified by the
+     *            {@code creatorName} and {@code raceUrl}), the existing password is left unchanged.
+     */
     void updateYellowBrickConfiguration(String name, String raceUrl, String username,
             String password, String creatorName);
     

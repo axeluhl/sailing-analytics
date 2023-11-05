@@ -16,7 +16,7 @@ public class RegistrationLinkWithQRCode {
     }
 
     /**
-     * Get entered secrect.
+     * Get entered secret.
      * 
      * @return Secret or null, if not set
      */
