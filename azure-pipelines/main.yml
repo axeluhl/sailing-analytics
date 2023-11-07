@@ -5,7 +5,6 @@
 trigger:
   branches:
     include:
-     - hyperspace
      - release-race-manager-app
      - release-buoy-pinger-app
 
