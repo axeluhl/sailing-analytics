@@ -5,8 +5,6 @@
 trigger:
   branches:
     include:
-     - hyperspace
-     - release-race-manager-app
      - release-buoy-pinger-app
 
 pr:
@@ -40,7 +38,7 @@ extends:
     #  https://pages.github.tools.sap/SAPMobile/Documentation/Pipelines/android-library/#configuration
     repositoryName: 'sapsailing'
     # whatever we use here for a tag or branch, make sure that it triggers the pipeline; see section "triggers:"
-    isRelease: ${{ startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}
+    isRelease: true
     # productiveBranchName acts as part of a condition that selects the flow, such as the "release" flow
     productiveBranchName: refs/heads/hyperspace
     buildLaneName: 'releaseBuild'
@@ -51,5 +49,5 @@ extends:
     androidVersion: 33
     # We are building more than one app from our repository; we will use branches
     # to determine which app is to be built/released/signed
-    # Default: Race Manager App
-    momaAssemblyId: 189
+    # Default: Buoy Pinger App
+    momaAssemblyId: 191
