@@ -42,6 +42,7 @@ extends:
     # productiveBranchName acts as part of a condition that selects the flow, such as the "release" flow
     productiveBranchName: refs/heads/hyperspace
     buildLaneName: 'releaseBuild'
+    buildOutputPath: mobile/com.sap.sailing.android.buoy.positioning.app/build/outputs/apk/release
     testLaneName: 'test'
     # requestAuthentication: true  # enable if fetching dependencies from Artifactory or Nexus
     appCenterSlug: 'sapsailing/sapsailing-android-apps'
