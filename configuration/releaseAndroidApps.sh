@@ -43,9 +43,10 @@ increment_version_code_and_set_version_name() {
 update_files2sign() {
   echo "Update files2sign.json with new versionName $NEW_VERSION_NAME"
   for f in $( find . -name "${FILES2SIGN}" ); do
-  OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' "${f}" | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
-  for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
-    sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "${f}"
+    OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' "${f}" | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
+    for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
+      sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "${f}"
+    done
   done
 }
 
