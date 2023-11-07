@@ -3,7 +3,7 @@ ANDROID_RELEASE_BRANCH=hyperspace
 RELEASE_BRANCHES="release-race-manager-app release-buoy-pinger-app"
 APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.android.buoy.positioning.app/ mobile/com.sap.sailing.racecommittee.app/"
 APP_GRADLE_PROPERTIES="gradle.properties"
-FILES2SIGN=cfg/files2sign.json
+FILES2SIGN=files2sign.json
 VERSION_FILE=cfg/VERSION
 GIT_REMOTE=githubsapsailing
 
@@ -42,9 +42,11 @@ increment_version_code_and_set_version_name() {
 # replace, e.g. "version": "1.4.xy" with new one
 update_files2sign() {
   echo "Update files2sign.json with new versionName $NEW_VERSION_NAME"
-  OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' $FILES2SIGN | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
-  for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
-    sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "$FILES2SIGN"
+  for f in $( find . -name "${FILES2SIGN}" ); do
+    OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' "${f}" | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
+    for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
+      sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "${f}"
+    done
   done
 }
 
