@@ -36,6 +36,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)throws Exception;
     
+    void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO);
+    
     MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) throws Exception;
 
     ArrayList<SSHKeyPairDTO> getSshKeys(String regionId);

@@ -47,6 +47,8 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsProcessFactory;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
+import com.sap.sailing.landscape.ui.client.CreateReverseProxyInClusterDialog;
+import com.sap.sailing.landscape.ui.client.CreateReverseProxyInClusterDialog.CreateReverseProxyDTO;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
@@ -82,6 +84,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
@@ -259,16 +262,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
         Map<AwsInstance<String>, TargetHealth> healths = null;
         if (targetGroupInQuestion != null) {
-             healths = landscape.getTargetHealthDescriptions(targetGroupInQuestion);
+            healths = landscape.getTargetHealthDescriptions(targetGroupInQuestion);
         }
         final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
         for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape))
                 .getHosts()) {
-            ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(), instance.getAvailabilityZone().toString(),
-                    instance.getPrivateAddress().toString(), instance.getPublicAddress().toString(), region,
-                    instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),
-                    instance.getImageId(), extractHealth(healths, instance));
-            dto.setDisposable(instance.getTags().parallelStream().anyMatch(tag -> tag.key().equals(DISPOSABLE_PROXY)));
+            ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(),
+                    instance.getAvailabilityZone().toString(), instance.getPrivateAddress().toString(),
+                    instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(),
+                    instance.isSharedHost(), instance.getNameTag(), instance.getImageId(),
+                    extractHealth(healths, instance));
+
+            dto.setDisposable(landscape.getTag(instance, region).equals(DISPOSABLE_PROXY));
             results.add(dto);
         }
         return results;
@@ -277,35 +282,44 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public void restartHttpdOnProxyInstance(ReverseProxyDTO instanceDTO, String region, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption) throws Exception {
         checkLandscapeManageAwsPermission();
-        AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(new AwsRegion(region,getLandscape()), instanceDTO.getInstanceId(), AwsInstanceImpl::new);
-        new ApacheReverseProxy<>(getLandscape(), awsInstance).restart(Optional.ofNullable(optionalKeyName),passphraseForPrivateKeyDecryption);
+        AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(new AwsRegion(region, getLandscape()),
+                instanceDTO.getInstanceId(), AwsInstanceImpl::new);
+        new ApacheReverseProxy<>(getLandscape(), awsInstance).restart(Optional.ofNullable(optionalKeyName),
+                passphraseForPrivateKeyDecryption);
     }
     
     private String extractHealth(Map<AwsInstance<String>, TargetHealth> healths, AwsInstance<String> instance) {
-        String no_health_value_found= "No health value found";
+        String no_health_value_found = "No health value found";
         if (healths == null) {
             return no_health_value_found;
-        } 
+        }
         TargetHealth health = healths.get(instance);
-        if (health!= null) {
+        if (health != null) {
             return health.state().toString();
         }
         return no_health_value_found;
     }
-    
-    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region) throws IllegalStateException, UnknownHostException {
+
+    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region)
+            throws IllegalStateException, UnknownHostException {
         checkLandscapeManageAwsPermission();
         AwsRegion awsRegion = new AwsRegion(region, getLandscape());
-        AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(awsRegion, proxy.getInstanceId(), AwsInstanceImpl::new);
+        AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(awsRegion, proxy.getInstanceId(),
+                AwsInstanceImpl::new);
         getLandscape().getCentralReverseProxy(awsRegion).removeHost(awsInstance);
         return true;
-        
+
     }
-    
-    public void addReverseProxy() {
-        
+
+    public void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO) {
+        getLandscape().getCentralReverseProxy(new AwsRegion(createProxyDTO.getRegion(), getLandscape()))
+                .createHost(InstanceType.fromValue(createProxyDTO.getInstanceType()),
+                        new AwsAvailabilityZoneImpl(createProxyDTO.getAvailabilityZone(),
+                                createProxyDTO.getAvailabilityZone(),
+                                new AwsRegion(createProxyDTO.getRegion(), getLandscape())),
+                        createProxyDTO.getKey());
+        // TODO: load balancer/target group stuff
     }
-    
 
     
     

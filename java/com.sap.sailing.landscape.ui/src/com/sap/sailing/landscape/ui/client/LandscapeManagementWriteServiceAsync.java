@@ -43,7 +43,8 @@ public interface LandscapeManagementWriteServiceAsync {
     
     void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
-
+    
+    void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO,   AsyncCallback<Void> callback);
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.
      */

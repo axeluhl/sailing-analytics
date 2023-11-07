@@ -172,4 +172,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String successfullyRestartedHttpdOnInstance(String instance);
     String invalidOperationForThisProxy();
     String pleaseProvideNonEmptyName();
+    String success();
 }

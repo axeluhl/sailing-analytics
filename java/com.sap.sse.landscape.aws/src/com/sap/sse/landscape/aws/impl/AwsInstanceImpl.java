@@ -131,19 +131,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         }
     }
     
-    public List<Tag> getTags() {
-        if (tags == null) {
-            final Instance instance = getInstance();
-            tags = instance.tags();
-            return tags;
-        } else {
-            return tags;
-        }
-    }
-   
-   
-   
-    
+
     @Override
     public InetAddress getPrivateAddress() {
         return privateAddress;

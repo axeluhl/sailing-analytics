@@ -68,8 +68,4 @@ public interface AwsInstance<ShardingKey> extends Host {
     
     boolean verifySshKey(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase); 
     
-    
-    default List<Tag> getTags() {
-        return new ArrayList<Tag>();
-    }
 }

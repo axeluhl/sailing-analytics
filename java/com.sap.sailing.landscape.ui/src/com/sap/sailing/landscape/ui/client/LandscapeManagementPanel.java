@@ -14,6 +14,7 @@ import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.logging.client.DefaultLevel;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -1458,16 +1459,39 @@ public class LandscapeManagementPanel extends SimplePanel {
         
     }
     
-    private void addReverseProxyToCluster(StringMessages stringMessages, String selectedObject) {
+    private void addReverseProxyToCluster(StringMessages stringMessages, String region) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
         } else {
-            //toWrite
+
+            new CreateReverseProxyInClusterDialog(stringMessages, errorReporter, landscapeManagementService,
+                    new DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO>() {
+                        @Override
+                        public void ok(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO editedObject) {
+                            editedObject.setRegion(region);
+                            landscapeManagementService.addReverseProxy(editedObject, new AsyncCallback<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
+                                }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(caught.getMessage());
+
+                                }
+                            });
+
+                        }
+                        @Override
+                        public void cancel() {
+                        }
+
+                    }).show();
         }
     }
+    
     private void refreshProxiesTable() {
         proxiesTable.getFilterPanel().removeAll();
-        
         if (mfaLoginWidget.hasValidSessionCredentials() && regionsTable.getSelectionModel().getSelectedObject() != null) {
             proxiesTableBusy.setBusy(true);
             landscapeManagementService.getReverseProxies(regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<ReverseProxyDTO>>() {
@@ -1476,7 +1500,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                 errorReporter.reportError(caught.getMessage());
                 proxiesTableBusy.setBusy(false);
                }
-      
                @Override
                public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
                 proxiesTable.refresh(reverseProxyDTOs);
@@ -1484,10 +1507,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                }
             });
         }
-        
     }
-
-
     
     private void restartHttpd(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
@@ -1499,18 +1519,15 @@ public class LandscapeManagementPanel extends SimplePanel {
                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
                             : null,
                     new AsyncCallback<Void>() {
-
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(caught.getMessage());
                         }
-
                         @Override
                         public void onSuccess(Void result) {
                             Notification.notify(
                                     stringMessages.successfullyRestartedHttpdOnInstance(reverseProxy.getInstanceId()),
                                     NotificationType.SUCCESS);
-
                         }
 
                     });
