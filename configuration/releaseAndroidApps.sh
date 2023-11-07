@@ -107,7 +107,7 @@ git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`"
 for RELEASE_BRANCH in ${RELEASE_BRANCHES}; do
   git checkout ${RELEASE_BRANCH}
   echo "Merging version number changes into release branch ${RELEASE_BRANCH}"
-  git merge ${ANDROID_RELEASE_BRANCH}
+  git merge -m "Merging version update from ${ANDROID_RELEASE_BRANCH} into ${RELEASE_BRANCH}" ${ANDROID_RELEASE_BRANCH}
   if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
     git push $GIT_REMOTE ${RELEASE_BRANCH}:${RELEASE_BRANCH}
   fi
