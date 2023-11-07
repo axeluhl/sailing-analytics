@@ -38,16 +38,13 @@ platform :android do
   desc "Assemble app"
   lane :releaseBuild do
     # Automatic versioning
-    if is_ci
-      commits = sh("git rev-list --count HEAD").to_i
-      update_version_code(code: commits)
-
-      # Generate GroupId, ArtifactId, Version coordinates for central signing service
-      generate_gav
-    end
+    #if is_ci
+      #commits = sh("git rev-list --count HEAD").to_i
+      #update_version_code(code: commits)
+    #end
 
     gradle(task: "assembleRelease")  # Build .apk
-    gradle(task: "bundleRelease")  # Build .aab
+    #gradle(task: "bundleRelease")  # Build .aab
   end
 
   desc "Call Kotlin Lint"
@@ -55,26 +52,4 @@ platform :android do
     gradle(task: "ktlintCheck")
   end
 
-  desc "Print GAV for central signing service to gav.json"
-  private_lane :generate_gav do
-    versionName = get_properties_value(
-      key: "versionName",
-      path: "gradle.properties"
-    )
-    versionCode = get_properties_value(
-      key: "versionCode",
-      path: "gradle.properties"
-    )
-
-    gav = {
-      groupID: CredentialsManager::AppfileConfig.try_fetch_value(:package_name),
-      artifactID: 'sapsailing',
-      version: "#{versionName}.#{versionCode}"
-    }
-
-    write_json(
-      file_path: "gav.json",
-      hash: gav
-    )
-  end
 end

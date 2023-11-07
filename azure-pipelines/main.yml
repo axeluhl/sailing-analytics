@@ -38,9 +38,17 @@ extends:
     # Please check the pipeline documentation for available parameters:
     #  https://pages.github.tools.sap/SAPMobile/Documentation/Pipelines/android-library/#configuration
     repositoryName: 'sapsailing'
+    # whatever we use here for a tag or branch, make sure that it triggers the pipeline; see section "triggers:"
+    isRelease: ${{ startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}
+    # productiveBranchName acts as part of a condition that selects the flow, such as the "release" flow
+    productiveBranchName: refs/heads/hyperspace
     buildLaneName: 'releaseBuild'
     testLaneName: 'test'
     # requestAuthentication: true  # enable if fetching dependencies from Artifactory or Nexus
     appCenterSlug: 'sapsailing/sapsailing-android-apps'
     jdkVersion: 11
     androidVersion: 33
+    # We are building more than one app from our repository; we will use branches
+    # to determine which app is to be built/released/signed
+    # Default: Race Manager App
+    momaAssemblyId: 189
