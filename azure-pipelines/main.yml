@@ -5,6 +5,7 @@
 trigger:
   branches:
     include:
+     - hyperspace
      - release-race-manager-app
 
 pr:
