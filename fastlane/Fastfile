@@ -17,7 +17,7 @@ platform :android do
   def update_version_code(code: 1)
     set_properties_value(
       path: "gradle.properties",
-      key: "versionCode",
+      key: "appVersionCode",
       value: "#{code}"
     )
   end
