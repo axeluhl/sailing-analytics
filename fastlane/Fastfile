@@ -38,10 +38,10 @@ platform :android do
   desc "Assemble app"
   lane :releaseBuild do
     # Automatic versioning
-    #if is_ci
-      #commits = sh("git rev-list --count HEAD").to_i
-      #update_version_code(code: commits)
-    #end
+    if is_ci
+      commits = sh("git rev-list --count HEAD").to_i
+      update_version_code(code: commits)
+    end
 
     gradle(task: "assembleRelease")  # Build .apk
     #gradle(task: "bundleRelease")  # Build .aab
