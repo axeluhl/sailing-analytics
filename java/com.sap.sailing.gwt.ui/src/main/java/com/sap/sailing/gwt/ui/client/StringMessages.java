@@ -63,6 +63,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseEnterAName();
     String pleaseEnterABoatClass();
     String discardRacesFromHowManyStartedRacesOn();
+    String applyDiscardsBasedOnNumberOfScoredRaces(int maxNumberOfDiscardedResults);
     String leaderboardWithThisNameAlreadyExists();
     String discardThresholdsMustBeNumeric();
     String discardThresholdsMustBeAscending();

@@ -80,7 +80,7 @@ public class DiscardThresholdBoxes {
     private Widget createDiscardThresholdBoxesPanel(StringMessages stringMessages) {
         assert discardThresholdBoxes != null && discardThresholdBoxes.length == MAX_NUMBER_OF_DISCARDED_RESULTS;
         final VerticalPanel vp = new VerticalPanel();
-        vp.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
+        vp.add(new Label(stringMessages.applyDiscardsBasedOnNumberOfScoredRaces(MAX_NUMBER_OF_DISCARDED_RESULTS)));
         final Grid grid = new Grid(0, 2*NUMBER_OF_BOXES_PER_LINE);
         grid.setCellSpacing(3);
         vp.add(grid);
