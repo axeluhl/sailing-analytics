@@ -2,6 +2,7 @@ package com.sap.sse.security.datamining.data.impl;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.datamining.data.HasSubscriptionContext;
 import com.sap.sse.security.datamining.data.HasUserContext;
 import com.sap.sse.security.shared.subscription.Subscription;
@@ -22,7 +23,7 @@ public class SubscriptionWithContext implements HasSubscriptionContext {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((subscription == null) ? 0 : subscription.getSubscriptionId().hashCode());
+        result = prime * result + ((subscription == null) ? 0 : subscription.getSubscriptionId() == null ? 0 : subscription.getSubscriptionId().hashCode());
         return result;
     }
 
@@ -38,7 +39,7 @@ public class SubscriptionWithContext implements HasSubscriptionContext {
         if (subscription == null) {
             if (other.subscription != null)
                 return false;
-        } else if (!subscription.getSubscriptionId().equals(other.subscription.getSubscriptionId()))
+        } else if (!Util.equalsWithNull(subscription.getSubscriptionId(), other.subscription.getSubscriptionId()))
             return false;
         return true;
     }
