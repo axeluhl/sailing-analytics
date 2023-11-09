@@ -2,10 +2,13 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Log;
@@ -21,7 +24,9 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
+import com.sap.sse.landscape.aws.TargetGroup;
 
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics,
@@ -54,9 +59,21 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         final AwsInstance<ShardingKey> host = getLandscape().launchHost(
                 (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, privateIpAddress, launchTimePoint, landscape),
-                getAmiId(), instanceType, az, keyName,
-                Collections.singleton(getSecurityGroup(az.getRegion())), Optional.of(Tags.with("Name", "ReverseProxy")));
+                getAmiId(az), instanceType, az, keyName,
+                getSecurityGroups(az.getRegion()), Optional.of(Tags.with("Name", "ReverseProxy").and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, "")));
         addHost(host);
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            int attempts = 0;
+            while (attempts < 10000 && host.getInstance().state().name().equals(InstanceStateName.PENDING));
+            for (TargetGroup<ShardingKey> targetGroup: getLandscape().getTargetGroups(az.getRegion())) {
+                targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
+                    if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
+                        targetGroup.addTarget(host);
+                    }
+                }));
+            }
+        });
+     
         return host;
     }
     
@@ -64,18 +81,19 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     public void removeHost(AwsInstance<ShardingKey> host) {
         assert Util.contains(getHosts(), host);
         if (Util.size(getHosts()) == 1) {
-            throw new IllegalStateException("Trying to remove the last hosts of reverse proxy "+this+". Use terminate() instead");
+            throw new IllegalStateException(
+                    "Trying to remove the last hosts of reverse proxy " + this + ". Use terminate() instead");
         }
         getLandscape().terminate(host); // this assumes that the host is running only the reverse proxy process...
     }
 
-    private SecurityGroup getSecurityGroup(Region region) {
-        return getLandscape().getDefaultSecurityGroupForCentralReverseProxy(region);
+    private List<SecurityGroup> getSecurityGroups(Region region) {
+        return getLandscape().getDefaultSecurityGroupsForCentralReverseProxy(region); 
+        
     }
 
-    private MachineImage getAmiId() {
-        // TODO Implement ApacheReverseProxy.getAmiId(...)
-        return null;
+    private MachineImage getAmiId(AwsAvailabilityZone az ) {
+        return getLandscape().getLatestImageWithType(az.getRegion(), SharedLandscapeConstants.IMAGE_TYPE_REVERSE_PROXY);
     }
 
     @Override

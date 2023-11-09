@@ -1,11 +1,12 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
@@ -37,6 +38,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
     void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)throws Exception;
     
     void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO);
+    
+    List<String> getAvailabilityZones(String region, AzFormat format);
     
     MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) throws Exception;
 

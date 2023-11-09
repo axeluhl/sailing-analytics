@@ -135,7 +135,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     
-    String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
+    
     
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see

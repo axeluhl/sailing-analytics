@@ -38,6 +38,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
@@ -48,7 +49,6 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsProcessFactory;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.CreateReverseProxyInClusterDialog;
-import com.sap.sailing.landscape.ui.client.CreateReverseProxyInClusterDialog.CreateReverseProxyDTO;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
@@ -82,9 +82,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
-import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
-import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
@@ -126,6 +124,8 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
+    
+    
     private static final long serialVersionUID = -3332717645383784425L;
     private static final Logger logger = Logger.getLogger(LandscapeManagementWriteServiceImpl.class.getName());
     
@@ -134,8 +134,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
     private final ServiceTracker<LandscapeService, LandscapeService> landscapeServiceTracker;
-    private String ALL_REVERSE_PROXIES = "allReverseProxies";
-    private String DISPOSABLE_PROXY = "disposableProxy";
+
 
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
@@ -243,6 +242,28 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
+    public List<String> getAvailabilityZones(String region, AzFormat format) {
+        List<String> zones = new ArrayList<String>();
+        switch (format) {
+        case MIXED:
+            getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
+                    .forEach(item -> zones.add(item.getName() + "/" + item.getId()));
+            break;
+        case NAME:
+            getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
+                    .forEach(item -> zones.add(item.getName()));
+            break;
+        case ID:
+            getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
+                    .forEach(item -> zones.add(item.getId()));
+            break;
+        }
+        return zones;
+    }
+    
+    
+    
+    @Override
     public ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception  {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
@@ -253,7 +274,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 if (!description.tags().isEmpty()) {
                     for (Tag tag : description.tags()) {
 
-                        if (tag.key().equals(ALL_REVERSE_PROXIES)) {
+                        if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
                             targetGroupInQuestion = targetGroup;
                         }
                     }
@@ -272,8 +293,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(),
                     instance.isSharedHost(), instance.getNameTag(), instance.getImageId(),
                     extractHealth(healths, instance));
-
-            dto.setDisposable(landscape.getTag(instance, region).equals(DISPOSABLE_PROXY));
+            dto.setDisposable(landscape.getTag(instance, SharedLandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false);
             results.add(dto);
         }
         return results;
@@ -311,14 +331,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     }
 
+
     public void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO) {
+        String[] azNameId=createProxyDTO.getAvailabilityZone().split("/");
+        String azName = azNameId[0];
+        String azId = azNameId[1];
         getLandscape().getCentralReverseProxy(new AwsRegion(createProxyDTO.getRegion(), getLandscape()))
-                .createHost(InstanceType.fromValue(createProxyDTO.getInstanceType()),
-                        new AwsAvailabilityZoneImpl(createProxyDTO.getAvailabilityZone(),
-                                createProxyDTO.getAvailabilityZone(),
+                .createHost(InstanceType.valueOf(createProxyDTO.getInstanceType()),
+                        new AwsAvailabilityZoneImpl(azId,
+                                azName,
                                 new AwsRegion(createProxyDTO.getRegion(), getLandscape())),
                         createProxyDTO.getKey());
-        // TODO: load balancer/target group stuff
+        
     }
 
     

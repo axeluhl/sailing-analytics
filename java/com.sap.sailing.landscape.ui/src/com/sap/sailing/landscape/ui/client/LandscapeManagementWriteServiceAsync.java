@@ -1,13 +1,16 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.landscape.ui.server.LandscapeManagementWriteServiceImpl;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
@@ -24,6 +27,7 @@ import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
+import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
@@ -45,6 +49,9 @@ public interface LandscapeManagementWriteServiceAsync {
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
     
     void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO,   AsyncCallback<Void> callback);
+    
+    void getAvailabilityZones(String region, AzFormat format, AsyncCallback<List<String>> asyncCallback);
+    
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.
      */

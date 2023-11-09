@@ -2,9 +2,11 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
+import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -14,9 +16,9 @@ public class LandscapeDialogUtil {
     public static ListBox createInstanceTypeListBox(DataEntryDialog<?> dialog,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
             String defaultInstanceTypeName, ErrorReporter errorReporter) {
-        return createInstanceTypeListBoxWithAdditionalDefaultEntry(dialog,
-                /* additionalItem */ null, /* additionalValue */ null,
-                landscapeManagementService, stringMessages, defaultInstanceTypeName, errorReporter);
+        return createInstanceTypeListBoxWithAdditionalDefaultEntry(dialog, /* additionalItem */ null,
+                /* additionalValue */ null, landscapeManagementService, stringMessages, defaultInstanceTypeName,
+                errorReporter);
     }
 
     /**
@@ -29,7 +31,7 @@ public class LandscapeDialogUtil {
             String additionalItem, String additionalValue,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
             String defaultInstanceTypeName, ErrorReporter errorReporter) {
-        final ListBox instanceTypeBox = dialog.createListBox(/*isMultipleSelect*/false);
+        final ListBox instanceTypeBox = dialog.createListBox(/* isMultipleSelect */false);
         if (additionalItem != null) {
             instanceTypeBox.addItem(additionalItem, additionalValue);
             instanceTypeBox.setSelectedIndex(0);
@@ -39,11 +41,11 @@ public class LandscapeDialogUtil {
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
-            
+
             @Override
             public void onSuccess(ArrayList<String> result) {
                 Collections.sort(result, new NaturalComparator());
-                int i=0;
+                int i = 0;
                 for (final String instanceType : result) {
                     instanceTypeBox.addItem(instanceType, instanceType);
                     if (additionalItem == null && instanceType.equals(defaultInstanceTypeName)) {
@@ -57,11 +59,54 @@ public class LandscapeDialogUtil {
     }
 
     public static void selectInstanceType(ListBox instanceTypeListBox, String instanceTypeName) {
-        for (int i=0; i<instanceTypeListBox.getItemCount(); i++) {
+        for (int i = 0; i < instanceTypeListBox.getItemCount(); i++) {
             if (instanceTypeListBox.getValue(i).equals(instanceTypeName)) {
                 instanceTypeListBox.setSelectedIndex(i);
                 break;
             }
         }
+    }
+
+    public static ListBox createInstanceAZTypeListBox(DataEntryDialog<?> dialog,
+            LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
+            String defaultAZ, ErrorReporter errorReporter, String region) {
+        return createInstanceAZTypeListBoxWithAdditionalDefaultEntry(dialog, /* additionalItem */ null,
+                /* additionalValue */ null, landscapeManagementService, stringMessages, defaultAZ, errorReporter,
+                region);
+    }
+
+    public static ListBox createInstanceAZTypeListBoxWithAdditionalDefaultEntry(DataEntryDialog<?> dialog,
+            String additionalItem, String additionalValue,
+            LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
+            String defaultAZ, ErrorReporter errorReporter, String region) {
+        final ListBox availabilityZoneBox = dialog.createListBox(false);
+        if (additionalItem != null) {
+            availabilityZoneBox.addItem(additionalItem, additionalValue);
+            availabilityZoneBox.setSelectedIndex(0);
+        }
+        landscapeManagementService.getAvailabilityZones(region, AzFormat.MIXED,  new AsyncCallback<List<String>>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+
+            }
+
+            @Override
+            public void onSuccess(List<String> result) {
+                Collections.sort(result);
+                int i = 0;
+                for (String az : result) {
+                    availabilityZoneBox.addItem(az, az);
+                    if (additionalItem == null && az.contains(defaultAZ)) {
+                        availabilityZoneBox.setSelectedIndex(i);
+                    }
+                    i++;
+                }
+
+            }
+        });
+
+        return availabilityZoneBox;
     }
 }

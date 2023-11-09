@@ -6,15 +6,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.logging.client.DefaultLevel;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -35,6 +38,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.MoveMasterProcessDialog.MoveMasterToOtherInstanceInstructions;
@@ -118,6 +122,8 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final AwsMfaLoginWidget mfaLoginWidget;
     private TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources> proxiesTable;
     private final BusyIndicator proxiesTableBusy;
+    protected String leastpopulatedAzName = "";
+    protected List<String> availabilityZones;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
     /**
@@ -493,6 +499,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getImageId(),stringMessages.id());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneId(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
                new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
@@ -1426,12 +1433,30 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
     
     private void refreshAllThatNeedsAwsCredentials() {
+        availabilityZones = null;
         refreshMongoEndpointsTable();
         refreshApplicationReplicaSetsTable();
+        getAzs();
         refreshMachineImagesTable();
         refreshProxiesTable();
         sshKeyManagementPanel.showKeysInRegion(mfaLoginWidget.hasValidSessionCredentials() ?
                 regionsTable.getSelectionModel().getSelectedObject() : null);
+    }
+
+    private void getAzs() {
+        if (regionsTable.getSelectionModel().getSelectedObject() != null) {
+            landscapeManagementService.getAvailabilityZones(regionsTable.getSelectionModel().getSelectedObject(), AzFormat.NAME,
+                    new AsyncCallback<List<String>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(caught.getMessage());
+                }
+                @Override
+                public void onSuccess(List<String> result) {
+                    availabilityZones = result;
+                }
+            });
+        }
     }
 
     private void removeReverseProxy(ReverseProxyDTO instance, String regionId, StringMessages stringMessages) {
@@ -1463,16 +1488,30 @@ public class LandscapeManagementPanel extends SimplePanel {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
         } else {
-
-            new CreateReverseProxyInClusterDialog(stringMessages, errorReporter, landscapeManagementService,
+            new CreateReverseProxyInClusterDialog(stringMessages, errorReporter, landscapeManagementService, region, leastpopulatedAzName,
                     new DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO>() {
                         @Override
                         public void ok(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO editedObject) {
-                            editedObject.setRegion(region);
+                            editedObject.setKey(sshKeyManagementPanel.getSelectedKeyPair() == null ? null
+                                    : sshKeyManagementPanel.getSelectedKeyPair().getName());
                             landscapeManagementService.addReverseProxy(editedObject, new AsyncCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void result) {
                                     Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
+//                                    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+//                                        
+//                                        @Override
+//                                        public void execute() {
+//                                            
+//                                            for (TargetGroup<ShardingKey> targetGroup: getLandscape().getTargetGroups(az.getRegion())) {
+//                                                targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
+//                                                    if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
+//                                                        targetGroup.addTarget(host);
+//                                                    }
+//                                                }));
+//                                            }
+//                                        }
+//                                    });
                                 }
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -1492,23 +1531,48 @@ public class LandscapeManagementPanel extends SimplePanel {
     
     private void refreshProxiesTable() {
         proxiesTable.getFilterPanel().removeAll();
-        if (mfaLoginWidget.hasValidSessionCredentials() && regionsTable.getSelectionModel().getSelectedObject() != null) {
+
+        if (mfaLoginWidget.hasValidSessionCredentials()
+                && regionsTable.getSelectionModel().getSelectedObject() != null) {
             proxiesTableBusy.setBusy(true);
-            landscapeManagementService.getReverseProxies(regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<ReverseProxyDTO>>() {
-               @Override
-               public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.getMessage());
-                proxiesTableBusy.setBusy(false);
-               }
-               @Override
-               public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
-                proxiesTable.refresh(reverseProxyDTOs);
-                proxiesTableBusy.setBusy(false);
-               }
-            });
+            landscapeManagementService.getReverseProxies(regionsTable.getSelectionModel().getSelectedObject(),
+                    new AsyncCallback<ArrayList<ReverseProxyDTO>>() {
+                      
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                            proxiesTableBusy.setBusy(false);
+                        }
+                        @Override
+                        public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
+                            leastPopulatedAzId(reverseProxyDTOs);
+                            Notification.notify(leastpopulatedAzName, NotificationType.ERROR); //REMOVEME
+                            proxiesTable.refresh(reverseProxyDTOs);
+                            proxiesTableBusy.setBusy(false);
+                        }
+                    });
         }
     }
-    
+        
+    private void leastPopulatedAzId(ArrayList<ReverseProxyDTO> reverseProxies) {
+        HashMap<String, Integer> azFill  = new HashMap<>(); 
+        
+        if (availabilityZones != null && availabilityZones.size() > 0 ) {
+            String minimum = availabilityZones.get(0);
+            availabilityZones.forEach(az -> azFill.put(az, 0));
+            for (ReverseProxyDTO reverseProxy : reverseProxies) {
+               azFill.put(reverseProxy.getAvailabilityZoneId(), azFill.get(reverseProxy.getAvailabilityZoneId()) + 1);
+            }
+            for (String  az : azFill.keySet()) {
+                minimum = azFill.get(az) < azFill.get(minimum) ? az : minimum;
+            }
+            leastpopulatedAzName = minimum;
+        } else {
+            leastpopulatedAzName = "";
+        }
+        
+        
+    }
     private void restartHttpd(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
@@ -1523,16 +1587,15 @@ public class LandscapeManagementPanel extends SimplePanel {
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(caught.getMessage());
                         }
+
                         @Override
                         public void onSuccess(Void result) {
                             Notification.notify(
                                     stringMessages.successfullyRestartedHttpdOnInstance(reverseProxy.getInstanceId()),
                                     NotificationType.SUCCESS);
                         }
-
                     });
         }
-
     }
     
     private void storeRegionSelection(UserService userService, String selectedRegion) {

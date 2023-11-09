@@ -173,4 +173,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String invalidOperationForThisProxy();
     String pleaseProvideNonEmptyName();
     String success();
+    String availabilityZone();
 }

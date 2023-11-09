@@ -75,4 +75,19 @@ public interface SharedLandscapeConstants {
      * of a typical process instance.
      */
     int DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY = 4;
+    
+    /**
+     * Indicates that an instance only acts as a reverse proxy. ie. it is not hosting other services.
+     */
+    String DISPOSABLE_PROXY = "disposableProxy";
+    
+    /**
+     * The tag name for a target group which contains all the instances running httpd.
+     */
+    String ALL_REVERSE_PROXIES = "allReverseProxies";
+    
+    String IMAGE_TYPE_REVERSE_PROXY = "disposable-reverse-proxy";
+    
+    String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
+
 }

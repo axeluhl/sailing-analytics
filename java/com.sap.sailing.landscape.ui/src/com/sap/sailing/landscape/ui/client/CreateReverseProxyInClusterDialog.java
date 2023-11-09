@@ -5,6 +5,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -18,17 +19,24 @@ import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 public class CreateReverseProxyInClusterDialog
         extends DataEntryDialog<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> {
 
-    public static class CreateReverseProxyDTO {
+    public static class CreateReverseProxyDTO implements IsSerializable {
 
         private String instanceType;
         private String name;
         private String region;
         private String availabilityZone;
+        private String keyName;
+        
+        @Deprecated
+        public CreateReverseProxyDTO() { // essential line for GWT serialization
 
-        public CreateReverseProxyDTO(String name, String instanceType, String availabilityZone) {
+        }
+
+        public CreateReverseProxyDTO(String name, String instanceType, String availabilityZone, String region) {
             this.name = name;
             this.instanceType = instanceType;
             this.availabilityZone = availabilityZone;
+            this.region = region;
 
         }
 
@@ -49,8 +57,7 @@ public class CreateReverseProxyInClusterDialog
         }
 
         public String getKey() {
-            // TODO Auto-generated method stub
-            return null;
+            return keyName;
         }
 
         public void setRegion(String region) {
@@ -58,15 +65,22 @@ public class CreateReverseProxyInClusterDialog
 
         }
 
+        public void setKey(String key) {
+            keyName = key;
+            
+        }
+
     }
 
     private StringMessages stringMessages;
     private final TextBox proxyName;
     private final ListBox dedicatedInstanceTypeListBox;
+    private ListBox availabilityZone;
+    private String region;
 
     public CreateReverseProxyInClusterDialog(StringMessages stringMessages, ErrorReporter errorReporter,
-            LandscapeManagementWriteServiceAsync landscapeManagementService,
-            DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> callback) {
+            LandscapeManagementWriteServiceAsync landscapeManagementService, String region,
+            String leastpopulatedAzId, DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> callback) {
         super(stringMessages.reverseProxies(), stringMessages.reverseProxies(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO>() {
 
@@ -89,6 +103,9 @@ public class CreateReverseProxyInClusterDialog
                                                                                                                // research
                                                                                                                // best
                                                                                                                // default.
+        availabilityZone = LandscapeDialogUtil.createInstanceAZTypeListBox(this, landscapeManagementService,
+                stringMessages, leastpopulatedAzId, errorReporter, region);
+        this.region= region; 
     }
 
     @Override
@@ -100,6 +117,8 @@ public class CreateReverseProxyInClusterDialog
         verticalPanel.add(proxyName);
         verticalPanel.add(new Label(stringMessages.instanceType()));
         verticalPanel.add(dedicatedInstanceTypeListBox);
+        verticalPanel.add(new Label(stringMessages.availabilityZone()));
+        verticalPanel.add(availabilityZone);
         return result;
     }
 
@@ -110,6 +129,7 @@ public class CreateReverseProxyInClusterDialog
 
     @Override
     protected CreateReverseProxyInClusterDialog.CreateReverseProxyDTO getResult() {
-        return new CreateReverseProxyDTO(proxyName.getText(), dedicatedInstanceTypeListBox.getSelectedValue(), "TODO");
+        return new CreateReverseProxyDTO(proxyName.getText(), dedicatedInstanceTypeListBox.getSelectedValue(),
+                availabilityZone.getSelectedItemText(), region);
     }
 }

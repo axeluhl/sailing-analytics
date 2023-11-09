@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -194,8 +195,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public static final long DEFAULT_DNS_TTL_SECONDS = 60l;
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
+    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85"; //Sailing Analytics App
+    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280"; //Java Application with Reverse Proxy
+    private static final String DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-ff806d90";  //Webserver
+    private static final String DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0d1f0a4126e889aaf"; //Webserver
+
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
@@ -1141,7 +1145,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, SharedLandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;
@@ -1239,8 +1243,19 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region) {
-        return getDefaultSecurityGroupForApplicationHosts(region);
+    public List<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(com.sap.sse.landscape.Region region) {
+        List<SecurityGroup> securityGroups = new ArrayList<>(); //basic security group
+        securityGroups.add(getDefaultSecurityGroupForApplicationHosts(region));
+        final SecurityGroup result;
+        if (region.getId().equals(Region.EU_WEST_1.id())) {
+            result = getSecurityGroup(DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
+        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
+            result = getSecurityGroup(DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
+        } else {
+            result = null;
+        }
+        securityGroups.add(result);
+        return securityGroups;
     }
 
     @Override
