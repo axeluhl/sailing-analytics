@@ -18,6 +18,6 @@ public interface HasTrackedLegContext {
     public LegType getLegType();
     @Dimension(messageKey="LegNumber", ordinal=7)
     public int getLegNumber();
-    @Statistic(messageKey = "LengthoftheLeg", resultDecimals = 2)
+    @Statistic(messageKey = "LengthOfTheLeg", resultDecimals = 2)
     Distance getLegLength();
 }
