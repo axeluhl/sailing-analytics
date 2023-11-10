@@ -1444,7 +1444,8 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
 
     private void getAzs() {
-        if (regionsTable.getSelectionModel().getSelectedObject() != null) {
+        if (mfaLoginWidget.hasValidSessionCredentials()
+                && regionsTable.getSelectionModel().getSelectedObject() != null) {
             landscapeManagementService.getAvailabilityZones(regionsTable.getSelectionModel().getSelectedObject(), AzFormat.NAME,
                     new AsyncCallback<List<String>>() {
                 @Override
@@ -1498,20 +1499,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 @Override
                                 public void onSuccess(Void result) {
                                     Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
-//                                    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-//                                        
-//                                        @Override
-//                                        public void execute() {
-//                                            
-//                                            for (TargetGroup<ShardingKey> targetGroup: getLandscape().getTargetGroups(az.getRegion())) {
-//                                                targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
-//                                                    if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
-//                                                        targetGroup.addTarget(host);
-//                                                    }
-//                                                }));
-//                                            }
-//                                        }
-//                                    });
                                 }
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -1546,7 +1533,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                         @Override
                         public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
                             leastPopulatedAzId(reverseProxyDTOs);
-                            Notification.notify(leastpopulatedAzName, NotificationType.ERROR); //REMOVEME
                             proxiesTable.refresh(reverseProxyDTOs);
                             proxiesTableBusy.setBusy(false);
                         }

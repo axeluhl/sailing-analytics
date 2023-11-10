@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
@@ -25,6 +27,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -34,6 +37,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT exten
 extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     private Set<AwsInstance<ShardingKey>> hosts;
+    
 
     public ApacheReverseProxyCluster(AwsLandscape<ShardingKey> landscape) {
         super(landscape);
@@ -55,25 +59,34 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
     
     @Override
-    public AwsInstance<ShardingKey> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
+    public AwsInstance<ShardingKey> createHost(String name, InstanceType instanceType, AwsAvailabilityZone az, String keyName) throws TimeoutException, Exception {
         final AwsInstance<ShardingKey> host = getLandscape().launchHost(
                 (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, privateIpAddress, launchTimePoint, landscape),
                 getAmiId(az), instanceType, az, keyName,
-                getSecurityGroups(az.getRegion()), Optional.of(Tags.with("Name", "ReverseProxy").and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, "")));
+                getSecurityGroups(az.getRegion()), Optional.of(Tags.with("Name", name).and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, "")));
         addHost(host);
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            int attempts = 0;
-            while (attempts < 10000 && host.getInstance().state().name().equals(InstanceStateName.PENDING));
-            for (TargetGroup<ShardingKey> targetGroup: getLandscape().getTargetGroups(az.getRegion())) {
-                targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
-                    if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
-                        targetGroup.addTarget(host);
-                    }
-                }));
-            }
-        });
-     
+  
+        Wait.wait(() -> !host.getInstance().state().name().equals(InstanceStateName.PENDING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, RETRY_ADD_TO_TARGET_GROUP );
+        for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
+            targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
+                if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
+                    targetGroup.addTarget(host);
+                }
+            }));
+        }
+//        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+//            int attempts = 0;
+//            while (attempts < 10000 && host.getInstance().state().name().equals(InstanceStateName.PENDING));
+//            for (TargetGroup<ShardingKey> targetGroup: getLandscape().getTargetGroups(az.getRegion())) {
+//                targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
+//                    if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
+//                        targetGroup.addTarget(host);
+//                    }
+//                }));
+//            }
+//        });
+        
         return host;
     }
     

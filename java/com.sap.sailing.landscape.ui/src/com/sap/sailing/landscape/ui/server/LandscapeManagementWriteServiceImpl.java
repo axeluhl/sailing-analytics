@@ -330,22 +330,23 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return true;
 
     }
-
-
+    
     public void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO) {
         String[] azNameId=createProxyDTO.getAvailabilityZone().split("/");
         String azName = azNameId[0];
         String azId = azNameId[1];
+        try {
         getLandscape().getCentralReverseProxy(new AwsRegion(createProxyDTO.getRegion(), getLandscape()))
-                .createHost(InstanceType.valueOf(createProxyDTO.getInstanceType()),
+                .createHost(createProxyDTO.getName(), InstanceType.valueOf(createProxyDTO.getInstanceType()),
                         new AwsAvailabilityZoneImpl(azId,
                                 azName,
                                 new AwsRegion(createProxyDTO.getRegion(), getLandscape())),
                         createProxyDTO.getKey());
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,e.getMessage());
+        }
         
     }
-
-    
     
     private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {
         final MongoEndpoint result;
