@@ -9,8 +9,8 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 public abstract class PremiumUiElement extends Composite implements HasEnabled {
 
     protected final Action action;
-    protected final PaywallResolverImpl paywallResolver;
-    private final SecuredDTO contextDTO;
+    protected final PaywallResolver paywallResolver;
+    protected final SecuredDTO contextDTO;
 
     /**
      * Flag to keep track of the actual enabled/disabled state of this UI component independent of the representing
@@ -19,11 +19,11 @@ public abstract class PremiumUiElement extends Composite implements HasEnabled {
      */
     private boolean enabled = true;
 
-    protected PremiumUiElement(final Action action, final PaywallResolverImpl paywallResolver, final SecuredDTO contextDTO) {
+    protected PremiumUiElement(final Action action, final PaywallResolver paywallResolver2, final SecuredDTO contextDTO) {
         this.action = action;
-        this.paywallResolver = paywallResolver;
+        this.paywallResolver = paywallResolver2;
         this.contextDTO = contextDTO;
-        paywallResolver.registerUserStatusEventHandler((user, preAuth) -> updateUserPermission());
+        paywallResolver2.registerUserStatusEventHandler((user, preAuth) -> updateUserPermission());
     }
 
     @Override

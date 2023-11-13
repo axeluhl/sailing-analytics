@@ -1,12 +1,12 @@
-package com.sap.sse.security.paywall.settings;
+package com.sap.sse.security.ui.client.premium.settings;
 
 import java.util.UUID;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.converter.UUIDConverter;
-import com.sap.sse.security.paywall.PaywallResolver;
-import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 
 public class SecuredUUIDSetting extends AbstractSecuredValueSetting<UUID> {
 

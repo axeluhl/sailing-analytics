@@ -21,6 +21,7 @@ import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.premium.settings.AbstractSecuredValueSetting;
 
 public abstract class PremiumCheckBox extends PremiumUiElement implements HasValue<Boolean>, HasAllKeyHandlers {
 
@@ -62,6 +63,17 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
      */
     protected PremiumCheckBox(final String label, final Action action, final PaywallResolverImpl paywallResolver, final SecuredDTO contextDTO) {
         super(action, paywallResolver, contextDTO);
+        this.image = createPremiumIcon();
+        this.checkBox = new CheckBox(label);
+        initWidget(uiBinder.createAndBindUi(this));
+        this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
+                i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),
+                () -> paywallResolver.getUnlockingSubscriptionPlans(action, contextDTO, this::onSubscribeDialogConfirmation));
+        updateUserPermission();
+    }
+    
+    protected PremiumCheckBox(final String label, AbstractSecuredValueSetting<?> setting) {
+        super(setting.getAction(), setting.getPaywallResolver(), setting.getDtoContext().getSecuredDTO());
         this.image = createPremiumIcon();
         this.checkBox = new CheckBox(label);
         initWidget(uiBinder.createAndBindUi(this));

@@ -20,9 +20,9 @@ import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
-import com.sap.sse.security.paywall.PaywallResolver;
-import com.sap.sse.security.paywall.SecuredDTOProxy;
-import com.sap.sse.security.paywall.settings.SecuredBooleanSetting;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
+import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
 
 public class RaceMapSettings extends AbstractGenericSerializableSettings {
 

@@ -1,4 +1,4 @@
-package com.sap.sse.security.paywall;
+package com.sap.sse.security.ui.client.premium;
 
 import com.sap.sse.security.shared.dto.SecuredDTO;
 

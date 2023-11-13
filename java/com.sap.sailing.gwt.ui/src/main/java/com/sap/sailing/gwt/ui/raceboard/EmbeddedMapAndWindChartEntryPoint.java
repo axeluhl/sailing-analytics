@@ -68,10 +68,10 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
-import com.sap.sse.security.paywall.SecuredDTOProxy;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
     

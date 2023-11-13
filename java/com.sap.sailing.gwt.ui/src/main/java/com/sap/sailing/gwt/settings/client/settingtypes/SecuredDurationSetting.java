@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.settings.client.settingtypes;
 import com.sap.sailing.gwt.settings.client.settingtypes.converter.DurationConverter;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
-import com.sap.sse.security.paywall.PaywallResolver;
-import com.sap.sse.security.paywall.SecuredDTOProxy;
-import com.sap.sse.security.paywall.settings.AbstractSecuredValueSetting;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
+import com.sap.sse.security.ui.client.premium.settings.AbstractSecuredValueSetting;
 
 public class SecuredDurationSetting extends AbstractSecuredValueSetting<Duration> {
     public SecuredDurationSetting(String name, AbstractGenericSerializableSettings settings,

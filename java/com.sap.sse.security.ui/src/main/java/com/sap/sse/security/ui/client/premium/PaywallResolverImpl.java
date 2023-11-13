@@ -14,7 +14,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.paywall.PaywallResolver;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
