@@ -168,3 +168,32 @@ maxretry = 5
 ```
 * Ensure that fail2ban will be started automatically when the instance starts: `chkconfig --level 23 fail2ban on` and start it right away with `service fail2ban start`. You can see which filters are active using `service fail2ban status`.
 * Ensure you have EC2 / EBS snapshot backups for the volumes by tagging them as follows: ``WeeklySailingInfrastructureBackup=Yes`` for ``/var/www/static``, ``/var/log``, ``/var/log/old`` and ``/var/log/old/cache``, ``DailySailingBackup=Yes`` for ``/home``.
+
+
+## Basic setup for reverse proxy instance
+
+perl 
+httpd
+apachetop
+per-CGI
+postfix
+sendmail-cf
+ mod_proxy_html
+tmux
+nfs-utils
+amazon linux extras install php7.2 && yum update && yum install php
+
+
+root access
+num of connections trackable
+keyreader token
+
+amazon-efs-utils
+mounts
+
+mail -> I don't think anything is needed but I added the stuf to sendmail-cf   ///
+
+logrotate target
+
+chkconfig nfs on (half complete)
+fail2ban setup
