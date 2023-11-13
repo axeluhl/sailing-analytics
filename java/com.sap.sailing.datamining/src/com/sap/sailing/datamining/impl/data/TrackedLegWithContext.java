@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -97,5 +98,9 @@ public class TrackedLegWithContext implements HasTrackedLegContext {
         }
         return at;
     }
-
+    
+    @Override
+    public Distance getLegLength() {
+        return getTrackedLeg().getWindwardDistance();
+    }
 }
