@@ -120,14 +120,16 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
 
     @Override
     public void setPlainRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setPlainRedirect(hostname, applicationProcess, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
     public void setHomeRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setHomeRedirect(hostname, applicationProcess, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
@@ -135,7 +137,8 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     @Override
     public void setEventRedirect(String hostname, ProcessT applicationProcess,
             UUID eventId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setEventRedirect(hostname, applicationProcess, eventId, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
@@ -143,7 +146,8 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     @Override
     public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
             UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setEventSeriesRedirect(hostname, applicationProcess, leaderboardGroupId, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
@@ -151,7 +155,8 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     @Override
     public void setEventArchiveRedirect(String hostname, UUID eventId, Optional<String> optionalKeyName,
             byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setEventArchiveRedirect(hostname, eventId, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
@@ -159,7 +164,8 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     @Override
     public void setEventSeriesArchiveRedirect(String hostname, UUID leaderboardGroupId,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setEventSeriesArchiveRedirect(hostname, leaderboardGroupId, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
@@ -167,35 +173,40 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     @Override
     public void setHomeArchiveRedirect(String hostname, Optional<String> optionalKeyName,
             byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setHomeArchiveRedirect(hostname, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
     public void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.setScopeRedirect(scope, applicationProcess);
         }
     }
 
     @Override
     public void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.createInternalStatusRedirect(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
     public void removeRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.removeRedirect(hostname, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
     public void removeRedirect(Scope<ShardingKey> scope, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+        if (getReverseProxies().iterator().hasNext()) {
+            final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
             proxy.removeRedirect(scope, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }

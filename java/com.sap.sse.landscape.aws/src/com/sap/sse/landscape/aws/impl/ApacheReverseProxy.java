@@ -85,7 +85,8 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String... macroArguments)
             throws Exception {
         final String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
-                + "\" >" + getConfigFilePath(configFileNameForHostname) + "; service httpd reload";
+                + "\" >" + getConfigFilePath(configFileNameForHostname) + "; service httpd reload;"
+                + "cd /etc/httpd && git add * && git commit -m \"" + hostname + " redirect set\" && git push origin main;";
         logger.info("Standard output from setting up the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
