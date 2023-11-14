@@ -77,7 +77,7 @@ public interface SharedLandscapeConstants {
     int DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY = 4;
     
     /**
-     * Indicates that an instance only acts as a reverse proxy. ie. it is not hosting other services.
+     * Indicates that an instance only acts as a reverse proxy. ie. it is not hosting other services. SO it can be terminated without risk.
      */
     String DISPOSABLE_PROXY = "disposableProxy";
     
@@ -86,8 +86,14 @@ public interface SharedLandscapeConstants {
      */
     String ALL_REVERSE_PROXIES = "allReverseProxies";
     
+    /**
+     * Used to launch the correct ami
+     */
     String IMAGE_TYPE_REVERSE_PROXY = "disposable-reverse-proxy";
     
+    /**
+     * Indicates an instance is a reverse proxy.
+     */
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
 
 }

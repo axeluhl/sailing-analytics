@@ -16,6 +16,11 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 
+/**
+ * Creates a dialog box for adding a reverse proxy to the cluster. 
+ * @author Thomas
+ *
+ */
 public class CreateReverseProxyInClusterDialog
         extends DataEntryDialog<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> {
 
@@ -31,7 +36,14 @@ public class CreateReverseProxyInClusterDialog
         public CreateReverseProxyDTO() { // essential line for GWT serialization
 
         }
-
+        
+        /**
+         * 
+         * @param name The name of the reverse proxy to spawn.
+         * @param instanceType The new instance type.
+         * @param availabilityZone The mixed format of the AZ with the fewest reverse proxies.
+         * @param region
+         */
         public CreateReverseProxyDTO(String name, String instanceType, String availabilityZone, String region) {
             this.name = name;
             this.instanceType = instanceType;
@@ -77,10 +89,19 @@ public class CreateReverseProxyInClusterDialog
     private final ListBox dedicatedInstanceTypeListBox;
     private ListBox availabilityZone;
     private String region;
-
+    
+    /**
+     * The dialog box allows users to choose the name, instance type and az. 
+     * @param stringMessages
+     * @param errorReporter
+     * @param landscapeManagementService
+     * @param region
+     * @param leastpopulatedAzName
+     * @param callback
+     */
     public CreateReverseProxyInClusterDialog(StringMessages stringMessages, ErrorReporter errorReporter,
             LandscapeManagementWriteServiceAsync landscapeManagementService, String region,
-            String leastpopulatedAzId, DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> callback) {
+            String leastpopulatedAzName, DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> callback) {
         super(stringMessages.reverseProxies(), stringMessages.reverseProxies(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO>() {
 
@@ -103,8 +124,11 @@ public class CreateReverseProxyInClusterDialog
                                                                                                                // research
                                                                                                                // best
                                                                                                                // default.
+        /**
+         * Displays the availability zones in the mixed format.
+         */
         availabilityZone = LandscapeDialogUtil.createInstanceAZTypeListBox(this, landscapeManagementService,
-                stringMessages, leastpopulatedAzId, errorReporter, region);
+                stringMessages, leastpopulatedAzName, errorReporter, region);
         this.region= region; 
     }
 

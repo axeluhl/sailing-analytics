@@ -67,6 +67,21 @@ public class LandscapeDialogUtil {
         }
     }
 
+    /**
+     * Creates a dropdown list of availability zones in the mixed format, initially selecting the item containing the az
+     * name, which is the least populated
+     * 
+     * @param dialog
+     * @param additionalItem
+     * @param additionalValue
+     * @param landscapeManagementService
+     * @param stringMessages
+     * @param defaultAZ
+     *            The least populated az name.
+     * @param errorReporter
+     * @param region
+     * @return
+     */
     public static ListBox createInstanceAZTypeListBox(DataEntryDialog<?> dialog,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
             String defaultAZ, ErrorReporter errorReporter, String region) {
@@ -75,10 +90,11 @@ public class LandscapeDialogUtil {
                 region);
     }
 
+
     public static ListBox createInstanceAZTypeListBoxWithAdditionalDefaultEntry(DataEntryDialog<?> dialog,
             String additionalItem, String additionalValue,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultAZ, ErrorReporter errorReporter, String region) {
+            String defaultAZName, ErrorReporter errorReporter, String region) {
         final ListBox availabilityZoneBox = dialog.createListBox(false);
         if (additionalItem != null) {
             availabilityZoneBox.addItem(additionalItem, additionalValue);
@@ -98,7 +114,7 @@ public class LandscapeDialogUtil {
                 int i = 0;
                 for (String az : result) {
                     availabilityZoneBox.addItem(az, az);
-                    if (additionalItem == null && az.contains(defaultAZ)) {
+                    if (additionalItem == null && az.contains(defaultAZName)) {
                         availabilityZoneBox.setSelectedIndex(i);
                     }
                     i++;

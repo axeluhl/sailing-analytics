@@ -63,7 +63,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         final AwsInstance<ShardingKey> host = getLandscape().launchHost(
                 (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, privateIpAddress, launchTimePoint, landscape),
-                getAmiId(az), instanceType, az, keyName,
+                getAmiId(az.getRegion()), instanceType, az, keyName,
                 getSecurityGroups(az.getRegion()), Optional.of(Tags.with("Name", name).and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, "")));
         addHost(host);
   
@@ -100,13 +100,23 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         getLandscape().terminate(host); // this assumes that the host is running only the reverse proxy process...
     }
 
+    /**
+     * Gets the security groups in the region that the reverse proxy requires.
+     * @param region
+     * @return
+     */
     private List<SecurityGroup> getSecurityGroups(Region region) {
         return getLandscape().getDefaultSecurityGroupsForCentralReverseProxy(region); 
         
     }
 
-    private MachineImage getAmiId(AwsAvailabilityZone az ) {
-        return getLandscape().getLatestImageWithType(az.getRegion(), SharedLandscapeConstants.IMAGE_TYPE_REVERSE_PROXY);
+    /**
+     * Gets the latest image in the current region with the correct tag.
+     * @param region 
+     * @return
+     */
+    private MachineImage getAmiId(Region region) {
+        return getLandscape().getLatestImageWithType(region, SharedLandscapeConstants.IMAGE_TYPE_REVERSE_PROXY);
     }
 
     @Override

@@ -473,9 +473,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         machineImagesVerticalPanel.add(machineImagesTable);
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
-        mainPanel.add(machineImagesCaptionPanel);
-        
-        
+        mainPanel.add(machineImagesCaptionPanel);       
         proxiesTable = new TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -490,17 +488,15 @@ public class LandscapeManagementPanel extends SimplePanel {
                     result.add(reverseProxyDTO.getPublicIpAddress());
                     result.add(reverseProxyDTO.getRegion());
                 }
-               
-                   
-                
                 return result;
             }
         };
         
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getImageId(),stringMessages.id());
-       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneId(), stringMessages.availabilityZone());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
+       //setup actions
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
                new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
        proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_REMOVE, reverseProxy -> {
@@ -509,12 +505,13 @@ public class LandscapeManagementPanel extends SimplePanel {
            } else {
                errorReporter.reportError(stringMessages.invalidOperationForThisProxy());
            }
-       }); // To write.
+       }); 
        proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_RESTART_HTTPD, reverseProxy -> restartHttpd(reverseProxy, stringMessages));
        proxiesTable.addColumn(proxiesActionColumn, stringMessages.actions());
        final CaptionPanel proxiesTableCaptionPanel = new CaptionPanel(stringMessages.reverseProxies());
        final VerticalPanel proxiesTableVerticalPanel = new VerticalPanel();
        final HorizontalPanel proxiesTableButtonPanel = new HorizontalPanel();
+       //setup buttons above rows
        final Button proxiesTableRefreshButton = new Button(stringMessages.refresh());
        final Button proxiesTableAddButton = new Button(stringMessages.add());
        proxiesTableRefreshButton.addClickHandler(event -> refreshProxiesTable());
@@ -524,16 +521,10 @@ public class LandscapeManagementPanel extends SimplePanel {
        proxiesTableVerticalPanel.add(proxiesTableButtonPanel);
        proxiesTableVerticalPanel.add(proxiesTable);
        proxiesTableBusy= new SimpleBusyIndicator();
-
        proxiesTableVerticalPanel.add(proxiesTableBusy);
-       
        proxiesTableCaptionPanel.add(proxiesTableVerticalPanel);
-
        mainPanel.add(proxiesTableCaptionPanel);
-        
-        
-        
-        
+ 
         regionsTable.getSelectionModel().addSelectionChangeHandler(e->
         {
             final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
@@ -1442,7 +1433,10 @@ public class LandscapeManagementPanel extends SimplePanel {
         sshKeyManagementPanel.showKeysInRegion(mfaLoginWidget.hasValidSessionCredentials() ?
                 regionsTable.getSelectionModel().getSelectedObject() : null);
     }
-
+    
+    /**
+     * Fetches and sets the list of all the availability zone <strong>names</strong>, in the region.
+     */
     private void getAzs() {
         if (mfaLoginWidget.hasValidSessionCredentials()
                 && regionsTable.getSelectionModel().getSelectedObject() != null) {
@@ -1460,6 +1454,12 @@ public class LandscapeManagementPanel extends SimplePanel {
         }
     }
 
+    /**
+     * Removes a reverse proxy from the cluster and terminates it.
+     * @param instance The reverse proxy to remove from the cluster.
+     * @param regionId The region the proxy is in.
+     * @param stringMessages
+     */
     private void removeReverseProxy(ReverseProxyDTO instance, String regionId, StringMessages stringMessages) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
@@ -1485,6 +1485,11 @@ public class LandscapeManagementPanel extends SimplePanel {
         
     }
     
+    /**
+     * Creates a reverse proxy based on the user's input.
+     * @param stringMessages
+     * @param region The region to spawn the reverse proxy in.
+     */
     private void addReverseProxyToCluster(StringMessages stringMessages, String region) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
@@ -1516,9 +1521,11 @@ public class LandscapeManagementPanel extends SimplePanel {
         }
     }
     
+    /**
+     * Updates the proxies table with all the reverse proxies in the region.
+     */
     private void refreshProxiesTable() {
         proxiesTable.getFilterPanel().removeAll();
-
         if (mfaLoginWidget.hasValidSessionCredentials()
                 && regionsTable.getSelectionModel().getSelectedObject() != null) {
             proxiesTableBusy.setBusy(true);
@@ -1532,22 +1539,25 @@ public class LandscapeManagementPanel extends SimplePanel {
                         }
                         @Override
                         public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
-                            leastPopulatedAzId(reverseProxyDTOs);
+                            leastPopulatedAzName(reverseProxyDTOs);
                             proxiesTable.refresh(reverseProxyDTOs);
                             proxiesTableBusy.setBusy(false);
                         }
                     });
         }
     }
-        
-    private void leastPopulatedAzId(ArrayList<ReverseProxyDTO> reverseProxies) {
+    
+    /**
+     * This gets the availability zone (name), with the fewest reverse proxies in the region.
+     * @param reverseProxies All the reverse proxies in the region.
+     */
+    private void leastPopulatedAzName(ArrayList<ReverseProxyDTO> reverseProxies) {
         HashMap<String, Integer> azFill  = new HashMap<>(); 
-        
         if (availabilityZones != null && availabilityZones.size() > 0 ) {
             String minimum = availabilityZones.get(0);
             availabilityZones.forEach(az -> azFill.put(az, 0));
             for (ReverseProxyDTO reverseProxy : reverseProxies) {
-               azFill.put(reverseProxy.getAvailabilityZoneId(), azFill.get(reverseProxy.getAvailabilityZoneId()) + 1);
+               azFill.put(reverseProxy.getAvailabilityZoneName(), azFill.get(reverseProxy.getAvailabilityZoneName()) + 1);
             }
             for (String  az : azFill.keySet()) {
                 minimum = azFill.get(az) < azFill.get(minimum) ? az : minimum;
@@ -1555,10 +1565,13 @@ public class LandscapeManagementPanel extends SimplePanel {
             leastpopulatedAzName = minimum;
         } else {
             leastpopulatedAzName = "";
-        }
-        
-        
+        }       
     }
+    /**
+     * Restarts httpd on the given reverse proxy via stop and then start.
+     * @param reverseProxy The instance to restart on.
+     * @param stringMessages
+     */
     private void restartHttpd(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
@@ -1567,7 +1580,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                     sshKeyManagementPanel.getSelectedKeyPair().getName(),
                     sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
-                            : null,
+                            : null,  //should this be "" instead
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {

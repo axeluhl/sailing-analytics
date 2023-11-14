@@ -299,6 +299,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return results;
     }
     
+    @Override
     public void restartHttpdOnProxyInstance(ReverseProxyDTO instanceDTO, String region, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption) throws Exception {
         checkLandscapeManageAwsPermission();
@@ -319,7 +320,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
         return no_health_value_found;
     }
-
+    
+    @Override
     public boolean removeReverseProxy(ReverseProxyDTO proxy, String region)
             throws IllegalStateException, UnknownHostException {
         checkLandscapeManageAwsPermission();
@@ -331,6 +333,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     }
     
+    @Override
     public void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO) {
         String[] azNameId=createProxyDTO.getAvailabilityZone().split("/");
         String azName = azNameId[0];
@@ -592,8 +595,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             logger.info("Shutting down MongoDB instance "+processToShutdown.getHost().getInstanceId()+" on behalf of user "+SessionUtils.getPrincipal());
             final AwsRegion region = new AwsRegion(processToShutdown.getHost().getRegion(), landscape);
             final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
-                    new AwsAvailabilityZoneImpl(processToShutdown.getHost().getAvailabilityZoneId(),
-                            processToShutdown.getHost().getAvailabilityZoneId(), region), 
+                    new AwsAvailabilityZoneImpl(processToShutdown.getHost().getAvailabilityZoneName(),
+                            processToShutdown.getHost().getAvailabilityZoneName(), region), 
                             InetAddress.getByName(processToShutdown.getHost().getPrivateIpAddress()),
                             processToShutdown.getHost().getLaunchTimePoint(), landscape);
             instance.terminate();
@@ -813,7 +816,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     private SailingAnalyticsHost<String> getHostFromInstanceDTO(AwsInstanceDTO hostDTO) throws UnknownHostException {
         return new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(hostDTO.getInstanceId(),
-                new AwsAvailabilityZoneImpl(AvailabilityZone.builder().regionName(hostDTO.getRegion()).zoneId(hostDTO.getAvailabilityZoneId()).build(), getLandscape()),
+                new AwsAvailabilityZoneImpl(AvailabilityZone.builder().regionName(hostDTO.getRegion()).zoneId(hostDTO.getAvailabilityZoneName()).build(), getLandscape()),
                 InetAddress.getByName(hostDTO.getPrivateIpAddress()), hostDTO.getLaunchTimePoint(), getLandscape(),
                 new SailingAnalyticsProcessFactory(this::getLandscape));
     }
