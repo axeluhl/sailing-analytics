@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -48,7 +47,6 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final AwsLandscape<ShardingKey> landscape;
     private String name;
     private String imageId;
-    private List<Tag> tags;
     
     public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
@@ -106,29 +104,33 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     }
     
     public String getNameTag() {
+        String result;
         if (name == null) {
             final Instance instance = getInstance();
             for (Tag tag : instance.tags()) {
                 if (tag.key().equals(StartAwsHost.NAME_TAG_NAME)) {
                     name = tag.value();
-                    return name;
+                    result = name;
+                    break;
                 }
             }
-            return "No name tag found";
+            result = "No name tag found";
         } else {
-            return name;
+            result = name;
         }
+        return result;
     }
     
     public String getImageId() {
+        final String result;
         if (imageId == null) {
             final Instance instance = getInstance();
             imageId = instance.imageId();
-            return imageId;
-            
+            result = imageId;
         } else {
-            return imageId;
+            result = imageId;
         }
+        return result;
     }
     
 
@@ -335,6 +337,4 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         final JSch jsch = new JSch();
         return keyPair.checkPassphrase(jsch, privateKeyEncryptionPassphrase);
     }
-    
- 
 }

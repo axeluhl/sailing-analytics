@@ -21,10 +21,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
     CompetitorsRaceDataDTO() {}
     
     public CompetitorsRaceDataDTO(DetailType detailType, Date requestedFromTime, Date requestedToTime) {
-        this.detailType = detailType;
-        this.requestedFromTime = requestedFromTime;
-        this.requestedToTime = requestedToTime;
-        this.competitorsData = new HashMap<>();
+        this(detailType, requestedFromTime, requestedToTime, new HashMap<>());
     }
     
     public CompetitorsRaceDataDTO(DetailType detailType, Date requestedFromTime, Date requestedToTime,
@@ -106,7 +103,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
     public Date getOldestDateOfNewestData() {
         Date dateOfNewestData = null;
         for (CompetitorRaceDataDTO competitorRaceData : competitorsData.values()) {
-            Date raceDateOfNewestData = competitorRaceData.getDateOfNewestData();
+            final Date raceDateOfNewestData = competitorRaceData.getDateOfNewestData();
             if (dateOfNewestData == null) {
                 dateOfNewestData = raceDateOfNewestData;
             } else {

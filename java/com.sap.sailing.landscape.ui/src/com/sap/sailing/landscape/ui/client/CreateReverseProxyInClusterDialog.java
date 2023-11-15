@@ -1,10 +1,5 @@
 package com.sap.sailing.landscape.ui.client;
 
-import com.sap.sse.common.Util;
-import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -15,6 +10,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * Creates a dialog box for adding a reverse proxy to the cluster. 
