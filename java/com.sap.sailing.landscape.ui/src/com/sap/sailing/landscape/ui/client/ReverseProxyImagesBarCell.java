@@ -2,7 +2,6 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.Arrays;
 
-
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sse.gwt.client.IconResources;

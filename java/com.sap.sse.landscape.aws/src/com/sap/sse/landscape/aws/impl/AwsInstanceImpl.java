@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -48,7 +47,6 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final AwsLandscape<ShardingKey> landscape;
     private String name;
     private String imageId;
-    private List<Tag> tags;
     
     public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
