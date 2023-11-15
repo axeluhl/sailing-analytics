@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.ConsumerWithException;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
@@ -37,7 +38,6 @@ extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     private Set<AwsInstance<ShardingKey>> hosts;
     
-
     public ApacheReverseProxyCluster(AwsLandscape<ShardingKey> landscape) {
         super(landscape);
         this.hosts = new HashSet<>();
@@ -65,7 +65,6 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 getAmiId(az.getRegion()), instanceType, az, keyName,
                 getSecurityGroups(az.getRegion()), Optional.of(Tags.with("Name", name).and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, "")));
         addHost(host);
-  
         Wait.wait(() -> !host.getInstance().state().name().equals(InstanceStateName.PENDING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, RETRY_ADD_TO_TARGET_GROUP );
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
@@ -74,18 +73,6 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 }
             }));
         }
-//        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-//            int attempts = 0;
-//            while (attempts < 10000 && host.getInstance().state().name().equals(InstanceStateName.PENDING));
-//            for (TargetGroup<ShardingKey> targetGroup: getLandscape().getTargetGroups(az.getRegion())) {
-//                targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
-//                    if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
-//                        targetGroup.addTarget(host);
-//                    }
-//                }));
-//            }
-//        });
-        
         return host;
     }
     
@@ -127,12 +114,16 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         }
     }
 
-    @Override
-    public void setPlainRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    private void setRedirect(ConsumerWithException<ApacheReverseProxy<ShardingKey, MetricsT, ProcessT>> redirectSetter) throws Exception {
         if (getReverseProxies().iterator().hasNext()) {
             final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = getReverseProxies().iterator().next(); 
-            proxy.setPlainRedirect(hostname, applicationProcess, optionalKeyName, privateKeyEncryptionPassphrase);
+            redirectSetter.accept(proxy);
         }
+    }
+    
+    @Override
+    public void setPlainRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(proxy->proxy.setPlainRedirect(hostname, applicationProcess, optionalKeyName, privateKeyEncryptionPassphrase));
     }
 
     @Override
