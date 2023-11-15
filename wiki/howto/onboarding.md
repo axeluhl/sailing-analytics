@@ -48,7 +48,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
 4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
 5. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
-6. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/)
+6. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/). You may need to choose the community edition. In addition, install `mongosh`.
 7. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
 8.  Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
     A setup guide for windows can be found on this webpage: [https://maven.apache.org/guides/getting-started/windows-prerequisites.html](https://maven.apache.org/guides/getting-started/windows-prerequisites.html)
@@ -92,7 +92,7 @@ Copy the settings.xml (may be in $GIT_HOME/configuration/maven-settings.xml and 
 
 ### Automatic Eclipse plugin installation
 The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2023-09.p2f` file, found in the git repository cloned in _step 11_. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2023-09.p2f`. 
-Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. In the pop-up dialog shown next, leave the top radio button selected ("Keep my installation the same and modify the items being installed to be compatible"). Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
+Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. In the pop-up dialog shown next, select the top radio button ("Update my installation to be compatible with the items being installed"). Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
 
 Be also aware that with this p2f-file it's not possible to update the plugins to newer versions. 
 
@@ -156,9 +156,14 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
    - In the list on the left, click on "Connectors"
    - For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL [http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php](http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php)(all other required information will be filled in automatically)
    - Press "List Races"
+
+
 6. Further useful launch configurations
    - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window ⇒ Perspective ⇒ Open Perspective ⇒ Profiling)
    - Debugging gwt: For further instructions please see [here](./development/super-dev-mode)
+
+If you want to use **breakpoints**, *avoid* clicking on the options in the Development Mode tab. Instead, within the _Debug Configurations_ menu, select the _Debug AdminConsole_ (found in the _Launch Browser_ subtab); change the browser search order, such that chrome is the leftmost; and then launch. This is necessary because SDBG is compatible with Chrome. Further, details of how GWT Super Dev Mode (SDM) works, can be found in the link above.
+
 
 ### Build for deployment
 Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
@@ -247,3 +252,11 @@ Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Fi
 ### Create Hudson Job
 If you want a hudson job to run when you push your branch then you can run a script in `configuration` called . Run options for a branch titled `createHudsonJobForBug.sh`. For you bug branch titled `bug<bug number>`, create a build job, which will create a release, by running the script like so: `./createHudsonJobForBug.sh <bug number>`.
 If on Windows, you may need to disable any web shields in antivirus software, to allow `curl` to function.
+
+###Issues when playing around with AWS
+- The problem: **aws cli (used for aws ec2 describe-tags) hangs in eu-west-2** in all AZs on new instances I created, using a target group which permitted all outbound connections and inbound https, http and ssh connections. I tried permitting everything but that didn’t work. When I attached (at Axel’s suggestion) the Java Application with Reverse Proxy security group, it worked but — even if I duplicated this security group, and applied that copy instead — it still didn’t work.
+Curl issue solution: it turns out that the network interface only permits certain outbound and inbounds from certain target groups. 
+The path to the solution: On my instance in eu-west-2a, I ran aws --debug ec2 describe-tags (you may need to do aws configure first). This is much akin to verbose mode of other unix commands. I noticed it hang on a request to  ec2.eu-west-2.amazonaws.com. If you do `dig -t any  ec2.eu-west-2.amazonaws.com` you see 3 ip addresses, which — as you will see later — are IPs in each of the eu-west-2 availability zones. When I ran curl -v ec2.eu-west-2.amazonaws.com (the v flag is verbose), one of the IPs from dig was used (namely the one in eu-west-2a, where the instance resides) and it hangs. I then went to endpoints for the VPC and noticed a service for the service `com.amazonaws.eu-west-2.ec2`. It had the default security group, which turned out to only allow inbound rules from the default or Java Application with Reverse Proxy target group. 
+- Problem: A load balancer's target group health checks fail. I was told the checks failed with 403 errors.
+Solution: This was occurring because the website didn't have any content in the /var/www/html. Whilst a site was still served (namely the Apache test page) it does throw a 403 error. If you fill the directory with and index.html the test then passes and a 200 code is returned
+

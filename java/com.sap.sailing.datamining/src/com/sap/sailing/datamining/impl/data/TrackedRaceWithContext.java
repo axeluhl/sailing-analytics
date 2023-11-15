@@ -460,9 +460,8 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
             if (timePoint != null) {
                 final Position courseCenter = getTrackedRace().getCenterOfCourse(timePoint);
                 if (courseCenter != null) {
-                    TimeZone timeZone;
                     try {
-                        timeZone = ReverseGeocoder.INSTANCE.getTimeZone(courseCenter, timePoint);
+                        final TimeZone timeZone = ReverseGeocoder.INSTANCE.getTimeZone(courseCenter, timePoint);
                         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
                         df.setTimeZone(timeZone);
                         cachedDayAsISO = df.format(timePoint.asDate());
