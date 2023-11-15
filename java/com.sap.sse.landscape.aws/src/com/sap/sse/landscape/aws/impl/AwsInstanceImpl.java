@@ -104,29 +104,33 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     }
     
     public String getNameTag() {
+        String result;
         if (name == null) {
             final Instance instance = getInstance();
             for (Tag tag : instance.tags()) {
                 if (tag.key().equals(StartAwsHost.NAME_TAG_NAME)) {
                     name = tag.value();
-                    return name;
+                    result = name;
+                    break;
                 }
             }
-            return "No name tag found";
+            result = "No name tag found";
         } else {
-            return name;
+            result = name;
         }
+        return result;
     }
     
     public String getImageId() {
+        final String result;
         if (imageId == null) {
             final Instance instance = getInstance();
             imageId = instance.imageId();
-            return imageId;
-            
+            result = imageId;
         } else {
-            return imageId;
+            result = imageId;
         }
+        return result;
     }
     
 
