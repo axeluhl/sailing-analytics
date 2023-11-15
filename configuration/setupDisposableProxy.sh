@@ -46,3 +46,4 @@ RemainAfterExit=true
 ExecStart=/usr/local/bin/mountnvmeswap
 EOF
 ln -s /home/wiki/gitwiki/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
+sed -i "s/nvme0n1/nvme4n1" /usr/local/bin/mountnvmeswap
