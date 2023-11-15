@@ -337,6 +337,4 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         final JSch jsch = new JSch();
         return keyPair.checkPassphrase(jsch, privateKeyEncryptionPassphrase);
     }
-    
- 
 }
