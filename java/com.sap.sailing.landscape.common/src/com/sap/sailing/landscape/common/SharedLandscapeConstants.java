@@ -98,4 +98,6 @@ public interface SharedLandscapeConstants {
      * Indicates an instance is a reverse proxy.
      */
     String REVERSE_PROXY_TAG_NAME = "ReverseProxy";
+    
+    String REVERSE_PROXY_SG_TAG = "reverse-proxy-sg";
 }

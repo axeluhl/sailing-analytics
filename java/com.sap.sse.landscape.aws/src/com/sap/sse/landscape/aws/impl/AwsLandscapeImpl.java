@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -1066,6 +1067,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .vpcId(vpcId == null ? getVpcId(region) : vpcId)
                 .protocol(guessProtocolFromPort(port))
                 .targetType(TargetTypeEnum.INSTANCE)
+                .tags(software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(SharedLandscapeConstants.ALL_REVERSE_PROXIES).value("").build()) // TODO test
                 .build()).targetGroups().iterator().next();
         final String targetGroupArn = targetGroup.targetGroupArn();
         int numberOfRetries = 3;
@@ -1242,20 +1244,29 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public List<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(com.sap.sse.landscape.Region region) {
-        List<SecurityGroup> securityGroups = new ArrayList<>(); //basic security group
-        securityGroups.add(getDefaultSecurityGroupForApplicationHosts(region));
-        final SecurityGroup result;
-        if (region.getId().equals(Region.EU_WEST_1.id())) {
-            result = getSecurityGroup(DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
-        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
-            result = getSecurityGroup(DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
-        } else {
-            result = null;
-        }
-        securityGroups.add(result);
+        List<SecurityGroup> securityGroups = new ArrayList<>();
+        securityGroups.addAll(getSecurityGroupByTag(SharedLandscapeConstants.REVERSE_PROXY_SG_TAG, region));
         return securityGroups;
     }
 
+    public List<SecurityGroup> getSecurityGroupByTag(String tag, com.sap.sse.landscape.Region region) {
+        final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> securityGroups = getEc2Client(
+                getRegion(region)).describeSecurityGroups(sg -> sg.filters(Filter.builder().name("tag-key").values(tag).build()))
+                        .securityGroups();
+        return securityGroups.stream().map(sg -> new SecurityGroup() {
+
+            @Override
+            public String getVpcId() {
+                return sg.vpcId();
+            }
+
+            @Override
+            public String getId() {
+                return sg.groupId();
+            }
+        }).collect(Collectors.toList());
+        
+    }
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationLoadBalancer(com.sap.sse.landscape.Region region) {
         return getDefaultSecurityGroupForApplicationHosts(region);
