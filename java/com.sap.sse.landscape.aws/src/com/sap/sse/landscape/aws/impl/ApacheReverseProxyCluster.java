@@ -27,6 +27,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
@@ -63,7 +64,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, privateIpAddress, launchTimePoint, landscape),
                 getAmiId(az.getRegion()), instanceType, az, keyName,
-                getSecurityGroups(az.getRegion()), Optional.of(Tags.with("Name", name).and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, "")));
+                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.REVERSE_PROXY_TAG_NAME, "")));
         addHost(host);
         Wait.wait(() -> !host.getInstance().state().name().equals(InstanceStateName.PENDING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, RETRY_ADD_TO_TARGET_GROUP );
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
@@ -87,9 +88,8 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
 
     /**
-     * Gets the security groups in the region that the reverse proxy requires.
-     * @param region
-     * @return
+     * Gets the security groups in the region that a reverse proxy instance should or does have.
+ 
      */
     private List<SecurityGroup> getSecurityGroups(Region region) {
         return getLandscape().getDefaultSecurityGroupsForCentralReverseProxy(region); 
@@ -97,7 +97,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
 
     /**
-     * Gets the latest image in the current region with the correct tag.
+     * Gets the latest image in the current region with the correct tag for creating a reverse proxy.
      * @param region 
      * @return
      */
