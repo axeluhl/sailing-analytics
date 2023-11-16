@@ -77,23 +77,25 @@ public interface SharedLandscapeConstants {
     int DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY = 4;
     
     /**
-     * Indicates that an instance only acts as a reverse proxy. ie. it is not hosting other services. SO it can be terminated without risk.
+     * Indicates that an instance only acts as a reverse proxy. ie. it is not hosting other services. SO it can be
+     * terminated without risk.
      */
     String DISPOSABLE_PROXY = "disposableProxy";
     
     /**
-     * The tag name for a target group which contains all the instances running httpd.
+     * The tag name for a target group which contains all the instances running httpd. Used to mark the
+     * target groups containing all of the reverse proxies, disposable and otherwise. This allows for health checks
+     * to be accessed and marks which groups any new reverse proxy instances should be added to.
      */
     String ALL_REVERSE_PROXIES = "allReverseProxies";
     
     /**
-     * Used to launch the correct ami
+     * Used to launch the correct ami.
      */
     String IMAGE_TYPE_REVERSE_PROXY = "disposable-reverse-proxy";
     
     /**
      * Indicates an instance is a reverse proxy.
      */
-    String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
-
+    String REVERSE_PROXY_TAG_NAME = "ReverseProxy";
 }
