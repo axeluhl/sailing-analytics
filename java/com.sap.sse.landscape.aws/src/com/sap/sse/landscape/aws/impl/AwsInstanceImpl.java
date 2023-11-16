@@ -104,7 +104,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     }
     
     public String getNameTag() {
-        String result;
+        String result = "No name tag found";
         if (name == null) {
             final Instance instance = getInstance();
             for (Tag tag : instance.tags()) {
@@ -114,7 +114,6 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
                     break;
                 }
             }
-            result = "No name tag found";
         } else {
             result = name;
         }
