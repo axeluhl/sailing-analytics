@@ -1,5 +1,4 @@
 # SAP Sailing Analytics
-
 The SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com)
 
 Sailing provides the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:
