@@ -5,7 +5,6 @@ Hi Github,
 we don't know if this was successful, but thanks for sending the webhook request.
 "
 BODY=$( cat )
-echo "${BODY}"
 echo "${BODY}" >/tmp/github-hook-body
 REF=$( echo "${BODY}" | jq -r '.ref' )
 PUSHER=$( echo "${BODY}" | jq -r '.pusher.email' )
