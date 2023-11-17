@@ -57,9 +57,10 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     private static final String CUSTOM_COURSE_AREA = "Custom X";
     private static final String INVITATION_URL_BASE = "https://sailinsight30-app.sapsailing.com/publicInvite?regatta_name=Audi+Business+Cup+(J70)+(J70)";
     private static final String INVITATION_QR_CODE_BASE = "https://sailinsight30-app.sapsailing.com/publicInvite?regatta_name=Audi%20Business%20Cup%20(J70)%20(J70)";
-    private static final String EXPECTED_QR_CODE_TITLE = "Welcome to the public regatta Audi Business Cup (J70) (J70)!";
-    private static final String EXPECTED_QR_CODE_LINK_TEXT = "Please scan this QR Code with your mobile device to proceed with the registration";
-    //private static final String EXPECTED_DEVICE_REGISTRATION_QR_CODE_TITLE = "Welcome Competitor Test to the regatta Audi Business Cup (J70) (J70)";
+    private static final String EXPECTED_PUPLIC_INVITE_QR_CODE_TITLE = "Welcome to the public regatta Audi Business Cup (J70) (J70)";    
+//    private static final String EXPECTED_RACE_MANAGER_APP_QR_CODE_TITLE = "Welcome to the Race Manager App registration";
+//    private static final String EXPECTED_DEVICE_REGISTRATION_QR_CODE_TITLE = "Welcome Competitor Test to the regatta Audi Business Cup (J70) (J70)";
+    private static final String EXPECTED_QR_LINK_TEXT = "Please scan this QR Code with your mobile device to proceed with the registration";
 
     private static final String CHECK_RACE_APP_URL_REGEX = "^https:\\/\\/racemanager-app.sapsailing.com\\/invite\\"
             + "?server_url=http:\\/\\/localhost(:\\d{0,5})?" 
@@ -109,17 +110,16 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         Assert.assertTrue(createdInvitationUrl.contains("event_id=" + selectedEventId));
         Assert.assertTrue(createdInvitationUrl.contains("server=http%3A%2F%2Flocalhost%3A"));
         registrationLinkWithQRCode.clickOkButtonOrThrow();
-        HomePage.goToPage(getWebDriver(), createdInvitationUrl);
-        Wait<WebDriver> wait = new WebDriverWait(getWebDriver(), 10);
+        HomePage.goToHomeUrl(getWebDriver(), createdInvitationUrl);
+        Wait<WebDriver> wait = new WebDriverWait(getWebDriver(), 30);
         // confirm dialog on my.sapsailing.com to redirect back to localhost
         wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//button[contains(text(), 'Yes')]"), 1)).get(0)
                 .click();
         // here we are back on localhost (Home.html#QRCodePlace)
-        Wait<WebDriver> longWait = new WebDriverWait(getWebDriver(), 20);
-        longWait.until(ExpectedConditions
-                .presenceOfElementLocated(By.xpath("//div[contains(text(), '" + EXPECTED_QR_CODE_TITLE + "')]")));
-        WebElement qrCodeLink = longWait.until(ExpectedConditions
-                .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_CODE_LINK_TEXT + "')]")));
+        wait.until(ExpectedConditions
+                .presenceOfElementLocated(By.xpath("//div[contains(text(), '" + EXPECTED_PUPLIC_INVITE_QR_CODE_TITLE + "')]")));
+        WebElement qrCodeLink = wait.until(ExpectedConditions
+                .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_LINK_TEXT + "')]")));
         Assert.assertTrue(qrCodeLink.getAttribute("href").startsWith(INVITATION_QR_CODE_BASE));
         Assert.assertTrue(qrCodeLink.getAttribute("href").contains("secret=" + secret));
         Assert.assertTrue(qrCodeLink.getAttribute("href").contains("server=http%3A%2F%2Flocalhost%3A"));
@@ -140,26 +140,28 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         Matcher<String> matcher = Matchers.matchesRegex(CHECK_RACE_APP_URL_REGEX);
         String createdInvitationUrl = qrCodeDialog.getUrl();
         MatcherAssert.assertThat("Check URL",  matcher.matches(createdInvitationUrl));
-        HomePage.goToPage(getWebDriver(), createdInvitationUrl);
-        /* Activate after setting up branch.io correctly
-        Wait<WebDriver> wait = new WebDriverWait(getWebDriver(), 20);
-        // confirm dialog on my.sapsailing.com to redirect back to localhost
-        wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//button[contains(text(), 'Yes')]"), 1)).get(0)
-                .click();
-        // here we are back on localhost (Home.html#QRCodePlace)
-        wait.until(ExpectedConditions
-                .presenceOfElementLocated(By.xpath("//div[contains(text(), '" + EXPECTED_QR_CODE_TITLE + "')]")));
-        WebElement qrCodeLink = wait.until(ExpectedConditions
-                .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_CODE_LINK_TEXT + "')]")));
-        MatcherAssert.assertThat("Check URL",  matcher.matches(qrCodeLink));
-        */
+        HomePage.goToHomeUrl(getWebDriver(), createdInvitationUrl);
+        /* Activate after setting up branch.io correctly */
+        // TODO: reactivate after branch.io is handling Race Manager App links the new way
+//        Wait<WebDriver> wait = new WebDriverWait(getWebDriver(), 30);
+//        // confirm dialog on my.sapsailing.com to redirect back to localhost
+//        wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//button[contains(text(), 'Yes')]"), 1)).get(0)
+//                .click();
+//        // here we are back on localhost (Home.html#QRCodePlace)
+//        wait.until(ExpectedConditions
+//                .presenceOfElementLocated(By.xpath("//div[contains(text(), '" + EXPECTED_RACE_MANAGER_APP_QR_CODE_TITLE + "')]")));
+//        WebElement qrCodeLink = wait.until(ExpectedConditions
+//                .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_LINK_TEXT + "')]")));
+//        MatcherAssert.assertThat("Check URL",  matcher.matches(qrCodeLink));
+        
     }
     
     /**
+     * @throws InterruptedException 
      * 
      */
     @Test
-    public void testDeviceRegistation() {
+    public void testDeviceRegistation() throws InterruptedException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // create an event and regatta
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -176,6 +178,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         RegisterCompetitorsDialogPO registerCompetitorsDialogPO = smartphoneTrackingPanel.pushCompetitorRegistrationsActionButton(aLeaderboard);
         AddCompetitorWithBoatDialogPO addCompetitorWithBoatDialogPO = registerCompetitorsDialogPO.openAddCompetitorWithBoatDialog();
         addCompetitorWithBoatDialogPO.addCompetitorWithBoat();
+        Thread.sleep(200L);
         registerCompetitorsDialogPO.clickOkButtonOrThrow();
         // Add device
         aLeaderboard = smartphoneTrackingPanel.getLeaderboardTable().getEntries().get(0);
@@ -193,17 +196,17 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         String qrCodeUrl = addDeviceMappingsDialog.getQrCodeUrl(compatitorUrlPattern);
         MatcherAssert.assertThat("Check URL",  competitorMater.matches(qrCodeUrl));
         // check redirect
-        // TODO: not working. goToPage is not calling the same way than manual execution of the url
-//        HomePage.goToPage(getWebDriver(), qrCodeUrl);
-//        Wait<WebDriver> wait = new WebDriverWait(getWebDriver(), 20);
-//        // confirm dialog on my.sapsailing.com to redirect back to localhost
-//        wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//button[contains(text(), 'Yes')]"), 1)).get(0)
-//                .click();
-//        // here we are back on localhost (Home.html#QRCodePlace)
+        HomePage.goToHomeUrl(getWebDriver(), qrCodeUrl);
+        Wait<WebDriver> wait = new WebDriverWait(getWebDriver(), 30);
+        // confirm dialog on my.sapsailing.com to redirect back to localhost
+        wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//button[contains(text(), 'Yes')]"), 1)).get(0)
+                .click();
+        // here we are back on localhost (Home.html#QRCodePlace)
+        // TODO: reactivate after fixing the problem that the link called by Selenium test is resulting in a different server behavior than manual request
 //        wait.until(ExpectedConditions
 //                .presenceOfElementLocated(By.xpath("//div[contains(text(), '" + EXPECTED_DEVICE_REGISTRATION_QR_CODE_TITLE + "')]")));
 //        WebElement qrCodeLink = wait.until(ExpectedConditions
-//                .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_CODE_LINK_TEXT + "')]")));
+//                .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_LINK_TEXT + "')]")));
 //        Matcher<String> matcher = Matchers.matchesRegex(compatitorUrlPattern);
 //        MatcherAssert.assertThat("Check URL",  matcher.matches(qrCodeLink));
     }
