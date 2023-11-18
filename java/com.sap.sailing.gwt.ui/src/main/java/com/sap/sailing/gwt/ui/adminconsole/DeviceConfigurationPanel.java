@@ -79,6 +79,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         HorizontalPanel deviceManagementControlPanel = new HorizontalPanel();
         deviceManagementControlPanel.setSpacing(5);
         addConfigurationButton = new Button(stringMessages.addConfiguration());
+        addConfigurationButton.ensureDebugId("addDeviceConfigurationButton");
         addConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
