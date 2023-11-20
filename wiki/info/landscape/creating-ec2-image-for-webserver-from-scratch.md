@@ -172,28 +172,16 @@ maxretry = 5
 
 ## Basic setup for reverse proxy instance
 
-perl 
-httpd
-apachetop
-per-CGI
-postfix
-sendmail-cf
- mod_proxy_html
-tmux
-nfs-utils
-amazon linux extras install php7.2 && yum update && yum install php
+From a fresh amazon linux 2023 instance (HVM) install perl, httpd, mod_proxy_html, tmux, nfs-utils, git, whois and jq. Then type `amazon-linux-extras install epel`, which adds the epel repo so you can then run install apachetop.
+Then you need to remove the automatic ec2 code which disabled root access; reconfigure the sshd_config; setup the keys update script; and initialise the crontab. Store a bearer token in the home dir.
+Rename the welcome.conf. Add a basic web page, as the Apache default page can sometimes return no 2xx codes, which can lead to failing health checks.
+Setup fail2ban like above.
+Ensure httpd is enabled, so that on restart the server auto boots.
+Other modules may need to be installed.
+Configure a startup service (either in /etc/systemd/system or etc/rc_x_ directories) to try to mount an attached nvme as swap space (this step needs to be checked after setup).
+Swap space still needs to be fully automated.
+Postmail is useful. The script for this procedure is in configuration and is titled setupDisposableProxy.sh
+Setup the logrotate target (not in script yet)
+Setup the fstab (not automated)
 
 
-root access
-num of connections trackable
-keyreader token
-
-amazon-efs-utils
-mounts
-
-mail -> I don't think anything is needed but I added the stuf to sendmail-cf   ///
-
-logrotate target
-
-chkconfig nfs on (half complete)
-fail2ban setup

@@ -44,7 +44,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 ### Installations
 
 1. JDK >= 11. No longer required by Eclipse because new Eclipse releases bring their own JDK bundled with the installer. Still, if you want to use Java 11 or Java 17, install any such JDK and set the `JAVA_HOME` variable to it.
-2. Eclipse IDE for Eclipse Committers, version 4.29.0 ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r)
+2. Eclipse IDE for Eclipse Committers, version 4.29.0 ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r) 
 3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
 4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
 5. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
@@ -245,6 +245,7 @@ See [RaceCommittee App](/wiki/info/mobile/racecommittee-app) for more informatio
 
 Irritating behavior can occur on ARM-based processors, such as on a MacBook. There are some problems, especially with graphical functions. There are cases where javax.imageio.ImageIO, javax.imageio.ImageReader or java.awt.graphics2D stops responding without error message.
 In such cases it might help to set AWT to headless mode (`-Djava.awt.headless=true`, see [stackoverflow](https://stackoverflow.com/questions/13796611/imageio-read-with-mac for more information)).
+Another struggle can be to install the JVM Profiler Plug-in on ARM based Eclipse. It seems to block the necessary Software while the Automatic Eclipse plugin installation. One way is to use the Eclipse x64 Installer. It will take more time for transformation, but you will be able to use the Profiler. 
 
 ### GWT Browser Plugin 
 Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work. The Plugin can be found on this page: [https://code.google.com/archive/p/google-web-toolkit/downloads](https://code.google.com/archive/p/google-web-toolkit/downloads)
