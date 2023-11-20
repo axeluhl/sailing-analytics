@@ -221,7 +221,6 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//button[contains(text(), 'Yes')] | //button[contains(text(), 'Ja')]"), 1)).get(0)
                 .click();
         // here we are back on localhost (Home.html#QRCodePlace)
-        // TODO: reactivate after fixing the problem that the link called by Selenium test is resulting in a different server behavior than manual request
         wait.until(ExpectedConditions
                 .presenceOfElementLocated(By.xpath("//div[contains(text(), '" + EXPECTED_DEVICE_REGISTRATION_QR_CODE_TITLE + "')]")));
         WebElement qrCodeLink = wait.until(ExpectedConditions
