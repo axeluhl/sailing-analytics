@@ -24,7 +24,7 @@ public abstract class AbstractSecuredValueSetting<T> extends AbstractValueSettin
 
     @Override
     public T getValue() {
-        if (dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
+        if (dtoContext != null && dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
             return super.getValue();
         } else {
             return super.getDefaultValue();
@@ -33,7 +33,7 @@ public abstract class AbstractSecuredValueSetting<T> extends AbstractValueSettin
 
     @Override
     public void setValue(T value) {
-        if (dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
+        if (dtoContext != null && dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
             super.setValue(value);
         }
     }
