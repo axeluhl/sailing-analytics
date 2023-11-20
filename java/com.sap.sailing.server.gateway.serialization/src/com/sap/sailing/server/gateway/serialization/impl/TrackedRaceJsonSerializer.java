@@ -35,13 +35,10 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
 
     public JSONObject serialize(TrackedRace trackedRace) {
         JSONObject jsonRace = new JSONObject();
-        
         jsonRace.put(FIELD_NAME, trackedRace.getRace().getName());
         jsonRace.put(FIELD_REGATTA, trackedRace.getRaceIdentifier().getRegattaName());
-
         if (windTrackSerializerProducer != null) {
             JSONArray windTracks = new JSONArray();
-
             List<WindSource> windSources = getAvailableWindSources(trackedRace);
             JSONArray jsonWindSourcesDisplayed = new JSONArray();
             for (WindSource windSource : windSources) {
