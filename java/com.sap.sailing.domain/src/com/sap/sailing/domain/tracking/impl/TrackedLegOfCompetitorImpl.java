@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -1241,5 +1242,24 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     private interface BravoTrackValueExtractor<R> {
         R getValue(BravoFixTrack<Competitor> track, TimePoint from, TimePoint to);
+    }
+    public TackType getTackType(TimePoint timePoint) throws NoWindException {
+        final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
+                /* extrapolate */ true);
+        // TODO Problem mit 2 Tonnen schauen
+        // TODO Problem mit vor nach Start GPS Fixes
+        final Position waypointPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
+        final Bearing cog = getSpeedOverGround(timePoint).getBearing();
+        final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
+        final Bearing bearingWind = getTrackedRace().getWind(competitorPosition, timePoint).getFrom();
+        final Bearing diffWindtoBoat = bearingWind.getDifferenceTo(cog).abs();
+        final Bearing diffMarktoBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
+        final TackType result;
+        if (diffMarktoBoat.getDegrees() < diffWindtoBoat.getDegrees()) {
+            result = TackType.LONGTACK;
+        } else {
+            result = TackType.SHORTTACK;
+        }
+        return result;
     }
 }

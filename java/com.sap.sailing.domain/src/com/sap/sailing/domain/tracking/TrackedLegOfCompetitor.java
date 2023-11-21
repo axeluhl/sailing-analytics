@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sse.common.Bearing;
@@ -340,6 +341,11 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * whichever is earlier.
      */
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
+    
+    /**
+     * Returns true when Competitor drives at TimePoint with LongTack
+     */
+    TackType getTackType(TimePoint timePoint) throws NoWindException;
 
     Double getExpeditionAWA(TimePoint at);
     Double getExpeditionAWS(TimePoint at);
