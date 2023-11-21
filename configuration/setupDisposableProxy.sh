@@ -53,5 +53,9 @@ sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logr
 echo "alias awsmfa='echo -n "Token: "; read aws_mfa_token; . awsmfalogon.sh "${MFA_NAME}" ${aws_mfa_token}' " >> root/.bashrc
 source /root/.bashrc
 
+yum remove awscli
+cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+cd ~ && unzip awscliv2.zip
+cd ~ && sudo ./aws/install
 # will aws credentials need to be set? or will the ami store these details? session tokens? we will need a user without mfa.
 
