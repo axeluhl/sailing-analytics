@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
  *
  */
 public enum DetailType implements Serializable {
+    TACKTYPE_LONGTACK_SHORTTACK(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "TACKTYPE"),
     LEG_DISTANCE_TRAVELED(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "DISTANCE_TRAVELED"),
     LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START(0, ASCENDING, null, "DISTANCE_TRAVELED_INCLUDING_GATE_START"),
     LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING, PREMIUM_LEADERBOARD_INFORMATION, "AVERAGE_SPEED_OVER_GROUND_IN_KNOTS"),
@@ -274,6 +275,7 @@ public enum DetailType implements Serializable {
      */
     public static Collection<DetailType> getAutoplayDetailTypesForChart() {
         final Collection<DetailType> availableDetailsTypes = new LinkedHashSet<>();
+        availableDetailsTypes.add(DetailType.TACKTYPE_LONGTACK_SHORTTACK);
         availableDetailsTypes.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.LEG_DISTANCE_TRAVELED);

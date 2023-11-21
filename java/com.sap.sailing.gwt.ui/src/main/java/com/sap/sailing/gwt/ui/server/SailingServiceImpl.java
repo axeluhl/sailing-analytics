@@ -177,6 +177,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -2577,6 +2578,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         try {
             TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
             switch (dataType) {
+            case TACKTYPE_LONGTACK_SHORTTACK:
+                if (trackedLeg != null) {
+                    final TackType tackType = trackedLeg.getTackType(timePoint);
+                    result = (tackType == null) ? null : ((tackType==TackType.LONGTACK) ? 1.0 : 0.0);
+                }
+                break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = trackedRace.getTrack(competitor);
                 if (sogTrack != null) {
