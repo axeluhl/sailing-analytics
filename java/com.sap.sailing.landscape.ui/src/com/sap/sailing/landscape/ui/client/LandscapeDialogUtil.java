@@ -2,7 +2,6 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
@@ -71,16 +70,8 @@ public class LandscapeDialogUtil {
      * Creates a dropdown list of availability zones in the mixed format, initially selecting the item containing the az
      * name, which is the least populated
      * 
-     * @param dialog
-     * @param additionalItem
-     * @param additionalValue
-     * @param landscapeManagementService
-     * @param stringMessages
      * @param defaultAZ
      *            The least populated az name.
-     * @param errorReporter
-     * @param region
-     * @return
      */
     public static ListBox createInstanceAZTypeListBox(DataEntryDialog<?> dialog,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
@@ -100,8 +91,7 @@ public class LandscapeDialogUtil {
             availabilityZoneBox.addItem(additionalItem, additionalValue);
             availabilityZoneBox.setSelectedIndex(0);
         }
-        landscapeManagementService.getAvailabilityZones(region, AzFormat.MIXED,  new AsyncCallback<List<String>>() {
-
+        landscapeManagementService.getAvailabilityZones(region, AzFormat.MIXED,  new AsyncCallback<ArrayList<String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
@@ -109,7 +99,7 @@ public class LandscapeDialogUtil {
             }
 
             @Override
-            public void onSuccess(List<String> result) {
+            public void onSuccess(ArrayList<String> result) {
                 Collections.sort(result);
                 int i = 0;
                 for (String az : result) {
@@ -119,10 +109,8 @@ public class LandscapeDialogUtil {
                     }
                     i++;
                 }
-
             }
         });
-
         return availabilityZoneBox;
     }
 }

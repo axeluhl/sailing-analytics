@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,6 +84,7 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
@@ -242,26 +244,28 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public List<String> getAvailabilityZones(String region, AzFormat format) {
-        List<String> zones = new ArrayList<String>();
+    public ArrayList<String> getAvailabilityZones(String region, AzFormat format) {
+        Function<AwsAvailabilityZone, String> azStringSupplier = null;
         switch (format) {
         case MIXED:
-            getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
-                    .forEach(item -> zones.add(item.getName() + "/" + item.getId()));
+            azStringSupplier = item -> item.getName() + "/" + item.getId();
             break;
         case NAME:
-            getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
-                    .forEach(item -> zones.add(item.getName()));
+            azStringSupplier = item -> item.getName();
             break;
         case ID:
-            getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
-                    .forEach(item -> zones.add(item.getId()));
+            azStringSupplier = item -> item.getId();
             break;
         }
-        return zones;
+        return getAvailabilityZones(region, azStringSupplier);
     }
     
-    
+    private ArrayList<String> getAvailabilityZones(String region, Function<AwsAvailabilityZone, String> azStringSupplier) {
+        final ArrayList<String> zones = new ArrayList<String>();
+        getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
+                .forEach(az -> zones.add(azStringSupplier.apply(az)));
+        return zones;
+    }
     
     @Override
     public ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception  {

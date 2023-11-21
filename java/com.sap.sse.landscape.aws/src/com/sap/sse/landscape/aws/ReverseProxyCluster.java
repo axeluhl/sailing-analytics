@@ -20,7 +20,6 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public interface ReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log>
 extends ReverseProxy<ShardingKey, MetricsT, ProcessT, LogT> {
     
-    String RETRY_ADD_TO_TARGET_GROUP = "Reattempting to add to target group";
     /**
      * A reverse proxy may scale out by adding more hosts.
      * 
@@ -32,8 +31,6 @@ extends ReverseProxy<ShardingKey, MetricsT, ProcessT, LogT> {
      * Add one host of the instance type specified to the availability zone {@code az}.
      * 
      * @return the host that was added by this request; it will also be part of the response of {@link #getHosts()} now
-     * @throws Exception 
-     * @throws TimeoutException 
      */
     AwsInstance<ShardingKey> createHost(String name, InstanceType instanceType, AwsAvailabilityZone az, String keyName) throws TimeoutException, Exception;
     

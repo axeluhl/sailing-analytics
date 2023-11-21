@@ -1,7 +1,6 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -39,7 +38,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO);
     
-    List<String> getAvailabilityZones(String region, AzFormat format);
+    ArrayList<String> getAvailabilityZones(String region, AzFormat format);
     
     MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) throws Exception;
 

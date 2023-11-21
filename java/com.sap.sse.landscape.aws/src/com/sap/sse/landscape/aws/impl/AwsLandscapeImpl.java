@@ -196,10 +196,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public static final long DEFAULT_DNS_TTL_SECONDS = 60l;
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85"; //Sailing Analytics App
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280"; //Java Application with Reverse Proxy
-    private static final String DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-ff806d90";  //Webserver
-    private static final String DEFAULT_OTHER_REVERSE_PROXY_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0d1f0a4126e889aaf"; //Webserver
+    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85"; // Sailing Analytics App
+    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280"; // Java Application with Reverse Proxy
 
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
@@ -1243,7 +1241,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public List<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(com.sap.sse.landscape.Region region) {
+    public Iterable<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(com.sap.sse.landscape.Region region) {
         List<SecurityGroup> securityGroups = new ArrayList<>();
         securityGroups.addAll(getSecurityGroupByTag(SharedLandscapeConstants.REVERSE_PROXY_SG_TAG, region));
         return securityGroups;

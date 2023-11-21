@@ -160,22 +160,15 @@ public interface Host extends WithID {
         return false;
     }
     
-    /*
+    /**
      * Checks if there is a name tag and returns the value, if it exists.
-     * 
+     * TODO Thomas, please explain the caching issues...
      * @return name tag value
      */
-    default String getNameTag() {
-        return "Name tag not found";
-    }
-    
+    String getNameTag();
     
     /**
      * Fetches the AMI id value.
-     * 
-     * @return ami id
      */
-    default String getImageId() {
-        return "No AMI found";
-    }
+    String getImageId();
 }

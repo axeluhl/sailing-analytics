@@ -1439,13 +1439,13 @@ public class LandscapeManagementPanel extends SimplePanel {
         if (mfaLoginWidget.hasValidSessionCredentials()
                 && regionsTable.getSelectionModel().getSelectedObject() != null) {
             landscapeManagementService.getAvailabilityZones(regionsTable.getSelectionModel().getSelectedObject(), AzFormat.NAME,
-                    new AsyncCallback<List<String>>() {
+                    new AsyncCallback<ArrayList<String>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError(caught.getMessage());
                 }
                 @Override
-                public void onSuccess(List<String> result) {
+                public void onSuccess(ArrayList<String> result) {
                     availabilityZones = result;
                 }
             });
@@ -1456,7 +1456,6 @@ public class LandscapeManagementPanel extends SimplePanel {
      * Removes a reverse proxy from the cluster and terminates it.
      * @param instance The reverse proxy to remove from the cluster.
      * @param regionId The region the proxy is in.
-     * @param stringMessages
      */
     private void removeReverseProxy(ReverseProxyDTO instance, String regionId, StringMessages stringMessages) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {

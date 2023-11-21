@@ -1,7 +1,6 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,41 +40,29 @@ public interface LandscapeManagementWriteServiceAsync {
     
     /**
      * Removes a reverse proxy from the given cluster and terminates it.
-     * 
-     * @param instance
-     * @param region
-     * @param callback
      * @return Returns true if a success.
-     * @throws Exception
      */
     void removeReverseProxy(ReverseProxyDTO instance, String region, AsyncCallback<Boolean> callback);
     
     /**
      * Restarts the httpd on a reverse proxy, by stopping and then starting the service.
-     * @param proxy
-     * @param region
      * @param optionalKeyName Name of key used to connect to the instance to restart
      * @param passphraseForPrivateKeyDecryption the passphrase for the given key
-     * @param callback
      */
     void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
     
     /**
      * Adds a reverse proxy to the cluster and the right target group.
-     * @param createProxyDTO
-     * @param callback
      */
     void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO,   AsyncCallback<Void> callback);
     
     
     /**
      * Gets all availability zones in a region in a certain format. NAME is az name. ID is az id. MIXED is in format name/id.
-     * @param region
      * @param format The format of the strings returned to denote the az. 
-     * @param asyncCallback
      */
-    void getAvailabilityZones(String region, AzFormat format, AsyncCallback<List<String>> asyncCallback);
+    void getAvailabilityZones(String region, AzFormat format, AsyncCallback<ArrayList<String>> asyncCallback);
     
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.

@@ -1,6 +1,5 @@
 package com.sap.sse.landscape;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.sap.sse.common.Duration;
@@ -39,7 +38,7 @@ public interface Landscape<ShardingKey> {
      * @return the security groups that shall be assigned by default to any host used as part of the central reverse
      *         proxy cluster in a region
      */
-    List<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(Region region);
+    Iterable<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(Region region);
 
     /**
      * @return the security group that shall be assigned by default to any host used as part of a MongoDB replica set;

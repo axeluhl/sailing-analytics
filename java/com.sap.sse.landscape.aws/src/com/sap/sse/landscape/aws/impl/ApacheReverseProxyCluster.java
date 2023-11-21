@@ -2,13 +2,11 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
@@ -39,7 +37,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT exten
 extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     private Set<AwsInstance<ShardingKey>> hosts;
-    private static final Logger logger = Logger.getLogger(ApacheReverseProxyCluster.class.getName());
+    
     public ApacheReverseProxyCluster(AwsLandscape<ShardingKey> landscape) {
         super(landscape);
         this.hosts = new HashSet<>();
@@ -67,7 +65,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 getAmiId(az.getRegion()), instanceType, az, keyName,
                 getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.REVERSE_PROXY_TAG_NAME, "")));
         addHost(host);
-        Wait.wait(() -> !host.getInstance().state().name().equals(InstanceStateName.PENDING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, RETRY_ADD_TO_TARGET_GROUP );
+        Wait.wait(() -> !host.getInstance().state().name().equals(InstanceStateName.PENDING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, "Reattempting to add to target group");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
@@ -90,17 +88,13 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
 
     /**
      * Gets the security groups in the region that a reverse proxy instance should or does have.
- 
      */
-    private List<SecurityGroup> getSecurityGroups(Region region) {
+    private Iterable<SecurityGroup> getSecurityGroups(Region region) {
         return getLandscape().getDefaultSecurityGroupsForCentralReverseProxy(region); 
-        
     }
 
     /**
      * Gets the latest image in the current region with the correct tag for creating a reverse proxy.
-     * @param region 
-     * @return
      */
     private MachineImage getAmiId(Region region) {
         return getLandscape().getLatestImageWithType(region, SharedLandscapeConstants.IMAGE_TYPE_REVERSE_PROXY);
@@ -172,12 +166,8 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
 
     @Override
-    public void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) {
-        try {
+    public void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) throws Exception {
         setRedirect(proxy -> proxy.setScopeRedirect(scope, applicationProcess));
-        } catch (Exception e) {
-            logger.log(Level.WARNING, e.toString());
-        }
     }
 
     @Override
