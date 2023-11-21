@@ -34,6 +34,9 @@ public class RegattaDetailsCompositePO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "SeriesCellTable")
     private WebElement seriesTable;
     
+    @FindBy(how = BySeleniumId.class, using = "registrationLinkWithQRCodeOpenButton")
+    private WebElement registrationLinkWithQRCodeOpenButton;
+    
     public RegattaDetailsCompositePO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -106,5 +109,11 @@ public class RegattaDetailsCompositePO extends PageArea {
     public void waitForRacesOfSeries(final String series, final List<String> races) {
         waitForAjaxRequests();
         waitUntil(() -> Objects.equal(getRaceNames(series), races));
+    }
+    
+    public RegistrationLinkWithQRCodeDialogPO configureRegistrationURL() {
+        registrationLinkWithQRCodeOpenButton.click();
+        WebElement dialog = findElementBySeleniumId(this.driver, "RegistrationLinkWithQRCodeDialog");
+        return new RegistrationLinkWithQRCodeDialogPO(this.driver, dialog);
     }
 }
