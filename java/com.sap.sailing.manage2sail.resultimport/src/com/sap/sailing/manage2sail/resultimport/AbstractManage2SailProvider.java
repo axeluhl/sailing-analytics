@@ -14,7 +14,7 @@ public abstract class AbstractManage2SailProvider extends AbstractResultUrlProvi
     public static final String NAME = "Manage2Sail XRR Result Importer";
 
     protected static final String EVENT_ID_REGEX = "^[\\da-f]{8}(-[\\da-f]{4}){3}-[\\da-f]{12}$";
-    protected static final String EVENT_ID_TEMPLATE = "http://manage2sail.com/api/public/links/event/%s?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+    protected static final String EVENT_ID_TEMPLATE = "https://manage2sail.com/api/public/links/event/%s?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
 
     private final ParserFactory parserFactory;
 
@@ -38,6 +38,6 @@ public abstract class AbstractManage2SailProvider extends AbstractResultUrlProvi
 
     @Override
     public String getOptionalSampleURL() {
-        return "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+        return String.format(EVENT_ID_TEMPLATE, "d30883d3-2876-4d7e-af49-891af6cbae1b");
     }
 }
