@@ -171,6 +171,7 @@ public class RegattaDetailsComposite extends Composite {
                 });
             }
         });
+        button.ensureDebugId("registrationLinkWithQRCodeOpenButton");
         grid.setWidget(row , 1, button);
         return button;
     }

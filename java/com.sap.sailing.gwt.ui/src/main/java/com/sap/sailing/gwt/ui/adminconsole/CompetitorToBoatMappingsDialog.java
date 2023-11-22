@@ -69,6 +69,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
         this.competitorTable = new CompactCompetitorTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, userService);
         this.boatTable = new CompactBoatTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        this.boatTable.asWidget().ensureDebugId("competitorToBoatMappingBoatTable");
         ImagesBarColumn<CompetitorDTO, CompactCompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<>(new CompactCompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
@@ -80,6 +81,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
             }
         });
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
+        competitorTable.asWidget().ensureDebugId("competitorToBoatMappingCompetitorTable");
         refreshableBoatSelectionModel = boatTable.getSelectionModel();
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
         boatListHandler = new SelectionChangeEvent.Handler() {

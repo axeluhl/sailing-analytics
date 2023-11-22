@@ -1,13 +1,11 @@
 package com.sap.sailing.selenium.pages.common;
 
-import java.util.function.BooleanSupplier;
-
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -65,11 +63,8 @@ public abstract class DataEntryDialogPO extends PageArea {
     public void pressOk(boolean acceptAlert, boolean waitForAjaxRequests) {
         // This generically triggers revalidation in dialogs to ensure that the ok button gets enabled
         ((JavascriptExecutor) driver).executeScript("!!document.activeElement ? document.activeElement.blur() : 0");
-        
-        scrollToView(this.okButton);
-        // Browsers may use smooth scrolling
-        waitUntil(() -> isElementEntirelyVisible(this.okButton) && this.okButton.isEnabled());
-        this.okButton.click();
+        Wait<WebDriver> wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.elementToBeClickable(okButton)).click();        
         
         if (acceptAlert) {
             final Alert alert = new WebDriverWait(driver, DEFAULT_WAIT_TIMEOUT_SECONDS)
@@ -81,19 +76,9 @@ public abstract class DataEntryDialogPO extends PageArea {
             // Wait, since we do a callback usually
             waitForAjaxRequests();
         }
-        
+        WebElement element = (WebElement) this.context;
         // This waits until the dialog is physically closed to make sure further don't fail because the dialog still covers other elements
-        waitUntil(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                try {
-                    return !((WebElement) context).isDisplayed();
-                } catch (StaleElementReferenceException e) {
-                    // When the element was removed from the DOM, it isn't displayed anymore
-                    return true;
-                }
-            }
-        });
+        wait.until(ExpectedConditions.invisibilityOf(element));
     }
     
     public void pressCancel() {
