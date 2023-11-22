@@ -111,6 +111,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
             }
         });
         addCompetitorWithBoatButton = new Button(stringMessages.add(stringMessages.competitorWithBoat()));
+        addCompetitorWithBoatButton.ensureDebugId("addCompetitorWithBoatButton");
         addCompetitorWithBoatButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
