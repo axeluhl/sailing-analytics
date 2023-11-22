@@ -14,6 +14,8 @@ public class DetailTypeFormatter {
 	
     public static String format(DetailType detailType) {
         switch (detailType) {
+        case TACKTYPE_LONGTACK_SHORTTACK:
+            return stringMessages.tacktype();
         case LEG_DISTANCE_TRAVELED:
             return stringMessages.distanceInMeters();
         case LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START:
