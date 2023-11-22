@@ -84,6 +84,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
             final String regattaRegistrationSecret, DialogCallback<Void> callback) {
         super(stringMessages.mapDevices(), /*message*/ null, stringMessages.ok(), stringMessages.cancel(), /*validator*/ null, callback);
+        this.ensureDebugId("regattaLogTrackingDeviceMappingsDialog");
         this.stringMessages = stringMessages;
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
@@ -99,6 +100,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         FlowPanel mainPanel = new FlowPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();
         Button addMappingButton = new Button(stringMessages.add());
+        addMappingButton.ensureDebugId("addMappingButton");
         addMappingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

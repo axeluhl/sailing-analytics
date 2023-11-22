@@ -120,6 +120,7 @@ public class DeviceConfigurationListComposite extends Composite  {
         CellTable<DeviceConfigurationWithSecurityDTO> table = new BaseCelltable<DeviceConfigurationWithSecurityDTO>(
                 /* pageSize */10000, tableResource);
         configurationsDataProvider.addDataDisplay(table);
+        table.ensureDebugId("DeviceConfigurationList");
         table.setWidth("100%");
         ListHandler<DeviceConfigurationWithSecurityDTO> columnSortHandler = new ListHandler<DeviceConfigurationWithSecurityDTO>(
                 configurationsDataProvider.getList());
