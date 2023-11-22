@@ -45,3 +45,29 @@ SailingServer (No Proxy) Chargebee.launch
 ## SAC Showcase, HDI Container
 mta_archives/
 db/.env
+
+## confi local bug5918
+java/com.sap.sailing.dashboards.gwt/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sailing.dashboards.gwt/GWT Dashboards DevMode.launch
+java/com.sap.sailing.dashboards.gwt/GWT Dashboards SDM.launch
+java/com.sap.sailing.datamining.shared/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sailing.datamining/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sailing.domain.common/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sailing.gwt.ui/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sailing.gwt.ui/GWT Sailing DevMode.launch
+java/com.sap.sailing.gwt.ui/GWT Sailing SDM (Home+Admin+Raceboard).launch
+java/com.sap.sailing.gwt.ui/GWT Sailing SDM ManagementConsole.launch
+java/com.sap.sailing.gwt.ui/GWT Sailing SDM.launch
+java/com.sap.sailing.polars.datamining.shared/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sailing.simulator.test/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sailing.simulator/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sse.common/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sse.gwt.adminconsole/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sse.gwt.test/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sse.gwt/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sse.gwt/GWT xdStorage Sample SDM.launch
+java/com.sap.sse.security.common/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sse.security.ui/.settings/com.gwtplugins.gwt.eclipse.core.prefs
+java/com.sap.sse.security.ui/GWT Security DevMode.launch
+java/com.sap.sse.security.ui/GWT Security SDM.launch
+java/com.google.gwt.ajaxloader/.settings/com.gwtplugins.gwt.eclipse.core.prefs
