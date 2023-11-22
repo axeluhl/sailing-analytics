@@ -275,7 +275,6 @@ public enum DetailType implements Serializable {
      */
     public static Collection<DetailType> getAutoplayDetailTypesForChart() {
         final Collection<DetailType> availableDetailsTypes = new LinkedHashSet<>();
-        availableDetailsTypes.add(DetailType.TACKTYPE_LONGTACK_SHORTTACK);
         availableDetailsTypes.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.LEG_DISTANCE_TRAVELED);
@@ -383,6 +382,7 @@ public enum DetailType implements Serializable {
 
     public static Collection<DetailType> getAllRaceDetailTypes() {
         final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(DetailType.TACKTYPE_LONGTACK_SHORTTACK);
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);
