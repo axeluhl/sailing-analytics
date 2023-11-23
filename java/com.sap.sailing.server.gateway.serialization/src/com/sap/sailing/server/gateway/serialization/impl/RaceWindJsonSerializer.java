@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
@@ -36,12 +37,13 @@ public class RaceWindJsonSerializer extends AbstractTrackedRaceDataJsonSerialize
 
     @Override
     public JSONObject serialize(TrackedRace trackedRace) {
-        final TimePoint finalFrom = trackedRace.getStartOfTracking();
-        final TimePoint finalTo = Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(),
-                trackedRace.getTimePointOfNewestEvent());
+        final TimePoint finalFrom = trackedRace.getStartOfRace();
+        final TimePoint finalTo = Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getEndOfRace());
+        final Set<WindSource> windSourcesToExclude = trackedRace.getWindSourcesToExclude();
         List<WindSource> highQualityWindSources = trackedRace.getWindSources().stream()
-                .filter(windSource -> windSource.getType() == WindSourceType.EXPEDITION
+                .filter(windSource -> (windSource.getType() == WindSourceType.EXPEDITION
                         || windSource.getType() == WindSourceType.RACECOMMITTEE)
+                        && !windSourcesToExclude.contains(windSource))
                 .collect(Collectors.toList());
         JSONArray windSourcesJson = new JSONArray();
         TimePoint earliestTimePoint = null;
