@@ -2578,7 +2578,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         try {
             TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
             switch (dataType) {
-            case TACKTYPE_LONGTACK_SHORTTACK:
+            case LEG_TACKTYPE_LONGTACK_SHORTTACK:
                 if (trackedLeg != null) {
                     final TackType tackType = trackedLeg.getTackType(timePoint);
                     result = (tackType == null) ? null : ((tackType==TackType.LONGTACK) ? 1.0 : 0.0);
