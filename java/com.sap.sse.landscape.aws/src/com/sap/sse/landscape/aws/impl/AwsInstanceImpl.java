@@ -103,6 +103,12 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         return publicAddress;
     }
     
+    /**
+     * Checks if there is a name tag and returns the value, if it exists. This implementation caches and so may cause
+     * caching issues, because the name of the instance can change over time. 
+     * 
+     * @return name tag value
+     */
     public String getNameTag() {
         String result = "No name tag found";
         if (name == null) {

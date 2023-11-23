@@ -118,7 +118,7 @@ public class CreateReverseProxyInClusterDialog
         this.stringMessages = stringMessages;
         proxyName = createTextBox("", 20);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
-                stringMessages, SharedLandscapeConstants.DEFAULT_DEDICATED_INSTANCE_TYPE_NAME, errorReporter); // TODO:
+                stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter); // TODO:
                                                                                                                // research
                                                                                                                // best
                                                                                                                // default.

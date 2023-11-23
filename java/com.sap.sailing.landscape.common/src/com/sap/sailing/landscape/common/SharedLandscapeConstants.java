@@ -99,5 +99,23 @@ public interface SharedLandscapeConstants {
      */
     String REVERSE_PROXY_TAG_NAME = "ReverseProxy";
     
+    /**
+     * The tag for a security group that a reverse proxy requires.
+     */
     String REVERSE_PROXY_SG_TAG = "reverse-proxy-sg";
+    
+    /**
+     * Marks the most appropriate instance type for a reverse proxy.
+     */
+    String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "C5_AD_XLARGE";
+    
+    /**
+     * The tag for any security groups for a mongo DB.
+     */
+    String MONGO_SG_TAG = "mongo-sg";
+    
+    /**
+     * The tag for a security group for a sailing application server.
+     */
+    String SAILING_APPLICATION_SG_TAG = "application-server-sg";
 }

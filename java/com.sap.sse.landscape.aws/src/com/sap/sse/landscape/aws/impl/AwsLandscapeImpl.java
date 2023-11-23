@@ -196,11 +196,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public static final long DEFAULT_DNS_TTL_SECONDS = 60l;
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85"; // Sailing Analytics App
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280"; // Java Application with Reverse Proxy
+//    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85"; // Sailing Analytics App
+//    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280"; // Java Application with Reverse Proxy
 
-    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
-    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
+//    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
+//    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
     private static final String SAILING_APP_SECURITY_GROUP_NAME = "Sailing Analytics App";
     private final String accessKeyId;
@@ -1228,15 +1228,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
         return getSecurityGroupByName(SAILING_APP_SECURITY_GROUP_NAME, region).orElseGet(()->{
-            final SecurityGroup result;
-            if (region.getId().equals(Region.EU_WEST_1.id())) {
-                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
-            } else if (region.getId().equals(Region.EU_WEST_2.id())) {
-                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
-            } else {
-                result = null;
-            }
-            return result;
+            List<SecurityGroup> securityGroups = new ArrayList<>();
+            securityGroups.addAll(getSecurityGroupByTag(SharedLandscapeConstants.SAILING_APPLICATION_SG_TAG, region));
+            return securityGroups.isEmpty() ? null : securityGroups.get(0);
         });
     }
 
@@ -1271,17 +1265,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public SecurityGroup getDefaultSecurityGroupForMongoDBHosts(com.sap.sse.landscape.Region region) {
-        final SecurityGroup result;
-        // TODO find a better way, e.g., by tagging, to identify the security group per region to use for MongoDB hosts
-        if (region.getId().equals(Region.EU_WEST_1.id())) {
-            result = getSecurityGroup(DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1, region);
-        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
-            result = getSecurityGroup(DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2, region);
-        } else {
-            result = null;
-        }
-        return result;
+    public Iterable<SecurityGroup> getDefaultSecurityGroupsForMongoDBHosts(com.sap.sse.landscape.Region region) {
+        List<SecurityGroup> securityGroups = new ArrayList<>();
+        securityGroups.addAll(getSecurityGroupByTag(SharedLandscapeConstants.MONGO_SG_TAG, region));
+        return securityGroups;
     }
 
     @Override

@@ -44,7 +44,7 @@ public interface Landscape<ShardingKey> {
      * @return the security group that shall be assigned by default to any host used as part of a MongoDB replica set;
      *         we expect public SSH access and local access to the default MongoDB port (usually 27017).
      */
-    SecurityGroup getDefaultSecurityGroupForMongoDBHosts(Region region);
+    Iterable<SecurityGroup> getDefaultSecurityGroupsForMongoDBHosts(Region region);
     
     /**
      * Obtains the default RabbitMQ configuration for the {@code region} specified. If nothing else is specified

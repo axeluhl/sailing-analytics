@@ -162,7 +162,7 @@ public interface Host extends WithID {
     
     /**
      * Checks if there is a name tag and returns the value, if it exists.
-     * TODO Thomas, please explain the caching issues...
+     * 
      * @return name tag value
      */
     String getNameTag();
