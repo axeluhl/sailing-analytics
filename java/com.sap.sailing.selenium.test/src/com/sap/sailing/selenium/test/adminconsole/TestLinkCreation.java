@@ -170,12 +170,10 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         WebElement qrCodeLink = wait.until(ExpectedConditions
                 .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_LINK_TEXT + "')]")));
         MatcherAssert.assertThat("Check URL", matcher.matches(qrCodeLink.getAttribute("href")));
-
     }
 
     /**
-     * @throws InterruptedException
-     * 
+     * Device registration via QR code test.
      */
     @Test
     public void testDeviceRegistation() throws InterruptedException {
