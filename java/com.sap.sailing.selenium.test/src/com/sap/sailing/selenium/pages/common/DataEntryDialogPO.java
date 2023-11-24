@@ -1,9 +1,6 @@
 package com.sap.sailing.selenium.pages.common;
 
-import java.util.List;
-
 import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -69,13 +66,11 @@ public abstract class DataEntryDialogPO extends PageArea {
         Wait<WebDriver> wait = new WebDriverWait(driver, 20);
         // click OK
         wait.until(ExpectedConditions.elementToBeClickable(okButton)).click();        
-        
         if (acceptAlert) {
             final Alert alert = new WebDriverWait(driver, DEFAULT_WAIT_TIMEOUT_SECONDS)
                     .until(ExpectedConditions.alertIsPresent());
             alert.accept();
         }
-        
         if (waitForAjaxRequests) {
             // Wait, since we do a callback usually
             waitForAjaxRequests();

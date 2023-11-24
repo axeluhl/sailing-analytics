@@ -383,6 +383,7 @@ public class PageObject {
     /**
      * <p>Finds and returns the first element with the specified selenium id in the given search context. If multiple
      *   elements exists, the element closest to the context is returned.</p>
+     * <p>To be more stable this search is based on a web driver wait. Default lookup timeout is used.
      * 
      * @param context
      *   The search context to use for the search.
@@ -391,8 +392,9 @@ public class PageObject {
      * @return
      *   The first matching element in the given context.
      */
-    protected WebElement findElementBySeleniumId(SearchContext context, String id) {
-        return context.findElement(new BySeleniumId(id));
+    protected WebElement findElementBySeleniumId(SearchContext context, String seleniumId) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        return webDriverWait.until(ExpectedConditions.presenceOfElementLocated(new BySeleniumId(seleniumId)));
     }
     
     /**
