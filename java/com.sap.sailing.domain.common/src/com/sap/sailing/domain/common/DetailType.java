@@ -24,7 +24,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
  *
  */
 public enum DetailType implements Serializable {
-    TACKTYPE_LONGTACK_SHORTTACK(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "TACKTYPE"),
+    LEG_TACKTYPE_LONGTACK_SHORTTACK(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "TACKTYPE"),
     LEG_DISTANCE_TRAVELED(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "DISTANCE_TRAVELED"),
     LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START(0, ASCENDING, null, "DISTANCE_TRAVELED_INCLUDING_GATE_START"),
     LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING, PREMIUM_LEADERBOARD_INFORMATION, "AVERAGE_SPEED_OVER_GROUND_IN_KNOTS"),
@@ -382,7 +382,7 @@ public enum DetailType implements Serializable {
 
     public static Collection<DetailType> getAllRaceDetailTypes() {
         final Collection<DetailType> allowed = new LinkedHashSet<>();
-        allowed.add(DetailType.TACKTYPE_LONGTACK_SHORTTACK);
+        allowed.add(DetailType.LEG_TACKTYPE_LONGTACK_SHORTTACK);
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);
