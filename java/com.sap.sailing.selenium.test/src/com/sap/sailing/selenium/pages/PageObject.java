@@ -392,9 +392,8 @@ public class PageObject {
      * @return
      *   The first matching element in the given context.
      */
-    protected WebElement findElementBySeleniumId(SearchContext context, String seleniumId) {
-        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
-        return webDriverWait.until(ExpectedConditions.presenceOfElementLocated(new BySeleniumId(seleniumId)));
+    protected WebElement findElementBySeleniumId(SearchContext context, String id) {
+        return context.findElement(new BySeleniumId(id));
     }
     
     /**
