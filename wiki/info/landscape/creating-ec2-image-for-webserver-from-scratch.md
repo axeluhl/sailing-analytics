@@ -190,5 +190,6 @@ Postmail is useful. The script for this procedure is in configuration and is tit
 Setup the logrotate target.
 
 Setup the fstab (not automated).
+Update amazon cli (because pricing list requires it)
 
 
