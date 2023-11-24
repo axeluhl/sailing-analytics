@@ -2572,10 +2572,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             TimePoint timePoint, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         Double result = null;
-        Course course = trackedRace.getRace().getCourse();
+        final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
+        trackedRace.lockForRead(trackedRace.getMarkPassings(competitor));
         try {
-            TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
+            final TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
             switch (dataType) {
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = trackedRace.getTrack(competitor);
@@ -2942,6 +2943,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
             return result;
         } finally {
+            trackedRace.unlockAfterRead(trackedRace.getMarkPassings(competitor));
             course.unlockAfterRead();
         }
     }
