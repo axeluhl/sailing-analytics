@@ -10,5 +10,9 @@ public enum TackType {
     /**
      * The shorttack takes you away from this Windline. It is the shorter tack in a leg.
      */
-    SHORTTACK
+    SHORTTACK,
+    /**
+     * If its undefinable, like besides the regatta time or the timepoint doesnt fit with the current leg time frame
+     */
+    NONE
 }

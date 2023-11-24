@@ -1246,20 +1246,27 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public TackType getTackType(TimePoint timePoint) throws NoWindException {
         final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                 /* extrapolate */ true);
-        // TODO Problem mit 2 Tonnen schauen
-        // TODO Problem mit vor nach Start GPS Fixes
-        final Position waypointPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
-        final Bearing cog = getSpeedOverGround(timePoint).getBearing();
-        final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
-        final Bearing bearingWind = getTrackedRace().getWind(competitorPosition, timePoint).getFrom();
-        final Bearing diffWindtoBoat = bearingWind.getDifferenceTo(cog).abs();
-        final Bearing diffMarktoBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
         final TackType result;
-        if (diffMarktoBoat.getDegrees() < diffWindtoBoat.getDegrees()) {
-            result = TackType.LONGTACK;
+        // TODO Problem mit 2 Tonnen schauen
+        MarkPassing start = getMarkPassingForLegStart();
+        if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
+            MarkPassing end = getMarkPassingForLegEnd();
+            if (end != null && timePoint.compareTo(end.getTimePoint()) >= 0) {
+                final Position waypointPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
+                final Bearing cog = getSpeedOverGround(timePoint).getBearing();
+                final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
+                final Bearing bearingWind = getTrackedRace().getWind(competitorPosition, timePoint).getFrom();
+                final Bearing diffWindtoBoat = bearingWind.getDifferenceTo(cog).abs();
+                final Bearing diffMarktoBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
+
+                if (diffMarktoBoat.getDegrees() < diffWindtoBoat.getDegrees()) {
+                    result = TackType.LONGTACK;
+                } else {
+                    result = TackType.SHORTTACK; }
+            } else {
+                result = TackType.NONE; }
         } else {
-            result = TackType.SHORTTACK;
-        }
+            result = TackType.NONE; }
         return result;
     }
 }
