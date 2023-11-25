@@ -4076,6 +4076,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return seriesCreationParams;
     }
 
+    // TODO should we make this really Manage2Sail specific, although the StructureImporter generally lives in the XRR package only?
+    // We could then specifically ask the Manage2Sail bundle, e.g., its activator or another service class, to extend the URL by
+    // adding the access token parameter...
     @Override
     public Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl) {
         StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);

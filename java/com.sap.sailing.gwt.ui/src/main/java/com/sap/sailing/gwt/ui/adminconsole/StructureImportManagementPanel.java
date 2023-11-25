@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingEventIdUrlUtil;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -131,8 +132,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         eventIDTextBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                jsonURLTextBox.setText("http://manage2sail.com/api/public/links/event/" + eventIDTextBox.getValue()
-                        + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
+                final String url = SwissTimingEventIdUrlUtil.getUrlFromEventId(eventIDTextBox.getValue());
+                jsonURLTextBox.setText(url);
             }
         });
         eventIDTextBox.ensureDebugId("eventIDTextBox");
@@ -140,8 +141,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         jsonURLTextBox = new TextBox();
         jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
-        jsonURLTextBox.getElement().setPropertyString("placeholder",
-                        "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
+        jsonURLTextBox.getElement().setPropertyString("placeholder", SwissTimingEventIdUrlUtil.getUrlFromEventId("d30883d3-2876-4d7e-af49-891af6cbae1b"));
         listRegattasButton = new Button(this.stringMessages.listRegattas());
         importDetailsButton = new Button(this.stringMessages.importRegattas());
         importDetailsButton.setEnabled(false);
@@ -258,8 +258,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         if (eventIDTextBox.getValue() == null || eventIDTextBox.getValue().length() == 0) {
             jsonURL = jsonURLTextBox.getValue();
         } else {
-            jsonURL = "http://manage2sail.com/api/public/links/event/" + eventIDTextBox.getValue()
-                    + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+            jsonURL = SwissTimingEventIdUrlUtil.getUrlFromEventId(eventIDTextBox.getValue());
         }
         if (jsonURL == null || jsonURL.length() == 0) {
             errorReporter.reportError(stringMessages.pleaseEnterNonEmptyUrl());

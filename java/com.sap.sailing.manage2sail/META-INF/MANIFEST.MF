@@ -11,4 +11,5 @@ Require-Bundle: org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.domain,
  com.sap.sse
 Export-Package: com.sap.sailing.manage2sail
+Import-Package: org.osgi.framework
 Automatic-Module-Name: com.sap.sailing.manage2sail
