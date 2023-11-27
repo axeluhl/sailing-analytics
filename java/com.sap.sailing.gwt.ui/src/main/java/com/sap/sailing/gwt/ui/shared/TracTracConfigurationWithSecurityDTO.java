@@ -51,7 +51,7 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
         this.jsonUrl = config.getJsonUrl();
         this.liveDataURI = config.getLiveDataURI();
         this.storedDataURI = config.getStoredDataURI();
-        this.courseDesignUpdateURI = config.getCourseDesignUpdateURI();
+        this.courseDesignUpdateURI = config.getUpdateURI();
         this.tracTracUsername = config.getTracTracUsername();
         this.tracTracPassword = config.getTracTracPassword();
         this.creatorName = config.getCreatorName();
@@ -97,7 +97,7 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
         return storedDataURI;
     }
 
-    public String getCourseDesignUpdateURI() {
+    public String getUpdateURI() {
         return courseDesignUpdateURI;
     }
 

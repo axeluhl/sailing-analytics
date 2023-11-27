@@ -496,7 +496,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                                 // if the leaderLeg is null, the leader has already finished the race
                                 if (leaderLeg == null || leg != leaderLeg.getLeg()) {
                                     // add distance to next mark because the leader is not in the same leg (but ahead because it's the leader)
-                                    Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), effectiveTimePoint);
+                                    Position nextMarkPosition = cache.getApproximatePosition(getTrackedRace(), leg.getTo(), effectiveTimePoint);
                                     if (nextMarkPosition == null) {
                                         result = null;
                                         break;

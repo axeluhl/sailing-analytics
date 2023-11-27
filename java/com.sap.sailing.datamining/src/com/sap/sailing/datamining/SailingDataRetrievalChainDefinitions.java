@@ -98,9 +98,14 @@ public class SailingDataRetrievalChainDefinitions {
                 HasFoilingSegmentContext.class, FoilingSegmentsDataMiningSettings.class, FoilingSegmentsDataMiningSettings.createDefaultSettings(), "FoilingSegments");
         dataRetrieverChainDefinitions.add(foilingSegmentsRetrieverChainDefinition);
         //
+        final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegContext> legRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                trackedRaceRetrieverChainDefinition, HasTrackedLegContext.class, "LegSailingDomainRetrieverChain");
+        legRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class,
+                HasTrackedLegContext.class, "Leg");
+        dataRetrieverChainDefinitions.add(legRetrieverChainDefinition);
+        //
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                trackedRaceRetrieverChainDefinition, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");
-        legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
+                legRetrieverChainDefinition, HasTrackedLegOfCompetitorContext.class, "LegOfCompetitorSailingDomainRetrieverChain");
         legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class, TrackedLegOfCompetitorRetrievalProcessor.class,
                 HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
         dataRetrieverChainDefinitions.add(legOfCompetitorRetrieverChainDefinition);

@@ -295,8 +295,8 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
     private void trackSelectedRaces(boolean trackWind, boolean correctWind) {
         final YellowBrickConfigurationWithSecurityDTO selectedConnection = connectionsTable.getSelectionModel()
                 .getSelectedSet().iterator().next();
-        final String username = selectedConnection.getUsername();
-        final String password = selectedConnection.getPassword();
+        final String creatorName = selectedConnection.getCreatorName();
+        final String raceUrl = selectedConnection.getRaceUrl();
         RegattaDTO selectedRegatta = getSelectedRegatta(); // null meaning "Default Regatta" selection
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
@@ -310,7 +310,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         final RefreshableMultiSelectionModel<YellowBrickRaceRecordDTO> selectionModel = racesTableWrapper.getSelectionModel();
         final List<YellowBrickRaceRecordDTO> selectedRaces = new ArrayList<>(selectionModel.getSelectedSet());
         sailingServiceWrite.trackWithYellowBrick(regattaIdentifier, selectedRaces, trackWind, correctWind,
-                username, password, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                creatorName, raceUrl, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         reportError(stringMessages.errorTryingToRegisterRacesForTracking(selectedRaces.toString(), caught.getMessage()));

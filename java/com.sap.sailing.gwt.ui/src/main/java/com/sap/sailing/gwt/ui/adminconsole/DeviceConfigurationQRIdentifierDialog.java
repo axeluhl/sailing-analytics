@@ -90,6 +90,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         panel.add(widget);
         panel.add(actionPanel);
         setWidget(panel);
+        this.ensureDebugId("DeviceConfigurationQRIdentifierDialog");
     }
     
     @Override

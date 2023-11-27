@@ -61,7 +61,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(bmwCupDescriptor);
+        regattaStructure.createRegatta(bmwCupDescriptor, /* withDefaultLeaderboard */ false);
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
@@ -79,7 +79,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     public void testStartTrackingWithDefaultReggataWhileReggataForBoatClassExists() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS));
+        regattaStructure.createRegatta(new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS), /* withDefaultLeaderboard */ false);
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(DEFAULT_REGATTA);
@@ -93,8 +93,8 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         RegattaDescriptor idm2013Descriptor = new RegattaDescriptor(IDM_2013_EVENT, IDM_2013_BOAT_CLASS);
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(bmwCupDescriptor);
-        regattaStructure.createRegatta(idm2013Descriptor);
+        regattaStructure.createRegatta(bmwCupDescriptor, /* withDefaultLeaderboard */ false);
+        regattaStructure.createRegatta(idm2013Descriptor, /* withDefaultLeaderboard */ false);
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(idm2013Descriptor);

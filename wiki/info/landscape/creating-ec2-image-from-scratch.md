@@ -2,7 +2,21 @@
 
 I started out with a clean "Amazon Linux AMI 2015.03 (HVM), SSD Volume Type - ami-a10897d6" image from Amazon and added the existing Swap and Home snapshots as new volumes. The root/system volume I left as is, to start with. This requires having access to a user key that can be selected when launching the image.
 
-Enable the EPEL repository by issuing `yum-config-manager --enable epel/x86_64`.		
+Add a ``sailing`` user / group. Under that user account, clone ``ssh://trac@sapsailing.com/home/trac/git`` to ``/home/sailing/code``.
+
+Under ``/usr/local/bin`` install the following:
+```
+lrwxrwxrwx  1 root root       56 Oct 20 09:20 cp_root_mail_properties -> /home/sailing/code/configuration/cp_root_mail_properties
+-rwxr-xr-x  1 root root 24707072 Jan 30  2022 docker-compose
+lrwxrwxrwx  1 root root       71 May 10  2021 getLatestImageOfType.sh -> /home/sailing/code/configuration/aws-automation/getLatestImageOfType.sh
+lrwxrwxrwx  1 root root       50 Mar 23  2021 launchhudsonslave -> /home/sailing/code/configuration/launchhudsonslave
+lrwxrwxrwx  1 root root       57 Mar 23  2021 launchhudsonslave-java11 -> /home/sailing/code/configuration/launchhudsonslave-java11
+lrwxrwxrwx  1 root root       69 Jun  1  2019 mountnvmeswap -> /home/sailing/code/configuration/archive_instance_setup/mountnvmeswap
+lrwxrwxrwx  1 root root       78 Jan 27  2021 update_authorized_keys_for_landscape_managers -> /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers
+lrwxrwxrwx  1 root root       89 Feb  4  2021 update_authorized_keys_for_landscape_managers_if_changed -> /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed
+```
+
+Enable the EPEL repository by issuing `yum-config-manager --enable epel/x86_64` or `sudo amazon-linux-extras install epel -y`.		
 
 I then did a `yum update` and added the following packages:
 
@@ -23,7 +37,9 @@ I then did a `yum update` and added the following packages:
  - xterm
  - sendmail-cf
 
-In order to be able to connect to AWS DocumentDB instances, the corresponding certificate must be installed into the JVM's certificate store:
+I copied the JDK7/JDK8 installations, particularly the current sapjvm_8 VM, from an existing SL instance to /opt (using scp).
+
+In order to be able to connect to AWS DocumentDB instances, the corresponding certificate must be installed into the JVM's certificate store (2 separate commands):
 
 ```
    wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
@@ -33,13 +49,13 @@ In order to be able to connect to AWS DocumentDB instances, the corresponding ce
 A latest MongoDB shell is installed by the following:
 
 ```
-cat << EOF >/etc/yum.repos.d/mongodb-org.3.6.repo
-[mongodb-org-3.6]
+cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
+[mongodb-org-4.4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/3.6/x86_64/
+baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/4.4/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.6.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
 EOF
 
 yum update
@@ -58,7 +74,7 @@ UUID=7d7e68a3-27a1-49ef-908f-a6ebadcc55bb       none    swap    sw      0       
 ```
 
 This will mount the swap space partition as well as the /home/sailing partition, /var/log/old and the Android SDK stuff required for local builds.
-
+Do the following steps (until it says otherwise) without logging out in between them:
 In `/etc/ssh/sshd_config` I commented the line
 
 ```
@@ -74,10 +90,13 @@ PermitRootLogin Yes
 MaxStartups 100
 ```
 
+
 to allow root shell login, and allow for several concurrent SSH connections (up to 100) starting up around the
 same time.
 
-I copied the JDK7/JDK8 installations, particularly the current sapjvm_8 VM, from an existing SL instance to /opt.
+Furthermore, on recent AMIs, you may have to go to `/root/.ssh/authorized_keys` and remove the statements before the keys start, otherwise you might lock yourself out (because you can't access root but the new permissions block ec2-user access). If you are locked out, then you can use EC2 Instance Connect, which can be found by clicking on an instance and clicking connect.
+
+You may now _logout_.
 
 I linked /etc/init.d/sailing to /home/sailing/code/configuration/sailing and added the following links to it:
 
@@ -106,10 +125,10 @@ Added the following two lines to `/etc/security/limits.conf`:
 
 ```
 *               hard    nproc           unlimited
-*               hard    nofile          65000
+*               hard    nofile          128000
 ```
 
-This increases the maximum number of open files allowed from the default 1024 to a more appropriate 65k.
+This increases the maximum number of open files allowed from the default 1024 to a more appropriate 128k.
 
 Copied the httpd configuration files `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf.d/000-macros.conf` and the skeletal `/etc/httpd/conf.d/001-events.conf` from an existing server. Make sure the following lines are in httpd.conf:
 
@@ -128,6 +147,12 @@ Copied /etc/logrotate.conf from an existing SL instance so that `/var/log/logrot
 Instead of having the `ANDROID_HOME` environment variable be set in `/etc/profile` as in the old instances, I moved this statement to the `sailing.sh` script in git at `configuration/sailing.sh` and linked to by `/etc/profile.d/sailing.sh`. For old instances this will set the variable redundantly, as they also have it set by a manually adjusted `/etc/profile`, but this shouldn't hurt.
 
 Had to fiddle a little with the JDK being used. The default installation has an OpenJDK installed, and the AWS tools depend on it. Therefore, it cannot just be removed. As a result, it's important that `env.sh` has the correct `JAVA_HOME` set (/opt/jdk1.8.0_45, in this case). Otherwise, the OSGi environment won't properly start up.
+
+For the ``root`` user create the symbolic link from ``/root/crontab`` to ``/home/sailing/code/configuration/crontab`` and run ``crontab crontab``. It adds the following crontab entry that is responsible for updating the SSH keys of the users with permission for landscape management in the ``/root/.ssh/authorized_keys`` file.
+```
+* * * * *   export PATH=/bin:/usr/bin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); update_authorized_keys_for_landscape_managers_if_changed $( cat /root/ssh-key-reader.token ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
+```
+Make sure, a valid bearer token is installed in ``/root/ssh-key-reader.token``.
 
 To ensure that chronyd is started during the boot sequence, issued the command
 

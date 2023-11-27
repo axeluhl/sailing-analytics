@@ -57,6 +57,7 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
         error = new Label();
         error.setStyleName("errorLabel");
         url = new Label();
+        url.ensureDebugId("QRIdentifierURL");
         VerticalPanel panel = new VerticalPanel();
         panel.add(inputGrid);
         panel.add(qrCodeComposite);

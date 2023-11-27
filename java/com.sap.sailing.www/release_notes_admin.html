@@ -23,6 +23,18 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">October 2023</h2>
+          <ul class="bulletList">
+            <li>TracTrac and YellowBrick passwords are no longer sent back to the client; there were ways to discover
+                those passwords from the password fields by tweaking with the browser's debug tools. When leaving
+                the password field empty during updating a connectivity record, the password will simply be left
+                unchanged.</li>
+            <li>The TracTrac "Update URI" is now discovered from the new field <tt>server_update_uri</tt> in the
+                JSON document describing an event. This way, users don't need to enter it unless they want to
+                override the default with some special value. It is therefore now usually sufficient
+                to enter a user name and password combination in order to activate these updates that are sent
+                back to the TracTrac server.</li>
+          </ul>
           <h2 class="articleSubheadline">August 2023</h2>
           <ul class="bulletList">
             <li>Added a new racing procedure <tt>SWC_4MIN</tt> for kites and windsurfers with a shortened four-minute

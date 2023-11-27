@@ -76,11 +76,13 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     @Override
     public void addYellowBrickRace(RacingEventService service, RegattaIdentifier regattaToAddTo,
             String yellowBrickRaceUrl, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            String yellowBrickUsername, String yellowBrickPassword, boolean trackWind, boolean correctWindByDeclination)
+            String creatorUsername, String raceUrl, boolean trackWind, boolean correctWindByDeclination)
             throws Exception {
+        final Pair<String, String> configKey = getConfigKey(raceUrl, creatorUsername);
+        final YellowBrickConfiguration configuration = yellowBrickConfigurations.get(configKey);
         service.addRace(regattaToAddTo,
-                new YellowBrickRaceTrackingConnectivityParams(yellowBrickRaceUrl, yellowBrickUsername,
-                        yellowBrickPassword, trackWind, correctWindByDeclination, raceLogStore, regattaLogStore,
+                new YellowBrickRaceTrackingConnectivityParams(yellowBrickRaceUrl, configuration==null?null:configuration.getUsername(),
+                        configuration==null?null:configuration.getPassword(), trackWind, correctWindByDeclination, raceLogStore, regattaLogStore,
                         baseDomainFactory, this),
                 /* timeout */ TIMEOUT_FOR_RACE_LOADING.asMillis());
     }
@@ -184,8 +186,12 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     @Override
     public void updateYellowBrickConfiguration(String name, String raceUrl, String username,
             String password, String creatorName) {
-        final YellowBrickConfigurationImpl updatedConfig = new YellowBrickConfigurationImpl(name, raceUrl, username, password, creatorName);
-        yellowBrickConfigurations.put(getConfigKey(raceUrl, creatorName), updatedConfig);
+        final Pair<String, String> configKey = getConfigKey(raceUrl, creatorName);
+        final YellowBrickConfiguration oldConfig = yellowBrickConfigurations.get(configKey);
+        final YellowBrickConfigurationImpl updatedConfig = new YellowBrickConfigurationImpl(name, raceUrl, username,
+                password == null ? oldConfig == null ? null : oldConfig.getPassword() : password,
+                creatorName);
+        yellowBrickConfigurations.put(configKey, updatedConfig);
         synchronized (yellowBrickConfigurationListeners) {
             for (final YellowBrickConfigurationListener listener : yellowBrickConfigurationListeners) {
                 listener.yellowBrickConfigurationUpdated(updatedConfig);

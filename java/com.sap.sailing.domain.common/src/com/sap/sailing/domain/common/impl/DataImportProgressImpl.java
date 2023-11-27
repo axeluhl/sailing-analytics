@@ -55,7 +55,7 @@ public class DataImportProgressImpl implements DataImportProgress {
     @Override
     public void setCurrentSubProgress(DataImportSubProgress subProgress) {
         if (subProgress != currentSubProgress) {
-            logger.info("Master data import with operation ID "+getOperationId()+" moving from stage "+currentSubProgressPct+" to "+subProgress);
+            logger.info("Master data import with operation ID "+getOperationId()+" moving from stage "+currentSubProgress+" to "+subProgress);
         }
         currentSubProgress = subProgress;
     }

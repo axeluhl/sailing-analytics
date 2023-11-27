@@ -550,7 +550,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected final SwissTimingFactory swissTimingFactory;
 
-    private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
+    protected final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
 
     protected final Executor executor;
 
@@ -1290,8 +1290,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI()==null?null:ttConfig.getLiveDataURI().toString(),
                         ttConfig.getStoredDataURI()==null?null:ttConfig.getStoredDataURI().toString(),
-                        ttConfig.getCourseDesignUpdateURI()==null?null:ttConfig.getCourseDesignUpdateURI().toString(),
-                        ttConfig.getTracTracUsername(), ttConfig.getTracTracPassword(), ttConfig.getCreatorName());
+                        ttConfig.getUpdateURI()==null?null:ttConfig.getUpdateURI().toString(),
+                        ttConfig.getTracTracUsername(), /* don't return passwords to the client */ null,
+                        ttConfig.getCreatorName());
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
                     return config;
                 });
@@ -6227,7 +6228,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 ybConfig -> {
                     final YellowBrickConfigurationWithSecurityDTO config = new YellowBrickConfigurationWithSecurityDTO(
                         ybConfig.getName(), ybConfig.getRaceUrl(),
-                        ybConfig.getUsername(), ybConfig.getPassword(), ybConfig.getCreatorName());
+                        ybConfig.getUsername(), /* don't sent password to client */ null, ybConfig.getCreatorName());
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
                     return config;
                 });

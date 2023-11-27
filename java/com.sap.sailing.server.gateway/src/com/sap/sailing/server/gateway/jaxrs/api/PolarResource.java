@@ -123,7 +123,7 @@ public class PolarResource extends AbstractSailingServerResource {
         Speed windSpeed = new KnotSpeedImpl(wSpeed);
         try {
             PolarDataService service = getService().getPolarDataService();
-            SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
+            SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithTrueWindAngle(boatClass,
                     windSpeed, legType, tack);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
                     + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "

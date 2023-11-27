@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sse.common.Util;
@@ -110,8 +111,7 @@ public class QRCodePresenter {
     }
 
     private void showQrCode(QRCodeView view) {
-        switch (place.getMode()) {
-        case BOUY_TENDER:
+        if (place.getMode() == InvitationMode.BOUY_TENDER) {
             logger.info("QR Code for buoy tender to be shown");
             if (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().isEmpty()) {
                 view.setError();
@@ -119,10 +119,7 @@ public class QRCodePresenter {
                 dataCollector = new DataCollector(view);
                 retrieveEvent(place.getEventId());
             }
-            break;
-        case COMPETITOR:
-        case COMPETITOR_2:
-        case COMPETITOR_3:
+        } else if (QRCodePlace.isCompetitorOrBoatRequest()) {
             logger.info("QR Code for competitor/boat/buoy tracking to be shown");
             if (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().isEmpty()) {
                 view.setError();
@@ -140,14 +137,17 @@ public class QRCodePresenter {
                 }
                 retrieveEvent(place.getEventId());
             }
-            break;
-        case PUBLIC_INVITE:
-        case PUBLIC_INVITE3:
+        } else if (QRCodePlace.isPublicInviteRequest()) {
             logger.info("QR Code for public regatta invite to be shown");
             // as the event is most likely displayed on a different server anyway, do not load additional data
             dataCollector = new DataCollector(view);
             dataCollector.proceedIfFinished();
-            break;
+        } else if (QRCodePlace.isRaceManagerAppRequest()) {
+            logger.info("QR Code for race manager app to be shown");
+            dataCollector = new DataCollector(view);
+            dataCollector.proceedIfFinished();
+        } else {
+            logger.severe("QR Code cannot be created. Request type cannot be identified.");
         }
     }
 
@@ -268,8 +268,7 @@ public class QRCodePresenter {
 
         private void proceedIfFinished() {
             logger.info("Checking if data for QR Code is loaded");
-            switch (place.getMode()) {
-            case BOUY_TENDER:
+            if (place.getMode() == InvitationMode.BOUY_TENDER) {
                 if (eventIsSet) {
                     logger.info("About to show QR Code for buoy tender");
                     String branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
@@ -278,10 +277,7 @@ public class QRCodePresenter {
                 } else {
                     logger.info("Event is missing for buoy tender QR Code");
                 }
-                break;
-            case COMPETITOR:
-            case COMPETITOR_2:
-            case COMPETITOR_3:
+            } else if (QRCodePlace.isCompetitorOrBoatRequest()) {
                 if (participantIsSet && eventIsSet) {
                     logger.info("About to show QR Code for competitor/boat/mark tracking");
                     String sailInsightBranch = place.getMode().getMailInvitationType().getBranchIOinviteURL();
@@ -297,13 +293,15 @@ public class QRCodePresenter {
                         logger.info("Event is missing for competitor/boat/mark tracking QR Code");
                     }
                 }
-                break;
-            case PUBLIC_INVITE:
-            case PUBLIC_INVITE3:
+            } else if (QRCodePlace.isPublicInviteRequest()) {
                 logger.info("About to show QR Code for public regatta invite");
                 view.showPublic(place.getPublicRegattaName(),
                         place.getPublicInviteBranchIOUrl(place.getMode().getMailInvitationType()));
-                break;
+            } else if (QRCodePlace.isRaceManagerAppRequest()) {
+                logger.info("About to show QR Code for race manager app");
+                view.showRaceManagerApp(place.getRaceManagerAppUrl());
+            } else {
+                logger.severe("Cannot identify request type.");
             }
         }
     }
