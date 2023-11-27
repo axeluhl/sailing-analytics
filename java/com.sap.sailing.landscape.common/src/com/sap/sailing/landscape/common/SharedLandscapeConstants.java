@@ -118,4 +118,8 @@ public interface SharedLandscapeConstants {
      * The tag for a security group for a sailing application server.
      */
     String SAILING_APPLICATION_SG_TAG = "application-server-sg";
+    /**
+     * Indicates that an instance is suitable for co-deployment with httpd.
+     */
+    String INSTANCE_SUITABLE_FOR_HTTPD = "canCoDeployWithHttpd";
 }
