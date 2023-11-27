@@ -24,10 +24,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TackTypeTest extends OnlineTracTracBasedTest {
-
     public TackTypeTest() throws MalformedURLException, URISyntaxException {
     }
-    
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -46,7 +44,6 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-      //00:00:30 später als Legstart um 15:27:35
         final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000));
         assertEquals(testcase, TackType.SHORTTACK);
     }
@@ -55,19 +52,26 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        //00:01:30 später als Legstart um 15:27:35
         final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
         assertEquals(testcase, TackType.LONGTACK);
-    }     
-    
+    }       
     @Test
-    public void TestWrongLeg() throws NoWindException {
+    public void TestAfterLeg() throws NoWindException {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisSecondLegAt = findelsSecondLeg.getStartTime();       
-        //00:01:30 später als Legstart um 15:27:35
         final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000));
         assertEquals(testcase, null);
     } 
+    @Test
+    public void TestBeforeLeg() throws NoWindException {
+        final Competitor findel = getCompetitorByName("Findel");
+        final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
+        final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
+        final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();       
+        final TackType testcase = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
+        assertEquals(testcase, null);
+    } 
 }
+

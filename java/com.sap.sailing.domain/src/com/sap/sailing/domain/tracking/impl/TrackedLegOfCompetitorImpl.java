@@ -1247,7 +1247,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                 /* extrapolate */ true);
         final TackType result;
-        // TODO Problem mit 2 Tonnen schauen
         MarkPassing start = getMarkPassingForLegStart();
         if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
             MarkPassing end = getMarkPassingForLegEnd();
@@ -1258,7 +1257,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 final Bearing bearingWind = getTrackedRace().getWind(competitorPosition, timePoint).getFrom();
                 final Bearing diffWindtoBoat = bearingWind.getDifferenceTo(cog).abs();
                 final Bearing diffMarktoBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
-
                 if (diffMarktoBoat.getDegrees() < diffWindtoBoat.getDegrees()) {
                     result = TackType.LONGTACK;
                 } else {
