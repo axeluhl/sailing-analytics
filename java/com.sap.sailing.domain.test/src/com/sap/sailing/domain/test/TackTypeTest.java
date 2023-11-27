@@ -59,16 +59,15 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
         assertEquals(testcase, TackType.LONGTACK);
     }     
-}
     
-//    @Test
-//    public void TestWrongLeg() throws NoWindException {
-//        final Competitor findel = getCompetitorByName("Findel");
-//        final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
-//        final TimePoint findelStartedHisSecondLegAt = findelsFirstLeg.getStartTime();
-//        
-//        //00:01:30 später als Legstart um 15:27:35
-//        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
-//        assertEquals(testcase, TackType.LONGTACK);
-//    } 
-//}
+    @Test
+    public void TestWrongLeg() throws NoWindException {
+        final Competitor findel = getCompetitorByName("Findel");
+        final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
+        final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
+        final TimePoint findelStartedHisSecondLegAt = findelsSecondLeg.getStartTime();       
+        //00:01:30 später als Legstart um 15:27:35
+        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000));
+        assertEquals(testcase, null);
+    } 
+}

@@ -1251,7 +1251,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         MarkPassing start = getMarkPassingForLegStart();
         if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
             MarkPassing end = getMarkPassingForLegEnd();
-            if (end != null && timePoint.compareTo(end.getTimePoint()) >= 0) {
+            if (end != null && end.getTimePoint().compareTo(timePoint) >= 0) {
                 final Position waypointPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
                 final Bearing cog = getSpeedOverGround(timePoint).getBearing();
                 final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
@@ -1264,9 +1264,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 } else {
                     result = TackType.SHORTTACK; }
             } else {
-                result = TackType.NONE; }
+                result = null; }
         } else {
-            result = TackType.NONE; }
+            result = null; }
         return result;
     }
 }
