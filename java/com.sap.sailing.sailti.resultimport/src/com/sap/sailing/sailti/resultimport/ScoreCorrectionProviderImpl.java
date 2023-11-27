@@ -3,6 +3,7 @@ package com.sap.sailing.sailti.resultimport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,7 +57,7 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
     }
     
     @Override
-    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws URISyntaxException {
         Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
         try {
             for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
@@ -82,7 +83,7 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
-            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
+            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         Parser parser = resolveParser(eventName, boatClassName);
         try {
             RegattaResults regattaResults = parser.parse();
@@ -103,7 +104,7 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
                 /* boatClassNameFilter */ Optional.empty());
     }
 
-    private Parser resolveParser(String eventName, String boatClassName) throws IOException {
+    private Parser resolveParser(String eventName, String boatClassName) throws IOException, URISyntaxException {
         Parser result = null;
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
             if (eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(resultDocDescr.getBoatClass())) {

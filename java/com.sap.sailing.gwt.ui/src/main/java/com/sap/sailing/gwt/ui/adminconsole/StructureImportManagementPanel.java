@@ -264,7 +264,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             errorReporter.reportError(stringMessages.pleaseEnterNonEmptyUrl());
         } else {
             busyIndicator.setBusy(true);
-            sailingServiceWrite.getRegattas(jsonURL, new AsyncCallback<Iterable<RegattaDTO>>() {
+            sailingServiceWrite.getManage2SailRegattas(jsonURL, new AsyncCallback<Iterable<RegattaDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     busyIndicator.setBusy(false);
