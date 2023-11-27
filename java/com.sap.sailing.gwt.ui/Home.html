@@ -52,7 +52,9 @@
     .loading > .waitmessage {
         margin: 60px 40px;
     }
-    
+    .loading .description {
+        margin: 10px 40px;
+    }
     .signal {
         border:3px solid #6a6a6a;
         border-radius: 50%;
@@ -103,14 +105,21 @@
 </head>
 <body>
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
-    <noscript>
-        <div
-            style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-            Your web browser must have JavaScript enabled in order for this
-            application to display correctly.</div>
-    </noscript>
+    
     <div id="loading" class="loading">
         <p class="sapsailing">${applicationScope['clientConfigurationContext.SAP']}Sailing Analytics</p>
+        <noscript>
+            <p class="description">
+               By delivering real time analytics around race rankings, speeds, maneuvers, bearings etc., SAP is helping to simplify and demystify the complex sport of sailing.
+            </p>
+            <p class="description">
+                SAP Sailing Analytics provide insights and transparency to the world of sailing by utilizing Cloud and In-Memory Technology, processing GPS and wind measurement data in real time and visualizing contents in various frontends accessible from anywhere.
+            </p>
+            <div
+                style="width: 22em; position: fixed; top: 10px; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+                Your web browser must have JavaScript enabled in order for this
+                application to display correctly.</div>
+        </noscript>
         <p class="waitmessage">Loading, please wait...</p>
         <div class="signal"></div>
     </div>
