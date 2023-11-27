@@ -1,6 +1,9 @@
 package com.sap.sailing.landscape.ui.client;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -15,7 +18,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
- * Creates a dialog box for adding a reverse proxy to the cluster. 
+ * Creates a dialog box for adding a reverse proxy to the cluster.
+ * 
  * @author Thomas
  *
  */
@@ -29,17 +33,20 @@ public class CreateReverseProxyInClusterDialog
         private String region;
         private String availabilityZone;
         private String keyName;
-        
+
         @Deprecated
         public CreateReverseProxyDTO() { // essential line for GWT serialization
 
         }
-        
+
         /**
          * 
-         * @param name The name of the reverse proxy to spawn.
-         * @param instanceType The new instance type.
-         * @param availabilityZone The mixed format of the AZ with the fewest reverse proxies.
+         * @param name
+         *            The name of the reverse proxy to spawn.
+         * @param instanceType
+         *            The new instance type.
+         * @param availabilityZone
+         *            The mixed format of the AZ with the fewest reverse proxies.
          * @param region
          */
         public CreateReverseProxyDTO(String name, String instanceType, String availabilityZone, String region) {
@@ -77,7 +84,7 @@ public class CreateReverseProxyInClusterDialog
 
         public void setKey(String key) {
             keyName = key;
-            
+
         }
 
     }
@@ -85,11 +92,22 @@ public class CreateReverseProxyInClusterDialog
     private StringMessages stringMessages;
     private final TextBox proxyName;
     private final ListBox dedicatedInstanceTypeListBox;
-    private ListBox availabilityZone;
-    private String region;
-    
+    private final ListBox availabilityZone;
+    private final String region;
+    private final CheckBox useSharedInstance;
+    private final ListBox coDeployInstances;
+    private final Label nameLabel;
+    private final Label instanceTypeLabel;
+    private final Label availabilityZoneLabel;
+    private Label instancesLabel;
     /**
-     * The dialog box allows users to choose the name, instance type and az. 
+     * A list of all lables in the dialog box.
+     */
+    private ArrayList<Label> labels;
+
+    /**
+     * The dialog box allows users to choose the name, instance type and az.
+     * 
      * @param stringMessages
      * @param errorReporter
      * @param landscapeManagementService
@@ -98,36 +116,87 @@ public class CreateReverseProxyInClusterDialog
      * @param callback
      */
     public CreateReverseProxyInClusterDialog(StringMessages stringMessages, ErrorReporter errorReporter,
-            LandscapeManagementWriteServiceAsync landscapeManagementService, String region,
-            String leastpopulatedAzName, DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> callback) {
+            LandscapeManagementWriteServiceAsync landscapeManagementService, String region, String leastpopulatedAzName,
+            DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO> callback) {
         super(stringMessages.reverseProxies(), stringMessages.reverseProxies(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO>() {
 
                     @Override
                     public String getErrorMessage(
                             CreateReverseProxyInClusterDialog.CreateReverseProxyDTO valueToValidate) {
-
                         if (!Util.hasLength(valueToValidate.getName())) {
                             return stringMessages.pleaseProvideNonEmptyName();
                         } else {
                             return null;
                         }
                     }
-
                 }, callback);
         this.stringMessages = stringMessages;
         proxyName = createTextBox("", 20);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
-                stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter); // TODO:
-                                                                                                               // research
-                                                                                                               // best
-                                                                                                               // default.
-        /**
-         * Displays the availability zones in the mixed format.
-         */
+                stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter);
+        // Displays the availability zones in the mixed format.
         availabilityZone = LandscapeDialogUtil.createInstanceAZTypeListBox(this, landscapeManagementService,
                 stringMessages, leastpopulatedAzName, errorReporter, region);
-        this.region= region; 
+        this.region = region;
+        useSharedInstance = createCheckbox(stringMessages.runOnExisting());
+        useSharedInstance.addValueChangeHandler(e -> updateInstanceTypesBasedOnSharedInstanceBox());
+        useSharedInstance.setValue(false);
+        useSharedInstance.setEnabled(true);
+        // setup available instances box, which is initially hidden.
+        coDeployInstances = createListBox(false);
+        populateCoDeployInstances();
+        // setup labels
+        nameLabel = new Label(stringMessages.name());
+        instanceTypeLabel = new Label(stringMessages.instanceType());
+        availabilityZoneLabel = new Label(stringMessages.availabilityZone());
+        instancesLabel = new Label(stringMessages.instanceId());
+        labels = new ArrayList<>(4);
+        labels.add(nameLabel);
+        labels.add(instanceTypeLabel);
+        labels.add(availabilityZoneLabel);
+        labels.add(instancesLabel);
+        validateAndUpdate();
+    }
+
+    private void populateCoDeployInstances() {
+        // TODO Fill with instanceID/name
+
+    }
+
+    private void updateInstanceTypesBasedOnSharedInstanceBox() {
+        if (useSharedInstance.getValue()) {
+            // box checked
+            proxyName.setVisible(false);
+            availabilityZone.setVisible(false);
+            dedicatedInstanceTypeListBox.setVisible(false);
+            labelVisibility(false);
+            instancesLabel.setVisible(true);
+            coDeployInstances.setVisible(true);
+
+        } else {
+            // box unchecked
+            proxyName.setVisible(true);
+            availabilityZone.setVisible(true);
+            dedicatedInstanceTypeListBox.setVisible(true);
+            labelVisibility(true);
+            instancesLabel.setVisible(false);
+            coDeployInstances.setVisible(false);
+
+        }
+    }
+
+    /**
+     * Makes all labels in the dialog box, which have been added to {@link labels} visible or invisible.
+     * 
+     * @param visible
+     *            true to make all labels visible and false to hide them.
+     */
+    private void labelVisibility(boolean visible) {
+        for (Label label : labels) {
+            label.setVisible(visible);
+        }
+
     }
 
     @Override
@@ -135,12 +204,15 @@ public class CreateReverseProxyInClusterDialog
         final FormPanel result = new FormPanel();
         final VerticalPanel verticalPanel = new VerticalPanel();
         result.add(verticalPanel);
-        verticalPanel.add(new Label(stringMessages.name()));
+        verticalPanel.add(nameLabel);
         verticalPanel.add(proxyName);
-        verticalPanel.add(new Label(stringMessages.instanceType()));
+        verticalPanel.add(instanceTypeLabel);
         verticalPanel.add(dedicatedInstanceTypeListBox);
-        verticalPanel.add(new Label(stringMessages.availabilityZone()));
+        verticalPanel.add(availabilityZoneLabel);
         verticalPanel.add(availabilityZone);
+        verticalPanel.add(useSharedInstance);
+        verticalPanel.add(instancesLabel);
+        verticalPanel.add(coDeployInstances);
         return result;
     }
 
