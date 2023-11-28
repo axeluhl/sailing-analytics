@@ -1243,28 +1243,38 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private interface BravoTrackValueExtractor<R> {
         R getValue(BravoFixTrack<Competitor> track, TimePoint from, TimePoint to);
     }
+    
+    @Override
     public TackType getTackType(TimePoint timePoint) throws NoWindException {
+        final TackType result;
         final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                 /* extrapolate */ true);
-        final TackType result;
-        MarkPassing start = getMarkPassingForLegStart();
-        if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
-            MarkPassing end = getMarkPassingForLegEnd();
-            if (end != null && end.getTimePoint().compareTo(timePoint) >= 0) {
-                final Position waypointPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
-                final Bearing cog = getSpeedOverGround(timePoint).getBearing();
-                final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
-                final Bearing bearingWind = getTrackedRace().getWind(competitorPosition, timePoint).getFrom();
-                final Bearing diffWindtoBoat = bearingWind.getDifferenceTo(cog).abs();
-                final Bearing diffMarktoBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
-                if (diffMarktoBoat.getDegrees() < diffWindtoBoat.getDegrees()) {
-                    result = TackType.LONGTACK;
+        if (competitorPosition != null) {
+            final MarkPassing start = getMarkPassingForLegStart();
+            if (start != null && timePoint.after(start.getTimePoint())) {
+                final MarkPassing end = getMarkPassingForLegEnd();
+                if (end != null && timePoint.before(end.getTimePoint())) {
+                    final Position waypointPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(),
+                            timePoint);
+                    final Bearing cog = getSpeedOverGround(timePoint).getBearing();
+                    final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
+                    final Bearing bearingWind = getTrackedRace().getWind(competitorPosition, timePoint).getFrom();
+                    final Bearing diffWindToBoat = bearingWind.getDifferenceTo(cog).abs();
+                    final Bearing diffMarkToBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
+                    if (diffMarkToBoat.compareTo(diffWindToBoat) < 0) {
+                        result = TackType.LONGTACK;
+                    } else {
+                        result = TackType.SHORTTACK;
+                    }
                 } else {
-                    result = TackType.SHORTTACK; }
+                    result = null;
+                }
             } else {
-                result = null; }
+                result = null;
+            }
         } else {
-            result = null; }
+            result = null;
+        }
         return result;
     }
 }
