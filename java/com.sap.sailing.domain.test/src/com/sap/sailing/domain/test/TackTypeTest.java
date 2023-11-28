@@ -44,16 +44,16 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000));
-        assertEquals(testcase, TackType.SHORTTACK);
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000));
+        assertEquals(TackType.SHORTTACK, actualTackType);
     }
     @Test
     public void TestLongTack() throws NoWindException {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
-        assertEquals(testcase, TackType.LONGTACK);
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
+        assertEquals(TackType.LONGTACK, actualTackType);
     }       
     @Test
     public void TestAfterLeg() throws NoWindException {
@@ -61,8 +61,8 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisSecondLegAt = findelsSecondLeg.getStartTime();       
-        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000));
-        assertEquals(testcase, null);
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000));
+        assertEquals(null, actualTackType);
     } 
     @Test
     public void TestBeforeLeg() throws NoWindException {
@@ -70,8 +70,8 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();       
-        final TackType testcase = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
-        assertEquals(testcase, null);
+        final TackType actualTackType = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
+        assertEquals(null, actualTackType);
     } 
 }
 
