@@ -43,7 +43,7 @@ public class SecuritySessionsRetrievalProcessor extends AbstractRetrievalProcess
                         final PrincipalCollection pc = (PrincipalCollection) attributeValue;
                         if (pc != null && pc.getPrimaryPrincipal() != null) {
                             final User user = securityService.getUserByName((String) pc.getPrimaryPrincipal());
-                            if (user != null) {
+                            if (user != null && securityService.hasCurrentUserReadPermission(user)) {
                                 data.add(new SessionWithContext(securityService, session, user));
                                 break;
                             }
