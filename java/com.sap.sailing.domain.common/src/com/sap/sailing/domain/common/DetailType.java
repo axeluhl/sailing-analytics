@@ -382,7 +382,7 @@ public enum DetailType implements Serializable {
 
     public static Collection<DetailType> getAllRaceDetailTypes() {
         final Collection<DetailType> allowed = new LinkedHashSet<>();
-        allowed.add(DetailType.LEG_TACKTYPE_LONGTACK_SHORTTACK);
+        allowed.add(LEG_TACKTYPE_LONGTACK_SHORTTACK);
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);

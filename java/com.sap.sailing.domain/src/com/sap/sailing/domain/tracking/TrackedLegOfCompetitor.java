@@ -343,7 +343,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
     
     /**
-     * Returns true when Competitor drives at TimePoint with LongTack
+     * Returns LongTack, ShortTack or null depending on the sailors direction and the next mark.
      */
     TackType getTackType(TimePoint timePoint) throws NoWindException;
 
