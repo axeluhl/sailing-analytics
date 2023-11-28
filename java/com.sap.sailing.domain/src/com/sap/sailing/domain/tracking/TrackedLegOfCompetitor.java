@@ -343,7 +343,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
     
     /**
-     * Returns LongTack, ShortTack or null depending on the sailors direction and the next mark.
+     * If the bearing between the cog and the next waypoint is smaller then the one between cog and wind direction 
+     * {@link TackType#LONGTACK longtack} is returned, if it is bigger {@link TackType#SHORTTACK shorttack}. For other cases <code>null</code> is returned. 
      */
     TackType getTackType(TimePoint timePoint) throws NoWindException;
 
