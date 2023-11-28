@@ -88,6 +88,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                         return null;
                     }
                 }, true, callback);
+        this.ensureDebugId("RegattaLogAddDeviceMappingDialog");
         this.stringMessages = stringMessages;
         this.sailingService = sailingServiceWrite;
         this.regattaRegisterSecret = regattaRegisterSecret;
