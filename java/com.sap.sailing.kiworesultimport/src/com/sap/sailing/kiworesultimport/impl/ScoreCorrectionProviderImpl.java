@@ -3,6 +3,7 @@ package com.sap.sailing.kiworesultimport.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +41,7 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
 
     @Override
     public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
         for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
             String eventName = regattaSummary.getEventName();
@@ -71,7 +72,7 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
         return result;
     }
 
-    private Iterable<RegattaSummary> getAllRegattaSummaries() throws IOException, SAXException, ParserConfigurationException {
+    private Iterable<RegattaSummary> getAllRegattaSummaries() throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         final List<RegattaSummary> result = new ArrayList<RegattaSummary>();
         for (ResultDocumentDescriptor resultDocDescr : getResultDocumentProvider().getResultDocumentDescriptors()) {
             if (resultDocDescr.getDocumentName().toLowerCase().endsWith(".zip")) {
@@ -88,7 +89,7 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
     }
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
-            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
+            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
             if (regattaSummary.getEventName().equals(eventName) && regattaSummary.getBoatClassName().equals(boatClassName) &&
                     regattaSummary.getTimePointPublished().equals(timePointPublished)) {

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import javax.xml.bind.JAXBException;
@@ -23,7 +24,7 @@ import com.sap.sse.common.Util;
 
 public class CompetitorImportTest extends AbstractCharlstonRaceWeek2015Test {
     @Test
-    public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException {
+    public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getReadableResultUrls(AbstractYachtScoringProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(CHARLSTONRACEWEEK2015_TESTFILE_XRR)));
         final YachtScoringCompetitorProvider competitorProvider = new YachtScoringCompetitorProvider(ParserFactory.INSTANCE, resultUrlRegistry, getTestDocumentProvider());

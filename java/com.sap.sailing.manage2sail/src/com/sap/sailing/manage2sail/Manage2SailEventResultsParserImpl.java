@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
@@ -15,11 +16,12 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.common.CompetitorGenderType;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.util.DateParser;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
  * URLs should be of the form
  * <pre>
- * http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
+ * https://www.manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
  * </pre>
  * where the UUID following the <code>event</code> path element represents the event ID. Events can be
  * discovered by the manage2sail.com website.
@@ -28,7 +30,11 @@ import com.sap.sse.util.DateParser;
  *
  */
 public class Manage2SailEventResultsParserImpl implements Manage2SailEventResultsParser {
-
+    public EventResultDescriptor getEventResult(URL eventJsonUrl) throws MalformedURLException, IOException, URISyntaxException {
+        return getEventResult((InputStream) HttpUrlConnectionHelper
+                .redirectConnection(Activator.getInstance().addAccessTokenToManage2SailUrl(eventJsonUrl)).getContent());
+    }
+    
     /**
      * @param is closed before the method returns, also in case of exception
      */
