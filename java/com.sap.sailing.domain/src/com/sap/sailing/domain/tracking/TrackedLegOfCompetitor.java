@@ -343,10 +343,15 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
     
     /**
-     * If the bearing between the cog and the next waypoint is smaller then the one between cog and wind direction 
+     * If the bearing between cog and the next waypoint is smaller then the one between cog and wind direction 
      * {@link TackType#LONGTACK longtack} is returned, if it is bigger {@link TackType#SHORTTACK shorttack}. For other cases <code>null</code> is returned. 
      */
     TackType getTackType(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Same as {@link #getTackType(TimePoint timePoint)}, only that a cache for leg type calculation is passed.
+     */
+    TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
 
     Double getExpeditionAWA(TimePoint at);
     Double getExpeditionAWS(TimePoint at);
