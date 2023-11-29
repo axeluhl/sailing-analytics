@@ -117,7 +117,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         
         // Create a regatta with 1 series and 5 races as well as a leaderborad
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(this.regatta);
+        regattaStructure.createRegatta(this.regatta, /* withDefaultLeaderboard */ false);
         
         RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);

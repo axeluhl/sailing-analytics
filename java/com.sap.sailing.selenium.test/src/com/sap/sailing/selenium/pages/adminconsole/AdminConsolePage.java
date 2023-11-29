@@ -22,6 +22,7 @@ import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanel
 import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.racemanagementapp.RaceManagementAppPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.roles.RoleDefinitionsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPanelPO;
@@ -48,6 +49,9 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private static final String EVENTS_TAB_LABEL = "Events"; //$NON-NLS-1$
     private static final String EVENTS_TAB_IDENTIFIER = "EventManagement"; //$NON-NLS-1$
+    
+    private static final String RACE_MANAGER_APP_TAB_LABEL = "Race Manager App"; //$NON-NLS-1$
+    private static final String RACE_MANAGER_APP_TAB_IDENTIFIER = "RaceCommiteeAppPanel"; //$NON-NLS-1$
     
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
@@ -158,6 +162,10 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     public EventConfigurationPanelPO goToEvents() {
         return new EventConfigurationPanelPO(this.driver, goToTab(EVENTS_TAB_LABEL, EVENTS_TAB_IDENTIFIER, true));
+    }
+    
+    public RaceManagementAppPanelPO goToRaceManagerApp() {
+        return new RaceManagementAppPanelPO(this.driver, goToTab(RACE_MANAGER_APP_TAB_LABEL, RACE_MANAGER_APP_TAB_IDENTIFIER, true));
     }
     
     public UserManagementPanelPO goToUserManagement() {
