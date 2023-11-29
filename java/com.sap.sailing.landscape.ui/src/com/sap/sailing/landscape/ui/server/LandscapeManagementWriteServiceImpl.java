@@ -106,6 +106,7 @@ import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
@@ -355,6 +356,29 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         
     }
     
+    public void getHostsSuitableForReverseProxy(com.sap.sse.landscape.Region region, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) {
+        final String command = "free -k | awk '(NR==2){print $7} | tr -d [:space:]'";
+        Iterable<AwsInstanceDTO> suitableInstances = new ArrayList<>();
+        for (AwsInstance<String> instance : getLandscape().getRunningHostsWithTag(region,
+                SharedLandscapeConstants.INSTANCE_SUITABLE_FOR_HTTPD, AwsInstanceImpl::new)) {
+            try {
+                final SshCommandChannel sshChannel = instance.createRootSshChannel(AwsLandscape.WAIT_FOR_PROCESS_TIMEOUT,
+                        optionalKeyName, privateKeyEncryptionPassphrase);
+                
+                final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(command,
+                        "Getting host memory info", Level.INFO);
+                //TODO: convert to number and check if above threshold
+                
+            } catch (JSchException | InterruptedException | IOException e) {
+                logger.log(Level.WARNING,
+                        "Run command over ssh failed for: " + instance.getInstanceId() + e.toString());
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Create channel failed for: " + instance.getInstanceId() + e.toString());
+            }
+
+        }
+    }
     private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {
         final MongoEndpoint result;
         if (mongoEndpointDTO == null) {

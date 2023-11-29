@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -79,6 +80,8 @@ import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
+import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -833,11 +836,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostsFilter());
     }
     
-    public void getHostsSuitableForReverseProxy(com.sap.sse.landscape.Region region) {
-        for (AwsInstance<ShardingKey> instance : getRunningHostsWithTag(region, SharedLandscapeConstants.INSTANCE_SUITABLE_FOR_HTTPD,  AwsInstanceImpl::new)) {
-            
-        }
-    }
     
     @Override
     public <HostT extends AwsInstance<ShardingKey>>
@@ -1066,7 +1064,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .vpcId(vpcId == null ? getVpcId(region) : vpcId)
                 .protocol(guessProtocolFromPort(port))
                 .targetType(TargetTypeEnum.INSTANCE)
-                .tags(software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(SharedLandscapeConstants.ALL_REVERSE_PROXIES).value("").build()) // TODO test
+                .tags(software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(SharedLandscapeConstants.ALL_REVERSE_PROXIES).value("").build())
                 .build()).targetGroups().iterator().next();
         final String targetGroupArn = targetGroup.targetGroupArn();
         int numberOfRetries = 3;
