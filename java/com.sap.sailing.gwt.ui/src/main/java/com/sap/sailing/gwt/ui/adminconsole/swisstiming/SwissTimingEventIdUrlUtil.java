@@ -2,8 +2,9 @@ package com.sap.sailing.gwt.ui.adminconsole.swisstiming;
 
 public final class SwissTimingEventIdUrlUtil {
     private static final String EVENT_ID_PATTERN = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
-    private static final String MANAGE2SAIL_API_BASE_URL = "http://manage2sail.com/api/public/links/event/";
-    private static final String MANAGE2SAIL_API_ACCESS_TOKEN = "?accesstoken=bDAv8CwsTM94ujZ";
+    private static final String MANAGE2SAIL_API_BASE_URL = "https://manage2sail.com/api/public/links/event/";
+    private static final String MANAGE2SAIL_API_ACCESS_TOKEN = "bDAv8CwsTM94ujZ";
+    private static final String MANAGE2SAIL_API_ACCESS_TOKEN_URL_PARAM = "?accesstoken="+MANAGE2SAIL_API_ACCESS_TOKEN;
     private static final String MANAGE2SAIL_API_APPENDIX = "&mediaType=json&includeRaces=true";
 
     /**
@@ -13,7 +14,7 @@ public final class SwissTimingEventIdUrlUtil {
      * @return The event ID inferred from the Json Url.
      */
     public static String getEventIdFromUrl(String eventUrl) {
-        if (eventUrl.matches("http://manage2sail.com/.*" + EVENT_ID_PATTERN + ".*")) {
+        if (eventUrl.matches("https?://manage2sail.com/.*" + EVENT_ID_PATTERN + ".*")) {
             return eventUrl.replaceFirst(".*(" + EVENT_ID_PATTERN + ").*", "$1");
         }
         return null;
@@ -27,7 +28,7 @@ public final class SwissTimingEventIdUrlUtil {
     public static String getUrlFromEventId(String eventIdText) {
         if (eventIdText.matches(".*" + EVENT_ID_PATTERN + ".*")) {
             final String inferredEventId = eventIdText.replaceFirst(".*(" + EVENT_ID_PATTERN + ").*", "$1");
-            return MANAGE2SAIL_API_BASE_URL + inferredEventId + MANAGE2SAIL_API_ACCESS_TOKEN + MANAGE2SAIL_API_APPENDIX;
+            return MANAGE2SAIL_API_BASE_URL + inferredEventId + MANAGE2SAIL_API_ACCESS_TOKEN_URL_PARAM + MANAGE2SAIL_API_APPENDIX;
         }
         return null;
     }

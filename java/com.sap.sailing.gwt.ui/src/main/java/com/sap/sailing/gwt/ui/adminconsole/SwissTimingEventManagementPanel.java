@@ -435,7 +435,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
-        
         // Check if the assigned regatta makes sense
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
             sailingServiceWrite.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port==null?0:port,

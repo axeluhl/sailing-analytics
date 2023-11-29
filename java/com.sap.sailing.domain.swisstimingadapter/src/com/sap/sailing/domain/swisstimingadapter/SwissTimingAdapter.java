@@ -3,7 +3,6 @@ package com.sap.sailing.domain.swisstimingadapter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -18,8 +17,6 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 public interface SwissTimingAdapter {
     String NAME = "SwissTiming";
     String DEFAULT_URL = null;
-
-    List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     /**
      * @param regattaToAddTo

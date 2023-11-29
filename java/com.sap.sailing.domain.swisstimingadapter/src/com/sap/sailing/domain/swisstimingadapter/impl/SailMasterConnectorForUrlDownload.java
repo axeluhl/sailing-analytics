@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
+import com.sap.sailing.manage2sail.Activator;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
@@ -67,9 +69,9 @@ public class SailMasterConnectorForUrlDownload extends AbstractSailMasterConnect
     }
 
     @Override
-    protected void connect() throws IOException {
+    protected void connect() throws IOException, URISyntaxException {
         logger.info("Connecting to "+raceDataUrl);
-        urlConnection = HttpUrlConnectionHelper.redirectConnection(raceDataUrl);
+        urlConnection = HttpUrlConnectionHelper.redirectConnection(Activator.getInstance().addAccessTokenToManage2SailUrl(raceDataUrl));
     }
 
     @Override
