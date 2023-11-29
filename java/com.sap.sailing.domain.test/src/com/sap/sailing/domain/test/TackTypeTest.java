@@ -8,8 +8,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.GregorianCalendar;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TackType;
@@ -18,6 +20,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -44,7 +47,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000));
+        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000), new NoCachingWindLegTypeAndLegBearingCache());
         assertEquals(testcase, TackType.SHORTTACK);
     }
     @Test
@@ -52,7 +55,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
+        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000), new NoCachingWindLegTypeAndLegBearingCache());
         assertEquals(testcase, TackType.LONGTACK);
     }       
     @Test
@@ -61,7 +64,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisSecondLegAt = findelsSecondLeg.getStartTime();       
-        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000));
+        final TackType testcase = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000), new NoCachingWindLegTypeAndLegBearingCache());
         assertEquals(testcase, null);
     } 
     @Test
@@ -70,7 +73,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();       
-        final TackType testcase = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
+        final TackType testcase = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000), new NoCachingWindLegTypeAndLegBearingCache());
         assertEquals(testcase, null);
     } 
 }

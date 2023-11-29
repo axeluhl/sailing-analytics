@@ -344,8 +344,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
     
     /**
      * Returns LongTack, ShortTack or null depending on the sailors direction and the next mark.
+     * @param cache TODO
      */
-    TackType getTackType(TimePoint timePoint) throws NoWindException;
+    TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
 
     Double getExpeditionAWA(TimePoint at);
     Double getExpeditionAWS(TimePoint at);

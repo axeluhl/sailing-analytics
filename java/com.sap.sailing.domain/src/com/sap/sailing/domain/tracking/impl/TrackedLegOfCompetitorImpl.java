@@ -1243,7 +1243,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private interface BravoTrackValueExtractor<R> {
         R getValue(BravoFixTrack<Competitor> track, TimePoint from, TimePoint to);
     }
-    public TackType getTackType(TimePoint timePoint) throws NoWindException {
+    public TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                 /* extrapolate */ true);
         final TackType result;
@@ -1251,7 +1251,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
             MarkPassing end = getMarkPassingForLegEnd();
             if (end != null && end.getTimePoint().compareTo(timePoint) >= 0) {
-                final Position waypointPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
+                final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(), timePoint);
                 final Bearing cog = getSpeedOverGround(timePoint).getBearing();
                 final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
                 final Bearing bearingWind = getTrackedRace().getWind(competitorPosition, timePoint).getFrom();
