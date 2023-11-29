@@ -59,7 +59,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000), new NoCachingWindLegTypeAndLegBearingCache());
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000));
         assertEquals(TackType.SHORTTACK, actualTackType);
     }
 
@@ -69,7 +69,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000), new NoCachingWindLegTypeAndLegBearingCache());
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
         assertEquals(TackType.LONGTACK, actualTackType);
     }
    
@@ -81,7 +81,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisSecondLegAt = findelsSecondLeg.getStartTime();
-        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000), new NoCachingWindLegTypeAndLegBearingCache());
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisSecondLegAt.plus(90000));
         assertEquals(null, actualTackType);
     }
 
@@ -93,7 +93,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-        final TackType actualTackType = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000), new NoCachingWindLegTypeAndLegBearingCache());
+        final TackType actualTackType = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
         assertEquals(null, actualTackType);
     }
 
@@ -109,7 +109,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         }
         getTrackedRace().updateMarkPassings(findel, newMarkPassings);
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(listOfFindelsLegs.get(0)).getTrackedLeg(findel);
-        final TackType actualTackType = findelsFirstLeg.getTackType(endOfFindelsRace.plus(9000), new NoCachingWindLegTypeAndLegBearingCache());
+        final TackType actualTackType = findelsFirstLeg.getTackType(endOfFindelsRace.plus(9000));
         assertEquals(null, actualTackType);
     }
 }
