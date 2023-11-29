@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -65,6 +66,11 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
     @Override
     protected UrlDTO getResult() {
         return new UrlDTO(urlProvider, textBox.getValue().trim());
+    }
+
+    @Override
+    protected FocusWidget getInitialFocusWidget() {
+        return textBox;
     }
 
     @Override
