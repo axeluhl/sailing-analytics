@@ -60,7 +60,7 @@ clean_httpd_logs() {
 
 clean_startup_logs() {
   echo "Clearing bootstrap logs" >>/var/log/sailing.err
-  rm /var/log/sailing*
+  rm -f /var/log/sailing*
   # Ensure that upon the next boot the reboot indicator is not present, indicating that it's the first boot
   rm "${REBOOT_INDICATOR}"
 }
