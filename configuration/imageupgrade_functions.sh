@@ -55,7 +55,7 @@ clean_httpd_logs() {
   echo "Clearing httpd logs" >>/var/log/sailing.err
   service httpd stop
   rm -rf /var/log/httpd/*
-  rm /etc/httpd/conf.d/001-internals.conf
+  rm -f /etc/httpd/conf.d/001-internals.conf
 }
 
 clean_startup_logs() {
@@ -95,7 +95,7 @@ finalize() {
   else
     # Only clean ${LOGON_USER_HOME}/.ssh directory and /tmp/image-upgrade-finished if the next step is shutdown / image creation
     clean_root_ssh_dir_and_tmp
-    rm /var/log/sailing.err
+    rm -f /var/log/sailing.err
     shutdown -h now &
   fi
 }
