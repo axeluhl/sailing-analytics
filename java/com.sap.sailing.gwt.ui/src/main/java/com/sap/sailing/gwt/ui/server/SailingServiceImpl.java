@@ -2456,16 +2456,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL)
-            throws UnknownHostException, IOException, InterruptedException, ParseException {
+            throws UnknownHostException, IOException, InterruptedException, ParseException, URISyntaxException {
         SwissTimingEventRecordDTO result = null;
-        List<SwissTimingRaceRecordDTO> swissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
-
-        // TODO: delete getSwissTimingAdapter().getSwissTimingRaceRecords() method
-        // TODO: delete SwissTimingDomainFactory.getRaceTypeFromRaceID(String raceID)
-        URL url = new URL(eventJsonURL);
-        URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
-        Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
-        EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
+        final List<SwissTimingRaceRecordDTO> swissTimingRaces = new ArrayList<>();
+        final URL url = new URL(eventJsonURL);
+        final Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
+        final EventResultDescriptor eventResult = parser.getEventResult(url);
         if (eventResult != null) {
             for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
                 for (RaceResultDescriptor race : regattaResult.getRaceResults()) {
@@ -4077,12 +4073,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl) {
-        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);
-        Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(manage2SailJsonUrl);
-        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
-        Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
-        for (Regatta regatta : regattas) {
+    public Iterable<RegattaDTO> getManage2SailRegattas(String manage2SailJsonUrl) throws MalformedURLException, URISyntaxException {
+        final StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);
+        final String manage2SailJsonUrlWithAccessToken = com.sap.sailing.manage2sail.Activator.getInstance().addAccessTokenToManage2SailUrl(new URL(manage2SailJsonUrl)).toString();
+        final Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(manage2SailJsonUrlWithAccessToken);
+        final List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
+        final Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
+        for (final Regatta regatta : regattas) {
             regattaDTOs.add(convertToRegattaDTO(regatta));
         }
         return regattaDTOs;

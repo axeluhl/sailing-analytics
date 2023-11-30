@@ -26,7 +26,7 @@ setProductionMainIfNotSet() {
 		#currently unhealthy
 		#set production to archive
 		logger -t archive "Healthy: setting production to main archive"
-		sed -i -E   "s/Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_IP}/"  ${MACROS_PATH}
+		sed -i -E   "s/^Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_IP}/"  ${MACROS_PATH}
                 notify "Healthy: main archive online"
 	else
                 #If already healthy then no reload or notification occurs.
@@ -46,7 +46,7 @@ then
 		then
 			#set production to failover if not already. Separate if statement in case the curl statement
                         #fails but the production is already set to point to the backup 
-			sed -i -E  "s/Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
+			sed -i -E  "s/^Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
 			logger -t archive "Unhealthy: second check failed, switching to failover"
 			systemctl reload httpd 
                         notify-operators "Unhealthy: main archive offline"

@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sse.common.Util.Pair;
@@ -29,10 +30,14 @@ import com.sap.sse.gwt.client.AbstractBasePlace;
  */
 public class QRCodePlace extends AbstractBasePlace {
     private static final Logger logger = Logger.getLogger(QRCodePlace.class.getName());
-    public static final String PARAM_REGATTA_NAME = "regatta_name";
-    public static final String PARAM_REGATTA_SECRET = "secret";
+    private static final String PARAM_REGATTA_NAME = "regatta_name";
+    private static final String PARAM_REGATTA_SECRET = "secret";
     private static final String PARAM_MODE = "mode";
-    public static final String PARAM_SERVER = "server";
+    private static final String PARAM_SERVER = "server";
+    private static final String PARAM_SERVER_URL = "server_url";
+    private static final String PARAM_DEVICE_CONFIG_ID = "device_config_identifier";
+    private static final String PARAM_DEVICE_CONFIG_UUID = "device_config_uuid";
+    private static final String PARAM_TOKEN = "token";
 
     private UUID eventId;
     private UUID competitorId;
@@ -44,6 +49,10 @@ public class QRCodePlace extends AbstractBasePlace {
     private InvitationMode mode;
     private String rawCheckInUrl;
     private String targetServer;
+    private String serverUrl;
+    private String deviceConfigIdentifier;
+    private String deviceConfigUuid;
+    private String token;
 
     public enum InvitationMode {
         COMPETITOR(MailInvitationType.SailInsight1),
@@ -74,6 +83,12 @@ public class QRCodePlace extends AbstractBasePlace {
                 if (publicRegattaName == null || regattaRegistrationLinkSecret == null || targetServer == null) {
                     logger.severe("Missing parameter for regatta, secret or server");
                 }
+            } else if (isRaceManagerAppRequest()) {
+                serverUrl = Window.Location.getParameter(PARAM_SERVER_URL);
+                targetServer = serverUrl;
+                deviceConfigIdentifier = Window.Location.getParameter(PARAM_DEVICE_CONFIG_ID);
+                deviceConfigUuid = Window.Location.getParameter(PARAM_DEVICE_CONFIG_UUID);
+                token = Window.Location.getParameter(PARAM_TOKEN);
             } else {
                 rawCheckInUrl = Window.Location.getParameter(DeviceMappingConstants.URL_CHECKIN_URL);
                 if (rawCheckInUrl != null) {
@@ -176,10 +191,26 @@ public class QRCodePlace extends AbstractBasePlace {
     }
 
     public String getPublicInviteBranchIOUrl(MailInvitationType mailInvitationType) {
-        return mailInvitationType.getBranchIOopenRegattaURL() + "?" + QRCodePlace.PARAM_REGATTA_NAME + "="
-                + encodeUrl(publicRegattaName) + "&" + QRCodePlace.PARAM_REGATTA_SECRET + "="
-                + encodeUrl(regattaRegistrationLinkSecret) + "&" + QRCodePlace.PARAM_SERVER + "="
+        return mailInvitationType.getBranchIOopenRegattaURL() + "?" + PARAM_REGATTA_NAME + "="
+                + encodeUrl(publicRegattaName) + "&" + PARAM_REGATTA_SECRET + "="
+                + encodeUrl(regattaRegistrationLinkSecret) + "&" + PARAM_SERVER + "="
                 + encodeUrl(targetServer);
+    }
+
+    public String getRaceManagerAppUrl() {
+        String url;
+        if (serverUrl != null && deviceConfigIdentifier != null && deviceConfigUuid != null) {
+            url = BranchIOConstants.RACEMANAGER_APP_BRANCH_QUICK_LINK
+                    + "?" + PARAM_SERVER_URL + "=" + encodeUrl(serverUrl) 
+                    + "&" + PARAM_DEVICE_CONFIG_ID + "=" + encodeUrl(deviceConfigIdentifier) 
+                    + "&" + PARAM_DEVICE_CONFIG_UUID + "=" + encodeUrl(deviceConfigUuid);
+            if (token != null) {
+                url += "&" + PARAM_TOKEN + "=" + encodeUrl(token);
+            }
+        } else {
+            url = null;
+        }
+        return url;
     }
 
     public InvitationMode getMode() {
@@ -227,7 +258,9 @@ public class QRCodePlace extends AbstractBasePlace {
         return "QRCodePlace [eventId=" + eventId + ", competitorId=" + competitorId + ", boatId=" + boatId + ", markId="
                 + markId + ", leaderboardName=" + leaderboardName + ", publicRegattaName=" + publicRegattaName
                 + ", regattaRegistrationLinkSecret=" + regattaRegistrationLinkSecret + ", mode=" + mode
-                + ", rawCheckInUrl=" + rawCheckInUrl + ", targetServer=" + targetServer + "]";
+                + ", rawCheckInUrl=" + rawCheckInUrl + ", targetServer=" + targetServer + ", serverUrl=" + serverUrl 
+                + ", deviceConfigIdentifier=" + deviceConfigIdentifier + ", deviceConfigUuid=" + deviceConfigUuid
+                + ", token=" + token + "]";
     }
 
     public static class Tokenizer implements PlaceTokenizer<QRCodePlace> {
@@ -257,8 +290,19 @@ public class QRCodePlace extends AbstractBasePlace {
      * @return true if it is a public invite request (former PUBLIC_INVITE or PUBLIC_INVITE3 mode)
      */
     static boolean isPublicInviteRequest() {
-        return Window.Location.getParameter(QRCodePlace.PARAM_REGATTA_NAME) != null
-                && Window.Location.getParameter(QRCodePlace.PARAM_REGATTA_SECRET) != null
-                && Window.Location.getParameter(QRCodePlace.PARAM_SERVER) != null;
+        return Window.Location.getParameter(PARAM_REGATTA_NAME) != null
+                && Window.Location.getParameter(PARAM_REGATTA_SECRET) != null
+                && Window.Location.getParameter(PARAM_SERVER) != null;
+    }
+    
+    /**
+     * Check if available URL parameter are indicating a public invite request.
+     * 
+     * @return true if it is a public invite request (former PUBLIC_INVITE or PUBLIC_INVITE3 mode)
+     */
+    static boolean isRaceManagerAppRequest() {
+        return Window.Location.getParameter(PARAM_SERVER_URL) != null
+                && Window.Location.getParameter(PARAM_DEVICE_CONFIG_ID) != null
+                && Window.Location.getParameter(PARAM_DEVICE_CONFIG_UUID) != null;
     }
 }
