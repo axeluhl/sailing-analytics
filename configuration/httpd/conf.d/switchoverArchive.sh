@@ -27,7 +27,7 @@ setProductionMainIfNotSet() {
 		#set production to archive
 		logger -t archive "Healthy: setting production to main archive"
 		sed -i -E   "s/Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_IP}/"  ${MACROS_PATH}
-                notify "Healthy: main archive online"
+                notify-operators "Healthy: main archive online"
 	else
                 #If already healthy then no reload or notification occurs.
 		logger -t archive "Healthy: already set, no change needed"

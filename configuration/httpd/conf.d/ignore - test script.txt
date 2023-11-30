@@ -1,0 +1,20 @@
+test script
+
+primary serving
+bring primary down
+bring primary back online
+
+test write options when primary is online
+test long timeouts
+test over a long duration
+test problematic urls (for nocanon)
+tests involving correct hostname
+
+
+1.unhealthy -> stay unhealthy
+2.unhealthy -> become healthy
+3.healthy -> stay healthy
+4.healthy -> become unhealthy
+
+#*/2 * * * * /root/updateHttpd.sh
+* * * * * /root/unhealthyNotification.sh
