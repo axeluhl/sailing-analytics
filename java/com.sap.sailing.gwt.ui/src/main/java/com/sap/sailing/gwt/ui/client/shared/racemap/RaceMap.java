@@ -19,6 +19,8 @@ import java.util.function.Consumer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -161,6 +163,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.gwt.client.DOMUtils;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -2864,12 +2867,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private ListBox createDetailTypeDropdown(CompetitorDTO competitor) {
-        ListBox lb = new ListBox();
+        final ListBox lb = new ListBox();
+        final NodeList<OptionElement> options = DOMUtils.getOptions(lb);
         lb.addItem(stringMessages.none(), "none");
         if (sortedAvailableDetailTypes != null) {
             for (int i = 0; i < sortedAvailableDetailTypes.size(); i++) {
-                DetailType detail = sortedAvailableDetailTypes.get(i);
+                final DetailType detail = sortedAvailableDetailTypes.get(i);
                 lb.addItem(DetailTypeFormatter.format(detail), detail.name());
+                final String tooltip = DetailTypeFormatter.getTooltip(detail);
+                if (Util.hasLength(tooltip)) {
+                    options.getItem(options.getLength()-1).setTitle(tooltip);
+                }
                 if (detail == selectedDetailType) {
                     lb.setSelectedIndex(i + 1);
                 }
