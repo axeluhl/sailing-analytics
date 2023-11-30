@@ -1,6 +1,7 @@
 package com.sap.sailing.manage2sail.resultimport;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class Manage2SailCompetitorProvider extends AbstractManage2SailProvider i
     }
     
     @Override
-    public Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException {
+    public Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException, URISyntaxException {
         return competitorResolver.getHasCompetitorsForRegattasInEvent();
     }
 
@@ -41,7 +42,7 @@ public class Manage2SailCompetitorProvider extends AbstractManage2SailProvider i
     }
 
     @Override
-    public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException {
+    public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException, URISyntaxException {
         return competitorResolver.getCompetitorDescriptors(eventName, regattaName);
     }
 

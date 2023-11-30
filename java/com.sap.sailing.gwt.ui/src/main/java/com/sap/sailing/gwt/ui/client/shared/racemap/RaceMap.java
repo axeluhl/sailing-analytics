@@ -403,7 +403,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
     private final FlowPanel topLeftControlsWrapperPanel;
 
-    private final TimeRangeActionsExecutor<CompactBoatPositionsDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable, String> timeRangeActionsExecutor;
+    private final TimeRangeActionsExecutor<CompactBoatPositionsDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable, Pair<String, DetailType>> timeRangeActionsExecutor;
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     /**
@@ -1504,7 +1504,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             timeRangeActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race,
                     fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall, /* extrapolate */ true,
                     detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
-                    new GetBoatPositionsCallback(new AsyncCallback<CompactBoatPositionsDTO>() {
+                    new GetBoatPositionsCallback(detailType, new AsyncCallback<CompactBoatPositionsDTO>() {
                         @Override
                         public void onFailure(Throwable t) {
                             errorReporter.reportError("Error obtaining racemap data: " + t.getMessage(), true /*silentMode */);

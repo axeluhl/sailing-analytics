@@ -2,6 +2,7 @@ package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,9 +59,8 @@ public class CompetitorResolver {
      * information about the results..
      * 
      * @return A Map, with sets of Regatta names as values, keyed by the events they belong to
-     * @throws IOException
      */
-    public Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException {
+    public Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException, URISyntaxException {
         Map<String, Set<String>> result = new HashMap<>();
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
             final String eventName = resultDocDescr.getEventName();
@@ -83,11 +83,9 @@ public class CompetitorResolver {
      * @param optional
      *            regattaName
      * @return A List of CompetitorDescriptors competing in a specified Event and Regatta
-     * @throws JAXBException
-     * @throws IOException
      */
     public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName)
-            throws JAXBException, IOException {
+            throws JAXBException, IOException, URISyntaxException {
         final List<CompetitorDescriptor> result = new ArrayList<>();
         final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();
         final Map<String, CompetitorDescriptor> teamsWithoutRaceAssignments = new HashMap<>(); // keys are the teamID

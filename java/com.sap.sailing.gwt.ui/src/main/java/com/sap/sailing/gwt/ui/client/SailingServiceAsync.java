@@ -387,12 +387,13 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getEventsForLeaderboard(String leaderboardName, AsyncCallback<Collection<EventDTO>> callback);
 
     /**
-     * Imports regatta structure definitions from an ISAF XRR document
+     * Imports regatta structure definitions from an ISAF XRR document provided through SwissTiming's Manage2Sail.
+     * The back-end will enhance the URL with the necessary API access token if none is provided in the URL.
      * 
      * @param manage2SailJsonUrl
      *            the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
      */
-    void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
+    void getManage2SailRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
     
     /**
      * Returns mark passings for the competitor. Using the {@code waitForCalculations} parameter callers can control

@@ -382,8 +382,6 @@ public class DetailTypeFormatter {
             return stringMessages.currentHeelInDegree();
         case BRAVO_RACE_PITCH_IN_DEGREES:
             return stringMessages.currentPitchInDegree();
-        default:
-            break;
         }
         return detailType.name();
     }
@@ -599,8 +597,6 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_JIB_CAR_STBD:
         case EXPEDITION_LEG_MAST_BUTT:
             return "";
-        default:
-            break;
         }
         // Throwing an exception to get notified if an implementation of
         // a detail type is missing.
@@ -854,11 +850,55 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_TWS:
         case EXPEDITION_RACE_VMG:
         case EXPEDITION_RACE_VMG_TARG_VMG_DELTA:
+        case BRAVO_RACE_HEEL_IN_DEGREES:
+        case BRAVO_RACE_PITCH_IN_DEGREES:
+        case EXPEDITION_LEG_AWA:
+        case EXPEDITION_LEG_AWS:
+        case EXPEDITION_LEG_BARO:
+        case EXPEDITION_LEG_BOAT_SPEED:
+        case EXPEDITION_LEG_COG:
+        case EXPEDITION_LEG_COURSE:
+        case EXPEDITION_LEG_DISTANCE_BELOW_LINE:
+        case EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT:
+        case EXPEDITION_LEG_DISTANCE_TO_PIN:
+        case EXPEDITION_LEG_DIST_TO_PORT_LAYLINE:
+        case EXPEDITION_LEG_DIST_TO_STB_LAYLINE:
+        case EXPEDITION_LEG_FORESTAY_LOAD:
+        case EXPEDITION_LEG_HEADING:
+        case EXPEDITION_LEG_JIB_CAR_PORT:
+        case EXPEDITION_LEG_JIB_CAR_STBD:
+        case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
+        case EXPEDITION_LEG_LOAD_P:
+        case EXPEDITION_LEG_LOAD_S:
+        case EXPEDITION_LEG_MAST_BUTT:
+        case EXPEDITION_LEG_RAKE:
+        case EXPEDITION_LEG_RATE_OF_TURN:
+        case EXPEDITION_LEG_RUDDER_ANGLE:
+        case EXPEDITION_LEG_SOG:
+        case EXPEDITION_LEG_TARGET_HEEL:
+        case EXPEDITION_LEG_TARG_BOAT_SPEED:
+        case EXPEDITION_LEG_TARG_TWA:
+        case EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT:
+        case EXPEDITION_LEG_TIME_TO_BURN_TO_LINE:
+        case EXPEDITION_LEG_TIME_TO_BURN_TO_PIN:
+        case EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT:
+        case EXPEDITION_LEG_TIME_TO_GUN:
+        case EXPEDITION_LEG_TIME_TO_PIN:
+        case EXPEDITION_LEG_TIME_TO_PORT_LAYLINE:
+        case EXPEDITION_LEG_TIME_TO_STB_LAYLINE:
+        case EXPEDITION_LEG_TWA:
+        case EXPEDITION_LEG_TWD:
+        case EXPEDITION_LEG_TWS:
+        case EXPEDITION_LEG_VMG:
+        case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
+        case EXPEDITION_RACE_BARO:
+        case EXPEDITION_RACE_JIB_CAR_PORT:
+        case EXPEDITION_RACE_JIB_CAR_STBD:
+        case EXPEDITION_RACE_LOAD_P:
+        case EXPEDITION_RACE_LOAD_S:
+        case EXPEDITION_RACE_MAST_BUTT:
             return "";
-        default:
-            break;
         }
-        
         return "";
     }
 

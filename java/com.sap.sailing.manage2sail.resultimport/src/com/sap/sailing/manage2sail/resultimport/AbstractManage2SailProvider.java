@@ -14,13 +14,14 @@ public abstract class AbstractManage2SailProvider extends AbstractResultUrlProvi
     public static final String NAME = "Manage2Sail XRR Result Importer";
 
     protected static final String EVENT_ID_REGEX = "^[\\da-f]{8}(-[\\da-f]{4}){3}-[\\da-f]{12}$";
-    protected static final String EVENT_ID_TEMPLATE = "http://manage2sail.com/api/public/links/event/%s?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+    private static String EVENT_ID_TEMPLATE;
 
     private final ParserFactory parserFactory;
 
     protected AbstractManage2SailProvider(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
         super(resultUrlRegistry);
         this.parserFactory = parserFactory;
+        EVENT_ID_TEMPLATE = "https://"+com.sap.sailing.manage2sail.Activator.getInstance().getManage2SailHostname()+"/api/public/links/event/%s?mediaType=json";
     }
 
     protected ParserFactory getParserFactory() {
@@ -31,13 +32,17 @@ public abstract class AbstractManage2SailProvider extends AbstractResultUrlProvi
     public URL resolveUrl(String url) throws MalformedURLException {
         String completedUrl = url;
         if (url.matches(EVENT_ID_REGEX)) {
-            completedUrl = String.format(EVENT_ID_TEMPLATE, url);
+            completedUrl = String.format(getEventIdTemplate(), url);
         }
         return new URL(completedUrl); // TODO Find a better way to check if a URL is valid
     }
 
     @Override
     public String getOptionalSampleURL() {
-        return "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+        return String.format(getEventIdTemplate(), "d30883d3-2876-4d7e-af49-891af6cbae1b");
+    }
+
+    protected static String getEventIdTemplate() {
+        return EVENT_ID_TEMPLATE;
     }
 }
