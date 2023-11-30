@@ -1,6 +1,5 @@
 #!/bin/bash
 MACROS_PATH=$1
-EMAIL=$2
 TIMEOUT1=2
 TIMEOUT2=9
 #Purpose: Script is used to switch to the failover archive if the primary is unhealthy by altering the macros 
@@ -20,7 +19,7 @@ else
 	alreadyHealthy=0
 	logger -t archive "currently unhealthy"
 fi
-#Sets the production value to point to the variable defining the main archive IP.
+#Sets the production value to point to the variable defining the main archive IP, provided it isn't already set.
 setProductionMainIfNotSet() {
 	if [[ $alreadyHealthy -eq 0 ]] 
 	then
@@ -28,13 +27,7 @@ setProductionMainIfNotSet() {
 		#set production to archive
 		logger -t archive "Healthy: setting production to main archive"
 		sed -i -E   "s/Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_IP}/"  ${MACROS_PATH}
-		systemctl reload httpd 
-                {
-                        echo "To: ${EMAIL}"
-                        echo Subject: Healthy 
-                        echo 
-                        echo Healthy: main archive online
-                } | /usr/sbin/sendmail -t
+                notify "Healthy: main archive online"
 	else
                 #If already healthy then no reload or notification occurs.
 		logger -t archive "Healthy: already set, no change needed"
@@ -56,12 +49,7 @@ then
 			sed -i -E  "s/Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
 			logger -t archive "Unhealthy: second check failed, switching to failover"
 			systemctl reload httpd 
-                        {
-                                echo "To: ${EMAIL}"
-                                echo Subject: Unhealthy 
-                                echo 
-                                echo Unhealthy: main archive offline
-                        } | /usr/sbin/sendmail -t
+                        notify-operators "Unhealthy: main archive offline"
 		else
 			logger -t archive "Unhealthy: second check still fails, failover already in use"
 		fi
@@ -71,4 +59,3 @@ then
 else 
 	setProductionMainIfNotSet
 fi
-cat ${MACROS_PATH}
