@@ -1250,7 +1250,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+    public TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
+            throws NoWindException {
         final TackType result;
         final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                 /* extrapolate */ true);
@@ -1259,7 +1260,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             if (start != null && timePoint.after(start.getTimePoint())) {
                 final MarkPassing end = getMarkPassingForLegEnd();
                 if (end != null && timePoint.before(end.getTimePoint())) {
-                    final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(), timePoint);
+                    // TODO: missing solution for cases with PassingInstruction Offsett and FixedBearing
+                    final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(),
+                            timePoint);
                     final Bearing cog = getSpeedOverGround(timePoint).getBearing();
                     final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
                     final Bearing bearingWind = cache.getWind(getTrackedRace(), competitor, timePoint).getFrom();
