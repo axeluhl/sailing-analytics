@@ -35,7 +35,9 @@ Require-Bundle: com.sap.sailing.domain,
  org.mongodb.driver-sync;bundle-version="4.3.1",
  org.apache.commons.math3;bundle-version="3.5.0",
  org.apache.shiro.core;bundle-version="1.2.2",
- org.hamcrest;bundle-version="2.2.0"
+ org.hamcrest;bundle-version="2.2.0",
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
 Export-Package: com.sap.sailing.domain.test,
  com.sap.sailing.domain.test.mock
 Import-Package: org.apache.commons.math;version="2.1.0",

@@ -32,6 +32,7 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
             Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> registeredCompetitorsRetriever) {
         super(stringMessages.registerCompetitors(), /* messsage */null, okButtonMessage, stringMessages.cancel(),
                 validator, callback);
+        this.ensureDebugId("registerCompetitorsDialog");
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.sailingService = sailingServiceWrite;

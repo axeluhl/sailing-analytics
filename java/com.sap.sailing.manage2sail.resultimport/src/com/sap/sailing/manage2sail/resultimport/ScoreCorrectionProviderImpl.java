@@ -2,6 +2,7 @@ package com.sap.sailing.manage2sail.resultimport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class ScoreCorrectionProviderImpl extends AbstractManage2SailProvider imp
     }
 
     @Override
-    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws URISyntaxException {
         Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
         try {
             for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
@@ -73,7 +74,7 @@ public class ScoreCorrectionProviderImpl extends AbstractManage2SailProvider imp
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
-            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
+            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         final Parser parser = resolveParser(eventName, boatClassName, timePointPublished);
         try {
             final RegattaResults regattaResults = parser.parse();
@@ -94,7 +95,7 @@ public class ScoreCorrectionProviderImpl extends AbstractManage2SailProvider imp
                 /* boatClassNameFilter */ Optional.empty());
     }
 
-    private Parser resolveParser(String eventName, String boatClassName, TimePoint timePointPublished) throws IOException {
+    private Parser resolveParser(String eventName, String boatClassName, TimePoint timePointPublished) throws IOException, URISyntaxException {
         Parser result = null;
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
             String boatClassAndGenderType = resultDocDescr.getBoatClass();

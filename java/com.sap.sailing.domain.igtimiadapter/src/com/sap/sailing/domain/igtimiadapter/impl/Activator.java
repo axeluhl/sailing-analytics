@@ -41,8 +41,6 @@ public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     private static Activator INSTANCE;
     
-    private static final String DEFAULT_CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
-    private static final String DEFAULT_CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
     private static final String DEFAULT_REDIRECT_PROTOCOL = "https";
     private static final String DEFAULT_REDIRECT_HOST = "www.sapsailing.com";
     private static final String DEFAULT_REDIRECT_PORT = null; // port==null means default
@@ -60,8 +58,8 @@ public class Activator implements BundleActivator {
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         logger.info(getClass().getName()+" constructor");
-        final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME, DEFAULT_CLIENT_ID);
-        final String clientSecret = System.getProperty(CLIENT_SECRET_PROPERTY_NAME, DEFAULT_CLIENT_SECRET);
+        final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME);
+        final String clientSecret = System.getProperty(CLIENT_SECRET_PROPERTY_NAME);
         final String clientRedirectProtocol = System.getProperty(CLIENT_REDIRECT_PROTOCOL_PROPERTY_NAME, DEFAULT_REDIRECT_PROTOCOL);
         final String clientRedirectHost = System.getProperty(CLIENT_REDIRECT_HOST_PROPERTY_NAME, DEFAULT_REDIRECT_HOST);
         final String clientRedirectPort = System.getProperty(CLIENT_REDIRECT_PORT_PROPERTY_NAME, DEFAULT_REDIRECT_PORT);
