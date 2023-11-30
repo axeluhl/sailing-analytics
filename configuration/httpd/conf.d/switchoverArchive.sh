@@ -1,57 +1,69 @@
 #!/bin/bash
 MACROS_PATH=$1
+EMAIL=$2
+TIMEOUT1=2
+TIMEOUT2=9
+#Purpose: Script is used to switch to the failover archive if the primary is unhealthy by altering the macros 
+#definitions and then reloading.
+
+#These next lines get the current ip values for the archive and failover, plus they store the value of production,
+#which is a variable pointing to either the primary or failover value.
 archiveIp="$(sed -n -E 's/^Define ARCHIVE_IP (.*)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
 failoverIp="$(sed -n -E 's/^Define ARCHIVE_FAILOVER_IP (.*)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
 productionIp="$(sed -n -E 's/^Define PRODUCTION (.*)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
+#Checks if the macro.conf is set as healthy or unhealthy currently.
 if [[ "${productionIp}" == "\${ARCHIVE_IP}" ]] 
 then 
 	alreadyHealthy=1
-	echo "currently healthy"
+	logger -t archive "currently healthy"
 else
 	alreadyHealthy=0
-	echo "currently unhealthy"
+	logger -t archive "currently unhealthy"
 fi
+#Sets the production value to point to the variable defining the main archive IP.
 setProductionMainIfNotSet() {
 	if [[ $alreadyHealthy -eq 0 ]] 
 	then
 		#currently unhealthy
 		#set production to archive
-		echo "setting production to main archive"
+		logger -t archive "Healthy: setting production to main archive"
 		sed -i -E   "s/Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_IP}/"  ${MACROS_PATH}
 		systemctl reload httpd 
                 {
-                        echo "To: thomasstokes@yahoo.co.uk"
+                        echo "To: ${EMAIL}"
                         echo Subject: Healthy 
                         echo 
                         echo Healthy: main archive online
                 } | /usr/sbin/sendmail -t
 	else
-		echo "currently healthy; no change needed"
+                #If already healthy then no reload or notification occurs.
+		logger -t archive "Healthy: already set, no change needed"
 	fi
 
 }
-echo "begin"
-curl -s --connect-timeout 2 "http://${archiveIp}:8888/gwt/status" >> /dev/null
+logger -t archive "begin check"
+curl -s --connect-timeout ${TIMEOUT1} "http://${archiveIp}:8888/gwt/status" >> /dev/null
 if [[ $? -ne 0 ]]
 then
-	echo "first check failed"
-	curl -s --connect-timeout 5 "http://${archiveIp}:8888/gwt/status" >> /dev/null
+	logger -t archive "first check failed"
+	curl -s --connect-timeout ${TIMEOUT2} "http://${archiveIp}:8888/gwt/status" >> /dev/null
 	if [[ $? -ne 0 ]]
 	then
 		if [[ $alreadyHealthy -eq 1 ]] 
 		then
-			#set production to failover if not already. Separate if statement in case the curl statement fails but the production is already set to point to the backup 
+			#set production to failover if not already. Separate if statement in case the curl statement
+                        #fails but the production is already set to point to the backup 
 			sed -i -E  "s/Define PRODUCTION .*/Define PRODUCTION \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
-			echo "switching to failover"
+			logger -t archive "Unhealthy: second check failed, switching to failover"
 			systemctl reload httpd 
                         {
-                                echo "To: thomasstokes@yahoo.co.uk"
+                                echo "To: ${EMAIL}"
                                 echo Subject: Unhealthy 
                                 echo 
                                 echo Unhealthy: main archive offline
                         } | /usr/sbin/sendmail -t
 		else
-			echo "unhealthy, failover already in use"
+			logger -t archive "Unhealthy: second check still fails, failover already in use"
 		fi
 	else
 		setProductionMainIfNotSet

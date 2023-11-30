@@ -100,27 +100,45 @@ Following the mandatory automated content comparison you should do a few spot ch
 
 ### Switching in Reverse Proxy
 
-Once you are content with the quality of the new archive server candidate's contents it's time to switch. Technically, switching archive servers is done by adjusting the corresponding configuration in the central Apache reverse proxy server. You find this in ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` in the definition of the macro ``ArchiveRewrite`` defined usually at the top of the file. You'll find a macro definition that looks like this:
-```&lt;Macro ArchiveRewrite&gt;
-# ARCHIVE, based on i3.2xlarge, 64GB RAM and 1.9TB swap
-#       Use Rewrite 172.31.4.106 8888
-        Use Rewrite 172.31.9.176 8888
-&lt;/Macro&gt;
+Once you are content with the quality of the new archive server candidate's contents it's time to switch. Technically, switching archive servers is done by adjusting the corresponding configuration in the central Apache reverse proxy server. You find this in ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` at the top. There should be a couple of statements at the top:
+
 ```
-Copy the uncommented ``Use Rewrite`` line and in the new copy adjust the internal IP to match the internal IP of your new archive server candidate. Then comment the line that pointed to the currently active primary archive server. Your macro definition then would look something like this, assuming that ``172.31.8.7`` were the IP address of your new archive server candidate:
-```&lt;Macro ArchiveRewrite&gt;
-# ARCHIVE, based on i3.2xlarge, 64GB RAM and 1.9TB swap
-#       Use Rewrite 172.31.4.106 8888
-#        Use Rewrite 172.31.9.176 8888
-        Use Rewrite 172.31.8.7 8888
-&lt;/Macro&gt;
+Define ARCHIVE_IP xxx.xx.xx.xxx
+Define ARCHIVE_FAILOVER_IP xxx.xx.xx.xxx
+
+<Macro ArchiveRewrite>
+        Use Rewrite ${ARCHIVE_IP} 8888
+</Macro>
 ```
-Exit your editor and reload the reverse proxy configuration by issuing the following command:
+In the past we changed this directly within the ArchiveRewrite macro, but this was slow if we needed to switchover. As an improvement, which happened to also be neater, we added variables -- defined at the top -- including a variable for an up-and-running failover. In the case of an outage, we could comment the current archive and rename the failover (and then reload).  This way we could also switch back if the primary returns to healthy. However, we have worked on an automation script, which now changes the PRODUCTION value to point to the variables ARCHIVE_IP or ARCHIVE_FAILOVER_IP. 
 ```
-    # service httpd reload
+Define ARCHIVE_IP xxx.xx.xx.xxx
+Define ARCHIVE_FAILOVER_IP xxx.xx.xx.xxx
+Define PRODUCTION ${ARCHIVE_IP}
+
+<Macro ArchiveRewrite>
+        Use Rewrite ${PRODUCTION} 8888
+</Macro>
 ```
-Check that the new archive service is now active, e.g., by looking at [sapsailing.com/gwt/status](https://sapsailing.com/gwt/status). It should reflect the new release in its ``release`` field.
+The script can be found in the git at  **switchoverArchive.sh**. This script has 1 parameter which is the path to the macros file, containing the above macros (currently in /etc/httpd/conf.d/000-macros.conf. Run ```crontab -e``` to edit the cronjobs and add 
+```
+* * * * * switchoverArchive "/etc/httpd/conf.d/000-macros.conf"
+```
+Then exit the editor.
+To setup switchoverArchive as a command for easy usage run ``` ln -s /home/wiki/gitwiki/configuration/switchoverArchive.sh switchoverArchive```. This creates a symbolic link and makes the command accessible anywhere.
+
+Check that the new archive service is now active, e.g., by looking at [sapsailing.com/gwt/status](https://sapsailing.com/gwt/status). It should reflect the new release in its ``release`` field. 
+## Tests
+
+1. Healthy -> Stay healthy
+2. Healthy -> Unhealthy
+3. Unhealthy -> Stay unhealthy
+4. Unhealthy -> Become healthy
+5. Multiple cycles 
+6. Different order combinations: eg. 1,2,3,4; 2,4,1,2,3
 
 ### Clean up EC2 Names and Instances
 
-Next, you should terminate the previous fail-over archive server instance, and you need to adjust the ``Name`` tags in the EC2 console of the old primary to show that it's now the fail-over, and for the candidate to show that it's now the primary. Select the old fail-over instance and terminate it. Then change the name tag of "SL Archive" to "SL Archive (Failover)", then change that of "SL Archive (New Candidate)" to "SL Archive", and you're done.
+Next, you should terminate the previous fail-over archive server instance, and you need to adjust the ``Name`` tags in the EC2 console of the old primary to show that it's now the fail-over, and for the candidate to show that it's now the primary. Select the old fail-over instance and terminate it. Then change the name tag of "SL Archive" to "SL Archive (Failover)", then change that of "SL Archive (New Candidate)" to "SL Archive", and you're done for now....
+
+If you establish that the old primary will not recover you must setup a new failover and reconfigure the httpd and then run ```systemctl reload httpd ```, which won't drop any connections.
