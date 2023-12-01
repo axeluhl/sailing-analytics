@@ -343,7 +343,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
     
     /**
-     * If the difference between cog and next waypoint direction is smaller then the one between cog and wind direction 
+     * If the difference between cog and the next waypoint direction is smaller then the one between cog and wind direction 
      * {@link TackType#LONGTACK longtack} is returned, if it is bigger or equal {@link TackType#SHORTTACK shorttack}. For other cases <code>null</code> is returned. 
      * @return {@code null} if {@link TimePoint} does not fit with current leg, or waypoint is null, or wind is null, or competitor position is null.
      */
