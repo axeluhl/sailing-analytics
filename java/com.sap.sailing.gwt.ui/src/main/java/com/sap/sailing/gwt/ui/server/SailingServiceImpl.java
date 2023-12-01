@@ -1884,6 +1884,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> result = new HashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        // let user see the detail values if and only if the detail type requires no permission for any action,
+        // or the current user has permission to this action on the leaderboard identified by the leaderboardName
+        // parameter:
+        final DetailType effectiveDetailTypeAfterPermissionCheck = detailType == null ? null :
+            detailType.getPremiumAction() == null || getSecurityService().hasCurrentUserExplicitPermissions(getLeaderboard(leaderboardName), detailType.getPremiumAction()) ?
+                        detailType : null;
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
@@ -1893,7 +1899,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     final TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     final TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     result.put(competitorDTO,
-                            new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(competitor, this, trackedRace, detailType,
+                            new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(competitor, this, trackedRace, effectiveDetailTypeAfterPermissionCheck,
                                     track, fromTimePoint, toTimePointExcluding, extrapolate,
                                     leaderboardName, leaderboardGroupName, leaderboardGroupId));
                 }
