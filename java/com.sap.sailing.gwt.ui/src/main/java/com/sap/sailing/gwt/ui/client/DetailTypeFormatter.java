@@ -596,9 +596,8 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_JIB_CAR_PORT:
         case EXPEDITION_LEG_JIB_CAR_STBD:
         case EXPEDITION_LEG_MAST_BUTT:
-            return "";
         case LEG_TACKTYPE_LONGTACK_SHORTTACK:
-            break;
+            return "";
         }
         // Throwing an exception to get notified if an implementation of
         // a detail type is missing.
