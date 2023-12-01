@@ -92,7 +92,7 @@ public class GPSFixWithContext implements HasGPSFixContext {
     }
     
     @Override
-    public TackType getTackType() {
+    public TackType getTackType() throws NoWindException {
         return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTackType(getTimePoint());
     }
 }

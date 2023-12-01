@@ -344,20 +344,20 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
     
     /**
-     * If the difference between COG and next waypoint direction is smaller then the one between COG and wind direction
-     * {@link TackType#LONGTACK long tack} is returned, if it is bigger or equal {@link TackType#SHORTTACK short tack}.
+     * If the difference between COG and next waypoint direction is smaller than the one between COG and wind direction
+     * {@link TackType#LONGTACK long tack} is returned; if it is greater or equal {@link TackType#SHORTTACK short tack}.
      * For other cases {@code null} is returned.
      * 
      * @return {@code null} if {@link TimePoint} does not fit with current leg, or waypoint is {@code null}, or wind is
      *         {@code null}, or competitor position is {@code null}.
      */
-    TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
 
     /**
      * Same as {@link #getTackType(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that an no-op cache will be used
      * for this single call. Good, e.g., for test cases.
      */
-    default TackType getTackType(TimePoint timePoint) {
+    default TackType getTackType(TimePoint timePoint) throws NoWindException {
         return getTackType(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
     }
 

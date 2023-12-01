@@ -35,6 +35,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -44,6 +45,7 @@ import com.sap.sse.common.Util;
  */
 public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private static final long serialVersionUID = -7060076837717432808L;
+    private static final Bearing MAX_REACHING_TOLERANCE_AWAY_FROM_WAYPOINT = new DegreeBearingImpl(10);
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
     private final Boat boat;
@@ -1245,7 +1247,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         final TackType result;
         final MarkPassing start = getMarkPassingForLegStart();
         final MarkPassing end = getMarkPassingForLegEnd();
@@ -1258,10 +1260,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                     /* extrapolate */ true);
             if (waypointPosition != null && wind != null && competitorPosition != null) {
-                final Bearing windBearing = wind.getFrom();
+                final LegType legType = cache.getLegType(getTrackedLeg(), timePoint);
+                final Bearing windBearing = legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing();
                 final Bearing cog = getSpeedOverGround(timePoint).getBearing();
                 final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
-                final Bearing diffWindToBoat = windBearing.getDifferenceTo(cog).abs();
+                // on reaching legs we won't compare to COG/Wind difference but to a fixed threshold, assuming
+                // that not sailing straight towards the next waypoint is a risk, conceptually making it the short tack
+                final Bearing diffWindToBoat = legType == LegType.REACHING ? MAX_REACHING_TOLERANCE_AWAY_FROM_WAYPOINT :
+                    windBearing.getDifferenceTo(cog).abs();
                 final Bearing diffMarkToBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
                 if (diffMarkToBoat.compareTo(diffWindToBoat) < 0) {
                     result = TackType.LONGTACK;
