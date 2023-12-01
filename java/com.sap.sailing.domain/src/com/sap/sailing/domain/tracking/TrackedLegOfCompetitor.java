@@ -344,8 +344,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
     
     /**
      * If the bearing between cog and the next waypoint is smaller then the one between cog and wind direction 
-     * {@link TackType#LONGTACK longtack} is returned, if it is bigger {@link TackType#SHORTTACK shorttack}. For other cases <code>null</code> is returned. 
-     * @return {@code null} if {@link TimePoint} does not fit to current leg, or Waypoint is null, or Wind is null, or {@link #getCompetitor() competitor} Position is null.
+     * {@link TackType#LONGTACK longtack} is returned, if it is bigger or equal {@link TackType#SHORTTACK shorttack}. For other cases <code>null</code> is returned. 
+     * @return {@code null} if {@link TimePoint} does not fit with current leg, or waypoint is null, or wind is null, or competitor position is null.
      */
     TackType getTackType(TimePoint timePoint);
     
