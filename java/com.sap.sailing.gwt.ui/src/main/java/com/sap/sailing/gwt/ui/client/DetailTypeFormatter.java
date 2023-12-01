@@ -507,6 +507,8 @@ public class DetailTypeFormatter {
             return stringMessages.degreesUnit();
         case EXPEDITION_RACE_MAST_BUTT:
             return stringMessages.millimetersUnit();
+        case LEG_TACKTYPE_LONGTACK_SHORTTACK:
+            return stringMessages.tackTypeUnit();
         // Cases for detail types without unit, so that an empty string is returned.
         case RACE_RANK:
         case REGATTA_RANK:
@@ -596,7 +598,6 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_JIB_CAR_PORT:
         case EXPEDITION_LEG_JIB_CAR_STBD:
         case EXPEDITION_LEG_MAST_BUTT:
-        case LEG_TACKTYPE_LONGTACK_SHORTTACK:
             return "";
         }
         // Throwing an exception to get notified if an implementation of

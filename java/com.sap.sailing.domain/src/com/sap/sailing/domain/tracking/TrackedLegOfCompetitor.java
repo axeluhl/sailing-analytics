@@ -344,9 +344,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
     
     /**
-     * If the difference between COG and next waypoint direction is smaller than the one between COG and wind direction
+     * For upwind: If the difference between COG and next waypoint direction is smaller than the one between COG and wind direction
      * {@link TackType#LONGTACK long tack} is returned; if it is greater or equal {@link TackType#SHORTTACK short tack}.
-     * For other cases {@code null} is returned.
+     * For downwind: Similar to upwind but instead of "wind direction", one use the opposite direction. So where the wind is blowing to.
+     * For reaching: Similar to upwind but instead of comparing to "COG and wind direction", one use 10°. To see more differences.
      * 
      * @return {@code null} if {@link TimePoint} does not fit with current leg, or waypoint is {@code null}, or wind is
      *         {@code null}, or competitor position is {@code null}.

@@ -2441,6 +2441,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
     String incrementalScoreCorrectionInPoints();
     String errorObtainingCourseAreasForLeaderboard(String leaderboardName, String message);
-    String tackType();
+    String tackTypeUnit();
     String tackTypeTooltip();
+    String tackType();
 }
