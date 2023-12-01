@@ -221,6 +221,13 @@ public enum DetailType implements Serializable {
 
     private final String[] oldNames;
 
+    /**
+     * @param precision
+     *            the number of decimal digits in which they are usually provided and should be formatted
+     * @param premiumAction
+     *            If not {@code null} then the user must have permission to execute this action on the leaderboard to
+     *            which it is applied.
+     */
     DetailType(int precision, SortingOrder defaultSortingOrder, Action premiumAction, String... oldNames) {
         this.oldNames = oldNames;
         this.precision = precision;
@@ -228,6 +235,9 @@ public enum DetailType implements Serializable {
         this.defaultSortingOrder = defaultSortingOrder;
     }
 
+    /**
+     * @return the number of decimal digits in which they are usually provided and should be formatted
+     */
     public int getPrecision() {
         return precision;
     }
