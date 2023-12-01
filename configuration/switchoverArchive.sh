@@ -22,9 +22,9 @@ TIMEOUT1=$2
 TIMEOUT2=$3
 # These next lines get the current ip values for the archive and failover, plus they store the value of production,
 # which is a variable pointing to either the primary or failover value.
-archiveIp="$(sed -n -E 's/^Define ARCHIVE_IP (.*)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
-failoverIp="$(sed -n -E 's/^Define ARCHIVE_FAILOVER_IP (.*)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
-productionIp="$(sed -n -E 's/^Define PRODUCTION_ARCHIVE (.*)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
+archiveIp="$(sed -n -e 's/^Define ARCHIVE_IP \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
+failoverIp="$(sed -n -e 's/^Define ARCHIVE_FAILOVER_IP \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
+productionIp="$(sed -n -e 's/^Define PRODUCTION_ARCHIVE \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
 # Checks if the macro.conf is set as healthy or unhealthy currently.
 if [[ "${productionIp}" == "\${ARCHIVE_IP}" ]]
 then
@@ -41,7 +41,7 @@ setProductionMainIfNotSet() {
         # currently unhealthy
         # set production to archive
         logger -t archive "Healthy: setting production to main archive"
-        sed -i -E   "s/^Define PRODUCTION_ARCHIVE .*/Define PRODUCTION_ARCHIVE \${ARCHIVE_IP}/"  ${MACROS_PATH}
+        sed -i -e   "s/^Define PRODUCTION_ARCHIVE .*/Define PRODUCTION_ARCHIVE \${ARCHIVE_IP}/"  ${MACROS_PATH}
         systemctl reload httpd
         notify-operators "Healthy: main archive online"
     else
@@ -56,7 +56,7 @@ setFailoverIfNotSet() {
     then
         # Set production to failover if not already. Separate if statement in case the curl statement
         # fails but the production is already set to point to the backup
-        sed -i -E  "s/^Define PRODUCTION_ARCHIVE .*/Define PRODUCTION_ARCHIVE \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
+        sed -i -e  "s/^Define PRODUCTION_ARCHIVE .*/Define PRODUCTION_ARCHIVE \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
         logger -t archive "Unhealthy: second check failed, switching to failover"
         systemctl reload httpd
         notify-operators "Unhealthy: main archive offline"
