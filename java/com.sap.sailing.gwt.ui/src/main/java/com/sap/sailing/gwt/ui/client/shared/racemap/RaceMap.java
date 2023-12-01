@@ -1283,7 +1283,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    public void redraw() {
+    private void redraw() {
         remoteCallsToSkipInExecution.removeAll(timer.getTime());
         timeChanged(timer.getTime(), null);
     }
@@ -1495,13 +1495,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // all its entries so that the other response received for GetBoatPositionsAction will consider this an
         // overlap if it happens after this update.
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
-            race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
+                    race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
                     raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),
                     newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
             GET_RACE_MAP_DATA_CATEGORY,
-                getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
-                        ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged));
+            getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
+                                   ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             timeRangeActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race,
@@ -1606,6 +1606,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         zoomMapToNewBounds(zoomToBounds);
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
+                    } else {
+                        GWT.log("Dropped result from getRaceMapData(...) because it was for request ID "+requestID+
+                                " while we already started processing request "+startedProcessingRequestID);
                     }
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
@@ -2887,8 +2890,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         lb.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                String value = lb.getSelectedValue();
-                DetailType previous = selectedDetailType;
+                final String value = lb.getSelectedValue();
+                final DetailType previous = selectedDetailType;
                 if (value == null || value.equals("none")) {
                     selectedDetailType = null;
                     metricOverlay.setVisible(false);
@@ -2902,6 +2905,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (selectedDetailType != previous) {
                     // Causes an overwrite of what are now wrong detailValues
                     selectedDetailTypeChanged = true;
+                    // FIXME bug5921: setting the tail visualizer would re-paint the tails based on the existing detailValues on the fixes which doesn't make any sense
                     setTailVisualizer();
                     // In case the new values don't make it through this will make the tails visible
                     tailColorMapper.notifyListeners();
