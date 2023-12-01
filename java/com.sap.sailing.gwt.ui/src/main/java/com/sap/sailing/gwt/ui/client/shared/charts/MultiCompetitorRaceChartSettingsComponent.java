@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -14,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.DetailTypeComparator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.DOMUtils;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -49,18 +52,26 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         Label chartSelectionLabel = new Label(stringMessages.chooseChart());
         mainPanel.add(chartSelectionLabel);
         chartFirstTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        final NodeList<OptionElement> firstTypeOptions = DOMUtils.getOptions(chartFirstTypeSelectionListBox);
         chartSecondTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        final NodeList<OptionElement> secondTypeOptions = DOMUtils.getOptions(chartSecondTypeSelectionListBox);
         //add empty values, required, if a non available value is saved as default in the settings. Eg. rideheight, which is only valid for foiling races
         chartSecondTypeSelectionListBox.addItem("--", "--");
         int i = 0;
-        
+        // sort detail types alphabetically first:
         List<DetailType> sortedAvailableDetailTypes = new ArrayList<DetailType>();
         Util.addAll(availableDetailsTypes, sortedAvailableDetailTypes);
         Collections.sort(sortedAvailableDetailTypes, new DetailTypeComparator());
-        
+        // then add them to the list boxes, including their tool tips
         for (DetailType detailType : sortedAvailableDetailTypes) {
-            chartFirstTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
-            chartSecondTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
+            final String detailTypeString = DetailTypeFormatter.format(detailType);
+            final String tooltip = DetailTypeFormatter.getTooltip(detailType);
+            chartFirstTypeSelectionListBox.addItem(detailTypeString, detailType.name());
+            chartSecondTypeSelectionListBox.addItem(detailTypeString, detailType.name());
+            if (Util.hasLength(tooltip)) {
+                firstTypeOptions.getItem(firstTypeOptions.getLength()-1).setTitle(tooltip);
+                secondTypeOptions.getItem(secondTypeOptions.getLength()-1).setTitle(tooltip);
+            }
             if (detailType == initialFirstDetailType) {
                 chartFirstTypeSelectionListBox.setSelectedIndex(i);
             }
