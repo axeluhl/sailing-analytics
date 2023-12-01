@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -38,7 +39,7 @@ import com.sap.sse.common.Util;
  */
 public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
-    public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException {
+    public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON+".txt")));
         final Manage2SailCompetitorProvider competitorImporter = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE, resultUrlRegistry);
@@ -53,7 +54,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     }
 
     @Test
-    public void simpleCompetitorImportTestNoResultsYet() throws FileNotFoundException, IOException, JAXBException {
+    public void simpleCompetitorImportTestNoResultsYet() throws FileNotFoundException, IOException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json.txt")));
         final CompetitorProvider competitorImporter = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE, resultUrlRegistry) {
@@ -77,7 +78,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     }
 
     @Test
-    public void simpleCompetitorImportTestNoResultsYetAndDivisionEmpty() throws FileNotFoundException, IOException, JAXBException {
+    public void simpleCompetitorImportTestNoResultsYetAndDivisionEmpty() throws FileNotFoundException, IOException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getReadableResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json.txt")));
         final CompetitorProvider competitorImporter = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE, resultUrlRegistry) {

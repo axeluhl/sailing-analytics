@@ -2,6 +2,7 @@ package com.sap.sailing.manage2sail.resultimport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -34,12 +35,11 @@ public abstract class AbstractManage2SailResultDocumentProvider implements Resul
     }
 
     @Override
-    public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
+    public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException, URISyntaxException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
         Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
         for (URL url : resultUrlProvider.getReadableUrls()) {
-            URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
-            EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
+            EventResultDescriptor eventResult = parser.getEventResult(url);
             addResultsForEvent(result, eventResult);
         }
         return result;
