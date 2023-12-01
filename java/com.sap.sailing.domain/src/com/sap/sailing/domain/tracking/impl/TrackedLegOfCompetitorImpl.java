@@ -1259,10 +1259,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             // TODO: missing solution for cases with PassingInstruction Offset and FixedBearing
             final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(),
                     timePoint);
-            final Bearing bearingWind = cache.getWind(getTrackedRace(), competitor, timePoint).getFrom();
+            final Wind wind = cache.getWind(getTrackedRace(), competitor, timePoint);
             final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                     /* extrapolate */ true);
-            if (waypointPosition != null && bearingWind != null && competitorPosition != null) {
+            if (waypointPosition != null && wind != null && competitorPosition != null) {
+                final Bearing bearingWind = wind.getFrom();
                 final Bearing cog = getSpeedOverGround(timePoint).getBearing();
                 final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
                 final Bearing diffWindToBoat = bearingWind.getDifferenceTo(cog).abs();

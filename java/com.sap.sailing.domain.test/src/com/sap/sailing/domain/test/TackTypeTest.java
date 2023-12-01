@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -23,7 +23,6 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
@@ -52,7 +51,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void TestShortTack() throws NoWindException {
+    public void TestShortTack() {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
@@ -62,7 +61,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void TestLongTack() throws NoWindException {
+    public void TestLongTack() {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
@@ -72,7 +71,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void TestAfterLeg() throws NoWindException {
+    public void TestAfterLeg() {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
@@ -84,31 +83,54 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void TestBeforeLeg() throws NoWindException {
+    public void TestBeforeLeg() {
         final Competitor findel = getCompetitorByName("Findel");
         final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
         final TrackedLegOfCompetitor findelsSecondLeg = getTrackedRace()
                 .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(1)).getTrackedLeg(findel);
         final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
-
         final TackType actualTackType = findelsSecondLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
         assertEquals(null, actualTackType);
     }
 
     @Test
-    public void TestNoGPSFix() throws NoWindException {
+    public void TestNoGPSFix() {
         final Competitor findel = getCompetitorByName("Findel");
         final TimePoint endOfFindelsRace = getTrackedRace().getEndOfRace();
-        final DynamicTrackedRaceImpl trackedRace = getTrackedRace();
-        final List<Leg> listOfFindelsLegs = trackedRace.getRace().getCourse().getLegs();
+        final List<Leg> listOfFindelsLegs = getTrackedRace().getRace().getCourse().getLegs();
         List<MarkPassing> newMarkPassings = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            newMarkPassings.add(new MarkPassingImpl(endOfFindelsRace.plus(9000 * i), listOfFindelsLegs.get(i).getTo(), findel));
+        for (int i = 0; i < 4; ++i) {
+            newMarkPassings.add(
+                    new MarkPassingImpl(endOfFindelsRace.plus(9000 * i), listOfFindelsLegs.get(i).getTo(), findel));
         }
         getTrackedRace().updateMarkPassings(findel, newMarkPassings);
-        final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(listOfFindelsLegs.get(0)).getTrackedLeg(findel);
+        final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace().getTrackedLeg(listOfFindelsLegs.get(0))
+                .getTrackedLeg(findel);
         final TackType actualTackType = findelsFirstLeg.getTackType(endOfFindelsRace.plus(9000));
+        assertEquals(null, actualTackType);
+    }
+
+    @Test
+    public void TestNoWaypoint() {
+        final Competitor findel = getCompetitorByName("Findel");
+        getTrackedRace().getRace().getCourse().addWaypoint(1,
+                new WaypointImpl(getDomainFactory().getBaseDomainFactory().getOrCreateMark("TestMark")));
+        final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
+                .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
+        final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000));
+        assertEquals(null, actualTackType);
+    }
+
+    @Test
+    public void TestNoWind() {
+        final Competitor findel = getCompetitorByName("Findel");
+        getTrackedRace().setWindSourcesToExclude(getTrackedRace().getWindSources());
+        final TrackedLegOfCompetitor findelsFirstLeg = getTrackedRace()
+                .getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().get(0)).getTrackedLeg(findel);
+        final TimePoint findelStartedHisFirstLegAt = findelsFirstLeg.getStartTime();
+        final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(30000));
         assertEquals(null, actualTackType);
     }
 }
