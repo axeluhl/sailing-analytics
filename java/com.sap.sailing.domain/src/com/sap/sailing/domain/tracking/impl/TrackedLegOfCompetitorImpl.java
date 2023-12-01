@@ -1245,11 +1245,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public TackType getTackType(TimePoint timePoint){
-        return getTackType(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
-    }
-    
-    @Override
     public TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TackType result;
         final MarkPassing start = getMarkPassingForLegStart();

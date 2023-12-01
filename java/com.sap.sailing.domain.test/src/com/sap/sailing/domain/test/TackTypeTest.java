@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -69,7 +70,7 @@ public class TackTypeTest extends OnlineTracTracBasedTest {
         final TackType actualTackType = findelsFirstLeg.getTackType(findelStartedHisFirstLegAt.plus(90000));
         assertEquals(TackType.LONGTACK, actualTackType);
     }
-
+   
     @Test
     public void TestAfterLeg() {
         final Competitor findel = getCompetitorByName("Findel");

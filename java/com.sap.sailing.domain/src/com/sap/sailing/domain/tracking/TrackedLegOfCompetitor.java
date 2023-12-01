@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -347,12 +348,15 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * {@link TackType#LONGTACK longtack} is returned, if it is bigger or equal {@link TackType#SHORTTACK shorttack}. For other cases <code>null</code> is returned. 
      * @return {@code null} if {@link TimePoint} does not fit with current leg, or waypoint is null, or wind is null, or competitor position is null.
      */
-    TackType getTackType(TimePoint timePoint);
-    
-    /**
-     * Same as {@link #getTackType(TimePoint timePoint)}, only that a cache for leg type calculation is passed.
-     */
     TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
+     * Same as {@link #getTackType(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that an no-op cache will be used
+     * for this single call. Good, e.g., for test cases.
+     */
+    default TackType getTackType(TimePoint timePoint) {
+        return getTackType(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
 
     Double getExpeditionAWA(TimePoint at);
     Double getExpeditionAWS(TimePoint at);
