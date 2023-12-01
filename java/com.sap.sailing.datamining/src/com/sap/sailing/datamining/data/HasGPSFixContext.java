@@ -18,7 +18,7 @@ public interface HasGPSFixContext {
     public GPSFixMoving getGPSFix();
     
     @Dimension(messageKey="TackType", ordinal=6)
-    TackType getTackType() throws NoWindException;
+    TackType getTackType();
 
     @Statistic(messageKey = "TrueWindAngle")
     Bearing getTrueWindAngle() throws NoWindException;
