@@ -1263,10 +1263,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
                     /* extrapolate */ true);
             if (waypointPosition != null && wind != null && competitorPosition != null) {
-                final Bearing bearingWind = wind.getFrom();
+                final Bearing windBearing = wind.getFrom();
                 final Bearing cog = getSpeedOverGround(timePoint).getBearing();
                 final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
-                final Bearing diffWindToBoat = bearingWind.getDifferenceTo(cog).abs();
+                final Bearing diffWindToBoat = windBearing.getDifferenceTo(cog).abs();
                 final Bearing diffMarkToBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
                 if (diffMarkToBoat.compareTo(diffWindToBoat) < 0) {
                     result = TackType.LONGTACK;
