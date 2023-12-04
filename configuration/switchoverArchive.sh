@@ -4,29 +4,35 @@
 # file and then reloading Httpd.
 # Crontab for every minute: * * * * * /path/to/switchoverArchive.sh
 help() {
-    echo "$0 PATH_TO_HTTPD_MACROS_FILE TIMEOUT_FIRST_CURL TIMEOUT_SECOND_CURL"
+    echo "$0 PATH_TO_HTTPD_MACROS_FILE TIMEOUT_FIRST_CURL_SECONDS TIMEOUT_SECOND_CURL_SECONDS"
     echo ""
     echo "Script used to automatically update the archive location (to the failover) in httpd if the primary is down."
-    echo "Pass in the path to the macros file containing the archive definitions; the timeout of the first curl check; and the timeout of the second curl check."
+    echo "Pass in the path to the macros file containing the archive definitions;"
+    echo "the timeout of the first curl check in seconds; and the timeout of the second curl check, also in seconds."
     exit 2
 }
 
 if [ $# -eq 0 ]; then
     help
+    exit 2
 fi
 
 MACROS_PATH=$1
 # Connection timeouts for curl requests (the time waited for a connection to be established). The second should be longer
 # as we want to be confident the main archive is in fact "down" before switching.
-TIMEOUT1=$2
-TIMEOUT2=$3
+TIMEOUT1_IN_SECONDS=$2
+TIMEOUT2_IN_SECONDS=$3
 # The following line checks if all the strings in "search" are present at the beginning of their own line.  
-$( awk -v search='Define PRODUCTION_ARCHIVE,Define ARCHIVE_IP,Define ARCHIVE_FAILOVER_IP'  'BEGIN{numStrings=split(search,temp,",")}{for (i in temp) {if (index($0,temp[i]) == 1) {numStrings-- ; delete temp[i] } }} END{ exit (numStrings ? 1 : 0)} ' ${MACROS_PATH})    # $0 is the whole line; 'index' command returns the index of arg 2 in arg 1 (indexing starts at 1) 
-if [[ $? -ne 0 ]]; then
-    logger -t archive "Necessary variables not found in macros"
-    notify-operators "Macros file does not contain definitions for the archive and failover IPs" 
-    exit 1
-fi
+for i in "^Define PRODUCTION_ARCHIVE\>" \
+         "^Define ARCHIVE_IP [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
+         "^Define ARCHIVE_FAILOVER_IP [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
+do
+    if ! grep -q "${i}" "${MACROS_PATH}"; then
+      logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
+      notify-operators "Macros file does not contain proper definitions for the archive and failover IPs. Expression not matched: ${i}" 
+      exit 1
+    fi
+done
 # These next lines get the current ip values for the archive and failover, plus they store the value of production,
 # which is a variable pointing to either the primary or failover value.
 archiveIp="$(sed -n -e 's/^Define ARCHIVE_IP \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
@@ -41,6 +47,12 @@ else
     alreadyHealthy=0
     logger -t archive "currently unhealthy"
 fi
+
+setProduction() {
+    # parameter $1: the name of the variable holding the IP of the archive instance to switch to
+    sed -i -e "s/^Define PRODUCTION_ARCHIVE\>.*$/Define PRODUCTION_ARCHIVE \${${1}}/" ${MACROS_PATH}
+}
+
 # Sets the production value to point to the variable defining the main archive IP, provided it isn't already set.
 setProductionMainIfNotSet() {
     if [[ $alreadyHealthy -eq 0 ]]
@@ -48,7 +60,7 @@ setProductionMainIfNotSet() {
         # currently unhealthy
         # set production to archive
         logger -t archive "Healthy: setting production to main archive"
-        sed -i -e   "s/^Define PRODUCTION_ARCHIVE .*/Define PRODUCTION_ARCHIVE \${ARCHIVE_IP}/"  ${MACROS_PATH}
+        setProduction ARCHIVE_IP
         systemctl reload httpd
         notify-operators "Healthy: main archive online"
     else
@@ -62,7 +74,7 @@ setFailoverIfNotSet() {
     then
         # Set production to failover if not already. Separate if statement in case the curl statement
         # fails but the production is already set to point to the backup
-        sed -i -e  "s/^Define PRODUCTION_ARCHIVE .*/Define PRODUCTION_ARCHIVE \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
+        setProduction ARCHIVE_FAILOVER_IP
         logger -t archive "Unhealthy: second check failed, switching to failover"
         systemctl reload httpd
         notify-operators "Unhealthy: main archive offline, failover in place"
@@ -72,11 +84,11 @@ setFailoverIfNotSet() {
 }
 
 logger -t archive "begin check"
-curl -s --connect-timeout ${TIMEOUT1} "http://${archiveIp}:8888/gwt/status" >> /dev/null
+curl -s --connect-timeout ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:8888/gwt/status" >> /dev/null
 if [[ $? -ne 0 ]]
 then
     logger -t archive "first check failed"
-    curl -s --connect-timeout ${TIMEOUT2} "http://${archiveIp}:8888/gwt/status" >> /dev/null
+    curl -s --connect-timeout ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:8888/gwt/status" >> /dev/null
     if [[ $? -ne 0 ]]
     then
         setFailoverIfNotSet
