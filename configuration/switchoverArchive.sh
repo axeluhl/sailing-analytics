@@ -20,6 +20,13 @@ MACROS_PATH=$1
 # as we want to be confident the main archive is in fact "down" before switching.
 TIMEOUT1=$2
 TIMEOUT2=$3
+# The following line checks if all the strings in "search" are present at the beginning of their own line.  
+$( awk -v search='Define PRODUCTION_ARCHIVE,Define ARCHIVE_IP,Define ARCHIVE_FAILOVER_IP'  'BEGIN{numStrings=split(search,temp,",")}{for (i in temp) {if (index($0,temp[i]) == 1) {numStrings-- ; delete temp[i] } }} END{ exit (numStrings ? 1 : 0)} ' ${MACROS_PATH})    # $0 is the whole line; 'index' command returns the index of arg 2 in arg 1 (indexing starts at 1) 
+if [[ $? -ne 0 ]]; then
+    logger -t archive "Necessary variables not found in macros"
+    notify-operators "Macros file does not contain definitions for the archive and failover IPs" 
+    exit 1
+fi
 # These next lines get the current ip values for the archive and failover, plus they store the value of production,
 # which is a variable pointing to either the primary or failover value.
 archiveIp="$(sed -n -e 's/^Define ARCHIVE_IP \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
