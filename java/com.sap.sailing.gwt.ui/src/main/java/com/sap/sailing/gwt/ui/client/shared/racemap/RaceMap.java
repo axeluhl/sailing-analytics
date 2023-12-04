@@ -3081,6 +3081,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
         if (selectedDetailType != null && !selectedDetailTypeChanged) {
+            // FIXME bug5921: loading of new (maybe first) detailValues will happen only after having called redraw() below; detailValues may still be null at this point
             fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
         }
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
@@ -3095,7 +3096,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
-        redraw();
+        redraw(); 
     }
     
     @Override
@@ -3457,15 +3458,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void onColorMappingChanged() {
         metricOverlay.updateLegend(fixesAndTails.getDetailValueBoundaries(), tailColorMapper, selectedDetailType);
-        for (CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
-            ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
+        for (final CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
+            final ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
             fixesAndTails.getTail(competitor).setOptions(options);
         }
     }
 
     @Override
     public ColorlineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode) {
-        ColorlineOptions options = new ColorlineOptions();
+        final ColorlineOptions options = new ColorlineOptions();
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
@@ -3478,14 +3479,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         case SELECTED:
             options.setColorMode(ColorlineMode.POLYCHROMATIC);
             options.setColorProvider(i -> {
+                final String resultColor;
+                final Double detailValue;
                 // If a DetailType has been selected and we are not currently waiting for the first update with the new values
-                if (selectedDetailType != null && !selectedDetailTypeChanged) {
-                    Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
-                    if (detailValue != null) {
-                        return tailColorMapper.getColor(detailValue);
-                    }
+                if (selectedDetailType != null && !selectedDetailTypeChanged && (detailValue = fixesAndTails.getDetailValueAt(competitor, i)) != null) {
+                    resultColor = tailColorMapper.getColor(detailValue);
+                } else {
+                    resultColor = competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
                 }
-                return competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
+                return resultColor;
             });
             options.setStrokeWeight(2);
             break;

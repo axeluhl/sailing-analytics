@@ -603,11 +603,11 @@ public class FixesAndTails {
      */
     protected Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
             Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds, boolean detailTypeChanged) {
-        Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
-        Map<CompetitorDTO, Date> from = new HashMap<>();
-        Map<CompetitorDTO, Date> to = new HashMap<>();
-        Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<>();
-        for (CompetitorDTO competitor : competitorsToShow) {
+        final Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
+        final Map<CompetitorDTO, Date> from = new HashMap<>();
+        final Map<CompetitorDTO, Date> to = new HashMap<>();
+        final Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<>();
+        for (final CompetitorDTO competitor : competitorsToShow) {
             final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
             final Date fromDate;
             final Date toDate;
@@ -687,11 +687,12 @@ public class FixesAndTails {
     /**
      * Searches a competitor's shown fixes (firstShownFix to lastShownFix but usually a smaller range since many fixes
      * have already been searched by a previous iteration) for the smallest and largest detailValue.
-     * @param competitor {@link CompetitorDTO} competitor whose tail to search in.
+     * 
+     * @param competitor
+     *            {@link CompetitorDTO} competitor whose tail to search in.
      */
     protected void searchMinMaxDetailValue(CompetitorDTO competitor) {
         Integer startIndex = null;
-        
         double min = 0;
         boolean minSet = false;
         int minIndex = -1;
@@ -706,7 +707,6 @@ public class FixesAndTails {
                 minSet = true;
             }
         }
-        
         double max = 0;
         boolean maxSet = false;
         int maxIndex = -1;
@@ -725,7 +725,6 @@ public class FixesAndTails {
                 maxSet = true;
             }
         }
-
         // If the startIndex has not been reset to the beginning of the shown range because the min/max value has just
         // left shown range it will now be set to the first not already searched index
         if (startIndex == null) {
@@ -742,14 +741,12 @@ public class FixesAndTails {
             if (fixes.get(competitor).size() == 0) return;
             startIndex = 0;
         }
-
         int endIndex = lastShownFix.containsKey(competitor) && lastShownFix.get(competitor) != null
                     && lastShownFix.get(competitor).get() != null && lastShownFix.get(competitor).get() != -1 ?
                     lastShownFix.get(competitor).get() : fixes.get(competitor).size() - 1;
-
         List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(competitor);
         for (int i = startIndex; i <= endIndex; i++) {
-            Double value = fixesForCompetitor.get(i).detailValue;
+            final Double value = fixesForCompetitor.get(i).detailValue;
             if (value != null) {
                 if (!minSet) {
                     min = value;
@@ -771,9 +768,12 @@ public class FixesAndTails {
                 }
             }
         }
-
-        if (minIndex > -1) minDetailValueFix.put(competitor, minIndex);
-        if (maxIndex > -1) maxDetailValueFix.put(competitor, maxIndex);
+        if (minIndex > -1) {
+            minDetailValueFix.put(competitor, minIndex);
+        }
+        if (maxIndex > -1) {
+            maxDetailValueFix.put(competitor, maxIndex);
+        }
         lastSearchedFix.put(competitor, endIndex);
     }
 
@@ -806,9 +806,12 @@ public class FixesAndTails {
                 int index = minDetailValueFix.get(competitor);
                 if (!fixes.containsKey(competitor) || fixes.get(competitor) == null || index >= fixes.get(competitor).size()) {
                     minDetailValueFix.put(competitor, -1);
-                } else if (!minSet || fixes.get(competitor).get(index).detailValue < min) {
-                    min = fixes.get(competitor).get(index).detailValue;
-                    minSet = true;
+                } else {
+                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixes.get(competitor).get(index);
+                    if (!minSet || competitorFix.detailValue != null && competitorFix.detailValue < min) {
+                        min = competitorFix.detailValue;
+                        minSet = true;
+                    }
                 }
             }
             // Find maximum value across all boats
@@ -816,13 +819,15 @@ public class FixesAndTails {
                 int index = maxDetailValueFix.get(competitor);
                 if (!fixes.containsKey(competitor) || fixes.get(competitor) == null || index >= fixes.get(competitor).size()) {
                     maxDetailValueFix.put(competitor, -1);
-                } else if (!maxSet || fixes.get(competitor).get(index).detailValue > max) {
-                    max = fixes.get(competitor).get(index).detailValue;
-                    maxSet = true;
+                } else {
+                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixes.get(competitor).get(index);
+                    if (!maxSet || competitorFix.detailValue != null && competitorFix.detailValue > max) {
+                        max = competitorFix.detailValue;
+                        maxSet = true;
+                    }
                 }
             }
         }
-
         // If possible update detailValueBoundaries
         if (minSet && maxSet) {
             detailValueBoundaries.setMinMax(min, max);
