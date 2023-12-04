@@ -370,12 +370,14 @@ public class LandscapeManagementPanel extends SimplePanel {
                 StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                 e -> removeApplicationReplicaSets(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         disableButtonWhenLocalReplicaSetIsSelected(removeApplicationReplicaSetButton, userService);
+        disableButtonWhenArchive(removeApplicationReplicaSetButton);
         applicationReplicaSetsButtonPanel.add(removeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> upgradeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
                 stringMessages.upgrade(), applicationReplicaSetsTable.getSelectionModel(),
                 e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         disableButtonWhenLocalReplicaSetIsSelected(upgradeApplicationReplicaSetButton, userService);
+        disableButtonWhenArchive(upgradeApplicationReplicaSetButton);
         applicationReplicaSetsButtonPanel.add(upgradeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> stopReplicatingAndUnregisterMasterButton = new SelectedElementsCountingButton<>(
                 stringMessages.stopReplicating(), applicationReplicaSetsTable.getSelectionModel(),
@@ -520,6 +522,11 @@ public class LandscapeManagementPanel extends SimplePanel {
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
         applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
                 !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO->arsDTO.isLocalReplicaSet(userService)).findAny().isPresent()));
+    }
+    
+    private void disableButtonWhenArchive(Button button) {
+        applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
+                !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO-> arsDTO.getName().contains(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME)).findAny().isPresent()));
     }
     
     private void validatePassphrase(StringMessages stringMessages, AsyncCallback<Boolean> callback) {

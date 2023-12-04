@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sse.gwt.client.IconResources;
@@ -45,7 +46,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
         @SuppressWarnings("unchecked")
         final SailingApplicationReplicaSetDTO<String> applicationReplicaSet = (SailingApplicationReplicaSetDTO<String>) getContext().getKey();
         final List<ImageSpec> result = new ArrayList<>();
-        if (!applicationReplicaSet.isLocalReplicaSet(userService)) {
+        if (!applicationReplicaSet.isLocalReplicaSet(userService) && !applicationReplicaSet.getName().contains(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME)) {
             result.add(new ImageSpec(ACTION_ARCHIVE, stringMessages.archive(), IconResources.INSTANCE.archiveIcon()));
             result.add(new ImageSpec(ACTION_REMOVE, stringMessages.remove(), IconResources.INSTANCE.removeIcon()));
         }
@@ -56,7 +57,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
         result.add(new ImageSpec(ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER,
                 stringMessages.launchAnotherReplicaSetOnThisMaster(),
                 IconResources.INSTANCE.launchAnotherReplicaSetOnThisMasterIcon()));
-        if (!applicationReplicaSet.isLocalReplicaSet(userService)) {
+        if (!applicationReplicaSet.isLocalReplicaSet(userService) && !applicationReplicaSet.getName().contains(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME)) {
             result.add(new ImageSpec(ACTION_UPGRADE, stringMessages.upgrade(), IconResources.INSTANCE.refreshIcon()));
         }
         result.add(new ImageSpec(ACTION_ENSURE_ONE_REPLICA_THEN_STOP_REPLICATING_AND_REMOVE_MASTER_FROM_TARGET_GROUPS,
@@ -68,7 +69,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
             result.add(new ImageSpec(ACTION_OPEN_SHARD_MANAGEMENT, stringMessages.openShardManagement(), IconResources.INSTANCE.shardManagementIcon()));
         }
         result.add(new ImageSpec(ACTION_SWITCH_TO_REPLICA_ON_SHARED_INSTANCE, stringMessages.switchToReplicaOnSharedInstance(), IconResources.INSTANCE.scaleDownIcon()));
-        if (!applicationReplicaSet.isLocalReplicaSet(userService)) {
+        if (!applicationReplicaSet.isLocalReplicaSet(userService)&& !applicationReplicaSet.getName().contains(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME)) {
             result.add(new ImageSpec(ACTION_MOVE_MASTER_TO_OTHER_INSTANCE, stringMessages.moveMasterToOtherInstance(), IconResources.INSTANCE.moveIcon()));
         }
         result.add(new ImageSpec(ACTION_SCALE_AUTO_SCALING_REPLICAS_UP_DOWN, stringMessages.scaleAutoScalingReplicasUpOrDown(), IconResources.INSTANCE.scaleIcon()));
