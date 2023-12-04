@@ -57,7 +57,6 @@ setProductionMainIfNotSet() {
     fi
 }
 
-
 setFailoverIfNotSet() {
     if [[ $alreadyHealthy -eq 1 ]]
     then
@@ -66,7 +65,7 @@ setFailoverIfNotSet() {
         sed -i -e  "s/^Define PRODUCTION_ARCHIVE .*/Define PRODUCTION_ARCHIVE \${ARCHIVE_FAILOVER_IP}/"  ${MACROS_PATH}
         logger -t archive "Unhealthy: second check failed, switching to failover"
         systemctl reload httpd
-        notify-operators "Unhealthy: main archive offline"
+        notify-operators "Unhealthy: main archive offline, failover in place"
     else
         logger -t archive "Unhealthy: second check still fails, failover already in use"
     fi
