@@ -16,30 +16,34 @@ if [ $# -eq 0 ]; then
     help
     exit 2
 fi
-
+#The names of the variables in the macros file.
+ARCHIVE_IP_NAME="ARCHIVE_IP"
+ARCHIVE_FAILOVER_IP_NAME="ARCHIVE_FAILOVER_IP"
+PRODUCTION_ARCHIVE_NAME="PRODUCTION_ARCHIVE"
 MACROS_PATH=$1
 # Connection timeouts for curl requests (the time waited for a connection to be established). The second should be longer
 # as we want to be confident the main archive is in fact "down" before switching.
 TIMEOUT1_IN_SECONDS=$2
 TIMEOUT2_IN_SECONDS=$3
-# The following line checks if all the strings in "search" are present at the beginning of their own line.  
-for i in "^Define PRODUCTION_ARCHIVE\>" \
-         "^Define ARCHIVE_IP [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
-         "^Define ARCHIVE_FAILOVER_IP [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
+# The following line checks if all the strings in "search" are present at the beginning of their own line. Note: grep uses BRE by default,
+# so the plus symbol must be escaped to refer to "one or more" of the previous character.
+for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
+         "^Define ${ARCHIVE_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
+         "^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
       logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
-      notify-operators "Macros file does not contain proper definitions for the archive and failover IPs. Expression not matched: ${i}" 
+      echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"  
       exit 1
     fi
 done
 # These next lines get the current ip values for the archive and failover, plus they store the value of production,
 # which is a variable pointing to either the primary or failover value.
-archiveIp="$(sed -n -e 's/^Define ARCHIVE_IP \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
-failoverIp="$(sed -n -e 's/^Define ARCHIVE_FAILOVER_IP \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
-productionIp="$(sed -n -e 's/^Define PRODUCTION_ARCHIVE \(.*\)/\1/p' ${MACROS_PATH} | tr -d '[:space:]')"
+archiveIp="$(sed -n -e "s/^Define ${ARCHIVE_IP_NAME} \(.*\)/\1/p" ${MACROS_PATH} | tr -d '[:space:]')"
+failoverIp="$(sed -n -e "s/^Define ${ARCHIVE_FAILOVER_IP_NAME} \(.*\)/\1/p" ${MACROS_PATH} | tr -d '[:space:]')"
+productionIp="$(sed -n -e "s/^Define ${PRODUCTION_ARCHIVE_NAME} \(.*\)/\1/p" ${MACROS_PATH} | tr -d '[:space:]')"
 # Checks if the macro.conf is set as healthy or unhealthy currently.
-if [[ "${productionIp}" == "\${ARCHIVE_IP}" ]]
+if [[ "${productionIp}" == "\${${ARCHIVE_IP_NAME}}" ]]
 then
     alreadyHealthy=1
     logger -t archive "currently healthy"
@@ -50,7 +54,7 @@ fi
 
 setProduction() {
     # parameter $1: the name of the variable holding the IP of the archive instance to switch to
-    sed -i -e "s/^Define PRODUCTION_ARCHIVE\>.*$/Define PRODUCTION_ARCHIVE \${${1}}/" ${MACROS_PATH}
+    sed -i -e "s/^Define ${PRODUCTION_ARCHIVE_NAME}\>.*$/Define ${PRODUCTION_ARCHIVE_NAME} \${${1}}/" ${MACROS_PATH}
 }
 
 # Sets the production value to point to the variable defining the main archive IP, provided it isn't already set.
@@ -60,9 +64,9 @@ setProductionMainIfNotSet() {
         # currently unhealthy
         # set production to archive
         logger -t archive "Healthy: setting production to main archive"
-        setProduction ARCHIVE_IP
+        setProduction ${ARCHIVE_IP_NAME}
         systemctl reload httpd
-        notify-operators "Healthy: main archive online"
+        echo "" | notify-operators "Healthy: main archive online"
     else
         # If already healthy then no reload or notification occurs.
         logger -t archive "Healthy: already set, no change needed"
@@ -74,10 +78,10 @@ setFailoverIfNotSet() {
     then
         # Set production to failover if not already. Separate if statement in case the curl statement
         # fails but the production is already set to point to the backup
-        setProduction ARCHIVE_FAILOVER_IP
+        setProduction ${ARCHIVE_FAILOVER_IP_NAME}
         logger -t archive "Unhealthy: second check failed, switching to failover"
         systemctl reload httpd
-        notify-operators "Unhealthy: main archive offline, failover in place"
+        echo "" | notify-operators "Unhealthy: main archive offline, failover in place"
     else
         logger -t archive "Unhealthy: second check still fails, failover already in use"
     fi
