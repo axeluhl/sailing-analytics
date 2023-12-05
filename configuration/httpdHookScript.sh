@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Purpose: Deployed as "post-receive" in a hooks dir of a bare git repo, so that upon a push, all those instances with a cetain tag
-# have a script triggered to update their local repos and then run another command within that repo. The user the hook
-# is installed on, must have aws credentials that don't need mfa.
+# Purpose: Deployed in a file named "post-receive", in the hooks dir of a bare git repo. Upon push completion, this script runs and
+# triggers an update to all instances' local repos (if the instance has a specific aws tag). A command is ran in the repo 
+# after the merge completes. The user, in which the bare repo and hook are installed, must have aws credentials, that
+# don't need mfa.
 
 TAG="TESTPROXY"
 DIR="/etc/httpd"
