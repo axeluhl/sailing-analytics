@@ -14,6 +14,8 @@ public class DetailTypeFormatter {
 	
     public static String format(DetailType detailType) {
         switch (detailType) {
+        case LEG_TACKTYPE_LONGTACK_SHORTTACK:
+            return stringMessages.tackType();
         case LEG_DISTANCE_TRAVELED:
             return stringMessages.distanceInMeters();
         case LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START:
@@ -505,6 +507,8 @@ public class DetailTypeFormatter {
             return stringMessages.degreesUnit();
         case EXPEDITION_RACE_MAST_BUTT:
             return stringMessages.millimetersUnit();
+        case LEG_TACKTYPE_LONGTACK_SHORTTACK:
+            return stringMessages.tackTypeUnit();
         // Cases for detail types without unit, so that an empty string is returned.
         case RACE_RANK:
         case REGATTA_RANK:
@@ -896,6 +900,8 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_LOAD_S:
         case EXPEDITION_RACE_MAST_BUTT:
             return "";
+        case LEG_TACKTYPE_LONGTACK_SHORTTACK:
+            return stringMessages.tackTypeTooltip();
         }
         return "";
     }
