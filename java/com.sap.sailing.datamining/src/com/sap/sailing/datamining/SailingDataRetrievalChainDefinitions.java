@@ -16,6 +16,7 @@ import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
@@ -34,6 +35,7 @@ import com.sap.sailing.datamining.impl.components.ManeuverRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.ManeuverSpeedDetailsRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.MarkPassingRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.RaceOfCompetitorRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.TackTypeSegmentRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
@@ -44,6 +46,7 @@ import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.datamining.shared.ManeuverSettingsImpl;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettingsImpl;
+import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
@@ -97,6 +100,12 @@ public class SailingDataRetrievalChainDefinitions {
         foilingSegmentsRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, FoilingSegmentRetrievalProcessor.class,
                 HasFoilingSegmentContext.class, FoilingSegmentsDataMiningSettings.class, FoilingSegmentsDataMiningSettings.createDefaultSettings(), "FoilingSegments");
         dataRetrieverChainDefinitions.add(foilingSegmentsRetrieverChainDefinition);
+        //
+        final DataRetrieverChainDefinition<RacingEventService, HasTackTypeSegmentContext> tackTypeSegmentsRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                raceOfCompetitorRetrieverChainDefinition, HasTackTypeSegmentContext.class, "tackTypeSegmentsRetrieverChainDefinition");
+        tackTypeSegmentsRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, TackTypeSegmentRetrievalProcessor.class,
+                HasTackTypeSegmentContext.class, TackTypeSegmentsDataMiningSettings.class, TackTypeSegmentsDataMiningSettings.createDefaultSettings(), "TackTypeSegments");
+        dataRetrieverChainDefinitions.add(tackTypeSegmentsRetrieverChainDefinition);
         //
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegContext> legRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasTrackedLegContext.class, "LegSailingDomainRetrieverChain");

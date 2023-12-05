@@ -40,6 +40,7 @@ public interface BravoFix extends SensorFix {
      * for a fix to be considered foiling.
      */
     boolean isFoiling(Distance minimumRideHeight);
+    boolean isTackType(Distance minimumRideHeight);
 
     @Statistic(messageKey="pitch", resultDecimals=1)
     Bearing getPitch();
