@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -34,6 +35,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -43,6 +45,7 @@ import com.sap.sse.common.Util;
  */
 public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private static final long serialVersionUID = -7060076837717432808L;
+    private static final Bearing MAX_REACHING_TOLERANCE_AWAY_FROM_WAYPOINT = new DegreeBearingImpl(10);
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
     private final Boat boat;
@@ -1241,5 +1244,42 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     private interface BravoTrackValueExtractor<R> {
         R getValue(BravoFixTrack<Competitor> track, TimePoint from, TimePoint to);
+    }
+    
+    @Override
+    public TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+        final TackType result;
+        final MarkPassing start = getMarkPassingForLegStart();
+        final MarkPassing end = getMarkPassingForLegEnd();
+        if (start != null && timePoint.after(start.getTimePoint()) && end != null
+                && timePoint.before(end.getTimePoint())) {
+            // TODO: missing solution for cases with PassingInstruction Offset and FixedBearing
+            final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(),
+                    timePoint);
+            final Wind wind = cache.getWind(getTrackedRace(), competitor, timePoint);
+            final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
+                    /* extrapolate */ true);
+            if (waypointPosition != null && wind != null && competitorPosition != null) {
+                final LegType legType = cache.getLegType(getTrackedLeg(), timePoint);
+                final Bearing windBearing = legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing();
+                final Bearing cog = getSpeedOverGround(timePoint).getBearing();
+                final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
+                // on reaching legs we won't compare to COG/Wind difference but to a fixed threshold, assuming
+                // that not sailing straight towards the next waypoint is a risk, conceptually making it the short tack
+                final Bearing diffWindToBoat = legType == LegType.REACHING ? MAX_REACHING_TOLERANCE_AWAY_FROM_WAYPOINT :
+                    windBearing.getDifferenceTo(cog).abs();
+                final Bearing diffMarkToBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
+                if (diffMarkToBoat.compareTo(diffWindToBoat) < 0) {
+                    result = TackType.LONGTACK;
+                } else {
+                    result = TackType.SHORTTACK;
+                }
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 }
