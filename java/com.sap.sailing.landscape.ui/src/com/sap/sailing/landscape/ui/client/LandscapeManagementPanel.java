@@ -393,10 +393,12 @@ public class LandscapeManagementPanel extends SimplePanel {
                 stringMessages.switchToReplicaOnSharedInstance(), applicationReplicaSetsTable.getSelectionModel(),
                 e->switchToReplicaOnSharedInstance(stringMessages, applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
+        disableButtonWhenArchive(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> scaleAutoScalingReplicasUpDown = new SelectedElementsCountingButton<>(
                 stringMessages.scaleAutoScalingReplicasUpOrDown(), applicationReplicaSetsTable.getSelectionModel(),
                 e->scaleAutoScalingReplicasUpDown(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        disableButtonWhenArchive(scaleAutoScalingReplicasUpDown);
         applicationReplicaSetsButtonPanel.add(scaleAutoScalingReplicasUpDown);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
@@ -526,7 +528,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     
     private void disableButtonWhenArchive(Button button) {
         applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
-                !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO-> arsDTO.getName().contains(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME)).findAny().isPresent()));
+                !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO-> arsDTO.isArchive()).findAny().isPresent()));
     }
     
     private void validatePassphrase(StringMessages stringMessages, AsyncCallback<Boolean> callback) {
