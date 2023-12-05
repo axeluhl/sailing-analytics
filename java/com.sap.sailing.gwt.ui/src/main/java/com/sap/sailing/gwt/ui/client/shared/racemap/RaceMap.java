@@ -516,11 +516,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private DetailType selectedDetailType;
     /**
      * Indicates if {@link #selectedDetailType} has changed. If that is the case {@link FixesAndTails} needs to
-     * overwrite its cache with new data and needs to reset its internal {@link ValueRangeFlexibleBoundaries} tracking
-     * the {@link DetailType} values.
-     * If set to {@code true} {@link #refreshMap(Date, long, boolean)} will pass the information along and set it back
-     * to {@code false} by {@link #updateBoatPositions(Date, long, Map, Iterable, Map, boolean, boolean)} once the
-     * first update with the new DetailType values arrives at the client.
+     * overwrite its cache with new data and needs to reset its internal {@link ValueRangeFlexibleBoundaries} which is
+     * tracking the {@link DetailType} values. If set to {@code true}, {@link #refreshMap(Date, long, boolean)} will pass
+     * the information along and set it back to {@code false} by
+     * {@link #updateBoatPositions(Date, long, Map, Iterable, Map, boolean, boolean)} once the first update with the new
+     * {@link DetailType} values arrives at the client.
      */
     private boolean selectedDetailTypeChanged;
     /**
@@ -1546,6 +1546,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
+                        GWT.log("Processing race map data request "+requestID);
                         if (raceMapDataDTO.raceCompetitorIdsAsStrings != null) {
                             try {
                                 raceCompetitorSet.setIdsAsStringsOfCompetitorsInRace(raceMapDataDTO.raceCompetitorIdsAsStrings);
@@ -1652,7 +1653,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     /**
      * @param hasTailOverlapForCompetitor
-     *            if for a competitor whose fixes are provided in <code>fixesForCompetitors</code> this holds
+     *            if for a competitor whose fixes are provided in <code>boatData</code> this holds
      *            <code>false</code>, any fixes previously stored for that competitor are removed, and the tail is
      *            deleted from the map (see {@link #removeTail(CompetitorWithBoatDTO)}); the new fixes are then added to the
      *            {@link #fixes} map, and a new tail will have to be constructed as needed (does not happen here). If
@@ -1678,7 +1679,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData,
             boolean updateTailsOnly, boolean detailTypeChanged) {
         if (zoomingAnimationsInProgress == 0) {
-            fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis, detailTypeChanged);
+            fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, transitionTimeInMillis, detailTypeChanged);
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
                     getCompetitorsToShow(), updateTailsOnly);
@@ -2899,6 +2900,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     selectedDetailType = DetailType.valueOfString(value);
                     metricOverlay.setVisible(true);
                     if (!competitorSelection.isSelected(competitor)) {
+                        // FIXME bug5921: changing the competitor selection already triggers the redraw() with re-loading the data; however, selectedDetailTypeChanged gets set only afterwards, see below...
                         competitorSelection.setSelected(competitor, true);
                     }
                 }

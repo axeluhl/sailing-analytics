@@ -251,8 +251,8 @@ public class FixesAndTails {
      * 
      */
     protected void updateFixes(Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> fixesForCompetitors,
-            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, //TODO Not being used
-            long timeForPositionTransitionMillis, boolean detailTypeChanged) {
+            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, long timeForPositionTransitionMillis,
+            boolean detailTypeChanged) {
         if (detailTypeChanged) {
             resetDetailValueSearch();
         }
@@ -686,7 +686,9 @@ public class FixesAndTails {
 
     /**
      * Searches a competitor's shown fixes (firstShownFix to lastShownFix but usually a smaller range since many fixes
-     * have already been searched by a previous iteration) for the smallest and largest detailValue.
+     * have already been searched by a previous iteration) for the smallest and largest detailValue.<p>
+     * 
+     * FIXME bug5921: this seems to assume that if additional fixes have been loaded then they are newer than all fixes loaded before; but this may be false as we may move backwards in time...
      * 
      * @param competitor
      *            {@link CompetitorDTO} competitor whose tail to search in.
