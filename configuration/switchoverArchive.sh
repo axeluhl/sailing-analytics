@@ -11,7 +11,7 @@ help() {
     echo "the timeout of the first curl check in seconds; and the timeout of the second curl check, also in seconds."
     exit 2
 }
-
+# $# is the number of arguments
 if [ $# -eq 0 ]; then
     help
 fi
@@ -28,13 +28,17 @@ TIMEOUT2_IN_SECONDS=$3
 # The following line checks if all the strings in "search" are present at the beginning of their own line. Note: grep uses BRE by default,
 # so the plus symbol must be escaped to refer to "one or more" of the previous character.
 for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
-         "^Define ${ARCHIVE_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
-         "^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
+"^Define ${ARCHIVE_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
+"^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
-      logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
-      echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"  
-      exit 1
+        message="Necessary variable assignment pattern ${i} not found in macros"
+        $(tail -n15 /var/log/messages | grep -q -F "$message") 
+        if [[ "$?" -ne 0 ]]; then
+            echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
+        fi       
+        logger -t archive "$message"
+        exit 1
     fi
 done
 # These next lines get the current ip values for the archive and failover, plus they store the value of production,
@@ -88,7 +92,7 @@ setFailoverIfNotSet() {
 }
 
 logger -t archive "begin check"
-# --fail option ensures that, if a server error is returned (ie. 5xx/4xx status code), then the status code (stored in $?) will be non zero. 
+# --fail option ensures that, if a server error is returned (ie. 5xx/4xx status code), then the status code (stored in $?) will be non zero.
 # -L follows redirects
 curl -s -L --fail --connect-timeout ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
 if [[ $? -ne 0 ]]
