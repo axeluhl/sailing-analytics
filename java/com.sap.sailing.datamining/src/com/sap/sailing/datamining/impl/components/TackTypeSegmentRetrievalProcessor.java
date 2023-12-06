@@ -11,8 +11,10 @@ import com.sap.sailing.datamining.impl.data.BravoFixTrackWithContext;
 import com.sap.sailing.datamining.impl.data.TackTypeSegmentWithContext;
 import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -55,12 +57,13 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                         if (isAborted()) {
                             break;
                         }
-                        final boolean currentFixIsTackType = 
-                                (bravoFix.isTackType(settings.getMinimumRideHeight()) &&
-                                        (settings.getMinimumSpeedForTackType() == null || settings.getMinimumSpeedForTackType().compareTo(
-                                                element.getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor()).getEstimatedSpeed(bravoFix.getTimePoint())) <= 0)) ||
-                                (settings.getMaximumSpeedNotTackType() != null && settings.getMaximumSpeedNotTackType().compareTo(
-                                        element.getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor()).getEstimatedSpeed(bravoFix.getTimePoint())) <= 0);
+                        TrackedLegOfCompetitor trackedLegComp = element.getTrackedRaceContext().getTrackedRace().getTrackedLeg(element.getCompetitor(), bravoFix.getTimePoint());
+                        boolean currentFixIsTackType;
+                        try {
+                            currentFixIsTackType = (bravoFix.isTackType(trackedLegComp.getTackType(bravoFix.getTimePoint())));
+                        } catch (NoWindException e) {
+                            currentFixIsTackType=false;
+                        }
                         if (currentFixIsTackType != isTackType) {
                             if (currentFixIsTackType) {
                                 startOfSegment = bravoFix.getTimePoint();
@@ -68,7 +71,7 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                                 if (settings.getMinimumTackTypeSegmentDuration() == null ||
                                         startOfSegment.until(last).compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
                                     addOrMergeTackTypeSegment(element, tackTypeSegments, bravoFixTrack, startOfSegment,
-                                            last /* don't include the last interval ending at the non-foiling fix */);
+                                            last /* don't include the last interval ending at the non-TackType fix */);
                                 }
                                 startOfSegment = null;
                             }

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.tracking;
 
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -40,11 +41,12 @@ public interface BravoFix extends SensorFix {
      * for a fix to be considered foiling.
      */
     boolean isFoiling(Distance minimumRideHeight);
-    boolean isTackType(Distance minimumRideHeight);
+    boolean isTackType(TackType tackType);
 
     @Statistic(messageKey="pitch", resultDecimals=1)
     Bearing getPitch();
 
     @Statistic(messageKey = "heel", resultDecimals = 1)
     Bearing getHeel();
+
 }
