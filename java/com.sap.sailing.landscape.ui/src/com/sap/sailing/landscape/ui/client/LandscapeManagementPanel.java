@@ -370,12 +370,14 @@ public class LandscapeManagementPanel extends SimplePanel {
                 StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                 e -> removeApplicationReplicaSets(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         disableButtonWhenLocalReplicaSetIsSelected(removeApplicationReplicaSetButton, userService);
+        disableButtonWhenArchive(removeApplicationReplicaSetButton);
         applicationReplicaSetsButtonPanel.add(removeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> upgradeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
                 stringMessages.upgrade(), applicationReplicaSetsTable.getSelectionModel(),
                 e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         disableButtonWhenLocalReplicaSetIsSelected(upgradeApplicationReplicaSetButton, userService);
+        disableButtonWhenArchive(upgradeApplicationReplicaSetButton);
         applicationReplicaSetsButtonPanel.add(upgradeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> stopReplicatingAndUnregisterMasterButton = new SelectedElementsCountingButton<>(
                 stringMessages.stopReplicating(), applicationReplicaSetsTable.getSelectionModel(),
@@ -391,10 +393,12 @@ public class LandscapeManagementPanel extends SimplePanel {
                 stringMessages.switchToReplicaOnSharedInstance(), applicationReplicaSetsTable.getSelectionModel(),
                 e->switchToReplicaOnSharedInstance(stringMessages, applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
+        disableButtonWhenArchive(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> scaleAutoScalingReplicasUpDown = new SelectedElementsCountingButton<>(
                 stringMessages.scaleAutoScalingReplicasUpOrDown(), applicationReplicaSetsTable.getSelectionModel(),
                 e->scaleAutoScalingReplicasUpDown(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        disableButtonWhenArchive(scaleAutoScalingReplicasUpDown);
         applicationReplicaSetsButtonPanel.add(scaleAutoScalingReplicasUpDown);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
@@ -520,6 +524,11 @@ public class LandscapeManagementPanel extends SimplePanel {
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
         applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
                 !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO->arsDTO.isLocalReplicaSet(userService)).findAny().isPresent()));
+    }
+    
+    private void disableButtonWhenArchive(Button button) {
+        applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
+                !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO-> arsDTO.isArchive()).findAny().isPresent()));
     }
     
     private void validatePassphrase(StringMessages stringMessages, AsyncCallback<Boolean> callback) {
