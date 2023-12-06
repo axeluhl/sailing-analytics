@@ -14,7 +14,6 @@ help() {
 
 if [ $# -eq 0 ]; then
     help
-    exit 2
 fi
 #The names of the variables in the macros file.
 ARCHIVE_IP_NAME="ARCHIVE_IP"
