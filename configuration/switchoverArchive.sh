@@ -19,6 +19,7 @@ fi
 ARCHIVE_IP_NAME="ARCHIVE_IP"
 ARCHIVE_FAILOVER_IP_NAME="ARCHIVE_FAILOVER_IP"
 PRODUCTION_ARCHIVE_NAME="PRODUCTION_ARCHIVE"
+ARCHIVE_PORT=8888
 MACROS_PATH=$1
 # Connection timeouts for curl requests (the time waited for a connection to be established). The second should be longer
 # as we want to be confident the main archive is in fact "down" before switching.
@@ -65,7 +66,7 @@ setProductionMainIfNotSet() {
         logger -t archive "Healthy: setting production to main archive"
         setProduction ${ARCHIVE_IP_NAME}
         systemctl reload httpd
-        echo "" | notify-operators "Healthy: main archive online"
+        echo "The main archive server is healthy again. Switching to it." | notify-operators "Healthy: main archive online"
     else
         # If already healthy then no reload or notification occurs.
         logger -t archive "Healthy: already set, no change needed"
@@ -80,18 +81,18 @@ setFailoverIfNotSet() {
         setProduction ${ARCHIVE_FAILOVER_IP_NAME}
         logger -t archive "Unhealthy: second check failed, switching to failover"
         systemctl reload httpd
-        echo "" | notify-operators "Unhealthy: main archive offline, failover in place"
+        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
     else
         logger -t archive "Unhealthy: second check still fails, failover already in use"
     fi
 }
 
 logger -t archive "begin check"
-curl -s --connect-timeout ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:8888/gwt/status" >> /dev/null
+curl -s --connect-timeout ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
 if [[ $? -ne 0 ]]
 then
     logger -t archive "first check failed"
-    curl -s --connect-timeout ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:8888/gwt/status" >> /dev/null
+    curl -s --connect-timeout ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
     if [[ $? -ne 0 ]]
     then
         setFailoverIfNotSet
