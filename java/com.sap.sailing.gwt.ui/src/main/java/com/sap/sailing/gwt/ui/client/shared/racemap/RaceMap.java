@@ -1501,7 +1501,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
             GET_RACE_MAP_DATA_CATEGORY,
             getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
-                                   ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged));
+                                   ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged, detailType, fromTimesForQuickCall, toTimesForQuickCall));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             timeRangeActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race,
@@ -1531,7 +1531,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Date newTime,
             final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
-            final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw, boolean detailTypeChanged) {
+            final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw, boolean detailTypeChanged,
+            DetailType detailType, Map<CompetitorDTO, Date> fromTimesForQuickCall, Map<CompetitorDTO, Date> toTimesForQuickCall) {
         remoteCallsInExecution.add(newTime);
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
             @Override
@@ -1546,7 +1547,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
-                        GWT.log("Processing race map data request "+requestID);
+                        GWT.log("Processing race map data request "+requestID+" with detail type "+detailType+"\n"+getFromAndToTimesAsString());
                         if (raceMapDataDTO.raceCompetitorIdsAsStrings != null) {
                             try {
                                 raceCompetitorSet.setIdsAsStringsOfCompetitorsInRace(raceMapDataDTO.raceCompetitorIdsAsStrings);
@@ -1608,12 +1609,27 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         zoomMapToNewBounds(zoomToBounds);
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     } else {
-                        GWT.log("Dropped result from getRaceMapData(...) because it was for request ID "+requestID+
-                                " while we already started processing request "+startedProcessingRequestID);
+                        GWT.log("Dropped result from getRaceMapData(...) with detail type "+detailType+
+                                " because it was for request ID "+requestID+
+                                " while we already started processing request "+startedProcessingRequestID+"\n"+
+                                getFromAndToTimesAsString());
                     }
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
                 }
+            }
+
+            private String getFromAndToTimesAsString() {
+                final StringBuilder result = new StringBuilder();
+                for (final Entry<CompetitorDTO, Date> from : fromTimesForQuickCall.entrySet()) {
+                    result.append(from.getKey().getName());
+                    result.append(": ");
+                    result.append(from.getValue());
+                    result.append("..");
+                    result.append(toTimesForQuickCall.get(from.getKey()));
+                    result.append("; ");
+                }
+                return result.toString();
             }
 
             private Map<CompetitorDTO, Double> getCompetitorsSpeedInKnotsMap(
