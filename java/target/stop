@@ -44,7 +44,7 @@ echo "Server process $SERVER_PID didn't die within ${KILL_TIMEOUT_IN_SECONDS}s a
 kill $SERVER_PID
 TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR=120
 seconds_counter=$TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR
-echo "Waiting up to $TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR for server process $SERVER_PID to disappear..."
+echo "Waiting up to ${TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR}s for server process $SERVER_PID to disappear..."
 while ((seconds_counter-- != 0)); do
   if [ ! -d /proc/$SERVER_PID ]; then
     echo "Server process $SERVER_PID disappeared after killing it. This took $(($TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR-$seconds_counter))s."
@@ -56,7 +56,7 @@ done
 echo "Server process $SERVER_PID did not die or disappear after SIGTERM. Trying SIGKILL..."
 kill -9 $SERVER_PID
 seconds_counter=$TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR
-echo "Waiting up to $TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR for server process $SERVER_PID to disappear after kill -SIGKILL..."
+echo "Waiting up to ${TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR}s for server process $SERVER_PID to disappear after kill -SIGKILL..."
 while ((seconds_counter-- != 0)); do
   if [ ! -d /proc/$SERVER_PID ]; then
     echo "Server process $SERVER_PID disappeared after killing it with SIGKILL. This took $(($TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR-$seconds_counter))s."
