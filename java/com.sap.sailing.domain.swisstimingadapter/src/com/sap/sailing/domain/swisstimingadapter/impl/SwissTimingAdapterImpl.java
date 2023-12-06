@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,14 +54,6 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     @Override
     public SwissTimingFactory getSwissTimingFactory() {
         return swissTimingFactory;
-    }
-
-    @Override
-    public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
-            int port) throws InterruptedException, UnknownHostException, IOException, ParseException {
-        List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
-        // TODO --> Frank: this needs to come from Manage2Sail and its JSON document somehow...
-        return result;
     }
 
     @Override

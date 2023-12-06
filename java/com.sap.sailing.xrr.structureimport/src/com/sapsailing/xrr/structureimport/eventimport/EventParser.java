@@ -24,7 +24,6 @@ public class EventParser {
         JSONObject jsonRoot;
         try {
             InputStreamReader streamReader = getStreamReader(url);
-            
             jsonRoot = (JSONObject) new JSONParser().parse(streamReader);
             String id = (String) jsonRoot.get("Id");
             String name = (String) jsonRoot.get("Name");

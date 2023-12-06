@@ -121,9 +121,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      */
     private long effectiveStepSize = -1;
     
-    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceDataForPrimary;
+    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> timeRangeActionsExecutorForCompetitorRaceDataForPrimary;
 
-    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceDataForSecondary;
+    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> timeRangeActionsExecutorForCompetitorRaceDataForSecondary;
 
     AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
@@ -281,13 +281,13 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
             ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder,
-            TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionExecutor) {
+            TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> timeRangeActionExecutor) {
         long effectiveStepSize = getEffectiveStepSize(from, to);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, effectiveStepSize, selectedDataTypeToRetrieve,
                 leaderboardGroupName, leaderboardGroupId, leaderboardName);
-        TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> dataLoadedCallback =
-                new TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO>() {
+        TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> dataLoadedCallback =
+                new TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>>() {
             @Override
             public void onSuccess(final CompetitorsRaceDataDTO result) {
                 GWT.log("Received complete result for getCompetitorsRaceData request "+
@@ -316,17 +316,17 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             }
 
             @Override
-            public Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipResult(CompetitorsRaceDataDTO result) {
-                final Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipped = new HashMap<>();
+            public Map<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> unzipResult(CompetitorsRaceDataDTO result) {
+                final Map<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> unzipped = new HashMap<>();
                 for (final CompetitorRaceDataDTO competitorRaceData : result.getAllRaceData()) {
-                    unzipped.put(competitorRaceData.getCompetitor(), new Triple<>(competitorRaceData,
-                            result.getRequestedFromTime(), result.getRequestedToTime()));
+                    unzipped.put(new Pair<>(competitorRaceData.getCompetitor(), result.getDetailType()),
+                            new Triple<>(competitorRaceData, result.getRequestedFromTime(), result.getRequestedToTime()));
                 }
                 return unzipped;
             }
 
             @Override
-            public CompetitorsRaceDataDTO zipSubResults(Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> subResultMap) {
+            public CompetitorsRaceDataDTO zipSubResults(Map<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> subResultMap) {
                 final DetailType detailType = subResultMap.values().stream().findFirst()
                         .map(competitorRaceDataWithDates -> competitorRaceDataWithDates.getA().getDetailType()).orElse(null);
                 final Date from = subResultMap.values().stream().findFirst()
@@ -334,8 +334,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 final Date to = subResultMap.values().stream().findFirst()
                         .map(competitorRaceDataWithDates -> competitorRaceDataWithDates.getC()).orElse(null);
                 final Map<CompetitorDTO, CompetitorRaceDataDTO> raceDataPerCompetitor = new HashMap<>();
-                for (final Entry<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> e : subResultMap.entrySet()) {
-                    raceDataPerCompetitor.put(e.getKey(), e.getValue().getA());
+                for (final Entry<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> e : subResultMap.entrySet()) {
+                    raceDataPerCompetitor.put(e.getKey().getA(), e.getValue().getA());
                 }
                 return new CompetitorsRaceDataDTO(detailType, from, to, raceDataPerCompetitor);
             }

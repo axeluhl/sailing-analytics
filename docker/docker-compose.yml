@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   sailing-analytics:
-    image: "docker.sapsailing.com:443/sapsailing:latest"
+    image: "docker.sapsailing.com/sapsailing:latest"
     ports:
       - "8888:8888"
       - "6666:6666"

@@ -62,7 +62,7 @@ public class DistanceBasedTwdTransitionImporter {
             // count progress each time the pair's first element changes:
             if (nextFixPair.getA() != previousFirstElementOfPair) {
                 windFixNumber++;
-                long percent = windFixNumber++ * 100 / numberOfWindFixes;
+                final long percent = windFixNumber++ * 100 / numberOfWindFixes;
                 if (percent > oldPercent) {
                     LoggingUtil.logInfo("Processing wind fix " + windFixNumber + "/" + numberOfWindFixes + " ("
                             + percent + "%) for distance dimension");
@@ -70,10 +70,10 @@ public class DistanceBasedTwdTransitionImporter {
                 }
                 previousFirstElementOfPair = nextFixPair.getA();
             }
-            double meters = nextFixPair.getA().getPosition().getDistance(nextFixPair.getB().getPosition()).getMeters();
+            final double meters = nextFixPair.getA().getPosition().getDistance(nextFixPair.getB().getPosition()).getMeters();
             if (meters <= MAX_DISTANCE_METERS && meters >= MIN_DISTANCE_METERS) {
-                double twdChange = nextFixPair.getA().getBearing().getDifferenceTo(nextFixPair.getB().getBearing()).getDegrees();
-                SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(meters, twdChange);
+                double twdChangeInDegrees = nextFixPair.getA().getBearing().getDifferenceTo(nextFixPair.getB().getBearing()).getDegrees();
+                SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(meters, twdChangeInDegrees);
                 distanceBasedTwdTransitionPersistenceManager.add(entry);
                 totalValuesCount++;
             }

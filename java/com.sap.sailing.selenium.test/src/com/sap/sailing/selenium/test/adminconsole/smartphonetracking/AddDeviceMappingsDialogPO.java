@@ -40,8 +40,6 @@ public class AddDeviceMappingsDialogPO extends DataEntryDialogPO {
     }
     
     public String getQrCodeUrl(String matcherPattern) {
-//        Wait<WebDriver> wait = new WebDriverWait(driver, 10);
-//        wait.until(ExpectedConditions.visibilityOf(qrCodeUrl));
         waitUntil(webDriver -> Pattern.compile(matcherPattern).matcher(qrCodeUrl.getText()).matches());
         return qrCodeUrl.getText();
     }    

@@ -2,15 +2,22 @@
 
 ## TL;DR
 
-- Launch MongoDB replica for ``archive`` replica set (see [here](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:))
-- Wait until MongoDB replica is in ``SECONDARY`` state
+- Optionally, to accelerate DB reads, launch MongoDB replica for ``archive`` replica set (see [here](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:)); wait until MongoDB replica is in ``SECONDARY`` state
 - Launch "more like this" based on existing primary archive, adjusting the ``INSTALL_FROM_RELEASE`` user data entry to the release of choice and the ``Name`` tag to "SL Archive (New Candidate)"
-- Wait until the new instance is done with its background tasks and CPU utilization goes to 0% (approximately 24h)
+- Wait until the new instance is done with its background tasks and CPU utilization goes to 0% (approximately 36h)
+- Create an entry in the reverse proxy's ``/etc/httpd/conf.d/001-events.conf`` file like this:
+```
+  Use Plain archive-candidate.sapsailing.com 172.31.46.203 8888
+```
+with ``172.31.46.203`` being an example of the internal IP address your new archive candidate instance got assigned.
 - Compare server contents, either with ``compareServers`` script or through REST API, and fix any differences
+```
+  java/target/compareServers -ael https://www.sapsailing.com https://archive-candidate.sapsailing.com
+```
 - Do some spot checks on the new instance
 - Switch reverse proxy by adjusting ``ArchiveRewrite`` macro under ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` followed by ``service httpd reload``
-- Terminate old fail-over EC2 instance
-- adjust Name tags for what is now the fail-over and what is now the primary archive server in EC2 console
+- Terminate old fail-over EC2 instance; you will have to disabel its termination protection first.
+- Adjust Name tags for what is now the fail-over and what is now the primary archive server in EC2 console
 
 [[_TOC_]]
 
@@ -61,6 +68,16 @@ INFO: Thread[MarkPassingCalculator for race R14 initialization,4,main]: Timeout 
 ```
 that will keep repeating. Watch out for the ``queued tasks`` count. It should be decreasing, and when done it should go down to 0 eventually.
 
+### Create a Temporary Mapping in ``/etc/httpd/conf.d/001-events.conf`` to Make New Server Accessible Before Switching
+
+Grab the internal IP address of your freshly launched archive server candidate (something like 172.31.x.x) and ensure you have a line of the form
+
+```
+    Use Plain archive-candidate.sapsailing.com 172.31.35.213 8888
+```
+
+in the file ``root@sapsailing.com:/etc/httpd/conf.d/001-events.conf``, preferably towards the top of the file where it can be quickly found. Save the changes and check the configuration using the ``apachectl configtest`` command. It should give an output saying ``Syntax OK``. Only in this case reload the configuration by issuing the ``service httpd reload`` command as user ``root``. After this command has completed, you can watch your archive server candidate start up at [https://archive-candidate.sapsailing.com/gwt/status](https://archive-candidate.sapsailing.com/gwt/status) and make any changes necessary when the ``compareServers`` script (see below) notifies you of any differences that need handling.
+
 ### Comparing Contents with Primary ARCHIVE Server
 
 This is when you can move on to comparing the new candidate's contents with the primary archive server. Two ways are currently possible.
@@ -93,6 +110,8 @@ Differences are reported in a JSON response document. If no differences are foun
         }
 ```
 In this example, ``34.242.227.113`` would be the public IP address of the server that responded to the ``www.sapsailing.com`` request (the current primary archive server), and ``1.2.3.4`` would be the public IP address of your new candidate archive server. The response status will be ``200`` if the comparison was ok, and ``409`` otherwise. Handle differences are described for the ``compareServers`` script above.
+
+You can also trigger the REST API-based comparison by using the ``-a`` option of the ``compareServers`` script.
 
 ### Manual Spot Checks
 

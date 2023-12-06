@@ -43,7 +43,7 @@ public class RaceWindJsonSerializer extends AbstractTrackedRaceDataJsonSerialize
         List<WindSource> highQualityWindSources = trackedRace.getWindSources().stream()
                 .filter(windSource -> (windSource.getType() == WindSourceType.EXPEDITION
                         || windSource.getType() == WindSourceType.RACECOMMITTEE)
-                        && windSourcesToExclude.contains(windSource))
+                        && !windSourcesToExclude.contains(windSource))
                 .collect(Collectors.toList());
         JSONArray windSourcesJson = new JSONArray();
         TimePoint earliestTimePoint = null;
