@@ -15,7 +15,7 @@ with ``172.31.46.203`` being an example of the internal IP address your new arch
   java/target/compareServers -ael https://www.sapsailing.com https://archive-candidate.sapsailing.com
 ```
 - Do some spot checks on the new instance
-- Switch reverse proxy by adjusting ``ArchiveRewrite`` macro under ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` followed by ``service httpd reload``
+- Switch reverse proxy, by adjusting the archive IP definitions at the top of ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf``, followed by ``service httpd reload``
 - Terminate old fail-over EC2 instance; you will have to disabel its termination protection first.
 - Adjust Name tags for what is now the fail-over and what is now the primary archive server in EC2 console
 
@@ -119,46 +119,46 @@ Following the mandatory automated content comparison you should do a few spot ch
 
 ### Switching in Reverse Proxy
 
-Once you are content with the quality of the new archive server candidate's contents it's time to switch. Technically, switching archive servers is done by adjusting the corresponding configuration in the central Apache reverse proxy server. You find this in ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` at the top. In the past we changed the macro directly and didn't have a failover setup to easily switch:
+Once you are content with the quality of the new archive server candidate's contents it's time to switch. Technically, switching archive servers is done by adjusting the corresponding configuration, in the central Apache reverse proxy server. You find this in ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` at the top.  The current macros file is as follows:
 
 ```
-Define ARCHIVE_IP xxx.xx.xx.xxx
-Define ARCHIVE_FAILOVER_IP xxx.xx.xx.xxx
-
-<Macro ArchiveRewrite>
-        Use Rewrite ${ARCHIVE_IP} 8888
-</Macro>
-```
-
-This was slow if we needed to switchover. As an improvement, which happened to also be neater, we added variables -- defined at the top -- including a variable for an up-and-running failover. In the case of an outage, we could comment the current archive and rename the failover (and then reload).  This way we could also switch back if the primary returns to healthy. However, we have worked on an automation script, which now changes the PRODUCTION_ARCHIVE value (see below) to point to the variables ARCHIVE_IP or ARCHIVE_FAILOVER_IP. Upon switching, it calls notify-operators, which can be found in /usr/local/bin: it's a symbollic link pointing to configuration/on-site-scripts/paris2024/notify-operators. The current macros file is as follows:
-```
-Define ARCHIVE_IP xxx.xx.xx.xxx
-Define ARCHIVE_FAILOVER_IP xxx.xx.xx.xxx
+Define ARCHIVE_IP 172.31.43.140
+Define ARCHIVE_FAILOVER_IP 172.31.9.8
 Define PRODUCTION_ARCHIVE ${ARCHIVE_IP}
 
 <Macro ArchiveRewrite>
         Use Rewrite ${PRODUCTION_ARCHIVE} 8888
 </Macro>
 ```
-When a new failover is setup, its IP must replace the ARCHIVE_FAILOVER_IP (a manual operation).
-The update script can be found in the git at  **switchoverArchive.sh**. This script has 1 parameter which is the path to the macros file, which contains the above macros (currently in /etc/httpd/conf.d/000-macros.conf). Run ```crontab -e``` to edit the cronjobs and add 
+
+When the new archive is ready, duplicate the "Define ARCHIVE_IP....." line; comment the first one; and then change the ip
+of the second one to be the upgraded archive's private IP. Set the "Define ARCHIVE_FAILOVER_IP....." value to the now old primary. Also make sure "Define PRODUCTION_ARCHIVE...." is a pointer to the archive value, by setting it to `${ARCHIVE_IP}`. It should look something like below (if the new IP
+is 172.31.7.12):
+
 ```
-* * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf"
+#Define ARCHIVE_IP 172.31.43.140  # comment the old primary
+Define ARCHIVE_IP 172.31.7.12 # add the new upgraded item
+Define ARCHIVE_FAILOVER_IP 172.31.43.140  # the old primary
+Define PRODUCTION_ARCHIVE ${ARCHIVE_IP} #ensure this points to the new archive variable
+
+<Macro ArchiveRewrite>
+        Use Rewrite ${PRODUCTION_ARCHIVE} 8888
+</Macro>
 ```
-Then save and exit the editor.
+
+Then save and exit the editor. And enter `systemctl reload httpd`.
 Check that the new archive service is now active, e.g., by looking at [sapsailing.com/gwt/status](https://sapsailing.com/gwt/status). It should reflect the new release in its ``release`` field. 
-
-## Tests
-
-1. Healthy -> Stay healthy
-2. Healthy -> Unhealthy
-3. Unhealthy -> Stay unhealthy
-4. Unhealthy -> Become healthy
-5. Multiple cycles 
-6. Different order combinations: eg. 1,2,3,4; 2,4,1,2,3
 
 ### Clean up EC2 Names and Instances
 
 Next, you should terminate the previous fail-over archive server instance, and you need to adjust the ``Name`` tags in the EC2 console of the old primary to show that it's now the fail-over, and for the candidate to show that it's now the primary. Select the old fail-over instance and terminate it. Then change the name tag of "SL Archive" to "SL Archive (Failover)", then change that of "SL Archive (New Candidate)" to "SL Archive", and you're done for now....
 
-If you establish that the old primary will not recover you must setup a new failover and reconfigure the httpd and then run ```systemctl reload httpd ```, which won't drop any connections.
+If you need to upgrade this old failover then you can repeat the whole process.
+
+
+### How we automated the automatic failover of the reverse proxy
+
+We setup a script to be installed as a cronjob on the reverse proxy. It runs multiple curl checks to `/gwt/status` of the primary and if a healthy status code is returned then no change is made but, 
+if multiple unhealthy status codes are returned, the PRODUCTION_IP definition (found at the top of the macros) is altered to point to the failover definition. Then a reload occurs
+and various users are notified by email. If it returns to healthy, then the definition returns to point to the definition of the main archive: `${ARCHIVE_IP}`.
+Note that we only reload, edit or send emails if the "new" status differs to what the macros file already displays.
