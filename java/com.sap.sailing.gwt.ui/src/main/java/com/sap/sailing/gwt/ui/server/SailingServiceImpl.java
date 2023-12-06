@@ -177,6 +177,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -1883,6 +1884,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> result = new HashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        // let user see the detail values if and only if the detail type requires no permission for any action,
+        // or the current user has permission to this action on the leaderboard identified by the leaderboardName
+        // parameter:
+        final DetailType effectiveDetailTypeAfterPermissionCheck = detailType == null ? null :
+            detailType.getPremiumAction() == null || getSecurityService().hasCurrentUserExplicitPermissions(getLeaderboard(leaderboardName), detailType.getPremiumAction()) ?
+                        detailType : null;
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
@@ -1892,7 +1899,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     final TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     final TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     result.put(competitorDTO,
-                            new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(competitor, this, trackedRace, detailType,
+                            new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(competitor, this, trackedRace, effectiveDetailTypeAfterPermissionCheck,
                                     track, fromTimePoint, toTimePointExcluding, extrapolate,
                                     leaderboardName, leaderboardGroupName, leaderboardGroupId));
                 }
@@ -2568,11 +2575,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             TimePoint timePoint, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         Double result = null;
-        Course course = trackedRace.getRace().getCourse();
+        final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
+        trackedRace.lockForRead(trackedRace.getMarkPassings(competitor));
         try {
-            TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
+            final TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
             switch (dataType) {
+            case LEG_TACKTYPE_LONGTACK_SHORTTACK:
+                final TackType tackType;
+                if (trackedLeg != null && (tackType = trackedLeg.getTackType(timePoint, cache)) != null ) {
+                    result = tackType==TackType.LONGTACK ? 1.0 : -1.0;
+                } else {
+                    // trackedLeg == null || tackType == null;
+                    result = 0.0;
+                }
+                break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = trackedRace.getTrack(competitor);
                 if (sogTrack != null) {
@@ -2938,6 +2955,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
             return result;
         } finally {
+            trackedRace.unlockAfterRead(trackedRace.getMarkPassings(competitor));
             course.unlockAfterRead();
         }
     }
