@@ -112,6 +112,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasBravoFixContext.class);
         internalClasses.add(HasBravoFixTrackContext.class);
         internalClasses.add(HasFoilingSegmentContext.class);
+        internalClasses.add(HasTackTypeSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasManeuverSpeedDetailsContext.class);
         internalClasses.add(HasCompleteManeuverCurveWithEstimationDataContext.class);
@@ -120,7 +121,6 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasCompetitorDayContext.class);
         internalClasses.add(HasLeaderboardGroupContext.class);
         internalClasses.add(HasLeaderboardContext.class);
-        internalClasses.add(HasTackTypeSegmentContext.class);
         return internalClasses;
     }
 
