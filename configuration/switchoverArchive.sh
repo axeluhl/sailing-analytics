@@ -32,15 +32,16 @@ for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
          "^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
-        message="Necessary variable assignment pattern ${i} not found in macros"
-        timeSinceLastSameMessage=$(grep  -F "$message" /var/log/messages | tail -n1 | sed  -e "s/^\(...  . ..:..:..\) .*/\1/") 
+        messageSubject="Incorrect httpd macros"
+        timeSinceLastSameMessage=$(grep  -F "$messageSubject" /var/log/messages | tail -n1 | sed  -e "s/^\(...  . ..:..:..\) .*/\1/") 
         unixTimeSinceLastSameMessage=$(date "+%s" -d "${timeSinceLastSameMessage}")
         currentUnixTime=$(date +"%s")
-        timeCheck=$((2 * 60))
-        if [[ $((${currentUnixTime} - ${unixTimeSinceLastSameMessage})) -gt "$timeCheck" ]]; then
-            echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
+        # The amount of time (in seconds) that must have elapsed, since the last httpd macros email, before notifying operators again.
+        timeCheckSeconds=$((15 * 60))
+        if [[ $((${currentUnixTime} - ${unixTimeSinceLastSameMessage})) -gt "$timeCheckSeconds" ]]; then
+            echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "$messageSubject"
         fi       
-        logger -t archive "$message"
+        logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
         exit 1
     fi
 done
