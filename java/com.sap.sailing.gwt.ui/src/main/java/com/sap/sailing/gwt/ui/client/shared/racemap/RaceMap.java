@@ -1390,7 +1390,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        if (remoteCallsInExecution.add(newTime)) {
+        if (remoteCallsInExecution.add(newTime)) { // FIXME bug5921: this is for the GetWindInfoAction call but uses the same multi-set as is used for GetRaceMapDataAction
             if (currentlyDragging || zoomingAnimationsInProgress > 0) {
                 remoteCallsToSkipInExecution.add(newTime);
             }
@@ -1417,8 +1417,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         }
                     });
-        }
-        else {
+        } else {
             remoteCallsToSkipInExecution.add(newTime);
         }
     }
@@ -1474,6 +1473,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         for (Map.Entry<CompetitorDTO, Boolean> e : fromAndToAndOverlap.getC().entrySet()) {
             if (e.getValue()) {
                 // overlap: expect a quick response; add original request interval for the competitor
+                // TODO bug5921: however, this may not be true for most cases where the new time range exceeds the tail loaded so far into past *and* future;
+                // TODO bug5921: then, an overlap will be announced, but from/to will be the full tail length; should this still be called an overlap?
                 fromTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getA().get(e.getKey()));
                 toTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getB().get(e.getKey()));
             } else {
@@ -1537,6 +1538,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
             @Override
             public void onFailure(Throwable caught) {
+                remoteCallsInExecution.remove(newTime);
                 errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
             }
             
