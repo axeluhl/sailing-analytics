@@ -28,8 +28,8 @@ TIMEOUT2_IN_SECONDS=$3
 # The following line checks if all the strings in "search" are present at the beginning of their own line. Note: grep uses BRE by default,
 # so the plus symbol must be escaped to refer to "one or more" of the previous character.
 for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
-"^Define ${ARCHIVE_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
-"^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
+         "^Define ${ARCHIVE_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
+         "^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
         message="Necessary variable assignment pattern ${i} not found in macros"
