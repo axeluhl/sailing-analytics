@@ -22,6 +22,8 @@ ARCHIVE_FAILOVER_IP_NAME="ARCHIVE_FAILOVER_IP"
 PRODUCTION_ARCHIVE_NAME="PRODUCTION_ARCHIVE"
 ARCHIVE_PORT=8888
 MACROS_PATH=$1
+# The amount of time (in seconds) that must have elapsed, since the last httpd macros email, before notifying operators again.
+TIME_CHECK_SECONDS=$((15*60))
 # Connection timeouts for curl requests (the time waited for a connection to be established). The second should be longer
 # as we want to be confident the main archive is in fact "down" before switching.
 TIMEOUT1_IN_SECONDS=$2
@@ -33,12 +35,9 @@ for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
          "^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
-        unixTimeSinceLastSameMessage=$(date "+%s" -d "${timeSinceLastSameMessage}")
         currentUnixTime=$(date +"%s")
-        # The amount of time (in seconds) that must have elapsed, since the last httpd macros email, before notifying operators again.
-        timeCheckSeconds=$((15*60))
-        if [[ ! -f "/var/cache/lastIncorrectMacroUnixTime" ]] || [[ $((${currentUnixTime} - $(cat /var/cache/lastIncorrectMacroUnixTime) )) -gt "$timeCheckSeconds" ]]; then
-            echo $(date +"%s") > /var/cache/lastIncorrectMacroUnixTime
+        if [[ ! -f "/var/cache/lastIncorrectMacroUnixTime" ]] || [[ $((currentUnixTime - $(cat /var/cache/lastIncorrectMacroUnixTime) )) -gt "$TIME_CHECK_SECONDS" ]]; then
+            date +"%s" > /var/cache/lastIncorrectMacroUnixTime
             echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
         fi       
         logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
