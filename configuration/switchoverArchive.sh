@@ -9,6 +9,7 @@ help() {
     echo "Script used to automatically update the archive location (to the failover) in httpd if the primary is down."
     echo "Pass in the path to the macros file containing the archive definitions;"
     echo "the timeout of the first curl check in seconds; and the timeout of the second curl check, also in seconds."
+    echo "Make sure the combined time taken is not longer than the crontab."
     exit 2
 }
 # $# is the number of arguments
@@ -32,14 +33,13 @@ for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
          "^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
-        messageSubject="Incorrect httpd macros"
-        timeSinceLastSameMessage=$(grep  -F "$messageSubject" /var/log/messages | tail -n1 | sed  -e "s/^\(...  . ..:..:..\) .*/\1/") 
         unixTimeSinceLastSameMessage=$(date "+%s" -d "${timeSinceLastSameMessage}")
         currentUnixTime=$(date +"%s")
         # The amount of time (in seconds) that must have elapsed, since the last httpd macros email, before notifying operators again.
-        timeCheckSeconds=$((15 * 60))
-        if [[ $((${currentUnixTime} - ${unixTimeSinceLastSameMessage})) -gt "$timeCheckSeconds" ]]; then
-            echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "$messageSubject"
+        timeCheckSeconds=$((15*60))
+        if [[ ! -f "/var/cache/lastIncorrectMacroUnixTime" ]] || [[ $((${currentUnixTime} - $(cat /var/cache/lastIncorrectMacroUnixTime) )) -gt "$timeCheckSeconds" ]]; then
+            echo $(date +"%s") > /var/cache/lastIncorrectMacroUnixTime
+            echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
         fi       
         logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
         exit 1
