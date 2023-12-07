@@ -28,6 +28,7 @@ TIME_CHECK_SECONDS=$((15*60))
 # as we want to be confident the main archive is in fact "down" before switching.
 TIMEOUT1_IN_SECONDS=$2
 TIMEOUT2_IN_SECONDS=$3
+CACHE_LOCATION="/var/cache/lastIncorrectMacroUnixTime"
 # The following line checks if all the strings in "search" are present at the beginning of their own line. Note: grep uses BRE by default,
 # so the plus symbol must be escaped to refer to "one or more" of the previous character.
 for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
@@ -36,8 +37,8 @@ for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
         currentUnixTime=$(date +"%s")
-        if [[ ! -f "/var/cache/lastIncorrectMacroUnixTime" ]] || [[ $((currentUnixTime - $(cat /var/cache/lastIncorrectMacroUnixTime) )) -gt "$TIME_CHECK_SECONDS" ]]; then
-            date +"%s" > /var/cache/lastIncorrectMacroUnixTime
+        if [[ ! -f ${CACHE_LOCATION} || $((currentUnixTime - $(cat "${CACHE_LOCATION}") )) -gt "$TIME_CHECK_SECONDS" ]]; then
+            date +"%s" > "${CACHE_LOCATION}"
             echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
         fi       
         logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
