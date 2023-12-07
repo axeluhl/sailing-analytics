@@ -33,8 +33,11 @@ for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
 do
     if ! grep -q "${i}" "${MACROS_PATH}"; then
         message="Necessary variable assignment pattern ${i} not found in macros"
-        $(tail -n15 /var/log/messages | grep -q -F "$message") 
-        if [[ "$?" -ne 0 ]]; then
+        timeSinceLastSameMessage=$(grep  -F "$message" /var/log/messages | tail -n1 | sed  -e "s/^\(...  . ..:..:..\) .*/\1/") 
+        unixTimeSinceLastSameMessage=$(date "+%s" -d "${timeSinceLastSameMessage}")
+        currentUnixTime=$(date +"%s")
+        timeCheck=$((2 * 60))
+        if [[ $((${currentUnixTime} - ${unixTimeSinceLastSameMessage})) -gt "$timeCheck" ]]; then
             echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
         fi       
         logger -t archive "$message"
