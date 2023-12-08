@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.datamining.impl.data.GPSFixTrackWithContext;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -54,37 +56,52 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                 TackType currentFixTackType = null;
                 TimePoint last = null;
                 TimePoint startOfSegment = null;
+                TimePoint startFixOfLeg = startOfRace;
                 gpsFixTrack.lockForRead();
                 try {
-                    for (final GPSFix gpsFix : gpsFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) { //SCHLEIFE die durch alle gps fixes des rennen geht 
-                        if (isAborted()) {
-                            break;
+                    TrackedRace trackedRaceComp = element.getTrackedRaceContext().getTrackedRace();
+                    for (Iterator<TrackedLeg> iterator = trackedRaceComp.getTrackedLegs().iterator(); iterator
+                            .hasNext();) {
+                        TrackedLegOfCompetitor trackedLegComp = trackedRaceComp.getTrackedLeg(element.getCompetitor(),
+                                startFixOfLeg);
+                        for (final GPSFix gpsFix : gpsFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end,
+                                /* toInclusive */ false)) { // SCHLEIFE die durch alle gps fixes des rennen geht
+                            while (gpsFix.getTimePoint().before(trackedLegComp.getFinishTime())) {
+                                if (isAborted()) {
+                                    break;
+                                }
+                                try {
+                                    currentFixTackType = trackedLegComp.getTackType(gpsFix.getTimePoint());
+                                } catch (NoWindException e) {
+                                    currentFixTackType = null;
+                                }
+                                if (currentFixTackType != lastTackType) { // wenn Veränderung des TT:
+                                    if (settings.getMinimumTackTypeSegmentDuration() == null
+                                            || startOfSegment.until(last) // wenn zu kleine segment dann:
+                                                    .compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
+                                        addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack,
+                                                startOfSegment,
+                                                last /*
+                                                      * don't include the last interval ending at the non-TackType fix
+                                                      */);
+                                    } // wenn next abschnitt nicht null TT ist:
+                                    if (currentFixTackType != null) { // immer wenn TT sich ändert start UND ende, außer null
+                                        startOfSegment = gpsFix.getTimePoint();
+                                    } else {
+                                        startOfSegment = null;
+                                    } // veränderter TT wird aktualisiert
+                                    lastTackType = currentFixTackType;
+                                }
+                                last = gpsFix.getTimePoint();
+                            }
+                            trackedLegComp = trackedRaceComp.getTrackedLeg(element.getCompetitor(),
+                                    gpsFix.getTimePoint());
                         }
-                        TrackedLegOfCompetitor trackedLegComp = element.getTrackedRaceContext().getTrackedRace().getTrackedLeg(element.getCompetitor(), gpsFix.getTimePoint());
-                        try {
-                            currentFixTackType = trackedLegComp.getTackType(gpsFix.getTimePoint());
-                        } catch (NoWindException e) {
-                            currentFixTackType=null;
-                        }
-                        if (currentFixTackType != lastTackType) { //wenn Veränderung des TT:
-                            if (settings.getMinimumTackTypeSegmentDuration() == null || startOfSegment.until(last) //wenn zu kleine segment dann:
-                                    .compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
-                                addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfSegment,
-                                        last /* don't include the last interval ending at the non-TackType fix */);
-                            } //wenn next abschnitt nicht null TT ist: 
-                            if (currentFixTackType != null) { // immer wenn TT sich ändert start UND ende, außer null
-                                startOfSegment = gpsFix.getTimePoint();
-                            } else {
-                                startOfSegment = null;
-                            } //veränderter TT wird aktualisiert
-                            lastTackType = currentFixTackType;
-                        }
-                        last = gpsFix.getTimePoint();
                     }
                 } finally {
                     gpsFixTrack.unlockAfterRead();
                 }
-                if (currentFixTackType == lastTackType && currentFixTackType!= null) {
+                if (currentFixTackType == lastTackType && currentFixTackType != null) {
                     addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfSegment, end);
                 }
             }
