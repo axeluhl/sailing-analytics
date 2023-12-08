@@ -16,8 +16,15 @@ import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 
 /**
+ * One or more {@link Polyline}s connected to form a longer polyline, with the possibility to change
+ * styles from segment to segment. Two different modes currently exist: {@link ColorlineMode#MONOCHROMATIC}
+ * and {@link ColorlineMode#POLYCHROMATIC}. In monochromatic mode the entire line is represented by a single
+ * {@link Polyline} as no style changes are required. In polychromatic mode, each connection between two
+ * dots is a separate {@link Polyline}, and the options for each segment---particularly their color---
+ * is decided by a {@link ColorlineColorProvider} embedded in the {@link ColorlineOptions} used for this
+ * color line.
  * 
- * @author Tim Hessenmüller (D062243)
+ * @author Tim Hessenmï¿½ller (D062243)
  */
 public class Colorline {
     private ColorlineOptions options;
@@ -46,9 +53,7 @@ public class Colorline {
     public Colorline(ColorlineOptions options) {
         this.options = options;
         polylines = new ArrayList<>();
-        
         pathChangeListeners = new HashSet<>();
-        
         clickMapHandlers = new HashSet<>();
         mouseOverMapHandlers = new HashSet<>();
         mouseDownMapHandlers = new HashSet<>();
@@ -154,7 +159,7 @@ public class Colorline {
                 } else {
                     // The Polyline at index 0 is incomplete
                     // Complete it
-                    polylines.get(0).getPath().insertAt(0, position);
+                    polylines.get(0).getPath().insertAt(0, position); // FIXME bug5921: what does this do to the polyline's color? Shouldn't the color always be determined by the first of the two points in the segment?
                 }
             } else if (index == getLength()) {
                 if (index == 1 && polylines.get(0).getPath().getLength() == 1) {
@@ -254,7 +259,7 @@ public class Colorline {
                 polylines.get(index - 1).getPath().setAt(1, position);
             } else { // Set a vertex somewhere in the middle which affects 2 polylines
                 polylines.get(index - 1).getPath().setAt(1, position);
-                polylines.get(index).getPath().setAt(0, position);
+                polylines.get(index).getPath().setAt(0, position); // FIXME bug5921: don't we need to update the color? Typically, the detailValue is more likely to change than the position...
             }
             break;
         }
