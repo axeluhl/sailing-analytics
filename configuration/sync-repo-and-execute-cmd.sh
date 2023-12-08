@@ -12,14 +12,33 @@ fi
 
 GIT_PATH=$1 # "/etc/httpd"
 COMMAND_ON_COMPLETION=$2 # "sudo service httpd reload"
-
-# rev-parse gets the commit hash of given reference.
-CURRENT=$(cd ${GIT_PATH} && git rev-parse HEAD)
-cd ${GIT_PATH} && git fetch
-if [[ $CURRENT != $(git rev-parse origin/main) ]]
+cd ${GIT_PATH}
+# Rev-parse gets the commit hash of given reference.
+CURRENT_HEAD=$(git rev-parse HEAD)
+git fetch
+if [[ $CURRENT_HEAD != $(git rev-parse origin/main) ]]
 then
     logger -t httpd "Changes found; merging now"
-    cd ${GIT_PATH} && git merge origin/main # fastforward merge occurs
+    cd ${GIT_PATH} && git merge origin/main
+    if [[ $? -eq 0 ]]; then
+        logger -t httpdMerge "SUCCESS: different files edited"
+    else
+        logger -t httpdMerge "NO SUCCESS: same file modified"
+        git merge --abort   # Returns to pre-merge state.
+        git stash
+        git merge origin/main # Should be fast-forward merge.
+        git stash apply  # Keeps stash on top of stack, in case the apply fails.
+        if [[ $? -eq 0 ]]; then
+            logger -t httpdMerge "SUCCESS: Merge of httpd remote to local successful, and previous working directory changes restored."
+            git stash drop  # Removes successful stash from stash stack.
+        else
+            echo "I may have a merging issue at commit $(git rev-parse HEAD)" | notify-operators "Merge conflict handled but there is a problem"
+            # Returns to pre-pull state and then pops
+            git reset --hard "${CURRENT_HEAD}"
+            git stash pop
+            exit 1
+        fi
+    fi
     sleep 2
     $($COMMAND_ON_COMPLETION)
 fi
