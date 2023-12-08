@@ -16,23 +16,24 @@ cd ${GIT_PATH}
 # Rev-parse gets the commit hash of given reference.
 CURRENT_HEAD=$(git rev-parse HEAD)
 git fetch
-if [[ $CURRENT_HEAD != $(git rev-parse origin/main) ]]
+if [[ $CURRENT_HEAD != $(git rev-parse origin/main) ]]  # Checks if there are new commits 
 then
     logger -t httpd "Changes found; merging now"
     cd ${GIT_PATH} && git merge origin/main
     if [[ $? -eq 0 ]]; then
-        logger -t httpdMerge "SUCCESS: different files edited"
+        logger -t httpdMerge "Merge succeeded: different files edited."
     else
-        logger -t httpdMerge "NO SUCCESS: same file modified"
+        logger -t httpdMerge "First merge unsuccessful: same file modified."
         git merge --abort   # Returns to pre-merge state.
         git stash
-        git merge origin/main # Should be fast-forward merge.
+        git merge origin/main # This should be a fast-forward merge.
         git stash apply  # Keeps stash on top of stack, in case the apply fails.
         if [[ $? -eq 0 ]]; then
-            logger -t httpdMerge "SUCCESS: Merge of httpd remote to local successful, and previous working directory changes restored."
+            logger -t httpdMerge "Second merge success: merge of httpd remote to local successful, and previous working directory changes restored."
             git stash drop  # Removes successful stash from stash stack.
         else
-            echo "I may have a merging issue at commit $(git rev-parse HEAD)" | notify-operators "Merge conflict handled but there is a problem"
+            logger -t httpdMerge "Second merge unsuccessful: same sections modified"
+            echo "Merging issue at commit $(git rev-parse HEAD). Currently at last safe commit." | notify-operators "Merge conflict on httpd instance. Manual intervention required."
             # Returns to pre-pull state and then pops
             git reset --hard "${CURRENT_HEAD}"
             git stash pop
