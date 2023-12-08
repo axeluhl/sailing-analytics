@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
@@ -613,9 +614,15 @@ public class FixesAndTails {
             final Date toDate;
             final Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             final Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
+            final TimeRange requestedTimeRange;
+            final TimeRange timeRangeAlreadyCached;
+            // Overlap can be before, after, or before and after the existing tail;
+            // we won't call it an overlap if the request exceeds (includes) the known part of the tail to both
+            // ends, so that at least for the resulting long request the split in quick/slow can happen;
             final boolean overlap = !detailTypeChanged && (timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
-                    new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo)).intersects(
-                            new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix))));
+                    (requestedTimeRange = new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo))).intersects(
+                            timeRangeAlreadyCached = new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix)))
+                    && !requestedTimeRange.includes(timeRangeAlreadyCached));
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix) && !detailTypeChanged) {

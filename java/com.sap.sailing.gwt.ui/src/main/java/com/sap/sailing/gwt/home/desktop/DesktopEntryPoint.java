@@ -30,10 +30,8 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, Des
     @Override
     public void doOnModuleLoad() {
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());
-        
         ServerConfigurationServiceAsync serverConfigService = GWT.create(ServerConfigurationService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) serverConfigService, RemoteServiceMappingConstants.serverConfigurationServiceRemotePath);
-       
         serverConfigService.isStandaloneServer(new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
