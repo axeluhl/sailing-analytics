@@ -8,8 +8,19 @@
 TAG="TESTPROXY"
 DIR="/etc/httpd"
 COMMAND="sudo service httpd reload"
-# Gets all public ips for the instances with the chosen tag and iterates over the IPs.
-for IP in $(aws ec2  describe-instances --filters Name=tag-key,Values="${TAG}" | jq -r '.Reservations[].Instances[].PublicIpAddress'); do
-        # strictHostKey... means no authenticity check. The sync-repo... script must be installed in the root user's home.
-        ssh -o "StrictHostKeyChecking=no" root@${IP} "cd ~ && ./sync-repo-and-execute-cmd.sh '${DIR}' '${COMMAND}'";
-done;
+MAIN_NAME="main"
+while read oldrev newrev refname; do
+    # Check if the update is on a branch
+    if [[ $refname == "refs/heads/"* ]]; then
+        branch_name=$(echo $refname | sed "s|refs/heads/\(.*\)$|\1|")
+        echo "Update on branch: $branch_name"
+        if [[ "$branch_name" == "$MAIN_NAME" ]]; then
+            # Gets all public ips for the instances with the chosen tag and iterates over the IPs.
+            for IP in $(aws ec2 describe-instances --filters Name=tag-key,Values="${TAG}" | jq -r '.Reservations[].Instances[].PublicIpAddress'); do
+                # strictHostKey... means no authenticity check. The sync-repo... script must be installed in the root user's home.
+                ssh -o "StrictHostKeyChecking=no" root@${IP} "cd ~ && ./sync-repo-and-execute-cmd.sh '${DIR}' '${COMMAND}' ";
+            done;
+        fi
+    fi
+done
+
