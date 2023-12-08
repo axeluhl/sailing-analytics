@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Purpose: Deployed in a file named "post-receive", in the hooks dir of a bare git repo. Upon push completion, this script runs and
+# Purpose: Deployed in a file named "pre-receive", in the hooks dir of a bare git repo. Upon push completion, this script runs and
 # triggers an update to all instances' local repos (if the instance has a specific aws tag). A command is ran in the repo 
 # after the merge completes. The user, in which the bare repo and hook are installed, must have aws credentials, that
 # don't need mfa.
