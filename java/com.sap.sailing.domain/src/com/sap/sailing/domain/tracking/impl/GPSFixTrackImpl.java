@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
@@ -1214,4 +1215,30 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         }
         return new SpeedWithBearingStepsIterable(speedWithBearingSteps);
     }
+    
+    private transient TimeRangeCache<Duration> tackTypeTimeCache;
+    
+    private transient TimeRangeCache<Distance> tackTypeDistanceCache;
+    //TODO: Morgen
+//    @Override
+//    public Duration getTimeSpentTackType(TimePoint from, TimePoint to) {
+//        return getValueSum(from, to, /* nullElement */ Duration.NULL, Duration::plus, tackTypeTimeCache,
+//                /* valueCalculator */ new Track.TimeRangeValueCalculator<Duration>() {
+//            @Override
+//            public Duration calculate(TimePoint from, TimePoint to) {
+//                Duration result = Duration.NULL;
+//                TimePoint last = from;
+//                boolean isTackType = false;
+//                for (final GPSFix fix : getFixes(from, true, to, true)) {
+//                    final boolean fixFoils = fix.isTackType(getTrackedRace().);
+//                    if (isTackType && fixFoils) {
+//                        result = result.plus(last.until(fix.getTimePoint()));
+//                    }
+//                    last = fix.getTimePoint();
+//                    isTackType = fixFoils;
+//                }
+//                return result;
+//            }
+//        });
+//    }
 }
