@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.data;
 
 import java.text.SimpleDateFormat;
 
-import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasGPSFixTrackContext;
 import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -13,28 +13,28 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public class TackTypeSegmentWithContext implements HasTackTypeSegmentContext {
-    private final HasBravoFixTrackContext bravoFixTrackContext;
+    private final HasGPSFixTrackContext gpsFixTrackContext;
     private final TimePoint startOfTackTypeSegment;
     private final TimePoint endOfTackTypeSegment;
     private static final SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
-    public TackTypeSegmentWithContext(HasBravoFixTrackContext bravoFixTrackContext, TimePoint startOfTackTypeSegment,
+    public TackTypeSegmentWithContext(GPSFixTrackWithContext gpsFixTrackWithContext, TimePoint startOfTackTypeSegment,
             TimePoint endOfTackTypeSegment) {
         super();
-        this.bravoFixTrackContext = bravoFixTrackContext;
+        this.gpsFixTrackContext = gpsFixTrackWithContext;
         this.startOfTackTypeSegment = startOfTackTypeSegment;
         this.endOfTackTypeSegment = endOfTackTypeSegment;
     }
 
     @Override
     public String getName() {
-        return bravoFixTrackContext.getRaceOfCompetitorContext().getCompetitor().getName() + "@"
+        return gpsFixTrackContext.getRaceOfCompetitorContext().getCompetitor().getName() + "@"
                 + TIMEPOINT_FORMATTER.format(startOfTackTypeSegment.asDate());
     }
 
     @Override
-    public HasBravoFixTrackContext getBravoFixTrackContext() {
-        return bravoFixTrackContext;
+    public HasGPSFixTrackContext getGPSFixTrackContext() {
+        return gpsFixTrackContext;
     }
 
     @Override
@@ -63,10 +63,10 @@ public class TackTypeSegmentWithContext implements HasTackTypeSegmentContext {
     }
 
     private Competitor getCompetitor() {
-        return getBravoFixTrackContext().getRaceOfCompetitorContext().getCompetitor();
+        return getGPSFixTrackContext().getRaceOfCompetitorContext().getCompetitor();
     }
 
     private TrackedRace getTrackedRace() {
-        return getBravoFixTrackContext().getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace();
+        return getGPSFixTrackContext().getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace();
     }
 }

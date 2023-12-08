@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
-import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.sensordata.ColumnMetadata;
@@ -73,10 +72,5 @@ public class BravoFixImpl extends SensorFixImpl implements BravoFix {
     public Bearing getHeel() {
         final Double bearingDeg = fix.get(BravoSensorDataMetadata.HEEL.getColumnIndex());
         return bearingDeg == null ? null : new DegreeBearingImpl(bearingDeg);
-    }
-
-    @Override
-    public boolean isTackType(TackType tackType) {
-        return TackType.LONGTACK == tackType;
     }
 }

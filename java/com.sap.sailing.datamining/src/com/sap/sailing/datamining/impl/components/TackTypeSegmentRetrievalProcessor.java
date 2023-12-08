@@ -7,13 +7,15 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
-import com.sap.sailing.datamining.impl.data.BravoFixTrackWithContext;
 import com.sap.sailing.datamining.impl.data.TackTypeSegmentWithContext;
 import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.tracking.BravoFix;
-import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.common.TackType;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.datamining.impl.data.GPSFixTrackWithContext;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -46,44 +48,44 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
             } else {
                 end = endOfRace;
             }
-            final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
-            if (bravoFixTrack != null) {
-                boolean isTackType = false;
+            final GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(element.getCompetitor());
+            if (gpsFixTrack != null) {
+                TackType lastTackType = null;
+                TackType currentFixTackType = null;
                 TimePoint last = null;
                 TimePoint startOfSegment = null;
-                bravoFixTrack.lockForRead();
+                gpsFixTrack.lockForRead();
                 try {
-                    for (final BravoFix bravoFix : bravoFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) {
+                    for (final GPSFix gpsFix : gpsFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) { //SCHLEIFE die durch alle gps fixes des rennen geht 
                         if (isAborted()) {
                             break;
                         }
-                        TrackedLegOfCompetitor trackedLegComp = element.getTrackedRaceContext().getTrackedRace().getTrackedLeg(element.getCompetitor(), bravoFix.getTimePoint());
-                        boolean currentFixIsTackType;
+                        TrackedLegOfCompetitor trackedLegComp = element.getTrackedRaceContext().getTrackedRace().getTrackedLeg(element.getCompetitor(), gpsFix.getTimePoint());
                         try {
-                            currentFixIsTackType = (bravoFix.isTackType(trackedLegComp.getTackType(bravoFix.getTimePoint())));
+                            currentFixTackType = trackedLegComp.getTackType(gpsFix.getTimePoint());
                         } catch (NoWindException e) {
-                            currentFixIsTackType=false;
+                            currentFixTackType=null;
                         }
-                        if (currentFixIsTackType != isTackType) {
-                            if (currentFixIsTackType) {
-                                startOfSegment = bravoFix.getTimePoint();
+                        if (currentFixTackType != lastTackType) { //wenn Veränderung des TT:
+                            if (settings.getMinimumTackTypeSegmentDuration() == null || startOfSegment.until(last) //wenn zu kleine segment dann:
+                                    .compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
+                                addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfSegment,
+                                        last /* don't include the last interval ending at the non-TackType fix */);
+                            } //wenn next abschnitt nicht null TT ist: 
+                            if (currentFixTackType != null) { // immer wenn TT sich ändert start UND ende, außer null
+                                startOfSegment = gpsFix.getTimePoint();
                             } else {
-                                if (settings.getMinimumTackTypeSegmentDuration() == null ||
-                                        startOfSegment.until(last).compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
-                                    addOrMergeTackTypeSegment(element, tackTypeSegments, bravoFixTrack, startOfSegment,
-                                            last /* don't include the last interval ending at the non-TackType fix */);
-                                }
                                 startOfSegment = null;
-                            }
-                            isTackType = currentFixIsTackType;
+                            } //veränderter TT wird aktualisiert
+                            lastTackType = currentFixTackType;
                         }
-                        last = bravoFix.getTimePoint();
+                        last = gpsFix.getTimePoint();
                     }
                 } finally {
-                    bravoFixTrack.unlockAfterRead();
+                    gpsFixTrack.unlockAfterRead();
                 }
-                if (isTackType) {
-                    addOrMergeTackTypeSegment(element, tackTypeSegments, bravoFixTrack, startOfSegment, end);
+                if (currentFixTackType == lastTackType && currentFixTackType!= null) {
+                    addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfSegment, end);
                 }
             }
         }
@@ -91,26 +93,26 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
     }
 
     private void addOrMergeTackTypeSegment(HasRaceOfCompetitorContext element,
-            List<HasTackTypeSegmentContext> tackTypeSegments, final BravoFixTrack<Competitor> bravoFixTrack,
+            List<HasTackTypeSegmentContext> tackTypeSegments, final GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack,
             TimePoint startOfSegment, TimePoint endOfSegment) {
         if (tackTypeSegments.isEmpty() || settings.getMinimumDurationBetweenAdjacentTackTypeSegments() == null) {
-            tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, bravoFixTrack));
+            tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, gpsFixTrack));
         } else {
             final HasTackTypeSegmentContext previousSegment = tackTypeSegments.get(tackTypeSegments.size()-1);
             final TimePoint previousEnd = previousSegment.getEndOfTackTypeSegment();
             if (previousEnd.until(startOfSegment).compareTo(settings.getMinimumDurationBetweenAdjacentTackTypeSegments()) < 0) {
                 // merge:
-                tackTypeSegments.set(tackTypeSegments.size()-1, createTackTypeSegment(previousSegment.getStartOfTackTypeSegment(), endOfSegment, element, bravoFixTrack));
+                tackTypeSegments.set(tackTypeSegments.size()-1, createTackTypeSegment(previousSegment.getStartOfTackTypeSegment(), endOfSegment, element, gpsFixTrack));
             } else {
                 // add; duration between the segments is large enough
-                tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, bravoFixTrack));
+                tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, gpsFixTrack));
             }
         }
     }
 
     private HasTackTypeSegmentContext createTackTypeSegment(TimePoint startOfSegment, TimePoint endOfSegment,
-            HasRaceOfCompetitorContext raceOfCompetitorContext, BravoFixTrack<Competitor> bravoFixTrack) {
-        return new TackTypeSegmentWithContext(new BravoFixTrackWithContext(raceOfCompetitorContext, bravoFixTrack), startOfSegment, endOfSegment); 
+            HasRaceOfCompetitorContext raceOfCompetitorContext, GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack) {
+        return new TackTypeSegmentWithContext(new GPSFixTrackWithContext(raceOfCompetitorContext, gpsFixTrack), startOfSegment, endOfSegment); 
     }
 
 }

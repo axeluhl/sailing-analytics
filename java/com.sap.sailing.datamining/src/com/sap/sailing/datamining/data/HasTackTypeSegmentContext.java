@@ -9,7 +9,7 @@ import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasTackTypeSegmentContext {
     @Connector(scanForStatistics=false)
-    HasBravoFixTrackContext getBravoFixTrackContext();
+    HasGPSFixTrackContext getGPSFixTrackContext();
     
     TimePoint getStartOfTackTypeSegment();
     
