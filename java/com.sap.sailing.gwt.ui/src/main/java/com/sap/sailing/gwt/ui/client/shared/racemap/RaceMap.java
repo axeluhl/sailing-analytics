@@ -528,8 +528,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private ColorMapper tailColorMapper;
 
-    private final MultiHashSet<Date> remoteCallsInExecution = new MultiHashSet<>();
-    private final MultiHashSet<Date> remoteCallsToSkipInExecution = new MultiHashSet<>();
     private boolean currentlyDragging = false;
 
     private int zoomingAnimationsInProgress = 0;
@@ -559,6 +557,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
 
+        /**
+         * @return {@code true} if an object that equals {@code t} was found and removed in this multi-set,
+         *         {@code false} otherwise
+         */
         public boolean remove(T t) {
             List<T> l = map.get(t);
             if (l != null) {
@@ -847,7 +849,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                     @Override
                     public void onEvent(ZoomChangeMapEvent event) {
-                        remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
                         if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
                             // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will
                             // restore old settings
@@ -956,7 +957,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         currentMapBounds = map.getBounds();
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
-                        refreshMapWithoutAnimationButLeaveTransitionsAlive();
                     }
                 });
                 // If there was a time change before the API was loaded, reset the time
@@ -1284,7 +1284,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void redraw() {
-        remoteCallsToSkipInExecution.removeAll(timer.getTime());
         timeChanged(timer.getTime(), null);
     }
     
@@ -1339,13 +1338,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return timer.getPlayMode() == PlayModes.Live;
     }
 
-    private void refreshMapWithoutAnimationButLeaveTransitionsAlive() {
-        remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
-    }
-
     private void refreshMapWithoutAnimation() {
         removeTransitions();
-        remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
     }
 
     private void updateMapWithWindInfo(final Date newTime, final long transitionTimeInMillis,
@@ -1390,36 +1384,27 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        if (remoteCallsInExecution.add(newTime)) { // FIXME bug5921: this is for the GetWindInfoAction call but uses the same multi-set as is used for GetRaceMapDataAction
-            if (currentlyDragging || zoomingAnimationsInProgress > 0) {
-                remoteCallsToSkipInExecution.add(newTime);
-            }
-            GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, raceIdentifier, newTime, 1000L,
-                    1, windSourceTypeNames,
-                    /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
-            asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY,
-                    new AsyncCallback<WindInfoForRaceDTO>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            remoteCallsInExecution.remove(newTime);
-                            errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(),
-                                    true /* silentMode */);
-                        }
+        GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, raceIdentifier, newTime, 1000L,
+                1, windSourceTypeNames,
+                /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
+        asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY,
+                new AsyncCallback<WindInfoForRaceDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(),
+                                true /* silentMode */);
+                    }
 
-                        @Override
-                        public void onSuccess(WindInfoForRaceDTO windInfo) {
-                            remoteCallsInExecution.remove(newTime);
-                            if (windInfo != null && !remoteCallsToSkipInExecution.remove(newTime)) {
-                                List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
-                                lastCombinedWindTrackInfoDTO = windInfo;
-                                updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo, windSourcesToShow);
-                                showWindSensorsOnMap(windSourcesToShow);
-                            }
+                    @Override
+                    public void onSuccess(WindInfoForRaceDTO windInfo) {
+                        if (windInfo != null) {
+                            List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
+                            lastCombinedWindTrackInfoDTO = windInfo;
+                            updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo, windSourcesToShow);
+                            showWindSensorsOnMap(windSourcesToShow);
                         }
-                    });
-        } else {
-            remoteCallsToSkipInExecution.add(newTime);
-        }
+                    }
+                });
     }
 
     @Override
@@ -1534,22 +1519,20 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw, boolean detailTypeChanged,
             DetailType detailType, Map<CompetitorDTO, Date> fromTimesForQuickCall, Map<CompetitorDTO, Date> toTimesForQuickCall) {
-        remoteCallsInExecution.add(newTime);
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                remoteCallsInExecution.remove(newTime);
                 errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
             }
             
             @Override
             public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
-                remoteCallsInExecution.remove(newTime);
-                if (map != null && raceMapDataDTO != null && !remoteCallsToSkipInExecution.remove(newTime)) {
+                if (map != null && raceMapDataDTO != null) {
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
-                        GWT.log("Processing race map data request "+requestID+" with detail type "+detailType+"\n"+getFromAndToTimesAsString());
+                        // Uncomment the following for enhanced log output regarding getRaceMapData requests
+                        // GWT.log("Processing race map data request "+requestID+" with detail type "+detailType+"\n"+getFromAndToTimesAsString());
                         if (raceMapDataDTO.raceCompetitorIdsAsStrings != null) {
                             try {
                                 raceCompetitorSet.setIdsAsStringsOfCompetitorsInRace(raceMapDataDTO.raceCompetitorIdsAsStrings);
@@ -1617,7 +1600,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 getFromAndToTimesAsString());
                     }
                 } else {
-                    lastTimeChangeBeforeInitialization = newTime;
+                    lastTimeChangeBeforeInitialization = newTime; // FIXME bug5921: why only for out-of-order responses? Wouldn't this have to depend on whether or not initialization has happened already?
                 }
             }
 
