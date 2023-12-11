@@ -2,13 +2,19 @@
 BEARER_TOKEN=$1
 MFA_NAME=$2
 yum update -y
-yum install -y perl httpd mod_proxy_html tmux nfs-utils git whois jq php
+sudo amazon-linux-extras enable 
+yum install -y perl httpd mod_proxy_html tmux nfs-utils git whois jq mailx
 sudo amazon-linux-extras install epel -y && yum install -y apachetop
+sudo -i
+amazon-linux-extras enable php7.1
+yum install -y php  # also install mod_php
 sed -i 's/.*sleep 10" //g' ~/.ssh/authorized_keys
 sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
+cd /usr/local/bin
 ln -s  /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin/update_authorized_keys_for_landscape_managers
 ln -s  /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
 ln -s  /home/wiki/gitwiki/configuration/crontab /root/crontab
+ln -s  /home/wiki/gitwiki/configuration/on-site-scripts/paris2024/notify-operators
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
 mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome_backup
@@ -57,5 +63,14 @@ yum remove awscli
 cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 cd ~ && unzip awscliv2.zip
 cd ~ && sudo ./aws/install
+cd /home
+adduser trac
+su --login trac
+crontab crontab
+exit
+adduser wiki
+su --login wiki
+crontab crontab
+exit
 # will aws credentials need to be set? or will the ami store these details? session tokens? we will need a user without mfa.
 
