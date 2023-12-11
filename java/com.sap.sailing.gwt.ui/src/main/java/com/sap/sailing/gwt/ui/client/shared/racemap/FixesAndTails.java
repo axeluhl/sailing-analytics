@@ -295,7 +295,7 @@ public class FixesAndTails {
                 } else {
                     if (detailTypeForFixes != null && detailType.get(competitor) != detailTypeForFixes) {
                         GWT.log("WARNING: Inconsistent detail types when merging fixed for competitor "+competitor+
-                                ". Got fixes with"+detailType.get(competitor)+" so far but now received fixes with "+detailTypeForFixes);
+                                ". Got fixes with "+detailType.get(competitor)+" so far but now received fixes with "+detailTypeForFixes);
                     }
                     mergeFixes(competitor, e.getValue(), timeForPositionTransitionMillis);
                 }
