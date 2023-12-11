@@ -15,7 +15,7 @@ with ``172.31.46.203`` being an example of the internal IP address your new arch
   java/target/compareServers -ael https://www.sapsailing.com https://archive-candidate.sapsailing.com
 ```
 - Do some spot checks on the new instance
-- Switch reverse proxy by adjusting ``ArchiveRewrite`` macro under ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` followed by ``service httpd reload``
+- Switch reverse proxy, by adjusting the archive IP definitions at the top of ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf``, followed by ``service httpd reload``
 - Terminate old fail-over EC2 instance; you will have to disabel its termination protection first.
 - Adjust Name tags for what is now the fail-over and what is now the primary archive server in EC2 console
 
@@ -119,27 +119,46 @@ Following the mandatory automated content comparison you should do a few spot ch
 
 ### Switching in Reverse Proxy
 
-Once you are content with the quality of the new archive server candidate's contents it's time to switch. Technically, switching archive servers is done by adjusting the corresponding configuration in the central Apache reverse proxy server. You find this in ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` in the definition of the macro ``ArchiveRewrite`` defined usually at the top of the file. You'll find a macro definition that looks like this:
-```&lt;Macro ArchiveRewrite&gt;
-# ARCHIVE, based on i3.2xlarge, 64GB RAM and 1.9TB swap
-#       Use Rewrite 172.31.4.106 8888
-        Use Rewrite 172.31.9.176 8888
-&lt;/Macro&gt;
+Once you are content with the quality of the new archive server candidate's contents it's time to switch. Technically, switching archive servers is done by adjusting the corresponding configuration, in the central Apache reverse proxy server. You find this in ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` at the top.  The current macros file is as follows:
+
 ```
-Copy the uncommented ``Use Rewrite`` line and in the new copy adjust the internal IP to match the internal IP of your new archive server candidate. Then comment the line that pointed to the currently active primary archive server. Your macro definition then would look something like this, assuming that ``172.31.8.7`` were the IP address of your new archive server candidate:
-```&lt;Macro ArchiveRewrite&gt;
-# ARCHIVE, based on i3.2xlarge, 64GB RAM and 1.9TB swap
-#       Use Rewrite 172.31.4.106 8888
-#        Use Rewrite 172.31.9.176 8888
-        Use Rewrite 172.31.8.7 8888
-&lt;/Macro&gt;
+Define ARCHIVE_IP 172.31.43.140
+Define ARCHIVE_FAILOVER_IP 172.31.9.8
+Define PRODUCTION_ARCHIVE ${ARCHIVE_IP}
+
+<Macro ArchiveRewrite>
+        Use Rewrite ${PRODUCTION_ARCHIVE} 8888
+</Macro>
 ```
-Exit your editor and reload the reverse proxy configuration by issuing the following command:
+
+When the new archive is ready, duplicate the "Define ARCHIVE_IP....." line; comment the first one; and then change the ip
+of the second one to be the upgraded archive's private IP. Set the "Define ARCHIVE_FAILOVER_IP....." value to the now old primary. Also make sure "Define PRODUCTION_ARCHIVE...." is a pointer to the archive value, by setting it to `${ARCHIVE_IP}`. It should look something like below (if the new IP
+is 172.31.7.12):
+
 ```
-    # service httpd reload
+#Define ARCHIVE_IP 172.31.43.140  # comment the old primary
+Define ARCHIVE_IP 172.31.7.12 # add the new upgraded item
+Define ARCHIVE_FAILOVER_IP 172.31.43.140  # the old primary
+Define PRODUCTION_ARCHIVE ${ARCHIVE_IP} #ensure this points to the new archive variable
+
+<Macro ArchiveRewrite>
+        Use Rewrite ${PRODUCTION_ARCHIVE} 8888
+</Macro>
 ```
-Check that the new archive service is now active, e.g., by looking at [sapsailing.com/gwt/status](https://sapsailing.com/gwt/status). It should reflect the new release in its ``release`` field.
+
+Then save and exit the editor. And enter `systemctl reload httpd`.
+Check that the new archive service is now active, e.g., by looking at [sapsailing.com/gwt/status](https://sapsailing.com/gwt/status). It should reflect the new release in its ``release`` field. 
 
 ### Clean up EC2 Names and Instances
 
-Next, you should terminate the previous fail-over archive server instance, and you need to adjust the ``Name`` tags in the EC2 console of the old primary to show that it's now the fail-over, and for the candidate to show that it's now the primary. Select the old fail-over instance and terminate it. Then change the name tag of "SL Archive" to "SL Archive (Failover)", then change that of "SL Archive (New Candidate)" to "SL Archive", and you're done.
+Next, you should terminate the previous fail-over archive server instance, and you need to adjust the ``Name`` tags in the EC2 console of the old primary to show that it's now the fail-over, and for the candidate to show that it's now the primary. Select the old fail-over instance and terminate it. Then change the name tag of "SL Archive" to "SL Archive (Failover)", then change that of "SL Archive (New Candidate)" to "SL Archive", and you're done for now....
+
+If you need to upgrade this old failover then you can repeat the whole process.
+
+
+### How we automated the automatic failover of the reverse proxy
+
+We setup a script to be installed as a cronjob on the reverse proxy. It runs multiple curl checks to `/gwt/status` of the primary and if a healthy status code is returned then no change is made but, 
+if multiple unhealthy status codes are returned, the PRODUCTION_IP definition (found at the top of the macros) is altered to point to the failover definition. Then a reload occurs
+and various users are notified by email. If it returns to healthy, then the definition returns to point to the definition of the main archive: `${ARCHIVE_IP}`.
+Note that we only reload, edit or send emails if the "new" status differs to what the macros file already displays.

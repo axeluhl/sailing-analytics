@@ -260,6 +260,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, true, "image/*");
+        getCancelButton().addClickHandler(clickEvent-> imageURLAndUploadComposite.deleteCurrentFile());
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<Map<String, String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Map<String, String>> event) {

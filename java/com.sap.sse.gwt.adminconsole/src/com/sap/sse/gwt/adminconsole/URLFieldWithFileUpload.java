@@ -95,15 +95,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
         imageUrlPanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
-        final FormPanel removePanel = new FormPanel();
-        removePanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
-        removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                setUri(null, true);
-            }
-        });
-        removePanel.setMethod(FormPanel.METHOD_POST);
         removeButton = new Button();
         removeButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().deleteButtonClass(), true);
         removeButton.addStyleName("btn-primary");
@@ -114,14 +105,12 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
             @Override
             public void onClick(ClickEvent event) {
                 for (String uri : uriList.keySet()) {
-                    removePanel.setAction("/sailingserver/api/v1/file?uri=" + uri);
-                    removePanel.submit();
+                    deleteFileOnServer(uri);
                 }
                 setUri(null, true);
                 urlTextBox.setEnabled(true);
             }
         });
-        removePanel.add(removeButton);
         urlTextBox = new TextBox();
         urlTextBox.ensureDebugId("urlTextBox");
         urlTextBox.getElement().addClassName("url-textbox");
@@ -134,7 +123,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
         selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass(), true);
         selectUploadButton.addStyleName("btn-primary");
         imageUrlPanel.add(selectUploadButton);
-        imageUrlPanel.add(removePanel);
+        imageUrlPanel.add(removeButton);
         // the upload panel
         uploadFormPanel = new FormPanel();
         uploadPanel = new FlowPanel();
@@ -377,7 +366,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
             return;
         }
         // use request object as form elements of dialog are already destroyed
-        RequestBuilder request = new RequestBuilder(RequestBuilder.POST, "/sailingserver/api/v1/file?uri=" + localUri);
+        RequestBuilder request = new RequestBuilder(RequestBuilder.DELETE, "/sailingserver/api/v1/file?uri=" + localUri);
         try {
             request.sendRequest(null, new RequestCallback() {
 
