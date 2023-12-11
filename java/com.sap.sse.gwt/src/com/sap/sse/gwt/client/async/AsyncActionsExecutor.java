@@ -57,7 +57,7 @@ public class AsyncActionsExecutor {
         @Override
         public void onFailure(Throwable caught) {
             try {
-                logger.warning("Execution failure for action of type " + getType() + ", category "+getCategory());
+                logger.warning("Execution failure for action of type " + getType() + ", category "+getCategory()+": "+caught.getMessage());
                 this.callback.onFailure(caught);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);

@@ -75,9 +75,12 @@ public class Colorline {
         }
         // Since colorMode and/or options have changed it's best to update the colors of all polylines
         for (int i = 0; i < polylines.size(); i++) {
-            String color = options.getColorProvider().getColor(i);
-            polylines.get(i).setOptions(options.newPolylineOptionsInstance(color));
+            updatePolylineColor(i);
         }
+    }
+    private void updatePolylineColor(int i) {
+        String color = options.getColorProvider().getColor(i);
+        polylines.get(i).setOptions(options.newPolylineOptionsInstance(color));
     }
     
     /**
@@ -259,7 +262,8 @@ public class Colorline {
                 polylines.get(index - 1).getPath().setAt(1, position);
             } else { // Set a vertex somewhere in the middle which affects 2 polylines
                 polylines.get(index - 1).getPath().setAt(1, position);
-                polylines.get(index).getPath().setAt(0, position); // FIXME bug5921: don't we need to update the color? Typically, the detailValue is more likely to change than the position...
+                polylines.get(index).getPath().setAt(0, position);
+                updatePolylineColor(index);
             }
             break;
         }

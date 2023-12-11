@@ -90,7 +90,6 @@ public class Hoverline {
         hoverline.setMap(colorline.getMap());
         hoverline.setPath(MVCArray.newInstance(colorline.getPath().toArray(new LatLng[0])));
         colorline.addPathChangeListener(hoverline);
-        
         options.setVisible(false);
         colorline.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
@@ -101,7 +100,7 @@ public class Hoverline {
                 hoverline.setOptions(options);
             }
         });
-        //Workaround for bug4480 (chrome does fire mouseOutMove on mouseclick)
+        // Workaround for bug4480 (chrome does fire mouseOutMove on mouseclick)
         hoverline.addMouseDownHandler(new MouseDownMapHandler() {
             @Override
             public void onEvent(MouseDownMapEvent event) {

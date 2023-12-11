@@ -11,11 +11,13 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -98,9 +100,18 @@ public class FixesAndTails {
     private ValueRangeFlexibleBoundaries detailValueBoundaries;
 
     private final CoordinateSystem coordinateSystem;
+    
+    /**
+     * Tells the type of value stored in the fixes' {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue} field for
+     * the competitor used as the key in this map. If {@code null} or no mapping exists for the competitor, the detail
+     * values shall be ignored and may be of inconsistent types. If not {@code null}, all fixes stored in {@link #fixes}
+     * are guaranteed to have their detail value of this type.
+     */
+    private final Map<CompetitorDTO, DetailType> detailType;
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
+        detailType = new HashMap<>();
         fixes = new HashMap<>();
         tails = new HashMap<>();
         firstShownFix = new HashMap<>();
@@ -169,11 +180,18 @@ public class FixesAndTails {
      * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
      * {@link #fixes fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
      * up to the last fix with time point before <code>to</code>. The polyline is returned. Updates are applied to
-     * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.<p>
+     * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
+     * <p>
      * 
      * Precondition: <code>tails.containsKey(competitorDTO) == false</code>
+     * 
+     * @param detailTypeToShow
+     *            the detail type the caller expects the fixes of {@code competitorDTO} to contain
      */
-    protected Colorline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory) {
+    protected Colorline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory, DetailType detailTypeToShow) {
+        if (detailTypeToShow != null && detailType.get(competitorDTO) != detailTypeToShow) {
+            GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailType+" but caller expected "+detailTypeToShow);
+        }
         List<LatLng> points = new ArrayList<LatLng>();
         List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
         int indexOfFirst = -1;
@@ -249,25 +267,23 @@ public class FixesAndTails {
      *            longer tail itself), such that the second request that uses the <em>same</em> map will be considered
      *            having an overlap now, not leading to a replacement of the previous update originating from the same
      *            request.
+     * @param detailTypeForFixes used to update {@link #detailType}
      * 
      */
     protected void updateFixes(Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, long timeForPositionTransitionMillis,
-            boolean detailTypeChanged) {
+            boolean detailTypeChanged, DetailType detailTypeForFixes) {
         if (detailTypeChanged) {
             resetDetailValueSearch();
         }
         for (final Map.Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 final CompetitorDTO competitor = e.getKey();
-                List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(competitor);
-                if (fixesForCompetitor == null) {
-                    fixesForCompetitor = new ArrayList<>();
-                    fixes.put(competitor, fixesForCompetitor);
-                }
+                final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.computeIfAbsent(competitor, c->new ArrayList<>());
                 if (!overlapsWithKnownFixes.get(competitor)) {
                     // clearing and then re-populating establishes the invariant that an extrapolated fix must be the last
                     fixesForCompetitor.clear();
+                    detailType.put(competitor, detailTypeForFixes);
                     // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
                     // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
                     final Triggerable triggerable = new Triggerable(()->clearTail(competitor));
@@ -277,6 +293,10 @@ public class FixesAndTails {
                     minDetailValueFix.remove(competitor);
                     maxDetailValueFix.remove(competitor);
                 } else {
+                    if (detailTypeForFixes != null && detailType.get(competitor) != detailTypeForFixes) {
+                        GWT.log("WARNING: Inconsistent detail types when merging fixed for competitor "+competitor+
+                                ". Got fixes with"+detailType.get(competitor)+" so far but now received fixes with "+detailTypeForFixes);
+                    }
                     mergeFixes(competitor, e.getValue(), timeForPositionTransitionMillis);
                 }
             }
@@ -491,14 +511,20 @@ public class FixesAndTails {
      * <p>
      * 
      * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
+     * 
      * @param delayForTailChangeInMillis
      *            the time in milliseconds after which to actually draw the tail update, or <code>-1</code> to perform
      *            the update immediately
+     * @param selectedDetailType
+     *            for verifying against {@link #detailType}
      */
-    protected void updateTail(final  CompetitorDTO competitorDTO, final Date from, final Date to, final int delayForTailChangeInMillis) {
+    protected void updateTail(final  CompetitorDTO competitorDTO, final Date from, final Date to, final int delayForTailChangeInMillis, DetailType selectedDetailType) {
         Timer delayedOrImmediateExecutor = new Timer() {
             @Override
             public void run() {
+                if (selectedDetailType != null && detailType.get(competitorDTO) != selectedDetailType) {
+                    GWT.log("WARNING: Detail type mismatch in updateTail: have "+detailType+" but caller expected "+selectedDetailType);
+                }
                 final Colorline tail = getTail(competitorDTO);
                 if (tail != null) {
                     int vertexCount = tail.getLength();
@@ -622,6 +648,7 @@ public class FixesAndTails {
             final boolean overlap = !detailTypeChanged && (timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
                     (requestedTimeRange = new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo))).intersects(
                             timeRangeAlreadyCached = new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix)))
+                    // TODO 5921: we shouldn't be asking the server again at all if what we have resulted from querying the same interval; exception: live mode where at the end new fixes may have been received late
                     && !requestedTimeRange.includes(timeRangeAlreadyCached));
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
@@ -876,7 +903,7 @@ public class FixesAndTails {
      * Clears all tail data, removing them from the map and from this object's internal structures. GPS fixes remain
      * cached. Immediately after this call, {@link #getTail(CompetitorWithBoatDTO)} will return <code>null</code> for all
      * competitors. Tails will need to be created (again) using
-     * {@link #createTailAndUpdateIndices(CompetitorWithBoatDTO, Date, Date, TailFactory)}.
+     * {@link #createTailAndUpdateIndices(CompetitorWithBoatDTO, Date, Date, TailFactory, DetailType)}.
      */
     protected void clearTails() {
         for (final Trigger<Colorline> tail : tails.values()) {

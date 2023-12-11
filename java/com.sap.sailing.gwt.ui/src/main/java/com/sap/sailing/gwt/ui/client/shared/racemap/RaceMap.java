@@ -519,7 +519,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * overwrite its cache with new data and needs to reset its internal {@link ValueRangeFlexibleBoundaries} which is
      * tracking the {@link DetailType} values. If set to {@code true}, {@link #refreshMap(Date, long, boolean)} will pass
      * the information along and set it back to {@code false} by
-     * {@link #updateBoatPositions(Date, long, Map, Iterable, Map, boolean, boolean)} once the first update with the new
+     * {@link #updateBoatPositions(Date, long, Map, Iterable, Map, boolean, boolean, DetailType)} once the first update with the new
      * {@link DetailType} values arrives at the client.
      */
     private boolean selectedDetailTypeChanged;
@@ -1450,7 +1450,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(
             final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
             RegattaAndRaceIdentifier race, final Date newTime, final long transitionTimeInMillis,
-            final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw, DetailType detailType, boolean detailTypeChanged) {
+            final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw, final DetailType detailType, boolean detailTypeChanged) {
         final Map<CompetitorDTO, Date> fromTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> toTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> fromTimesForNonOverlappingTailsCall = new HashMap<>();
@@ -1460,6 +1460,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // overlap: expect a quick response; add original request interval for the competitor
                 // TODO bug5921: however, this may not be true for most cases where the new time range exceeds the tail loaded so far into past *and* future;
                 // TODO bug5921: then, an overlap will be announced, but from/to will be the full tail length; should this still be called an overlap?
+                // TODO bug5921: droppable and out-of-order-cancellable requests should only be done for single time points
                 fromTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getA().get(e.getKey()));
                 toTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getB().get(e.getKey()));
             } else {
@@ -1507,7 +1508,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             // overlap if it happens after this update.
                             updateBoatPositions(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(),
                                     competitorsToShow, result.getBoatPositionsForCompetitors(
-                                            competitorsByIdAsString), /* updateTailsOnly */ true, detailTypeChanged);
+                                            competitorsByIdAsString), /* updateTailsOnly */ true, detailTypeChanged, detailType);
                         }
                     }));
         }
@@ -1551,7 +1552,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
                         // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
-                                competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged);
+                                competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged, detailType);
                         if (!isRedraw) {
                             // only remove markers if the time is actually changed
                             if (douglasMarkers != null) {
@@ -1654,19 +1655,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     /**
      * @param hasTailOverlapForCompetitor
-     *            if for a competitor whose fixes are provided in <code>boatData</code> this holds
-     *            <code>false</code>, any fixes previously stored for that competitor are removed, and the tail is
-     *            deleted from the map (see {@link #removeTail(CompetitorWithBoatDTO)}); the new fixes are then added to the
-     *            {@link #fixes} map, and a new tail will have to be constructed as needed (does not happen here). If
-     *            this map holds <code>true</code>, {@link #mergeFixes(CompetitorWithBoatDTO, List, long)} is used to merge the
-     *            new fixes from <code>fixesForCompetitors</code> into the {@link #fixes} collection, and the tail is
-     *            left unchanged. <b>NOTE:</b> When a non-overlapping set of fixes is updated (<code>false</code>), this
+     *            if for a competitor whose fixes are provided in <code>boatData</code> this holds <code>false</code>,
+     *            any fixes previously stored for that competitor are removed, and the tail is deleted from the map (see
+     *            {@link #removeTail(CompetitorWithBoatDTO)}); the new fixes are then added to the {@link #fixes} map,
+     *            and a new tail will have to be constructed as needed (does not happen here). If this map holds
+     *            <code>true</code>, {@link #mergeFixes(CompetitorWithBoatDTO, List, long)} is used to merge the new
+     *            fixes from <code>fixesForCompetitors</code> into the {@link #fixes} collection, and the tail is left
+     *            unchanged. <b>NOTE:</b> When a non-overlapping set of fixes is updated (<code>false</code>), this
      *            map's record for the competitor is <b>UPDATED</b> to <code>true</code> after the tail deletion and
      *            {@link #fixes} replacement has taken place. This helps in cases where this update is only one of two
      *            into which an original request was split (one quick update of the tail's head and another one for the
      *            longer tail itself), such that the second request that uses the <em>same</em> map will be considered
      *            having an overlap now, not leading to a replacement of the previous update originating from the same
-     *            request. See also {@link FixesAndTails#updateFixes(Map, Map, TailFactory, long)}.
+     *            request. See also {@link FixesAndTails#updateFixes(Map, Map, TailFactory, long, DetailType)}.
      * @param updateTailsOnly
      *            if <code>true</code>, only the tails are updated according to <code>boatData</code> and
      *            <code>hasTailOverlapForCompetitor</code>, but the advantage line is not updated, and neither are the
@@ -1674,16 +1675,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      *            which <em>does</em> update those structures. In particular, tails that do not appear in
      *            <code>boatData</code> are not removed from the map in case <code>updateTailsOnly</code> is
      *            <code>true</code>.
+     * @param detailType
+     *            the detail type the {@code boatData} fixes contain detail values for; used for consistency check in
+     *            {@link FixesAndTails} cache.
      */
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData,
-            boolean updateTailsOnly, boolean detailTypeChanged) {
+            boolean updateTailsOnly, boolean detailTypeChanged, DetailType detailType) {
         if (zoomingAnimationsInProgress == 0) {
-            fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, transitionTimeInMillis, detailTypeChanged);
+            fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, transitionTimeInMillis, detailTypeChanged, detailType);
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
-                    getCompetitorsToShow(), updateTailsOnly);
+                    getCompetitorsToShow(), updateTailsOnly, detailType);
             if (detailTypeChanged) {
                 selectedDetailTypeChanged = false;
                 tailColorMapper.notifyListeners();
@@ -1894,11 +1898,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (timer.getPlayState() == PlayStates.Playing) {
             // choose 130% of the refresh interval as transition period to make it unlikely that the transition
             // stops before the next update has been received
-            long smoothIntervall = 1300 * timer.getRefreshInterval() / 1000;
-            if (timeForPositionTransitionMillis > 0 && timeForPositionTransitionMillis < smoothIntervall) {
-                timeForPositionTransitionMillisSmoothed = smoothIntervall;
+            long smoothInterval = 1300 * timer.getRefreshInterval() / 1000;
+            if (timeForPositionTransitionMillis > 0 && timeForPositionTransitionMillis < smoothInterval) {
+                timeForPositionTransitionMillisSmoothed = smoothInterval;
             } else {
-                // either a large transition positive transition happend or any negative one, do not use the smooth
+                // either a large positive transition happend or any negative one, do not use the smooth
                 // value
                 if (timeForPositionTransitionMillis > 0) {
                     timeForPositionTransitionMillisSmoothed = timeForPositionTransitionMillis;
@@ -1918,9 +1922,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * @param updateTailsOnly
      *            if <code>false</code>, tails of competitors not in <code>competitorsToShow</code> are removed from the
      *            map
+     * @param detailTypeToShow
+     *            the detail type expected to be shown on the fixes; used for consistency check for now
      */
     private void showBoatsOnMap(final Date newTime, final long timeForPositionTransitionMillis,
-            final Iterable<CompetitorDTO> competitorsToShow, boolean updateTailsOnly) {
+            final Iterable<CompetitorDTO> competitorsToShow, boolean updateTailsOnly, DetailType detailTypeToShow) {
         if (map != null) {
             Date tailsFromTime = new Date(newTime.getTime() - settings.getEffectiveTailLengthInMilliseconds());
             Date tailsToTime = newTime;
@@ -1936,11 +1942,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     if (!fixesAndTails.hasTail(competitorDTO)) {
-                        fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
+                        fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this, detailTypeToShow);
                     } else {
                         fixesAndTails.updateTail(competitorDTO, tailsFromTime, tailsToTime,
                                 (int) (timeForPositionTransitionMillis == -1 ? -1
-                                        : timeForPositionTransitionMillis / 2));
+                                        : timeForPositionTransitionMillis / 2), detailTypeToShow);
                         if (!updateTailsOnly) {
                             competitorDTOsOfUnusedTails.remove(competitorDTO);
                         }
@@ -2104,7 +2110,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             advantageLine.setPath(pointsAsArray);
                             advantageLine.setMap(map);
                             Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
-                            
                             advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
                                     bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
                             advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
@@ -2399,7 +2404,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
                     lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
                     lineToShowOrRemoveOrUpdate.setMap(map);
-                    Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options, this);
+                    final Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options, this);
                     lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
                         @Override
                         public void onEvent(MouseOverMapEvent event) {
