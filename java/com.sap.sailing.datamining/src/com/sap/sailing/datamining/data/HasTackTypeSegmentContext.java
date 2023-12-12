@@ -1,5 +1,8 @@
 package com.sap.sailing.datamining.data;
 
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -14,6 +17,12 @@ public interface HasTackTypeSegmentContext {
     TimePoint getStartOfTackTypeSegment();
     
     TimePoint getEndOfTackTypeSegment();
+    
+    @Dimension(messageKey="TackType")
+    TackType getTackType() throws NoWindException;
+    
+    @Dimension(messageKey="LegType")
+    LegType getLegType() throws NoWindException;
     
     @Dimension(messageKey="TackTypeSegmentName")
     String getName();

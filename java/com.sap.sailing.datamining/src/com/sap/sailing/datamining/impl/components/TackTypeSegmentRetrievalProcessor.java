@@ -59,48 +59,39 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                 TimePoint startOfSegment = null;
                 gpsFixTrack.lockForRead();
                 try {
-                    TrackedRace trackedRaceComp = element.getTrackedRaceContext().getTrackedRace();
-                        while (wayPointPassingIterator.hasNext()) {
-                            TimePoint time = trackedRaceComp.getMarkPassing(element.getCompetitor(), wayPointPassingIterator.next()).getTimePoint();
-                            TimePoint time2 = null;
-                            try {
-                                time2 = trackedRaceComp
-                                        .getMarkPassing(element.getCompetitor(), wayPointPassingIterator.next())
-                                        .getTimePoint();
-                            } catch (NullPointerException e) {
-                                time2 = endOfRace;
-                            }
-                            TrackedLegOfCompetitor trackedLegComp = trackedRaceComp
-                                    .getTrackedLeg(element.getCompetitor(), time);
-
+                    final TrackedRace trackedRaceComp = element.getTrackedRaceContext().getTrackedRace();
+                    while (wayPointPassingIterator.hasNext()) {
+                        TimePoint time = trackedRaceComp
+                                .getMarkPassing(element.getCompetitor(), wayPointPassingIterator.next()).getTimePoint();
+                        TimePoint time2 = wayPointPassingIterator.hasNext() ? trackedRaceComp
+                                .getMarkPassing(element.getCompetitor(), wayPointPassingIterator.next()).getTimePoint()
+                                : end;
+                        final TrackedLegOfCompetitor trackedLegComp = trackedRaceComp.getTrackedLeg(element.getCompetitor(),
+                                time);
                         for (final GPSFix gpsFix : gpsFixTrack.getFixes(time, /* fromInclusive */ true, time2,
-                                /* toInclusive */ false)) { // SCHLEIFE die durch alle gps fixes des rennen geht
-//                            if (trackedLegComp == null || gpsFix.getTimePoint().after(trackedLegComp.getFinishTime())) {
-//                                trackedLegComp = trackedRaceComp.getTrackedLeg(element.getCompetitor(),
-//                                        gpsFix.getTimePoint());
-//                            }
+                                /* toInclusive */ false)) {
                             if (isAborted()) {
                                 break;
                             }
                             try {
-                                currentFixTackType = trackedLegComp.getTackType(gpsFix.getTimePoint()); // tacktype mit current fix, sobald fix in erstem leg ist
+                                currentFixTackType = trackedLegComp.getTackType(gpsFix.getTimePoint());
                             } catch (NoWindException e) {
                                 currentFixTackType = null;
                             }
-                            if (currentFixTackType != lastTackType) { // wenn Veränderung des TT:
-                                if (settings.getMinimumTackTypeSegmentDuration() == null || startOfSegment.until(last) // wenn nicht zu kleine segment dann:
+                            if (currentFixTackType != lastTackType) {
+                                if (settings.getMinimumTackTypeSegmentDuration() == null || startOfSegment.until(last)
                                         .compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
                                     addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfSegment,
                                             last /*don't include the last interval ending at the non-TackType fix  */);
-                                } // wenn next abschnitt nicht null TT ist:
-                                if (currentFixTackType != null) { // immer wenn TT sich ändert wird current tacktype und lasttacktype geupdated, außer bei null
+                                }
+                                if (currentFixTackType != null) {
                                     startOfSegment = gpsFix.getTimePoint();
                                     lastTackType = currentFixTackType;
                                 } else {
                                     startOfSegment = null;
                                 }
                             }
-                            last = gpsFix.getTimePoint(); //für nächsten gps fix vergleich
+                            last = gpsFix.getTimePoint();
                         }
                     }
                 } finally {

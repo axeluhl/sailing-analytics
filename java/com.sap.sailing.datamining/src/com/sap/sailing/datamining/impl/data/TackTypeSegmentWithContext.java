@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import com.sap.sailing.datamining.data.HasGPSFixTrackContext;
 import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -69,4 +72,16 @@ public class TackTypeSegmentWithContext implements HasTackTypeSegmentContext {
     private TrackedRace getTrackedRace() {
         return getGPSFixTrackContext().getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace();
     }
+
+    @Override
+    public TackType getTackType() throws NoWindException {
+        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTackType(getStartOfTackTypeSegment());
+       // return getGPSFixTrackContext().getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTackType(getStartOfTackTypeSegment());
+    }
+    
+    public LegType getLegType() throws NoWindException {
+        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTrackedLeg().getLegType(getStartOfTackTypeSegment());
+    }
+    
+    
 }
