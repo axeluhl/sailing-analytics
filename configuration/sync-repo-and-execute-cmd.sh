@@ -6,12 +6,14 @@
 if [ $# -eq 0 ]; then
     echo "$0 PATH_TO_GIT_REPO COMMAND_TO_RUN_ON_COMPLETION_IN_REPO"
     echo ""
-    echo "Script used to automatically fetch from a git repo and, if there are new commits, merge the changes."
+    echo "EXAMPLE: sync-repo-and-execute-cmd.sh \"/etc/httpd\"  \"sudo service httpd reload\""
+    echo "This script is used to automatically fetch from a git repo and, if there are new commits, merge the changes."
+    echo "And then run a command, passed as an argument."
     exit 2
 fi
 
-GIT_PATH=$1 # "/etc/httpd"
-COMMAND_ON_COMPLETION=$2 # "sudo service httpd reload"
+GIT_PATH=$1
+COMMAND_ON_COMPLETION=$2
 cd ${GIT_PATH}
 # Rev-parse gets the commit hash of given reference.
 CURRENT_HEAD=$(git rev-parse HEAD)

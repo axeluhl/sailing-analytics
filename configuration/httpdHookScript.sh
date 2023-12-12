@@ -19,7 +19,7 @@ while read oldrev newrev refname; do   # These vars are passed on stdin to this 
             for IP in $(aws ec2 describe-instances --filters Name=tag-key,Values="${TAG}" | jq -r '.Reservations[].Instances[].PublicIpAddress'); do
                 # strictHostKey... means no authenticity check. The sync-repo... script must be installed in the root user's home.
                 ssh -o "StrictHostKeyChecking=no" root@${IP} "cd ~ && ./sync-repo-and-execute-cmd.sh '${DIR}' '${COMMAND}' ";
-            done;
+            done
         fi
     fi
 done
