@@ -19,7 +19,7 @@ public interface HasTackTypeSegmentContext {
     TimePoint getEndOfTackTypeSegment();
     
     @Dimension(messageKey="TackType")
-    TackType getTackType() throws NoWindException;
+    TackType getTackType();
     
     @Dimension(messageKey="LegType")
     LegType getLegType() throws NoWindException;

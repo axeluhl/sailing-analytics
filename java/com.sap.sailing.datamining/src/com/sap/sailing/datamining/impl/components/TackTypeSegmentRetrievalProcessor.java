@@ -6,8 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
+import com.sap.sailing.datamining.impl.data.GPSFixTrackWithContext;
 import com.sap.sailing.datamining.impl.data.TackTypeSegmentWithContext;
 import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Competitor;
@@ -16,12 +17,11 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.datamining.impl.data.GPSFixTrackWithContext;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
@@ -41,64 +41,69 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
         List<HasTackTypeSegmentContext> tackTypeSegments = new ArrayList<>();
         final TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         final TimePoint startOfRace = element.getTrackedRaceContext().getTrackedRace().getStartOfRace();
+        final Competitor competitor = element.getCompetitor();
         if (startOfRace != null) {
-            final TimePoint endOfRace = element.getTrackedRaceContext().getTrackedRace().getEndOfRace();
-            final TimePoint end;
-            if (endOfRace == null) {
-                final TimePoint endOfTracking = element.getTrackedRaceContext().getTrackedRace().getEndOfTracking();
-                end = endOfTracking == null ? MillisecondsTimePoint.now() : endOfTracking;
-            } else {
-                end = endOfRace;
-            }
             final GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(element.getCompetitor());
-            final Iterator<Waypoint> wayPointPassingIterator = element.getTrackedRaceContext().getTrackedRace().getRace().getCourse().getWaypoints().iterator();
             if (gpsFixTrack != null) {
-                TackType lastTackType = null;
-                TackType currentFixTackType = null;
-                TimePoint last = null;
-                TimePoint startOfSegment = null;
-                gpsFixTrack.lockForRead();
-                try {
-                    final TrackedRace trackedRaceComp = element.getTrackedRaceContext().getTrackedRace();
-                    while (wayPointPassingIterator.hasNext()) {
-                        TimePoint time = trackedRaceComp
-                                .getMarkPassing(element.getCompetitor(), wayPointPassingIterator.next()).getTimePoint();
-                        TimePoint time2 = wayPointPassingIterator.hasNext() ? trackedRaceComp
-                                .getMarkPassing(element.getCompetitor(), wayPointPassingIterator.next()).getTimePoint()
-                                : end;
-                        final TrackedLegOfCompetitor trackedLegComp = trackedRaceComp.getTrackedLeg(element.getCompetitor(),
-                                time);
-                        for (final GPSFix gpsFix : gpsFixTrack.getFixes(time, /* fromInclusive */ true, time2,
-                                /* toInclusive */ false)) {
+                final Iterator<MarkPassing> markPassingIterator = trackedRace.getMarkPassings(competitor).iterator();
+                if (markPassingIterator.hasNext()) { // only search for tack type segments if the competitor has started the race
+                    MarkPassing legStartMarkPassing = markPassingIterator.next();
+                    TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLegStartingAt(legStartMarkPassing.getWaypoint()).getTrackedLeg(competitor);
+                    MarkPassing nextMarkPassing = markPassingIterator.hasNext() ? markPassingIterator.next() : null;
+                    final Waypoint finish = trackedRace.getRace().getCourse().getLastWaypoint();
+                    TackType currentTackType = null;
+                    boolean segmentEmpty = true;
+                    TackType nextTackType = null;
+                    TimePoint startOfCurrentSegment = legStartMarkPassing.getTimePoint();
+                    GPSFix gpsFix = null;
+                    gpsFixTrack.lockForRead();
+                    try {
+                        // run through all of the competitor's fixes, starting at the first mark passing and finishing when there are
+                        // no more fixes left or the finish mark passing has been reached
+                        for (final Iterator<GPSFixMoving> i=gpsFixTrack.getFixesIterator(startOfCurrentSegment, /* fromInclusive */ true);
+                             i.hasNext() && legStartMarkPassing.getWaypoint() != finish; ) {
                             if (isAborted()) {
                                 break;
                             }
+                            gpsFix = i.next();
                             try {
-                                currentFixTackType = trackedLegComp.getTackType(gpsFix.getTimePoint());
+                                nextTackType = trackedLegOfCompetitor.getTackType(gpsFix.getTimePoint());
                             } catch (NoWindException e) {
-                                currentFixTackType = null;
+                                nextTackType = null;
                             }
-                            if (currentFixTackType != lastTackType) {
-                                if (settings.getMinimumTackTypeSegmentDuration() == null || startOfSegment.until(last)
-                                        .compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
-                                    addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfSegment,
-                                            last /*don't include the last interval ending at the non-TackType fix  */);
+                            while (nextMarkPassing != null && !gpsFix.getTimePoint().before(nextMarkPassing.getTimePoint())) {
+                                // reached leg's end; complete the current segment if not empty and move through mark passings
+                                // iterator until having found the leg the gpsFix is in, while moving the trackedLegOfCompetitor along
+                                legStartMarkPassing = nextMarkPassing;
+                                if (!segmentEmpty) {
+                                    addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfCurrentSegment,
+                                            nextMarkPassing.getTimePoint(), currentTackType);
+                                    segmentEmpty = gpsFix.getTimePoint().equals(nextMarkPassing.getTimePoint()); // if the fix is exactly at leg start
+                                    startOfCurrentSegment = nextMarkPassing.getTimePoint();
+                                    currentTackType = nextTackType;
                                 }
-                                if (currentFixTackType != null) {
-                                    startOfSegment = gpsFix.getTimePoint();
-                                    lastTackType = currentFixTackType;
-                                } else {
-                                    startOfSegment = null;
-                                }
+                                trackedLegOfCompetitor = trackedRace.getTrackedLegStartingAt(nextMarkPassing.getWaypoint()).getTrackedLeg(competitor);
+                                nextMarkPassing = markPassingIterator.hasNext() ? markPassingIterator.next() : null;
                             }
-                            last = gpsFix.getTimePoint();
+                            // invariant: nextMarkPassing is either null or after gpsFix's time and representing the passing of the mark at the end
+                            // of the leg gpsFix is in; trackedLegOfCompetitor corresponds to the leg gpsFix is in
+                            if (!segmentEmpty && nextTackType != currentTackType) {
+                                addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfCurrentSegment,
+                                        gpsFix.getTimePoint() /* don't include the last interval ending at the non-TackType fix */, currentTackType);
+                                segmentEmpty = true; // because gpsFix is now exactly at the beginning of the new segment
+                                startOfCurrentSegment = gpsFix.getTimePoint();
+                                currentTackType = nextTackType;
+                            } else {
+                                segmentEmpty = false; // gpsFix is in the current segment
+                            }
                         }
+                    } finally {
+                        gpsFixTrack.unlockAfterRead();
                     }
-                } finally {
-                    gpsFixTrack.unlockAfterRead();
-                }
-                if (currentFixTackType == lastTackType && currentFixTackType != null) {
-                    addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfSegment, end);
+                    if (!segmentEmpty) {
+                        addOrMergeTackTypeSegment(element, tackTypeSegments, gpsFixTrack, startOfCurrentSegment, gpsFix.getTimePoint(), currentTackType);
+                        // no need to update segmentEmpty / startOfCurrentSegment / lastTackType because now we're done
+                    }
                 }
             }
         }
@@ -107,25 +112,29 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
 
     private void addOrMergeTackTypeSegment(HasRaceOfCompetitorContext element,
             List<HasTackTypeSegmentContext> tackTypeSegments, final GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack,
-            TimePoint startOfSegment, TimePoint endOfSegment) {
-        if (tackTypeSegments.isEmpty() || settings.getMinimumDurationBetweenAdjacentTackTypeSegments() == null) {
-            tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, gpsFixTrack));
-        } else {
-            final HasTackTypeSegmentContext previousSegment = tackTypeSegments.get(tackTypeSegments.size()-1);
-            final TimePoint previousEnd = previousSegment.getEndOfTackTypeSegment();
-            if (previousEnd.until(startOfSegment).compareTo(settings.getMinimumDurationBetweenAdjacentTackTypeSegments()) < 0) {
-                // merge:
-                tackTypeSegments.set(tackTypeSegments.size()-1, createTackTypeSegment(previousSegment.getStartOfTackTypeSegment(), endOfSegment, element, gpsFixTrack));
+            TimePoint startOfSegment, TimePoint endOfSegment, TackType tackType) {
+        if (settings.getMinimumTackTypeSegmentDuration() == null || startOfSegment.until(endOfSegment)
+                .compareTo(settings.getMinimumTackTypeSegmentDuration()) >= 0) {
+            if (tackTypeSegments.isEmpty() || settings.getMinimumDurationBetweenAdjacentTackTypeSegments() == null) {
+                tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, gpsFixTrack, tackType));
             } else {
-                // add; duration between the segments is large enough
-                tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, gpsFixTrack));
+                // we wouldn't want to merge segments with different tack types; different from foiling segments where you *would* want to join to closely-adjacent foiled segments
+                final HasTackTypeSegmentContext previousSegment = tackTypeSegments.get(tackTypeSegments.size()-1);
+                final TimePoint previousEnd = previousSegment.getEndOfTackTypeSegment();
+                if (previousSegment.getTackType() == tackType && previousEnd.until(startOfSegment).compareTo(settings.getMinimumDurationBetweenAdjacentTackTypeSegments()) < 0) {
+                    // merge:
+                    tackTypeSegments.set(tackTypeSegments.size()-1, createTackTypeSegment(previousSegment.getStartOfTackTypeSegment(), endOfSegment, element, gpsFixTrack, tackType));
+                } else {
+                    // add; duration between the segments is large enough or tack type is different
+                    tackTypeSegments.add(createTackTypeSegment(startOfSegment, endOfSegment, element, gpsFixTrack, tackType));
+                }
             }
         }
     }
 
     private HasTackTypeSegmentContext createTackTypeSegment(TimePoint startOfSegment, TimePoint endOfSegment,
-            HasRaceOfCompetitorContext raceOfCompetitorContext, GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack) {
-        return new TackTypeSegmentWithContext(new GPSFixTrackWithContext(raceOfCompetitorContext, gpsFixTrack), startOfSegment, endOfSegment); 
+            HasRaceOfCompetitorContext raceOfCompetitorContext, GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TackType tackType) {
+        return new TackTypeSegmentWithContext(new GPSFixTrackWithContext(raceOfCompetitorContext, gpsFixTrack), startOfSegment, endOfSegment, tackType); 
     }
 
 }

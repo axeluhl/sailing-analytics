@@ -18,15 +18,17 @@ import com.sap.sse.common.TimePoint;
 public class TackTypeSegmentWithContext implements HasTackTypeSegmentContext {
     private final HasGPSFixTrackContext gpsFixTrackContext;
     private final TimePoint startOfTackTypeSegment;
-    private final TimePoint endOfTackTypeSegment;
+    private final TimePoint endOfTackTypeSegment; // TODO is this exclusive or inclusive? Suggestion: it should be exclusive, as usual in most Java interval specifications; please comment accordingly
+    private final TackType tackType;
     private static final SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     public TackTypeSegmentWithContext(GPSFixTrackWithContext gpsFixTrackWithContext, TimePoint startOfTackTypeSegment,
-            TimePoint endOfTackTypeSegment) {
+            TimePoint endOfTackTypeSegment, TackType tackType) {
         super();
         this.gpsFixTrackContext = gpsFixTrackWithContext;
         this.startOfTackTypeSegment = startOfTackTypeSegment;
         this.endOfTackTypeSegment = endOfTackTypeSegment;
+        this.tackType = tackType;
     }
 
     @Override
@@ -74,13 +76,13 @@ public class TackTypeSegmentWithContext implements HasTackTypeSegmentContext {
     }
 
     @Override
-    public TackType getTackType() throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTackType(getStartOfTackTypeSegment());
-       // return getGPSFixTrackContext().getRaceOfCompetitorContext().getTrackedRaceContext().getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTackType(getStartOfTackTypeSegment());
+    public TackType getTackType() {
+        return tackType;
     }
     
     public LegType getLegType() throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTrackedLeg().getLegType(getStartOfTackTypeSegment());
+        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTrackedLeg().getLegType(
+                getStartOfTackTypeSegment().plus(getStartOfTackTypeSegment().until(getEndOfTackTypeSegment()).divide(2)));
     }
     
     
