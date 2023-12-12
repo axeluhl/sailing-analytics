@@ -1,11 +1,14 @@
 #!/bin/bash
+REMOTE=$1
+cd /etc/httpd
 git status
 if [[ $? -eq 0 ]]; then 
+    rm -rf conf   # Perhaps, this script should instead mv to a backup location
+    rm -rf conf.d
     git init
     git branch -m main
-    git remote add origin httpdGit@18.135.5.168:/home/httpdGit/mainHttpdConfig.git
-    git add *
-    git pull --set-upstream origin main
+    git remote add origin "${REMOTE}"
+    git checkout main
 else 
     echo "fail"
 fi
