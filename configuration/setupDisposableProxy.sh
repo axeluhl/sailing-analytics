@@ -2,22 +2,25 @@
 BEARER_TOKEN=$1
 MFA_NAME=$2
 yum update -y
-sudo amazon-linux-extras enable 
-yum install -y perl httpd mod_proxy_html tmux nfs-utils git whois jq mailx
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx
 sudo amazon-linux-extras install epel -y && yum install -y apachetop
 sudo -i
+# main conf mandates php7.1
 amazon-linux-extras enable php7.1
 yum install -y php  # also install mod_php
+# Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sed -i 's/.*sleep 10" //g' ~/.ssh/authorized_keys
-sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
+sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFailure yes/' /etc/ssh/sshd_config
+# setup symbolic links
 cd /usr/local/bin
 ln -s  /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin/update_authorized_keys_for_landscape_managers
 ln -s  /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
-ln -s  /home/wiki/gitwiki/configuration/crontab /root/crontab
+ln -s  /home/wiki/gitwiki/configuration/crontab /root/crontab   # make sure to check the correct crontab is used
 ln -s  /home/wiki/gitwiki/configuration/on-site-scripts/paris2024/notify-operators
+ln -s  /home/wiki/gitwiki/configuration/sync-repo-and-execute-cmd.sh
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
-mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome_backup
+# add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>Health check</title><meta charset="UTF-8"></head><body><h1>Test page</h1></body></html>
 EOF
