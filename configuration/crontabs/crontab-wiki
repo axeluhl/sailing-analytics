@@ -1,0 +1,3 @@
+*/10 * * * * /home/wiki/syncgit
+10 12 * * * /home/wiki/gitwiki/configuration/update-tractrac-urls-to-archive.sh >/home/wiki/update-tractrac-urls-to-archive.out 2>/home/wiki/update-tractrac-urls-to-archive.err
+15 12 * * * /home/wiki/gitwiki/configuration/downloadNewArchivedTracTracEvents.sh /home/trac/static/TracTracTracks >/home/wiki/downloadNewArchivedTracTracEvents.out 2>/home/wiki/downloadNewArchivedTracTracEvents.err
