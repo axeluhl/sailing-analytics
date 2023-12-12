@@ -93,6 +93,7 @@ import software.amazon.awssdk.services.acm.model.CertificateStatus;
 import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
 import software.amazon.awssdk.services.autoscaling.model.EnableMetricsCollectionRequest;
@@ -1874,7 +1875,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private CreateLaunchConfigurationRequest.Builder copyLaunchConfigurationToCreateRequestBuilder(LaunchConfiguration launchConfigurationToCopy) {
         return CreateLaunchConfigurationRequest.builder()
             .associatePublicIpAddress(launchConfigurationToCopy.associatePublicIpAddress())
-            .blockDeviceMappings(launchConfigurationToCopy.blockDeviceMappings())
+            .blockDeviceMappings(new BlockDeviceMapping[0]) // empty the block device mappings, forcing AMI device mappings to be used
             .classicLinkVPCId(launchConfigurationToCopy.classicLinkVPCId())
             .classicLinkVPCSecurityGroups(launchConfigurationToCopy.classicLinkVPCSecurityGroups())
             .ebsOptimized(launchConfigurationToCopy.ebsOptimized())

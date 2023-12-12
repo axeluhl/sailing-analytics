@@ -54,6 +54,7 @@ public class TagInputPanel extends FlowPanel {
             visibleForPublicCheckBox = createCheckbox(stringMessages.tagVisibleForPublicCheckBox());
             visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
             imageUploadPanel = new URLFieldWithFileUpload(stringMessages, null);
+            getCancelButton().addClickHandler(clickEvent-> imageUploadPanel.deleteCurrentFile());
             validateAndUpdate();
         }
 

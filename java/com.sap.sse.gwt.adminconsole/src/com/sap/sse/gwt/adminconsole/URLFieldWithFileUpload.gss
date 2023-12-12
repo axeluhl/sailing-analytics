@@ -41,8 +41,7 @@
 
 .deleteButton {
     outline: none;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 2rem;
     position: relative;
     margin-left: -3px;
     border-top-left-radius: 0;
