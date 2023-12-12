@@ -24,8 +24,10 @@ crontab /root/crontab
 cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>Health check</title><meta charset="UTF-8"></head><body><h1>Test page</h1></body></html>
 EOF
+# ensure httpd starts on startup
 systemctl enable httpd
-echo "net.ipv4.ip_conntrac_max = 131072" > /etc/sysctl.conf   #should I have appended to limits.conf too
+echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf   # should I have appended to limits.conf too
+# setup fail2ban
 yum install -y fail2ban
 cat <<EOF > /etc/fail2ban/jail.d/customisation.local
 [ssh-iptables]
@@ -39,9 +41,8 @@ maxretry = 5
 EOF
 chkconfig --level 23 fail2ban on
 service fail2ban start
-yum install -y mod_ssl mod_perl mod_php
-
-
+yum install -y mod_ssl
+#setup mounting of nvme
 cat <<EOF > /etc/systemd/system/mountnvmeswap.service
 [Unit]
 Description=An unformatted /dev/nvme0n1 is turned into swap space
@@ -57,14 +58,17 @@ ExecStart=/usr/local/bin/mountnvmeswap
 EOF
 ln -s /home/wiki/gitwiki/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
 sed -i "s/nvme0n1/nvme4n1" /usr/local/bin/mountnvmeswap
+# setup mfa script
 ln -s /home/wiki/gitwiki/configuration/aws-automation/awsmfalogon.sh /usr/local/bin
-sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 echo "alias awsmfa='echo -n "Token: "; read aws_mfa_token; . awsmfalogon.sh "${MFA_NAME}" ${aws_mfa_token}' " >> root/.bashrc
 source /root/.bashrc
-
+#logrotate
+sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
+# setup latest cli
 yum remove awscli
 cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 cd ~ && unzip awscliv2.zip
+rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
 cd /home
 adduser trac
