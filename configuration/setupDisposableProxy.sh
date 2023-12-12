@@ -70,11 +70,14 @@ cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awsc
 cd ~ && unzip awscliv2.zip
 rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
+# setup other users and crontabs to keep repo updated
 cd /home
+chown -R trac:trac trac
 adduser trac
 su --login trac
 crontab crontab
 exit
+chown -R wiki:wiki wiki
 adduser wiki
 su --login wiki
 crontab crontab
