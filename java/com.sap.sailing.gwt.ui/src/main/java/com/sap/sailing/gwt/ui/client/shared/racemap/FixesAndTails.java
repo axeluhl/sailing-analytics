@@ -190,7 +190,7 @@ public class FixesAndTails {
      */
     protected Colorline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory, DetailType detailTypeToShow) {
         if (detailTypeToShow != null && detailType.get(competitorDTO) != detailTypeToShow) {
-            GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailType+" but caller expected "+detailTypeToShow);
+            GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailType.get(competitorDTO)+" but caller expected "+detailTypeToShow);
         }
         List<LatLng> points = new ArrayList<LatLng>();
         List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
@@ -399,10 +399,10 @@ public class FixesAndTails {
                         runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                     }
                     if (intoThisIndex < indexOfFirstShownFix) {
-                        indexOfFirstShownFix--;
+                        indexOfFirstShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
                     }
                     if (intoThisIndex <= indexOfLastShownFix) {
-                        indexOfLastShownFix--;
+                        indexOfLastShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
                     }
                     // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes
                     if (minDetailValueFix.containsKey(competitorDTO)) {
@@ -430,6 +430,7 @@ public class FixesAndTails {
                     intoThis.add(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         // fix inserted at a position currently visualized by tail
+                        // TODO bug5921: why isn't insertAt and setAt (see above) run in a Triggerable like the removeAt calls?
                         tail.insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                     }
                     if (intoThisIndex < indexOfFirstShownFix) {
@@ -462,10 +463,10 @@ public class FixesAndTails {
                             runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                         }
                         if (intoThisIndex-1 < indexOfFirstShownFix) {
-                            indexOfFirstShownFix--;
+                            indexOfFirstShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
                         }
                         if (intoThisIndex-1 <= indexOfLastShownFix) {
-                            indexOfLastShownFix--;
+                            indexOfLastShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
                         }
                         if (minDetailValueFix.containsKey(competitorDTO) && intoThisIndex - 1 <= minDetailValueFix.get(competitorDTO)) {
                             minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) - 1);
@@ -523,7 +524,7 @@ public class FixesAndTails {
             @Override
             public void run() {
                 if (selectedDetailType != null && detailType.get(competitorDTO) != selectedDetailType) {
-                    GWT.log("WARNING: Detail type mismatch in updateTail: have "+detailType+" but caller expected "+selectedDetailType);
+                    GWT.log("WARNING: Detail type mismatch in updateTail: have "+detailType.get(competitorDTO)+" but caller expected "+selectedDetailType);
                 }
                 final Colorline tail = getTail(competitorDTO);
                 if (tail != null) {
