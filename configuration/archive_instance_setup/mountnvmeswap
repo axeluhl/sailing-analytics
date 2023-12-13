@@ -3,7 +3,7 @@
 # Script to deploy on an instance that has an ephemeral volume as /dev/nvme0n1 (adjust env var PARTITION if different)
 # Ensures the partition is xfs-formatted, any existing partition contents will be overwritten if formatted otherwise.
 # An existing xfs partition will be left alone.
-PARTITION=/dev/nvme0n1
+PARTITION=/dev/nvme4n1
 FSTYPE=$(blkid -p $PARTITION -s TYPE -o value)
 if [ "$FSTYPE" = "" ]; then
   echo FSTYPE was empty, creating swap partition
