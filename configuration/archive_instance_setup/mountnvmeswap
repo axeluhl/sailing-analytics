@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Script to deploy on an instance that has an ephemeral volume as /dev/nvme0n1 (adjust env var PARTITION if different)
+# Script to deploy on an instance that has an ephemeral volume. It finds the volumes that are disks or partitionless; ls -l /dev | awk '{print $10}' | grep -o "nvme[0-9]*n" | sort | uniq -u
+# that are nvme and contain no partition. (adjust env var PARTITION if different)
 # Ensures the partition is xfs-formatted, any existing partition contents will be overwritten if formatted otherwise.
 # An existing xfs partition will be left alone.
-PARTITION=/dev/nvme0n1
+PARTITION="/dev/$(ls -l /dev | awk '{print $10}' | grep -o "nvme[0-9]*n" | sort | uniq -u)"
 FSTYPE=$(blkid -p $PARTITION -s TYPE -o value)
 if [ "$FSTYPE" = "" ]; then
   echo FSTYPE was empty, creating swap partition
