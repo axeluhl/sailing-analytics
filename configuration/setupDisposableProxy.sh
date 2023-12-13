@@ -81,8 +81,15 @@ cd ~ && sudo ./aws/install
 
 #setup git
 /home/wiki/gitwiki/configuration/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
-# ensure welcome.conf doesn't conflict
-# mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.bak   #may already be handled by git repo
+#certs
+cd /etc
+mkdir letsencrypt
+mkdir letsencrypt/live
+mkdir letsencrypt/live/sail-insight.com
+cd letsencrypt/live/sail-insight.com
+scp -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com .
+systemctl start httpd
+
 
 # will aws credentials need to be set? or will the ami store these details? session tokens? we will need a user without mfa.
 # manual setup is mounts and tagging
