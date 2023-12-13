@@ -1,10 +1,21 @@
 #!/bin/bash
 BEARER_TOKEN=$1
-MFA_NAME=$2
+#fstab
+mkdir /var/log/old
+echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
+mount -a
+# setup other users and crontabs to keep repo updated
+cd /home
+git clone -o "StrictHostKeyChecking=no" ssh://trac@sapsailing.com/home/trac/git
+mv git wiki
+adduser wiki
+chown -R wiki:wiki wiki
+crontab -u wiki /home/wiki/configuration/crontabs/cron-wiki
+#update
 yum update -y
+yum install amazon-linux-extras
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx
-sudo amazon-linux-extras install epel -y && yum install -y apachetop
-sudo -i
+amazon-linux-extras install epel -y && yum install -y apachetop
 # main conf mandates php7.1
 amazon-linux-extras enable php7.1
 yum install -y php  # also install mod_php
