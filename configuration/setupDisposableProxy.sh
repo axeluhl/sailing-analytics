@@ -56,7 +56,7 @@ yum install -y mod_ssl
 #setup mounting of nvme
 cat <<EOF > /etc/systemd/system/mountnvmeswap.service
 [Unit]
-Description=An unformatted /dev/nvme0n1 is turned into swap space
+Description=An unformatted nvme is turned into swap space
 Requires=-.mount
 After=-.mount
 
@@ -68,31 +68,17 @@ RemainAfterExit=true
 ExecStart=/usr/local/bin/mountnvmeswap
 EOF
 ln -s /home/wiki/gitwiki/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
-sed -i "s/nvme0n1/nvme4n1" /usr/local/bin/mountnvmeswap
-# setup mfa script
-ln -s /home/wiki/gitwiki/configuration/aws-automation/awsmfalogon.sh /usr/local/bin
-echo "alias awsmfa='echo -n "Token: "; read aws_mfa_token; . awsmfalogon.sh "${MFA_NAME}" ${aws_mfa_token}' " >> root/.bashrc
 source /root/.bashrc
+./mountnvmeswap
 #logrotate
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 # setup latest cli
-yum remove awscli
+yum remove -y awscli
 cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 cd ~ && unzip awscliv2.zip
 rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
-# setup other users and crontabs to keep repo updated
-cd /home
-chown -R trac:trac trac
-adduser trac
-su --login trac
-crontab crontab
-exit
-chown -R wiki:wiki wiki
-adduser wiki
-su --login wiki
-crontab crontab
-exit
+
 #setup git
 /home/wiki/gitwiki/configuration/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
 # ensure welcome.conf doesn't conflict
