@@ -17,10 +17,10 @@ public class TestMemoryMonitorAction {
     
     @Test
     public void testSimpleActionOrdering() {
-        MemoryMonitorAction low = new Test_MemoryMonitorAction(0.8);
-        MemoryMonitorAction medium = new Test_MemoryMonitorAction(0.5);
-        MemoryMonitorAction high1 = new Test_MemoryMonitorAction(0.2);
-        MemoryMonitorAction high2 = new Test_MemoryMonitorAction(0.2);
+        MemoryMonitorAction low = new Test_MemoryMonitorAction(0.8, /* 2GB freeMemoryInBytes */ 2l*1024*1024*1024);
+        MemoryMonitorAction medium = new Test_MemoryMonitorAction(0.5, /* 2GB freeMemoryInBytes */ 2*1024*1024*1024);
+        MemoryMonitorAction high1 = new Test_MemoryMonitorAction(0.2, /* 2GB freeMemoryInBytes */ 2*1024*1024*1024);
+        MemoryMonitorAction high2 = new Test_MemoryMonitorAction(0.2, /* 2GB freeMemoryInBytes */ 2*1024*1024*1024);
         List<MemoryMonitorAction> actions = Arrays.asList(low, high2, high1, medium);
         Collections.sort(actions);
 
@@ -31,15 +31,18 @@ public class TestMemoryMonitorAction {
     
     @Test
     public void testActionPerforming() {
-        Test_MemoryMonitorAction action = new Test_MemoryMonitorAction(0.2);
-
-        assertThat(action.checkMemoryAndPerformAction(0.3), is(false));
+        Test_MemoryMonitorAction action = new Test_MemoryMonitorAction(0.2, /* 2GB freeMemoryInBytes */ 2l*1024*1024*1024);
+        // enough ratio and absolute
+        assertThat(action.checkMemoryAndPerformAction(0.3, /* 2GB freeMemoryInBytes */ 2l*1024*1024*1024+1), is(false));
         assertThat(action.actionHasBeenPerformed(), is(false));
-
-        assertThat(action.checkMemoryAndPerformAction(0.2), is(false));
+        // enough ratio but too little absolute still won't fire
+        assertThat(action.checkMemoryAndPerformAction(0.3, /* 2GB freeMemoryInBytes */ 2l*1024*1024*1024-1), is(false));
         assertThat(action.actionHasBeenPerformed(), is(false));
-
-        assertThat(action.checkMemoryAndPerformAction(0.1), is(true));
+        // exactly matching ratio, and too little absolute won't fire
+        assertThat(action.checkMemoryAndPerformAction(0.2, /* 2GB freeMemoryInBytes */ 2l*1024*1024*1024-1), is(false));
+        assertThat(action.actionHasBeenPerformed(), is(false));
+        // too little ratio and too little absolute will fire
+        assertThat(action.checkMemoryAndPerformAction(0.1, /* 2GB freeMemoryInBytes */ 2l*1024*1024*1024-1), is(true));
         assertThat(action.actionHasBeenPerformed(), is(true));
     }
 
