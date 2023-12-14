@@ -23,11 +23,13 @@ chown -R wiki:wiki wiki
 crontab -u wiki /home/wiki/configuration/crontabs/cron-wiki
 # setup symbolic links
 cd /usr/local/bin
-ln -s  /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin/update_authorized_keys_for_landscape_managers
-ln -s  /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
-ln -s  /home/wiki/gitwiki/configuration/crontab /root/crontab   # make sure to check the correct crontab is used
-ln -s  /home/wiki/gitwiki/configuration/on-site-scripts/paris2024/notify-operators
-ln -s  /home/wiki/gitwiki/configuration/sync-repo-and-execute-cmd.sh
+ln -s  /home/wiki/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin/update_authorized_keys_for_landscape_managers
+ln -s  /home/wiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
+ln -s  /home/wiki/configuration/on-site-scripts/paris2024/notify-operators
+ln -s  /home/wiki/configuration/sync-repo-and-execute-cmd.sh
+ln -s  /home/wiki/configuration/switchoverArchive.sh 
+
+ln -s  /home/wiki/configuration/crontab /root/crontab   # make sure to check the correct crontab is used
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
 # add basic test page which won't cause redirect error code if used as a health check.
@@ -66,7 +68,7 @@ Type=oneshot
 RemainAfterExit=true
 ExecStart=/usr/local/bin/mountnvmeswap
 EOF
-ln -s /home/wiki/gitwiki/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
+ln -s /home/wiki/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
 source /root/.bashrc
 ./mountnvmeswap
 #logrotate
@@ -79,7 +81,7 @@ rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
 
 #setup git
-/home/wiki/gitwiki/configuration/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
+/home/wiki/configuration/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
 #certs
 cd /etc
 mkdir letsencrypt
