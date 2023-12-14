@@ -18,8 +18,7 @@ sed -i 's/.*sleep 10" //g' ~/.ssh/authorized_keys
 sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFailure yes/' /etc/ssh/sshd_config
 # setup other users and crontabs to keep repo updated
 cd /home
-GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone -o "StrictHostKeyChecking=no" ssh://trac@sapsailing.com/home/trac/git
-mv git wiki
+GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone ssh://trac@sapsailing.com/home/trac/git
 adduser wiki
 chown -R wiki:wiki wiki
 crontab -u wiki /home/wiki/configuration/crontabs/cron-wiki
@@ -83,7 +82,9 @@ rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
 
 #setup git
-/home/wiki/configuration/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
+## /home/wiki/git/configuration/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
+/root/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
+
 #certs
 cd /etc
 mkdir letsencrypt
