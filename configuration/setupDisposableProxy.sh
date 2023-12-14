@@ -1,5 +1,7 @@
 #!/bin/bash
 BEARER_TOKEN=$1
+INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
+HTTP_LOGROTATE=/etc/logrotate.d/httpd
 #fstab
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
