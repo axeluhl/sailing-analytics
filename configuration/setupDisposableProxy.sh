@@ -20,17 +20,22 @@ sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFa
 cd /home
 GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone ssh://trac@sapsailing.com/home/trac/git
 adduser wiki
+mv git wiki
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:~/.ssh /home/wiki/.ssh
 chown -R wiki:wiki wiki
-crontab -u wiki /home/wiki/configuration/crontabs/cron-wiki
+## crontab -u wiki /home/wiki/git/configuration/crontabs/cron-wiki
+ln -s   /home/wiki/git/configuration/syncgit /home/wiki
+#cron.daily logrotate
+scp root@sapsailing.com:/etc/cron.daily/logrotate /etc/cron.daily/logrotate
 # setup symbolic links
 cd /usr/local/bin
-ln -s  /home/wiki/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin/update_authorized_keys_for_landscape_managers
-ln -s  /home/wiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
-ln -s  /home/wiki/configuration/on-site-scripts/paris2024/notify-operators
-ln -s  /home/wiki/configuration/sync-repo-and-execute-cmd.sh
-ln -s  /home/wiki/configuration/switchoverArchive.sh 
+ln -s  /home/wiki/git/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin/update_authorized_keys_for_landscape_managers
+ln -s  /home/wiki/git/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
+ln -s  /home/wiki/git/configuration/on-site-scripts/paris2024/notify-operators
+ln -s  /home/wiki/git/configuration/sync-repo-and-execute-cmd.sh
+## ln -s  /home/wiki/git/configuration/switchoverArchive.sh 
 
-ln -s  /home/wiki/configuration/crontab /root/crontab   # make sure to check the correct crontab is used
+ln -s  /home/wiki/git/configuration/crontab /root/crontab   # make sure to check the correct crontab is used
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
 # add basic test page which won't cause redirect error code if used as a health check.
