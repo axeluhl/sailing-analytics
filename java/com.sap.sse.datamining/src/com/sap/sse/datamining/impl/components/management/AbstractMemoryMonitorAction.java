@@ -2,22 +2,30 @@ package com.sap.sse.datamining.impl.components.management;
 
 import com.sap.sse.datamining.components.management.MemoryMonitorAction;
 
+/**
+ * Triggers an abort when the free memory ratio is below a given threshold and the absolute free memory
+ * is below a certain threshold, too. This should give good results for different sizes of heaps; in particular,
+ * for an "ARCHIVE" server workload with heap sizes of several hundred GBs, a fixed ratio may not be adequate alone
+ * because 10% of 500GB = 50GB may still be lots for a data mining query.
+ */
 public abstract class AbstractMemoryMonitorAction implements MemoryMonitorAction {
 
-    private final double threshold;
+    private final double thresholdFreeMemoryRatio;
+    private final long minFreeMemoryInBytes;
 
-    public AbstractMemoryMonitorAction(double freeMemoryRatioThreshold) {
-        this.threshold = freeMemoryRatioThreshold;
+    public AbstractMemoryMonitorAction(double freeMemoryRatioThreshold, long minFreeMemoryInBytes) {
+        this.thresholdFreeMemoryRatio = freeMemoryRatioThreshold;
+        this.minFreeMemoryInBytes = minFreeMemoryInBytes;
     }
 
     @Override
     public double getThreshold() {
-        return threshold;
+        return thresholdFreeMemoryRatio;
     }
 
     @Override
-    public boolean checkMemoryAndPerformAction(double freeMemoryRatio) {
-        if (freeMemoryRatio < threshold) {
+    public boolean checkMemoryAndPerformAction(double freeMemoryRatio, long freeMemoryInBytes) {
+        if (freeMemoryRatio < thresholdFreeMemoryRatio && freeMemoryInBytes < minFreeMemoryInBytes) {
             performAction();
             return true;
         }
@@ -42,7 +50,7 @@ public abstract class AbstractMemoryMonitorAction implements MemoryMonitorAction
         final int prime = 31;
         int result = 1;
         long temp;
-        temp = Double.doubleToLongBits(threshold);
+        temp = Double.doubleToLongBits(thresholdFreeMemoryRatio);
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
@@ -56,7 +64,7 @@ public abstract class AbstractMemoryMonitorAction implements MemoryMonitorAction
         if (getClass() != obj.getClass())
             return false;
         AbstractMemoryMonitorAction other = (AbstractMemoryMonitorAction) obj;
-        if (Double.doubleToLongBits(threshold) != Double.doubleToLongBits(other.threshold))
+        if (Double.doubleToLongBits(thresholdFreeMemoryRatio) != Double.doubleToLongBits(other.thresholdFreeMemoryRatio))
             return false;
         return true;
     }
