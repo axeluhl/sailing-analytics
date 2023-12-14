@@ -69,10 +69,14 @@ Type=oneshot
 RemainAfterExit=true
 ExecStart=/usr/local/bin/mountnvmeswap
 EOF
-ln -s /home/wiki/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
+## ln -s /home/wiki/git/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
+ln -s /root/mountnvmeswap /usr/local/bin/mountnvmeswap
 source /root/.bashrc
 ./mountnvmeswap
-#logrotate
+#logrotate.d/httpd
+echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$INSTANCE_IP4" >>/var/log/sailing.out
+sed -i -e "s/\/var\/log\/old\/\([^/]*\)\/\([^/ ]*\)/\/var\/log\/old\/$INSTANCE_IP4/" $HTTP_LOGROTATE
+#logrotate.conf
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 # setup latest cli
 yum remove -y awscli
