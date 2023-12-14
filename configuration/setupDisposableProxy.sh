@@ -4,16 +4,8 @@ BEARER_TOKEN=$1
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
 mount -a
-# setup other users and crontabs to keep repo updated
-cd /home
-git clone -o "StrictHostKeyChecking=no" ssh://trac@sapsailing.com/home/trac/git
-mv git wiki
-adduser wiki
-chown -R wiki:wiki wiki
-crontab -u wiki /home/wiki/configuration/crontabs/cron-wiki
 #update
 yum update -y
-yum install amazon-linux-extras
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx
 amazon-linux-extras install epel -y && yum install -y apachetop
 # main conf mandates php7.1
@@ -22,6 +14,13 @@ yum install -y php  # also install mod_php
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sed -i 's/.*sleep 10" //g' ~/.ssh/authorized_keys
 sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFailure yes/' /etc/ssh/sshd_config
+# setup other users and crontabs to keep repo updated
+cd /home
+GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone -o "StrictHostKeyChecking=no" ssh://trac@sapsailing.com/home/trac/git
+mv git wiki
+adduser wiki
+chown -R wiki:wiki wiki
+crontab -u wiki /home/wiki/configuration/crontabs/cron-wiki
 # setup symbolic links
 cd /usr/local/bin
 ln -s  /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin/update_authorized_keys_for_landscape_managers
@@ -86,8 +85,7 @@ cd /etc
 mkdir letsencrypt
 mkdir letsencrypt/live
 mkdir letsencrypt/live/sail-insight.com
-cd letsencrypt/live/sail-insight.com
-scp -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com .
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
 systemctl start httpd
 
 
