@@ -1460,7 +1460,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // overlap: expect a quick response; add original request interval for the competitor
                 // TODO bug5921: however, this may not be true for most cases where the new time range exceeds the tail loaded so far into past *and* future;
                 // TODO bug5921: then, an overlap will be announced, but from/to will be the full tail length; should this still be called an overlap?
-                // TODO bug5921: droppable and out-of-order-cancellable requests should only be done for single time points
+                // TODO bug5921: droppable and out-of-order-cancellable requests should only be done for single time points and when being sure that another call will fill FixesAndTails properly
                 fromTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getA().get(e.getKey()));
                 toTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getB().get(e.getKey()));
             } else {
