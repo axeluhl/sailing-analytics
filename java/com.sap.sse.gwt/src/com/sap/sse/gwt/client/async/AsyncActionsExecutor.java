@@ -45,6 +45,10 @@ public class AsyncActionsExecutor {
             this.action.execute(new MarkedAsyncCallback<T>(this, getCategory()));
         }
         
+        public void dropped() {
+            action.dropped(AsyncActionsExecutor.this);
+        }
+        
         @Override
         public void onSuccess(T result) {
             try {
@@ -156,13 +160,10 @@ public class AsyncActionsExecutor {
     }
     
     private void execute(ExecutionJob<?> job) {
-        Integer numActionsOfType = actionsPerTypeCounter.get(job.getType());
-        if (numActionsOfType == null) {
-            numActionsOfType = Integer.valueOf(0);
-        }
+        Integer numActionsOfType = actionsPerTypeCounter.computeIfAbsent(job.getType(), j->Integer.valueOf(0));
         if (numPendingCalls >= maxPendingCalls || (numActionsOfType >= maxPendingCallsPerType)) {
-            TimePoint now = MillisecondsTimePoint.now();
-            TimePoint timePointToInspectForResetDecision = timePointOfTypeLastBeingExecuted.get(job.getType()) != null ?
+            final TimePoint now = MillisecondsTimePoint.now();
+            final TimePoint timePointToInspectForResetDecision = timePointOfTypeLastBeingExecuted.get(job.getType()) != null ?
                     timePointOfTypeLastBeingExecuted.get(job.getType()) : timePointOfFirstExecutorInit;
             if (timePointToInspectForResetDecision != null &&
                     now.minus(durationAfterToResetQueue).after(timePointToInspectForResetDecision)) {
@@ -171,7 +172,7 @@ public class AsyncActionsExecutor {
                 // reset number of pending actions per type - 0 is fine as checkForEmptyCallQueue
                 // will check for a number less than maxPendingCallsPerType to send out the
                 // last job pending for a given type
-                for (String jobPendingTypeKey : lastRequestedActionsNotBeingSentOut.keySet()) {
+                for (final String jobPendingTypeKey : lastRequestedActionsNotBeingSentOut.keySet()) {
                     actionsPerTypeCounter.put(jobPendingTypeKey, 0);
                 }
                 numActionsOfType = 0;
@@ -183,6 +184,7 @@ public class AsyncActionsExecutor {
                  * emptying the lastRequestedActionsQueue.
                  * */
                 lastRequestedActionsNotBeingSentOut.put(job.getType(), job);
+                job.dropped();
                 return;
             }
         }
