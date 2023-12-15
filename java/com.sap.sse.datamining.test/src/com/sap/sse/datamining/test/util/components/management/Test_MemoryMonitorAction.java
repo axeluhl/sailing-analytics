@@ -6,8 +6,8 @@ public class Test_MemoryMonitorAction extends AbstractMemoryMonitorAction {
 
     private boolean actionHasBeenPerformed;
 
-    public Test_MemoryMonitorAction(double freeMemoryInPercentThreshold) {
-        super(freeMemoryInPercentThreshold);
+    public Test_MemoryMonitorAction(double freeMemoryInPercentThreshold, long minFreeMemoryInBytes) {
+        super(freeMemoryInPercentThreshold, minFreeMemoryInBytes);
         actionHasBeenPerformed = false;
     }
     
