@@ -11,8 +11,8 @@ With bugs [5921](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5921) 
 There are various requirements for this combination of track loading / caching / visualization:
 
 - Work efficiently in live scenarios where new data becomes available as time progresses; in particular, load only the new data not yet cached locally as it becomes available, with as few calls as possible
-- Enable showing extrapolated or interpolated boat positions if a tail needs to be drawn for a time point for which no fix exists
-- Distinguish expensive requests for long tails, perhaps even with an expensive-to-compute detail metric, from determining the "current" position of all boats for the time point for which to display the boats on the map; in other words, don't delay the drawing of the boats until all tail data has arrived
+- Enable showing extrapolated or interpolated boat positions if a tail or boat icon canvas needs to be drawn for a time point for which no fix exists
+- Distinguish expensive requests for long tails, perhaps even with an expensive-to-compute detail metric, from determining the "current" position of all boats to be displayed for the time point for which to display the boats on the map; in other words, don't delay the drawing of the boats until all tail data has arrived
 - Delay updating the tails slightly, especially in replay mode; see the ``Triggerable`` pattern already partly employed by ``FixesAndTails``
 - Avoid re-loading data already present; particularly, when requesting data for a time range and the cache already has data for this time range but doesn't exactly reach the start and end of this time range, don't force a re-load of the parts of the track already loaded
 - Handle out-of-order responses appropriately; different sorts of requests may cause very different computational efforts and therefore responses may arrive in an order different from the order in which their requests were sent
