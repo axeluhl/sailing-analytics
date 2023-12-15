@@ -67,7 +67,19 @@ Alternatively, we could stick with asking for at least short pieces of the tail 
 
 ### Manage Request Dropping Explicitly
 
-How about letting an ``AsyncAction`` optionally react to its being dropped? 
+How about letting an ``AsyncAction`` optionally react to its being dropped? If a ``GetRaceMapDataAction`` is dropped, maybe we could then check whether it was asking for a relevant segment of the track and then form a new non-droppable ``GetBoatPositionsAction`` and hand that to the TimeRangeActionsExecutor.
+
+The benefit of such an approach would be that under normal circumstances, with the server being responsive, no additional request would be required, and action would only need to be taken upon the less likely case of dropped requests.
+
+### Keep Track of Time Ranges Requested
+
+Similar to the ``TimeRangeActionsExecutor`` we could try to keep track of the time ranges requested and the requests currently being "in flight." Even with out-of-order responses we would then know which answers to still expect. This should help in establishing the "contiguousness" invariant in ``FixesAndTails``, e.g., by accepting and "merging" fixes into the cache although they temporarily may produce a gap, knowing that other responses still in flight will close those gaps.
+
+But maybe this is similar to what we do today: when recording the "overlap" at request construction time then this is taken as an indication for merging vs. replacing. The problem with this approach is mainly that ``GetRaceMapDataAction`` requests may be dropped and then leave holes in the track segments. If we can avoid this by sending dropped position requests to the ``TimeRangeActionsExecutor`` as additional ``GetBoatPositionsAction`` requests, things may improve.
+
+To be consistent, though, requests shouldn't be trimmed against the cached fixes but against the union of cached *and* requested fixes. For everything requested through the ``TimeRangeActionsExecutor``, this happens automatically. But the track segments requested through droppable ``GetRaceMapDataAction`` requests sent to the ``AsyncActionsExecutor`` are more challenging. If some of them are still in flight, their requested range is not yet in the cache, and the executor doesn't know about the time range.
+
+Let's assume we keep track of all position requests (both, ``GetRaceMapDataAction`` and ``GetBoatPositionsAction``) requested and not yet responded to. When then a ``GetRaceMapDataAction`` is dropped, only its boat positions part will be re-scheduled with the ``TimeRangeActionsExecutor``, and the request will be recorded. Over time, a changing "to-be" version of the cache will develop, and the goal shall be to deliver this "to-be" state eventually. With this, as long as the "to-be" state is consistent with all cache invariants, then despite temporary inconsistencies the final outcome will again be consistent.
 
 ### Decide Overlap During Response Processing, Store Requested Time Ranges
 
@@ -86,9 +98,3 @@ If we need this ``Triggerable`` pattern at all, it should be made consistent wit
 The ``FixesAndTails`` cache could manage separate detail value caches for different detail types per competitor and store those detail values separately from the GPS fixes. A separate RPC method may be provided to only request detail values for time ranges without the ``GPSFixDTO`` data. This would nicely support a user having cached the essential parts of the tracks already and now only switching between different detail types for tail coloring.
 
 The ``FixesAndTails.computeFromAndTo`` method then would have to consider the selected detail type and inspect the cache contents to see what has already been loaded and which detail values are still missing. As a result, the time ranges requested for a competitor in ``GetBoatPositionsAction`` may differ between GPS fixes and detail values, and the result structure should separate detail value segments from GPS fix segments.
-
-### Idea: "Streaming" all position data to the client
-
-Especially for a live race we are constantly interested in the new fixes added to the end of all tracks. What if we periodically, at the ticking of the time slider, asked for all that's new and merged this into the FixesAndTails structure if it is showing the tails close to the "live" time point? Interpolation / extrapolation then only would have to happen on the client side.
-
-### Problems to Expect
