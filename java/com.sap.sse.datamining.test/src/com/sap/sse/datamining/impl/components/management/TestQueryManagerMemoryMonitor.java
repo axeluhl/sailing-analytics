@@ -28,11 +28,11 @@ public class TestQueryManagerMemoryMonitor {
 
     @Before
     public void initializeActionsAndInfoProvider() {
-        veryLow = new Test_MemoryMonitorAction(0.9);
-        low = new Test_MemoryMonitorAction(0.8);
-        medium = new Test_MemoryMonitorAction(0.5);
-        high1 = new Test_MemoryMonitorAction(0.2);
-        high2 = new Test_MemoryMonitorAction(0.2);
+        veryLow = new Test_MemoryMonitorAction(0.9, 1l*1024*1024*1024);
+        low = new Test_MemoryMonitorAction(0.8, 1l*1024*1024*1024);
+        medium = new Test_MemoryMonitorAction(0.5, 1l*1024*1024*1024);
+        high1 = new Test_MemoryMonitorAction(0.2, 1l*1024*1024*1024);
+        high2 = new Test_MemoryMonitorAction(0.2, 1l*1024*1024*1024);
         infoProvider = new Test_MemoryInfoProvider(85 * 1024 * 1024, 100 * 1024 * 1024);
     }
     
