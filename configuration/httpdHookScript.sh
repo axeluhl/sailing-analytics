@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Purpose: Deployed in a file named "post-receive", in the hooks dir of a bare git repo. Upon push completion, this script runs and
-# triggers an update to all instances' local repos (if the instance has a specific aws tag). A command is ran in the repo 
+# triggers an update to instances in the region with a specified tag. A command is ran in the repo 
 # after the merge completes. The user, in which the bare repo and hook are installed, must have aws credentials, that
-# don't need mfa.
+# don't need mfa. (These may need to be installed manually -- within the correct user -- if starting from a clean instance.)
 
-TAG="TESTPROXY"
+TAG="ReverseProxy"
 DIR="/etc/httpd"
 COMMAND="sudo service httpd reload"
 MAIN_BRANCH_NAME="main"
