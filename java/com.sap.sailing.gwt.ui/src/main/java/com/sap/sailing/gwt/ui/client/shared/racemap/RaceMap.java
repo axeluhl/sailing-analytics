@@ -68,7 +68,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.AnimationType;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
@@ -91,8 +90,10 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
+import com.sap.sailing.gwt.common.client.premium.SailingPremiumListBox;
 import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsCallback;
@@ -181,6 +182,8 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
@@ -2866,23 +2869,27 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return vPanel;
     }
 
-    private ListBox createDetailTypeDropdown(CompetitorDTO competitor) {
-        final ListBox lb = new ListBox();
-        final NodeList<OptionElement> options = DOMUtils.getOptions(lb);
-        lb.addItem(stringMessages.none(), "none");
-        if (sortedAvailableDetailTypes != null) {
-            for (int i = 0; i < sortedAvailableDetailTypes.size(); i++) {
-                final DetailType detail = sortedAvailableDetailTypes.get(i);
-                lb.addItem(DetailTypeFormatter.format(detail), detail.name());
-                final String tooltip = DetailTypeFormatter.getTooltip(detail);
-                if (Util.hasLength(tooltip)) {
-                    options.getItem(options.getLength()-1).setTitle(tooltip);
-                }
-                if (detail == selectedDetailType) {
-                    lb.setSelectedIndex(i + 1);
-                }
+    private VerticalPanel createDetailTypeDropdown(CompetitorDTO competitor) {
+        final VerticalPanel vPanel = new VerticalPanel();
+        vPanel.add(createDetailTypePremiumList(competitor));
+        // reset component if user changes (login/out)
+        paywallResolver.registerUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                vPanel.clear();
+                vPanel.add(createDetailTypePremiumList(competitor));
             }
-        }
+        });
+        return vPanel;
+    }
+
+    private SailingPremiumListBox createDetailTypePremiumList(CompetitorDTO competitor) {
+        // reset metric overlay
+        selectedDetailType = null;
+        metricOverlay.setVisible(false);
+        // create new premium list box
+        SailingPremiumListBox lb = new SailingPremiumListBox(stringMessages.none(), "none", TrackedRaceActions.DETAILTYPES, paywallResolver, competitor);
+        fillItemsFromAvailableDetailTypes(lb);
         lb.setVisibleItemCount(1);
         lb.addChangeHandler(new ChangeHandler() {
             @Override
@@ -2912,6 +2919,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         });
         return lb;
+    }
+
+    private void fillItemsFromAvailableDetailTypes(SailingPremiumListBox lb) {
+        final NodeList<OptionElement> options = DOMUtils.getOptions(lb.getListBox());
+        if (lb.isEnabled() && sortedAvailableDetailTypes != null) {
+            for (int i = 0; i < sortedAvailableDetailTypes.size(); i++) {
+                final DetailType detail = sortedAvailableDetailTypes.get(i);
+                lb.addItem(DetailTypeFormatter.format(detail), detail.name());
+                final String tooltip = DetailTypeFormatter.getTooltip(detail);
+                if (Util.hasLength(tooltip)) {
+                    options.getItem(options.getLength()-1).setTitle(tooltip);
+                }
+                if (detail == selectedDetailType) {
+                    lb.setSelectedIndex(i + 1);
+                }
+            }
+        } else {
+            lb.reset();
+        }
     }
 
     /**

@@ -66,7 +66,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
         EXPORT,
         SIMULATOR,
         VIEWSTREAMLETS,
-        VIEWANALYSISCHARTS;
+        VIEWANALYSISCHARTS,
+        DETAILTYPES;
 
         private static final Action[] ALL_ACTIONS = DefaultActions.plus(TrackedRaceActions.values());
 
