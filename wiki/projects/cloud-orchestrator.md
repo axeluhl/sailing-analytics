@@ -94,9 +94,10 @@ We should also consider alternatives to MongoDB, at least for the storage of the
 
 #### Automatic fail-over for archive server
 
-We now automate the failover of the archive server. The approach switches a PRODUCTION_IP variable to point to either the ARCHIVE_IP or the ARCHIVE_FAILOVER_IP, within the macros file, depending on the status of the primary (checked via multiple curl requests). If changes are made then operators are notified and the config reloaded. Note that this only occurs if the status actually changes, so if it is still unhealthy, then notification/reload do not occur.
+We now automate the failover of the archive server, using `configuration/switchoverArchive.sh`. This script runs on all reverse proxies. It works by switching a PRODUCTION_IP variable to point to either the ARCHIVE_IP or the ARCHIVE_FAILOVER_IP, within the macros file, depending on the status of the primary (checked via multiple curl requests). If changes are made then operators are notified and the config reloaded. Note that this only occurs if the status actually changes, so if it is still unhealthy, then notification/reload do not occur.
 
 Another note: This approach has some coupling to the archiving process of creating new event-archive macros, because that causes an auto-pull. However, the script prioritises local state, as to maintain archive failover function.
+Another +1 note: This script doesn't commit the changes. It only makes them locally.
 
 #### No good approach for dynamic scale-up
 

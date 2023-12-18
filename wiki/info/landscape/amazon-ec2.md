@@ -31,16 +31,16 @@ Further ALBs may exist in addition to the default ALB and the NLB for ``sapsaili
 ### Apache httpd Webserver and Reverse Proxy
 
 The web server currently exists only as one "central" reverse proxy but work is being undertaken to duplicate the essential services,
-to improve availability. Only the current central reverse proxy will be non-disposable, hosting the wiki, releases, Git and Bugzilla.
-Other services, such as jobs, static and p2 remain to be decided. Any traffic to the Hudson build server subdomain gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the build server.
+to improve availability. Only the current central reverse proxy will be non-disposable, hosting the wiki, releases, Git jobs, static and Bugzilla.
+Other services, such as p2 remain to be decided. Any traffic to the Hudson build server subdomain gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
 
-The IPs for these servers will automatically be added to the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
+The IPs for all reverse proxies will automatically be added to the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
 and to the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
 Currently, the new approach tags instances with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
 
 There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
 co-deployment.
-For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). The central reverse proxy offers the following services:
+Most of sapsailing.com no longer cares about SSL and does not need to have an SSL certificate. Sail-insight still does though. The central reverse proxy offers the following services:
 
 * bugzilla.sapsailing.com - a Bugzilla installation under /usr/lib/bugzilla
 * wiki.sapsailing.com - a Gollum-based Wiki served off our git, see /home/wiki
@@ -1068,7 +1068,7 @@ Use Event-ARCHIVE 49erEuros2022.sapsailing.com bee070d1-605c-4fff-9d71-7688452ab
 which utilises an in-house macro called Event-ARCHIVE, which creates a proxy pass pointing to the archive. Upon adding to the central
 reverse proxy, changes are pushed to the main branch of a specialised repo (must be main for script to work). Upon push completion, a git `post-receive` hook is triggered (found in `httpdHookScript.sh`) which connects to all reverse proxy instances and runs 
 `configuration/sync-repo-and-execute-cmd.sh`. This script fetches changes and merges them, whilst trying to best preserve any changes.
-This is done because live changes can occur to some files such as the 000-macros.conf (see the cloud orchestrator page for more details).
+This is done because live changes can occur to some files such as the 000-macros.conf by the `configuration/switchoverArchive.sh` script, which is installed on each reverse proxy (see the cloud orchestrator page for more details).
 
 ### ELB Setup with replication server(s)
 - Remove all Replica's from the ELB and wait at least 2 minutes until no request reaches their Apache webservers anymore. You can check this with looking at `apachetop` on the respective instances. Let only the Master server live inside the ELB.
