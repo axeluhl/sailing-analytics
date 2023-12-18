@@ -495,7 +495,8 @@ public class LandscapeManagementPanel extends SimplePanel {
         };
         
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
-       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getImageId(),stringMessages.id());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getImageId(), stringMessages.id());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getPublicIpAddress()  , stringMessages.publicIp());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        //setup actions
@@ -1510,6 +1511,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 @Override
                                 public void onSuccess(Void result) {
                                     Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
+                                    refreshProxiesTable();
                                 }
                                 @Override
                                 public void onFailure(Throwable caught) {
