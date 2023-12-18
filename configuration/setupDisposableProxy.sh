@@ -4,11 +4,11 @@
 BEARER_TOKEN=$1
 INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
 HTTP_LOGROTATE=/etc/logrotate.d/httpd
-#fstab
+# fstab setup
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
 mount -a
-#update
+# update instance
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx
 amazon-linux-extras install epel -y && yum install -y apachetop
@@ -24,7 +24,7 @@ GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking
 adduser wiki
 mv git wiki
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/home/wiki/.ssh /home/wiki
-## crontab -u wiki /home/wiki/git/configuration/crontabs/cron-wiki
+## crontab -u wiki /home/wiki/git/configuration/crontabs/crontab-wiki
 ln -s   /home/wiki/git/configuration/syncgit /home/wiki
 chown -R wiki:wiki wiki
 # setup symbolic links
@@ -34,7 +34,7 @@ ln -s  /home/wiki/git/configuration/update_authorized_keys_for_landscape_manager
 ln -s  /home/wiki/git/configuration/on-site-scripts/paris2024/notify-operators
 ln -s  /home/wiki/git/configuration/sync-repo-and-execute-cmd.sh
 ## ln -s  /home/wiki/git/configuration/switchoverArchive.sh 
-ln -s  /home/wiki/git/configuration/crontab /root/crontab   # make sure to check the correct crontab is used
+ln -s  /home/wiki/git/configuration/crontabs/crontab-reverse-proxy /root/crontab   # make sure to check the correct crontab is used
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
 # add basic test page which won't cause redirect error code if used as a health check.
@@ -59,29 +59,23 @@ EOF
 chkconfig --level 23 fail2ban on
 service fail2ban start
 yum install -y mod_ssl
-#setup mounting of nvme
-cat <<EOF > /etc/systemd/system/mountnvmeswap.service
-[Unit]
-Description=An unformatted nvme is turned into swap space
-Requires=-.mount
-After=-.mount
+# setup mounting of nvme
+ln -s /home/wiki/git/configuration/archive_instance_setup/mountnvmeswap.service  /etc/systemd/system/mountnvmeswap.service
 
-[Install]
-
-[Service]
-Type=oneshot
-RemainAfterExit=true
-ExecStart=/usr/local/bin/mountnvmeswap
-EOF
 ## ln -s /home/wiki/git/configuration/archive_instance_setup/mountnvmeswap /usr/local/bin/mountnvmeswap
 ln -s /root/mountnvmeswap /usr/local/bin/mountnvmeswap
 source /root/.bashrc
 ./mountnvmeswap
-#logrotate.d/httpd
+# setup logrotate.d/httpd 
+mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$INSTANCE_IP4" >>/var/log/sailing.out
-sed -i -e "s/\/var\/log\/old\/\([^/]*\)\/\([^/ ]*\)/\/var\/log\/old\/$INSTANCE_IP4/" $HTTP_LOGROTATE
-#logrotate.conf
+rm $HTTP_LOGROTATE
+ln -s /home/wiki/git/configuration/logrotate-httpd /etc/logrotate.d/httpd
+mkdir --parents "/var/log/old/REVERSE_PROXIES/${INSTANCE_IP4}"
+sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${INSTANCE_IP4}|" $HTTP_LOGROTATE 
+# logrotate.conf setup
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
+sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup latest cli
 yum remove -y awscli
 cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -89,11 +83,11 @@ cd ~ && unzip awscliv2.zip
 rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
 
-#setup git
+# setup git
 ## /home/wiki/git/configuration/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
 /root/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
 
-#certs
+# certs setup
 cd /etc
 mkdir letsencrypt
 mkdir letsencrypt/live
@@ -101,7 +95,4 @@ mkdir letsencrypt/live/sail-insight.com
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
 systemctl start httpd
 
-
-# will aws credentials need to be set? or will the ami store these details? session tokens? we will need a user without mfa.
-# manual setup is mounts and tagging
 
