@@ -4,7 +4,7 @@
     sharedscripts
     delaycompress
     postrotate
-        /etc/init.d/httpd reload > /dev/null 2>/dev/null || true
+        /bin/systemctl reload httpd.service > /dev/null 2>/dev/null || true
         mv /var/log/logrotate-target/* /var/log/old
     endscript
 }
