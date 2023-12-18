@@ -57,33 +57,21 @@ Furthermore, if a user switches back and forth between different detail types fo
 
 ### Holistically Maintain Ranges Requested and Repeat Position Requests for Dropped ``GetRaceMapDataActions``
 
-We shall manage the to-be track segment time ranges for ``FixesAndTails``. This has to take into account responses already received and cached, but also requests sent for which no response has been received yet. The callback objects for requests sent that haven't seen a response yet can be referenced, and if ``FixesAndTails`` decides that the data for their time range is to be dropped from the cache then the request callback could be informed about this; when the response arrives later it must not be added to / merged into the cache anymore as this may create inconsistencies again. A special case for this is an in-flight request for fixes with detail values for a detail type, where the user has switched to a different detail type after the request has been sent. The response then must not be inserted into the cache anymore.
+At any time, for each competitor the ``FixesAndTails`` cache has a time range that it expects to have positions requested for, either already received or still in flight. When deciding to clear a competitor's fixes/tails cache, all callbacks for outstanding requests need to be informed to drop their responses for those competitors.
+
+Request trimming works against the start of the time range *requested*, but at the end of the requested time range the last fix *received* may be a good trimming point because in live scenarios the latest fixes sometimes may arrive a bit late.
+
+When trimming requests with an overlap, the "to-be" time ranges maintained by ``FixesAndTails`` are extended accordingly, and outstanding requests' callbacks are recorded so they can be notified in case they need to be invalidated.
+
+With this, eventual consistency shall be achieved.
+
+This has to take into account position fixes already received and cached, but also requests sent for which no response has been received yet. The callback objects for requests sent that haven't seen a response yet can be referenced, and if ``FixesAndTails`` decides that the data for their time range and competitor is to be dropped from the cache then the request callback could be informed about this; when the response arrives later, its parts for the competitors whose cached fixes were dropped must not be added to / merged into the cache anymore as this may create inconsistencies again. A special case for this is an in-flight request for fixes with detail values for a detail type, where the user has switched to a different detail type after the request has been sent. The response then must not be inserted into the cache anymore.
 
 The ``GetRaceMapDataAction`` requests should be limited to very short track segments only; probably some 5-10s at most. For low sampling rates this will then only produce an extrapolated fix. For typical sampling rates of 1/3-1Hz this will typically produce one or more actual fixes. Requests for longer track segments should immediately be moved to ``GetBoatPositionsAction`` requests to keep finding the "current" boat position quick.
 
 As ``GetRaceMapDataAction`` requests may be dropped, their dropping must trigger a separate ``GetBoatPositionsAction`` for the time range originally requested (unless the callback was informed about its boat positions result no longer to be added to the cache), only without extrapolation, as now we're interested only in real fixes and assume that other follow-up ``GetRaceMapDataAction`` requests will take care of the "current" boat position instead. These ``GetBoatPositionsAction`` requests that replace a dropped ``GetRaceMapDataAction`` will blend in through the ``TimeRangeActionsExecutor`` with other ongoing requests and may correspondingly get trimmed and merged. Request dropping is now signaled to the action by invoking its ``dropped(...)`` method.
 
-With this, out-of-order responses will add to the cache if an only if the cache hasn't informed the callback that its result is no longer desired/needed. In particular, out-of-order responses *may* reasonably add to the cache if needed. This also needs to be implemented for the ``GetRaceMapDataAction`` callback, restricted to the boat positions aspect of the response. For all its other aspects, only representing single instant snapshots, out-of-order responses do not have to be considered.
-
-### Keep Track of Time Ranges Requested
-
-Similar to the ``TimeRangeActionsExecutor`` we have to keep track of the time ranges requested and the requests currently being "in flight." Even with out-of-order responses we would then know which answers to still expect. This should help in establishing the "contiguousness" invariant in ``FixesAndTails``, e.g., by accepting and "merging" fixes into the cache although they temporarily may produce a gap, knowing that other responses still in flight will close those gaps.
-
-As such, it isn't wrong to record overlap and intention to merge into the cache at request assembly time, as long as we keep track of all requests still in flight, inform callbacks of in-flight requests about their results not to be considered anymore on an individual basis, and trim new requests against all non-invalidated in-flight requests taken together with the current cache contents, making for an eventual total track segment per competitor.
-
-If a ``GetRaceMapDataAction`` request is dropped and its callback hasn't had its track part be invalidated yet, a new ``GetBoatPositionsAction`` must be created and registered, the ``GetRaceMapDataAction`` must be removed from the set of outstanding requests.
-
-At any time, for each competitor the ``FixesAndTails`` cache has a time range that it expects to  have position requests received for or still in flight. When deciding to clear a competitor's fixes/tails cache, all callbacks for outstanding requests need to be informed to drop their responses for those competitors. When trimming requests with an overlap, the time ranges are extended accordingly, and outstanding requests' callbacks are recorded so they can be notified in case they need to be invalidated.
-
-With this, eventual consistency shall be achieved.
-
-### Decide Overlap During Response Processing, Store Requested Time Ranges
-
-We should carry along the requested time ranges into the response. On the starting side of the time range we should assume that if we received fixes in the range then there won't be earlier fixes in the range. We can therefore decide the overlap based on the beginning of the time range requested. For the end of the time range this is not so simple. If we have received newer fixes already then it's safe to assume that there are no fixes in the time range requested between its end and the last fix received for it. However, if we don't have any newer fixes yet, fixes may appear between the latest fix received and the end of the time range at a later point in time, e.g., due to late delivery to the server. For each competitor we should store the contiguous time range for which we assume we have all fixes there will ever be. This way, no long requests will emerge only because the first fix doesn't perfectly align with the start of the time range requested. Furthermore, deciding overlap when processing the response makes us independent of the order in which responses are delivered.
-
-A potential problem with this may be that with a continued division between short/quick and long-running requests the responses received may look like not generating an overlap, e.g., when the head of the tail is being received, but in-between fixes may still be missing. With a contiguousness check at receipt we would then delete older parts of the tail to which the gap would be closed as soon as an already-running long tail request delivers its response.
-
-So maybe we would need to record the time ranges requested already, at least regarding the long requests which cannot be dropped, and decide based on those whether or not there will be an overlap.
+With this, out-of-order responses will add to the cache if an only if the cache hasn't informed the callback that its result is no longer desired/needed. In particular, out-of-order responses *may* reasonably add to the cache if needed. This also needs to be implemented for the ``GetRaceMapDataAction`` callback, restricted to the boat positions aspect of the response. For all its other aspects, only representing single instant snapshots, out-of-order responses do not have to be considered at all.
 
 ### Make Consistent Use of the ``Triggerable`` Pattern
 
