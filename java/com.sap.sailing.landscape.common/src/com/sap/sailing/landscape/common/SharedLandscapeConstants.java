@@ -80,7 +80,7 @@ public interface SharedLandscapeConstants {
      * Indicates that an instance only acts as a reverse proxy. ie. it is not hosting other services. SO it can be
      * terminated without risk.
      */
-    String DISPOSABLE_PROXY = "disposableProxy";
+    String DISPOSABLE_PROXY = "DisposableProxy";
     
     /**
      * The tag name for a target group which contains all the instances running httpd. Used to mark the
