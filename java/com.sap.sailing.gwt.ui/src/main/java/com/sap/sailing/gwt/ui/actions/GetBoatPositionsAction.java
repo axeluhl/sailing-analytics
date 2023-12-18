@@ -17,13 +17,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.async.TimeRangeAsyncAction;
 
-public class GetBoatPositionsAction implements TimeRangeAsyncAction<CompactBoatPositionsDTO, Pair<String, DetailType>> {
-    private final SailingServiceAsync sailingService;
-    private final RegattaAndRaceIdentifier raceIdentifier;
-    private final Map<CompetitorDTO, Date> from;
-    private final Map<CompetitorDTO, Date> to;
-    private final boolean extrapolate;
-    private final DetailType detailType;
+public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<CompactBoatPositionsDTO> implements TimeRangeAsyncAction<CompactBoatPositionsDTO, Pair<String, DetailType>> {
     private final String leaderboardName;
     private final String leaderboardGroupName;
     private final UUID leaderboardGroupId;
@@ -31,12 +25,7 @@ public class GetBoatPositionsAction implements TimeRangeAsyncAction<CompactBoatP
     public GetBoatPositionsAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, boolean extrapolate, DetailType detailType,
             String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
-        this.sailingService = sailingService;
-        this.raceIdentifier = raceIdentifier;
-        this.from = from;
-        this.to = to;
-        this.extrapolate = extrapolate;
-        this.detailType = detailType;
+        super(sailingService, raceIdentifier, from, to, extrapolate, detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId);
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardGroupId = leaderboardGroupId;
@@ -52,18 +41,18 @@ public class GetBoatPositionsAction implements TimeRangeAsyncAction<CompactBoatP
             fromByCompetitorIdAsString.put(entry.getKey().getA(), from);
             toByCompetitorIdAsString.put(entry.getKey().getA(), to);
         }
-        sailingService.getBoatPositions(raceIdentifier, fromByCompetitorIdAsString, toByCompetitorIdAsString,
-                extrapolate, detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId, callback);
+        getSailingService().getBoatPositions(getRaceIdentifier(), fromByCompetitorIdAsString, toByCompetitorIdAsString,
+                isExtrapolate(), getDetailType(), leaderboardName, leaderboardGroupName, leaderboardGroupId, callback);
     }
 
     @Override
     public Map<Pair<String, DetailType>, TimeRange> getTimeRanges() {
-        final Map<Pair<String, DetailType>, TimeRange> timeRangeByCompetitorId = new HashMap<>(from.size());
-        for (final Map.Entry<CompetitorDTO, Date> entry : from.entrySet()) {
+        final Map<Pair<String, DetailType>, TimeRange> timeRangeByCompetitorId = new HashMap<>(getFrom().size());
+        for (final Map.Entry<CompetitorDTO, Date> entry : getFrom().entrySet()) {
             final Date fromDate = entry.getValue();
-            final Date toDate = to.get(entry.getKey());
+            final Date toDate = getTo().get(entry.getKey());
             if (fromDate != null && toDate != null) {
-                timeRangeByCompetitorId.put(new Pair<>(entry.getKey().getIdAsString(), detailType),
+                timeRangeByCompetitorId.put(new Pair<>(entry.getKey().getIdAsString(), getDetailType()),
                         new TimeRangeImpl(TimePoint.of(fromDate), TimePoint.of(toDate), /* toIsInclusive */ true));
             }
         }
