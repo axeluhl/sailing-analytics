@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasCompetitorContext;
 import com.sap.sailing.datamining.data.HasCompetitorDayContext;
 import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
@@ -25,6 +26,7 @@ import com.sap.sailing.datamining.impl.components.BravoFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.BravoFixTrackRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.CompetitorDayRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.CompetitorOfRaceInLeaderboardRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.CompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.CompleteManeuverCurveWithEstimationDataRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.FoilingSegmentRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
@@ -59,6 +61,12 @@ public class SailingDataRetrievalChainDefinitions {
         leaderboardRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, HasLeaderboardGroupContext.class, "LeaderboardGroup");
         leaderboardRetrieverChainDefinition.endWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class,
                 HasLeaderboardContext.class, "Leaderboard");
+        dataRetrieverChainDefinitions.add(leaderboardRetrieverChainDefinition);
+        //
+        final DataRetrieverChainDefinition<RacingEventService, HasCompetitorContext> competitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                leaderboardRetrieverChainDefinition, HasCompetitorContext.class, "CompetitorSailingDomainRetrieverChain");
+        competitorRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, CompetitorRetrievalProcessor.class, HasCompetitorContext.class, "CompetitorInLeaderboard");
+        dataRetrieverChainDefinitions.add(competitorRetrieverChainDefinition);
         //
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedRaceContext> trackedRaceResultOfCompetitorRetrieverChainDefinition =
                 new SimpleDataRetrieverChainDefinition<>(leaderboardRetrieverChainDefinition, HasTrackedRaceContext.class, "TrackedRaceResultOfCompetitorRetrieverChain");
