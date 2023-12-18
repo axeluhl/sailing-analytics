@@ -279,7 +279,12 @@ public class FixesAndTails {
         for (final Map.Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 final CompetitorDTO competitor = e.getKey();
-                final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.computeIfAbsent(competitor, c->new ArrayList<>());
+                final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.computeIfAbsent(competitor,
+                        c->{
+                              final List<GPSFixDTOWithSpeedWindTackAndLegType> f = new ArrayList<>();
+                              fixes.put(c, f);
+                              return f;
+                           });
                 if (!overlapsWithKnownFixes.get(competitor)) {
                     // clearing and then re-populating establishes the invariant that an extrapolated fix must be the last
                     fixesForCompetitor.clear();
