@@ -57,7 +57,7 @@ For example, within the production landscape of sapsailing.com, you could try th
 
 ## Automation
 
-For `wiki@sapsailing.com` the process of updating the `configuration/tractrac-json-urls` file from the ARCHIVE server is automated by means of two cron jobs as specified in `wiki@sapsailing.com:crontab` or at `$OUR_GIT_HOME/configuration/crontabs/crontab-wiki`:
+For `wiki@sapsailing.com` the process of updating the `configuration/tractrac-json-urls` file from the ARCHIVE server is automated by means of two cron jobs as specified in `wiki@sapsailing.com:crontab` or at `$OUR_GIT_HOME/configuration/crontabs/users/crontab-wiki`:
 
 ```
 10 12 * * * /home/wiki/gitwiki/configuration/update-tractrac-urls-to-archive.sh >/home/wiki/update-tractrac-urls-to-archive.out 2>/home/wiki/update-tractrac-urls-to-archive.err
