@@ -1,0 +1,1 @@
+* * * * * /home/trac/bin/notify-unhealthy-mongodb 2>/home/trac/notify-unhealthy-mongodb.err >/home/trac/notify-unhealthy-mongodb.out
