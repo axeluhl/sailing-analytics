@@ -5,7 +5,7 @@
     delaycompress
     postrotate
         /bin/systemctl reload httpd.service > /dev/null 2>/dev/null || true
-        mv /var/log/logrotate-target/* /var/log/old
+        mv /var/log/logrotate-target/*.gz /var/log/old
     endscript
 }
 
