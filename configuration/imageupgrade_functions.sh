@@ -70,7 +70,8 @@ clean_servers_dir() {
 }
 
 update_root_crontab() {
-  # The following assumes that /root/crontab is a symbolic link to /home/sailing/code/configuration/crontab
+  # The following assumes that /root/crontab is a symbolic link to /home/sailing/code/configuration/crontabs/<the crontab appropriate
+  # to the environment>
   # which has previously been updated by a git pull:
   cd /root
   crontab crontab
