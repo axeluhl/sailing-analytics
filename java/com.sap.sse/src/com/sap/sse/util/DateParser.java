@@ -94,7 +94,7 @@ public class DateParser {
             // Not mandatory now
             //
 
-            // Secondes
+            // Seconds
             if (!st.hasMoreTokens()) {
                 return calendar;
             }

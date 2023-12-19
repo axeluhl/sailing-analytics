@@ -3,6 +3,8 @@ package com.sap.sailing.datamining.impl.data;
 import com.sap.sailing.datamining.data.HasWindFixContext;
 import com.sap.sailing.datamining.data.HasWindTrackContext;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
  * Equality is based on the {@link #getWind() wind fix} only.
@@ -70,6 +72,18 @@ public class WindFixWithContext implements HasWindFixContext {
     @Override
     public String getWindSourceType() {
         return windSourceType;
+    }
+
+    @Override
+    public boolean isInTrackingInterval() {
+        final TrackedRace trackedRace = getWindTrackContext().getTrackedRaceContext().getTrackedRace();
+        return trackedRace != null && new TimeRangeImpl(trackedRace.getStartOfTracking(), trackedRace.getEndOfTracking()).includes(getTimePoint());
+    }
+
+    @Override
+    public boolean isInRace() {
+        final TrackedRace trackedRace = getWindTrackContext().getTrackedRaceContext().getTrackedRace();
+        return trackedRace != null && new TimeRangeImpl(trackedRace.getStartOfRace(), trackedRace.getEndOfRace()).includes(getTimePoint());
     }
 
     @Override

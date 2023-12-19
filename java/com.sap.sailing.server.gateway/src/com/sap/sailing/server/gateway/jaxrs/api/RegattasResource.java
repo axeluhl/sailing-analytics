@@ -1777,7 +1777,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
                             .type(MediaType.TEXT_PLAIN).build();
                 } else {
-                    TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                    final TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                     getSecurityService().checkCurrentUserReadPermission(trackedRace);
                     checkExportPermission(trackedRace, secondaryUserBearerToken);
                     TimePoint from;
@@ -1801,12 +1801,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                     final TimePoint finalFrom = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
                     final TimePoint finalTo = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(
                             trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
-                    TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
+                    final TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
                             ws -> new DefaultWindTrackJsonSerializer(/* maxNumberOfFixes */ 10000, finalFrom, finalTo,
                                     ws),
                             windSource, windSourceId);
 
-                    JSONObject jsonWindTracks = serializer.serialize(trackedRace);
+                    final JSONObject jsonWindTracks = serializer.serialize(trackedRace);
                     response = Response.ok(streamingOutput(jsonWindTracks)).build();
                 }
             }
