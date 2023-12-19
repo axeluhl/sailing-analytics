@@ -53,6 +53,10 @@ We currently always load the detail values together with the ``GPSFixDTO`` objec
 
 Furthermore, if a user switches back and forth between different detail types for the tail color, detail values already loaded will be dropped and replaced by other detail values for another detail type because currently the ``FixesAndTails`` cache currently stores the detail values within the ``GPSFixDTO`` objects and there can only be one detail value per fix.
 
+### Incorrect Implementation of ``FixesAndTails.searchMinMaxDetailValue``
+
+When moving backwards in time, fixes may be added to a competitor's tail that are older than the oldest fix part of the tail so far. However, 
+
 ## How to Improve
 
 ### Holistically Maintain Ranges Requested and Repeat Position Requests for Dropped ``GetRaceMapDataActions``

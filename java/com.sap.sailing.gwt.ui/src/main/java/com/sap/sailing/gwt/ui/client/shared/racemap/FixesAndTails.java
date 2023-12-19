@@ -84,10 +84,12 @@ public class FixesAndTails {
      * Stores the index to the smallest found detailValue in {@link #fixes} for a given competitor.
      */
     private final Map<CompetitorDTO, Integer> minDetailValueFix;
+    
     /**
      * Stores the index to the largest found detailValue in {@link #fixes} for a given competitor.
      */
     private final Map<CompetitorDTO, Integer> maxDetailValueFix;
+    
     /**
      * Stores at what index the last search on the fixes of a given competitor stopped.
      */
@@ -366,7 +368,6 @@ public class FixesAndTails {
         final Trigger<Integer> lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
         int indexOfLastShownFix = (lastShownFixForCompetitor == null || lastShownFixForCompetitor.get() == null) ? -1 : lastShownFixForCompetitor.get();
         final Colorline tail = getTail(competitorDTO);
-        int intoThisIndex = 0;
         int earliestMergeIndex = -1;
         final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
             @Override
@@ -375,7 +376,7 @@ public class FixesAndTails {
             }
         };
         for (GPSFixDTOWithSpeedWindTackAndLegType mergeThisFix : mergeThis) {
-            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, fixByTimePointComparator);
+            int intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, fixByTimePointComparator);
             if (intoThisIndex < 0) {
                 intoThisIndex = -intoThisIndex-1;
             }
@@ -479,13 +480,9 @@ public class FixesAndTails {
                         if (maxDetailValueFix.containsKey(competitorDTO) && intoThisIndex - 1 <= maxDetailValueFix.get(competitorDTO)) {
                             maxDetailValueFix.put(competitorDTO, maxDetailValueFix.get(competitorDTO) - 1);
                         }
-                        intoThisIndex--;
                     }
-                } else {
-                    intoThisIndex--; // to compensate for the following ++
                 }
             }
-            intoThisIndex++;
         }
         // invariant: for one CompetitorDTO, either both of firstShownFix and lastShownFix have an entry for that key,
         // or both don't
@@ -707,28 +704,37 @@ public class FixesAndTails {
 
 
     /**
-     * Determines whether an index for a competitor lies in [firstShownFix, lastShownFix], i.e. the index is included in the competitors tail.
-     * @param competitor {@link CompetitorDTO} specifying the tail.
-     * @param index {@code int} the index in question.
+     * Determines whether an index for a competitor lies in [{@link #firstShownFix}, {@link #lastShownFix}], i.e. the
+     * index is included in the competitors tail.
+     * 
+     * @param competitor
+     *            {@link CompetitorDTO} specifying the tail.
+     * @param index
+     *            {@code int} the index in question.
      * @return {@code boolean} {@code true} if {@code index} is shown.
      */
     protected boolean isIndexShown(CompetitorDTO competitor, int index) {
+        final boolean result;
         if (getFirstShownFix(competitor) == null || lastShownFix.get(competitor) == null || lastShownFix.get(competitor).get() == null) {
-            return false;
+            result = false;
+        } else {
+            final int first = firstShownFix.get(competitor).get();
+            final int last  = lastShownFix.get(competitor).get();
+            result = index >= first && index <= last && first != -1 && last != -1;
         }
-        final int first = firstShownFix.get(competitor).get();
-        final int last  = lastShownFix.get(competitor).get();
-        if (index >= first && index <= last && first != -1 && last != -1) {
-            return true;
-        }
-        return false;
+        return result;
     }
 
     /**
      * Searches a competitor's shown fixes (firstShownFix to lastShownFix but usually a smaller range since many fixes
-     * have already been searched by a previous iteration) for the smallest and largest detailValue.<p>
+     * have already been searched by a previous iteration) for the smallest and largest detailValue.
+     * <p>
      * 
-     * FIXME bug5921: this seems to assume that if additional fixes have been loaded then they are newer than all fixes loaded before; but this may be false as we may move backwards in time...
+     * FIXME bug5921: this seems to assume that if additional fixes have been loaded then they are newer than all fixes
+     * loaded before; see the use of lastSearchedFix for the initialization of startIndex below; but this may be false
+     * as we may move backwards in time... We would instead need to know the TimeRange searched for min/max values per
+     * competitor, subtract that from the shown tail's TimeRange and scan whatever remains, which may be before and/or
+     * after the interval searched so far.
      * 
      * @param competitor
      *            {@link CompetitorDTO} competitor whose tail to search in.
@@ -829,12 +835,15 @@ public class FixesAndTails {
     }
 
     /**
-     * Updates the fleet wide {@link #detailValueBoundaries} with the current maximum and minimum detailValues.
-     * To do so each competitors (in parameter {@code competitors}) tail will be searched and then the maximum and minimum search
-     * results will be collected.
-     * Finally {@link #detailValueBoundaries} will be updated.
-     * @param competitors {@link Iterable}{@code <}{@link CompetitorDTO}{@code >} containing all competitors to include
-     * in the search.
+     * Updates the fleet wide {@link #detailValueBoundaries} with the current maximum and minimum detailValues. To do
+     * so, each competitor's (in parameter {@code competitors}) tail will be searched and then the maximum and minimum
+     * search results will be collected. The findings are recorded as a side effect into {@link #minDetailValueFix} and
+     * {@link #maxDetailValueFix}. Finally {@link #detailValueBoundaries} will be
+     * {@link ValueRangeFlexibleBoundaries#setMinMax(double, double) updated}.
+     * 
+     * @param competitors
+     *            {@link Iterable}{@code <}{@link CompetitorDTO}{@code >} containing all competitors to include in the
+     *            search.
      */
     protected void updateDetailValueBoundaries(Iterable<CompetitorDTO> competitors) {
         double min = 0;
