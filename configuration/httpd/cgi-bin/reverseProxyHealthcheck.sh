@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Purpose: This script identifies whether the instance the script runs on is in the same AZ as the archive.
-# The user it is installed on must have aws credentials that don't need mfa.
+# The user it is installed on must have aws credentials that don't need mfa. Install to  /usr/share/httpd/.aws.
 
 outputMessage() {
     # parameter 1: the message to display on the site
