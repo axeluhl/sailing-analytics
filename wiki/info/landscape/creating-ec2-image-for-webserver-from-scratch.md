@@ -123,13 +123,13 @@ lrwxrwxrwx  1 root root       75 Oct 20 09:00 notify-operators -> /home/wiki/git
 lrwxrwxrwx  1 root root       78 Feb  8  2021 update_authorized_keys_for_landscape_managers -> /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers
 lrwxrwxrwx  1 root root       89 Feb  8  2021 update_authorized_keys_for_landscape_managers_if_changed -> /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed
 ```
-* set up ``crontab`` for ``root`` user (remove the symbolic link to ``/home/sailing/code/configuration/crontab`` if that had been created earlier). Note that ``configuration/crontabs`` contains a selection of crontab files for different use cases, including the ``crontab-reverse-proxy-instance``, which should be pointed to by a symbolic link in /root.
+* set up ``crontab`` for ``root`` user (remove the symbolic link to ``/home/sailing/code/configuration/crontab`` if that had been created earlier). Note that ``configuration/crontabs`` contains a selection of crontab files for different use cases, including the ``environments/crontab-reverse-proxy-instance``, which should be pointed to by a symbolic link in /root.
 ```
 0 10 1 * *  export PATH=/bin:/usr/bin:/usr/local/bin; mail-events-on-my >/dev/null 2>/dev/null
 * * * * *   export PATH=/bin:/usr/bin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); update_authorized_keys_for_landscape_managers_if_changed $( cat /root/ssh-key-reader.token ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 0 7 2 * *   export PATH=/bin:/usr/bin:/usr/local/bin; docker exec -it registry-registry-1 registry garbage-collect /etc/docker/registry/config.yml
 ```
-* set up crontab for user `wiki` as a symbolic link to /configuration/crontabs/crontab-wiki-user.
+* set up crontab for user `wiki` as a symbolic link to /configuration/crontabs/users/crontab-wiki.
 * ensure that ``/var/log/old/cache/docker`` makes it across from any previous installation to the new one; it contains the docker registry contents. See in particular ``/var/log/old/cache/docker/registry/docker/registry/v2/repositories``.
 * [install docker registry](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) so that the following containers are up and running:
 ```

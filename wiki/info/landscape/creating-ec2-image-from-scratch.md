@@ -148,7 +148,7 @@ Instead of having the `ANDROID_HOME` environment variable be set in `/etc/profil
 
 Had to fiddle a little with the JDK being used. The default installation has an OpenJDK installed, and the AWS tools depend on it. Therefore, it cannot just be removed. As a result, it's important that `env.sh` has the correct `JAVA_HOME` set (/opt/jdk1.8.0_45, in this case). Otherwise, the OSGi environment won't properly start up.
 
-For the ``root`` user create the symbolic link from ``/root/crontab`` to ``/home/sailing/code/configuration/crontabs/<whichever is most appropriate>`` and run ``crontab crontab``. It adds the following crontab entry that is responsible for updating the SSH keys of the users with permission for landscape management in the ``/root/.ssh/authorized_keys`` file.
+For the ``root`` user create the symbolic link from ``/root/crontab`` to ``/home/sailing/code/configuration/crontabs/<whichever user or environment is most appropriate>`` and run ``crontab crontab``. It adds the following crontab entry that is responsible for updating the SSH keys of the users with permission for landscape management in the ``/root/.ssh/authorized_keys`` file.
 ```
 * * * * *   export PATH=/bin:/usr/bin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); update_authorized_keys_for_landscape_managers_if_changed $( cat /root/ssh-key-reader.token ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 ```

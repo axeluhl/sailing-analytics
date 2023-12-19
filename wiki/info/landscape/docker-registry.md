@@ -104,7 +104,7 @@ This process is automated by adding the line
   0 7 2 * *       export PATH=/bin:/usr/bin:/usr/local/bin; docker exec -it registry-registry-1 registry garbage-collect /etc/docker/registry/config.yml
 ```
 
-to /root/crontab and running ``crontab crontab`` as the ``root`` user. See also ``crontab -l`` for whether this has already been set up. This line can also be found in the `/configuration/crontabs/crontab-application-server` file.
+to /root/crontab and running ``crontab crontab`` as the ``root`` user. See also ``crontab -l`` for whether this has already been set up. This line can also be found in the `/configuration/crontabs/environments/crontab-application-server` file.
 
 If you want to delete an entire repository, e.g., because you pushed images under an incorrect repository tag, try this:
 ```
