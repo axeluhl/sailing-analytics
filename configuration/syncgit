@@ -1,7 +1,11 @@
 #!/bin/sh
 ADMIN_EMAIL="axel.uhl@sap.com jan.hamann@sapsailing.com"
-
-cd /home/wiki/gitwiki
+if [ $# -eq 0 ]; then
+    GIT_PATH="/home/wiki/gitwiki"
+else 
+    GIT_PATH=$1
+fi
+cd $GIT_PATH
 git pull >/tmp/wiki-git.out 2>/tmp/wiki-git.err
 if [ "$?" != "0" ]; then
   cat /tmp/wiki-git.out /tmp/wiki-git.err | mail -s "Wiki git problem" $ADMIN_EMAIL
