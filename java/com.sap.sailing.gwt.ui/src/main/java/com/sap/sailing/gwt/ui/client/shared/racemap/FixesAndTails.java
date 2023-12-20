@@ -5,11 +5,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.base.LatLng;
@@ -20,12 +23,18 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
+import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.MultiTimeRange;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -116,6 +125,9 @@ import com.sap.sse.gwt.client.TriggerableTimer;
  *
  */
 public class FixesAndTails {
+    private static final Duration MAX_DURATION_FOR_QUICK_REQUESTS = Duration.ONE_SECOND.times(10l);
+    
+
     /**
      * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous"
      * list of fixes for the competitor. This means the server has no more data for the time interval covered, unless
@@ -150,6 +162,21 @@ public class FixesAndTails {
      * versa. If a tail is present but has an empty path, this map contains <code>-1</code> for that competitor.
      */
     private final Map<CompetitorDTO, Trigger<Integer>> lastShownFix;
+    
+    /**
+     * The position fixes in {@link #fixes} are filled by processing the responses to asynchronous requests. This map
+     * keeps track of the beginning of the contiguous time range for which position data has been requested, per
+     * competitor. This may cover time ranges requested but not yet responded to. The earliest requested time point for
+     * a competitor may also be earlier than the earliest fix eventually received and cached, for example, because the
+     * start of the requested time range does not coincide exactly with the time stamp of a fix.
+     * <p>
+     * 
+     * These time points shall be used to trim new position requests (see
+     * {@link #computeFromAndTo(Date, Iterable, long, boolean)}), as opposed to the earliest fix, and to decide whether
+     * a new request will contiguously extend the time range or will have to start a new, disconnected time range,
+     * clearing the cache contents for that competitor.
+     */
+    private final Map<CompetitorDTO, Date> earliestTimePointRequested;
 
     /**
      * Stores the index to the smallest found detailValue in {@link #fixes} for a given competitor.
@@ -180,11 +207,124 @@ public class FixesAndTails {
      * values shall be ignored and may be of inconsistent types. If not {@code null}, all fixes stored in {@link #fixes}
      * are guaranteed to have their detail value of this type.
      */
-    private final Map<CompetitorDTO, DetailType> detailType;
+    private final Map<CompetitorDTO, DetailType> detailTypesRequested;
+    
+    /**
+     * Adjusted by {@link #updateTail(CompetitorDTO, Date, Date, int, DetailType)}. The field records the time range
+     * in which fixes added to the cache shall be used to update existing tails in place. Note how this is different
+     * from {@link #firstShownFix} and {@link #lastShownFix} which only keeps track of which part of the cache is
+     * visualized by a tail.
+     */
+    private TimeRange desiredVisibleTailTimeRange;
+    
+    /**
+     * Requests returned from {@link #computeFromAndTo(Date, Iterable, long, boolean)} for execution as quick or slow
+     * requests that have not yet started {@link PositionRequest#processResponse(Map) processing their response}.
+     */
+    private final Set<PositionRequest> inFlightRequests;
+    
+    /**
+     * The result of {@link FixesAndTails#computeFromAndTo(Date, Iterable, long, boolean)}; two such requests may result
+     * from the ask to obtain positions for a certain time range per competitor from the server: one for quick
+     * execution, and another one for a potentially long-running request. The two requests may be "entangled" regarding
+     * their need to clear the fixes cache of a competitor when the first of the two has received its result. As soon as
+     * the first of the two has cleared fixes from the cache, the second one to receive its response will refrain from
+     * doing so.
+     * <p>
+     * 
+     * A request may be marked as <em>invalid</em> regarding zero or more competitors. This happens when a request is
+     * made for a new disconnected track segment or a different detail type, where the response will clear the cache for
+     * one or more competitors. In such a case, all "in-flight" requests at the time will be informed to drop their
+     * position fixes for those competitors.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    class PositionRequest {
+        /**
+         * The <em>same</em> set for two entangled requests; when a request processes its response and
+         * finds here that a competitor's cache must first be cleared before entering new position fixes,
+         * that competitor is removed from this set, so an entangled request that receives its response
+         * later will not clear the cache again.
+         */
+        private final Set<CompetitorDTO> mustClearCacheForTheseCompetitors;
+        
+        private final Set<CompetitorDTO> ignoreFixesForTheseCompetitors;
+        
+        private final Map<CompetitorDTO, TimeRange> timeRanges;
+        
+        private final long transitionTimeInMillis;
+        
+        private final DetailType detailTypeForFixes;
+        
+        private final boolean isQuick;
+        
+        PositionRequest(Map<CompetitorDTO, TimeRange> timeRanges, DetailType detailTypeForFixes, long transitionTimeInMillis, boolean isQuick) {
+            mustClearCacheForTheseCompetitors = new HashSet<>();
+            ignoreFixesForTheseCompetitors = new HashSet<>();
+            this.timeRanges = timeRanges;
+            this.detailTypeForFixes = detailTypeForFixes;
+            this.transitionTimeInMillis = transitionTimeInMillis;
+            this.isQuick = isQuick;
+        }
+        
+        Map<CompetitorDTO, Date> getFrom() {
+            return getFromOrTo(TimeRange::from);
+        }
+        
+        Map<CompetitorDTO, Date> getTo() {
+            return getFromOrTo(TimeRange::to);
+        }
+        
+        /**
+         * Guesses whether running this request will be quick.
+         */
+        boolean isQuick() {
+            return isQuick;
+        }
+        
+        private Map<CompetitorDTO, Date> getFromOrTo(Function<TimeRange, TimePoint> dateFetcher) {
+            final Map<CompetitorDTO, Date> result = new HashMap<>();
+            for (final Entry<CompetitorDTO, TimeRange> e : timeRanges.entrySet()) {
+                result.put(e.getKey(), dateFetcher.apply(e.getValue()).asDate());
+            }
+            return result;
+        }
+        
+        /**
+         * Informs this request that when it receives position fixes for {@code competitor} it shall not
+         * store them into the cache. The reason is probably that a newer request has been formed that will
+         * have to clear that competitor's cache when processing its response, e.g., because the time range
+         * requested is disconnected from the track segment cached for that competitor so far.
+         */
+        void ignoreFixesFor(CompetitorDTO competitor) {
+            ignoreFixesForTheseCompetitors.add(competitor);
+        }
+        
+        void processResponse(Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositions) {
+            if (!inFlightRequests.remove(this)) {
+                GWT.log("WARNING: processing response for a request that does not seem to have been sent or that has already been processed: "+this);
+            }
+            for (final Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : boatPositions.entrySet()) {
+                if (!ignoreFixesForTheseCompetitors.contains(e.getKey())) {
+                    final boolean mustClearCache = mustClearCacheForTheseCompetitors.remove(e.getKey());
+                    updateFixes(e.getKey(), e.getValue(), mustClearCache, transitionTimeInMillis, detailTypeForFixes);
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "PositionRequest [mustClearCacheForTheseCompetitors=" + mustClearCacheForTheseCompetitors
+                    + ", ignoreFixesForTheseCompetitors=" + ignoreFixesForTheseCompetitors + ", timeRanges="
+                    + timeRanges + ", transitionTimeInMillis=" + transitionTimeInMillis + ", detailTypeForFixes="
+                    + detailTypeForFixes + "]";
+        }
+    }
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
-        detailType = new HashMap<>();
+        detailTypesRequested = new HashMap<>();
         fixes = new HashMap<>();
         tails = new HashMap<>();
         firstShownFix = new HashMap<>();
@@ -192,6 +332,8 @@ public class FixesAndTails {
         minDetailValueFix = new HashMap<>();
         maxDetailValueFix = new HashMap<>();
         lastSearchedFix = new HashMap<>();
+        inFlightRequests = new HashSet<>();
+        earliestTimePointRequested = new HashMap<>();
     }
 
     /**
@@ -267,8 +409,8 @@ public class FixesAndTails {
      *            the detail type the caller expects the fixes of {@code competitorDTO} to contain
      */
     protected Colorline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory, DetailType detailTypeToShow) {
-        if (detailTypeToShow != null && detailType.get(competitorDTO) != detailTypeToShow) {
-            GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailType.get(competitorDTO)+" but caller expected "+detailTypeToShow);
+        if (detailTypeToShow != null && detailTypesRequested.get(competitorDTO) != detailTypeToShow) {
+            GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailTypesRequested.get(competitorDTO)+" but caller expected "+detailTypeToShow);
         }
         List<LatLng> points = new ArrayList<LatLng>();
         List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
@@ -345,7 +487,7 @@ public class FixesAndTails {
      *            longer tail itself), such that the second request that uses the <em>same</em> map will be considered
      *            having an overlap now, not leading to a replacement of the previous update originating from the same
      *            request.
-     * @param detailTypeForFixes used to update {@link #detailType}
+     * @param detailTypeForFixes used to update {@link #detailTypesRequested}
      * 
      */
     protected void updateFixes(Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> fixesForCompetitors,
@@ -357,32 +499,40 @@ public class FixesAndTails {
         for (final Map.Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 final CompetitorDTO competitor = e.getKey();
-                final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.computeIfAbsent(competitor,
-                        c->{
-                              final List<GPSFixDTOWithSpeedWindTackAndLegType> f = new ArrayList<>();
-                              fixes.put(c, f);
-                              return f;
-                           });
-                if (!overlapsWithKnownFixes.get(competitor)) {
-                    // clearing and then re-populating establishes the invariant that an extrapolated fix must be the last
-                    fixesForCompetitor.clear();
-                    detailType.put(competitor, detailTypeForFixes);
-                    // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
-                    // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-                    final Triggerable triggerable = new Triggerable(()->clearTail(competitor));
-                    registerTriggerable(competitor, triggerable);
-                    Util.addAll(e.getValue(), fixesForCompetitor);
-                    overlapsWithKnownFixes.put(competitor, true); // In case this was only one part of a split request, the next request *does* have an overlap
-                    minDetailValueFix.remove(competitor);
-                    maxDetailValueFix.remove(competitor);
-                } else {
-                    if (detailTypeForFixes != null && detailType.get(competitor) != detailTypeForFixes) {
-                        GWT.log("WARNING: Inconsistent detail types when merging fixed for competitor "+competitor+
-                                ". Got fixes with "+detailType.get(competitor)+" so far but now received fixes with "+detailTypeForFixes);
-                    }
-                    mergeFixes(competitor, e.getValue(), timeForPositionTransitionMillis);
-                }
+                final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesToAddForCompetitor = e.getValue();
+                final boolean mustClearCache = !overlapsWithKnownFixes.put(competitor, true); // In case this was only one part of a split request, the next request *does* have an overlap
+                updateFixes(competitor, fixesToAddForCompetitor, mustClearCache, timeForPositionTransitionMillis,
+                        detailTypeForFixes);
             }
+        }
+    }
+
+    private void updateFixes(final CompetitorDTO competitor,
+            final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesToAddForCompetitor, final boolean mustClearCache,
+            long timeForPositionTransitionMillis, DetailType detailTypeForFixes) {
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.computeIfAbsent(competitor,
+                c->{
+                      final List<GPSFixDTOWithSpeedWindTackAndLegType> f = new ArrayList<>();
+                      fixes.put(c, f);
+                      return f;
+                   });
+        if (mustClearCache) {
+            // clearing and then re-populating establishes the invariant that an extrapolated fix must be the last
+            fixesForCompetitor.clear();
+            detailTypesRequested.put(competitor, detailTypeForFixes);
+            // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
+            // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
+            final Triggerable triggerable = new Triggerable(()->clearTail(competitor));
+            registerTriggerable(competitor, triggerable);
+            Util.addAll(fixesToAddForCompetitor, fixesForCompetitor);
+            minDetailValueFix.remove(competitor);
+            maxDetailValueFix.remove(competitor);
+        } else {
+            if (detailTypeForFixes != null && detailTypesRequested.get(competitor) != detailTypeForFixes) {
+                GWT.log("WARNING: Inconsistent detail types when merging fixed for competitor "+competitor+
+                        ". Got fixes with "+detailTypesRequested.get(competitor)+" so far but now received fixes with "+detailTypeForFixes);
+            }
+            mergeFixes(competitor, fixesToAddForCompetitor, timeForPositionTransitionMillis);
         }
     }
 
@@ -595,14 +745,14 @@ public class FixesAndTails {
      *            the time in milliseconds after which to actually draw the tail update, or <code>-1</code> to perform
      *            the update immediately
      * @param selectedDetailType
-     *            for verifying against {@link #detailType}
+     *            for verifying against {@link #detailTypesRequested}
      */
     protected void updateTail(final  CompetitorDTO competitorDTO, final Date from, final Date to, final int delayForTailChangeInMillis, DetailType selectedDetailType) {
         Timer delayedOrImmediateExecutor = new Timer() {
             @Override
             public void run() {
-                if (selectedDetailType != null && detailType.get(competitorDTO) != selectedDetailType) {
-                    GWT.log("WARNING: Detail type mismatch in updateTail: have "+detailType.get(competitorDTO)+" but caller expected "+selectedDetailType);
+                if (selectedDetailType != null && detailTypesRequested.get(competitorDTO) != selectedDetailType) {
+                    GWT.log("WARNING: Detail type mismatch in updateTail: have "+detailTypesRequested.get(competitorDTO)+" but caller expected "+selectedDetailType);
                 }
                 final Colorline tail = getTail(competitorDTO);
                 if (tail != null) {
@@ -696,65 +846,59 @@ public class FixesAndTails {
     }
 
     /**
-     * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
-     * from/to times for which to request GPS fixes from the server. No update is performed here to {@link #fixes}. The
-     * result guarantees that, when used in
+     * From {@link #timeRangeRequested} as well as the selection of {@code competitorsToShow}, computes the from/to
+     * times for which to request GPS fixes from the server, per competitor. No update is performed here to
+     * {@link #fixes}. The result guarantees that, when used in
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
-     * competitor from {@link #competitorsToShow} there are all fixes known by the server for that competitor starting
-     * at <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
+     * competitor from {@code competitorsToShow} there are all fixes known by the server for that competitor starting at
+     * <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
      * 
-     * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
-     *         second} component contains the "to" times for the competitors whose trails / positions to show; the
-     *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
-     *         those requested (<code>true</code>) or need to be replaced (<code>false</code>)
+     * @return a sequence of {@link PositionRequest} objects; if {@link PositionRequest#isQuick a quick request}, the
+     *         call can be performed in a compound {@link GetRaceMapDataAction}. The others describe the parameters for
+     *         possibly longer-running requests that can be sent using {@link GetBoatPositionsAction}. If two requests
+     *         are returned (none of the pair's components is {@code null}), the two requests are "entangled", in the
+     *         sense that if the combined effect of the requests has to be that the cache for one or more competitors is
+     *         to be cleared before updating the new positions, exactly the first of the two requests to process its
+     *         response will carry out this clearing.
      */
-    protected Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
-            Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds, boolean detailTypeChanged) {
+    protected Iterable<PositionRequest> computeFromAndTo(
+            Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds, DetailType detailType) {
         final Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
         final Map<CompetitorDTO, Date> from = new HashMap<>();
         final Map<CompetitorDTO, Date> to = new HashMap<>();
-        final Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<>();
+        final Set<CompetitorDTO> mustClearCacheForTheseCompetitors = new HashSet<>();
+        final TimeRange timeRangeNeeded = new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo));
         for (final CompetitorDTO competitor : competitorsToShow) {
             final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
             final Date fromDate;
             final Date toDate;
+            final MultiTimeRange missingPieces;
             final Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
-            final Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
-            final TimeRange requestedTimeRange;
-            final TimeRange timeRangeAlreadyCached;
-            // Overlap can be before, after, or before and after the existing tail;
-            // we won't call it an overlap if the request exceeds (includes) the known part of the tail to both
-            // ends, so that at least for the resulting long request the split in quick/slow can happen;
-            final boolean overlap = !detailTypeChanged && (timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
-                    (requestedTimeRange = new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo))).intersects(
-                            timeRangeAlreadyCached = new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix)))
-                    // TODO 5921: we shouldn't be asking the server again at all if what we have resulted from querying the same interval; exception: live mode where at the end new fixes may have been received late
-                    && !requestedTimeRange.includes(timeRangeAlreadyCached));
-            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
-                    && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
-                    && !tailstart.after(timepointOfLastKnownFix) && !detailTypeChanged) {
-                // the beginning of what we need is contained in the interval we already have; skip what we already have
-                fromDate = new Date(timepointOfLastKnownFix.getTime()+1l); // "from" is "inclusive", so add 1ms to also skip the last fix we have
+            final Date earliestTimePointRequestedForCompetitor = earliestTimePointRequested.get(competitor);
+            final TimeRange timeRangeNotToRequestAgain = TimeRange.create(TimePoint.of(earliestTimePointRequestedForCompetitor), TimePoint.of(timepointOfLastKnownFix));
+            // The cache must be cleared upon result processing if the detail type has changed to a different, non-null one,
+            // or the timeRangeNeeded does not touch/overlap the timeRangeAlreadyRequested
+            if (detailType != null && detailType != this.detailTypesRequested.get(competitor)
+             || (timeRangeNotToRequestAgain != null && !timeRangeNeeded.touches(timeRangeNotToRequestAgain))) {
+                mustClearCacheForTheseCompetitors.add(competitor);
+                ignoreResultsForCompetitorInPendingRequests(competitor);
+                missingPieces = timeRangeNeeded.subtract(timeRangeNotToRequestAgain);
             } else {
-                fromDate = tailstart;
-            }
-            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
-                    && !upTo.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
-                    && !upTo.after(timepointOfLastKnownFix)) {
-                // the end of what we need is contained in the interval we already have; skip what we already have
-                toDate = timepointOfFirstKnownFix;
-            } else {
-                toDate = upTo;
+                missingPieces = MultiTimeRange.of(timeRangeNeeded);
             }
             // only request something for the competitor if we're missing information at all
-            if (!fromDate.after(toDate)) {
+            if (!missingPieces.isEmpty()) {
                 from.put(competitor, fromDate);
                 to.put(competitor, toDate);
-                overlapWithKnownFixes.put(competitor, overlap);
             }
         }
-        return new Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>>(from, to,
-                overlapWithKnownFixes);
+        return new Pair<>(from, to); // TODO bug5921: slice MulitTimeRanges into quick and long requests; two long requests may be needed if for one or more competitors we need to obtain long track segments before and after the segment requested so far
+    }
+
+    private void ignoreResultsForCompetitorInPendingRequests(CompetitorDTO competitor) {
+        for (final PositionRequest inFlightRequest : inFlightRequests) {
+            inFlightRequest.ignoreFixesFor(competitor);
+        }
     }
 
     private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor) {
