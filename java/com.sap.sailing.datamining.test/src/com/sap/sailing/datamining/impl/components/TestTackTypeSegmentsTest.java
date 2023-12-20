@@ -178,7 +178,7 @@ public class TestTackTypeSegmentsTest {
         final Map<Competitor, Boat> competitorsAndBoats2 = createCompetitorAndBoatsMap(competitor1, competitor2);
         trackedRace2 = createTestTrackedRace("TestRegatta", "TestRace", "F18", competitorsAndBoats2,
                 MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false, null,
-                null);
+                OneDesignRankingMetric::new);
 
         // RENNEN 2
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
@@ -220,7 +220,7 @@ public class TestTackTypeSegmentsTest {
 
         // Iterable<HasTackTypeSegmentContext> result = getInstancesOfType(compkeineAhnung,
         // HasTackTypeSegmentContext.class);
-        HasTackTypeSegmentContext resultTTSegments = (HasTackTypeSegmentContext) raceOfCompContext;
+        //HasTackTypeSegmentContext resultTTSegments = (HasTackTypeSegmentContext) raceOfCompContext;
         
         final TackTypeSegmentRetrievalProcessor resultTTSegmentsRetrieval = Mockito.mock(TackTypeSegmentRetrievalProcessor.class);
 
@@ -229,8 +229,8 @@ public class TestTackTypeSegmentsTest {
         for (HasTackTypeSegmentContext oneTTSegment : allTTSegments) {
             sumDistance = sumDistance.add(oneTTSegment.getDistance());
         }
-        assertTrue(resultTTSegments == null);
-        assertEquals(null, resultTTSegments);
+        assertTrue(sumDistance == null);
+        assertEquals(null, sumDistance);
     }
     // missing + skipped
 
