@@ -201,7 +201,7 @@ public class FixesAndTails {
         int i = 0;
         // TODO consider binary search to find beginning of interesting segment faster
         for (Iterator<GPSFixDTOWithSpeedWindTackAndLegType> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
-            GPSFixDTOWithSpeedWindTackAndLegType fix = fixIter.next();
+            final GPSFixDTOWithSpeedWindTackAndLegType fix = fixIter.next();
             if (!fix.timepoint.before(to)) {
                 indexOfLast = i-1;
             } else {
@@ -493,7 +493,7 @@ public class FixesAndTails {
             lastShownFix.put(competitorDTO, new Trigger<>(indexOfLastShownFix));
         }
         if (earliestMergeIndex != -1) {
-            lastSearchedFix.merge(competitorDTO, earliestMergeIndex, Math::min);
+            lastSearchedFix.merge(competitorDTO, earliestMergeIndex, Math::min); // FIXME bug5921: this may end up being before the firstShownFix
         }
     }
 
@@ -578,6 +578,7 @@ public class FixesAndTails {
                     }
                     firstShownFix.put(competitorDTO, new Trigger<>(indexOfFirstShownFix));
                     lastShownFix.put(competitorDTO, new Trigger<>(indexOfLastShownFix));
+                    // FIXME bug5921: what about lastSearchedFix?
                 }
             }
         };
@@ -727,7 +728,9 @@ public class FixesAndTails {
 
     /**
      * Searches a competitor's shown fixes (firstShownFix to lastShownFix but usually a smaller range since many fixes
-     * have already been searched by a previous iteration) for the smallest and largest detailValue.
+     * have already been searched by a previous iteration) for the smallest and largest detailValue. Only when the
+     * fix that previously had the minimum/maximum value is no longer shown on the tail, a new search across the
+     * entire visible tail is required.
      * <p>
      * 
      * FIXME bug5921: this seems to assume that if additional fixes have been loaded then they are newer than all fixes
@@ -777,7 +780,7 @@ public class FixesAndTails {
         // left shown range it will now be set to the first not already searched index
         if (startIndex == null) {
             if (lastSearchedFix.containsKey(competitor)) {
-                startIndex = lastSearchedFix.get(competitor) + 1;
+                startIndex = lastSearchedFix.get(competitor) + 1; // FIXME bug5921: what if, e.g., the tail length was increased and only older fixes were added to the tail? Wouldn't we then have to search in those older fixes? mergeFixes(...) may set lastSearchedFix to an index less than firstShownFix
             }
             if (startIndex == null || !isIndexShown(competitor, startIndex)) {
                 startIndex = getFirstShownFix(competitor) != null && getFirstShownFix(competitor) != -1
@@ -822,7 +825,7 @@ public class FixesAndTails {
         if (maxIndex > -1) {
             maxDetailValueFix.put(competitor, maxIndex);
         }
-        lastSearchedFix.put(competitor, endIndex);
+        lastSearchedFix.put(competitor, endIndex); // FIXME bug5921: this makes lastSearchedFix inclusive; however, mergeFixes(...) seems to assume it's exclusive, setting it to the minimum insert index for new merged fixes
     }
 
     /**
