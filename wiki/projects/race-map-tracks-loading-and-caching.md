@@ -53,6 +53,10 @@ We currently always load the detail values together with the ``GPSFixDTO`` objec
 
 Furthermore, if a user switches back and forth between different detail types for the tail color, detail values already loaded will be dropped and replaced by other detail values for another detail type because currently the ``FixesAndTails`` cache currently stores the detail values within the ``GPSFixDTO`` objects and there can only be one detail value per fix.
 
+### ``RaceMap.updateBoatPositions(...)`` and Out-of-Order Responses
+
+The call to ``updateBoatPositions`` by the two callback handlers for the quick and slow position requests both aim to adjust the tails based on the new results received. They compute the new time range to visualize with the tail based on the ``Timer`` time point at the time the data request was constructed. However, with out-of-order responses, a request made earlier may arrive later than a request for a newer time point. The slow request would then move the tail backwards in time while processing its response.
+
 ### Incorrect Implementation of ``FixesAndTails.searchMinMaxDetailValue``
 
 When moving backwards in time, fixes may be added to a competitor's tail that are older than the oldest fix part of the tail so far. However, ``FixesAndTails.searchMinMaxDetailValue`` uses ``lastSearchedFix+1`` as a start index to search for new min/max values. This will then not find extreme values that became part of the tail in ``FixesAndTails.updateTail(...)`` which manages ``firstShownFix`` and ``lastShownFix`` but not ``lastSearchedFix``. Furthermore, ``lastSearchedFix`` seems to be assumed to be inclusive by ``searchMinMaxDetailValue``, but ``mergeFixes(...)`` inserts the minimum insert index of new fixes added. This may even be before the tail, and then searching for extreme values potentially before the visible tail.
@@ -76,6 +80,14 @@ The ``GetRaceMapDataAction`` requests should be limited to very short track segm
 As ``GetRaceMapDataAction`` requests may be dropped, their dropping must trigger a separate ``GetBoatPositionsAction`` for the time range originally requested (unless the callback was informed about its boat positions result no longer to be added to the cache), only without extrapolation, as now we're interested only in real fixes and assume that other follow-up ``GetRaceMapDataAction`` requests will take care of the "current" boat position instead. These ``GetBoatPositionsAction`` requests that replace a dropped ``GetRaceMapDataAction`` will blend in through the ``TimeRangeActionsExecutor`` with other ongoing requests and may correspondingly get trimmed and merged. Request dropping is now signaled to the action by invoking its ``dropped(...)`` method.
 
 With this, out-of-order responses will add to the cache if an only if the cache hasn't informed the callback that its result is no longer desired/needed. In particular, out-of-order responses *may* reasonably add to the cache if needed. This also needs to be implemented for the ``GetRaceMapDataAction`` callback, restricted to the boat positions aspect of the response. For all its other aspects, only representing single instant snapshots, out-of-order responses do not have to be considered at all.
+
+### Keep Track of Desired Tail Time Range
+
+When the ``Timer`` "ticks", one or two asynchronous requests for track data are made. If the ``FixesAndTails`` cache already has the data desired, there wouldn't be a need to wait for the responses. Yet, at least one of the requests needs to receive a response, the fixes in the response---if any---need to be updated to the cache, and only then the visible tail will be updated. Boat position and tail updates could be quicker with already cached data if the ``RaceMap`` in its ``refreshMap`` method first told ``FixesAndTails`` which time range the tail shall visualize and then cared about fetching the data later.
+
+The same goes for the boat icon/canvas display: if the position data required is already in the cache, why wait for the round trip to deliver mark position, sideline, and wind data, and why not immediately update the canvas position based on the already cached fixes?
+
+Slow requests returning late should not mess with the desired tail time range. Several newer time ticks may already have adjusted the desired tail time range.
 
 ### Fix the Search for Extreme Detail Values
 

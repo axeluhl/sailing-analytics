@@ -35,11 +35,82 @@ import com.sap.sse.common.util.Triggerable;
 import com.sap.sse.gwt.client.TriggerableTimer;
 
 /**
- * Manages the cache of {@link GPSFixDTOWithSpeedWindTackAndLegType}s for the competitors and the polylines encoding the tails that visualize the
- * course the boats took. The tails are based on the GPS fix data. This class offers methods to update the fixes and
- * the tails, making sure that the data is always managed consistently. In particular, it keeps an eye on
- * {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated fixes}. Those are just a guess where a boat may have been and will need
- * to be removed once actual data for that time is available.
+ * Manages the cache of {@link GPSFixDTOWithSpeedWindTackAndLegType}s for the competitors and the {@link Colorline}s
+ * representing sub-sets of those fixes, encoding the tails that visualize the course the boats took. The fixes cached
+ * for each competitor are intended to represent a contiguous segment of the competitor's track managed by the server. A
+ * tail may show a sub-segment of the fixes cached for a competitor, for example, because new fixes are added to the end
+ * of a competitors fixes cache, extending the contiguous cached segment beyond the length visualized by the tail. This
+ * way, moving back and forth in time while updating the tail may sometimes be possible even without having to load more
+ * data from the server. The last fix of a segment of cached fixes may be an
+ * {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} one. When a later (extrapolated or real) fix
+ * is to be cached for that competitor, the earlier extrapolated fix is removed from the cache and, if currently
+ * visualized on the tail, also from the tail.
+ * <p>
+ * 
+ * The "contiguous condition" may be violated temporarily due to requests for data being executed asynchronously, with
+ * results being processed out of order, and with compound requests getting dropped and only their position data request
+ * being re-sent later.
+ * <p>
+ * 
+ * If a competitor's tail is to be shown for a time range for which data is missing from the cache, and the time range
+ * does not have an overlap with the cached time range, in order to maintain only contiguous track segments in the
+ * cache, the previously cached fixes will be dropped from the cache, and a new contiguous segment will be started as
+ * the response to the new request is processed. "In-flight" requests for data that would extend the previous track
+ * segment will have their callbacks informed so that when processing the response they don't try to merge their fixes
+ * into the cache anymore, basically dropping the fixes received to avoid cache inconsistencies.
+ * <p>
+ * 
+ * Fixes can optionally be annotated with detail values that can be used to color the tail based on the respective
+ * value. For example, the detail value may represent the boat's speed over ground (SOG) in knots, or its velocity made
+ * good (VMG) in knots. The semantics of the detail value is described by a {@link DetailType}. Currently, the detail
+ * values are always obtained together with the basic GPS fix data such as position and time point. As the user selects
+ * a different detail type, the detail values of those competitors who have their tail colored based on the detail
+ * values need to be updated to reflect the new detail type; this requires a re-load at least of the track segment
+ * currently visualized for that competitor, dropping the data cached for that competitor so far. (See also bug 5925
+ * which considers separating the detail values from the fixes.)
+ * <p>
+ * 
+ * When showing colored tails, the color range is determined by monitoring minimum and maximum detail values across all
+ * competitors for which colored tails are shown. The color range is adjusted in case the value range changes beyond a
+ * certain threshold (see {@link ValueRangeFlexibleBoundaries}). To achieve this, adding fixes to a colored tail must
+ * check the new fixes for extreme values; when removing a fix from a colored tail that had a minimal / maximal detail
+ * value, that tail must be searched again for a new minimal / maximal value.
+ * <p>
+ * 
+ * TODO Talk about remembering the track segment boundaries already requested; and how this is used to trim requests at
+ * the beginning, but last fixes in the cache are used to trim requests at the end.
+ * <p>
+ * 
+ * A client of an instance of this class (typically a {@link RaceMap}) interacts in three possible ways:
+ * <ol>
+ * <li>Preparing the requests that update the fixes cache: Based on the tail length and a "current time" (usually
+ * defined by the {@link com.sap.sse.gwt.client.player.Timer Timer}'s
+ * {@link com.sap.sse.gwt.client.player.Timer#getTime() time slider}), one or two requests including callback handlers
+ * are returned: one for a quick request for only a short piece of the track, and optionally another one for a longer
+ * piece of the track, where the remote call is expected to take a bit longer than we would like to wait with showing
+ * the current boat position. The requests know the time ranges to request for which competitor, and they know whether
+ * when processing their response they first need to {@link #clearTails() clear} the cache before entering new,
+ * non-overlapping positions. The two requests are linked to each other and share the knowledge about whether the first
+ * of them to process its response needs to clear the cache. The resulting time ranges already received or requested per
+ * competitor are remembered and are used to trim subsequent request. Should later requests require a clearing of the
+ * cache (such as after changing the detail type or when requesting a disconnected time range), requests still "in
+ * flight" will have their callbacks informed so that they will discard the positions they will receive.</li>
+ * <li>Processing the responses to those requests: The callbacks returned with the one or two requests from the previous
+ * step check whether their results are still valid; if so, they use
+ * {@link #updateFixes(Map, Map, long, boolean, DetailType)} to install the position fixes received in the cache and
+ * either clear (in case the response started a new contiguous track segment) or incrementally update an existing
+ * tail.</li>
+ * <li>Request initial creation or incremental update of a competitor's tail: This is used to adjust the time range
+ * for which the tail visualizes the cached fixes. Tail creation and update is largely independent of requesting and
+ * updating cached fixes; instead, tail updates use the cached fixes currently available. Fixes being updated into
+ * the cache upon receiving responses from the server will update the visible tails if they fall into the desired
+ * visible time range.</li>
+ * </ol>
+ * 
+ * This class offers methods to update the fixes and the tails, making sure that the data is always managed
+ * consistently. In particular, it keeps an eye on {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated
+ * fixes}. Those are just a guess where a boat may have been and will need to be removed once actual data for that time
+ * is available.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -51,11 +122,11 @@ public class FixesAndTails {
      * the last fix was {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated obtained by extrapolation}.
      * <p>
      * 
-     * If the fixes for a competitor contain an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} fix, that fix is always
-     * guaranteed to be the last element of the list when outside the execution of a method on this class. This in
-     * particular means that when more fixes are added, and there is now one fix later than the extrapolated fix, the
-     * extrapolated fix will be removed, re-establishing the invariant of an extrapolated fix always being the last
-     * in the list.
+     * If the fixes for a competitor contain an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated}
+     * fix, that fix is always guaranteed to be the last element of the list when outside the execution of a method on
+     * this class. This in particular means that when more fixes are added, and there is now one fix later than the
+     * extrapolated fix, the extrapolated fix will be removed, re-establishing the invariant of an extrapolated fix
+     * always being the last in the list.
      */
     private final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> fixes;
     
@@ -181,9 +252,14 @@ public class FixesAndTails {
     /**
      * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
      * {@link #fixes fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
-     * up to the last fix with time point before <code>to</code>. The polyline is returned. Updates are applied to
-     * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
+     * up to the last fix with time point before <code>to</code>. The polyline is added to the map and returned. Updates
+     * are applied to {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
      * <p>
+     * 
+     * The {@link #fixes} map must hold an entry for {@code competitorDTO}, but the fixes it holds for that competitor
+     * do not need to cover or even touch the time range described by {@code from} and {@code to}. As a result, the
+     * color-line returned may be empty or contain fewer fixes than desired. Later calls to
+     * {@link #updateFixes(Map, Map, long, boolean, DetailType)} may then extend the tail accordingly.
      * 
      * Precondition: <code>tails.containsKey(competitorDTO) == false</code>
      * 

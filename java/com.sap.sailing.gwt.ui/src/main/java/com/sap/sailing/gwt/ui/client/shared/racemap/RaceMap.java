@@ -2974,8 +2974,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      *         <code>null</code> if no fix is available
      */
     private GPSFixDTOWithSpeedWindTackAndLegType getBoatFix(CompetitorDTO competitorDTO, Date date) {
-        GPSFixDTOWithSpeedWindTackAndLegType result = null;
-        List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = fixesAndTails.getFixes(competitorDTO);
+        final GPSFixDTOWithSpeedWindTackAndLegType result;
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = fixesAndTails.getFixes(competitorDTO);
         if (competitorFixes != null && !competitorFixes.isEmpty()) {
             int i = Collections.binarySearch(competitorFixes, new GPSFixDTOWithSpeedWindTackAndLegType(date, null, null, (WindDTO) null, null, null, false),
                     new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
@@ -3006,7 +3006,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // now compute a weighted average depending on the time difference to "date" (see also bug 1924)
                     double factorForAfter = (double) (date.getTime()-fixBefore.timepoint.getTime()) / (double) (fixAfter.timepoint.getTime() - fixBefore.timepoint.getTime());
                     double factorForBefore = 1-factorForAfter;
-                    DegreePosition betweenPosition = new DegreePosition(factorForBefore*fixBefore.position.getLatDeg() + factorForAfter*fixAfter.position.getLatDeg(),
+                    final DegreePosition betweenPosition = new DegreePosition(factorForBefore*fixBefore.position.getLatDeg() + factorForAfter*fixAfter.position.getLatDeg(),
                             factorForBefore*fixBefore.position.getLngDeg() + factorForAfter*fixAfter.position.getLngDeg());
                     final double betweenBearing;
                     if (fixBefore.speedWithBearing == null) {
@@ -3022,7 +3022,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
                                         multiply(factorForAfter)).divide(1).getDegrees();
                     }
-                    SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
+                    final SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
                             factorForBefore*(fixBefore.speedWithBearing==null?0:fixBefore.speedWithBearing.speedInKnots) +
                             factorForAfter*(fixAfter.speedWithBearing==null?0:fixAfter.speedWithBearing.speedInKnots),
                             betweenBearing);
@@ -3034,6 +3034,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 final GPSFixDTOWithSpeedWindTackAndLegType fixAfter = competitorFixes.get(i);
                 result = fixAfter;
             }
+        } else {
+            result = null;
         }
         return result;
     }
