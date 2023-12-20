@@ -3500,7 +3500,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         result.setMap(map);
         ColorlineOptions hoverlineOptions = new ColorlineOptions(options);
         hoverlineOptions.setColorMode(ColorlineMode.MONOCHROMATIC);
-        hoverlineOptions.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+        hoverlineOptions.setColorProvider(fixIndex -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
         Hoverline resultHoverline = new Hoverline(result, hoverlineOptions, this);
         final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override
