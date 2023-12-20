@@ -55,7 +55,7 @@ Furthermore, if a user switches back and forth between different detail types fo
 
 ### Incorrect Implementation of ``FixesAndTails.searchMinMaxDetailValue``
 
-When moving backwards in time, fixes may be added to a competitor's tail that are older than the oldest fix part of the tail so far. However, 
+When moving backwards in time, fixes may be added to a competitor's tail that are older than the oldest fix part of the tail so far. However, ``FixesAndTails.searchMinMaxDetailValue`` uses ``lastSearchedFix+1`` as a start index to search for new min/max values. This will then not find extreme values that became part of the tail in ``FixesAndTails.updateTail(...)`` which manages ``firstShownFix`` and ``lastShownFix`` but not ``lastSearchedFix``. Furthermore, ``lastSearchedFix`` seems to be assumed to be inclusive by ``searchMinMaxDetailValue``, but ``mergeFixes(...)`` inserts the minimum insert index of new fixes added. This may even be before the tail, and then searching for extreme values potentially before the visible tail.
 
 ## How to Improve
 
@@ -76,6 +76,16 @@ The ``GetRaceMapDataAction`` requests should be limited to very short track segm
 As ``GetRaceMapDataAction`` requests may be dropped, their dropping must trigger a separate ``GetBoatPositionsAction`` for the time range originally requested (unless the callback was informed about its boat positions result no longer to be added to the cache), only without extrapolation, as now we're interested only in real fixes and assume that other follow-up ``GetRaceMapDataAction`` requests will take care of the "current" boat position instead. These ``GetBoatPositionsAction`` requests that replace a dropped ``GetRaceMapDataAction`` will blend in through the ``TimeRangeActionsExecutor`` with other ongoing requests and may correspondingly get trimmed and merged. Request dropping is now signaled to the action by invoking its ``dropped(...)`` method.
 
 With this, out-of-order responses will add to the cache if an only if the cache hasn't informed the callback that its result is no longer desired/needed. In particular, out-of-order responses *may* reasonably add to the cache if needed. This also needs to be implemented for the ``GetRaceMapDataAction`` callback, restricted to the boat positions aspect of the response. For all its other aspects, only representing single instant snapshots, out-of-order responses do not have to be considered at all.
+
+### Fix the Search for Extreme Detail Values
+
+The ``FixesAndTails.lastSearchedFix`` map seems conceptually flawed. If the invariant is to be that at all times we know the minimum and maximum detailValues for all tails visible then we would in particular need to compute an update each time anything is added to or removed from any visible tail. While checking for a new minimum/maximum value upon addition, finding out what to do in case of removing a so far extreme fix is more difficult.
+
+For this, we already remember ``minDetailValueFix`` and ``maxDetailValueFix`` as indices into the ``fixes`` lists, for each competitor maintaining which of the fixes visible in their current tail has the minimum/maximum detail value. When such a maximum or minimum fix is removed from the visible tail (e.g., because the tail is shortened, or it moves backwards or forwards in time) then the new minimum/maximum must be found in the visible tail.
+
+The "add" case should entirely be handled in ``FixesAndTails.updateTail(...)``. (``FixesAndTails.createTailAndUpdateIndices`` currently would not need to search for a minimum/maximum because it only creates a monochromatic tail, assuming the competitor for which a new tail is required is not part of the selection yet.) If a new fix with a minimum/maximum value is added to the tail, ``minDetailValueFix``/``maxDetailValueFix`` can be adjusted immediately.
+
+The "remove" case could also be handled in ``FixesAndTails.updateTail(...)``, after having removed a fix from a tail that was the one with the minimal/maximal detail value.
 
 ### Make Consistent Use of the ``Triggerable`` Pattern
 
