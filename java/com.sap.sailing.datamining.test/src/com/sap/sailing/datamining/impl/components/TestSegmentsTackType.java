@@ -1,6 +1,5 @@
 package com.sap.sailing.datamining.impl.components;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -48,6 +47,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
 
     DynamicTrackedRaceImpl trackedRace;
     CompetitorWithBoat competitorA;
+    Iterable<HasTackTypeSegmentContext> allTTSegments;
 
     @Before
     public void setup() {
@@ -75,11 +75,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
             }
         }
         trackedRace.updateMarkPassings(competitorA, markPassingForCompetitor);
-    }
-
-    @Test
-    public void testingMissingMarkPassing() {
-        // missing + skipped
+        
         final Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test",
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
                 new CourseAreaImpl("Here", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
@@ -88,15 +84,23 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
                 trackedRace.getTrackedRegatta().getRegatta(), null, null, trackedRace);
         final HasRaceOfCompetitorContext raceOfCompContext = new RaceOfCompetitorWithContext(trackedRaceContext, competitorA);
         final TackTypeSegmentRetrievalProcessor resultTTSegmentsRetrieval = new TackTypeSegmentRetrievalProcessor(null, Collections.emptySet(), TackTypeSegmentsDataMiningSettings.createDefaultSettings(), 0, null);
-        final Iterable<HasTackTypeSegmentContext> allTTSegments = resultTTSegmentsRetrieval.retrieveData(raceOfCompContext);
+        allTTSegments = resultTTSegmentsRetrieval.retrieveData(raceOfCompContext);
+    }
+    
+    @Test
+    public void testingSegmentsAreNotNull() {
         Distance sumDistance = new NullDistance();
         for (HasTackTypeSegmentContext oneTTSegment : allTTSegments) {
             if (oneTTSegment != null) {
                 sumDistance = sumDistance.add(oneTTSegment.getDistance());
             }
         }
-        assertTrue(sumDistance == null);
-        assertEquals(null, sumDistance);
+        assertTrue(sumDistance != null);
+    }
+
+    @Test
+    public void testingMissingMarkPassing() {
+        // missing + skipped
     }
 
     @Test
