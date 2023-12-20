@@ -1251,7 +1251,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         final TackType result;
         final MarkPassing start = getMarkPassingForLegStart();
         final MarkPassing end = getMarkPassingForLegEnd();
-        if (start != null && timePoint.after(start.getTimePoint()) && end != null
+        if (start != null && !timePoint.before(start.getTimePoint()) && end != null
                 && timePoint.before(end.getTimePoint())) {
             // TODO: missing solution for cases with PassingInstruction Offset and FixedBearing
             final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(),
