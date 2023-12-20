@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -59,7 +60,9 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -69,10 +72,13 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
@@ -82,7 +88,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class TestTackTypeSegmentsTest {
 
     public static DynamicCompetitorWithBoat createCompetitorWithBoat(String competitorName) {
-        DynamicBoat boat = (DynamicBoat) new BoatImpl("id12345", competitorName + "'s boat",
+        final DynamicBoat boat = (DynamicBoat) new BoatImpl("id12345", competitorName + "'s boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null);
         return new CompetitorWithBoatImpl(competitorName, competitorName, "KYC", Color.RED, null, null,
                 new TeamImpl("STG",
@@ -95,42 +101,44 @@ public class TestTackTypeSegmentsTest {
     }
 
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName,
-            String boatClassName, Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes,
+            final String boatClassName, Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes,
             boolean useMarkPassingCalculator, RaceLogAndTrackedRaceResolver raceLogResolver,
             RankingMetricConstructor rankingMetricConstructor) {
-        BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
+        final BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
+        final Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /* startDate */ null,
                 /* endDate */ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null,
                 /* registrationLinkSecret */ UUID.randomUUID().toString());
-        TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
-        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        final TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
+        final List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
-        MarkImpl left = new MarkImpl("Left lee gate buoy");
-        MarkImpl right = new MarkImpl("Right lee gate buoy");
-        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate", "Lee Gate");
-        Mark windwardMark = new MarkImpl("Windward mark");
+        final MarkImpl left = new MarkImpl("Left lee gate buoy");
+        final MarkImpl right = new MarkImpl("Right lee gate buoy");
+        final ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate", "Lee Gate");
+        final Mark windwardMark = new MarkImpl("Windward mark");
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));
         waypoints.add(new WaypointImpl(leeGate));
-        Course course = new CourseImpl(raceName, waypoints);
-        RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats);
+        final Course course = new CourseImpl(raceName, waypoints);
+        final RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats);
         regatta.addRace(race);
-        DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race,
+        final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, useMarkPassingCalculator,
                 rankingMetricConstructor, raceLogResolver, /* trackingConnectorInfo */ null,
                 /* markPassingRaceFingerprintRegistry */ null);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
-        DegreePosition topPosition = new DegreePosition(54.48, 10.24);
-        TimePoint afterTheRace = new MillisecondsTimePoint(timePointForFixes.asMillis() + 36000000); // 10h after the
+        final DegreePosition topPosition = new DegreePosition(54.48, 10.24);
+        final TimePoint afterTheRace = new MillisecondsTimePoint(timePointForFixes.asMillis() + 36000000); // 10h after the
                                                                                                      // fix timed
+        trackedRace.setStartTimeReceived(timePointForFixes);
         trackedRace.setStartOfTrackingReceived(timePointForFixes);
+       
         trackedRace.getOrCreateTrack(left)
                 .addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.234451), new MillisecondsTimePoint(0)));
         trackedRace.getOrCreateTrack(right)
@@ -145,6 +153,7 @@ public class TestTackTypeSegmentsTest {
                 new WindImpl(topPosition, timePointForFixes,
                         new KnotSpeedWithBearingImpl(/* speedInKnots */14.7, new DegreeBearingImpl(180))),
                 new WindSourceImpl(WindSourceType.WEB));
+        
         return trackedRace;
     }
 
@@ -159,13 +168,30 @@ public class TestTackTypeSegmentsTest {
         // RENNEN 1
         competitor1 = createCompetitorWithBoat("C1");
         competitor2 = createCompetitorWithBoat("C2");
-        Map<Competitor, Boat> competitorsAndBoats2 = new LinkedHashMap<>();
+        final Map<Competitor, Boat> competitorsAndBoats2 = new LinkedHashMap<>();
         competitorsAndBoats2.put(competitor1, competitor1.getBoat());
         competitorsAndBoats2.put(competitor2, competitor2.getBoat());
         
         trackedRace2 = createTestTrackedRace("TestRegatta", "TestRace", "F18", competitorsAndBoats2,
-                MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false, null,
+                MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ true, null,
                 OneDesignRankingMetric::new);
+        
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> competitor1Track = trackedRace2.getTrack(competitor1);
+        for (int i=0; i<10;i++) {
+            competitor1Track.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424+i, 10.234451+i), trackedRace2.getStartOfTracking().plus(i*4),
+                    new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45))));
+        }
+        
+        TimePoint fixTimePoint = new MillisecondsTimePoint(trackedRace2.getStartOfTracking().asMillis());
+        Set<MarkPassing> markPassingForCompetitor = new HashSet<MarkPassing>();
+        int i=0;
+        for (Waypoint waypoint : trackedRace2.getRace().getCourse().getWaypoints()) {
+            if (i++ <= 5) {
+            markPassingForCompetitor.add(new MarkPassingImpl(fixTimePoint, waypoint, competitor1));
+            fixTimePoint = new MillisecondsTimePoint(fixTimePoint.asMillis()+100);
+            }
+        }
+        trackedRace2.updateMarkPassings(competitor1, markPassingForCompetitor);
 
         // RENNEN 2
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
@@ -195,22 +221,22 @@ public class TestTackTypeSegmentsTest {
 
     @Test
     public void testingMissingMarkPassing() {
-        // missing + skipped
-        Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test",
+        final Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test",
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
                 new CourseAreaImpl("Here", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
         final HasLeaderboardContext leaderboardContext = new LeaderboardWithContext(leaderboard, null);
-        HasTrackedRaceContext trackedRaceContext = new TrackedRaceWithContext(leaderboardContext,
+        final HasTrackedRaceContext trackedRaceContext = new TrackedRaceWithContext(leaderboardContext,
                 trackedRace2.getTrackedRegatta().getRegatta(), null, null, trackedRace2);
-        HasRaceOfCompetitorContext raceOfCompContext = new RaceOfCompetitorWithContext(trackedRaceContext, competitor1);
+        final HasRaceOfCompetitorContext raceOfCompContext = new RaceOfCompetitorWithContext(trackedRaceContext, competitor1);
+        // missing + skipped
 
         // Iterable<HasTackTypeSegmentContext> result = getInstancesOfType(compkeineAhnung,
         // HasTackTypeSegmentContext.class);
         //HasTackTypeSegmentContext resultTTSegments = (HasTackTypeSegmentContext) raceOfCompContext;
         
-        final TackTypeSegmentRetrievalProcessor resultTTSegmentsRetrieval = Mockito.mock(TackTypeSegmentRetrievalProcessor.class);
-
-        Iterable<HasTackTypeSegmentContext> allTTSegments = resultTTSegmentsRetrieval.retrieveData(raceOfCompContext);
+        final TackTypeSegmentRetrievalProcessor resultTTSegmentsRetrieval = new TackTypeSegmentRetrievalProcessor(null, Collections.emptySet(), null, 0, null);
+ 
+        final Iterable<HasTackTypeSegmentContext> allTTSegments = resultTTSegmentsRetrieval.retrieveData(raceOfCompContext);
         Distance sumDistance = null;
         for (HasTackTypeSegmentContext oneTTSegment : allTTSegments) {
             sumDistance = sumDistance.add(oneTTSegment.getDistance());
