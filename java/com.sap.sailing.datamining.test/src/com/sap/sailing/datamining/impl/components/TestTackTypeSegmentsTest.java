@@ -81,12 +81,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TestTackTypeSegmentsTest {
 
-    public static DynamicBoat createBoat(String competitorName) {
-        return new BoatImpl("id12345", competitorName + "'s boat",
+    public static DynamicCompetitorWithBoat createCompetitorWithBoat(String competitorName) {
+        DynamicBoat boat = (DynamicBoat) new BoatImpl("id12345", competitorName + "'s boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null);
-    }
-
-    public static DynamicCompetitorWithBoat createCompetitorWithBoat(String competitorName, DynamicBoat boat) {
         return new CompetitorWithBoatImpl(competitorName, competitorName, "KYC", Color.RED, null, null,
                 new TeamImpl("STG",
                         Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
@@ -95,19 +92,6 @@ public class TestTackTypeSegmentsTest {
                                 "This is Rigo, the coach")),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, /* searchTag */ null,
                 boat);
-    }
-
-    public static DynamicCompetitorWithBoat createCompetitorWithBoat(String competitorName) {
-        DynamicBoat boat = (DynamicBoat) createBoat(competitorName);
-        return createCompetitorWithBoat(competitorName, boat);
-    }
-
-    public static Map<Competitor, Boat> createCompetitorAndBoatsMap(CompetitorWithBoat... competitorsWithBoats) {
-        Map<Competitor, Boat> result = new LinkedHashMap<>();
-        for (CompetitorWithBoat competitorWithBoat : competitorsWithBoats) {
-            result.put(competitorWithBoat, competitorWithBoat.getBoat());
-        }
-        return result;
     }
 
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName,
@@ -175,7 +159,10 @@ public class TestTackTypeSegmentsTest {
         // RENNEN 1
         competitor1 = createCompetitorWithBoat("C1");
         competitor2 = createCompetitorWithBoat("C2");
-        final Map<Competitor, Boat> competitorsAndBoats2 = createCompetitorAndBoatsMap(competitor1, competitor2);
+        Map<Competitor, Boat> competitorsAndBoats2 = new LinkedHashMap<>();
+        competitorsAndBoats2.put(competitor1, competitor1.getBoat());
+        competitorsAndBoats2.put(competitor2, competitor2.getBoat());
+        
         trackedRace2 = createTestTrackedRace("TestRegatta", "TestRace", "F18", competitorsAndBoats2,
                 MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false, null,
                 OneDesignRankingMetric::new);
@@ -208,8 +195,7 @@ public class TestTackTypeSegmentsTest {
 
     @Test
     public void testingMissingMarkPassing() {
-        
-
+        // missing + skipped
         Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test",
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
                 new CourseAreaImpl("Here", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
@@ -232,7 +218,6 @@ public class TestTackTypeSegmentsTest {
         assertTrue(sumDistance == null);
         assertEquals(null, sumDistance);
     }
-    // missing + skipped
 
     @Test
     public void testingFixExactOnMarkPassing() {
