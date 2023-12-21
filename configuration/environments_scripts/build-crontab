@@ -7,7 +7,7 @@
 #then construct the crontab, replacing a keyword with the user in the specification. install the crontab in the path of the user 
 #and then run it for the specified user.
 if [[ $# -ne 3 ]]; then
-    echo "$0 <ENVIRONMENT_YPE> <USER_WITH_CODE> <NAME_OF_GIT_DIR>"
+    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_CODE> <NAME_OF_GIT_DIR>"
     echo ""
     echo "Where USER_WITH_CODE is a user that contains a checked out copy of the main git."
     echo "And where NAME_OF_GIT_DIR is the path to the git repo from the USER_WITH_CODE's home directory."
@@ -25,6 +25,6 @@ for crontab in $(ls crontab*); do
     cat "$crontab"  >> $HOME_DIR/crontab
     echo "" >> $HOME_DIR/crontab  # Adds a newline
 done
-sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|" $HOME_DIR/crontab # Sets correct path to the git repo within the crontab.
-sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
+sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" $HOME_DIR/crontab # Sets correct path to the git repo within the crontab.
+sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
 crontab -u $(cat USER) $HOME_DIR/crontab

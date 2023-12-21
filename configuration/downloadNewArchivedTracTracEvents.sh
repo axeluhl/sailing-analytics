@@ -1,5 +1,7 @@
 #!/bin/bash
-GIT_ROOT=/home/wiki/gitwiki
+/home/wiki/gitwiki
+#eg /home/wiki/gitwiki
+GIT_ROOT="${2}"
 # Downloads all TracTrac event data based on ${GIT_ROOT}/configuration/tractrac-json-urls
 # into the target directory (specified as $1) for those event URLs whose specific folder
 # does not yet exist in the target directory.
