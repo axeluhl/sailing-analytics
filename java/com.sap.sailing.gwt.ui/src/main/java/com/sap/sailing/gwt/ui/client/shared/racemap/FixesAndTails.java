@@ -38,7 +38,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.common.util.Trigger;
 import com.sap.sse.common.util.Triggerable;
-import com.sap.sse.gwt.client.TriggerableTimer;
 import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 
 /**
@@ -518,8 +517,7 @@ public class FixesAndTails {
             detailTypesRequested.put(competitor, detailTypeForFixes);
             // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
             // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-            final Triggerable triggerable = new Triggerable(()->clearTail(competitor));
-            registerTriggerable(competitor, triggerable);
+            clearTail(competitor);
             Util.addAll(fixesToAddForCompetitor, fixesForCompetitor);
             minDetailValueFix.remove(competitor);
             maxDetailValueFix.remove(competitor);
@@ -530,32 +528,6 @@ public class FixesAndTails {
             }
             mergeFixes(competitor, fixesToAddForCompetitor, timeForPositionTransitionMillis);
         }
-    }
-
-    /**
-     * A {@link Triggerable} that is usually a {@link TriggerableTimer} and is or will be scheduled for delayed execution
-     * will be registered with the {@link #tails}, {@link #firstShownFix} and {@link #lastShownFix} structures such that
-     * when any of them is accessed for the {@code competitor} passed as parameter then the {@code triggerable} will be
-     * triggered to ensure consistency and establish all invariants. This way, invariants may temporarily be left unmet
-     * which gives the UI a better chance of delaying particularly the tail updates. However, in case of read access the
-     * invariants all must be established, hence the trigger pattern.
-     */
-    private void registerTriggerable(final CompetitorDTO competitor, final Triggerable triggerable) {
-        final Trigger<Colorline> tailTrigger = tails.get(competitor);
-        if (tailTrigger != null) {
-            tailTrigger.register(triggerable);
-        }
-        registerIndexTrigger(triggerable, firstShownFix, competitor);
-        registerIndexTrigger(triggerable, lastShownFix, competitor);
-    }
-    
-    private void registerIndexTrigger(Triggerable triggerable, Map<CompetitorDTO, Trigger<Integer>> indexMap, CompetitorDTO competitor) {
-        Trigger<Integer> firstShownFixTrigger = indexMap.get(competitor);
-        if (firstShownFixTrigger == null) {
-            firstShownFixTrigger = new Trigger<>(-1);
-            indexMap.put(competitor, firstShownFixTrigger);
-        }
-        firstShownFixTrigger.register(triggerable);
     }
 
     /**
@@ -621,16 +593,13 @@ public class FixesAndTails {
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         final int finalIntoThisIndex = intoThisIndex;
                         final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
-                        final Triggerable triggerable = new Triggerable(()->tail.removeAt(finalIntoThisIndex - finalIndexOfFirstShownFix));
-                        registerTriggerable(competitorDTO, triggerable);
-                        Timer timer = new TriggerableTimer(triggerable);
-                        runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
+                        tail.removeAt(finalIntoThisIndex - finalIndexOfFirstShownFix);
                     }
                     if (intoThisIndex < indexOfFirstShownFix) {
-                        indexOfFirstShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
+                        indexOfFirstShownFix--;
                     }
                     if (intoThisIndex <= indexOfLastShownFix) {
-                        indexOfLastShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
+                        indexOfLastShownFix--;
                     }
                     // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes
                     if (minDetailValueFix.containsKey(competitorDTO)) {
@@ -658,7 +627,6 @@ public class FixesAndTails {
                     intoThis.add(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         // fix inserted at a position currently visualized by tail
-                        // TODO bug5921: why isn't insertAt and setAt (see above) run in a Triggerable like the removeAt calls?
                         tail.insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                     }
                     if (intoThisIndex < indexOfFirstShownFix) {
@@ -680,21 +648,13 @@ public class FixesAndTails {
                         if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
                             final int finalIntoThisIndex = intoThisIndex;
                             final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
-                            Triggerable triggerable = new Triggerable(new Runnable() {
-                                @Override
-                                public void run() {
-                                    tail.removeAt(finalIntoThisIndex-1 - finalIndexOfFirstShownFix);
-                                }
-                            });
-                            registerTriggerable(competitorDTO, triggerable);
-                            Timer timer = new TriggerableTimer(triggerable);
-                            runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
+                            tail.removeAt(finalIntoThisIndex-1 - finalIndexOfFirstShownFix);
                         }
                         if (intoThisIndex-1 < indexOfFirstShownFix) {
-                            indexOfFirstShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
+                            indexOfFirstShownFix--;
                         }
                         if (intoThisIndex-1 <= indexOfLastShownFix) {
-                            indexOfLastShownFix--; // FIXME bug5921: the removal happens inside the Triggerable, so possibly delayed, but the index management is done synchronously here
+                            indexOfLastShownFix--;
                         }
                         if (minDetailValueFix.containsKey(competitorDTO) && intoThisIndex - 1 <= minDetailValueFix.get(competitorDTO)) {
                             minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) - 1);
