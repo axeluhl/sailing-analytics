@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -39,6 +40,7 @@ import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.common.util.Trigger;
 import com.sap.sse.common.util.Triggerable;
 import com.sap.sse.gwt.client.TriggerableTimer;
+import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 
 /**
  * Manages the cache of {@link GPSFixDTOWithSpeedWindTackAndLegType}s for the competitors and the {@link Colorline}s
@@ -162,18 +164,23 @@ public class FixesAndTails {
     
     /**
      * The position fixes in {@link #fixes} are filled by processing the responses to asynchronous requests. This map
-     * keeps track of the beginning of the contiguous time range for which position data has been requested, per
-     * competitor. This may cover time ranges requested but not yet responded to. The earliest requested time point for
-     * a competitor may also be earlier than the earliest fix eventually received and cached, for example, because the
-     * start of the requested time range does not coincide exactly with the time stamp of a fix.
+     * keeps track of the beginning and end of the contiguous time range for which position data has been requested, per
+     * competitor. This may cover time ranges requested but not yet responded to, represented by the
+     * {@link #inFlightRequests}. The earliest requested time point for a competitor may also be earlier than the
+     * earliest fix eventually received and cached, for example, because the start of the requested time range does not
+     * coincide exactly with the time stamp of a fix. Likewise, the latest requested time point may be later than the
+     * latest fix eventually received and cached.
      * <p>
      * 
-     * These time points shall be used to trim new position requests (see
-     * {@link #computeFromAndTo(Date, Iterable, long, long, boolean)}), as opposed to the earliest fix, and to decide whether
-     * a new request will contiguously extend the time range or will have to start a new, disconnected time range,
-     * clearing the cache contents for that competitor.
+     * These time ranges shall be used to trim new position requests (see
+     * {@link #computeFromAndTo(Date, Iterable, long, long, boolean)}), and to decide
+     * whether a new request will contiguously extend the time range or will have to start a new, disconnected time
+     * range, clearing the cache contents for that competitor. When trimming, if no request is currently
+     * {@link #inFlightRequests in flight}, instead of the last time point <em>requested</em>, the time
+     * point of the last fix <em>received</em> shall be used for trimming because we may hope to receive
+     * fixes delivered late, e.g. in a live situation with too short a delay.
      */
-    private final Map<CompetitorDTO, TimePoint> earliestTimePointRequested;
+    private final Map<CompetitorDTO, TimeRange> timeRangesRequested;
 
     /**
      * Stores the index to the smallest found detailValue in {@link #fixes} for a given competitor.
@@ -288,7 +295,9 @@ public class FixesAndTails {
         private Map<CompetitorDTO, Date> getFromOrTo(Function<TimeRange, TimePoint> dateFetcher) {
             final Map<CompetitorDTO, Date> result = new HashMap<>();
             for (final Entry<CompetitorDTO, TimeRange> e : timeRanges.entrySet()) {
-                result.put(e.getKey(), dateFetcher.apply(e.getValue()).asDate());
+                if (!ignoreFixesForTheseCompetitors.contains(e.getKey())) {
+                    result.put(e.getKey(), dateFetcher.apply(e.getValue()).asDate());
+                }
             }
             return result;
         }
@@ -322,6 +331,17 @@ public class FixesAndTails {
                     + timeRanges + ", transitionTimeInMillis=" + transitionTimeInMillis + ", detailTypeForFixes="
                     + detailTypeForFixes + "]";
         }
+
+        public TimePoint getToTimepoint(CompetitorDTO competitor) {
+            final TimeRange competitorTimeRange = timeRanges.get(competitor);
+            final TimePoint result;
+            if (competitorTimeRange == null) {
+                result = null;
+            } else {
+                result = competitorTimeRange.to();
+            }
+            return result;
+        }
     }
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
@@ -335,7 +355,7 @@ public class FixesAndTails {
         maxDetailValueFix = new HashMap<>();
         lastSearchedFix = new HashMap<>();
         inFlightRequests = new HashSet<>();
-        earliestTimePointRequested = new HashMap<>();
+        timeRangesRequested = new HashMap<>();
     }
 
     /**
@@ -831,16 +851,18 @@ public class FixesAndTails {
     }
 
     /**
-     * From {@link #earliestTimePointRequested} as well as the selection of {@code competitorsToShow}, computes the from/to
-     * times for which to request GPS fixes from the server, per competitor. No update is performed here to
+     * From {@link #earliestTimePointRequested} as well as the selection of {@code competitorsToShow}, computes the
+     * from/to times for which to request GPS fixes from the server, per competitor. No update is performed here to
      * {@link #fixes}. The result guarantees that, when used in
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
      * competitor from {@code competitorsToShow} all fixes known by the server for that competitor starting at
      * <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive) will be loaded
-     * into the {@link #fixes} cache.<p>
+     * into the {@link #fixes} cache.
+     * <p>
      * 
      * The {@link #earliestTimePointRequested} map is updated, assuming that the requests returned will be sent before
-     * invoking this method again.
+     * invoking this method again. The two {@link PositionRequest}s returned are added to the {@link #inFlightRequests}
+     * set.
      * 
      * @return a pair of {@link PositionRequest} objects; the {@link Pair#getA() first} provides the parameters for a
      *         "quick" request, assuming that only a few positions (up to {@link #MAX_DURATION_FOR_QUICK_REQUESTS}) need
@@ -850,7 +872,10 @@ public class FixesAndTails {
      *         {@link PositionRequest#getFrom()} and {@link PositionRequest#getTo()} results may be empty. The two
      *         requests are "entangled", in the sense that if the combined effect of the requests has to be that the
      *         cache for one or more competitors is to be cleared before updating the new positions, exactly the first
-     *         of the two requests to process its response will carry out this clearing.
+     *         of the two requests to process its response will carry out this clearing. It is important to reliably
+     *         obtain the positions for both requests, so if the "quick" request should be dropped together with a
+     *         compound {@link GetRaceMapDataAction}, at least the position-related part needs to be run, e.g., using
+     *         a more specific {@link GetBoatPositionsAction} with the {@link TimeRangeActionsExecutor}. 
      */
     protected Pair<PositionRequest, PositionRequest> computeFromAndTo(Date upTo,
             Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds,
@@ -863,10 +888,7 @@ public class FixesAndTails {
         final Map<CompetitorDTO, TimeRange> timeRangesForQuickRequest = new HashMap<>();
         final Map<CompetitorDTO, TimeRange> timeRangesForSlowRequest = new HashMap<>();
         for (final CompetitorDTO competitor : competitorsToShow) {
-            final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
-            final Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
-            final TimePoint earliestTimePointRequestedForCompetitor = earliestTimePointRequested.get(competitor);
-            final TimeRange timeRangeNotToRequestAgain = earliestTimePointRequestedForCompetitor == null ? null : TimeRange.create(earliestTimePointRequestedForCompetitor, TimePoint.of(timepointOfLastKnownFix));
+            final TimeRange timeRangeNotToRequestAgain = getTimeRangeNotToRequestAgain(competitor);
             // The cache must be cleared upon result processing if the detail type has changed to a different, non-null one,
             // or the timeRangeNeeded does not touch/overlap the timeRangeAlreadyRequested
             if (detailType != null && detailType != detailTypesRequested.get(competitor)
@@ -875,14 +897,17 @@ public class FixesAndTails {
                 ignoreResultsForCompetitorInPendingRequests(competitor);
                 timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
                 timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
+                timeRangesRequested.put(competitor, timeRangeNeeded);
             } else {
                 if (timeRangeNotToRequestAgain == null) {
                     // we need to ask for the full time range needed because there is no data in the cache yet; cache clearing not necessary
                     timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
                     timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
+                    timeRangesRequested.put(competitor, timeRangeNeeded);
                 } else {
                     final MultiTimeRange timeRangesToRequest = timeRangeNeeded.subtract(timeRangeNotToRequestAgain);
                     if (Util.size(timeRangesToRequest) > 1) {
+                        GWT.log("Request for "+competitor+" exceeds cached region at start and end; requesting the full tail");
                         // We would need to ask for data on both ends of the cached contiguous track segment; for now we
                         // have no support for querying multiple segments for the same competitor in one round trip, and we
                         // don't want to make another round trip for this infrequent case (probably occurs only when tail length
@@ -890,6 +915,7 @@ public class FixesAndTails {
                         // fixes
                         timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
                         timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
+                        timeRangesRequested.put(competitor, timeRangeNeeded);
                     } else {
                         if (!Util.isEmpty(timeRangesToRequest)) {
                             final TimeRange timeRangeToRequest = timeRangesToRequest.iterator().next();
@@ -908,12 +934,11 @@ public class FixesAndTails {
                                     timeRangesForSlowRequest.put(competitor, TimeRange.create(timeRangeToRequest.from(), timeRangeToRequest.to().minus(MAX_DURATION_FOR_QUICK_REQUESTS)));
                                 }
                             }
+                            timeRangesRequested.put(competitor, timeRangeToRequest.extend(timeRangesRequested.get(competitor)));
                         }
-                        // TODO bug5921 only request something for the competitor if we're missing information at all
                     }
                 }
             }
-            earliestTimePointRequested.put(competitor, tailstart);
             detailTypesRequested.put(competitor, detailType);
         }
         final PositionRequest quick = new PositionRequest(timeRangesForQuickRequest, mustClearCacheForTheseCompetitors, detailType, transitionTimeInMillis);
@@ -921,6 +946,43 @@ public class FixesAndTails {
         inFlightRequests.add(quick);
         inFlightRequests.add(slow);
         return new Pair<>(quick, slow);
+    }
+
+    /**
+     * Roughly speaking, this methods finds the time range represented by the contiguous track segment cached for
+     * {@code competitor}.
+     * <p>
+     * 
+     * This first looks at what has been <em>requested</em> through
+     * {@link #computeFromAndTo(Date, Iterable, long, long, DetailType)} with the {@link PositionRequest} objects
+     * returned from it. These time ranges are stored in {@link #timeRangesRequested}. If no {@link #inFlightRequests
+     * in-flight request} ends at the end of the time range requested overall for {@code competitor} then we take into
+     * account the possibility that new fixes may have been delivered late to the server after we last asked for them.
+     * In this case, this method will return a time range starting at the beginning of the time range requested so
+     * far for {@code competitor}, ending at the last fix received for that competitor (instead of the last time point
+     * <em>requested</em>). This way, fixes delivered late can be expected to still make it into the cache.
+     */
+    private TimeRange getTimeRangeNotToRequestAgain(CompetitorDTO competitor) {
+        final TimeRange timeRangeRequestedForCompetitor = timeRangesRequested.get(competitor);
+        for (final PositionRequest inFlightRequest : inFlightRequests) {
+            final TimePoint competitorTimeRangeEnd = inFlightRequest.getToTimepoint(competitor);
+            if (competitorTimeRangeEnd != null && competitorTimeRangeEnd.equals(timeRangeRequestedForCompetitor.to())) {
+                return timeRangeRequestedForCompetitor; // found an in-flight request ending at the last time point requested; we hope it delivers fixes up to there
+            }
+        }
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
+        final TimeRange result;
+        if (fixesForCompetitor == null) {
+            result = timeRangeRequestedForCompetitor;
+        } else {
+            final TimePoint timePointOfLastFix = TimePoint.of(getTimepointOfLastNonExtrapolated(fixesForCompetitor));
+            if (timePointOfLastFix == null) {
+                result = timeRangeRequestedForCompetitor;
+            } else {
+                result = TimeRange.create(timeRangeRequestedForCompetitor.from(), timePointOfLastFix);
+            }
+        }
+        return result;
     }
 
     private void ignoreResultsForCompetitorInPendingRequests(CompetitorDTO competitor) {
@@ -1088,6 +1150,7 @@ public class FixesAndTails {
      *            search.
      */
     protected void updateDetailValueBoundaries(Iterable<CompetitorDTO> competitors) {
+        try {
         double min = 0;
         boolean minSet = false;
         double max = 0;
@@ -1124,6 +1187,9 @@ public class FixesAndTails {
         // If possible update detailValueBoundaries
         if (minSet && maxSet) {
             detailValueBoundaries.setMinMax(min, max);
+        }
+        } catch (NullPointerException npe) {
+            GWT.log("NPE: "+npe.getMessage());
         }
     }
     

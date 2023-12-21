@@ -1445,11 +1445,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
         // only update the tails for these competitors
-        asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
+        asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, timeRangeActionsExecutor, competitorsByIdAsString,
                     race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */ true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
                     raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),
-                    newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
+                    newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId,
+                    // callback to use for alternative GetBoatPositionsAction fired when GetRaceMapDataAction gets dropped:
+                    getBoatPositionsCallback(quickAndSlowRequest.getA(), newTime, transitionTimeInMillis, competitorsToShow, detailType, detailTypeChanged, competitorsByIdAsString)),
             GET_RACE_MAP_DATA_CATEGORY,
             getRaceMapDataCallback(newTime, transitionTimeInMillis, quickAndSlowRequest.getA(), competitorsToShow,
                                    ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged, detailType, fromTimesForQuickCall, toTimesForQuickCall));
@@ -1458,26 +1460,35 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             timeRangeActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race,
                     fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall, /* extrapolate */ true,
                     detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
-                    new GetBoatPositionsCallback(detailType, new AsyncCallback<CompactBoatPositionsDTO>() {
-                        @Override
-                        public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error obtaining racemap data: " + t.getMessage(), true /*silentMode */);
-                        }
-
-                        @Override
-                        public void onSuccess(CompactBoatPositionsDTO result) {
-                            // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions for those
-                            // entries that are considered not overlapping; subsequently, fromAndToOverlap.getC() will contain true for
-                            // all its entries so that the other response received for GetRaceMapDataAction will consider this an
-                            // overlap if it happens after this update.
-                            final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositionsForCompetitors = result.getBoatPositionsForCompetitors(
-                                    competitorsByIdAsString);
-                            quickAndSlowRequest.getB().processResponse(boatPositionsForCompetitors);
-                            updateBoatPositions(newTime, transitionTimeInMillis,
-                                    competitorsToShow, boatPositionsForCompetitors, /* updateTailsOnly */ true, detailTypeChanged, detailType);
-                        }
-                    }));
+                    getBoatPositionsCallback(quickAndSlowRequest.getB(), newTime, transitionTimeInMillis, competitorsToShow,
+                            detailType, detailTypeChanged, competitorsByIdAsString));
         }
+    }
+
+    private GetBoatPositionsCallback getBoatPositionsCallback(
+            final PositionRequest positionRequest, final Date newTime,
+            final long transitionTimeInMillis, final Iterable<CompetitorDTO> competitorsToShow,
+            final DetailType detailType, boolean detailTypeChanged,
+            final Map<String, CompetitorDTO> competitorsByIdAsString) {
+        return new GetBoatPositionsCallback(detailType, new AsyncCallback<CompactBoatPositionsDTO>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error obtaining racemap data: " + t.getMessage(), true /*silentMode */);
+            }
+
+            @Override
+            public void onSuccess(CompactBoatPositionsDTO result) {
+                // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions for those
+                // entries that are considered not overlapping; subsequently, fromAndToOverlap.getC() will contain true for
+                // all its entries so that the other response received for GetRaceMapDataAction will consider this an
+                // overlap if it happens after this update.
+                final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositionsForCompetitors = result.getBoatPositionsForCompetitors(
+                        competitorsByIdAsString);
+                positionRequest.processResponse(boatPositionsForCompetitors);
+                updateBoatPositions(newTime, transitionTimeInMillis,
+                        competitorsToShow, boatPositionsForCompetitors, /* updateTailsOnly */ true, detailTypeChanged, detailType);
+            }
+        });
     }
 
     private AsyncCallback<RaceMapDataDTO> getRaceMapDataCallback(
@@ -1516,7 +1527,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData = raceMapDataDTO.boatPositions;
                         Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData); // FIXME bug5921: why do we need this from the *response*, and why couldn't this come straight from the FixesAndTails cache?
                         quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
-                        quickRequest.processResponse(boatData);
+                        quickRequest.processResponse(boatData); // stores the boat fixes received into the FixesAndTails cache
                         // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged, detailType);
