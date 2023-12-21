@@ -1,1 +1,1 @@
-*/10 * * * * syncgit
+*/10 * * * * syncgit PATH_OF_GIT_HOME_DIR_TO_REPLACE 

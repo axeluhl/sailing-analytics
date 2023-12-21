@@ -3,13 +3,20 @@
 #go to folder. find within parameters list and add all scripts to usr/local/bin
 #then construct the crontab, replacing a keyword with the user in the specification. install the crontab in the path of the user 
 #and then run it for the specified user.
-
-RELATIVE_PATH="${1}"
-cd "$(dirname "$0")/${RELATIVE_PATH}"
-HOME_DIR=$(grep $(cat USER) /etc/passwd | cut -d':' -f6)
+if [[ $# -ne 3 ]]; then
+	exit 2
+fi
+ENV_TYPE="$1"
+GIT_DIR_NAME="$2"
+GIT_USER="$3"
+cd "$(dirname "$0")/${ENV_TYPE}"
+HOME_DIR=$(grep "^$(cat USER)" /etc/passwd | cut -d':' -f6)
+GIT_PATH="/home/${GIT_USER}/${GIT_DIR_NAME}"
 touch $HOME_DIR/crontab
 for crontab in $(ls crontab*); do
-    echo "$crontab" >> $HOME_DIR/crontab
+    cat "$crontab"  >> $HOME_DIR/crontab
+    echo "" >> $HOME_DIR/crontab
 done
-sed -i "s/PATH_OF_HOME_DIR_TO_REPLACE/${HOME_DIR}/" $HOME_DIR/crontab
-crontab -u $(cat USER) $HOME_DIR/crontab
+sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|" $HOME_DIR/crontab
+sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|" $HOME_DIR/crontab 
+#crontab -u $(cat USER) $HOME_DIR/crontab
