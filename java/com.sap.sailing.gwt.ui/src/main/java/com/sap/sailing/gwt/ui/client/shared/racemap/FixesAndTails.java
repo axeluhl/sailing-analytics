@@ -147,14 +147,14 @@ public class FixesAndTails {
     /**
      * Key set is equal to that of {@link #tails} and tells what the index in {@link #fixes} of the first fix shown
      * in {@link #tails} is. If a key is contained in this map, it is also contained in {@link #lastShownFix} and vice
-     * versa. If a tail is present but has an empty path, this map contains <code>-1</code> for that competitor.
+     * versa. If a tail is present but has an empty path, this map does not contain an entry for that competitor.
      */
     private final Map<CompetitorDTO, Integer> firstShownFix;
 
     /**
      * Key set is equal to that of {@link #tails} and tells what the index in {@link #fixes} of the last fix shown in
      * {@link #tails} is. If a key is contained in this map, it is also contained in {@link #firstShownFix} and vice
-     * versa. If a tail is present but has an empty path, this map contains <code>-1</code> for that competitor.
+     * versa. If a tail is present but has an empty path, this map does not contain an entry for that competitor.
      */
     private final Map<CompetitorDTO, Integer> lastShownFix;
     
@@ -424,8 +424,8 @@ public class FixesAndTails {
         if (detailTypeToShow != null && detailTypesRequested.get(competitorDTO) != detailTypeToShow) {
             GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailTypesRequested.get(competitorDTO)+" but caller expected "+detailTypeToShow);
         }
-        List<LatLng> points = new ArrayList<LatLng>();
-        List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
+        final List<LatLng> points = new ArrayList<LatLng>();
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
         int indexOfFirst = -1;
         int indexOfLast = -1;
         int i = 0;
@@ -452,7 +452,7 @@ public class FixesAndTails {
             }
             i++;
         }
-        if (indexOfLast == -1) {
+        if (indexOfLast == -1) { // all fixes consumed; all were before "to"
             indexOfLast = i - 1;
         }
         if (indexOfFirst != -1 && indexOfLast != -1) {
@@ -551,7 +551,7 @@ public class FixesAndTails {
         final Integer firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
         int indexOfFirstShownFix = firstShownFixForCompetitor == null ? -1 : firstShownFixForCompetitor;
         final Integer lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
-        int indexOfLastShownFix = lastShownFixForCompetitor == null ? -1 : lastShownFixForCompetitor;
+        int indexOfLastShownFix = lastShownFixForCompetitor == null ? -2 : lastShownFixForCompetitor;
         final Colorline tail = getTail(competitorDTO);
         int earliestMergeIndex = -1;
         final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
@@ -617,6 +617,7 @@ public class FixesAndTails {
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         // fix inserted at a position currently visualized by tail
                         tail.insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
+                        // TODO bug5921 / bug5925: check if min/max value and adjust minDetailValueFix/maxDetailValueFix incrementally 
                     }
                     if (intoThisIndex < indexOfFirstShownFix) {
                         indexOfFirstShownFix++;
@@ -635,9 +636,7 @@ public class FixesAndTails {
                     if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
                         intoThis.remove(intoThisIndex-1);
                         if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
-                            final int finalIntoThisIndex = intoThisIndex;
-                            final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
-                            tail.removeAt(finalIntoThisIndex-1 - finalIndexOfFirstShownFix);
+                            tail.removeAt(intoThisIndex-1 - indexOfFirstShownFix);
                         }
                         if (intoThisIndex-1 < indexOfFirstShownFix) {
                             indexOfFirstShownFix--;
@@ -657,11 +656,12 @@ public class FixesAndTails {
         }
         // invariant: for one CompetitorDTO, either both of firstShownFix and lastShownFix have an entry for that key,
         // or both don't
-        if (indexOfFirstShownFix != -1) {
+        if (indexOfFirstShownFix <= indexOfLastShownFix) {
             firstShownFix.put(competitorDTO, indexOfFirstShownFix);
-        }
-        if (indexOfLastShownFix != -1) {
             lastShownFix.put(competitorDTO, indexOfLastShownFix);
+        } else {
+            firstShownFix.remove(competitorDTO);
+            lastShownFix.remove(competitorDTO);
         }
         if (earliestMergeIndex != -1) {
             lastSearchedFix.merge(competitorDTO, earliestMergeIndex, Math::min); // FIXME bug5921: this may end up being before the firstShownFix
@@ -685,6 +685,25 @@ public class FixesAndTails {
      * <p>
      * 
      * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
+     * <p>
+     * 
+     * FIXME: I don't think this method handles empty tails correctly; firstShownFix/lastShownFix then won't hold a
+     * record for competitorDTO, and nothing in here will properly fill the tail
+     * <p>
+     * FIXME: update to a non-overlapping time range probably won't work
+     * <p>
+     * 
+     * Requirements:
+     * <ul>
+     * <li>handle a so far empty tail ({@code tail.getLength() == 0}, and {@link #firstShownFix}/{@link #lastShownFix}
+     * not containing key {@code competitorDTO})</li>
+     * <li>handle moving to a new {@code from/to} time range that does not overlap the current tail's time range</li>
+     * <li>all fixes from {@link #getFixes(CompetitorDTO) getFixes(competitorDTO)} that are between {@code from/to}
+     * (inclusive), and only those fixes, are visualized on the tail if tail exists</li>
+     * <li>{@link #firstShownFix}/{@link #lastShownFix} afterwards reflect the new tail; in particular, if the tail is empty,
+     * they both do not contain the key {@code competitorDTO}.</li>
+     * </ul>
+     * <p>
      * 
      * @param delayForTailChangeInMillis
      *            the time in milliseconds after which to actually draw the tail update, or <code>-1</code> to perform
@@ -702,58 +721,112 @@ public class FixesAndTails {
                 final Colorline tail = getTail(competitorDTO);
                 if (tail != null) {
                     int vertexCount = tail.getLength();
-                    final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
                     final Integer firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
-                    int indexOfFirstShownFix = firstShownFixForCompetitor == null ? -1 : firstShownFixForCompetitor;
-                    // remove fixes before what is now to be the beginning of the polyline:
-                    while (indexOfFirstShownFix != -1 && vertexCount > 0
-                            && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
-                        tail.removeAt(0);
-                        vertexCount--;
-                        indexOfFirstShownFix++;
-                    }
-                    // now the polyline contains no more vertices representing fixes before "from";
-                    // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
-                    // and insert corresponding vertices into the polyline
-                    while (indexOfFirstShownFix > 0
-                            && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
-                        indexOfFirstShownFix--;
-                        GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfFirstShownFix);
-                        tail.insertAt(0, coordinateSystem.toLatLng(fix.position));
-                        vertexCount++;
-                    }
-                    // now adjust the polyline's tail: remove excess vertices that are after "to"
                     final Integer lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
-                    int indexOfLastShownFix = lastShownFixForCompetitor == null ? -1 : lastShownFixForCompetitor;
-                    while (indexOfLastShownFix != -1 && vertexCount > 0
-                            && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
-                        if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {
-                            // the loop will abort after this iteration
+                    if (firstShownFixForCompetitor == null) {
+                        // empty tail; do a few consistency checks:
+                        if (lastShownFixForCompetitor != null) {
+                            GWT.log("Inconsistent lastShownFix for competitor "+competitorDTO+"; should have been null but was "+lastShownFixForCompetitor);
                         }
-                        if (tail.getLength() > --vertexCount) {
-                            tail.removeAt(vertexCount);
+                        if (vertexCount != 0) {
+                            throw new IllegalStateException("Inconsistent fistShownFix/lastShownFix for competitor "+competitorDTO+
+                                    "; tail is empty, both should have been null but were "+firstShownFixForCompetitor+
+                                    " and "+lastShownFixForCompetitor);
                         }
-                        indexOfLastShownFix--;
+                        fillEmptyTail(competitorDTO, from, to);
+                    } else {
+                        if (lastShownFixForCompetitor == null) {
+                            throw new IllegalStateException("Inconsistent lastShownFix for competitor "+competitorDTO+
+                                    "; should have contained the competitor as key because firstShownFix did");
+                        }
+                        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
+                        // we have a non-empty tail, but there may be a gap between old and new; if so, clear tail and start over
+                        if (!TimeRange.create(TimePoint.of(fixesForCompetitor.get(firstShownFixForCompetitor).timepoint),
+                                             TimePoint.of(fixesForCompetitor.get(lastShownFixForCompetitor).timepoint)).
+                                touches(TimeRange.create(TimePoint.of(from), TimePoint.of(to)))) {
+                            clearTail(competitorDTO);
+                            fillEmptyTail(competitorDTO, from, to);
+                        } else {
+                            // the time ranges of the non-empty tail and the desired time range from..to touch; adjust incrementally
+                            int indexOfFirstShownFix = firstShownFixForCompetitor;
+                            int indexOfLastShownFix = lastShownFixForCompetitor;
+                            // remove fixes before what is now to be the beginning of the polyline:
+                            while (vertexCount > 0 && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+                                tail.removeAt(0);
+                                vertexCount--;
+                                indexOfFirstShownFix++;
+                            }
+                            // now the polyline contains no more vertices representing fixes before "from";
+                            // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
+                            // and insert corresponding vertices into the polyline
+                            while (indexOfFirstShownFix > 0
+                                    && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
+                                indexOfFirstShownFix--;
+                                final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfFirstShownFix);
+                                tail.insertAt(0, coordinateSystem.toLatLng(fix.position));
+                                vertexCount++;
+                            }
+                            // now adjust the tail's end: remove excess vertices that are after "to"
+                            while (vertexCount > 0 && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+                                tail.removeAt(--vertexCount);
+                                indexOfLastShownFix--;
+                            }
+                            // now the polyline contains no more vertices representing fixes after "to";
+                            // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
+                            // and insert corresponding vertices into the polyline
+                            while (indexOfLastShownFix < fixesForCompetitor.size() - 1
+                                    && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
+                                indexOfLastShownFix++;
+                                final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
+                                tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
+                            }
+                            firstShownFix.put(competitorDTO, indexOfFirstShownFix);
+                            lastShownFix.put(competitorDTO, indexOfLastShownFix);
+                            // FIXME bug5921: what about lastSearchedFix?
+                        }
                     }
-                    // now the polyline contains no more vertices representing fixes after "to";
-                    // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
-                    // and insert corresponding vertices into the polyline
-                    while (indexOfLastShownFix < fixesForCompetitor.size() - 1
-                            && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
-                        indexOfLastShownFix++;
-                        GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
-                        tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
-                        if (indexOfFirstShownFix < 0) { // empty tail before?
-                            indexOfFirstShownFix = indexOfLastShownFix; // set to the first vertex inserted into tail
-                        }
-                    }
-                    firstShownFix.put(competitorDTO, indexOfFirstShownFix);
-                    lastShownFix.put(competitorDTO, indexOfLastShownFix);
-                    // FIXME bug5921: what about lastSearchedFix?
                 }
             }
         };
         runDelayedOrImmediately(delayedOrImmediateExecutor, delayForTailChangeInMillis);
+    }
+
+    /**
+     * Assuming the {@link #getTail(CompetitorDTO) tail of competitorDTO} is empty, fills in all
+     * fixes between {@code from} and {@code to} (inclusive) and adjusts {@link #firstShownFix}
+     * and {@link #lastShownFix} accordingly. In particular, if no fix is inserted, the
+     * {@code competitorDTO} key is removed from those two maps.
+     */
+    private void fillEmptyTail(CompetitorDTO competitorDTO, Date from, Date to) {
+        int first = -1;
+        int last = -1;
+        final Colorline tail = getTail(competitorDTO);
+        int vertexCount = tail.getLength();
+        if (vertexCount != 0) {
+            throw new IllegalStateException("Can call fillEmptyTail only for empty tails; the tail of competitor "+
+                    competitorDTO+" contains "+vertexCount+" vertices");
+        }
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = getFixes(competitorDTO);
+        if (competitorFixes != null) {
+            GPSFixDTOWithSpeedWindTackAndLegType fix;
+            int i;
+            for (i=0; i<competitorFixes.size() && !(fix=competitorFixes.get(i)).timepoint.after(to); i++) {
+                if (!fix.timepoint.before(from)) {
+                    if (first == -1) {
+                        first = i;
+                    }
+                    tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
+                    // TODO bug5921: adjust min/max values as we visit all fixes constituting the new tail contents anyhow
+                }
+            }
+            last = i-1;
+        }
+        if (first != -1) {
+            firstShownFix.put(competitorDTO, first);
+            lastShownFix.put(competitorDTO, last);
+        } else {
+            tailRemoved(competitorDTO);
+        }
     }
 
     private void runDelayedOrImmediately(Timer runThis, final int delayForTailChangeInMillis) {
@@ -773,8 +846,20 @@ public class FixesAndTails {
         if (removedTail != null) {
             removedTail.setMap(null);
         }
+        tailRemoved(competitor);
+    }
+
+    /**
+     * Removes the entry for {@code competitor} from {@link #firstShownFix}, {@link #lastShownFix},
+     * {@link #minDetailValueFix}, and {@link #maxDetailValueFix}; to be called when the competitor's
+     * tail has been cleared or entirely removed.
+     */
+    private void tailRemoved(CompetitorDTO competitor) {
         firstShownFix.remove(competitor);
         lastShownFix.remove(competitor);
+        minDetailValueFix.remove(competitor);
+        maxDetailValueFix.remove(competitor);
+        lastSearchedFix.remove(competitor);
     }
     
     /**
@@ -785,8 +870,7 @@ public class FixesAndTails {
         final Colorline tail = tails.get(competitor);
         if (tail != null) {
             tail.clear();
-            firstShownFix.put(competitor, -1);
-            lastShownFix.put(competitor, -1);
+            tailRemoved(competitor);
         }
     }
 
@@ -975,7 +1059,7 @@ public class FixesAndTails {
         } else {
             final int first = firstShownFix.get(competitor);
             final int last  = lastShownFix.get(competitor);
-            result = index >= first && index <= last && first != -1 && last != -1;
+            result = index >= first && index <= last;
         }
         return result;
     }
@@ -1160,10 +1244,13 @@ public class FixesAndTails {
 
     /**
      * Gets the detail value at a specific index in a competitors tail.
-     * @param competitorDTO {@link CompetitorDTO} specifying the competitor.
-     * @param index {@code int} specifying the index.
-     * @return {@code null} if {@code index} is out of bounds or if a detail value cannot be found. Otherwise returns
-     * a {@link Double} of the respective value.
+     * 
+     * @param competitorDTO
+     *            {@link CompetitorDTO} specifying the competitor.
+     * @param index
+     *            {@code int} specifying the index, relative to the start of the visual tail
+     * @return {@code null} if {@code index} is out of bounds or if a detail value cannot be found. Otherwise returns a
+     *         {@link Double} of the respective value.
      */
     protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
         final Integer firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
