@@ -55,27 +55,24 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         trackedRace = createTestTrackedRace("TestRegatta", "TestRace", "F18", createCompetitorAndBoatsMap(competitorA),
                 MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ true, null,
                 OneDesignRankingMetric::new);
-        
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorATrack = trackedRace.getTrack(competitorA);
-        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), trackedRace.getStartOfTracking().plus(10),
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45)));
-        for (int i=0; i<20;i++) {
+        final KnotSpeedWithBearingImpl sogCog = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45));
+        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), trackedRace.getStartOfTracking().plus(10), sogCog);
+        for (int i=0; i<20; i++) {
             competitorATrack.addGPSFix(currentGPS);
-            Position currentPosition = currentGPS.getSpeed().travelTo(currentGPS.getPosition(), currentGPS.getTimePoint(), currentGPS.getTimePoint().plus(490));
-            currentGPS = new GPSFixMovingImpl (currentPosition, currentGPS.getTimePoint().plus(240),
-                    new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45)));            
+            final Position currentPosition = currentGPS.getSpeed().travelTo(currentGPS.getPosition(), currentGPS.getTimePoint(), currentGPS.getTimePoint().plus(490));
+            currentGPS = new GPSFixMovingImpl (currentPosition, currentGPS.getTimePoint().plus(240), sogCog);
         }
         TimePoint fixTimePoint = new MillisecondsTimePoint(trackedRace.getStartOfTracking().asMillis());
-        Set<MarkPassing> markPassingForCompetitor = new HashSet<MarkPassing>();
+        final Set<MarkPassing> markPassingForCompetitor = new HashSet<MarkPassing>();
         int i=0;
         for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
             if (i++ <= 5) {
-            markPassingForCompetitor.add(new MarkPassingImpl(fixTimePoint, waypoint, competitorA));
-            fixTimePoint = new MillisecondsTimePoint(fixTimePoint.asMillis()+1000);
+                markPassingForCompetitor.add(new MarkPassingImpl(fixTimePoint, waypoint, competitorA));
+                fixTimePoint = new MillisecondsTimePoint(fixTimePoint.asMillis() + 1000);
             }
         }
         trackedRace.updateMarkPassings(competitorA, markPassingForCompetitor);
-        
         final Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test",
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
                 new CourseAreaImpl("Here", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
@@ -86,7 +83,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         final TackTypeSegmentRetrievalProcessor resultTTSegmentsRetrieval = new TackTypeSegmentRetrievalProcessor(null, Collections.emptySet(), TackTypeSegmentsDataMiningSettings.createDefaultSettings(), 0, null);
         allTTSegments = resultTTSegmentsRetrieval.retrieveData(raceOfCompContext);
     }
-    
+
     @Test
     public void testingSegmentsAreNotNull() {
         Distance sumDistance = new NullDistance();
