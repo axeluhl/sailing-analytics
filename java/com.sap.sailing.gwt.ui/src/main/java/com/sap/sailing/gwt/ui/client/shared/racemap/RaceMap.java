@@ -115,6 +115,7 @@ import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickFlagDataValuesProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
+import com.sap.sailing.gwt.ui.client.shared.racemap.FixesAndTails.PositionRequest;
 import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickFlagDataListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
@@ -155,7 +156,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -1355,10 +1355,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void refreshMap(final Date newTime, final long transitionTimeInMillis, boolean isRedraw) {
         final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
-        final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = fixesAndTails
-                .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds(), selectedDetailTypeChanged);
+        final Pair<PositionRequest, PositionRequest> quickAndSlowRequest = fixesAndTails
+                .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds(), transitionTimeInMillis, selectedDetailType);
         // Request map data update, possibly in two calls; see method details
-        callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
+        callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(quickAndSlowRequest,
                 raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType,
                 selectedDetailTypeChanged);
         // draw the wind into the map, get the combined wind
@@ -1433,46 +1433,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * <p>
      */
     private void callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(
-            final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
+            final Pair<PositionRequest, PositionRequest> quickAndSlowRequest,
             RegattaAndRaceIdentifier race, final Date newTime, final long transitionTimeInMillis,
             final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw, final DetailType detailType, boolean detailTypeChanged) {
-        final Map<CompetitorDTO, Date> fromTimesForQuickCall = new HashMap<>();
-        final Map<CompetitorDTO, Date> toTimesForQuickCall = new HashMap<>();
-        final Map<CompetitorDTO, Date> fromTimesForNonOverlappingTailsCall = new HashMap<>();
-        final Map<CompetitorDTO, Date> toTimesForNonOverlappingTailsCall = new HashMap<>();
-        for (Map.Entry<CompetitorDTO, Boolean> e : fromAndToAndOverlap.getC().entrySet()) {
-            if (e.getValue()) {
-                // overlap: expect a quick response; add original request interval for the competitor
-                // TODO bug5921: however, this may not be true for most cases where the new time range exceeds the tail loaded so far into past *and* future;
-                // TODO bug5921: then, an overlap will be announced, but from/to will be the full tail length; should this still be called an overlap?
-                // TODO bug5921: droppable and out-of-order-cancellable requests should only be done for single time points and when being sure that another call will fill FixesAndTails properly
-                fromTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getA().get(e.getKey()));
-                toTimesForQuickCall.put(e.getKey(), fromAndToAndOverlap.getB().get(e.getKey()));
-            } else {
-                // no overlap; add competitor to request with a zero-length interval asking only position at newTime, not the entire tail
-                fromTimesForQuickCall.put(e.getKey(), newTime);
-                toTimesForQuickCall.put(e.getKey(), newTime);
-                fromTimesForNonOverlappingTailsCall.put(e.getKey(), fromAndToAndOverlap.getA().get(e.getKey()));
-                toTimesForNonOverlappingTailsCall.put(e.getKey(), fromAndToAndOverlap.getB().get(e.getKey()));
-            }
-        }
+        final Map<CompetitorDTO, Date> fromTimesForQuickCall = quickAndSlowRequest.getA().getFrom();
+        final Map<CompetitorDTO, Date> toTimesForQuickCall = quickAndSlowRequest.getA().getTo();
+        final Map<CompetitorDTO, Date> fromTimesForNonOverlappingTailsCall = quickAndSlowRequest.getB().getFrom();
+        final Map<CompetitorDTO, Date> toTimesForNonOverlappingTailsCall = quickAndSlowRequest.getB().getTo();
         final Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<>();
         for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
             competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
         // only update the tails for these competitors
-        // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions happening inside
-        // the callback provided by getRaceMapDataCallback(...) for those
-        // entries that are considered not overlapping; subsequently, fromAndToOverlap.getC() will contain true for
-        // all its entries so that the other response received for GetBoatPositionsAction will consider this an
-        // overlap if it happens after this update.
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
                     race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */ true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
                     raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),
                     newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId),
             GET_RACE_MAP_DATA_CATEGORY,
-            getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
+            getRaceMapDataCallback(newTime, transitionTimeInMillis, quickAndSlowRequest.getA(), competitorsToShow,
                                    ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged, detailType, fromTimesForQuickCall, toTimesForQuickCall));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
@@ -1491,9 +1470,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             // entries that are considered not overlapping; subsequently, fromAndToOverlap.getC() will contain true for
                             // all its entries so that the other response received for GetRaceMapDataAction will consider this an
                             // overlap if it happens after this update.
-                            updateBoatPositions(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(),
-                                    competitorsToShow, result.getBoatPositionsForCompetitors(
-                                            competitorsByIdAsString), /* updateTailsOnly */ true, detailTypeChanged, detailType);
+                            final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositionsForCompetitors = result.getBoatPositionsForCompetitors(
+                                    competitorsByIdAsString);
+                            quickAndSlowRequest.getB().processResponse(boatPositionsForCompetitors);
+                            updateBoatPositions(newTime, transitionTimeInMillis,
+                                    competitorsToShow, boatPositionsForCompetitors, /* updateTailsOnly */ true, detailTypeChanged, detailType);
                         }
                     }));
         }
@@ -1502,7 +1483,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private AsyncCallback<RaceMapDataDTO> getRaceMapDataCallback(
             final Date newTime,
             final long transitionTimeInMillis,
-            final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
+            final PositionRequest quickRequest,
             final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw, boolean detailTypeChanged,
             DetailType detailType, Map<CompetitorDTO, Date> fromTimesForQuickCall, Map<CompetitorDTO, Date> toTimesForQuickCall) {
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
@@ -1533,10 +1514,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
                         Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData = raceMapDataDTO.boatPositions;
-                        Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData);
+                        Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData); // FIXME bug5921: why do we need this from the *response*, and why couldn't this come straight from the FixesAndTails cache?
                         quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
+                        quickRequest.processResponse(boatData);
                         // Do boat specific actions
-                        updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
+                        updateBoatPositions(newTime, transitionTimeInMillis,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged, detailType);
                         if (!isRedraw) {
                             // only remove markers if the time is actually changed
@@ -1639,6 +1621,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     /**
+     * Assumes that the fixes required for displaying the boat position have been received and updated to
+     * the {@link FixesAndTails} cache already.
+     * 
      * @param hasTailOverlapForCompetitor
      *            if for a competitor whose fixes are provided in <code>boatData</code> this holds <code>false</code>,
      *            any fixes previously stored for that competitor are removed, and the tail is deleted from the map (see
@@ -1665,10 +1650,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      *            {@link FixesAndTails} cache.
      */
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
-            final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData,
             boolean updateTailsOnly, boolean detailTypeChanged, DetailType detailType) {
-        fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, transitionTimeInMillis, detailTypeChanged, detailType);
         showBoatsOnMap(newTime, transitionTimeInMillis,
                 /* re-calculate; it could have changed since the asynchronous request was made: */
                 getCompetitorsToShow(), updateTailsOnly, detailType);

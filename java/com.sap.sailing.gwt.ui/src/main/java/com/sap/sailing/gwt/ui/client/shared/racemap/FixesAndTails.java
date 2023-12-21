@@ -172,11 +172,11 @@ public class FixesAndTails {
      * <p>
      * 
      * These time points shall be used to trim new position requests (see
-     * {@link #computeFromAndTo(Date, Iterable, long, boolean)}), as opposed to the earliest fix, and to decide whether
+     * {@link #computeFromAndTo(Date, Iterable, long, long, boolean)}), as opposed to the earliest fix, and to decide whether
      * a new request will contiguously extend the time range or will have to start a new, disconnected time range,
      * clearing the cache contents for that competitor.
      */
-    private final Map<CompetitorDTO, Date> earliestTimePointRequested;
+    private final Map<CompetitorDTO, TimePoint> earliestTimePointRequested;
 
     /**
      * Stores the index to the smallest found detailValue in {@link #fixes} for a given competitor.
@@ -218,13 +218,13 @@ public class FixesAndTails {
     private TimeRange desiredVisibleTailTimeRange;
     
     /**
-     * Requests returned from {@link #computeFromAndTo(Date, Iterable, long, boolean)} for execution as quick or slow
+     * Requests returned from {@link #computeFromAndTo(Date, Iterable, long, long, boolean)} for execution as quick or slow
      * requests that have not yet started {@link PositionRequest#processResponse(Map) processing their response}.
      */
     private final Set<PositionRequest> inFlightRequests;
     
     /**
-     * The result of {@link FixesAndTails#computeFromAndTo(Date, Iterable, long, boolean)}; two such requests may result
+     * The result of {@link FixesAndTails#computeFromAndTo(Date, Iterable, long, long, boolean)}; two such requests may result
      * from the ask to obtain positions for a certain time range per competitor from the server: one for quick
      * execution, and another one for a potentially long-running request. The two requests may be "entangled" regarding
      * their need to clear the fixes cache of a competitor when the first of the two has received its result. As soon as
@@ -257,15 +257,27 @@ public class FixesAndTails {
         
         private final DetailType detailTypeForFixes;
         
-        private final boolean isQuick;
-        
-        PositionRequest(Map<CompetitorDTO, TimeRange> timeRanges, DetailType detailTypeForFixes, long transitionTimeInMillis, boolean isQuick) {
-            mustClearCacheForTheseCompetitors = new HashSet<>();
+        PositionRequest(Map<CompetitorDTO, TimeRange> timeRanges, Set<CompetitorDTO> mustClearCacheForTheseCompetitors, DetailType detailTypeForFixes, long transitionTimeInMillis) {
             ignoreFixesForTheseCompetitors = new HashSet<>();
-            this.timeRanges = timeRanges;
+            this.mustClearCacheForTheseCompetitors = mustClearCacheForTheseCompetitors;
+            this.timeRanges = Collections.unmodifiableMap(timeRanges);
             this.detailTypeForFixes = detailTypeForFixes;
             this.transitionTimeInMillis = transitionTimeInMillis;
-            this.isQuick = isQuick;
+        }
+        
+        /**
+         * Creates a position request that is entangled with the {@code entangledWith} request. It uses the
+         * same {@link DetailType} and {@code transitionTimeInMillis} but has its own time ranges. The first of the
+         * two requests---this new one or the {@code entagledWith} request---that starts processing its response
+         * makes sure to clear the cache for the competitors for which this was requested; the other request
+         * is told to not clear those caches anymore.
+         */
+        PositionRequest(Map<CompetitorDTO, TimeRange> timeRanges, PositionRequest entangleWith) {
+            mustClearCacheForTheseCompetitors = entangleWith.mustClearCacheForTheseCompetitors;
+            ignoreFixesForTheseCompetitors = new HashSet<>();
+            this.timeRanges = Collections.unmodifiableMap(timeRanges);
+            this.detailTypeForFixes = entangleWith.detailTypeForFixes;
+            this.transitionTimeInMillis = entangleWith.transitionTimeInMillis;
         }
         
         Map<CompetitorDTO, Date> getFrom() {
@@ -274,13 +286,6 @@ public class FixesAndTails {
         
         Map<CompetitorDTO, Date> getTo() {
             return getFromOrTo(TimeRange::to);
-        }
-        
-        /**
-         * Guesses whether running this request will be quick.
-         */
-        boolean isQuick() {
-            return isQuick;
         }
         
         private Map<CompetitorDTO, Date> getFromOrTo(Function<TimeRange, TimePoint> dateFetcher) {
@@ -747,7 +752,7 @@ public class FixesAndTails {
      * @param selectedDetailType
      *            for verifying against {@link #detailTypesRequested}
      */
-    protected void updateTail(final  CompetitorDTO competitorDTO, final Date from, final Date to, final int delayForTailChangeInMillis, DetailType selectedDetailType) {
+    protected void updateTail(final CompetitorDTO competitorDTO, final Date from, final Date to, final int delayForTailChangeInMillis, DetailType selectedDetailType) {
         Timer delayedOrImmediateExecutor = new Timer() {
             @Override
             public void run() {
@@ -846,68 +851,100 @@ public class FixesAndTails {
     }
 
     /**
-     * From {@link #timeRangeRequested} as well as the selection of {@code competitorsToShow}, computes the from/to
+     * From {@link #earliestTimePointRequested} as well as the selection of {@code competitorsToShow}, computes the from/to
      * times for which to request GPS fixes from the server, per competitor. No update is performed here to
      * {@link #fixes}. The result guarantees that, when used in
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
-     * competitor from {@code competitorsToShow} there are all fixes known by the server for that competitor starting at
-     * <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
+     * competitor from {@code competitorsToShow} all fixes known by the server for that competitor starting at
+     * <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive) will be loaded
+     * into the {@link #fixes} cache.<p>
      * 
-     * @return a sequence of {@link PositionRequest} objects; if {@link PositionRequest#isQuick a quick request}, the
-     *         call can be performed in a compound {@link GetRaceMapDataAction}. The others describe the parameters for
-     *         possibly longer-running requests that can be sent using {@link GetBoatPositionsAction}. If two requests
-     *         are returned (none of the pair's components is {@code null}), the two requests are "entangled", in the
-     *         sense that if the combined effect of the requests has to be that the cache for one or more competitors is
-     *         to be cleared before updating the new positions, exactly the first of the two requests to process its
-     *         response will carry out this clearing.
+     * The {@link #earliestTimePointRequested} map is updated, assuming that the requests returned will be sent before
+     * invoking this method again.
+     * 
+     * @return a pair of {@link PositionRequest} objects; the {@link Pair#getA() first} provides the parameters for a
+     *         "quick" request, assuming that only a few positions (up to {@link #MAX_DURATION_FOR_QUICK_REQUESTS}) need
+     *         to be fetched and where the call can be performed in a compound {@link GetRaceMapDataAction}; the
+     *         {@link Pair#getB() second} is for a "slow" request that needs to fetch longer segments of tracks and that
+     *         can be sent using {@link GetBoatPositionsAction}. None of the pair's components is {@code null}), but the
+     *         {@link PositionRequest#getFrom()} and {@link PositionRequest#getTo()} results may be empty. The two
+     *         requests are "entangled", in the sense that if the combined effect of the requests has to be that the
+     *         cache for one or more competitors is to be cleared before updating the new positions, exactly the first
+     *         of the two requests to process its response will carry out this clearing.
      */
-    protected Iterable<PositionRequest> computeFromAndTo(
-            Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds, DetailType detailType) {
-        final Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
-        final Map<CompetitorDTO, Date> from = new HashMap<>();
-        final Map<CompetitorDTO, Date> to = new HashMap<>();
+    protected Pair<PositionRequest, PositionRequest> computeFromAndTo(Date upTo,
+            Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds,
+            long transitionTimeInMillis, DetailType detailType) {
+        final TimePoint upToTimePoint = TimePoint.of(upTo);
+        final TimePoint tailstart = upToTimePoint.minus(effectiveTailLengthInMilliseconds);
+        final TimeRange quickTipTimeRange = TimeRange.create(upToTimePoint, upToTimePoint);
         final Set<CompetitorDTO> mustClearCacheForTheseCompetitors = new HashSet<>();
-        final TimeRange timeRangeNeeded = new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo));
+        final TimeRange timeRangeNeeded = TimeRange.create(tailstart, upToTimePoint);
+        final Map<CompetitorDTO, TimeRange> timeRangesForQuickRequest = new HashMap<>();
+        final Map<CompetitorDTO, TimeRange> timeRangesForSlowRequest = new HashMap<>();
         for (final CompetitorDTO competitor : competitorsToShow) {
             final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
-            final Date fromDate;
-            final Date toDate;
-            final MultiTimeRange missingPieces;
             final Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
-            final Date earliestTimePointRequestedForCompetitor = earliestTimePointRequested.get(competitor);
-            final TimeRange timeRangeNotToRequestAgain = TimeRange.create(TimePoint.of(earliestTimePointRequestedForCompetitor), TimePoint.of(timepointOfLastKnownFix));
+            final TimePoint earliestTimePointRequestedForCompetitor = earliestTimePointRequested.get(competitor);
+            final TimeRange timeRangeNotToRequestAgain = TimeRange.create(earliestTimePointRequestedForCompetitor, TimePoint.of(timepointOfLastKnownFix));
             // The cache must be cleared upon result processing if the detail type has changed to a different, non-null one,
             // or the timeRangeNeeded does not touch/overlap the timeRangeAlreadyRequested
-            if (detailType != null && detailType != this.detailTypesRequested.get(competitor)
+            if (detailType != null && detailType != detailTypesRequested.get(competitor)
              || (timeRangeNotToRequestAgain != null && !timeRangeNeeded.touches(timeRangeNotToRequestAgain))) {
                 mustClearCacheForTheseCompetitors.add(competitor);
                 ignoreResultsForCompetitorInPendingRequests(competitor);
-                missingPieces = timeRangeNeeded.subtract(timeRangeNotToRequestAgain);
+                timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
+                timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
             } else {
-                missingPieces = MultiTimeRange.of(timeRangeNeeded);
+                if (timeRangeNotToRequestAgain == null) {
+                    // we need to ask for the full time range needed because there is no data in the cache yet; cache clearing not necessary
+                    timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
+                    timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
+                } else {
+                    final MultiTimeRange timeRangesToRequest = timeRangeNeeded.subtract(timeRangeNotToRequestAgain);
+                    if (Util.size(timeRangesToRequest) > 1) {
+                        // We would need to ask for data on both ends of the cached contiguous track segment; for now we
+                        // have no support for querying multiple segments for the same competitor in one round trip, and we
+                        // don't want to make another round trip for this infrequent case (probably occurs only when tail length
+                        // is extended in play/live mode beyond cached fixes). We will instead ask for the full segment and merge its
+                        // fixes
+                        timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
+                        timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
+                    } else {
+                        if (!Util.isEmpty(timeRangesToRequest)) {
+                            final TimeRange timeRangeToRequest = timeRangesToRequest.iterator().next();
+                            // The single time range that is missing could be before or after the cached fixes.
+                            // Anything before the cached fixes shall be loaded with the slow request:
+                            if (timeRangeToRequest.startsBefore(timeRangeNotToRequestAgain)) {
+                                timeRangesForSlowRequest.put(competitor, timeRangeToRequest);
+                            } else {
+                                // A segment to load after the cached fixes may need to be split into two:
+                                // a quick segment with maximum length MAX_DURATION_FOR_QUICK_REQUESTS, and
+                                // a slow segment with the remaining part of the time range to request.
+                                if (timeRangeToRequest.getDuration().compareTo(MAX_DURATION_FOR_QUICK_REQUESTS) <= 0) {
+                                    timeRangesForQuickRequest.put(competitor, timeRangeToRequest);
+                                } else {
+                                    timeRangesForQuickRequest.put(competitor, TimeRange.create(timeRangeToRequest.to().minus(MAX_DURATION_FOR_QUICK_REQUESTS), timeRangeToRequest.to()));
+                                    timeRangesForSlowRequest.put(competitor, TimeRange.create(timeRangeToRequest.from(), timeRangeToRequest.to().minus(MAX_DURATION_FOR_QUICK_REQUESTS)));
+                                }
+                            }
+                        }
+                        // TODO bug5921 only request something for the competitor if we're missing information at all
+                    }
+                }
             }
-            // only request something for the competitor if we're missing information at all
-            if (!missingPieces.isEmpty()) {
-                from.put(competitor, fromDate);
-                to.put(competitor, toDate);
-            }
+            earliestTimePointRequested.put(competitor, tailstart);
+            detailTypesRequested.put(competitor, detailType);
         }
-        return new Pair<>(from, to); // TODO bug5921: slice MulitTimeRanges into quick and long requests; two long requests may be needed if for one or more competitors we need to obtain long track segments before and after the segment requested so far
+        final PositionRequest quick = new PositionRequest(timeRangesForQuickRequest, mustClearCacheForTheseCompetitors, detailType, transitionTimeInMillis);
+        final PositionRequest slow = new PositionRequest(timeRangesForSlowRequest, quick); // entangle with quick request
+        return new Pair<>(quick, slow);
     }
 
     private void ignoreResultsForCompetitorInPendingRequests(CompetitorDTO competitor) {
         for (final PositionRequest inFlightRequest : inFlightRequests) {
             inFlightRequest.ignoreFixesFor(competitor);
         }
-    }
-
-    private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor) {
-        for (GPSFixDTOWithSpeedWindTackAndLegType fix : fixesForCompetitor) {
-            if (!fix.extrapolated) {
-                return fix.timepoint;
-            }
-        }
-        return null;
     }
 
     private Date getTimepointOfLastNonExtrapolated(List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor) {
