@@ -1,0 +1,1 @@
+10 12 * * * /home/wiki/gitwiki/configuration/update-tractrac-urls-to-archive.sh >/home/wiki/update-tractrac-urls-to-archive.out 2>/home/wiki/update-tractrac-urls-to-archive.err

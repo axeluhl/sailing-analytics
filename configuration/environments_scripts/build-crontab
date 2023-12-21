@@ -1,0 +1,15 @@
+#!/bin/bash
+#take folder parameter.
+#go to folder. find within parameters list and add all scripts to usr/local/bin
+#then construct the crontab, replacing a keyword with the user in the specification. install the crontab in the path of the user 
+#and then run it for the specified user.
+
+RELATIVE_PATH="${1}"
+cd "$(dirname "$0")/${RELATIVE_PATH}"
+HOME_DIR=$(grep $(cat USER) /etc/passwd | cut -d':' -f6)
+touch $HOME_DIR/crontab
+for crontab in $(ls crontab*); do
+    echo "$crontab" >> $HOME_DIR/crontab
+done
+sed -i "s/PATH_OF_HOME_DIR_TO_REPLACE/${HOME_DIR}/" $HOME_DIR/crontab
+crontab -u $(cat USER) $HOME_DIR/crontab
