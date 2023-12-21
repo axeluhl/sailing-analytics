@@ -455,7 +455,7 @@ public class FixesAndTails {
     }
 
     /**
-     * Adds the fixes received in <code>fixesForCompetitors</code> to {@link #fixes} and ensures they are still
+     * Adds the fixes received in <code>fixesToAddForCompetitor</code> to {@link #fixes} and ensures they are still
      * contiguous for each competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in
      * <code>result</code> overlap with those already known, the fixes are merged into the list of already known fixes
      * for the competitor. Otherwise, the fixes received in <code>result</code> replace those known so far for the
@@ -492,23 +492,6 @@ public class FixesAndTails {
      * @param detailTypeForFixes used to update {@link #detailTypesRequested}
      * 
      */
-    protected void updateFixes(Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> fixesForCompetitors,
-            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, long timeForPositionTransitionMillis,
-            boolean detailTypeChanged, DetailType detailTypeForFixes) {
-        if (detailTypeChanged) {
-            resetDetailValueSearch();
-        }
-        for (final Map.Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : fixesForCompetitors.entrySet()) {
-            if (e.getValue() != null && !e.getValue().isEmpty()) {
-                final CompetitorDTO competitor = e.getKey();
-                final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesToAddForCompetitor = e.getValue();
-                final boolean mustClearCache = !overlapsWithKnownFixes.put(competitor, true); // In case this was only one part of a split request, the next request *does* have an overlap
-                updateFixes(competitor, fixesToAddForCompetitor, mustClearCache, timeForPositionTransitionMillis,
-                        detailTypeForFixes);
-            }
-        }
-    }
-
     private void updateFixes(final CompetitorDTO competitor,
             final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesToAddForCompetitor, final boolean mustClearCache,
             long timeForPositionTransitionMillis, DetailType detailTypeForFixes) {
@@ -883,7 +866,7 @@ public class FixesAndTails {
             final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
             final Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             final TimePoint earliestTimePointRequestedForCompetitor = earliestTimePointRequested.get(competitor);
-            final TimeRange timeRangeNotToRequestAgain = TimeRange.create(earliestTimePointRequestedForCompetitor, TimePoint.of(timepointOfLastKnownFix));
+            final TimeRange timeRangeNotToRequestAgain = earliestTimePointRequestedForCompetitor == null ? null : TimeRange.create(earliestTimePointRequestedForCompetitor, TimePoint.of(timepointOfLastKnownFix));
             // The cache must be cleared upon result processing if the detail type has changed to a different, non-null one,
             // or the timeRangeNeeded does not touch/overlap the timeRangeAlreadyRequested
             if (detailType != null && detailType != detailTypesRequested.get(competitor)
@@ -935,6 +918,8 @@ public class FixesAndTails {
         }
         final PositionRequest quick = new PositionRequest(timeRangesForQuickRequest, mustClearCacheForTheseCompetitors, detailType, transitionTimeInMillis);
         final PositionRequest slow = new PositionRequest(timeRangesForSlowRequest, quick); // entangle with quick request
+        inFlightRequests.add(quick);
+        inFlightRequests.add(slow);
         return new Pair<>(quick, slow);
     }
 
