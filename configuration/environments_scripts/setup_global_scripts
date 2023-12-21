@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# Purpose: Create symbolic links to all the useful scripts which an instance might need. 
 cd $(dirname $0)
 cd all_require
 for file in $(ls); do

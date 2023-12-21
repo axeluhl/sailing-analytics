@@ -1,22 +1,30 @@
 #!/bin/bash
-#take folder parameter.
-#go to folder. find within parameters list and add all scripts to usr/local/bin
+
+# Purpose: This script takes the environment type; the name of a user that has a git repo checked out; and the directory within that $HOME dir
+# that contains the git repo. It then goes to the environment type directory and concatenates all files with the names crontab*, placing the result
+# into the home directory specified by the USER file.
+
 #then construct the crontab, replacing a keyword with the user in the specification. install the crontab in the path of the user 
 #and then run it for the specified user.
 if [[ $# -ne 3 ]]; then
-	exit 2
+    echo "$0 <ENVIRONMENT_YPE> <USER_WITH_CODE> <NAME_OF_GIT_DIR>"
+    echo ""
+    echo "Where USER_WITH_CODE is a user that contains a checked out copy of the main git."
+    echo "And where NAME_OF_GIT_DIR is the path to the git repo from the USER_WITH_CODE's home directory."
+    exit 2
 fi
 ENV_TYPE="$1"
-GIT_DIR_NAME="$2"
-GIT_USER="$3"
+GIT_USER="$2"
+GIT_DIR_NAME="$3"
+
 cd "$(dirname "$0")/${ENV_TYPE}"
-HOME_DIR=$(grep "^$(cat USER)" /etc/passwd | cut -d':' -f6)
-GIT_PATH="/home/${GIT_USER}/${GIT_DIR_NAME}"
+HOME_DIR=$(grep "^$(cat USER)" /etc/passwd | cut -d':' -f6)  # The path to the home dir of the user whose cronjob will be installed.
+GIT_PATH="$(grep "^${GIT_USER}" /etc/passwd | cut -d':' -f6)/${GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
 touch $HOME_DIR/crontab
 for crontab in $(ls crontab*); do
     cat "$crontab"  >> $HOME_DIR/crontab
-    echo "" >> $HOME_DIR/crontab
+    echo "" >> $HOME_DIR/crontab  # Adds a newline
 done
-sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|" $HOME_DIR/crontab
-sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|" $HOME_DIR/crontab 
-#crontab -u $(cat USER) $HOME_DIR/crontab
+sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|" $HOME_DIR/crontab # Sets correct path to the git repo within the crontab.
+sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
+crontab -u $(cat USER) $HOME_DIR/crontab
