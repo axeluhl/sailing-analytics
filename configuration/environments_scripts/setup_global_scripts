@@ -1,0 +1,6 @@
+#!/bin/bash
+cd $(dirname $0)
+cd all_require
+for file in $(ls); do
+    ln -s "$(pwd)/${file}" /usr/local/bin
+done;
