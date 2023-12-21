@@ -189,12 +189,14 @@ public class Colorline {
     }
     
     /**
-     * Removes a vertex at a specified position from the displayed path.
-     * If the removed vertex was not at one of the ends the two adjacent vertices will now
-     * directly connect to each other.
-     * @param index {@code int} indication the vertex to be removed from path.
+     * Removes a vertex at a specified position from the displayed path. If the removed vertex was not at one of the
+     * ends the two adjacent vertices will now directly connect to each other.
+     * 
+     * @param index
+     *            {@code int} indication the vertex to be removed from path.
      * @return {@link LatLng} vertex that was removed.
-     * @throws IndexOutOfBoundsException if {@code index} is not in bounds of path.
+     * @throws IndexOutOfBoundsException
+     *             if {@code index} is not in bounds of path.
      */
     public LatLng removeAt(int index) throws IndexOutOfBoundsException {
         if (index < 0 || index >= getLength()) {

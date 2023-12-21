@@ -274,6 +274,10 @@ public class FixesAndTails {
             this.transitionTimeInMillis = entangleWith.transitionTimeInMillis;
         }
         
+        boolean isMustClearCacheForCompetitor(CompetitorDTO competitor) {
+            return mustClearCacheForTheseCompetitors.contains(competitor);
+        }
+        
         Map<CompetitorDTO, Date> getFrom() {
             return getFromOrTo(TimeRange::from);
         }
@@ -323,12 +327,16 @@ public class FixesAndTails {
         }
 
         public TimePoint getToTimepoint(CompetitorDTO competitor) {
-            final TimeRange competitorTimeRange = timeRanges.get(competitor);
             final TimePoint result;
-            if (competitorTimeRange == null) {
+            if (ignoreFixesForTheseCompetitors.contains(competitor)) {
                 result = null;
             } else {
-                result = competitorTimeRange.to();
+                final TimeRange competitorTimeRange = timeRanges.get(competitor);
+                if (competitorTimeRange == null) {
+                    result = null;
+                } else {
+                    result = competitorTimeRange.to();
+                }
             }
             return result;
         }
@@ -591,9 +599,7 @@ public class FixesAndTails {
                     // remove the fix at the respective index with the same time point and adjust indices:
                     intoThis.remove(intoThisIndex);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                        final int finalIntoThisIndex = intoThisIndex;
-                        final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
-                        tail.removeAt(finalIntoThisIndex - finalIndexOfFirstShownFix);
+                        tail.removeAt(intoThisIndex - indexOfFirstShownFix);
                     }
                     if (intoThisIndex < indexOfFirstShownFix) {
                         indexOfFirstShownFix--;
@@ -900,37 +906,50 @@ public class FixesAndTails {
     }
 
     /**
-     * Roughly speaking, this methods finds the time range represented by the contiguous track segment cached for
+     * Roughly speaking, this method finds the time range represented by the contiguous track segment cached for
      * {@code competitor}.
      * <p>
      * 
      * This first looks at what has been <em>requested</em> through
      * {@link #computeFromAndTo(Date, Iterable, long, long, DetailType)} with the {@link PositionRequest} objects
-     * returned from it. These time ranges are stored in {@link #timeRangesRequested}. If no {@link #inFlightRequests
-     * in-flight request} ends at the end of the time range requested overall for {@code competitor} then we take into
-     * account the possibility that new fixes may have been delivered late to the server after we last asked for them.
-     * In this case, this method will return a time range starting at the beginning of the time range requested so
-     * far for {@code competitor}, ending at the last fix received for that competitor (instead of the last time point
-     * <em>requested</em>). This way, fixes delivered late can be expected to still make it into the cache.
+     * returned from it. These time ranges are stored in {@link #timeRangesRequested}, and this is what will be returned
+     * if any in-flight request will clear the {@code competitor}'s cache.
+     * <p>
+     * 
+     * If no in-flight request clears the {@code competitor}'s cache, and if no {@link #inFlightRequests in-flight
+     * request} ends at the end of the time range requested overall for {@code competitor} and doesn't ignore the fixes
+     * for that competitor then we take into account the possibility that new fixes may have been delivered late to the
+     * server after we last asked for them. In this case, this method will return a time range starting at the beginning
+     * of the time range requested so far for {@code competitor}, ending at the last fix received for that competitor
+     * (instead of the last time point <em>requested</em>). This way, fixes delivered late can be expected to still make
+     * it into the cache.
      */
     private TimeRange getTimeRangeNotToRequestAgain(CompetitorDTO competitor) {
         final TimeRange timeRangeRequestedForCompetitor = timeRangesRequested.get(competitor);
+        boolean inFlightRequestWillClearCacheForCompetitor = false;
         for (final PositionRequest inFlightRequest : inFlightRequests) {
+            if (inFlightRequest.isMustClearCacheForCompetitor(competitor)) {
+                inFlightRequestWillClearCacheForCompetitor = true;
+            }
             final TimePoint competitorTimeRangeEnd = inFlightRequest.getToTimepoint(competitor);
             if (competitorTimeRangeEnd != null && competitorTimeRangeEnd.equals(timeRangeRequestedForCompetitor.to())) {
                 return timeRangeRequestedForCompetitor; // found an in-flight request ending at the last time point requested; we hope it delivers fixes up to there
             }
         }
-        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
         final TimeRange result;
-        if (fixesForCompetitor == null) {
+        if (inFlightRequestWillClearCacheForCompetitor) {
             result = timeRangeRequestedForCompetitor;
         } else {
-            final TimePoint timePointOfLastFix = TimePoint.of(getTimepointOfLastNonExtrapolated(fixesForCompetitor));
-            if (timePointOfLastFix == null) {
+            final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
+            if (fixesForCompetitor == null) {
                 result = timeRangeRequestedForCompetitor;
             } else {
-                result = TimeRange.create(timeRangeRequestedForCompetitor.from(), timePointOfLastFix);
+                final TimePoint timePointOfLastFix = TimePoint.of(getTimepointOfLastNonExtrapolated(fixesForCompetitor));
+                if (timePointOfLastFix == null) {
+                    result = timeRangeRequestedForCompetitor;
+                } else {
+                    result = TimeRange.create(timeRangeRequestedForCompetitor.from(), timePointOfLastFix);
+                }
             }
         }
         return result;
