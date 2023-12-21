@@ -399,7 +399,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId());
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), SharedLandscapeConstants.ALL_REVERSE_PROXIES);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1040,10 +1040,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
         return getTargetGroup(region, targetGroupName, /* discover load balancer ARN from target group */ null);
     }
-
     @Override
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId) {
+        return createTargetGroup(region, targetGroupName, port, healthCheckPath, healthCheckPort, loadBalancerArn,
+                vpcId, new String[] {});
+    }
+    
+    public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId, String... tagnames) {
+        software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[] tags = new software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[tagnames.length];
+        for (int i = 0; i < tags.length; i++) {
+            software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag tag = software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(tagnames[i]).value("").build();
+            tags[i] = tag;
+        }
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
                 loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
@@ -1060,7 +1070,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .vpcId(vpcId == null ? getVpcId(region) : vpcId)
                 .protocol(guessProtocolFromPort(port))
                 .targetType(TargetTypeEnum.INSTANCE)
-                .tags(software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(SharedLandscapeConstants.ALL_REVERSE_PROXIES).value("").build())
+                .tags(tags)
                 .build()).targetGroups().iterator().next();
         final String targetGroupArn = targetGroup.targetGroupArn();
         int numberOfRetries = 3;
