@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -212,14 +211,6 @@ public class FixesAndTails {
      * are guaranteed to have their detail value of this type.
      */
     private final Map<CompetitorDTO, DetailType> detailTypesRequested;
-    
-    /**
-     * Adjusted by {@link #updateTail(CompetitorDTO, Date, Date, int, DetailType)}. The field records the time range
-     * in which fixes added to the cache shall be used to update existing tails in place. Note how this is different
-     * from {@link #firstShownFix} and {@link #lastShownFix} which only keeps track of which part of the cache is
-     * visualized by a tail.
-     */
-    private TimeRange desiredVisibleTailTimeRange;
     
     /**
      * Requests returned from {@link #computeFromAndTo(Date, Iterable, long, long, boolean)} for execution as quick or slow
