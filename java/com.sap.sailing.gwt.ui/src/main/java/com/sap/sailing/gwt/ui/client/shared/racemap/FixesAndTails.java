@@ -571,6 +571,7 @@ public class FixesAndTails {
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
                     intoThis.set(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) { // false if first/last shown index is -1
+                        // FIXME bug5921 it seems it may happen that the tail is empty at this point...
                         tail.setAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                     }
                 } else {
