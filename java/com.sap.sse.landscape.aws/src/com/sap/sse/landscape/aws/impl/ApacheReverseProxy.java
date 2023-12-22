@@ -80,7 +80,13 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private String getConfigFileNameForHostname(String hostname) {
         return hostname+CONFIG_FILE_EXTENSION;
     }
-
+    
+    public void rotateLogs(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final String command = "logrotate --force /etc/logrotate.conf";
+        logger.info("Standard output from forced log rotate on" + this.getHostname() + ": " + runCommandAndReturnStdoutAndStderr(command, "Standard error fromlogrotate ",
+                        Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));
+    }
+    
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String... macroArguments)
             throws Exception {

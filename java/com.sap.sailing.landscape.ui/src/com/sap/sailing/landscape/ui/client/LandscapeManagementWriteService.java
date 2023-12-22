@@ -2,6 +2,7 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -32,7 +33,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception;
     
-    boolean removeReverseProxy(ReverseProxyDTO instance, String region) throws Exception;
+    boolean removeReverseProxy(ReverseProxyDTO instance, String region, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)throws Exception;
     

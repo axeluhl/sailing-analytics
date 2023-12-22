@@ -81,12 +81,14 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
     
     @Override
-    public void removeHost(AwsInstance<ShardingKey> host) {
+    public void removeHost(AwsInstance<ShardingKey> host, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         assert Util.contains(getHosts(), host);
         if (Util.size(getHosts()) == 1) {
             throw new IllegalStateException(
                     "Trying to remove the last hosts of reverse proxy " + this + ". Use terminate() instead");
         }
+        ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = new ApacheReverseProxy<>(getLandscape(), host);
+        proxy.rotateLogs(optionalKeyName, privateKeyEncryptionPassphrase);
         getLandscape().terminate(host); // this assumes that the host is running only the reverse proxy process...
     }
 

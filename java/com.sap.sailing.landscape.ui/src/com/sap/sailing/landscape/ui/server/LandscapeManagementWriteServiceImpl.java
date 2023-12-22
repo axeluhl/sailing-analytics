@@ -327,13 +327,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region)
-            throws IllegalStateException, UnknownHostException {
+    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception {
         checkLandscapeManageAwsPermission();
         AwsRegion awsRegion = new AwsRegion(region, getLandscape());
         AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(awsRegion, proxy.getInstanceId(),
                 AwsInstanceImpl::new);
-        getLandscape().getCentralReverseProxy(awsRegion).removeHost(awsInstance);
+        getLandscape().getCentralReverseProxy(awsRegion).removeHost(awsInstance, optionalKeyName, privateKeyEncryptionPassphrase);
         return true;
 
     }

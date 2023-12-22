@@ -1472,26 +1472,30 @@ public class LandscapeManagementPanel extends SimplePanel {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
         } else {
             proxiesTableBusy.setBusy(true);
-            landscapeManagementService.removeReverseProxy(instance, regionId, new AsyncCallback<Boolean>() {
+            landscapeManagementService.removeReverseProxy(instance, regionId,
+                    Optional.of(sshKeyManagementPanel.getSelectedKeyPair().getName()),
+                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
+                            : new byte[0],
+                    new AsyncCallback<Boolean>() {     //TODO Should this be null/new byte[0]/""?
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.getMessage());
-                    proxiesTableBusy.setBusy(false);
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                            proxiesTableBusy.setBusy(false);
 
-                }
+                        }
 
-                @Override
-                public void onSuccess(Boolean result) {
-                    proxiesTableBusy.setBusy(false);
-                    refreshProxiesTable();
-                }
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            proxiesTableBusy.setBusy(false);
+                            refreshProxiesTable();
+                        }
 
-            });
+                    });
         }
-        
     }
-    
+
     /**
      * Creates a reverse proxy based on the user's input.
      * @param stringMessages

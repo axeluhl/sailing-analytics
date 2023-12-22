@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 import com.sap.sse.landscape.Log;
@@ -41,5 +42,5 @@ extends ReverseProxy<ShardingKey, MetricsT, ProcessT, LogT> {
      * host, an {@link IllegalStateException} will be thrown and the method will not complete the request. Consider
      * using {@link #terminate()} to terminate all hosts forming this reverse proxy.
      */
-    void removeHost(AwsInstance<ShardingKey> host);
+    void removeHost(AwsInstance<ShardingKey> host, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

@@ -42,7 +42,7 @@ public interface LandscapeManagementWriteServiceAsync {
      * Removes a reverse proxy from the given cluster and terminates it.
      * @return Returns true if a success.
      */
-    void removeReverseProxy(ReverseProxyDTO instance, String region, AsyncCallback<Boolean> callback);
+    void removeReverseProxy(ReverseProxyDTO instance, String region, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Boolean> callback);
     
     /**
      * Restarts the httpd on a reverse proxy, by stopping and then starting the service.
