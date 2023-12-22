@@ -81,10 +81,6 @@ import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
  * value, that tail must be searched again for a new minimal / maximal value.
  * <p>
  * 
- * TODO Talk about remembering the track segment boundaries already requested; and how this is used to trim requests at
- * the beginning, but last fixes in the cache are used to trim requests at the end.
- * <p>
- * 
  * A client of an instance of this class (typically a {@link RaceMap}) interacts in three possible ways:
  * <ol>
  * <li>Preparing the requests that update the fixes cache: Based on the tail length and a "current time" (usually
