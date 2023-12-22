@@ -846,6 +846,9 @@ public class FixesAndTails {
             }
             last = i-1;
         }
+        if (last < 0 && first >= 0) {
+            GWT.log("Inconsistency: last < 0 but first=="+first+" for competitor "+competitorDTO);
+        }
         if (last != -1) {
             lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), last);
         } else {
