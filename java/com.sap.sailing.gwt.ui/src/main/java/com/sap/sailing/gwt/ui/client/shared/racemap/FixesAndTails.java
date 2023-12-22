@@ -781,7 +781,7 @@ public class FixesAndTails {
                             while (indexOfLastShownFix < fixesForCompetitor.size() - 1
                                     && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
                                 indexOfLastShownFix++;
-                                firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
+                                lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
                                 final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
                                 tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                             }
