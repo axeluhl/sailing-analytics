@@ -1506,7 +1506,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             @Override
             public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
                 if (map != null && raceMapDataDTO != null) {
-                    // process response only if not received out of order
+                    final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData = raceMapDataDTO.boatPositions;
+                    quickRequest.processResponse(boatData); // stores the boat fixes received into the FixesAndTails cache
+                    // process the rest of the response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
                         // Uncomment the following for enhanced log output regarding getRaceMapData requests
@@ -1524,10 +1526,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                             simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
-                        Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData = raceMapDataDTO.boatPositions;
-                        Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData); // FIXME bug5921: why do we need this from the *response*, and why couldn't this come straight from the FixesAndTails cache?
+                        Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData); // TODO: why do we need this from the *response*, and why couldn't this come straight from the FixesAndTails cache?
                         quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
-                        quickRequest.processResponse(boatData); // stores the boat fixes received into the FixesAndTails cache
                         // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged, detailType);
@@ -1573,7 +1573,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         zoomMapToNewBounds(zoomToBounds);
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     } else {
-                        GWT.log("Dropped result from getRaceMapData(...) with detail type "+detailType+
+                        GWT.log("Dropped result from getRaceMapData(...) except for boat positions with detail type "+detailType+
                                 " because it was for request ID "+requestID+
                                 " while we already started processing request "+startedProcessingRequestID+"\n"+
                                 getFromAndToTimesAsString());
