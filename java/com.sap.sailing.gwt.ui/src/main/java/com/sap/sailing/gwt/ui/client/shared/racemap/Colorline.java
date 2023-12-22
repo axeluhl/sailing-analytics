@@ -61,9 +61,6 @@ public class Colorline {
         mouseOutMapHandlers = new HashSet<>();
     }
     
-    /*public ColorlineOptions getOptions() {
-        return options;
-    }*/
     public void setOptions(final ColorlineOptions options) {
         if (this.options.getColorMode() != options.getColorMode()) {
             // If colorMode changed the path needs to change from one polyline to multiple polylines and vice versa
@@ -78,13 +75,15 @@ public class Colorline {
             updatePolylineColor(i);
         }
     }
-    private void updatePolylineColor(int i) {
-        String color = options.getColorProvider().getColor(i);
-        polylines.get(i).setOptions(options.newPolylineOptionsInstance(color));
+    
+    private void updatePolylineColor(int fixIndexInTail) {
+        String color = options.getColorProvider().getColor(fixIndexInTail);
+        polylines.get(fixIndexInTail).setOptions(options.newPolylineOptionsInstance(color));
     }
     
     /**
      * Creates an ordered {@link List} of all {@link LatLng} vertices in this {@code Colorline}.
+     * 
      * @return ordered {@link List} of {@link LatLng}.
      */
     public List<LatLng> getPath() {
@@ -130,25 +129,30 @@ public class Colorline {
     
     /**
      * Inserts a vertex at a specified position in the path.
-     * @param index {@code int} indicating the insertion position.
-     * @param position {@link LatLng} the vertex to insert.
-     * @throws IllegalArgumentException if {@code position} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code index} is not in bounds of path.
+     * 
+     * @param fixIndexInTail
+     *            {@code int} indicating the insertion position.
+     * @param position
+     *            {@link LatLng} the vertex to insert.
+     * @throws IllegalArgumentException
+     *             if {@code position} is {@code null}.
+     * @throws IndexOutOfBoundsException
+     *             if {@code index} is not in bounds of path.
      */
-    public void insertAt(int index, LatLng position) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void insertAt(int fixIndexInTail, LatLng position) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (position == null) throw new IllegalArgumentException("Cannot insert value: null");
         for (Colorline line : pathChangeListeners) {
-            line.insertAt(index, position);
+            line.insertAt(fixIndexInTail, position);
         }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
             if (polylines.isEmpty()) {
                 polylines.add(createPolyline(MVCArray.newInstance(), 0));   
             }
-            polylines.get(0).getPath().insertAt(index, position);
+            polylines.get(0).getPath().insertAt(fixIndexInTail, position);
             break;
         case POLYCHROMATIC:
-            if (index == 0) {
+            if (fixIndexInTail == 0) {
                 // Prepend a new Polyline
                 if (polylines.isEmpty() || polylines.get(0).getPath().getLength() == 2) {
                     // There either is no Polyline or the existing Polyline at index 0 is completed
@@ -158,31 +162,31 @@ public class Colorline {
                     if (!polylines.isEmpty()) { // If we can connect the new Polyline to an existing one do so
                         path.push(polylines.get(0).getPath().get(0));
                     }
-                    polylines.add(0, createPolyline(path, index));
+                    polylines.add(0, createPolyline(path, fixIndexInTail));
                 } else {
                     // The Polyline at index 0 is incomplete
                     // Complete it
                     polylines.get(0).getPath().insertAt(0, position); // FIXME bug5921: what does this do to the polyline's color? Shouldn't the color always be determined by the first of the two points in the segment?
                 }
-            } else if (index == getLength()) {
-                if (index == 1 && polylines.get(0).getPath().getLength() == 1) {
+            } else if (fixIndexInTail == getLength()) {
+                if (fixIndexInTail == 1 && polylines.get(0).getPath().getLength() == 1) {
                     // Finish first polyline
                     polylines.get(0).getPath().push(position);
                 } else {
                     // Append a new Polyline
                     MVCArray<LatLng> path = MVCArray.newInstance();
-                    path.push(polylines.get(index - 2).getPath().get(1));
+                    path.push(polylines.get(fixIndexInTail - 2).getPath().get(1));
                     path.push(position);
-                    polylines.add(index - 1, createPolyline(path, index));
+                    polylines.add(fixIndexInTail - 1, createPolyline(path, fixIndexInTail));
                 }
             } else {
                 // Split an existing Polyline into two
-                LatLng end = polylines.get(index - 1).getPath().get(1);
-                polylines.get(index - 1).getPath().setAt(1, position);
+                LatLng end = polylines.get(fixIndexInTail - 1).getPath().get(1);
+                polylines.get(fixIndexInTail - 1).getPath().setAt(1, position);
                 MVCArray<LatLng> path = MVCArray.newInstance();
                 path.push(position);
                 path.push(end);
-                polylines.add(index, createPolyline(path, index));
+                polylines.add(fixIndexInTail, createPolyline(path, fixIndexInTail));
             }
             break;
         }
@@ -245,9 +249,13 @@ public class Colorline {
     
     /**
      * Sets a specified vertex.
-     * @param index {@code int} vertex to set.
-     * @param position {@link LatLng} to set vertex to.
-     * @throws IndexOutOfBoundsException if {@code index} is not in bounds of path.
+     * 
+     * @param index
+     *            {@code int} vertex to set.
+     * @param position
+     *            {@link LatLng} to set vertex to.
+     * @throws IndexOutOfBoundsException
+     *             if {@code index} is not in bounds of path.
      */
     public void setAt(int index, LatLng position) throws IndexOutOfBoundsException {
         for (Colorline line : pathChangeListeners) {
@@ -328,8 +336,8 @@ public class Colorline {
         return -1;
     }
     
-    private Polyline createPolyline(MVCArray<LatLng> path, int colorIndex) {
-        Polyline line = options.newPolylineInstance(colorIndex);
+    private Polyline createPolyline(MVCArray<LatLng> path, int fixIndexInTail) {
+        final Polyline line = options.newPolylineInstance(fixIndexInTail);
         line.setPath(path);
         if (map != null) {
             line.setMap(map);

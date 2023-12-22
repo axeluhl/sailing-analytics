@@ -570,7 +570,7 @@ public class FixesAndTails {
                 // need according adjustments
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
                     intoThis.set(intoThisIndex, mergeThisFix);
-                    if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                    if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) { // false if first/last shown index is -1
                         tail.setAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                     }
                 } else {
@@ -586,6 +586,7 @@ public class FixesAndTails {
                     if (intoThisIndex <= indexOfLastShownFix) {
                         indexOfLastShownFix--;
                     }
+                    updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                     // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes
                     if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString())) {
                         if (intoThisIndex < minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
@@ -621,6 +622,7 @@ public class FixesAndTails {
                     if (intoThisIndex <= indexOfLastShownFix) {
                         indexOfLastShownFix++;
                     }
+                    updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                     if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
                         minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) + 1);
                     }
@@ -640,6 +642,7 @@ public class FixesAndTails {
                         if (intoThisIndex-1 <= indexOfLastShownFix) {
                             indexOfLastShownFix--;
                         }
+                        updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                         if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex - 1 <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
                             minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
                         }
@@ -650,17 +653,19 @@ public class FixesAndTails {
                 }
             }
         }
-        // invariant: for one CompetitorDTO, either both of firstShownFix and lastShownFix have an entry for that key,
-        // or both don't
-        if (indexOfFirstShownFix <= indexOfLastShownFix) {
-            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
-            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
-        } else {
-            firstShownFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
-            lastShownFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
-        }
         if (earliestMergeIndex != -1) {
             lastSearchedFixByCompetitorIdsAsStrings.merge(competitorDTO.getIdAsString(), earliestMergeIndex, Math::min); // FIXME bug5921: this may end up being before the firstShownFix
+        }
+    }
+
+    private void updateTailBoundaries(CompetitorDTO competitorDTO, int indexOfFirstShownFix, int indexOfLastShownFix) {
+        if (indexOfFirstShownFix > indexOfLastShownFix ||
+                (indexOfFirstShownFix < 0 && indexOfLastShownFix < 0)) {
+            firstShownFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+            lastShownFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+        } else {
+            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
+            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
         }
     }
 
@@ -751,6 +756,7 @@ public class FixesAndTails {
                                 tail.removeAt(0);
                                 vertexCount--;
                                 indexOfFirstShownFix++;
+                                firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
                             }
                             // now the polyline contains no more vertices representing fixes before "from";
                             // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
@@ -758,6 +764,7 @@ public class FixesAndTails {
                             while (indexOfFirstShownFix > 0
                                     && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
                                 indexOfFirstShownFix--;
+                                firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
                                 final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfFirstShownFix);
                                 tail.insertAt(0, coordinateSystem.toLatLng(fix.position));
                                 vertexCount++;
@@ -766,6 +773,7 @@ public class FixesAndTails {
                             while (vertexCount > 0 && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
                                 tail.removeAt(--vertexCount);
                                 indexOfLastShownFix--;
+                                lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
                             }
                             // now the polyline contains no more vertices representing fixes after "to";
                             // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
@@ -773,11 +781,10 @@ public class FixesAndTails {
                             while (indexOfLastShownFix < fixesForCompetitor.size() - 1
                                     && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
                                 indexOfLastShownFix++;
+                                firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
                                 final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
                                 tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                             }
-                            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
-                            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
                             // FIXME bug5921: what about lastSearchedFix?
                         }
                     }
@@ -810,6 +817,7 @@ public class FixesAndTails {
                 if (!fix.timepoint.before(from)) {
                     if (first == -1) {
                         first = i;
+                        firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), first);
                     }
                     tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                     // TODO bug5921: adjust min/max values as we visit all fixes constituting the new tail contents anyhow
@@ -817,8 +825,7 @@ public class FixesAndTails {
             }
             last = i-1;
         }
-        if (first != -1) {
-            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), first);
+        if (last != -1) {
             lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), last);
         } else {
             tailRemoved(competitorDTO.getIdAsString());
@@ -1243,16 +1250,16 @@ public class FixesAndTails {
      * 
      * @param competitorDTO
      *            {@link CompetitorDTO} specifying the competitor.
-     * @param index
+     * @param fixIndexIntoTail
      *            {@code int} specifying the index, relative to the start of the visual tail
      * @return {@code null} if {@code index} is out of bounds or if a detail value cannot be found. Otherwise returns a
      *         {@link Double} of the respective value.
      */
-    protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
+    protected Double getDetailValueAt(CompetitorDTO competitorDTO, int fixIndexIntoTail) {
         final Integer firstShownFixForCompetitor = firstShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
         int indexOfFirstShownFix = firstShownFixForCompetitor == null ? -1 : firstShownFixForCompetitor;
         try {
-            return getFixes(competitorDTO).get(indexOfFirstShownFix + index).detailValue;
+            return getFixes(competitorDTO).get(indexOfFirstShownFix + fixIndexIntoTail).detailValue;
         } catch (IndexOutOfBoundsException e) {
             return null;
         }
