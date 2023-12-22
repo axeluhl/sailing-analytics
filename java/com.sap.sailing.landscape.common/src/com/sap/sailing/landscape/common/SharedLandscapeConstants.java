@@ -90,6 +90,10 @@ public interface SharedLandscapeConstants {
     String ALL_REVERSE_PROXIES = "allReverseProxies";
     
     /**
+     * 
+     */
+    String NLB_ARN_CONTAINS = "loadbalancer/net";
+    /**
      * Used to launch the correct ami.
      */
     String IMAGE_TYPE_REVERSE_PROXY = "disposable-reverse-proxy";
@@ -122,4 +126,6 @@ public interface SharedLandscapeConstants {
      * Indicates that an instance is suitable for co-deployment with httpd.
      */
     String INSTANCE_SUITABLE_FOR_HTTPD = "canCoDeployWithHttpd";
+    
+
 }

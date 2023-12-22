@@ -69,7 +69,11 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
-                    targetGroup.addTarget(host);
+                    if (targetGroup.getLoadBalancer().getArn().contains(SharedLandscapeConstants.NLB_ARN_CONTAINS)) {
+                        getLandscape().addIpTargetToTargetGroup(targetGroup, Collections.singleton(host));
+                    } else {
+                        targetGroup.addTarget(host);
+                    }
                 }
             }));
         }

@@ -875,4 +875,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * it is used to filter for only those AZs that have a subnet configured in the VPC.
      */
     Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region region, Optional<String> vpcId);
+
+    void addIpTargetToTargetGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> hosts);
+
 }
