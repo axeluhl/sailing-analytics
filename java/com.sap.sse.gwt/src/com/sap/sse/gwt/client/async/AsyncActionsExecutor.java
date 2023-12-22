@@ -183,8 +183,12 @@ public class AsyncActionsExecutor {
                  * are other jobs of that type that need execution and execute the last one thus
                  * emptying the lastRequestedActionsQueue.
                  * */
-                lastRequestedActionsNotBeingSentOut.put(job.getType(), job);
-                job.dropped();
+                final ExecutionJob<?> droppedJob = lastRequestedActionsNotBeingSentOut.put(job.getType(), job);
+                if (droppedJob != null) {
+                    // a job not sent out was replaced by the latest one not being sent out;
+                    // the job replaced will definitely not be executed anymore; notify it:
+                    droppedJob.dropped();
+                }
                 return;
             }
         }
