@@ -1944,7 +1944,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 for (String unusedTailCompetitorDTO : competitorIdsAsStringOfUnusedTails) {
                     fixesAndTails.removeTail(unusedTailCompetitorDTO);
-                    //competitorSelection.removeCompetitorSelectionChangeListener();
                 }
             }
         }
