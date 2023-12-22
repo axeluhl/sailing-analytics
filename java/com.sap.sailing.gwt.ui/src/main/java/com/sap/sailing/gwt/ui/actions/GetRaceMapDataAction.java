@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.actions;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,8 +41,8 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
     
     public GetRaceMapDataAction(SailingServiceAsync sailingService,
             TimeRangeActionsExecutor<CompactBoatPositionsDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable, Pair<String, DetailType>> timeRangeActionsExecutor,
-            Map<String, CompetitorDTO> competitorsByIdAsString, RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
-            Map<CompetitorDTO, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier,
+            Map<String, CompetitorDTO> competitorsByIdAsString, RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> from,
+            Map<String, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeForEstimation,
             boolean targetEstimationRequired, DetailType detailType, String leaderboardName,
             String leaderboardGroupName, UUID leaderboardGroupId, GetBoatPositionsCallback getBoatPositionsCallback) {
@@ -60,14 +59,8 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
     
     @Override
     public void execute(final AsyncCallback<RaceMapDataDTO> callback) {
-        Map<String, Date> fromByCompetitorIdAsString = new HashMap<String, Date>();
-        for (Map.Entry<CompetitorDTO, Date> fromEntry : getFrom().entrySet()) {
-            fromByCompetitorIdAsString.put(fromEntry.getKey().getIdAsString(), fromEntry.getValue());
-        }
-        Map<String, Date> toByCompetitorIdAsString = new HashMap<String, Date>();
-        for (Map.Entry<CompetitorDTO, Date> toEntry : getTo().entrySet()) {
-            toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
-        }
+        Map<String, Date> fromByCompetitorIdAsString = getFromByCompetitorIdAsString();
+        Map<String, Date> toByCompetitorIdAsString = getToByCompetitorIdAsString();
         getSailingService().getRaceMapData(getRaceIdentifier(), date, fromByCompetitorIdAsString, toByCompetitorIdAsString, isExtrapolate(), simulationLegIdentifier,
                 md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, timeForEstimation, targetEstimationRequired, getDetailType(),
                 getLeaderboardName(), getLeaderboardGroupName(), getLeaderboardGroupId(), 
@@ -91,11 +84,11 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
      */
     @Override
     public void dropped(AsyncActionsExecutor executor) {
-        GWT.log("Executing getBoatPositions(...) call instead of a dropped GetRaceMapDataAction:\n"+getFrom()+"; "+getTo());
+        GWT.log("Executing getBoatPositions(...) call instead of a dropped GetRaceMapDataAction:\n"+getFromByCompetitorIdAsString()+"; "+getToByCompetitorIdAsString());
         // TODO bug5921: if we had the PositionRequest object at hand, we could check if the positions are still required or if they were marked as to be dropped in which case no request would have to be made;
         // We could then compute the getFrom() and getTo() from the PositionRequest which would filter those time ranges that will be dropped anyhow; if empty, no request will need to be sent anymore.
         timeRangeActionsExecutor.execute(new GetBoatPositionsAction(getSailingService(), getRaceIdentifier(),
-                getFrom(), getTo(), isExtrapolate(), getDetailType(), getLeaderboardName(), getLeaderboardGroupName(), getLeaderboardGroupId()),
+                getFromByCompetitorIdAsString(), getToByCompetitorIdAsString(), isExtrapolate(), getDetailType(), getLeaderboardName(), getLeaderboardGroupName(), getLeaderboardGroupId()),
                 getBoatPositionsCallback);
     }
 }

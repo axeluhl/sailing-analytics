@@ -8,7 +8,6 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sse.common.TimePoint;
@@ -23,7 +22,7 @@ public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<Comp
     private final UUID leaderboardGroupId;
 
     public GetBoatPositionsAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, boolean extrapolate, DetailType detailType,
+            Map<String, Date> from, Map<String, Date> to, boolean extrapolate, DetailType detailType,
             String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
         super(sailingService, raceIdentifier, from, to, extrapolate, detailType, leaderboardName, leaderboardGroupName, leaderboardGroupId);
         this.leaderboardName = leaderboardName;
@@ -47,12 +46,12 @@ public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<Comp
 
     @Override
     public Map<Pair<String, DetailType>, TimeRange> getTimeRanges() {
-        final Map<Pair<String, DetailType>, TimeRange> timeRangeByCompetitorId = new HashMap<>(getFrom().size());
-        for (final Map.Entry<CompetitorDTO, Date> entry : getFrom().entrySet()) {
+        final Map<Pair<String, DetailType>, TimeRange> timeRangeByCompetitorId = new HashMap<>(getFromByCompetitorIdAsString().size());
+        for (final Map.Entry<String, Date> entry : getFromByCompetitorIdAsString().entrySet()) {
             final Date fromDate = entry.getValue();
-            final Date toDate = getTo().get(entry.getKey());
+            final Date toDate = getToByCompetitorIdAsString().get(entry.getKey());
             if (fromDate != null && toDate != null) {
-                timeRangeByCompetitorId.put(new Pair<>(entry.getKey().getIdAsString(), getDetailType()),
+                timeRangeByCompetitorId.put(new Pair<>(entry.getKey(), getDetailType()),
                         new TimeRangeImpl(TimePoint.of(fromDate), TimePoint.of(toDate), /* toIsInclusive */ true));
             }
         }

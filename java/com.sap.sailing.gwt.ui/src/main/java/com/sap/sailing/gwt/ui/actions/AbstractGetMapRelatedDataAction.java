@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 
 /**
@@ -32,8 +31,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 public abstract class AbstractGetMapRelatedDataAction<T> {
     private final SailingServiceAsync sailingService;
     private final RegattaAndRaceIdentifier raceIdentifier;
-    private final Map<CompetitorDTO, Date> from;
-    private final Map<CompetitorDTO, Date> to;
+    private final Map<String, Date> from;
+    private final Map<String, Date> to;
     private final boolean extrapolate;
     private final DetailType detailType;
     private final String leaderboardName;
@@ -41,7 +40,7 @@ public abstract class AbstractGetMapRelatedDataAction<T> {
     private final UUID leaderboardGroupId;
 
     public AbstractGetMapRelatedDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, boolean extrapolate, DetailType detailType,
+            Map<String, Date> from, Map<String, Date> to, boolean extrapolate, DetailType detailType,
             String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -62,11 +61,11 @@ public abstract class AbstractGetMapRelatedDataAction<T> {
         return raceIdentifier;
     }
 
-    protected Map<CompetitorDTO, Date> getFrom() {
+    protected Map<String, Date> getFromByCompetitorIdAsString() {
         return from;
     }
 
-    protected Map<CompetitorDTO, Date> getTo() {
+    protected Map<String, Date> getToByCompetitorIdAsString() {
         return to;
     }
 

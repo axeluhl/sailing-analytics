@@ -135,31 +135,31 @@ public class FixesAndTails {
      * extrapolated fix, the extrapolated fix will be removed, re-establishing the invariant of an extrapolated fix
      * always being the last in the list.
      */
-    private final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> fixes;
+    private final Map<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> fixesByCompetitorIdsAsStrings;
     
     /**
      * Tails of competitors currently displayed as overlays on the map. A tail may have an {@link MVCArray#getLength()
-     * empty} {@link Polyline#getPath()}. In this case, {@link #firstShownFix} and {@link #lastShownFix} will hold
+     * empty} {@link Polyline#getPath()}. In this case, {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #lastShownFixByCompetitorIdsAsStrings} will hold
      * <code>-1</code> for that competitor key.
      */
-    private final Map<CompetitorDTO, Colorline> tails;
+    private final Map<String, Colorline> tailsByCompetitorIdsAsStrings;
 
     /**
-     * Key set is equal to that of {@link #tails} and tells what the index in {@link #fixes} of the first fix shown
-     * in {@link #tails} is. If a key is contained in this map, it is also contained in {@link #lastShownFix} and vice
+     * Key set is equal to that of {@link #tailsByCompetitorIdsAsStrings} and tells what the index in {@link #fixesByCompetitorIdsAsStrings} of the first fix shown
+     * in {@link #tailsByCompetitorIdsAsStrings} is. If a key is contained in this map, it is also contained in {@link #lastShownFixByCompetitorIdsAsStrings} and vice
      * versa. If a tail is present but has an empty path, this map does not contain an entry for that competitor.
      */
-    private final Map<CompetitorDTO, Integer> firstShownFix;
+    private final Map<String, Integer> firstShownFixByCompetitorIdsAsStrings;
 
     /**
-     * Key set is equal to that of {@link #tails} and tells what the index in {@link #fixes} of the last fix shown in
-     * {@link #tails} is. If a key is contained in this map, it is also contained in {@link #firstShownFix} and vice
+     * Key set is equal to that of {@link #tailsByCompetitorIdsAsStrings} and tells what the index in {@link #fixesByCompetitorIdsAsStrings} of the last fix shown in
+     * {@link #tailsByCompetitorIdsAsStrings} is. If a key is contained in this map, it is also contained in {@link #firstShownFixByCompetitorIdsAsStrings} and vice
      * versa. If a tail is present but has an empty path, this map does not contain an entry for that competitor.
      */
-    private final Map<CompetitorDTO, Integer> lastShownFix;
+    private final Map<String, Integer> lastShownFixByCompetitorIdsAsStrings;
     
     /**
-     * The position fixes in {@link #fixes} are filled by processing the responses to asynchronous requests. This map
+     * The position fixes in {@link #fixesByCompetitorIdsAsStrings} are filled by processing the responses to asynchronous requests. This map
      * keeps track of the beginning and end of the contiguous time range for which position data has been requested, per
      * competitor. This may cover time ranges requested but not yet responded to, represented by the
      * {@link #inFlightRequests}. The earliest requested time point for a competitor may also be earlier than the
@@ -176,25 +176,25 @@ public class FixesAndTails {
      * point of the last fix <em>received</em> shall be used for trimming because we may hope to receive
      * fixes delivered late, e.g. in a live situation with too short a delay.
      */
-    private final Map<CompetitorDTO, TimeRange> timeRangesRequested;
+    private final Map<String, TimeRange> timeRangesRequestedByCompetitorIdAsString;
 
     /**
-     * Stores the index to the smallest found detailValue in {@link #fixes} for a given competitor.
+     * Stores the index to the smallest found detailValue in {@link #fixesByCompetitorIdsAsStrings} for a given competitor.
      */
-    private final Map<CompetitorDTO, Integer> minDetailValueFix;
+    private final Map<String, Integer> minDetailValueFixByCompetitorIdsAsStrings;
     
     /**
-     * Stores the index to the largest found detailValue in {@link #fixes} for a given competitor.
+     * Stores the index to the largest found detailValue in {@link #fixesByCompetitorIdsAsStrings} for a given competitor.
      */
-    private final Map<CompetitorDTO, Integer> maxDetailValueFix;
+    private final Map<String, Integer> maxDetailValueFixByCompetitorIdsAsStrings;
     
     /**
      * Stores at what index the last search on the fixes of a given competitor stopped.
      */
-    private final Map<CompetitorDTO, Integer> lastSearchedFix;
+    private final Map<String, Integer> lastSearchedFixByCompetitorIdsAsStrings;
 
     /**
-     * Keeps track of detailValues (stored in {@link GPSFixDTOWithSpeedWindTackAndLegType} in {@link #fixes})
+     * Keeps track of detailValues (stored in {@link GPSFixDTOWithSpeedWindTackAndLegType} in {@link #fixesByCompetitorIdsAsStrings})
      * boundaries so that a {@link ColorMapper} can be used.
      */
     private ValueRangeFlexibleBoundaries detailValueBoundaries;
@@ -204,10 +204,10 @@ public class FixesAndTails {
     /**
      * Tells the type of value stored in the fixes' {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue} field for
      * the competitor used as the key in this map. If {@code null} or no mapping exists for the competitor, the detail
-     * values shall be ignored and may be of inconsistent types. If not {@code null}, all fixes stored in {@link #fixes}
+     * values shall be ignored and may be of inconsistent types. If not {@code null}, all fixes stored in {@link #fixesByCompetitorIdsAsStrings}
      * are guaranteed to have their detail value of this type.
      */
-    private final Map<CompetitorDTO, DetailType> detailTypesRequested;
+    private final Map<String, DetailType> detailTypesRequestedByCompetitorIdsAsStrings;
     
     /**
      * Requests returned from {@link #computeFromAndTo(Date, Iterable, long, long, boolean)} for execution as quick or slow
@@ -239,20 +239,20 @@ public class FixesAndTails {
          * that competitor is removed from this set, so an entangled request that receives its response
          * later will not clear the cache again.
          */
-        private final Set<CompetitorDTO> mustClearCacheForTheseCompetitors;
+        private final Set<String> mustClearCacheForTheseCompetitorIdsAsString;
         
-        private final Set<CompetitorDTO> ignoreFixesForTheseCompetitors;
+        private final Set<String> ignoreFixesForTheseCompetitorIdsAsString;
         
-        private final Map<CompetitorDTO, TimeRange> timeRanges;
+        private final Map<String, TimeRange> timeRangesByCompetitorIdAsString;
         
         private final long transitionTimeInMillis;
         
         private final DetailType detailTypeForFixes;
         
-        PositionRequest(Map<CompetitorDTO, TimeRange> timeRanges, Set<CompetitorDTO> mustClearCacheForTheseCompetitors, DetailType detailTypeForFixes, long transitionTimeInMillis) {
-            ignoreFixesForTheseCompetitors = new HashSet<>();
-            this.mustClearCacheForTheseCompetitors = mustClearCacheForTheseCompetitors;
-            this.timeRanges = Collections.unmodifiableMap(timeRanges);
+        PositionRequest(Map<String, TimeRange> timeRanges, Set<String> mustClearCacheForTheseCompetitorIdsAsString, DetailType detailTypeForFixes, long transitionTimeInMillis) {
+            ignoreFixesForTheseCompetitorIdsAsString = new HashSet<>();
+            this.mustClearCacheForTheseCompetitorIdsAsString = mustClearCacheForTheseCompetitorIdsAsString;
+            this.timeRangesByCompetitorIdAsString = Collections.unmodifiableMap(timeRanges);
             this.detailTypeForFixes = detailTypeForFixes;
             this.transitionTimeInMillis = transitionTimeInMillis;
         }
@@ -264,30 +264,30 @@ public class FixesAndTails {
          * makes sure to clear the cache for the competitors for which this was requested; the other request
          * is told to not clear those caches anymore.
          */
-        PositionRequest(Map<CompetitorDTO, TimeRange> timeRanges, PositionRequest entangleWith) {
-            mustClearCacheForTheseCompetitors = entangleWith.mustClearCacheForTheseCompetitors;
-            ignoreFixesForTheseCompetitors = new HashSet<>();
-            this.timeRanges = Collections.unmodifiableMap(timeRanges);
+        PositionRequest(Map<String, TimeRange> timeRanges, PositionRequest entangleWith) {
+            mustClearCacheForTheseCompetitorIdsAsString = entangleWith.mustClearCacheForTheseCompetitorIdsAsString;
+            ignoreFixesForTheseCompetitorIdsAsString = new HashSet<>();
+            this.timeRangesByCompetitorIdAsString = Collections.unmodifiableMap(timeRanges);
             this.detailTypeForFixes = entangleWith.detailTypeForFixes;
             this.transitionTimeInMillis = entangleWith.transitionTimeInMillis;
         }
         
         boolean isMustClearCacheForCompetitor(CompetitorDTO competitor) {
-            return mustClearCacheForTheseCompetitors.contains(competitor);
+            return mustClearCacheForTheseCompetitorIdsAsString.contains(competitor.getIdAsString());
         }
         
-        Map<CompetitorDTO, Date> getFrom() {
-            return getFromOrTo(TimeRange::from);
+        Map<String, Date> getFromByCompetitorIdAsString() {
+            return getFromOrToByCompetitorIdAsString(TimeRange::from);
         }
         
-        Map<CompetitorDTO, Date> getTo() {
-            return getFromOrTo(TimeRange::to);
+        Map<String, Date> getToByCompetitorIdAsString() {
+            return getFromOrToByCompetitorIdAsString(TimeRange::to);
         }
         
-        private Map<CompetitorDTO, Date> getFromOrTo(Function<TimeRange, TimePoint> dateFetcher) {
-            final Map<CompetitorDTO, Date> result = new HashMap<>();
-            for (final Entry<CompetitorDTO, TimeRange> e : timeRanges.entrySet()) {
-                if (!ignoreFixesForTheseCompetitors.contains(e.getKey())) {
+        private Map<String, Date> getFromOrToByCompetitorIdAsString(Function<TimeRange, TimePoint> dateFetcher) {
+            final Map<String, Date> result = new HashMap<>();
+            for (final Entry<String, TimeRange> e : timeRangesByCompetitorIdAsString.entrySet()) {
+                if (!ignoreFixesForTheseCompetitorIdsAsString.contains(e.getKey())) {
                     result.put(e.getKey(), dateFetcher.apply(e.getValue()).asDate());
                 }
             }
@@ -301,7 +301,7 @@ public class FixesAndTails {
          * requested is disconnected from the track segment cached for that competitor so far.
          */
         void ignoreFixesFor(CompetitorDTO competitor) {
-            ignoreFixesForTheseCompetitors.add(competitor);
+            ignoreFixesForTheseCompetitorIdsAsString.add(competitor.getIdAsString());
         }
         
         void processResponse(Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositions) {
@@ -309,8 +309,8 @@ public class FixesAndTails {
                 GWT.log("WARNING: processing response for a request that does not seem to have been sent or that has already been processed: "+this);
             }
             for (final Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> e : boatPositions.entrySet()) {
-                if (!ignoreFixesForTheseCompetitors.contains(e.getKey())) {
-                    final boolean mustClearCache = mustClearCacheForTheseCompetitors.remove(e.getKey());
+                if (!ignoreFixesForTheseCompetitorIdsAsString.contains(e.getKey().getIdAsString())) {
+                    final boolean mustClearCache = mustClearCacheForTheseCompetitorIdsAsString.remove(e.getKey().getIdAsString());
                     updateFixes(e.getKey(), e.getValue(), mustClearCache, transitionTimeInMillis, detailTypeForFixes);
                 }
             }
@@ -318,18 +318,18 @@ public class FixesAndTails {
 
         @Override
         public String toString() {
-            return "PositionRequest [mustClearCacheForTheseCompetitors=" + mustClearCacheForTheseCompetitors
-                    + ", ignoreFixesForTheseCompetitors=" + ignoreFixesForTheseCompetitors + ", timeRanges="
-                    + timeRanges + ", transitionTimeInMillis=" + transitionTimeInMillis + ", detailTypeForFixes="
+            return "PositionRequest [mustClearCacheForTheseCompetitors=" + mustClearCacheForTheseCompetitorIdsAsString
+                    + ", ignoreFixesForTheseCompetitors=" + ignoreFixesForTheseCompetitorIdsAsString + ", timeRanges="
+                    + timeRangesByCompetitorIdAsString + ", transitionTimeInMillis=" + transitionTimeInMillis + ", detailTypeForFixes="
                     + detailTypeForFixes + "]";
         }
 
         public TimePoint getToTimepoint(CompetitorDTO competitor) {
             final TimePoint result;
-            if (ignoreFixesForTheseCompetitors.contains(competitor)) {
+            if (ignoreFixesForTheseCompetitorIdsAsString.contains(competitor.getIdAsString())) {
                 result = null;
             } else {
-                final TimeRange competitorTimeRange = timeRanges.get(competitor);
+                final TimeRange competitorTimeRange = timeRangesByCompetitorIdAsString.get(competitor.getIdAsString());
                 if (competitorTimeRange == null) {
                     result = null;
                 } else {
@@ -342,16 +342,16 @@ public class FixesAndTails {
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
-        detailTypesRequested = new HashMap<>();
-        fixes = new HashMap<>();
-        tails = new HashMap<>();
-        firstShownFix = new HashMap<>();
-        lastShownFix = new HashMap<>();
-        minDetailValueFix = new HashMap<>();
-        maxDetailValueFix = new HashMap<>();
-        lastSearchedFix = new HashMap<>();
+        detailTypesRequestedByCompetitorIdsAsStrings = new HashMap<>();
+        fixesByCompetitorIdsAsStrings = new HashMap<>();
+        tailsByCompetitorIdsAsStrings = new HashMap<>();
+        firstShownFixByCompetitorIdsAsStrings = new HashMap<>();
+        lastShownFixByCompetitorIdsAsStrings = new HashMap<>();
+        minDetailValueFixByCompetitorIdsAsStrings = new HashMap<>();
+        maxDetailValueFixByCompetitorIdsAsStrings = new HashMap<>();
+        lastSearchedFixByCompetitorIdsAsStrings = new HashMap<>();
         inFlightRequests = new HashSet<>();
-        timeRangesRequested = new HashMap<>();
+        timeRangesRequestedByCompetitorIdAsString = new HashMap<>();
     }
 
     /**
@@ -360,27 +360,27 @@ public class FixesAndTails {
      *         <code>competitor</code>. The list returned is unmodifiable for the caller.
      */
     public List<GPSFixDTOWithSpeedWindTackAndLegType> getFixes(CompetitorDTO competitor) {
-        final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = fixes.get(competitor);
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
         return competitorFixes == null ? null : Collections.unmodifiableList(competitorFixes);
     }
     
     public Colorline getTail(CompetitorDTO competitor) {
-        return tails.get(competitor);
+        return tailsByCompetitorIdsAsStrings.get(competitor.getIdAsString());
     }
 
     public Integer getFirstShownFix(CompetitorDTO competitor) {
-        return firstShownFix.get(competitor);
+        return firstShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
     }
     
     /**
      * The set of all competitors for which this object maintains tails. The collection is unmodifiable for the caller.
      */
-    public Set<CompetitorDTO> getCompetitorsWithTails() {
-        return Collections.unmodifiableSet(tails.keySet());
+    public Set<String> getCompetitorIdsAsStringWithTails() {
+        return Collections.unmodifiableSet(tailsByCompetitorIdsAsStrings.keySet());
     }
 
     public boolean hasFixesFor(CompetitorDTO competitor) {
-        return fixes.containsKey(competitor);
+        return fixesByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString());
     }
     
     /**
@@ -405,12 +405,12 @@ public class FixesAndTails {
 
     /**
      * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
-     * {@link #fixes fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
+     * {@link #fixesByCompetitorIdsAsStrings fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
      * up to the last fix with time point before <code>to</code>. The polyline is added to the map and returned. Updates
-     * are applied to {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
+     * are applied to {@link #lastShownFixByCompetitorIdsAsStrings}, {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #tailsByCompetitorIdsAsStrings}.
      * <p>
      * 
-     * The {@link #fixes} map must hold an entry for {@code competitorDTO}, but the fixes it holds for that competitor
+     * The {@link #fixesByCompetitorIdsAsStrings} map must hold an entry for {@code competitorDTO}, but the fixes it holds for that competitor
      * do not need to cover or even touch the time range described by {@code from} and {@code to}. As a result, the
      * color-line returned may be empty or contain fewer fixes than desired. Later calls to
      * {@link #updateFixes(Map, Map, long, boolean, DetailType)} may then extend the tail accordingly.
@@ -421,8 +421,8 @@ public class FixesAndTails {
      *            the detail type the caller expects the fixes of {@code competitorDTO} to contain
      */
     protected Colorline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory, DetailType detailTypeToShow) {
-        if (detailTypeToShow != null && detailTypesRequested.get(competitorDTO) != detailTypeToShow) {
-            GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailTypesRequested.get(competitorDTO)+" but caller expected "+detailTypeToShow);
+        if (detailTypeToShow != null && detailTypesRequestedByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) != detailTypeToShow) {
+            GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailTypesRequestedByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())+" but caller expected "+detailTypeToShow);
         }
         final List<LatLng> points = new ArrayList<LatLng>();
         final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
@@ -456,21 +456,21 @@ public class FixesAndTails {
             indexOfLast = i - 1;
         }
         if (indexOfFirst != -1 && indexOfLast != -1) {
-            firstShownFix.put(competitorDTO, indexOfFirst);
-            lastShownFix.put(competitorDTO, indexOfLast);
+            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirst);
+            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLast);
         }
         final Colorline result = tailFactory.createTail(competitorDTO, points);
-        tails.put(competitorDTO, result);
+        tailsByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), result);
         return result;
     }
 
     /**
-     * Adds the fixes received in <code>fixesToAddForCompetitor</code> to {@link #fixes} and ensures they are still
+     * Adds the fixes received in <code>fixesToAddForCompetitor</code> to {@link #fixesByCompetitorIdsAsStrings} and ensures they are still
      * contiguous for each competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in
      * <code>result</code> overlap with those already known, the fixes are merged into the list of already known fixes
      * for the competitor. Otherwise, the fixes received in <code>result</code> replace those known so far for the
-     * respective competitor. The {@link #tails} affected by these fixes are updated accordingly when modifications fall
-     * inside the interval shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails
+     * respective competitor. The {@link #tailsByCompetitorIdsAsStrings} affected by these fixes are updated accordingly when modifications fall
+     * inside the interval shown by the tail, as defined by {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #lastShownFixByCompetitorIdsAsStrings}. The tails
      * are, however, not trimmed according to the specification for the tail length. This has to happen elsewhere (see
      * also {@link #updateTail}).
      * 
@@ -481,58 +481,58 @@ public class FixesAndTails {
      *            if for a competitor whose fixes are provided in <code>fixesForCompetitors</code> this holds
      *            <code>false</code>, any fixes previously stored for that competitor are removed, and the tail is
      *            deleted from the map (see {@link #removeTail(CompetitorWithBoatDTO)}); the new fixes are then added to the
-     *            {@link #fixes} map, and a new tail will have to be constructed as needed (does not happen here). If
+     *            {@link #fixesByCompetitorIdsAsStrings} map, and a new tail will have to be constructed as needed (does not happen here). If
      *            this map holds <code>true</code>, {@link #mergeFixes(CompetitorWithBoatDTO, List, long)} is used to merge the
-     *            new fixes from <code>fixesForCompetitors</code> into the {@link #fixes} collection, and the tail is
+     *            new fixes from <code>fixesForCompetitors</code> into the {@link #fixesByCompetitorIdsAsStrings} collection, and the tail is
      *            left unchanged. <b>NOTE:</b> When a non-overlapping set of fixes is updated (<code>false</code>), this
      *            map's record for the competitor is <b>UPDATED</b> to <code>true</code> after the tail deletion and
-     *            {@link #fixes} replacement has taken place. This helps in cases where this update is only one of two
+     *            {@link #fixesByCompetitorIdsAsStrings} replacement has taken place. This helps in cases where this update is only one of two
      *            into which an original request was split (one quick update of the tail's head and another one for the
      *            longer tail itself), such that the second request that uses the <em>same</em> map will be considered
      *            having an overlap now, not leading to a replacement of the previous update originating from the same
      *            request.
-     * @param detailTypeForFixes used to update {@link #detailTypesRequested}
+     * @param detailTypeForFixes used to update {@link #detailTypesRequestedByCompetitorIdsAsStrings}
      * 
      */
     private void updateFixes(final CompetitorDTO competitor,
             final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesToAddForCompetitor, final boolean mustClearCache,
             long timeForPositionTransitionMillis, DetailType detailTypeForFixes) {
-        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.computeIfAbsent(competitor,
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.computeIfAbsent(competitor.getIdAsString(),
                 c->{
                       final List<GPSFixDTOWithSpeedWindTackAndLegType> f = new ArrayList<>();
-                      fixes.put(c, f);
+                      fixesByCompetitorIdsAsStrings.put(c, f);
                       return f;
                    });
         if (mustClearCache) {
             // clearing and then re-populating establishes the invariant that an extrapolated fix must be the last
             fixesForCompetitor.clear();
-            detailTypesRequested.put(competitor, detailTypeForFixes);
+            detailTypesRequestedByCompetitorIdsAsStrings.put(competitor.getIdAsString(), detailTypeForFixes);
             // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
             // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
             clearTail(competitor);
             Util.addAll(fixesToAddForCompetitor, fixesForCompetitor);
-            minDetailValueFix.remove(competitor);
-            maxDetailValueFix.remove(competitor);
+            minDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
+            maxDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
         } else {
-            if (detailTypeForFixes != null && detailTypesRequested.get(competitor) != detailTypeForFixes) {
+            if (detailTypeForFixes != null && detailTypesRequestedByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != detailTypeForFixes) {
                 GWT.log("WARNING: Inconsistent detail types when merging fixed for competitor "+competitor+
-                        ". Got fixes with "+detailTypesRequested.get(competitor)+" so far but now received fixes with "+detailTypeForFixes);
+                        ". Got fixes with "+detailTypesRequestedByCompetitorIdsAsStrings.get(competitor.getIdAsString())+" so far but now received fixes with "+detailTypeForFixes);
             }
             mergeFixes(competitor, fixesToAddForCompetitor, timeForPositionTransitionMillis);
         }
     }
 
     /**
-     * While updating the {@link #fixes} for <code>competitorDTO</code>, the invariants for {@link #tails} and
-     * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted and we have a tail
-     * in {@link #tails} for <code>competitorDTO</code>, the {@link #firstShownFix} record for
+     * While updating the {@link #fixesByCompetitorIdsAsStrings} for <code>competitorDTO</code>, the invariants for {@link #tailsByCompetitorIdsAsStrings} and
+     * {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #lastShownFixByCompetitorIdsAsStrings} are maintained: each time a fix is inserted and we have a tail
+     * in {@link #tailsByCompetitorIdsAsStrings} for <code>competitorDTO</code>, the {@link #firstShownFixByCompetitorIdsAsStrings} record for
      * <code>competitorDTO</code> is incremented if it is greater than the insertion index, and the
-     * {@link #lastShownFix} records for <code>competitorDTO</code> is incremented if is is greater than or equal to the
+     * {@link #lastShownFixByCompetitorIdsAsStrings} records for <code>competitorDTO</code> is incremented if is is greater than or equal to the
      * insertion index. This means, in particular, that when a fix is inserted exactly at the index that points to the
      * first fix shown so far, the fix inserted will become the new first fix shown. When inserting a fix exactly at
-     * index {@link #lastShownFix}, the fix that so far was the last one shown remains the last one shown because in
-     * this case, {@link #lastShownFix} will be incremented by one. If {@link #firstShownFix} &lt;=
-     * <code>insertindex</code> &lt;= {@link #lastShownFix}, meaning that the fix is in the range of fixes shown in the
+     * index {@link #lastShownFixByCompetitorIdsAsStrings}, the fix that so far was the last one shown remains the last one shown because in
+     * this case, {@link #lastShownFixByCompetitorIdsAsStrings} will be incremented by one. If {@link #firstShownFixByCompetitorIdsAsStrings} &lt;=
+     * <code>insertindex</code> &lt;= {@link #lastShownFixByCompetitorIdsAsStrings}, meaning that the fix is in the range of fixes shown in the
      * competitor's tail, the tail is adjusted by inserting the corresponding fix.
      * <p>
      * 
@@ -547,10 +547,10 @@ public class FixesAndTails {
      *            the list
      */
     private void mergeFixes(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable mergeThis, final long timeForPositionTransitionMillis) {
-        List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixes.get(competitorDTO);
-        final Integer firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
+        List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixesByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+        final Integer firstShownFixForCompetitor = firstShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
         int indexOfFirstShownFix = firstShownFixForCompetitor == null ? -1 : firstShownFixForCompetitor;
-        final Integer lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
+        final Integer lastShownFixForCompetitor = lastShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
         int indexOfLastShownFix = lastShownFixForCompetitor == null ? -2 : lastShownFixForCompetitor;
         final Colorline tail = getTail(competitorDTO);
         int earliestMergeIndex = -1;
@@ -591,20 +591,20 @@ public class FixesAndTails {
                         indexOfLastShownFix--;
                     }
                     // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes
-                    if (minDetailValueFix.containsKey(competitorDTO)) {
-                        if (intoThisIndex < minDetailValueFix.get(competitorDTO)) {
-                            minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) - 1);
-                        } else if (intoThisIndex == minDetailValueFix.get(competitorDTO)) {
+                    if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString())) {
+                        if (intoThisIndex < minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
+                            minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
+                        } else if (intoThisIndex == minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
                             // The fix with the highest value was removed so re-search
-                            minDetailValueFix.remove(competitorDTO);
+                            minDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
                         }
                     }
-                    if (maxDetailValueFix.containsKey(competitorDTO)) {
-                        if (intoThisIndex < maxDetailValueFix.get(competitorDTO)) {
-                            maxDetailValueFix.put(competitorDTO, maxDetailValueFix.get(competitorDTO) - 1);
-                        } else if (intoThisIndex == maxDetailValueFix.get(competitorDTO)) {
+                    if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString())) {
+                        if (intoThisIndex < maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
+                            maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
+                        } else if (intoThisIndex == maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
                             // The fix with the highest value was removed so re-search
-                            maxDetailValueFix.remove(competitorDTO);
+                            maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
                         }
                     }
                     intoThisIndex--;
@@ -625,11 +625,11 @@ public class FixesAndTails {
                     if (intoThisIndex <= indexOfLastShownFix) {
                         indexOfLastShownFix++;
                     }
-                    if (minDetailValueFix.containsKey(competitorDTO) && intoThisIndex <= minDetailValueFix.get(competitorDTO)) {
-                        minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) + 1);
+                    if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
+                        minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) + 1);
                     }
-                    if (maxDetailValueFix.containsKey(competitorDTO) && intoThisIndex <= maxDetailValueFix.get(competitorDTO)) {
-                        maxDetailValueFix.put(competitorDTO, maxDetailValueFix.get(competitorDTO) + 1);
+                    if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex <= maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
+                        maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) + 1);
                     }
                     // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
                     // extrapolated fixes can only be the last in the list
@@ -644,11 +644,11 @@ public class FixesAndTails {
                         if (intoThisIndex-1 <= indexOfLastShownFix) {
                             indexOfLastShownFix--;
                         }
-                        if (minDetailValueFix.containsKey(competitorDTO) && intoThisIndex - 1 <= minDetailValueFix.get(competitorDTO)) {
-                            minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) - 1);
+                        if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex - 1 <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
+                            minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
                         }
-                        if (maxDetailValueFix.containsKey(competitorDTO) && intoThisIndex - 1 <= maxDetailValueFix.get(competitorDTO)) {
-                            maxDetailValueFix.put(competitorDTO, maxDetailValueFix.get(competitorDTO) - 1);
+                        if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex - 1 <= maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
+                            maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
                         }
                     }
                 }
@@ -657,34 +657,34 @@ public class FixesAndTails {
         // invariant: for one CompetitorDTO, either both of firstShownFix and lastShownFix have an entry for that key,
         // or both don't
         if (indexOfFirstShownFix <= indexOfLastShownFix) {
-            firstShownFix.put(competitorDTO, indexOfFirstShownFix);
-            lastShownFix.put(competitorDTO, indexOfLastShownFix);
+            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
+            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
         } else {
-            firstShownFix.remove(competitorDTO);
-            lastShownFix.remove(competitorDTO);
+            firstShownFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+            lastShownFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
         }
         if (earliestMergeIndex != -1) {
-            lastSearchedFix.merge(competitorDTO, earliestMergeIndex, Math::min); // FIXME bug5921: this may end up being before the firstShownFix
+            lastSearchedFixByCompetitorIdsAsStrings.merge(competitorDTO.getIdAsString(), earliestMergeIndex, Math::min); // FIXME bug5921: this may end up being before the firstShownFix
         }
     }
 
     /**
      * If the tail starts before <code>from</code>, removes leading vertices from <code>tail</code> that are before
-     * <code>from</code>. This is determined by using the {@link #firstShownFix} index which tells us where in
-     * {@link #fixes} we find the sequence of fixes currently represented in the tail.
+     * <code>from</code>. This is determined by using the {@link #firstShownFixByCompetitorIdsAsStrings} index which tells us where in
+     * {@link #fixesByCompetitorIdsAsStrings} we find the sequence of fixes currently represented in the tail.
      * <p>
      * 
-     * If the tail starts after <code>from</code>, vertices for those {@link #fixes} for <code>competitorDTO</code> at
+     * If the tail starts after <code>from</code>, vertices for those {@link #fixesByCompetitorIdsAsStrings} for <code>competitorDTO</code> at
      * or after time point <code>from</code> and before the time point of the first fix displayed so far in the tail and
      * before <code>to</code> are prepended to the tail.
      * <p>
      * 
      * Now to the end of the tail: if the existing tail's end exceeds <code>to</code>, the vertices in excess are
-     * removed (aided by {@link #lastShownFix}). Otherwise, for the competitor's fixes starting at the tail's end up to
+     * removed (aided by {@link #lastShownFixByCompetitorIdsAsStrings}). Otherwise, for the competitor's fixes starting at the tail's end up to
      * <code>to</code> are appended to the tail.
      * <p>
      * 
-     * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
+     * When this method returns, {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #lastShownFixByCompetitorIdsAsStrings} have been updated accordingly.
      * <p>
      * 
      * FIXME: I don't think this method handles empty tails correctly; firstShownFix/lastShownFix then won't hold a
@@ -695,12 +695,12 @@ public class FixesAndTails {
      * 
      * Requirements:
      * <ul>
-     * <li>handle a so far empty tail ({@code tail.getLength() == 0}, and {@link #firstShownFix}/{@link #lastShownFix}
+     * <li>handle a so far empty tail ({@code tail.getLength() == 0}, and {@link #firstShownFixByCompetitorIdsAsStrings}/{@link #lastShownFixByCompetitorIdsAsStrings}
      * not containing key {@code competitorDTO})</li>
      * <li>handle moving to a new {@code from/to} time range that does not overlap the current tail's time range</li>
      * <li>all fixes from {@link #getFixes(CompetitorDTO) getFixes(competitorDTO)} that are between {@code from/to}
      * (inclusive), and only those fixes, are visualized on the tail if tail exists</li>
-     * <li>{@link #firstShownFix}/{@link #lastShownFix} afterwards reflect the new tail; in particular, if the tail is empty,
+     * <li>{@link #firstShownFixByCompetitorIdsAsStrings}/{@link #lastShownFixByCompetitorIdsAsStrings} afterwards reflect the new tail; in particular, if the tail is empty,
      * they both do not contain the key {@code competitorDTO}.</li>
      * </ul>
      * <p>
@@ -709,20 +709,20 @@ public class FixesAndTails {
      *            the time in milliseconds after which to actually draw the tail update, or <code>-1</code> to perform
      *            the update immediately
      * @param selectedDetailType
-     *            for verifying against {@link #detailTypesRequested}
+     *            for verifying against {@link #detailTypesRequestedByCompetitorIdsAsStrings}
      */
     protected void updateTail(final CompetitorDTO competitorDTO, final Date from, final Date to, final int delayForTailChangeInMillis, DetailType selectedDetailType) {
         Timer delayedOrImmediateExecutor = new Timer() {
             @Override
             public void run() {
-                if (selectedDetailType != null && detailTypesRequested.get(competitorDTO) != selectedDetailType) {
-                    GWT.log("WARNING: Detail type mismatch in updateTail: have "+detailTypesRequested.get(competitorDTO)+" but caller expected "+selectedDetailType);
+                if (selectedDetailType != null && detailTypesRequestedByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) != selectedDetailType) {
+                    GWT.log("WARNING: Detail type mismatch in updateTail: have "+detailTypesRequestedByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())+" but caller expected "+selectedDetailType);
                 }
                 final Colorline tail = getTail(competitorDTO);
                 if (tail != null) {
                     int vertexCount = tail.getLength();
-                    final Integer firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
-                    final Integer lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
+                    final Integer firstShownFixForCompetitor = firstShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+                    final Integer lastShownFixForCompetitor = lastShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
                     if (firstShownFixForCompetitor == null) {
                         // empty tail; do a few consistency checks:
                         if (lastShownFixForCompetitor != null) {
@@ -780,8 +780,8 @@ public class FixesAndTails {
                                 final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
                                 tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                             }
-                            firstShownFix.put(competitorDTO, indexOfFirstShownFix);
-                            lastShownFix.put(competitorDTO, indexOfLastShownFix);
+                            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
+                            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
                             // FIXME bug5921: what about lastSearchedFix?
                         }
                     }
@@ -793,8 +793,8 @@ public class FixesAndTails {
 
     /**
      * Assuming the {@link #getTail(CompetitorDTO) tail of competitorDTO} is empty, fills in all
-     * fixes between {@code from} and {@code to} (inclusive) and adjusts {@link #firstShownFix}
-     * and {@link #lastShownFix} accordingly. In particular, if no fix is inserted, the
+     * fixes between {@code from} and {@code to} (inclusive) and adjusts {@link #firstShownFixByCompetitorIdsAsStrings}
+     * and {@link #lastShownFixByCompetitorIdsAsStrings} accordingly. In particular, if no fix is inserted, the
      * {@code competitorDTO} key is removed from those two maps.
      */
     private void fillEmptyTail(CompetitorDTO competitorDTO, Date from, Date to) {
@@ -822,10 +822,10 @@ public class FixesAndTails {
             last = i-1;
         }
         if (first != -1) {
-            firstShownFix.put(competitorDTO, first);
-            lastShownFix.put(competitorDTO, last);
+            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), first);
+            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), last);
         } else {
-            tailRemoved(competitorDTO);
+            tailRemoved(competitorDTO.getIdAsString());
         }
     }
 
@@ -838,50 +838,50 @@ public class FixesAndTails {
     }
 
     /**
-     * Consistently removes the <code>competitor</code>'s tail from {@link #tails} and from the map, and the corresponding position
-     * data from {@link #firstShownFix} and {@link #lastShownFix}.
+     * Consistently removes the <code>competitor</code>'s tail from {@link #tailsByCompetitorIdsAsStrings} and from the map, and the corresponding position
+     * data from {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #lastShownFixByCompetitorIdsAsStrings}.
      */
-    protected void removeTail(CompetitorDTO competitor) {
-        final Colorline removedTail = tails.remove(competitor);
+    protected void removeTail(String competitorIdAsString) {
+        final Colorline removedTail = tailsByCompetitorIdsAsStrings.remove(competitorIdAsString);
         if (removedTail != null) {
             removedTail.setMap(null);
         }
-        tailRemoved(competitor);
+        tailRemoved(competitorIdAsString);
     }
 
     /**
-     * Removes the entry for {@code competitor} from {@link #firstShownFix}, {@link #lastShownFix},
-     * {@link #minDetailValueFix}, and {@link #maxDetailValueFix}; to be called when the competitor's
+     * Removes the entry for {@code competitor} from {@link #firstShownFixByCompetitorIdsAsStrings}, {@link #lastShownFixByCompetitorIdsAsStrings},
+     * {@link #minDetailValueFixByCompetitorIdsAsStrings}, and {@link #maxDetailValueFixByCompetitorIdsAsStrings}; to be called when the competitor's
      * tail has been cleared or entirely removed.
      */
-    private void tailRemoved(CompetitorDTO competitor) {
-        firstShownFix.remove(competitor);
-        lastShownFix.remove(competitor);
-        minDetailValueFix.remove(competitor);
-        maxDetailValueFix.remove(competitor);
-        lastSearchedFix.remove(competitor);
+    private void tailRemoved(String competitorIdAsString) {
+        firstShownFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
+        lastShownFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
+        minDetailValueFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
+        maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
+        lastSearchedFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
     }
     
     /**
      * Leaves the tail on the map and empties its path {@link Polyline#getPath()}. Correspondingly, the
-     * {@link #firstShownFix} and {@link #lastShownFix} entries for <code>competitor</code> are set to <code>-1</code>.
+     * {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #lastShownFixByCompetitorIdsAsStrings} entries for <code>competitor</code> are set to <code>-1</code>.
      */
     private void clearTail(CompetitorDTO competitor) {
-        final Colorline tail = tails.get(competitor);
+        final Colorline tail = tailsByCompetitorIdsAsStrings.get(competitor.getIdAsString());
         if (tail != null) {
             tail.clear();
-            tailRemoved(competitor);
+            tailRemoved(competitor.getIdAsString());
         }
     }
 
     /**
      * From {@link #earliestTimePointRequested} as well as the selection of {@code competitorsToShow}, computes the
      * from/to times for which to request GPS fixes from the server, per competitor. No update is performed here to
-     * {@link #fixes}. The result guarantees that, when used in
+     * {@link #fixesByCompetitorIdsAsStrings}. The result guarantees that, when used in
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
      * competitor from {@code competitorsToShow} all fixes known by the server for that competitor starting at
      * <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive) will be loaded
-     * into the {@link #fixes} cache.
+     * into the {@link #fixesByCompetitorIdsAsStrings} cache.
      * <p>
      * 
      * The {@link #earliestTimePointRequested} map is updated, assuming that the requests returned will be sent before
@@ -893,7 +893,7 @@ public class FixesAndTails {
      *         to be fetched and where the call can be performed in a compound {@link GetRaceMapDataAction}; the
      *         {@link Pair#getB() second} is for a "slow" request that needs to fetch longer segments of tracks and that
      *         can be sent using {@link GetBoatPositionsAction}. None of the pair's components is {@code null}), but the
-     *         {@link PositionRequest#getFrom()} and {@link PositionRequest#getTo()} results may be empty. The two
+     *         {@link PositionRequest#getFromByCompetitorIdAsString()} and {@link PositionRequest#getToByCompetitorIdAsString()} results may be empty. The two
      *         requests are "entangled", in the sense that if the combined effect of the requests has to be that the
      *         cache for one or more competitors is to be cleared before updating the new positions, exactly the first
      *         of the two requests to process its response will carry out this clearing. It is important to reliably
@@ -907,27 +907,27 @@ public class FixesAndTails {
         final TimePoint upToTimePoint = TimePoint.of(upTo);
         final TimePoint tailstart = upToTimePoint.minus(effectiveTailLengthInMilliseconds);
         final TimeRange quickTipTimeRange = TimeRange.create(upToTimePoint, upToTimePoint);
-        final Set<CompetitorDTO> mustClearCacheForTheseCompetitors = new HashSet<>();
+        final Set<String> mustClearCacheForTheseCompetitorIdsAsString = new HashSet<>();
         final TimeRange timeRangeNeeded = TimeRange.create(tailstart, upToTimePoint);
-        final Map<CompetitorDTO, TimeRange> timeRangesForQuickRequest = new HashMap<>();
-        final Map<CompetitorDTO, TimeRange> timeRangesForSlowRequest = new HashMap<>();
+        final Map<String, TimeRange> timeRangesForQuickRequest = new HashMap<>();
+        final Map<String, TimeRange> timeRangesForSlowRequest = new HashMap<>();
         for (final CompetitorDTO competitor : competitorsToShow) {
             final TimeRange timeRangeNotToRequestAgain = getTimeRangeNotToRequestAgain(competitor);
             // The cache must be cleared upon result processing if the detail type has changed to a different, non-null one,
             // or the timeRangeNeeded does not touch/overlap the timeRangeAlreadyRequested
-            if (detailType != null && detailType != detailTypesRequested.get(competitor)
+            if (detailType != null && detailType != detailTypesRequestedByCompetitorIdsAsStrings.get(competitor.getIdAsString())
              || (timeRangeNotToRequestAgain != null && !timeRangeNeeded.touches(timeRangeNotToRequestAgain))) {
-                mustClearCacheForTheseCompetitors.add(competitor);
+                mustClearCacheForTheseCompetitorIdsAsString.add(competitor.getIdAsString());
                 ignoreResultsForCompetitorInPendingRequests(competitor);
-                timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
-                timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
-                timeRangesRequested.put(competitor, timeRangeNeeded);
+                timeRangesForQuickRequest.put(competitor.getIdAsString(), quickTipTimeRange);
+                timeRangesForSlowRequest.put(competitor.getIdAsString(), timeRangeNeeded);
+                timeRangesRequestedByCompetitorIdAsString.put(competitor.getIdAsString(), timeRangeNeeded);
             } else {
                 if (timeRangeNotToRequestAgain == null) {
                     // we need to ask for the full time range needed because there is no data in the cache yet; cache clearing not necessary
-                    timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
-                    timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
-                    timeRangesRequested.put(competitor, timeRangeNeeded);
+                    timeRangesForQuickRequest.put(competitor.getIdAsString(), quickTipTimeRange);
+                    timeRangesForSlowRequest.put(competitor.getIdAsString(), timeRangeNeeded);
+                    timeRangesRequestedByCompetitorIdAsString.put(competitor.getIdAsString(), timeRangeNeeded);
                 } else {
                     final MultiTimeRange timeRangesToRequest = timeRangeNeeded.subtract(timeRangeNotToRequestAgain);
                     if (Util.size(timeRangesToRequest) > 1) {
@@ -937,35 +937,35 @@ public class FixesAndTails {
                         // don't want to make another round trip for this infrequent case (probably occurs only when tail length
                         // is extended in play/live mode beyond cached fixes). We will instead ask for the full segment and merge its
                         // fixes
-                        timeRangesForQuickRequest.put(competitor, quickTipTimeRange);
-                        timeRangesForSlowRequest.put(competitor, timeRangeNeeded);
-                        timeRangesRequested.put(competitor, timeRangeNeeded);
+                        timeRangesForQuickRequest.put(competitor.getIdAsString(), quickTipTimeRange);
+                        timeRangesForSlowRequest.put(competitor.getIdAsString(), timeRangeNeeded);
+                        timeRangesRequestedByCompetitorIdAsString.put(competitor.getIdAsString(), timeRangeNeeded);
                     } else {
                         if (!Util.isEmpty(timeRangesToRequest)) {
                             final TimeRange timeRangeToRequest = timeRangesToRequest.iterator().next();
                             // The single time range that is missing could be before or after the cached fixes.
                             // Anything before the cached fixes shall be loaded with the slow request:
                             if (timeRangeToRequest.startsBefore(timeRangeNotToRequestAgain)) {
-                                timeRangesForSlowRequest.put(competitor, timeRangeToRequest);
+                                timeRangesForSlowRequest.put(competitor.getIdAsString(), timeRangeToRequest);
                             } else {
                                 // A segment to load after the cached fixes may need to be split into two:
                                 // a quick segment with maximum length MAX_DURATION_FOR_QUICK_REQUESTS, and
                                 // a slow segment with the remaining part of the time range to request.
                                 if (timeRangeToRequest.getDuration().compareTo(MAX_DURATION_FOR_QUICK_REQUESTS) <= 0) {
-                                    timeRangesForQuickRequest.put(competitor, timeRangeToRequest);
+                                    timeRangesForQuickRequest.put(competitor.getIdAsString(), timeRangeToRequest);
                                 } else {
-                                    timeRangesForQuickRequest.put(competitor, TimeRange.create(timeRangeToRequest.to().minus(MAX_DURATION_FOR_QUICK_REQUESTS), timeRangeToRequest.to()));
-                                    timeRangesForSlowRequest.put(competitor, TimeRange.create(timeRangeToRequest.from(), timeRangeToRequest.to().minus(MAX_DURATION_FOR_QUICK_REQUESTS)));
+                                    timeRangesForQuickRequest.put(competitor.getIdAsString(), TimeRange.create(timeRangeToRequest.to().minus(MAX_DURATION_FOR_QUICK_REQUESTS), timeRangeToRequest.to()));
+                                    timeRangesForSlowRequest.put(competitor.getIdAsString(), TimeRange.create(timeRangeToRequest.from(), timeRangeToRequest.to().minus(MAX_DURATION_FOR_QUICK_REQUESTS)));
                                 }
                             }
-                            timeRangesRequested.put(competitor, timeRangeToRequest.extend(timeRangesRequested.get(competitor)));
+                            timeRangesRequestedByCompetitorIdAsString.put(competitor.getIdAsString(), timeRangeToRequest.extend(timeRangesRequestedByCompetitorIdAsString.get(competitor.getIdAsString())));
                         }
                     }
                 }
             }
-            detailTypesRequested.put(competitor, detailType);
+            detailTypesRequestedByCompetitorIdsAsStrings.put(competitor.getIdAsString(), detailType);
         }
-        final PositionRequest quick = new PositionRequest(timeRangesForQuickRequest, mustClearCacheForTheseCompetitors, detailType, transitionTimeInMillis);
+        final PositionRequest quick = new PositionRequest(timeRangesForQuickRequest, mustClearCacheForTheseCompetitorIdsAsString, detailType, transitionTimeInMillis);
         final PositionRequest slow = new PositionRequest(timeRangesForSlowRequest, quick); // entangle with quick request
         inFlightRequests.add(quick);
         inFlightRequests.add(slow);
@@ -979,7 +979,7 @@ public class FixesAndTails {
      * 
      * This first looks at what has been <em>requested</em> through
      * {@link #computeFromAndTo(Date, Iterable, long, long, DetailType)} with the {@link PositionRequest} objects
-     * returned from it. These time ranges are stored in {@link #timeRangesRequested}, and this is what will be returned
+     * returned from it. These time ranges are stored in {@link #timeRangesRequestedByCompetitorIdAsString}, and this is what will be returned
      * if any in-flight request will clear the {@code competitor}'s cache.
      * <p>
      * 
@@ -992,7 +992,7 @@ public class FixesAndTails {
      * it into the cache.
      */
     private TimeRange getTimeRangeNotToRequestAgain(CompetitorDTO competitor) {
-        final TimeRange timeRangeRequestedForCompetitor = timeRangesRequested.get(competitor);
+        final TimeRange timeRangeRequestedForCompetitor = timeRangesRequestedByCompetitorIdAsString.get(competitor.getIdAsString());
         boolean inFlightRequestWillClearCacheForCompetitor = false;
         for (final PositionRequest inFlightRequest : inFlightRequests) {
             if (inFlightRequest.isMustClearCacheForCompetitor(competitor)) {
@@ -1043,7 +1043,7 @@ public class FixesAndTails {
 
 
     /**
-     * Determines whether an index for a competitor lies in [{@link #firstShownFix}, {@link #lastShownFix}], i.e. the
+     * Determines whether an index for a competitor lies in [{@link #firstShownFixByCompetitorIdsAsStrings}, {@link #lastShownFixByCompetitorIdsAsStrings}], i.e. the
      * index is included in the competitors tail.
      * 
      * @param competitor
@@ -1054,11 +1054,11 @@ public class FixesAndTails {
      */
     protected boolean isIndexShown(CompetitorDTO competitor, int index) {
         final boolean result;
-        if (getFirstShownFix(competitor) == null || lastShownFix.get(competitor) == null) {
+        if (getFirstShownFix(competitor) == null || lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) == null) {
             result = false;
         } else {
-            final int first = firstShownFix.get(competitor);
-            final int last  = lastShownFix.get(competitor);
+            final int first = firstShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+            final int last  = lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
             result = index >= first && index <= last;
         }
         return result;
@@ -1086,13 +1086,13 @@ public class FixesAndTails {
         boolean minSet = false;
         int minIndex = -1;
         // Check if the previously found minimum is still shown and use its value
-        if (minDetailValueFix.containsKey(competitor)) {
-            int minFix = minDetailValueFix.get(competitor);
+        if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())) {
+            int minFix = minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
             if (minFix < 0 || !isIndexShown(competitor, minFix)) {
-                minDetailValueFix.remove(competitor);
+                minDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
                 startIndex = getFirstShownFix(competitor);
-            } else if (minFix < fixes.get(competitor).size() && fixes.get(competitor).get(minFix).detailValue != null) {
-                min = fixes.get(competitor).get(minFix).detailValue;
+            } else if (minFix < fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() && fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(minFix).detailValue != null) {
+                min = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(minFix).detailValue;
                 minSet = true;
             }
         }
@@ -1100,25 +1100,25 @@ public class FixesAndTails {
         boolean maxSet = false;
         int maxIndex = -1;
         // Check if the previously found maximum is still shown and use its value
-        if (maxDetailValueFix.containsKey(competitor)) {
-            int maxFix = maxDetailValueFix.get(competitor);
+        if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())) {
+            int maxFix = maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
             if (maxFix < 0 || !isIndexShown(competitor, maxFix)) {
-                maxDetailValueFix.remove(competitor);
+                maxDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
                 if (startIndex == null) {
                     startIndex = getFirstShownFix(competitor);
                 } else if (getFirstShownFix(competitor) != null) {
                     startIndex = Math.min(startIndex, getFirstShownFix(competitor));
                 }
-            } else if (maxFix < fixes.get(competitor).size() && fixes.get(competitor).get(maxFix).detailValue != null) {
-                max = fixes.get(competitor).get(maxFix).detailValue;
+            } else if (maxFix < fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() && fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(maxFix).detailValue != null) {
+                max = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(maxFix).detailValue;
                 maxSet = true;
             }
         }
         // If the startIndex has not been reset to the beginning of the shown range because the min/max value has just
         // left shown range it will now be set to the first not already searched index
         if (startIndex == null) {
-            if (lastSearchedFix.containsKey(competitor)) {
-                startIndex = lastSearchedFix.get(competitor) + 1; // FIXME bug5921: what if, e.g., the tail length was increased and only older fixes were added to the tail? Wouldn't we then have to search in those older fixes? mergeFixes(...) may set lastSearchedFix to an index less than firstShownFix
+            if (lastSearchedFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())) {
+                startIndex = lastSearchedFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) + 1; // FIXME bug5921: what if, e.g., the tail length was increased and only older fixes were added to the tail? Wouldn't we then have to search in those older fixes? mergeFixes(...) may set lastSearchedFix to an index less than firstShownFix
             }
             if (startIndex == null || !isIndexShown(competitor, startIndex)) {
                 startIndex = getFirstShownFix(competitor) != null && getFirstShownFix(competitor) != -1
@@ -1127,13 +1127,13 @@ public class FixesAndTails {
         }
         if (startIndex < 0) {
             // If a tail is present but has no path getFirstShownFix will return -1
-            if (fixes.get(competitor).size() == 0) return;
+            if (fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() == 0) return;
             startIndex = 0;
         }
-        int endIndex = lastShownFix.containsKey(competitor) && lastShownFix.get(competitor) != null
-                    && lastShownFix.get(competitor) != null && lastShownFix.get(competitor) != -1 ?
-                    lastShownFix.get(competitor) : fixes.get(competitor).size() - 1;
-        List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(competitor);
+        int endIndex = lastShownFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null
+                    && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1 ?
+                    lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) : fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() - 1;
+        List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
         for (int i = startIndex; i <= endIndex; i++) {
             final Double value = fixesForCompetitor.get(i).detailValue;
             if (value != null) {
@@ -1158,28 +1158,28 @@ public class FixesAndTails {
             }
         }
         if (minIndex > -1) {
-            minDetailValueFix.put(competitor, minIndex);
+            minDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), minIndex);
         }
         if (maxIndex > -1) {
-            maxDetailValueFix.put(competitor, maxIndex);
+            maxDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), maxIndex);
         }
-        lastSearchedFix.put(competitor, endIndex); // FIXME bug5921: this makes lastSearchedFix inclusive; however, mergeFixes(...) seems to assume it's exclusive, setting it to the minimum insert index for new merged fixes
+        lastSearchedFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), endIndex); // FIXME bug5921: this makes lastSearchedFix inclusive; however, mergeFixes(...) seems to assume it's exclusive, setting it to the minimum insert index for new merged fixes
     }
 
     /**
      * Resets the search so that the next iteration will start from the beginning.
      */
     protected void resetDetailValueSearch() {
-        lastSearchedFix.clear();
-        minDetailValueFix.clear();
-        maxDetailValueFix.clear();
+        lastSearchedFixByCompetitorIdsAsStrings.clear();
+        minDetailValueFixByCompetitorIdsAsStrings.clear();
+        maxDetailValueFixByCompetitorIdsAsStrings.clear();
     }
 
     /**
      * Updates the fleet wide {@link #detailValueBoundaries} with the current maximum and minimum detailValues. To do
      * so, each competitor's (in parameter {@code competitors}) tail will be searched and then the maximum and minimum
-     * search results will be collected. The findings are recorded as a side effect into {@link #minDetailValueFix} and
-     * {@link #maxDetailValueFix}. Finally {@link #detailValueBoundaries} will be
+     * search results will be collected. The findings are recorded as a side effect into {@link #minDetailValueFixByCompetitorIdsAsStrings} and
+     * {@link #maxDetailValueFixByCompetitorIdsAsStrings}. Finally {@link #detailValueBoundaries} will be
      * {@link ValueRangeFlexibleBoundaries#setMinMax(double, double) updated}.
      * 
      * @param competitors
@@ -1195,12 +1195,12 @@ public class FixesAndTails {
         for (CompetitorDTO competitor : competitors) {
             searchMinMaxDetailValue(competitor);
             // Find minimum value across all boats
-            if (minDetailValueFix.containsKey(competitor) && minDetailValueFix.get(competitor) != null && minDetailValueFix.get(competitor) != -1) {
-                int index = minDetailValueFix.get(competitor);
-                if (!fixes.containsKey(competitor) || fixes.get(competitor) == null || index >= fixes.get(competitor).size()) {
-                    minDetailValueFix.put(competitor, -1);
+            if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) && minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1) {
+                int index = minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+                if (!fixesByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) || fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()) == null || index >= fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size()) {
+                    minDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), -1);
                 } else {
-                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixes.get(competitor).get(index);
+                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(index);
                     if (!minSet || competitorFix.detailValue != null && competitorFix.detailValue < min) {
                         min = competitorFix.detailValue;
                         minSet = true;
@@ -1208,12 +1208,12 @@ public class FixesAndTails {
                 }
             }
             // Find maximum value across all boats
-            if (maxDetailValueFix.containsKey(competitor) && maxDetailValueFix.get(competitor) != null && maxDetailValueFix.get(competitor) != -1) {
-                int index = maxDetailValueFix.get(competitor);
-                if (!fixes.containsKey(competitor) || fixes.get(competitor) == null || index >= fixes.get(competitor).size()) {
-                    maxDetailValueFix.put(competitor, -1);
+            if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) && maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1) {
+                int index = maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+                if (!fixesByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) || fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()) == null || index >= fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size()) {
+                    maxDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), -1);
                 } else {
-                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixes.get(competitor).get(index);
+                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(index);
                     if (!maxSet || competitorFix.detailValue != null && competitorFix.detailValue > max) {
                         max = competitorFix.detailValue;
                         maxSet = true;
@@ -1253,7 +1253,7 @@ public class FixesAndTails {
      *         {@link Double} of the respective value.
      */
     protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
-        final Integer firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
+        final Integer firstShownFixForCompetitor = firstShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
         int indexOfFirstShownFix = firstShownFixForCompetitor == null ? -1 : firstShownFixForCompetitor;
         try {
             return getFixes(competitorDTO).get(indexOfFirstShownFix + index).detailValue;
@@ -1269,12 +1269,12 @@ public class FixesAndTails {
      * {@link #createTailAndUpdateIndices(CompetitorWithBoatDTO, Date, Date, TailFactory, DetailType)}.
      */
     protected void clearTails() {
-        for (final Colorline tail : tails.values()) {
+        for (final Colorline tail : tailsByCompetitorIdsAsStrings.values()) {
             tail.clear();
         }
-        tails.clear();
-        firstShownFix.clear();
-        lastShownFix.clear();
+        tailsByCompetitorIdsAsStrings.clear();
+        firstShownFixByCompetitorIdsAsStrings.clear();
+        lastShownFixByCompetitorIdsAsStrings.clear();
         resetDetailValueSearch();
     }
 
@@ -1282,6 +1282,6 @@ public class FixesAndTails {
      * Tells whether a tail currently exists for the {@code competitor}.
      */
     public boolean hasTail(CompetitorDTO competitor) {
-        return tails.containsKey(competitor);
+        return tailsByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString());
     }
 }
