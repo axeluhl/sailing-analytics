@@ -2888,7 +2888,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         selectedDetailType = null;
         metricOverlay.setVisible(false);
         // create new premium list box
-        SailingPremiumListBox lb = new SailingPremiumListBox(stringMessages.none(), "none", TrackedRaceActions.DETAILTYPES, paywallResolver, competitor);
+        SailingPremiumListBox lb = new SailingPremiumListBox(stringMessages.none(), "none", 
+                TrackedRaceActions.DETAILTYPES, paywallResolver, raceMapLifecycle.getRaceDTO());
         fillItemsFromAvailableDetailTypes(lb);
         lb.setVisibleItemCount(1);
         lb.addChangeHandler(new ChangeHandler() {
