@@ -141,18 +141,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         if (competitorsFilterSet == null || competitorsFilterSet.getFilters().isEmpty()) {
             result = allCompetitors;
         } else {
-            final Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<>(allCompetitors);
-            if (competitorsFilterSet != null) {
-                for (Filter<CompetitorDTO> filter : competitorsFilterSet.getFilters()) {
-                    for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
-                        CompetitorDTO competitorDTO = i.next();
-                        if (!filter.matches(competitorDTO)) {
-                            i.remove();
-                        }
-                    }
-                }
-            }
-            result = currentFilteredList;
+            result = Util.filter(allCompetitors, competitorDTO -> competitorsFilterSet.getFilters().stream().allMatch(filter->filter.matches(competitorDTO)));
         }
         return result;
     }
