@@ -580,13 +580,20 @@ public class FixesAndTails {
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         tail.removeAt(intoThisIndex - indexOfFirstShownFix);
                     }
-                    if (intoThisIndex < indexOfFirstShownFix) {
-                        indexOfFirstShownFix--;
+                    {
+                        boolean indicesChanged = false;
+                        if (intoThisIndex < indexOfFirstShownFix) {
+                            indexOfFirstShownFix--;
+                            indicesChanged = true;
+                        }
+                        if (intoThisIndex <= indexOfLastShownFix) {
+                            indexOfLastShownFix--;
+                            indicesChanged = true;
+                        }
+                        if (indicesChanged) {
+                            updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
+                        }
                     }
-                    if (intoThisIndex <= indexOfLastShownFix) {
-                        indexOfLastShownFix--;
-                    }
-                    updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                     // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes
                     if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString())) {
                         if (intoThisIndex < minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
@@ -616,13 +623,20 @@ public class FixesAndTails {
                         tail.insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                         // TODO bug5921 / bug5925: check if min/max value and adjust minDetailValueFix/maxDetailValueFix incrementally 
                     }
-                    if (intoThisIndex < indexOfFirstShownFix) {
-                        indexOfFirstShownFix++;
+                    {
+                        boolean indicesChanged = false;
+                        if (intoThisIndex < indexOfFirstShownFix) {
+                            indexOfFirstShownFix++;
+                            indicesChanged = true;
+                        }
+                        if (intoThisIndex <= indexOfLastShownFix) {
+                            indexOfLastShownFix++;
+                            indicesChanged = true;
+                        }
+                        if (indicesChanged) {
+                            updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
+                        }
                     }
-                    if (intoThisIndex <= indexOfLastShownFix) {
-                        indexOfLastShownFix++;
-                    }
-                    updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                     if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
                         minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) + 1);
                     }
@@ -636,13 +650,20 @@ public class FixesAndTails {
                         if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
                             tail.removeAt(intoThisIndex-1 - indexOfFirstShownFix);
                         }
-                        if (intoThisIndex-1 < indexOfFirstShownFix) {
-                            indexOfFirstShownFix--;
+                        {
+                            boolean indicesChanged = false;
+                            if (intoThisIndex-1 < indexOfFirstShownFix) {
+                                indexOfFirstShownFix--;
+                                indicesChanged = true;
+                            }
+                            if (intoThisIndex-1 <= indexOfLastShownFix) {
+                                indexOfLastShownFix--;
+                                indicesChanged = true;
+                            }
+                            if (indicesChanged) {
+                                updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
+                            }
                         }
-                        if (intoThisIndex-1 <= indexOfLastShownFix) {
-                            indexOfLastShownFix--;
-                        }
-                        updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                         if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex - 1 <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
                             minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
                         }
