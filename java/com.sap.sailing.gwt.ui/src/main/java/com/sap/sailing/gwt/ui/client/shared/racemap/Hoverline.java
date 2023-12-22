@@ -36,7 +36,7 @@ public class Hoverline {
         }
         options.setVisible(false);
         options.setColorMode(ColorlineMode.MONOCHROMATIC);
-        options.setColorProvider((i) -> polylineOptions.getStrokeColor());
+        options.setColorProvider(indexIntoTail -> polylineOptions.getStrokeColor());
         hoverline = new Colorline(options);
         hoverline.setMap(polyline.getMap());
         hoverline.setPath(polyline.getPath());

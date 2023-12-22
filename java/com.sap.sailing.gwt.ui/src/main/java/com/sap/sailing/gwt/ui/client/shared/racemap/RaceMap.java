@@ -3450,16 +3450,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         switch (displayMode) {
         case DEFAULT:
             options.setColorMode(ColorlineMode.MONOCHROMATIC);
-            options.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+            options.setColorProvider(fixIndexInTail -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
             options.setStrokeWeight(1);
             break;
         case SELECTED:
             options.setColorMode(ColorlineMode.POLYCHROMATIC);
-            options.setColorProvider(i -> {
+            options.setColorProvider(fixIndexInTail -> {
                 final String resultColor;
                 final Double detailValue;
                 // If a DetailType has been selected and we are not currently waiting for the first update with the new values
-                if (selectedDetailType != null && !selectedDetailTypeChanged && (detailValue = fixesAndTails.getDetailValueAt(competitor, i)) != null) {
+                if (selectedDetailType != null && !selectedDetailTypeChanged && (detailValue = fixesAndTails.getDetailValueAt(competitor, fixIndexInTail)) != null) {
                     resultColor = tailColorMapper.getColor(detailValue);
                 } else {
                     resultColor = competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
@@ -3470,7 +3470,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             break;
         case NOT_SELECTED:
             options.setColorMode(ColorlineMode.MONOCHROMATIC);
-            options.setColorProvider((i) -> LOWLIGHTED_TAIL_COLOR.getAsHtml());
+            options.setColorProvider(fixIndexInTail -> LOWLIGHTED_TAIL_COLOR.getAsHtml());
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
             break;
         }
@@ -3488,7 +3488,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         result.setMap(map);
         ColorlineOptions hoverlineOptions = new ColorlineOptions(options);
         hoverlineOptions.setColorMode(ColorlineMode.MONOCHROMATIC);
-        hoverlineOptions.setColorProvider(fixIndex -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+        hoverlineOptions.setColorProvider(fixIndexInTail -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
         Hoverline resultHoverline = new Hoverline(result, hoverlineOptions, this);
         final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override
