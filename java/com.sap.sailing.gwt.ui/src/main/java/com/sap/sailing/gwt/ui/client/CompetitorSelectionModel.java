@@ -137,18 +137,24 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Iterable<CompetitorDTO> getFilteredCompetitors() {
-        Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<>(allCompetitors);
-        if (competitorsFilterSet != null) {
-            for (Filter<CompetitorDTO> filter : competitorsFilterSet.getFilters()) {
-                for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
-                    CompetitorDTO competitorDTO = i.next();
-                    if (!filter.matches(competitorDTO)) {
-                        i.remove();
+        final Iterable<CompetitorDTO> result;
+        if (competitorsFilterSet == null || competitorsFilterSet.getFilters().isEmpty()) {
+            result = allCompetitors;
+        } else {
+            final Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<>(allCompetitors);
+            if (competitorsFilterSet != null) {
+                for (Filter<CompetitorDTO> filter : competitorsFilterSet.getFilters()) {
+                    for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
+                        CompetitorDTO competitorDTO = i.next();
+                        if (!filter.matches(competitorDTO)) {
+                            i.remove();
+                        }
                     }
                 }
             }
+            result = currentFilteredList;
         }
-        return currentFilteredList;
+        return result;
     }
     
     public void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {
