@@ -843,9 +843,9 @@ public class FixesAndTails {
                     }
                     tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                     // TODO bug5921: adjust min/max values as we visit all fixes constituting the new tail contents anyhow
+                    last = i;
                 }
             }
-            last = i-1;
         }
         if (last < 0 && first >= 0) {
             GWT.log("Inconsistency: last < 0 but first=="+first+" for competitor "+competitorDTO);
