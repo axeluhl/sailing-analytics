@@ -2888,8 +2888,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         selectedDetailType = null;
         metricOverlay.setVisible(false);
         // create new premium list box
-        SailingPremiumListBox lb = new SailingPremiumListBox(stringMessages.none(), "none", 
-                TrackedRaceActions.DETAILTYPES, paywallResolver, raceMapLifecycle.getRaceDTO());
+        final String EMPTY_VALUE = "none";
+        SailingPremiumListBox lb = new SailingPremiumListBox(stringMessages.none(), EMPTY_VALUE, 
+                TrackedRaceActions.COLORED_TAILS, paywallResolver, raceMapLifecycle.getRaceDTO());
         fillItemsFromAvailableDetailTypes(lb);
         lb.setVisibleItemCount(1);
         lb.addChangeHandler(new ChangeHandler() {
@@ -2897,7 +2898,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             public void onChange(ChangeEvent event) {
                 String value = lb.getSelectedValue();
                 DetailType previous = selectedDetailType;
-                if (value == null || value.equals("none")) {
+                if (value == null || value.equals(EMPTY_VALUE)) {
                     selectedDetailType = null;
                     metricOverlay.setVisible(false);
                 } else {
