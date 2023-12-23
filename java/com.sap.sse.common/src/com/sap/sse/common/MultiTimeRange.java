@@ -2,6 +2,8 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.impl.MultiTimeRangeImpl;
+
 /**
  * A minimal sequence of non-overlapping, non-touching, non-{@link TimeRange#isEmpty() empty} {@link TimeRange} objects.
  * The iteration order is from earlier to later time range. An object of this type may be empty. Only the last
@@ -18,6 +20,14 @@ import java.io.Serializable;
  *
  */
 public interface MultiTimeRange extends Iterable<TimeRange>, Serializable {
+    static MultiTimeRange of(TimeRange... timeRanges) {
+        return new MultiTimeRangeImpl(timeRanges);
+    }
+    
+    static MultiTimeRange of(Iterable<TimeRange> timeRanges) {
+        return new MultiTimeRangeImpl(timeRanges);
+    }
+    
     /**
      * @return a multi time range that {@link #includes(MultiTimeRange) includes} the {@code other} multi time range and
      *         {@code this}, and that {@link #includes(TimePoint) includes} only time points that are
