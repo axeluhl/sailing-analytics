@@ -2868,9 +2868,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private SailingPremiumListBox createDetailTypePremiumList(CompetitorDTO competitor) {
-        // reset metric overlay
-        selectedDetailType = null;
-        metricOverlay.setVisible(false);
         // create new premium list box
         final String EMPTY_VALUE = "none";
         SailingPremiumListBox lb = new SailingPremiumListBox(stringMessages.none(), EMPTY_VALUE, 
