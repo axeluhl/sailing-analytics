@@ -122,17 +122,17 @@ public abstract class PremiumListBox extends PremiumUiElement implements HasAllK
     }
 
     public int getSelectedIndex() {
-        int selectedIndex = 0;
+        final int selectedIndex;
         if (hasPermission()) {
             selectedIndex = this.listBox.getSelectedIndex();
+        } else {
+            selectedIndex = 0;
         }
         return selectedIndex;
     }
 
     /**
      * If NO permission is granted select empty item (index 0) and return the default empty value.
-     * 
-     * @return
      */
     public String getSelectedValue() {
         if (!hasPermission()) {
