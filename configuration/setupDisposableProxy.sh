@@ -1,12 +1,21 @@
 #!/bin/bash
 
 # Setup script for Amazon Linux 2. May need to update macro definitions for the archive IP. 
-BEARER_TOKEN=$1
-INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
+IP=$1
+BEARER_TOKEN=$2
 HTTP_LOGROTATE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 HTTPD_GIT_REPO_IP="18.135.5.168"
 AWS_CREDENTIALS_IP="52.17.217.83"
+ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
+# Correct authorized keys. May not be necessary if update_authorized_keys is running.
+sudo -E bash <<NESTEDEOF
+sed -i 's/.*sleep 10. //g' ~/.ssh/authorized_keys
+NESTEDEOF
+FIRSTEOF
+ssh -A "root@${IP}" "bash -s" << SECONDEOF  2>&1 
+sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFailure yes/' /etc/ssh/sshd_config
+
 # fstab setup
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
@@ -18,9 +27,7 @@ amazon-linux-extras install epel -y && yum install -y apachetop
 # main conf mandates php7.1
 amazon-linux-extras enable php7.1
 yum install -y php  # also install mod_php
-# Correct authorized keys. May not be necessary if update_authorized_keys is running.
-sed -i 's/.*sleep 10" //g' ~/.ssh/authorized_keys
-sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFailure yes/' /etc/ssh/sshd_config
+
 # setup other users and crontabs to keep repo updated
 cd /home
 GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone ssh://trac@sapsailing.com/home/trac/git
