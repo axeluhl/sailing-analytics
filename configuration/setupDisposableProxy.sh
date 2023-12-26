@@ -108,13 +108,16 @@ mkdir letsencrypt
 mkdir letsencrypt/live
 mkdir letsencrypt/live/sail-insight.com
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
-systemctl start httpd
-#copy aws credentials to apache user
+# copy aws credentials to apache user
 scp -o StrictHostKeyChecking=no  -r "root@${AWS_CREDENTIALS_IP}:~/.aws"  /usr/share/httpd
 chown -R apache:apache /usr/share/httpd
-# # setup releases
+sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config
+# setup releases
 # rsync -av --delete root@sapsailing.com:/var/www/static/releases /home/trac
 # # setup p2
 # rsync -av --delete trac@sapsailing.com:p2-repositories /home/trac
 
+systemctl start httpd
+
+SECONDEOF
 
