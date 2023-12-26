@@ -75,7 +75,6 @@ yum install -y mod_ssl
 ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/archive_instance_setup/mountnvmeswap.service"  /etc/systemd/system/mountnvmeswap.service
 
 ## ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/archive_instance_setup/mountnvmeswap" /usr/local/bin/mountnvmeswap
-ln -s /root/mountnvmeswap /usr/local/bin/mountnvmeswap
 source /root/.bashrc
 ./mountnvmeswap
 # setup logrotate.d/httpd 
@@ -99,7 +98,10 @@ cd ~ && sudo ./aws/install
 ## "/home/${GIT_COPY_USER}/gitwiki/configuration/setupHttpdGitLocal.sh" "httpdConf@18.135.5.168:repo.git"
 /root/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
 # copy key accross
-scp -o StrictHostKeyChecking=no "root@${HTTPD_GIT_REPO_IP}:/root/.ssh/id_ed25519" /root/.ssh
+scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519" /root/.ssh
+scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519.pub" /root/.ssh/temp
+cat /root/.ssh/temp  >> /root/.ssh/authorized_keys
+rm /root/.ssh/temp
 # certs setup
 cd /etc
 mkdir letsencrypt
