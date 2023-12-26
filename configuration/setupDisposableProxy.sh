@@ -45,7 +45,8 @@ ln -s  "/home/${GIT_COPY_USER}/gitwiki/configuration/on-site-scripts/paris2024/n
 ln -s  "/home/${GIT_COPY_USER}/gitwiki/configuration/sync-repo-and-execute-cmd.sh" /root
 ln -s  /home/${GIT_COPY_USER}/gitwiki/configuration/switchoverArchive.sh 
 ln -s  /home/${GIT_COPY_USER}/gitwiki/configuration/crontabs/environments/crontab-reverse-proxy /root/crontab   # make sure to check the correct crontab is used
-cp  /home/${GIT_COPY_USER}/gitwiki/configuration/httpd/cgi-bin/reverseProxyHealthcheck.sh /var/www/cgi-bin
+## cp  /home/${GIT_COPY_USER}/gitwiki/configuration/httpd/cgi-bin/reverseProxyHealthcheck.sh /var/www/cgi-bin
+cp /root/reverseProxyHealthcheck.sh /var/www/cgi-bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
 # add basic test page which won't cause redirect error code if used as a health check.
@@ -79,11 +80,11 @@ source /root/.bashrc
 ./mountnvmeswap
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
-echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$INSTANCE_IP4" >>/var/log/sailing.out
+echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
 rm $HTTP_LOGROTATE
 ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/logrotate-httpd /etc/logrotate.d/httpd"
-mkdir --parents "/var/log/old/REVERSE_PROXIES/${INSTANCE_IP4}"
-sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${INSTANCE_IP4}|" $HTTP_LOGROTATE 
+mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
+sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${IP}|" $HTTP_LOGROTATE 
 # logrotate.conf setup
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
