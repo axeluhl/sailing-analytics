@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.impl.components;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -93,6 +94,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
             markPassingTimePoint = markPassingTimePoint.plus(legDuration);
         }
         trackedRace.updateMarkPassings(competitorA, markPassingsForCompetitor);
+        assertNotNull(trackedRace.getEndOfRace());
         // now run the actual test:
         Iterable<HasTackTypeSegmentContext> allTTSegments = retrieveData();
         Distance sumDistance = new NullDistance();
@@ -115,9 +117,5 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
 
     @Test
     public void testingOpenEndedRace() {
-    }
-
-    @Test
-    public void testingFinishedRace() {
     }
 }
