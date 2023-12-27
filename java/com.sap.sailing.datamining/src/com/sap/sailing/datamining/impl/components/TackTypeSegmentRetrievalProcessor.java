@@ -37,7 +37,7 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
     }
 
     @Override
-    protected Iterable<HasTackTypeSegmentContext> retrieveData(HasRaceOfCompetitorContext element) {
+    public Iterable<HasTackTypeSegmentContext> retrieveData(HasRaceOfCompetitorContext element) {
         List<HasTackTypeSegmentContext> tackTypeSegments = new ArrayList<>();
         final TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         final TimePoint startOfRace = element.getTrackedRaceContext().getTrackedRace().getStartOfRace();

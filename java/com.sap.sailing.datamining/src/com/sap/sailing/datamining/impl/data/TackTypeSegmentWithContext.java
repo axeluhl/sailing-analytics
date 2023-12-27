@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -80,9 +81,20 @@ public class TackTypeSegmentWithContext implements HasTackTypeSegmentContext {
         return tackType;
     }
     
+    @Override
     public LegType getLegType() throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTrackedLeg().getLegType(
+        return getTrackedLeg().getLegType(
                 getStartOfTackTypeSegment().plus(getStartOfTackTypeSegment().until(getEndOfTackTypeSegment()).divide(2)));
+    }
+    
+    @Override
+    public int getLegNumber() {
+        final TrackedLeg trackedLeg = getTrackedLeg();
+        return trackedLeg == null ? 0 : getTrackedRace().getRace().getCourse().getIndexOfWaypoint(trackedLeg.getLeg().getTo());
+    }
+
+    private TrackedLeg getTrackedLeg() {
+        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfTackTypeSegment()).getTrackedLeg();
     }
     
     @Override

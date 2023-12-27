@@ -66,7 +66,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         final HasLeaderboardContext leaderboardContext = new LeaderboardWithContext(leaderboard, null);
         final HasTrackedRaceContext trackedRaceContext = new TrackedRaceWithContext(leaderboardContext,
                 trackedRace.getTrackedRegatta().getRegatta(), null, null, trackedRace);
-        raceOfCompContext = new RaceOfCompetitorWithContext(trackedRaceContext, competitorA);
+        raceOfCompContext = new RaceOfCompetitorWithContext(trackedRaceContext, competitorA, TackTypeSegmentsDataMiningSettings.createDefaultSettings());
         resultTTSegmentsRetrieval = new TackTypeSegmentRetrievalProcessor(null, Collections.emptySet(), TackTypeSegmentsDataMiningSettings.createDefaultSettings(), 0, null);
     }
     

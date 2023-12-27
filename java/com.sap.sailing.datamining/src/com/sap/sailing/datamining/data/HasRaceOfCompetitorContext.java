@@ -172,4 +172,10 @@ public interface HasRaceOfCompetitorContext {
     
     @Statistic(messageKey="AverageRaceWindSpeed")
     Speed getAverageRaceWindSpeed();
+
+    @Statistic(messageKey="RatioDurationLongVsShortTack", resultDecimals=2)
+    public double getRatioDurationLongVsShortTack();
+    
+    @Statistic(messageKey="RatioDistanceLongVsShortTack", resultDecimals=2)
+    public double getRatioDistanceLongVsShortTack();
 }

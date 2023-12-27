@@ -89,7 +89,9 @@ public class SailingDataRetrievalChainDefinitions {
         //
         final DataRetrieverChainDefinition<RacingEventService, HasRaceOfCompetitorContext> raceOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasRaceOfCompetitorContext.class, "RaceOfCompetitorSailingDomainRetrieverChain");
-        raceOfCompetitorRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, RaceOfCompetitorRetrievalProcessor.class, HasRaceOfCompetitorContext.class, "Competitor");
+        // use TackTypeSegmentsDataMiningSettings here to support the per-leg statistics about tack type segments
+        raceOfCompetitorRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, RaceOfCompetitorRetrievalProcessor.class, HasRaceOfCompetitorContext.class,
+                TackTypeSegmentsDataMiningSettings.class, TackTypeSegmentsDataMiningSettings.createDefaultSettings(), "Competitor");
         dataRetrieverChainDefinitions.add(raceOfCompetitorRetrieverChainDefinition);
         //
         final DataRetrieverChainDefinition<RacingEventService, HasCompetitorDayContext> competitorDayRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
@@ -123,8 +125,9 @@ public class SailingDataRetrievalChainDefinitions {
         //
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 legRetrieverChainDefinition, HasTrackedLegOfCompetitorContext.class, "LegOfCompetitorSailingDomainRetrieverChain");
+        // use TackTypeSegmentsDataMiningSettings here to support the per-leg statistics about tack type segments
         legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class, TrackedLegOfCompetitorRetrievalProcessor.class,
-                HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
+                HasTrackedLegOfCompetitorContext.class, TackTypeSegmentsDataMiningSettings.class, TackTypeSegmentsDataMiningSettings.createDefaultSettings(), "LegOfCompetitor");
         dataRetrieverChainDefinitions.add(legOfCompetitorRetrieverChainDefinition);
         //
         final DataRetrieverChainDefinition<RacingEventService, HasGPSFixContext> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(

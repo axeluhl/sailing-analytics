@@ -24,6 +24,9 @@ public interface HasTackTypeSegmentContext {
     @Dimension(messageKey="LegType")
     LegType getLegType() throws NoWindException;
     
+    @Dimension(messageKey="LegNumber")
+    int getLegNumber();
+
     @Dimension(messageKey="TackTypeSegmentName")
     String getName();
     
