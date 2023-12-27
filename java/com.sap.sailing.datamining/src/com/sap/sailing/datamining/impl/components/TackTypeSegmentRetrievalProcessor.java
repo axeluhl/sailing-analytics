@@ -66,12 +66,6 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                                 break;
                             }
                             gpsFix = i.next();
-                            try {
-                                //no null case like line 87, because for loop checks that mark passing at leg start is not finish mark passing
-                                nextTackType = trackedLegOfCompetitor.getTackType(gpsFix.getTimePoint());
-                            } catch (NoWindException e) {
-                                nextTackType = null;
-                            }
                             while (nextMarkPassing != null && !gpsFix.getTimePoint().before(nextMarkPassing.getTimePoint())) {
                                 // reached leg's end; complete the current segment if not empty and move through mark passings
                                 // iterator until having found the leg the gpsFix is in, while moving the trackedLegOfCompetitor along
@@ -81,11 +75,16 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                                             nextMarkPassing.getTimePoint(), currentTackType);
                                     segmentEmpty = gpsFix.getTimePoint().equals(nextMarkPassing.getTimePoint()); // if the fix is exactly at leg start
                                     startOfCurrentSegment = nextMarkPassing.getTimePoint();
-                                    currentTackType = nextTackType;
                                 }
                                 // if nextMarkPassing is last MarkPassing there will be no leg after, trackedLeg is null
                                 trackedLegOfCompetitor = nextMarkPassing.getWaypoint()==finish ? null : trackedRace.getTrackedLegStartingAt(nextMarkPassing.getWaypoint()).getTrackedLeg(competitor);
                                 nextMarkPassing = markPassingIterator.hasNext() ? markPassingIterator.next() : null;
+                            }
+                            try {
+                                // no null case like line 87, because for loop checks that mark passing at leg start is not finish mark passing
+                                nextTackType = trackedLegOfCompetitor.getTackType(gpsFix.getTimePoint());
+                            } catch (NoWindException e) {
+                                nextTackType = null;
                             }
                             // invariant: nextMarkPassing is either null or after gpsFix's time and representing the passing of the mark at the end
                             // of the leg gpsFix is in; trackedLegOfCompetitor corresponds to the leg gpsFix is in
@@ -94,10 +93,10 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                                         gpsFix.getTimePoint() /* don't include the last interval ending at the non-TackType fix */, currentTackType);
                                 segmentEmpty = true; // because gpsFix is now exactly at the beginning of the new segment
                                 startOfCurrentSegment = gpsFix.getTimePoint();
-                                currentTackType = nextTackType;
                             } else {
                                 segmentEmpty = false; // gpsFix is in the current segment
                             }
+                            currentTackType = nextTackType;
                         }
                     } finally {
                         gpsFixTrack.unlockAfterRead();

@@ -1251,14 +1251,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         final TackType result;
         final MarkPassing start = getMarkPassingForLegStart();
         final MarkPassing end = getMarkPassingForLegEnd();
-        if (start != null && !timePoint.before(start.getTimePoint()) && end != null
-                && timePoint.before(end.getTimePoint())) {
+        if (start != null && !timePoint.before(start.getTimePoint()) && (end == null || timePoint.before(end.getTimePoint()))) {
             // TODO: missing solution for cases with PassingInstruction Offset and FixedBearing
-            final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(),
-                    timePoint);
+            final Position waypointPosition = cache.getApproximatePosition(getTrackedRace(), getLeg().getTo(), timePoint);
             final Wind wind = cache.getWind(getTrackedRace(), competitor, timePoint);
-            final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint,
-                    /* extrapolate */ true);
+            final Position competitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
             if (waypointPosition != null && wind != null && competitorPosition != null) {
                 final LegType legType = cache.getLegType(getTrackedLeg(), timePoint);
                 final Bearing windBearing = legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing();

@@ -85,5 +85,10 @@ public class TackTypeSegmentWithContext implements HasTackTypeSegmentContext {
                 getStartOfTackTypeSegment().plus(getStartOfTackTypeSegment().until(getEndOfTackTypeSegment()).divide(2)));
     }
     
-    
+    @Override
+    public String toString() {
+        return "TackTypeSegmentWithContext [gpsFixTrackContext=" + gpsFixTrackContext + ", startOfTackTypeSegment="
+                + startOfTackTypeSegment + ", endOfTackTypeSegment=" + endOfTackTypeSegment + ", tackType=" + tackType
+                + "]";
+    }
 }
