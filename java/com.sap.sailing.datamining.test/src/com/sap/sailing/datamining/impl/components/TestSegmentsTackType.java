@@ -46,9 +46,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TestSegmentsTackType extends StoredTrackBasedTest {
 
-    DynamicTrackedRaceImpl trackedRace;
-    CompetitorWithBoat competitorA;
-    Iterable<HasTackTypeSegmentContext> allTTSegments;
+    private DynamicTrackedRaceImpl trackedRace;
+    private CompetitorWithBoat competitorA;
+    private HasRaceOfCompetitorContext raceOfCompContext;
+    private TackTypeSegmentRetrievalProcessor resultTTSegmentsRetrieval;
 
     @Before
     public void setup() {
@@ -62,9 +63,12 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         final HasLeaderboardContext leaderboardContext = new LeaderboardWithContext(leaderboard, null);
         final HasTrackedRaceContext trackedRaceContext = new TrackedRaceWithContext(leaderboardContext,
                 trackedRace.getTrackedRegatta().getRegatta(), null, null, trackedRace);
-        final HasRaceOfCompetitorContext raceOfCompContext = new RaceOfCompetitorWithContext(trackedRaceContext, competitorA);
-        final TackTypeSegmentRetrievalProcessor resultTTSegmentsRetrieval = new TackTypeSegmentRetrievalProcessor(null, Collections.emptySet(), TackTypeSegmentsDataMiningSettings.createDefaultSettings(), 0, null);
-        allTTSegments = resultTTSegmentsRetrieval.retrieveData(raceOfCompContext);
+        raceOfCompContext = new RaceOfCompetitorWithContext(trackedRaceContext, competitorA);
+        resultTTSegmentsRetrieval = new TackTypeSegmentRetrievalProcessor(null, Collections.emptySet(), TackTypeSegmentsDataMiningSettings.createDefaultSettings(), 0, null);
+    }
+    
+    private Iterable<HasTackTypeSegmentContext> retrieveData() {
+        return resultTTSegmentsRetrieval.retrieveData(raceOfCompContext);
     }
 
     @Test
@@ -81,7 +85,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
             timePoint = timePoint.plus(timeBetweenFixes);
             currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCog);
         }
-        TimePoint markPassingTimePoint = new MillisecondsTimePoint(trackedRace.getStartOfTracking().asMillis());
+        TimePoint markPassingTimePoint = trackedRace.getStartOfTracking().plus(20);
         final List<MarkPassing> markPassingsForCompetitor = new ArrayList<>();
         final Duration legDuration = Duration.ofSeconds(60);
         for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
@@ -90,13 +94,14 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         }
         trackedRace.updateMarkPassings(competitorA, markPassingsForCompetitor);
         // now run the actual test:
+        Iterable<HasTackTypeSegmentContext> allTTSegments = retrieveData();
         Distance sumDistance = new NullDistance();
         for (HasTackTypeSegmentContext oneTTSegment : allTTSegments) {
             if (oneTTSegment != null) {
                 sumDistance = sumDistance.add(oneTTSegment.getDistance());
             }
         }
-        assertTrue(sumDistance != null);
+        assertTrue(sumDistance.compareTo(Distance.NULL) > 0);
     }
 
     @Test
@@ -105,7 +110,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
     }
 
     @Test
-    public void testingFixExactOnMarkPassing() {
+    public void testingFixExactlyOnMarkPassing() {
     }
 
     @Test
