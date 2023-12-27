@@ -82,7 +82,7 @@ public class TackTypeSegmentRetrievalProcessor extends AbstractRetrievalProcesso
                             }
                             try {
                                 // no null case like line 87, because for loop checks that mark passing at leg start is not finish mark passing
-                                nextTackType = trackedLegOfCompetitor.getTackType(gpsFix.getTimePoint());
+                                nextTackType = trackedLegOfCompetitor == null ? null : trackedLegOfCompetitor.getTackType(gpsFix.getTimePoint());
                             } catch (NoWindException e) {
                                 nextTackType = null;
                             }
