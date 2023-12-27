@@ -384,7 +384,7 @@ public class TimeRangeResultCache<SubResult> {
      *            {@link SubResult} of the trimmed request; this result will be cached
      */
     public void registerResult(TimeRangeAsyncAction<?, ?> action, SubResult subResult) {
-        Request request = requestCache.get(action);
+        final Request request = requestCache.get(action);
         if (request == null) {
             throw new IllegalArgumentException("Attempted to register result for non-existent request: " + action.toString());
         }
@@ -400,7 +400,7 @@ public class TimeRangeResultCache<SubResult> {
      *            {@link Throwable} that occurred
      */
     public void registerFailure(TimeRangeAsyncAction<?, ?> action, Throwable cause) {
-        Request request = requestCache.get(action);
+        final Request request = requestCache.get(action);
         if (request != null) {
             request.onFailure(cause);
         }
@@ -419,7 +419,7 @@ public class TimeRangeResultCache<SubResult> {
      *         requested by {@code action}
      */
     public List<Pair<TimeRange, SubResult>> getResults(TimeRangeAsyncAction<?, ?> action) throws IllegalArgumentException {
-        Request request = requestCache.get(action);
+        final Request request = requestCache.get(action);
         if (request == null) {
             throw new IllegalArgumentException("No request found for action: " + action.toString());
         }
@@ -433,7 +433,7 @@ public class TimeRangeResultCache<SubResult> {
      *            corresponding {@link TimeRangeAsyncAction}
      */
     public void removeRequest(TimeRangeAsyncAction<?, ?> action) throws IllegalArgumentException {
-        Request request = requestCache.get(action);
+        final Request request = requestCache.get(action);
         if (request == null) {
             throw new IllegalArgumentException("No request found for action: " + action.toString());
         }
@@ -457,8 +457,8 @@ public class TimeRangeResultCache<SubResult> {
             TimeRangeAsyncAction<?, ?> action, boolean forceTimeRange) {
         // TODO There is a lot of potential for improvements here
         TimeRange potentiallyTrimmed = toTrim;
-        List<Request> rangesToTrimWithAsList = new LinkedList<>(requestCache.values());
-        List<Request> childrenList = new ArrayList<>();
+        final List<Request> rangesToTrimWithAsList = new LinkedList<>(requestCache.values());
+        final List<Request> childrenList = new ArrayList<>();
         iterationsLoop: for (int i = 0; i < TRIM_MAX_ITERATIONS; i++) {
             boolean rangeWasTrimmedThisIteration = false;
             final Iterator<Request> iter = rangesToTrimWithAsList.iterator();

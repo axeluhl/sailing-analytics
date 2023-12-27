@@ -1262,17 +1262,23 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             if (waypointPosition != null && wind != null && competitorPosition != null) {
                 final LegType legType = cache.getLegType(getTrackedLeg(), timePoint);
                 final Bearing windBearing = legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing();
-                final Bearing cog = getSpeedOverGround(timePoint).getBearing();
-                final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
-                // on reaching legs we won't compare to COG/Wind difference but to a fixed threshold, assuming
-                // that not sailing straight towards the next waypoint is a risk, conceptually making it the short tack
-                final Bearing diffWindToBoat = legType == LegType.REACHING ? MAX_REACHING_TOLERANCE_AWAY_FROM_WAYPOINT :
-                    windBearing.getDifferenceTo(cog).abs();
-                final Bearing diffMarkToBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
-                if (diffMarkToBoat.compareTo(diffWindToBoat) < 0) {
-                    result = TackType.LONGTACK;
+                final SpeedWithBearing cogSog = getSpeedOverGround(timePoint);
+                if (cogSog != null) {
+                    final Bearing cog = cogSog.getBearing();
+                    final Bearing bearingToWaypoint = competitorPosition.getBearingGreatCircle(waypointPosition);
+                    // on reaching legs we won't compare to COG/Wind difference but to a fixed threshold, assuming
+                    // that not sailing straight towards the next waypoint is a risk, conceptually making it the short tack
+                    final Bearing diffWindToBoat = legType == LegType.REACHING ? MAX_REACHING_TOLERANCE_AWAY_FROM_WAYPOINT :
+                        windBearing.getDifferenceTo(cog).abs();
+                    final Bearing diffMarkToBoat = bearingToWaypoint.getDifferenceTo(cog).abs();
+                    if (diffMarkToBoat.compareTo(diffWindToBoat) < 0) {
+                        result = TackType.LONGTACK;
+                    } else {
+                        result = TackType.SHORTTACK;
+                    }
                 } else {
-                    result = TackType.SHORTTACK;
+                    // no COG/SOG could be inferred
+                    result = null;
                 }
             } else {
                 result = null;
