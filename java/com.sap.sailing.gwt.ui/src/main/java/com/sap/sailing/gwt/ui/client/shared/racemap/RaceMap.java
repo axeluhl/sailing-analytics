@@ -3507,7 +3507,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final BoatDTO boat = competitorSelection.getBoat(competitor);
         ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         Colorline result = new Colorline(options);
-        MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
+        MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[points.size()]));
         result.setPath(pointsAsArray);
         result.setMap(map);
         ColorlineOptions hoverlineOptions = new ColorlineOptions(options);
