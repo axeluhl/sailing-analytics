@@ -2816,33 +2816,35 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
                 final Map<CompetitorDTO, TimeRange> timeRange = new HashMap<>();
-                final TimePoint from = new MillisecondsTimePoint(fixesAndTails.getFixes(competitorDTO)
-                        .get(fixesAndTails.getFirstShownFix(competitorDTO)).timepoint);
-                final TimePoint to = new MillisecondsTimePoint(getBoatFix(competitorDTO, timer.getTime()).timepoint);
-                timeRange.put(competitorDTO, new TimeRangeImpl(from, to, true));
-                if (settings.isShowDouglasPeuckerPoints()) {
-                    sailingService.getDouglasPoints(race, timeRange, 3,
-                            new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage(), true /*silentMode */);
-                                }
-    
-                                @Override
-                                public void onSuccess(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result) {
-                                    lastDouglasPeuckerResult = result;
-                                    if (douglasMarkers != null) {
-                                        removeAllMarkDouglasPeuckerpoints();
+                final Integer firstShownFix = fixesAndTails.getFirstShownFix(competitorDTO);
+                if (firstShownFix != null) {
+                    final TimePoint from = new MillisecondsTimePoint(fixesAndTails.getFixes(competitorDTO).get(firstShownFix).timepoint);
+                    final TimePoint to = new MillisecondsTimePoint(getBoatFix(competitorDTO, timer.getTime()).timepoint);
+                    timeRange.put(competitorDTO, new TimeRangeImpl(from, to, true));
+                    if (settings.isShowDouglasPeuckerPoints()) {
+                        sailingService.getDouglasPoints(race, timeRange, 3,
+                                new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage(), true /*silentMode */);
                                     }
-                                    if (!(timer.getPlayState() == PlayStates.Playing)) {
-                                        if (settings.isShowDouglasPeuckerPoints()) {
-                                            showMarkDouglasPeuckerPoints(result);
+        
+                                    @Override
+                                    public void onSuccess(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result) {
+                                        lastDouglasPeuckerResult = result;
+                                        if (douglasMarkers != null) {
+                                            removeAllMarkDouglasPeuckerpoints();
+                                        }
+                                        if (!(timer.getPlayState() == PlayStates.Playing)) {
+                                            if (settings.isShowDouglasPeuckerPoints()) {
+                                                showMarkDouglasPeuckerPoints(result);
+                                            }
                                         }
                                     }
-                                }
-                            });
+                                });
+                    }
+                    maneuverMarkersAndLossIndicators.getAndShowManeuvers(race, timeRange);
                 }
-                maneuverMarkersAndLossIndicators.getAndShowManeuvers(race, timeRange);
             }
         }
         // If a metric is shown a click on any competitor / competitors tail will
@@ -3462,8 +3464,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public void onColorMappingChanged() {
         metricOverlay.updateLegend(fixesAndTails.getDetailValueBoundaries(), tailColorMapper, selectedDetailType);
         for (final CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
-            final ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
-            fixesAndTails.getTail(competitor).setOptions(options);
+            final Colorline tail = fixesAndTails.getTail(competitor);
+            if (tail != null) {
+                final ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
+                tail.setOptions(options);
+            }
         }
     }
 
