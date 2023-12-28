@@ -116,7 +116,6 @@ import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 public class FixesAndTails {
     private static final Duration MAX_DURATION_FOR_QUICK_REQUESTS = Duration.ONE_SECOND.times(10l);
     
-
     /**
      * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous"
      * list of fixes for the competitor. This means the server has no more data for the time interval covered, unless
@@ -173,20 +172,21 @@ public class FixesAndTails {
     private final Map<String, TimeRange> timeRangesRequestedByCompetitorIdAsString;
 
     /**
-     * Stores the index to the smallest found detailValue in {@link #fixesByCompetitorIdsAsStrings} for a given competitor.
+     * Stores the index to the smallest found {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue detailValue} in
+     * {@link #fixesByCompetitorIdsAsStrings} for a given competitor. If a competitor ID is not part of the map's key
+     * set, nothing is known about any minimum detail values on the competitor's visible
+     * {@link #tailsByCompetitorIdsAsStrings tail}.
      */
     private final Map<String, Integer> minDetailValueFixByCompetitorIdsAsStrings;
     
     /**
-     * Stores the index to the largest found detailValue in {@link #fixesByCompetitorIdsAsStrings} for a given competitor.
+     * Stores the index to the largest found {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue detailValue} in
+     * {@link #fixesByCompetitorIdsAsStrings} for a given competitor. If a competitor ID is not part of the map's key
+     * set, nothing is known about any maximum detail values on the competitor's visible
+     * {@link #tailsByCompetitorIdsAsStrings tail}.
      */
     private final Map<String, Integer> maxDetailValueFixByCompetitorIdsAsStrings;
     
-    /**
-     * Stores at what index the last search on the fixes of a given competitor stopped.
-     */
-    private final Map<String, Integer> lastSearchedFixByCompetitorIdsAsStrings;
-
     /**
      * Keeps track of detailValues (stored in {@link GPSFixDTOWithSpeedWindTackAndLegType} in {@link #fixesByCompetitorIdsAsStrings})
      * boundaries so that a {@link ColorMapper} can be used.
@@ -343,7 +343,6 @@ public class FixesAndTails {
         lastShownFixByCompetitorIdsAsStrings = new HashMap<>();
         minDetailValueFixByCompetitorIdsAsStrings = new HashMap<>();
         maxDetailValueFixByCompetitorIdsAsStrings = new HashMap<>();
-        lastSearchedFixByCompetitorIdsAsStrings = new HashMap<>();
         inFlightRequests = new HashSet<>();
         timeRangesRequestedByCompetitorIdAsString = new HashMap<>();
     }
@@ -513,7 +512,6 @@ public class FixesAndTails {
         final Integer lastShownFixForCompetitor = lastShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
         int indexOfLastShownFix = lastShownFixForCompetitor == null ? -2 : lastShownFixForCompetitor;
         final Colorline tail = getTail(competitorDTO);
-        int earliestMergeIndex = -1;
         final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
             @Override
             public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
@@ -525,16 +523,14 @@ public class FixesAndTails {
             if (intoThisIndex < 0) {
                 intoThisIndex = -intoThisIndex-1;
             }
-            if (earliestMergeIndex == -1 || intoThisIndex < earliestMergeIndex) {
-                earliestMergeIndex = intoThisIndex;
-            }
             if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
                 // exactly same time point; replace with fix from mergeThis unless the new fix is extrapolated and there is a later fix in intoThis;
                 // in the (unlikely) case the existing non-extrapolated fix is replaced by an extrapolated one, the indices of the shown fixes
                 // need according adjustments
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
-                    intoThis.set(intoThisIndex, mergeThisFix);
+                    final Double oldDetailValue = intoThis.set(intoThisIndex, mergeThisFix).detailValue;
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) { // false if first/last shown index is -1
+                        adjustMinMaxForReplaced(competitorDTO, intoThisIndex, oldDetailValue, intoThis);
                         tail.setAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                         // if the fix removed had a min/max detailValue then min/maxDetailValueFixByCompetitorIdsAsString will be reset for competitor below
                     }
@@ -543,6 +539,7 @@ public class FixesAndTails {
                     // remove the fix at the respective index with the same time point and adjust indices:
                     intoThis.remove(intoThisIndex);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                        adjustMinMaxForRemoved(competitorDTO, intoThisIndex);
                         tail.removeAt(intoThisIndex - indexOfFirstShownFix);
                         // if the fix removed had a min/max detailValue then min/maxDetailValueFixByCompetitorIdsAsString will be reset for competitor below
                     }
@@ -586,8 +583,8 @@ public class FixesAndTails {
                     intoThis.add(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         // fix inserted at a position currently visualized by tail
+                        adjustMinMaxForInserted(competitorDTO, intoThisIndex, intoThis);
                         tail.insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
-                        // TODO bug5921 / bug5925: check if min/max value and adjust minDetailValueFix/maxDetailValueFix incrementally 
                     }
                     {
                         boolean indicesChanged = false;
@@ -614,6 +611,7 @@ public class FixesAndTails {
                     if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
                         intoThis.remove(intoThisIndex-1);
                         if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
+                            adjustMinMaxForRemoved(competitorDTO, intoThisIndex);
                             tail.removeAt(intoThisIndex-1 - indexOfFirstShownFix);
                         }
                         {
@@ -640,8 +638,118 @@ public class FixesAndTails {
                 }
             }
         }
-        if (earliestMergeIndex != -1) {
-            lastSearchedFixByCompetitorIdsAsStrings.merge(competitorDTO.getIdAsString(), earliestMergeIndex, Math::min); // FIXME bug5921: this may end up being before the firstShownFix
+    }
+
+    /**
+     * The fix with index {@code insertedFixIndex} in {@link #fixesByCompetitorIdsAsStrings} is being inserted into the
+     * visible tail of competitor {@code competitorDTO}. If {@link #minDetailValueFixByCompetitorIdsAsStrings} /
+     * {@link #maxDetailValueFixByCompetitorIdsAsStrings} have a value for the {@code competitorDTO} key, the
+     * {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue detailValue} of that fix is compared to that of the new
+     * fix being added, and if the new fix has a new extreme value, the respective map is updated to hold
+     * {@code fixIndex} for the {@code competitorDTO} key.
+     */
+    private void adjustMinMaxForInserted(final CompetitorDTO competitorDTO, final int insertedFixIndex, final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes) {
+        final GPSFixDTOWithSpeedWindTackAndLegType insertedFix = competitorFixes.get(insertedFixIndex);
+        {
+            final Integer minIndex = minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+            final GPSFixDTOWithSpeedWindTackAndLegType minFix;
+            if (minIndex != null
+                    && (minFix = competitorFixes.get(minIndex)).detailValue != null
+                    && insertedFix.detailValue != null
+                    && insertedFix.detailValue < minFix.detailValue) {
+                minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), insertedFixIndex);
+            }
+        }
+        {
+            final Integer maxIndex = maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+            final GPSFixDTOWithSpeedWindTackAndLegType maxFix;
+            if (maxIndex != null
+                    && (maxFix = competitorFixes.get(maxIndex)).detailValue != null
+                    && insertedFix.detailValue != null
+                    && insertedFix.detailValue > maxFix.detailValue) {
+                maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), insertedFixIndex);
+            }
+        }
+    }
+
+    /**
+     * The fix with index {@code removedFixIndex} in {@link #fixesByCompetitorIdsAsStrings} is being removed from the
+     * visible tail of competitor {@code competitorDTO}. If {@link #minDetailValueFixByCompetitorIdsAsStrings} /
+     * {@link #maxDetailValueFixByCompetitorIdsAsStrings} have {@link removedFixIndex} as the value for the
+     * {@code competitorDTO} key, the {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue detailValue} of that fix
+     * was an extreme value. The mapping for {@code competitorDTO} is therefore then removed from the respective map
+     * so that later, in {@link #updateDetailValueBoundaries(Iterable)}, a new search for the extreme value on
+     * the visible tail needs to be carried out.
+     */
+    private void adjustMinMaxForRemoved(CompetitorDTO competitorDTO, int removedFixIndex) {
+        {
+            final Integer minIndex = minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+            if (minIndex != null && minIndex.intValue() == removedFixIndex) {
+                minDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+            }
+        }
+        {
+            final Integer maxIndex = maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+            if (maxIndex != null && maxIndex.intValue() == removedFixIndex) {
+                maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+            }
+        }
+    }
+
+    /**
+     * The fix with index {@code replacedFixIndex} in {@link #fixesByCompetitorIdsAsStrings} replaces a fix in the
+     * visible tail of competitor {@code competitorDTO}. If {@link #minDetailValueFixByCompetitorIdsAsStrings} /
+     * {@link #maxDetailValueFixByCompetitorIdsAsStrings} have {@link replacedFixIndex} as the value for the
+     * {@code competitorDTO} key, the {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue oldDetailValue} of that
+     * fix was an extreme value. Two cases then have to be distinguished:
+     * <ul>
+     * <li>The new detail value is at least as extreme as the {@code oldDetailValue}: in this case no change is
+     * required because the respective extreme (min/max) is still at the same index.</li>
+     * <li>The new detail value is not as extreme as the {@code oldDetailValue}: now we cannot know whether
+     * the new value still would be extreme compared to the detail values of all other fixes on the visible
+     * tail, so we need to clear the mapping for {@code competitorDTO} from the respective map, forcing a
+     * new search the next time {@link #updateDetailValueBoundaries(Iterable)} is invoked.</li>
+     * </ul>
+     * 
+     * If the replacement is not at the index of a previous extreme value we can still compare the new detail
+     * value to what currently is considered the extreme value, and if the replacing fix has a new extreme value,
+     * the index in the respective map is updated to {@code replacedFixIndex}.
+     */
+    private void adjustMinMaxForReplaced(CompetitorDTO competitorDTO, int replacedFixIndex, Double oldDetailValue, final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes) {
+        final GPSFixDTOWithSpeedWindTackAndLegType newFix = competitorFixes.get(replacedFixIndex);
+        {
+            final Integer minIndex = minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+            if (minIndex != null) {
+                if (minIndex.intValue() == replacedFixIndex) {
+                    if (newFix.detailValue == null || newFix.detailValue > oldDetailValue) {
+                        minDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+                    }
+                } else {
+                    final GPSFixDTOWithSpeedWindTackAndLegType minFix = competitorFixes.get(minIndex);
+                    // replacing a fix with a non-minimal detailValue
+                    if (newFix.detailValue != null && minFix.detailValue != null && newFix.detailValue < minFix.detailValue) {
+                        // the replacement fix is a new minimum
+                        minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), replacedFixIndex);
+                    }
+                }
+            }
+        }
+        {
+            final Integer maxIndex = maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+            if (maxIndex != null) {
+                if (maxIndex.intValue() == replacedFixIndex) {
+                    if (newFix.detailValue == null || newFix.detailValue > oldDetailValue) {
+                        maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+                    }
+                } else {
+                    final GPSFixDTOWithSpeedWindTackAndLegType maxFix = competitorFixes.get(maxIndex);
+                    // replacing a fix with a non-maximal detailValue
+                    if (newFix.detailValue != null && maxFix.detailValue != null && newFix.detailValue < maxFix.detailValue) {
+                        // the replacement fix is a new maximum
+                        maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), replacedFixIndex);
+                    }
+                }
+            }
         }
     }
 
@@ -734,6 +842,7 @@ public class FixesAndTails {
                             int indexOfLastShownFix = lastShownFixForCompetitor;
                             // remove fixes before what is now to be the beginning of the polyline:
                             while (vertexCount > 0 && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+                                adjustMinMaxForRemoved(competitorDTO, indexOfFirstShownFix);
                                 tail.removeAt(0);
                                 vertexCount--;
                                 indexOfFirstShownFix++;
@@ -747,11 +856,13 @@ public class FixesAndTails {
                                 indexOfFirstShownFix--;
                                 firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirstShownFix);
                                 final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfFirstShownFix);
+                                adjustMinMaxForInserted(competitorDTO, indexOfFirstShownFix, fixesForCompetitor);
                                 tail.insertAt(0, coordinateSystem.toLatLng(fix.position));
                                 vertexCount++;
                             }
                             // now adjust the tail's end: remove excess vertices that are after "to"
                             while (vertexCount > 0 && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+                                adjustMinMaxForRemoved(competitorDTO, indexOfLastShownFix);
                                 tail.removeAt(--vertexCount);
                                 indexOfLastShownFix--;
                                 lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
@@ -764,9 +875,9 @@ public class FixesAndTails {
                                 indexOfLastShownFix++;
                                 lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLastShownFix);
                                 final GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
+                                adjustMinMaxForInserted(competitorDTO, indexOfLastShownFix, fixesForCompetitor);
                                 tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                             }
-                            // FIXME bug5921: what about lastSearchedFix?
                         }
                     }
                 }
@@ -800,8 +911,8 @@ public class FixesAndTails {
                         first = i;
                         firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), first);
                     }
+                    adjustMinMaxForInserted(competitorDTO, i, competitorFixes);
                     tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
-                    // TODO bug5921: adjust min/max values as we visit all fixes constituting the new tail contents anyhow
                     last = i;
                 }
             }
@@ -846,7 +957,6 @@ public class FixesAndTails {
         lastShownFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
         minDetailValueFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
         maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
-        lastSearchedFixByCompetitorIdsAsStrings.remove(competitorIdAsString);
     }
     
     /**
@@ -1028,134 +1138,66 @@ public class FixesAndTails {
         return null;
     }
 
-
     /**
-     * Determines whether an index for a competitor lies in [{@link #firstShownFixByCompetitorIdsAsStrings}, {@link #lastShownFixByCompetitorIdsAsStrings}], i.e. the
-     * index is included in the competitors tail.
-     * 
-     * @param competitor
-     *            {@link CompetitorDTO} specifying the tail.
-     * @param index
-     *            {@code int} the index in question.
-     * @return {@code boolean} {@code true} if {@code index} is shown.
-     */
-    protected boolean isIndexShown(CompetitorDTO competitor, int index) {
-        final boolean result;
-        if (getFirstShownFix(competitor) == null || lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) == null) {
-            result = false;
-        } else {
-            final int first = firstShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-            final int last  = lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-            result = index >= first && index <= last;
-        }
-        return result;
-    }
-
-    /**
-     * Searches a competitor's shown fixes (firstShownFix to lastShownFix but usually a smaller range since many fixes
-     * have already been searched by a previous iteration) for the smallest and largest detailValue. Only when the
-     * fix that previously had the minimum/maximum value is no longer shown on the tail, a new search across the
-     * entire visible tail is required.
+     * Establishes that {@link #minDetailValueFixByCompetitorIdsAsStrings} and
+     * {@link #maxDetailValueFixByCompetitorIdsAsStrings} hold the correct values for {@code competitor}, unless the
+     * competitor has an empty tail or only {@code null} values for the
+     * {@link GPSFixDTOWithSpeedWindTackAndLegType#detailValue detailValue} fields of its fixes. If an index is already
+     * contained in one of the maps it is assumed to be correct, and no search for the corresponding extreme value is
+     * performed. Otherwise, all visible fixes of the competitor's {@link #tailsByCompetitorIdsAsStrings tail}, so
+     * between index {@link #firstShownFixByCompetitorIdsAsStrings} and index
+     * {@link #lastShownFixByCompetitorIdsAsStrings}, are searched for extreme values, and the index, relative to the
+     * fix list in {@link #fixesByCompetitorIdsAsStrings}, is stored in the respective map for the {@code competitor}'s
+     * ID.
      * <p>
      * 
-     * FIXME bug5921: this seems to assume that if additional fixes have been loaded then they are newer than all fixes
-     * loaded before; see the use of lastSearchedFix for the initialization of startIndex below; but this may be false
-     * as we may move backwards in time... We would instead need to know the TimeRange searched for min/max values per
-     * competitor, subtract that from the shown tail's TimeRange and scan whatever remains, which may be before and/or
-     * after the interval searched so far.
+     * Note that in case of an empty tail or all empty detail values the
+     * {@link #minDetailValueFixByCompetitorIdsAsStrings} and/or {@link #maxDetailValueFixByCompetitorIdsAsStrings} map
+     * may still not contain the {@code competitor}'s ID as key when this method returns, so callers must still perform
+     * a {@code null} check.
      * 
      * @param competitor
-     *            {@link CompetitorDTO} competitor whose tail to search in.
+     *            {@link CompetitorDTO} competitor whose tail to search in
      */
     protected void searchMinMaxDetailValue(CompetitorDTO competitor) {
-        Integer startIndex = null;
-        double min = 0;
-        boolean minSet = false;
+        double min = Double.MAX_VALUE;
+        boolean minSet = minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString());
         int minIndex = -1;
-        // Check if the previously found minimum is still shown and use its value
-        if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())) {
-            int minFix = minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-            if (minFix < 0 || !isIndexShown(competitor, minFix)) {
-                minDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
-                startIndex = getFirstShownFix(competitor);
-            } else if (minFix < fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() && fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(minFix).detailValue != null) {
-                min = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(minFix).detailValue;
-                minSet = true;
-            }
-        }
-        double max = 0;
-        boolean maxSet = false;
+        double max = Double.MIN_VALUE;
+        boolean maxSet = maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString());
         int maxIndex = -1;
-        // Check if the previously found maximum is still shown and use its value
-        if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())) {
-            int maxFix = maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-            if (maxFix < 0 || !isIndexShown(competitor, maxFix)) {
-                maxDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
-                if (startIndex == null) {
-                    startIndex = getFirstShownFix(competitor);
-                } else if (getFirstShownFix(competitor) != null) {
-                    startIndex = Math.min(startIndex, getFirstShownFix(competitor));
-                }
-            } else if (maxFix < fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() && fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(maxFix).detailValue != null) {
-                max = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(maxFix).detailValue;
-                maxSet = true;
-            }
-        }
         // If the startIndex has not been reset to the beginning of the shown range because the min/max value has just
         // left shown range it will now be set to the first not already searched index
-        if (startIndex == null) {
-            if (lastSearchedFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())) {
-                startIndex = lastSearchedFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) + 1; // FIXME bug5921: what if, e.g., the tail length was increased and only older fixes were added to the tail? Wouldn't we then have to search in those older fixes? mergeFixes(...) may set lastSearchedFix to an index less than firstShownFix
-            }
-            if (startIndex == null || !isIndexShown(competitor, startIndex)) {
-                startIndex = getFirstShownFix(competitor) != null && getFirstShownFix(competitor) != -1
-                        ? getFirstShownFix(competitor) : 0;
-            }
-        }
-        if (startIndex < 0) {
-            // If a tail is present but has no path getFirstShownFix will return -1
-            if (fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() == 0) return;
-            startIndex = 0;
-        }
-        final int endIndex = lastShownFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())
-                    && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1 ?
-                    lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) : fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() - 1;
-        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-        for (int i = startIndex; i <= endIndex; i++) {
-            final Double value = fixesForCompetitor.get(i).detailValue;
-            if (value != null) {
-                if (!minSet) {
-                    min = value;
-                    minIndex = i;
-                    minSet = true;
-                } else if (value <= min) {
-                    min = value;
-                    minIndex = i;
-                }
-                if (!maxSet) {
-                    max = value;
-                    maxIndex = i;
-                    maxSet = true;
-                } else if (value >= max) {
-                    max = value;
-                    maxIndex = i;
+        final Integer startIndex = getFirstShownFix(competitor);
+        if (startIndex != null) {
+            final int endIndex = lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+            final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+            for (int i = startIndex; i <= endIndex; i++) {
+                final Double value = fixesForCompetitor.get(i).detailValue;
+                if (value != null) {
+                    if (!minSet && value <= min) {
+                        min = value;
+                        minIndex = i;
+                    }
+                    if (!maxSet && value >= max) {
+                        max = value;
+                        maxIndex = i;
+                    }
                 }
             }
+            if (!minSet && minIndex > -1) {
+                minDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), minIndex);
+            }
+            if (!maxSet && maxIndex > -1) {
+                maxDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), maxIndex);
+            }
         }
-        if (minIndex > -1) {
-            minDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), minIndex);
-        }
-        if (maxIndex > -1) {
-            maxDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), maxIndex);
-        }
-        lastSearchedFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), endIndex); // FIXME bug5921: this makes lastSearchedFix inclusive; however, mergeFixes(...) seems to assume it's exclusive, setting it to the minimum insert index for new merged fixes
     }
 
     /**
      * Resets the search so that the next iteration will start from the beginning.
      */
     protected void resetDetailValueSearch() {
-        lastSearchedFixByCompetitorIdsAsStrings.clear();
         minDetailValueFixByCompetitorIdsAsStrings.clear();
         maxDetailValueFixByCompetitorIdsAsStrings.clear();
     }
@@ -1172,19 +1214,20 @@ public class FixesAndTails {
      *            search.
      */
     protected void updateDetailValueBoundaries(Iterable<CompetitorDTO> competitors) {
-        double min = 0;
+        double min = Double.MAX_VALUE;
         boolean minSet = false;
-        double max = 0;
+        double max = Double.MIN_VALUE;
         boolean maxSet = false;
         for (CompetitorDTO competitor : competitors) {
             searchMinMaxDetailValue(competitor);
             // Find minimum value across all boats
-            if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) && minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1) {
-                int index = minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-                if (!fixesByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) || fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()) == null || index >= fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size()) {
-                    minDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), -1);
+            final Integer minIndex = minDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+            final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+            if (minIndex != null) {
+                if (competitorFixes == null || minIndex >= competitorFixes.size()) {
+                    minDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
                 } else {
-                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(index);
+                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = competitorFixes.get(minIndex);
                     if (!minSet || competitorFix.detailValue != null && competitorFix.detailValue < min) {
                         min = competitorFix.detailValue;
                         minSet = true;
@@ -1192,12 +1235,12 @@ public class FixesAndTails {
                 }
             }
             // Find maximum value across all boats
-            if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) && maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1) {
-                int index = maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-                if (!fixesByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) || fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()) == null || index >= fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size()) {
-                    maxDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), -1);
+            final Integer maxIndex = maxDetailValueFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+            if (maxIndex != null) {
+                if (competitorFixes == null || maxIndex >= competitorFixes.size()) {
+                    maxDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
                 } else {
-                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).get(index);
+                    final GPSFixDTOWithSpeedWindTackAndLegType competitorFix = competitorFixes.get(maxIndex);
                     if (!maxSet || competitorFix.detailValue != null && competitorFix.detailValue > max) {
                         max = competitorFix.detailValue;
                         maxSet = true;

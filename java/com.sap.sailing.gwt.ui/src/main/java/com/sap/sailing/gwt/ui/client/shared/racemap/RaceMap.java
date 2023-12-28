@@ -1581,8 +1581,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 " while we already started processing request "+startedProcessingRequestID+"\n"+
                                 getFromAndToTimesAsString());
                     }
-                } else {
-                    lastTimeChangeBeforeInitialization = newTime; // FIXME bug5921: why only for out-of-order responses? Wouldn't this have to depend on whether or not initialization has happened already?
+                } else { // map was null or we didn't get a valid response; record time in case this was because map API hasn't loaded yet
+                    lastTimeChangeBeforeInitialization = newTime;
                 }
             }
 
@@ -2882,19 +2882,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (value == null || value.equals(EMPTY_VALUE)) {
                     selectedDetailType = null;
                     metricOverlay.setVisible(false);
+                    selectedDetailTypeChanged = previous != null;
                 } else {
                     selectedDetailType = DetailType.valueOfString(value);
+                    selectedDetailTypeChanged = selectedDetailType != previous;
                     metricOverlay.setVisible(true);
                     if (!competitorSelection.isSelected(competitor)) {
-                        // FIXME bug5921: changing the competitor selection already triggers the redraw() with re-loading the data; however, selectedDetailTypeChanged gets set only afterwards, see below...
                         competitorSelection.setSelected(competitor, true);
                     }
                 }
-                if (selectedDetailType != previous) {
+                if (selectedDetailTypeChanged) {
                     // Causes an overwrite of what are now wrong detailValues
-                    selectedDetailTypeChanged = true;
-                    // FIXME bug5921: setting the tail visualizer would re-paint the tails based on the existing detailValues on the fixes which doesn't make any sense
-                    setTailVisualizer();
+                    if (selectedDetailType != null) {
+                        // start with fresh value boundaries
+                        setTailVisualizer();
+                    }
                     // In case the new values don't make it through this will make the tails visible
                     tailColorMapper.notifyListeners();
                     // Forces update of tail values which subsequently results
@@ -3082,7 +3084,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
         if (selectedDetailType != null && !selectedDetailTypeChanged) {
-            // FIXME bug5921: loading of new (maybe first) detailValues will happen only after having called redraw() below; detailValues may still be null at this point
+            // assumes that the detail values have already been loaded, as the detail type hasn't changed
             fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
         }
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
@@ -3142,7 +3144,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 tail.setOptions(newOptions);
             }
         }
-        //Trigger auto-zoom if needed
+        // Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
