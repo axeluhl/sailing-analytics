@@ -11,7 +11,10 @@ import java.util.function.BiFunction;
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.impl.components.TackTypeSegmentRetrievalProcessor;
+import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -53,10 +56,12 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
 
     private final HasTrackedRaceContext trackedRaceContext;
     private final Competitor competitor;
+    private final TackTypeSegmentsDataMiningSettings settings;
 
-    public RaceOfCompetitorWithContext(HasTrackedRaceContext trackedRaceContext, Competitor competitor) {
+    public RaceOfCompetitorWithContext(HasTrackedRaceContext trackedRaceContext, Competitor competitor, TackTypeSegmentsDataMiningSettings settings) {
         this.trackedRaceContext = trackedRaceContext;
         this.competitor = competitor;
+        this.settings = settings;
     }
 
     @Override
@@ -661,5 +666,52 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         }
         Integer rank = getTrackedRace().getRank(getCompetitor(), timePoint);
         return rank == 0 ? null : rank;
+    }
+
+    @Override
+    public double getRatioDurationLongVsShortTack() {
+        final TackTypeRatioCollector<Duration> resultProcessor = new TackTypeRatioCollector<Duration>(Duration.NULL) {
+            @Override
+            protected Duration add(Duration a, Duration b) {
+                return a.plus(b);
+            }
+
+            @Override
+            protected double divide(Duration a, Duration b) {
+                return a.divide(b);
+            }
+
+            @Override
+            protected Duration getAddable(HasTackTypeSegmentContext element) {
+                return element.getDuration();
+            }
+        };
+        final TackTypeSegmentRetrievalProcessor tackTypeSegmentRetriever = new TackTypeSegmentRetrievalProcessor(
+                /* executor */ null,
+                Collections.emptySet(), settings, 0, "TackTypeSegments");
+        return Util.stream(tackTypeSegmentRetriever.retrieveData(this)).collect(resultProcessor);
+    }
+
+    @Override
+    public double getRatioDistanceLongVsShortTack() {
+        final TackTypeRatioCollector<Distance> resultProcessor = new TackTypeRatioCollector<Distance>(Distance.NULL) {
+            @Override
+            protected Distance add(Distance a, Distance b) {
+                return a.add(b);
+            }
+
+            @Override
+            protected double divide(Distance a, Distance b) {
+                return a.divide(b);
+            }
+
+            @Override
+            protected Distance getAddable(HasTackTypeSegmentContext element) {
+                return element.getDistance();
+            }
+        };
+        final TackTypeSegmentRetrievalProcessor tackTypeSegmentRetriever = new TackTypeSegmentRetrievalProcessor(/* executor */ null,
+                Collections.emptySet(), settings, 0, "TackTypeSegments");
+        return Util.stream(tackTypeSegmentRetriever.retrieveData(this)).collect(resultProcessor);
     }
 }

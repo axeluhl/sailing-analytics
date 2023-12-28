@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -15,7 +14,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Timer;
@@ -420,43 +418,9 @@ public class FixesAndTails {
         if (detailTypeToShow != null && detailTypesRequestedByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) != detailTypeToShow) {
             GWT.log("WARNING: Detail type mismatch in createTailAndUpdateIndices: have "+detailTypesRequestedByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())+" but caller expected "+detailTypeToShow);
         }
-        final List<LatLng> points = new ArrayList<LatLng>();
-        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
-        int indexOfFirst = -1;
-        int indexOfLast = -1;
-        int i = 0;
-        // TODO consider binary search to find beginning of interesting segment faster
-        for (Iterator<GPSFixDTOWithSpeedWindTackAndLegType> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
-            final GPSFixDTOWithSpeedWindTackAndLegType fix = fixIter.next();
-            if (!fix.timepoint.before(to)) {
-                indexOfLast = i-1;
-            } else {
-                final LatLng point;
-                if (indexOfFirst == -1) {
-                    if (!fix.timepoint.before(from)) {
-                        indexOfFirst = i;
-                        point = coordinateSystem.toLatLng(fix.position);
-                    } else {
-                        point = null;
-                    }
-                } else {
-                    point = coordinateSystem.toLatLng(fix.position);
-                }
-                if (point != null) {
-                    points.add(point);
-                }
-            }
-            i++;
-        }
-        if (indexOfLast == -1) { // all fixes consumed; all were before "to"
-            indexOfLast = i - 1;
-        }
-        if (indexOfFirst != -1 && indexOfLast != -1) {
-            firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfFirst);
-            lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), indexOfLast);
-        }
-        final Colorline result = tailFactory.createTail(competitorDTO, points);
+        final Colorline result = tailFactory.createTail(competitorDTO, Collections.emptyList());
         tailsByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), result);
+        fillEmptyTail(competitorDTO, from, to);
         return result;
     }
 
@@ -571,8 +535,8 @@ public class FixesAndTails {
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
                     intoThis.set(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) { // false if first/last shown index is -1
-                        // FIXME bug5921 it seems it may happen that the tail is empty at this point...
                         tail.setAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
+                        // if the fix removed had a min/max detailValue then min/maxDetailValueFixByCompetitorIdsAsString will be reset for competitor below
                     }
                 } else {
                     // extrapolated fix would be added one or more positions before the last fix in intoThis; instead,
@@ -580,6 +544,7 @@ public class FixesAndTails {
                     intoThis.remove(intoThisIndex);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         tail.removeAt(intoThisIndex - indexOfFirstShownFix);
+                        // if the fix removed had a min/max detailValue then min/maxDetailValueFixByCompetitorIdsAsString will be reset for competitor below
                     }
                     {
                         boolean indicesChanged = false;
@@ -708,12 +673,6 @@ public class FixesAndTails {
      * <p>
      * 
      * When this method returns, {@link #firstShownFixByCompetitorIdsAsStrings} and {@link #lastShownFixByCompetitorIdsAsStrings} have been updated accordingly.
-     * <p>
-     * 
-     * FIXME: I don't think this method handles empty tails correctly; firstShownFix/lastShownFix then won't hold a
-     * record for competitorDTO, and nothing in here will properly fill the tail
-     * <p>
-     * FIXME: update to a non-overlapping time range probably won't work
      * <p>
      * 
      * Requirements:
@@ -1158,10 +1117,10 @@ public class FixesAndTails {
             if (fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() == 0) return;
             startIndex = 0;
         }
-        int endIndex = lastShownFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null
+        final int endIndex = lastShownFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())
                     && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1 ?
                     lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) : fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() - 1;
-        List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
         for (int i = startIndex; i <= endIndex; i++) {
             final Double value = fixesForCompetitor.get(i).detailValue;
             if (value != null) {
@@ -1169,17 +1128,15 @@ public class FixesAndTails {
                     min = value;
                     minIndex = i;
                     minSet = true;
+                } else if (value <= min) {
+                    min = value;
+                    minIndex = i;
                 }
                 if (!maxSet) {
                     max = value;
                     maxIndex = i;
                     maxSet = true;
-                }
-                if (value <= min) {
-                    min = value;
-                    minIndex = i;
-                }
-                if (value >= max) {
+                } else if (value >= max) {
                     max = value;
                     maxIndex = i;
                 }
@@ -1215,7 +1172,6 @@ public class FixesAndTails {
      *            search.
      */
     protected void updateDetailValueBoundaries(Iterable<CompetitorDTO> competitors) {
-        try {
         double min = 0;
         boolean minSet = false;
         double max = 0;
@@ -1252,9 +1208,6 @@ public class FixesAndTails {
         // If possible update detailValueBoundaries
         if (minSet && maxSet) {
             detailValueBoundaries.setMinMax(min, max);
-        }
-        } catch (NullPointerException npe) {
-            GWT.log("NPE: "+npe.getMessage());
         }
     }
     

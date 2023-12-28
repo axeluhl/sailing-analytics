@@ -10,8 +10,11 @@ import java.util.function.Supplier;
 
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
+import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.datamining.impl.components.TackTypeSegmentRetrievalProcessor;
+import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -44,6 +47,7 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private static final long serialVersionUID = 5944904146286262768L;
 
     private final HasTrackedLegContext trackedLegContext;
+    private final TackTypeSegmentsDataMiningSettings settings;
     
     private final TrackedLegOfCompetitor trackedLegOfCompetitor;
     private final Competitor competitor;
@@ -54,10 +58,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private boolean isRankAtFinishInitialized;
     private Wind wind;
 
-    public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor) {
+    public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor, TackTypeSegmentsDataMiningSettings settings) {
         this.trackedLegContext = trackedLegContext;
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.competitor = trackedLegOfCompetitor.getCompetitor();
+        this.settings = settings;
     }
     
     @Override
@@ -515,5 +520,57 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Speed getVelocityMadeGood() {
         final TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
         return getTrackedLegOfCompetitor().getAverageVelocityMadeGood(finishTime == null ? TimePoint.now() : finishTime);
+    }
+
+    @Override
+    public double getRatioDurationLongVsShortTack() {
+        final TackTypeRatioCollector<Duration> resultProcessor = new TackTypeRatioCollector<Duration>(Duration.NULL) {
+            @Override
+            protected Duration add(Duration a, Duration b) {
+                return a.plus(b);
+            }
+
+            @Override
+            protected double divide(Duration a, Duration b) {
+                return a.divide(b);
+            }
+
+            @Override
+            protected Duration getAddable(HasTackTypeSegmentContext element) {
+                return element.getDuration();
+            }
+        };
+        final TackTypeSegmentRetrievalProcessor tackTypeSegmentRetriever = new TackTypeSegmentRetrievalProcessor(
+                /* executor */ null,
+                Collections.emptySet(), settings, 0, "TackTypeSegments");
+        return Util.stream(tackTypeSegmentRetriever.retrieveData(
+                new RaceOfCompetitorWithContext(getTrackedLegContext().getTrackedRaceContext(), competitor, settings)))
+                .filter(tt->tt.getLegNumber() == getTrackedLegContext().getLegNumber()).collect(resultProcessor);
+    }
+
+    @Override
+    public double getRatioDistanceLongVsShortTack() {
+        final TackTypeRatioCollector<Distance> resultProcessor = new TackTypeRatioCollector<Distance>(Distance.NULL) {
+            @Override
+            protected Distance add(Distance a, Distance b) {
+                return a.add(b);
+            }
+
+            @Override
+            protected double divide(Distance a, Distance b) {
+                return a.divide(b);
+            }
+
+            @Override
+            protected Distance getAddable(HasTackTypeSegmentContext element) {
+                return element.getDistance();
+            }
+        };
+        final TackTypeSegmentRetrievalProcessor tackTypeSegmentRetriever = new TackTypeSegmentRetrievalProcessor(
+                /* executor */ null,
+                Collections.emptySet(), settings, 0, "TackTypeSegments");
+        return Util.stream(tackTypeSegmentRetriever.retrieveData(
+                new RaceOfCompetitorWithContext(getTrackedLegContext().getTrackedRaceContext(), competitor, settings)))
+                .filter(tt->tt.getLegNumber() == getTrackedLegContext().getLegNumber()).collect(resultProcessor);
     }
 }

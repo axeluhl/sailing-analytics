@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.impl.data;
 import java.util.function.BiFunction;
 
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
+import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sse.common.TimePoint;
 
@@ -26,7 +27,7 @@ public class TrackedLegOfCompetitorWithSpecificTimePointWithContext extends Trac
 
     public TrackedLegOfCompetitorWithSpecificTimePointWithContext(HasTrackedLegContext trackedLegContext,
             TrackedLegOfCompetitor trackedLegOfCompetitor, TimePoint timePoint) {
-        super(trackedLegContext, trackedLegOfCompetitor);
+        super(trackedLegContext, trackedLegOfCompetitor, TackTypeSegmentsDataMiningSettings.createDefaultSettings());
         this.timePoint = timePoint;
     }
 

@@ -197,5 +197,15 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      * {@link #getFixes()} if and only if this method returns {@code true}.
      */
     boolean isValid(FixType e);
+    //TODO: Morgen
+//    /**
+//     * The time spent on TackType during the time range provided
+//     */
+//    Duration getTimeSpentTackType(TimePoint from, TimePoint to);
+//
+//    /**
+//     * The distance sailed on TackType during the time range provided
+//     */
+//    Distance getDistanceSpentTackType(TimePoint from, TimePoint to);
 
 }
