@@ -571,8 +571,8 @@ public class FixesAndTails {
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
                     intoThis.set(intoThisIndex, mergeThisFix);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) { // false if first/last shown index is -1
-                        // FIXME bug5921 it seems it may happen that the tail is empty at this point...
                         tail.setAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
+                        // if the fix removed had a min/max detailValue then min/maxDetailValueFixByCompetitorIdsAsString will be reset for competitor below
                     }
                 } else {
                     // extrapolated fix would be added one or more positions before the last fix in intoThis; instead,
@@ -580,6 +580,7 @@ public class FixesAndTails {
                     intoThis.remove(intoThisIndex);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         tail.removeAt(intoThisIndex - indexOfFirstShownFix);
+                        // if the fix removed had a min/max detailValue then min/maxDetailValueFixByCompetitorIdsAsString will be reset for competitor below
                     }
                     {
                         boolean indicesChanged = false;
@@ -1158,10 +1159,10 @@ public class FixesAndTails {
             if (fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() == 0) return;
             startIndex = 0;
         }
-        int endIndex = lastShownFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString()) && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null
+        final int endIndex = lastShownFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString())
                     && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != null && lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != -1 ?
                     lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString()) : fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString()).size() - 1;
-        List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
         for (int i = startIndex; i <= endIndex; i++) {
             final Double value = fixesForCompetitor.get(i).detailValue;
             if (value != null) {
@@ -1169,17 +1170,15 @@ public class FixesAndTails {
                     min = value;
                     minIndex = i;
                     minSet = true;
+                } else if (value <= min) {
+                        min = value;
+                        minIndex = i;
                 }
                 if (!maxSet) {
                     max = value;
                     maxIndex = i;
                     maxSet = true;
-                }
-                if (value <= min) {
-                    min = value;
-                    minIndex = i;
-                }
-                if (value >= max) {
+                } else if (value >= max) {
                     max = value;
                     maxIndex = i;
                 }
