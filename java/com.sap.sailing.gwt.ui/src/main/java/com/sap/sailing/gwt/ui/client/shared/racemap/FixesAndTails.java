@@ -1214,7 +1214,6 @@ public class FixesAndTails {
      *            search.
      */
     protected void updateDetailValueBoundaries(Iterable<CompetitorDTO> competitors) {
-        try {
         double min = 0;
         boolean minSet = false;
         double max = 0;
@@ -1251,9 +1250,6 @@ public class FixesAndTails {
         // If possible update detailValueBoundaries
         if (minSet && maxSet) {
             detailValueBoundaries.setMinMax(min, max);
-        }
-        } catch (NullPointerException npe) {
-            GWT.log("NPE: "+npe.getMessage());
         }
     }
     
