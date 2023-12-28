@@ -1129,8 +1129,8 @@ public class FixesAndTails {
                     minIndex = i;
                     minSet = true;
                 } else if (value <= min) {
-                        min = value;
-                        minIndex = i;
+                    min = value;
+                    minIndex = i;
                 }
                 if (!maxSet) {
                     max = value;
