@@ -58,7 +58,10 @@ public abstract class TackTypeRatioCollector<ADDABLE> implements Collector<HasTa
 
     @Override
     public Function<Map<TackType, ADDABLE>, Double> finisher() {
-        return sumPerTackType->divide(sumPerTackType.get(TackType.LONGTACK), sumPerTackType.get(TackType.SHORTTACK));
+        return sumPerTackType->{
+            final ADDABLE shortTackSum = sumPerTackType.get(TackType.SHORTTACK);
+            return shortTackSum.equals(nullValue) ? null : divide(sumPerTackType.get(TackType.LONGTACK), shortTackSum);
+        };
     }
 
 
