@@ -189,7 +189,7 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
     /* Line colors */
-    static private final RGBColor COURSE_MIDDLE_LINE_COLOR = new RGBColor("#0eed1d"); // selected by Larry Rosenfeld...
+    static private final RGBColor COURSE_MIDDLE_LINE_COLOR = new RGBColor("#0eed1d");
     static final Color ADVANTAGE_LINE_COLOR = new RGBColor("#ff9900"); // orange
     static final Color START_LINE_COLOR = Color.WHITE;
     static final Color FINISH_LINE_COLOR = Color.BLACK;
@@ -3062,7 +3062,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 Iterator<Map.Entry<String, BoatOverlay>> i = boatOverlaysByCompetitorIdsAsStrings.entrySet().iterator();
                 while (i.hasNext()) {
                     Entry<String, BoatOverlay> next = i.next();
-                    if (!next.getKey().equals(competitor)) {
+                    if (!next.getKey().equals(competitor.getIdAsString())) {
                         CanvasOverlayV3 boatOverlay = next.getValue();
                         boatOverlay.removeFromMap();
                         fixesAndTails.removeTail(next.getKey());
