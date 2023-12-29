@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.util.logging.Logger;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
 
 public class Activator implements BundleActivator {
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
+
     private static BundleContext context;
     private SailingServiceImpl sailingServiceToStopWhenStopping;
     private static Activator INSTANCE;
@@ -28,9 +32,9 @@ public class Activator implements BundleActivator {
         Activator.context = context;
         googleMapsLoaderAuthenticationParams = context.getProperty(GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME);
         if (googleMapsLoaderAuthenticationParams == null) {
-            throw new IllegalArgumentException(
-                    "Missing property definition for " + GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME
-                            + " which is required for Google Maps operations. Cannot activate.");
+            googleMapsLoaderAuthenticationParams = "key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
+            logger.warning("Did not find a value for the "+GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME+
+                    " system property. Using a test key for the Google Maps API instead. Your mileage may vary.");
         }
     }
     
