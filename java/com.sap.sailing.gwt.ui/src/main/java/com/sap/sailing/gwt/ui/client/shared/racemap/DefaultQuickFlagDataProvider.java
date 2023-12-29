@@ -10,14 +10,14 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sse.common.Util;
 
 public class DefaultQuickFlagDataProvider extends AbstractQuickFlagDataProvider {
-    private Map<String, QuickRankDTO> currentQuickRanksFromServer = Collections.emptyMap();
-    private Map<CompetitorDTO, Double> currentQuickSpeedsInKnotsFromServer = Collections.emptyMap();
+    private Map<String, QuickRankDTO> currentQuickRanksFromServerByCompetitorIdAsString = Collections.emptyMap();
+    private Map<String, Double> currentQuickSpeedsInKnotsFromServerByCompetitorIdAsString = Collections.emptyMap();
 
     @Override
     public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> receivedQuickRanksFromServer) {
-        final Map<String, QuickRankDTO> oldQuickRanksFromServer = this.currentQuickRanksFromServer;
-        this.currentQuickRanksFromServer = Util.nullToEmptyMap(receivedQuickRanksFromServer);
-        for (final Entry<String, QuickRankDTO> e : currentQuickRanksFromServer.entrySet()) {
+        final Map<String, QuickRankDTO> oldQuickRanksFromServer = this.currentQuickRanksFromServerByCompetitorIdAsString;
+        this.currentQuickRanksFromServerByCompetitorIdAsString = Util.nullToEmptyMap(receivedQuickRanksFromServer);
+        for (final Entry<String, QuickRankDTO> e : currentQuickRanksFromServerByCompetitorIdAsString.entrySet()) {
             final QuickRankDTO oldQuickRank = oldQuickRanksFromServer.get(e.getKey());
             if (Util.equalsWithNull(oldQuickRank, e.getValue())) {
                 notifyListenersRankChanged(e.getKey(), oldQuickRank, e.getValue());
@@ -27,17 +27,17 @@ public class DefaultQuickFlagDataProvider extends AbstractQuickFlagDataProvider 
 
     @Override
     public Map<String, QuickRankDTO> getQuickRanks() {
-        return currentQuickRanksFromServer;
+        return currentQuickRanksFromServerByCompetitorIdAsString;
     }
 
     @Override
-    public void quickSpeedsInKnotsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots) {
-        final Map<CompetitorDTO, Double> oldQuickSpeedsFromServerInKnots = this.currentQuickSpeedsInKnotsFromServer;
-        this.currentQuickSpeedsInKnotsFromServer = Util.nullToEmptyMap(quickSpeedsFromServerInKnots);
-        for (final Entry<CompetitorDTO, Double> e : currentQuickSpeedsInKnotsFromServer.entrySet()) {
+    public void quickSpeedsInKnotsReceivedFromServer(Map<String, Double> quickSpeedsFromServerInKnotsByCompetitorIdAsString, Map<String, CompetitorDTO> competitorsByIdAsString) {
+        final Map<String, Double> oldQuickSpeedsFromServerInKnots = this.currentQuickSpeedsInKnotsFromServerByCompetitorIdAsString;
+        this.currentQuickSpeedsInKnotsFromServerByCompetitorIdAsString = Util.nullToEmptyMap(quickSpeedsFromServerInKnotsByCompetitorIdAsString);
+        for (final Entry<String, Double> e : currentQuickSpeedsInKnotsFromServerByCompetitorIdAsString.entrySet()) {
             final Double oldQuickSpeedInKnots = oldQuickSpeedsFromServerInKnots.get(e.getKey());
             if (Util.equalsWithNull(oldQuickSpeedInKnots, e.getValue())) {
-                notifyListenersSpeedInKnotsChanged(e.getKey(), e.getValue());
+                notifyListenersSpeedInKnotsChanged(competitorsByIdAsString.get(e.getKey()), e.getValue());
             }
         }
 
@@ -45,7 +45,6 @@ public class DefaultQuickFlagDataProvider extends AbstractQuickFlagDataProvider 
 
     @Override
     public Double getQuickSpeedsInKnots(CompetitorDTO competitor) {
-        return currentQuickSpeedsInKnotsFromServer.get(competitor);
+        return currentQuickSpeedsInKnotsFromServerByCompetitorIdAsString.get(competitor.getIdAsString());
     }
-
 }

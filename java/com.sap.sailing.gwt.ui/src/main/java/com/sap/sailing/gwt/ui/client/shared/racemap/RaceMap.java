@@ -1457,7 +1457,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     getBoatPositionsCallback(quickAndSlowRequest.getA(), newTime, transitionTimeInMillis, competitorsToShow, detailType, detailTypeChanged, competitorsByIdAsString)),
             GET_RACE_MAP_DATA_CATEGORY,
             getRaceMapDataCallback(newTime, transitionTimeInMillis, quickAndSlowRequest.getA(), competitorsToShow,
-                                   ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged, detailType, fromTimesForQuickCall, toTimesForQuickCall));
+                                   ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged, detailType, fromTimesForQuickCall, toTimesForQuickCall, competitorsByIdAsString));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             timeRangeActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race,
@@ -1499,7 +1499,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final long transitionTimeInMillis,
             final PositionRequest quickRequest,
             final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw, boolean detailTypeChanged,
-            DetailType detailType, Map<String, Date> fromTimesForQuickCall, Map<String, Date> toTimesForQuickCall) {
+            DetailType detailType, final Map<String, Date> fromTimesForQuickCall, final Map<String, Date> toTimesForQuickCall,
+            final Map<String, CompetitorDTO> competitorsByIdAsString) {
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -1529,8 +1530,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                             simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
-                        Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData); // TODO: why do we need this from the *response*, and why couldn't this come straight from the FixesAndTails cache?
-                        quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnots);
+                        final Map<String, Double> quickSpeedsFromServerInKnotsByCompetitorIdAsString = getCompetitorsSpeedInKnotsMap(boatData); // TODO: why do we need this from the *response*, and why couldn't this come straight from the FixesAndTails cache?
+                        quickFlagDataProvider.quickSpeedsInKnotsReceivedFromServer(quickSpeedsFromServerInKnotsByCompetitorIdAsString, competitorsByIdAsString);
                         // Do boat specific actions
                         updateBoatPositions(newTime, transitionTimeInMillis,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged, detailType);
@@ -1599,16 +1600,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 return result.toString();
             }
 
-            private Map<CompetitorDTO, Double> getCompetitorsSpeedInKnotsMap(
+            private Map<String, Double> getCompetitorsSpeedInKnotsMap(
                     Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatData) {
-                Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = new HashMap<>();
-                for (CompetitorDTO competitor : boatData.keySet()) {
-                    GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesList = boatData.get(competitor);
+                final Map<String, Double> quickSpeedsFromServerInKnots = new HashMap<>();
+                for (Entry<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatDataEntry : boatData.entrySet()) {
+                    GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixesList = boatDataEntry.getValue();
                     if (!fixesList.isEmpty()) {
                         SpeedWithBearingDTO speedWithBearing = fixesList.last().speedWithBearing;
                         if (speedWithBearing != null) {
                             Double speedInKnots = speedWithBearing.speedInKnots;
-                            quickSpeedsFromServerInKnots.put(competitor, speedInKnots);
+                            quickSpeedsFromServerInKnots.put(boatDataEntry.getKey().getIdAsString(), speedInKnots);
                         }
                     }
                 }
