@@ -504,7 +504,7 @@ public class FixesAndTails {
      *            the list
      */
     private void mergeFixes(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable mergeThis, final long timeForPositionTransitionMillis) {
-        List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixesByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixesByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
         final Integer firstShownFixForCompetitor = firstShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
         int indexOfFirstShownFix = firstShownFixForCompetitor == null ? -1 : firstShownFixForCompetitor;
         final Integer lastShownFixForCompetitor = lastShownFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
@@ -521,6 +521,8 @@ public class FixesAndTails {
             if (intoThisIndex < 0) {
                 intoThisIndex = -intoThisIndex-1;
             }
+            final Integer minIndex = minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
+            final Integer maxIndex = maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
             if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
                 // exactly same time point; replace with fix from mergeThis unless the new fix is extrapolated and there is a later fix in intoThis;
                 // in the (unlikely) case the existing non-extrapolated fix is replaced by an extrapolated one, the indices of the shown fixes
@@ -536,6 +538,23 @@ public class FixesAndTails {
                     // extrapolated fix would be added one or more positions before the last fix in intoThis; instead,
                     // remove the fix at the respective index with the same time point and adjust indices:
                     intoThis.remove(intoThisIndex);
+                    // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes; do this before calling adjustMinMaxForRemoved!
+                    if (minIndex != null) {
+                        if (intoThisIndex < minIndex) {
+                            minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minIndex - 1);
+                        } else if (intoThisIndex == minIndex) {
+                            // The fix with the highest value was removed so re-search
+                            minDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+                        }
+                    }
+                    if (maxIndex != null) {
+                        if (intoThisIndex < maxIndex) {
+                            maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxIndex - 1);
+                        } else if (intoThisIndex == maxIndex) {
+                            // The fix with the highest value was removed so re-search
+                            maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+                        }
+                    }
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         adjustMinMaxForRemoved(competitorDTO, intoThisIndex);
                         tail.removeAt(intoThisIndex - indexOfFirstShownFix);
@@ -555,23 +574,6 @@ public class FixesAndTails {
                             updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                         }
                     }
-                    // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes
-                    if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString())) {
-                        if (intoThisIndex < minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                            minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
-                        } else if (intoThisIndex == minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                            // The fix with the highest value was removed so re-search
-                            minDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
-                        }
-                    }
-                    if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString())) {
-                        if (intoThisIndex < maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                            maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
-                        } else if (intoThisIndex == maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                            // The fix with the highest value was removed so re-search
-                            maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
-                        }
-                    }
                     intoThisIndex--;
                 }
             } else {
@@ -579,6 +581,13 @@ public class FixesAndTails {
                 // being the only fix)
                 if (!mergeThisFix.extrapolated || intoThisIndex == intoThis.size()) {
                     intoThis.add(intoThisIndex, mergeThisFix);
+                    // this has to happen *before* adjustMinMaxForInserted is called! Else, min/max point to the fix just inserted
+                    if (minIndex != null && intoThisIndex <= minIndex) {
+                        minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minIndex + 1);
+                    }
+                    if (maxIndex != null && intoThisIndex <= maxIndex) {
+                        maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxIndex + 1);
+                    }
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         // fix inserted at a position currently visualized by tail
                         adjustMinMaxForInserted(competitorDTO, intoThisIndex, intoThis);
@@ -598,16 +607,17 @@ public class FixesAndTails {
                             updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                         }
                     }
-                    if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                        minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) + 1);
-                    }
-                    if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex <= maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                        maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) + 1);
-                    }
                     // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
                     // extrapolated fixes can only be the last in the list
                     if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
                         intoThis.remove(intoThisIndex-1);
+                        // min/max index adjustment needs to happen *before* calling adjustMinMaxForRemoved
+                        if (minIndex != null && intoThisIndex - 1 <= minIndex) {
+                            minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minIndex - 1);
+                        }
+                        if (maxIndex != null && intoThisIndex - 1 <= maxIndex) {
+                            maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxIndex - 1);
+                        }
                         if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
                             adjustMinMaxForRemoved(competitorDTO, intoThisIndex);
                             tail.removeAt(intoThisIndex-1 - indexOfFirstShownFix);
@@ -625,12 +635,6 @@ public class FixesAndTails {
                             if (indicesChanged) {
                                 updateTailBoundaries(competitorDTO, indexOfFirstShownFix, indexOfLastShownFix);
                             }
-                        }
-                        if (minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex - 1 <= minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                            minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
-                        }
-                        if (maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitorDTO.getIdAsString()) && intoThisIndex - 1 <= maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString())) {
-                            maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString()) - 1);
                         }
                     }
                 }
