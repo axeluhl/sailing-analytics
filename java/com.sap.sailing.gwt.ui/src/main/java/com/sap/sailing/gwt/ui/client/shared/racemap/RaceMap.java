@@ -3066,7 +3066,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 Iterator<Map.Entry<String, BoatOverlay>> i = boatOverlaysByCompetitorIdsAsStrings.entrySet().iterator();
                 while (i.hasNext()) {
                     Entry<String, BoatOverlay> next = i.next();
-                    if (!next.getKey().equals(competitor)) {
+                    if (!next.getKey().equals(competitor.getIdAsString())) {
                         CanvasOverlayV3 boatOverlay = next.getValue();
                         boatOverlay.removeFromMap();
                         fixesAndTails.removeTail(next.getKey());
@@ -3084,16 +3084,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             }
         }
-        // Now update tails for all competitors because selection change may also affect all unselected competitors
         if (selectedDetailType != null && !selectedDetailTypeChanged) {
             // assumes that the detail values have already been loaded, as the detail type hasn't changed
             fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
         }
+        // update tails for all competitors because selection change may also affect all unselected competitors
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
             Colorline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
                 ColorlineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
-                tail.setOptions(newOptions);
+                tail.setOptions(newOptions); // depends on the min/max boundaries computed above
             }
         }
         // Trigger auto-zoom if needed

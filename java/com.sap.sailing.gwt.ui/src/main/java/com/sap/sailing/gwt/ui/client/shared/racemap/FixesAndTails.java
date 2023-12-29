@@ -419,7 +419,7 @@ public class FixesAndTails {
         }
         final Colorline result = tailFactory.createTail(competitorDTO, Collections.emptyList());
         tailsByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), result);
-        fillEmptyTail(competitorDTO, from, to);
+        fillEmptyTail(competitorDTO, from, to, detailTypeToShow != null);
         return result;
     }
 
@@ -470,8 +470,6 @@ public class FixesAndTails {
             // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
             clearTail(competitor);
             Util.addAll(fixesToAddForCompetitor, fixesForCompetitor);
-            minDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
-            maxDetailValueFixByCompetitorIdsAsStrings.remove(competitor.getIdAsString());
         } else {
             if (detailTypeForFixes != null && detailTypesRequestedByCompetitorIdsAsStrings.get(competitor.getIdAsString()) != detailTypeForFixes) {
                 GWT.log("WARNING: Inconsistent detail types when merging fixed for competitor "+competitor+
@@ -738,7 +736,7 @@ public class FixesAndTails {
             final Integer maxIndex = maxDetailValueFixByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
             if (maxIndex != null) {
                 if (maxIndex.intValue() == replacedFixIndex) {
-                    if (newFix.detailValue == null || newFix.detailValue > oldDetailValue) {
+                    if (newFix.detailValue == null || newFix.detailValue < oldDetailValue) {
                         maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
                     }
                 } else {
@@ -823,7 +821,7 @@ public class FixesAndTails {
                                     "; tail is empty, both should have been null but were "+firstShownFixForCompetitor+
                                     " and "+lastShownFixForCompetitor);
                         }
-                        fillEmptyTail(competitorDTO, from, to);
+                        fillEmptyTail(competitorDTO, from, to, selectedDetailType != null);
                     } else {
                         if (lastShownFixForCompetitor == null) {
                             throw new IllegalStateException("Inconsistent lastShownFix for competitor "+competitorDTO+
@@ -835,7 +833,7 @@ public class FixesAndTails {
                                              TimePoint.of(fixesForCompetitor.get(lastShownFixForCompetitor).timepoint)).
                                 touches(TimeRange.create(TimePoint.of(from), TimePoint.of(to)))) {
                             clearTail(competitorDTO);
-                            fillEmptyTail(competitorDTO, from, to);
+                            fillEmptyTail(competitorDTO, from, to, selectedDetailType != null);
                         } else {
                             // the time ranges of the non-empty tail and the desired time range from..to touch; adjust incrementally
                             int indexOfFirstShownFix = firstShownFixForCompetitor;
@@ -892,9 +890,13 @@ public class FixesAndTails {
      * and {@link #lastShownFixByCompetitorIdsAsStrings} accordingly. In particular, if no fix is inserted, the
      * {@code competitorDTO} key is removed from those two maps.
      */
-    private void fillEmptyTail(CompetitorDTO competitorDTO, Date from, Date to) {
+    private void fillEmptyTail(CompetitorDTO competitorDTO, Date from, Date to, boolean findMinAndMaxDetailValue) {
         int first = -1;
         int last = -1;
+        int minIndex = -1;
+        int maxIndex = -1;
+        double max = Double.MIN_VALUE;
+        double min = Double.MAX_VALUE;
         final Colorline tail = getTail(competitorDTO);
         int vertexCount = tail.getLength();
         if (vertexCount != 0) {
@@ -911,7 +913,16 @@ public class FixesAndTails {
                         first = i;
                         firstShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), first);
                     }
-                    adjustMinMaxForInserted(competitorDTO, i, competitorFixes);
+                    if (findMinAndMaxDetailValue) {
+                        if (fix.detailValue != null && fix.detailValue < min) {
+                            minIndex = i;
+                            min = fix.detailValue;
+                        }
+                        if (fix.detailValue != null && fix.detailValue > max) {
+                            maxIndex = i;
+                            max = fix.detailValue;
+                        }
+                    }
                     tail.insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                     last = i;
                 }
@@ -922,6 +933,18 @@ public class FixesAndTails {
         }
         if (last != -1) {
             lastShownFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), last);
+            if (findMinAndMaxDetailValue) {
+                if (minIndex >= 0) {
+                    minDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), minIndex);
+                } else {
+                    minDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+                }
+                if (maxIndex >= 0) {
+                    maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), maxIndex);
+                } else {
+                    maxDetailValueFixByCompetitorIdsAsStrings.remove(competitorDTO.getIdAsString());
+                }
+            }
         } else {
             tailRemoved(competitorDTO.getIdAsString());
         }
@@ -1160,36 +1183,41 @@ public class FixesAndTails {
      *            {@link CompetitorDTO} competitor whose tail to search in
      */
     protected void searchMinMaxDetailValue(CompetitorDTO competitor) {
-        double min = Double.MAX_VALUE;
         boolean minSet = minDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString());
-        int minIndex = -1;
-        double max = Double.MIN_VALUE;
         boolean maxSet = maxDetailValueFixByCompetitorIdsAsStrings.containsKey(competitor.getIdAsString());
-        int maxIndex = -1;
-        // If the startIndex has not been reset to the beginning of the shown range because the min/max value has just
-        // left shown range it will now be set to the first not already searched index
-        final Integer startIndex = getFirstShownFix(competitor);
-        if (startIndex != null) {
-            final int endIndex = lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-            final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
-            for (int i = startIndex; i <= endIndex; i++) {
-                final Double value = fixesForCompetitor.get(i).detailValue;
-                if (value != null) {
-                    if (!minSet && value <= min) {
-                        min = value;
-                        minIndex = i;
+        if (!minSet || !maxSet) { // only need to do something if min or max are not known
+            double min = Double.MAX_VALUE;
+            int minIndex = -1;
+            double max = Double.MIN_VALUE;
+            int maxIndex = -1;
+            // If the startIndex has not been reset to the beginning of the shown range because the min/max value has just
+            // left shown range it will now be set to the first not already searched index
+            final Integer startIndex = getFirstShownFix(competitor);
+            if (startIndex != null) {
+                final int endIndex = lastShownFixByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+                final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixesByCompetitorIdsAsStrings.get(competitor.getIdAsString());
+                int i = startIndex;
+                for (final GPSFixDTOWithSpeedWindTackAndLegType fix : fixesForCompetitor.subList(startIndex, endIndex+1)) {
+                    final Double value = fix.detailValue;
+                    if (value != null) {
+                        final double doubleValue = value.doubleValue();
+                        if (!minSet && doubleValue <= min) {
+                            min = doubleValue;
+                            minIndex = i;
+                        }
+                        if (!maxSet && doubleValue >= max) {
+                            max = doubleValue;
+                            maxIndex = i;
+                        }
                     }
-                    if (!maxSet && value >= max) {
-                        max = value;
-                        maxIndex = i;
-                    }
+                    i++;
                 }
-            }
-            if (!minSet && minIndex > -1) {
-                minDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), minIndex);
-            }
-            if (!maxSet && maxIndex > -1) {
-                maxDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), maxIndex);
+                if (!minSet && minIndex > -1) {
+                    minDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), minIndex);
+                }
+                if (!maxSet && maxIndex > -1) {
+                    maxDetailValueFixByCompetitorIdsAsStrings.put(competitor.getIdAsString(), maxIndex);
+                }
             }
         }
     }
