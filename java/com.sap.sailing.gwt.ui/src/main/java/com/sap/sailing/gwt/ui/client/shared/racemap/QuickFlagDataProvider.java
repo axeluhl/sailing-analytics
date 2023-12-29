@@ -63,10 +63,11 @@ public interface QuickFlagDataProvider {
      * {@link LeaderboardDTO leaderboard} should ignore this call if it already has quick ranks information available
      * from a leaderboard.
      * 
-     * @param quickSpeedsFromServerInKnots
-     *            keys are the competitors, values are current speeds of competitors provided in knots (nautical miles per hour)
+     * @param quickSpeedsFromServerInKnotsByCompetitorIdAsString
+     *            keys are the {@link CompetitorDTO#getIdAsString() competitor IDs as string}, values are current speeds
+     *            of competitors provided in knots (nautical miles per hour)
      */
-    void quickSpeedsInKnotsReceivedFromServer(Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots);
+    void quickSpeedsInKnotsReceivedFromServer(Map<String, Double> quickSpeedsFromServerInKnotsByCompetitorIdAsString, Map<String, CompetitorDTO> competitorsByIdAsString);
 
     /**
      * @return keys are the {@link CompetitorWithBoatDTO#getIdAsString() competitor IDs are string}, values are the

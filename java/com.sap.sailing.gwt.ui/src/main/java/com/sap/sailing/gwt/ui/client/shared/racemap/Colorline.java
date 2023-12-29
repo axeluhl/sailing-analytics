@@ -50,6 +50,7 @@ public class Colorline {
     public Colorline(ColorlineColorProvider colorProvider) {
         this(new ColorlineOptions(colorProvider));
     }
+    
     public Colorline(ColorlineOptions options) {
         this.options = options;
         polylines = new ArrayList<>();
@@ -64,7 +65,8 @@ public class Colorline {
     public void setOptions(final ColorlineOptions options) {
         if (this.options.getColorMode() != options.getColorMode()) {
             // If colorMode changed the path needs to change from one polyline to multiple polylines and vice versa
-            MVCArray<LatLng> path = MVCArray.newInstance(getPath().toArray(new LatLng[0]));
+            final List<LatLng> pathOfLatLngs = getPath();
+            MVCArray<LatLng> path = MVCArray.newInstance(pathOfLatLngs.toArray(new LatLng[pathOfLatLngs.size()]));
             this.options = options;
             setPath(path);
         } else {
@@ -88,7 +90,7 @@ public class Colorline {
      */
     public List<LatLng> getPath() {
         final int cap = getLength();
-        List<LatLng> path = new ArrayList<>(cap);
+        final List<LatLng> path = new ArrayList<>(cap);
         if (cap > 0) {
             // In POLYCHROMATIC mode it is possible to have a single invisible vertex if the total path length is 1
             path.add(polylines.get(0).getPath().get(0));
