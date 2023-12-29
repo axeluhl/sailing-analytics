@@ -6257,4 +6257,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId()),
                         raceMetadata.getTimePointOfLastFix(), raceMetadata.getNumberOfCompetitors())));
     }
+
+    @Override
+    public String getGoogleMapsLoaderAuthenticationParams() {
+        return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
+    }
 }

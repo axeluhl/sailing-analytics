@@ -2449,4 +2449,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorMinimumTackTypeSegmentDurationMustNotBeNegative();
     String minimumDurationBetweenAdjacentTackTypeSegmentsInSeconds();
     String minimumTackTypeSegmentsDurationInSeconds();
+    String errorNoAuthenticationParamsForGoogleMapsFound(String message);
 }
