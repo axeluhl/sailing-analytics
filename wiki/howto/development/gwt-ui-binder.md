@@ -30,13 +30,13 @@ Ubilabs will deliver two versions of the site: one for use on desktops and table
 
 ## Internationalization (i18n)
 
-We're not yet decided on how to implement i18n. GWT offers two mechanisms that seem viable, see http://www.gwtproject.org/doc/latest/DevGuideUiBinderI18n.html. We could use GWT's feature that generates the property files. The upside would be that in case of many static texts we would get a quick start. The generation of UUIDs from the original static texts additionally ensures that changes cause compile errors and hence notify us that re-translation is required, which is good.
+GWT offers two mechanisms for i18n, see [https://www.gwtproject.org/doc/latest/DevGuideUiBinderI18n.html](https://www.gwtproject.org/doc/latest/DevGuideUiBinderI18n.html) for the UI Binder approach and [https://www.gwtproject.org/doc/latest/DevGuideI18nMessages.html](https://www.gwtproject.org/doc/latest/DevGuideI18nMessages.html) for explicit message declaration. The upside of GWT's feature that generates the property files would be that in case of many static texts we would get a quick start. The generation of UUIDs from the original static texts additionally ensures that changes cause compile errors and hence notify us that re-translation is required, which is good.
 
 The downside is that redundancies across different entry points are not handled well and that the property files may not fit in well with programmatic use of those message strings.
 
-Alternatively, it is possible to declare the string messages class and the method name that shall be used for the string message property. This way, we could consolidate all texts into a single message properties file which may help avoid redundancies.
+Alternatively, it is possible to declare the string messages class and the method name that shall be used for the string message property. This way, we consolidate all texts into a single message properties file which may help avoid redundancies. This is what we have decided for. Find those various ``StringMessages.java`` and corresponding ``StringMessages.properties`` in various places.
 
-We'll probably try out both approaches in a small scale and then decide.
+More details on the i18n process, e.g., how translation is triggered, can be found [here](/wiki/howto/development/i18n).
 
 ## UI Architecture
 

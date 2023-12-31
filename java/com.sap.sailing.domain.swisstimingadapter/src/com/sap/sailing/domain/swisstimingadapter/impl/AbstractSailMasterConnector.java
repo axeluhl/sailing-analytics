@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -568,7 +569,7 @@ public abstract class AbstractSailMasterConnector extends SailMasterTransceiverI
                                     + " which seems to be OK. I think we're connected in "+this+"!");
                         }
                     }
-                } catch (IOException e) {
+                } catch (IOException | URISyntaxException e) {
                     logger.log(Level.INFO, "Exception trying to establish connection in "+this+". Trying again in 1s.", e);
                     disconnectAndWaitABit();
                 }
@@ -576,7 +577,7 @@ public abstract class AbstractSailMasterConnector extends SailMasterTransceiverI
         }
     }
 
-    protected abstract void connect() throws IOException;
+    protected abstract void connect() throws IOException, URISyntaxException;
 
     protected abstract boolean isConnected() throws IOException;
 

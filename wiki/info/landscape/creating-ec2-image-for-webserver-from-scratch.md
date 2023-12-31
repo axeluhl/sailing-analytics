@@ -168,3 +168,50 @@ maxretry = 5
 ```
 * Ensure that fail2ban will be started automatically when the instance starts: `chkconfig --level 23 fail2ban on` and start it right away with `service fail2ban start`. You can see which filters are active using `service fail2ban status`.
 * Ensure you have EC2 / EBS snapshot backups for the volumes by tagging them as follows: ``WeeklySailingInfrastructureBackup=Yes`` for ``/var/www/static``, ``/var/log``, ``/var/log/old`` and ``/var/log/old/cache``, ``DailySailingBackup=Yes`` for ``/home``.
+
+## Automating archive failover 
+
+We have a script in our git repo called `switchoverArchive.sh`, which takes a path to the macros file and two timeout values (in seconds). It checks the macros file and checks if the following lines are present:
+
+```
+Define ARCHIVE_IP 172.31.7.12 
+Define ARCHIVE_FAILOVER_IP 172.31.43.140  
+Define PRODUCTION_ARCHIVE ${ARCHIVE_IP} 
+```
+Then it curls the primary/main archive's `/gwt/status` (with the first timeout value) and, if healthy, sets the production value to the definition of the archive; however, if unhealthy,  a
+second curl occurs (with the second timeout value) and if this again returns unhealthy then the production value above is this time set to be the value of the failover definition. 
+After these changes, key admins are notified and the apache config is reloaded. This only happens though if the new value differs from the currently known value:
+ie. if already healthy, and the health checks pass, then no reload or email occurs.
+To install, enter `crontab -e`; set the frequency to say `* * * * *`; add the path to the script; parameterise it with the path to the macros file, the first timeout value and the second timeout value (both seconds); and then 
+write and quit, to install the cronjob.
+
+```
+# Example crontab
+* * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf" 2 9
+```
+
+If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`, in that directory.
+
+## Basic setup for reverse proxy instance
+
+From a fresh amazon linux 2023 instance (HVM) install perl, httpd, mod_proxy_html, tmux, nfs-utils, git, whois and jq. Then type `amazon-linux-extras install epel`, which adds the epel repo so you can then run install apachetop.
+Then you need to remove the automatic ec2 code which disabled root access; reconfigure the sshd_config; setup the keys update script; and initialise the crontab. Store a bearer token in the home dir.
+
+Rename the welcome.conf. Add a basic web page, as the Apache default page can sometimes return no 2xx codes, which can lead to failing health checks.
+
+Setup fail2ban like above.
+
+Ensure httpd is enabled, so that the server auto starts upon a restart.
+Other modules may need to be installed, depending on the httpd config.
+
+Configure a startup service (either in /etc/systemd/system or etc/rcX directories) to try to mount an attached nvme as swap space (this step needs to be checked after setup).
+Swap space still needs to be fully automated.
+
+Postmail is useful. The script for this procedure is in configuration and is titled setupDisposableProxy.sh
+
+Setup the logrotate target.
+
+Setup the fstab (not automated).
+Update amazon cli (because pricing list requires it)
+
+

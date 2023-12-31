@@ -177,6 +177,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -1789,7 +1790,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
-
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
         // competitor set will be calculated and returned to the client
         if (trackedRace == null || Arrays.equals(md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, trackedRace.getRace().getCompetitorMD5())) {
@@ -1883,6 +1883,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> result = new HashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        // let user see the detail values if and only if the detail type requires no permission for any action,
+        // or the current user has permission to this action on the leaderboard identified by the leaderboardName
+        // parameter:
+        final DetailType effectiveDetailTypeAfterPermissionCheck = detailType == null ? null :
+            detailType.getPremiumAction() == null || getSecurityService().hasCurrentUserExplicitPermissions(getLeaderboard(leaderboardName), detailType.getPremiumAction()) ?
+                        detailType : null;
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
@@ -1892,7 +1898,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     final TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     final TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     result.put(competitorDTO,
-                            new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(competitor, this, trackedRace, detailType,
+                            new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(competitor, this, trackedRace, effectiveDetailTypeAfterPermissionCheck,
                                     track, fromTimePoint, toTimePointExcluding, extrapolate,
                                     leaderboardName, leaderboardGroupName, leaderboardGroupId));
                 }
@@ -2456,16 +2462,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL)
-            throws UnknownHostException, IOException, InterruptedException, ParseException {
+            throws UnknownHostException, IOException, InterruptedException, ParseException, URISyntaxException {
         SwissTimingEventRecordDTO result = null;
-        List<SwissTimingRaceRecordDTO> swissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
-
-        // TODO: delete getSwissTimingAdapter().getSwissTimingRaceRecords() method
-        // TODO: delete SwissTimingDomainFactory.getRaceTypeFromRaceID(String raceID)
-        URL url = new URL(eventJsonURL);
-        URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
-        Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
-        EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
+        final List<SwissTimingRaceRecordDTO> swissTimingRaces = new ArrayList<>();
+        final URL url = new URL(eventJsonURL);
+        final Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
+        final EventResultDescriptor eventResult = parser.getEventResult(url);
         if (eventResult != null) {
             for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
                 for (RaceResultDescriptor race : regattaResult.getRaceResults()) {
@@ -2572,11 +2574,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             TimePoint timePoint, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
         Double result = null;
-        Course course = trackedRace.getRace().getCourse();
+        final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
+        trackedRace.lockForRead(trackedRace.getMarkPassings(competitor));
         try {
-            TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
+            final TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
             switch (dataType) {
+            case LEG_TACKTYPE_LONGTACK_SHORTTACK:
+                final TackType tackType;
+                if (trackedLeg != null && (tackType = trackedLeg.getTackType(timePoint, cache)) != null ) {
+                    result = tackType==TackType.LONGTACK ? 1.0 : -1.0;
+                } else {
+                    // trackedLeg == null || tackType == null;
+                    result = 0.0;
+                }
+                break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = trackedRace.getTrack(competitor);
                 if (sogTrack != null) {
@@ -2942,6 +2954,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
             return result;
         } finally {
+            trackedRace.unlockAfterRead(trackedRace.getMarkPassings(competitor));
             course.unlockAfterRead();
         }
     }
@@ -4077,12 +4090,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl) {
-        StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);
-        Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(manage2SailJsonUrl);
-        List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
-        Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
-        for (Regatta regatta : regattas) {
+    public Iterable<RegattaDTO> getManage2SailRegattas(String manage2SailJsonUrl) throws MalformedURLException, URISyntaxException {
+        final StructureImporter structureImporter = new StructureImporter(new SetRacenumberFromSeries(), baseDomainFactory);
+        final String manage2SailJsonUrlWithAccessToken = com.sap.sailing.manage2sail.Activator.getInstance().addAccessTokenToManage2SailUrl(new URL(manage2SailJsonUrl)).toString();
+        final Iterable<RegattaJSON> parsedEvent = structureImporter.parseEvent(manage2SailJsonUrlWithAccessToken);
+        final List<RegattaDTO> regattaDTOs = new ArrayList<RegattaDTO>();
+        final Iterable<Regatta> regattas = structureImporter.getRegattas(parsedEvent);
+        for (final Regatta regatta : regattas) {
             regattaDTOs.add(convertToRegattaDTO(regatta));
         }
         return regattaDTOs;
@@ -6242,5 +6256,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 Collections.singletonList(new YellowBrickRaceRecordDTO(config.getName(),
                         raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId()),
                         raceMetadata.getTimePointOfLastFix(), raceMetadata.getNumberOfCompetitors())));
+    }
+
+    @Override
+    public String getGoogleMapsLoaderAuthenticationParams() {
+        return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
     }
 }

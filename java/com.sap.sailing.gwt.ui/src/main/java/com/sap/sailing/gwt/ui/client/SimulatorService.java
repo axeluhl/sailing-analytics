@@ -60,4 +60,6 @@ public interface SimulatorService extends RemoteService {
     List<String> getRacesNames();
 
     List<String> getCompetitorsNames(int selectedRaceIndex);
+
+    String getGoogleMapsLoaderAuthenticationParams();
 }

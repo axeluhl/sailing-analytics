@@ -1,6 +1,9 @@
-<VirtualHost *:443>
+# The problem with this is that Wordpress seems to redirect to https,
+# leading to an endless redirect loop when the ALB then receives the
+# https request, does the SSL handling and forwards as an http request
+# to here again...
+<VirtualHost *:80>
 	ServerName blog.sapsailing.com
-	Use SSL
 	CustomLog logs/blog_log combined
 	DocumentRoot /home/wordpress/wordpress
 	<Directory /home/wordpress/wordpress>

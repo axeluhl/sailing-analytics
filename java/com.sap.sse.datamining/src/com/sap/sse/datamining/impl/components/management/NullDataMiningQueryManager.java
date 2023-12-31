@@ -23,7 +23,7 @@ public class NullDataMiningQueryManager implements DataMiningQueryManager {
 
     @Override
     public <ResultType> QueryResult<ResultType> runNewAndAbortPrevious(DataMiningSession session, Query<ResultType> query) {
-        logger.info("This query manager, doesn't manage anything. Just running the query " + query);
+        logger.info("This query manager doesn't manage anything. Just running the query " + query);
         queries.add(query);
         final QueryResult<ResultType> result = query.run();
         queries.remove(query);

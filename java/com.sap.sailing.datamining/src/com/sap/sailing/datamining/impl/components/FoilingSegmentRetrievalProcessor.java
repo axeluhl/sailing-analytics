@@ -51,7 +51,7 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                 TimePoint startOfSegment = null;
                 bravoFixTrack.lockForRead();
                 try {
-                    for (final BravoFix bravoFix : bravoFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) {
+                    for (final BravoFix bravoFix : bravoFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) { //geht ganzes Rennen durch
                         if (isAborted()) {
                             break;
                         }
@@ -61,10 +61,10 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                                                 element.getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor()).getEstimatedSpeed(bravoFix.getTimePoint())) <= 0)) ||
                                 (settings.getMaximumSpeedNotFoiling() != null && settings.getMaximumSpeedNotFoiling().compareTo(
                                         element.getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor()).getEstimatedSpeed(bravoFix.getTimePoint())) <= 0);
-                        if (currentFixIsFoiling != isFoiling) {
-                            if (currentFixIsFoiling) {
+                        if (currentFixIsFoiling != isFoiling) { //checken ob boot zum loop davor mit voherigem fix immernoch am fliegen ist, wenn nicht dann muss segment gemacht werden, wenn ja dann wird es zum segment ergänzt
+                            if (currentFixIsFoiling) { //wenn ich vorher nicht am fliegen war und jetzt schon start von segment 
                                 startOfSegment = bravoFix.getTimePoint();
-                            } else {
+                            } else { // wenn ich vorher am fliegen war und jetzt nicht mehr, segment muss gebildet werden!!!!!
                                 if (settings.getMinimumFoilingSegmentDuration() == null ||
                                         startOfSegment.until(last).compareTo(settings.getMinimumFoilingSegmentDuration()) >= 0) {
                                     addOrMergeFoilingSegment(element, foilingSegments, bravoFixTrack, startOfSegment,
@@ -72,7 +72,7 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                                 }
                                 startOfSegment = null;
                             }
-                            isFoiling = currentFixIsFoiling;
+                            isFoiling = currentFixIsFoiling; //aktualisiert das es vorher nicht gleich war also entweder fliegen zuende oder gerade beginnt
                         }
                         last = bravoFix.getTimePoint();
                     }

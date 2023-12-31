@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -103,7 +104,7 @@ public class ParserTest {
 
     @Test
     public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = new ResultUrlRegistryImpl(mock(MongoObjectFactory.class),
                 mock(DomainObjectFactory.class));
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(

@@ -8,20 +8,15 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ScriptElement;
 
 /**
- * The {@link #load(Runnable)} method can be used by clients to request the loading of the Google Maps API.
+ * The {@link #load(Runnable, String)} method can be used by clients to request the loading of the Google Maps API.
  * The callback passed will be invoked immediately if the API has already been loaded (e.g., by another
- * client call to the {@link #load(Runnable)} method within the same frame / document); it will be queued
+ * client call to the {@link #load(Runnable, String)} method within the same frame / document); it will be queued
  * for invocation by a Google Maps API callback function registered otherwise. This callback function
- * is injected at most once when the {@link #load(Runnable)} method is invoked for the first time and
- * will trigger all callbacks registered through the {@link #load(Runnable)} method until the maps API
+ * is injected at most once when the {@link #load(Runnable, String)} method is invoked for the first time and
+ * will trigger all callbacks registered through the {@link #load(Runnable, String)} method until the maps API
  * invokes the callback registered.
  */
 public class GoogleMapsLoader {
-    /**
-     * These params define the required information to authenticate with the Google Maps API.
-     */
-    public static final String AUTHENTICATION_PARAMS = "client=gme-sapglobalmarketing&channel=sapsailing.com";
-
     /**
      * Note: If you use 3, it will take the newest stable available. We want that, although we didn't test with that yet!
      * Google Release notes: https://developers.google.com/maps/documentation/javascript/releases.
@@ -45,7 +40,7 @@ public class GoogleMapsLoader {
     /**
      * @param callback must not be {@code null}.
      */
-    public static void load(Runnable callback) {
+    public static void load(Runnable callback, String authenticationParams) {
         if (loaded) {
             Scheduler.get().scheduleDeferred(() -> callback.run());
         } else {
@@ -54,7 +49,7 @@ public class GoogleMapsLoader {
                 loading = true;
                 installCallback();
                 final ScriptElement scriptElement = Document.get().createScriptElement();
-                scriptElement.setSrc("https://maps.googleapis.com/maps/api/js?v="+API_VERSION+"&" + AUTHENTICATION_PARAMS
+                scriptElement.setSrc("https://maps.googleapis.com/maps/api/js?v="+API_VERSION+"&" + authenticationParams
                         + "&libraries="+LIBRARIES+"&callback=googleMapsLoadedCallback");
                 Document.get().getHead().appendChild(scriptElement);
             }

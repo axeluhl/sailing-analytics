@@ -66,7 +66,6 @@ public class SwissTimingConnectionTableWrapper extends
         this.stringMessagesClient = stringMessages;
         this.sailingServiceAsync = sailingServiceWriteAsync;
         final ListHandler<SwissTimingConfigurationWithSecurityDTO> swissTimingConectionColumnListHandler = getColumnSortHandler();
-
         // table
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionNameColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
                 dto -> dto.getName(), swissTimingConectionColumnListHandler);
@@ -85,7 +84,6 @@ public class SwissTimingConnectionTableWrapper extends
                 dto -> dto.getUpdateUsername(), swissTimingConectionColumnListHandler);
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionCreatorNameColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
                 dto -> dto.getCreatorName(), swissTimingConectionColumnListHandler);
-
         final HasPermissions type = SecuredDomainType.SWISS_TIMING_ACCOUNT;
         final AccessControlledActionsColumn<SwissTimingConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
@@ -113,7 +111,6 @@ public class SwissTimingConnectionTableWrapper extends
                 }
             }, userService, errorReporter).show();
         });
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
             sailingServiceWriteAsync.deleteSwissTimingConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
@@ -127,19 +124,16 @@ public class SwissTimingConnectionTableWrapper extends
                 }
             });
         });
-
         final EditOwnershipDialog.DialogConfig<SwissTimingConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementWriteService(), type, dto -> refreshSwissTimingConnectionList(),
                         stringMessages);
-
         final EditACLDialog.DialogConfig<SwissTimingConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type, dto -> dto.getAccessControlList(), stringMessages);
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
+        // filter field:
         filterField = new LabeledAbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO>(
                 new Label(stringMessagesClient.filterSwissTimingConnections()),
                 new ArrayList<SwissTimingConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {

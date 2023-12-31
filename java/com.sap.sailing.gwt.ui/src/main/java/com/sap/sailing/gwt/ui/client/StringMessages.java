@@ -62,7 +62,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardName();
     String pleaseEnterAName();
     String pleaseEnterABoatClass();
-    String discardRacesFromHowManyStartedRacesOn();
     String applyDiscardsBasedOnNumberOfScoredRaces(int maxNumberOfDiscardedResults);
     String leaderboardWithThisNameAlreadyExists();
     String discardThresholdsMustBeNumeric();
@@ -2079,6 +2078,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String qrCodeTitle(String leaderboardName);
     String qrCodeSubtitle(String eventName, String eventLocationAndVenue);
     String qrCodeTitleOpenRegatta(String regattaName);
+    String qrCodeTitleOpenRaceManagerApp();
+    String qrCodeSubTitleOpenRaceManagerApp();
+    String qrCodeTitleErrorCreatingQrCode();
     String qrCodeUnsecureServerRedirect(String hostName);
     String qrCodeUnsecureServerRedirectTitle(String hostName);
     String qrCodeInfoMessage();
@@ -2439,4 +2441,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
     String incrementalScoreCorrectionInPoints();
     String errorObtainingCourseAreasForLeaderboard(String leaderboardName, String message);
+    String tackTypeUnit();
+    String tackTypeTooltip();
+    String tackType();
+    String tackTypeSegments();
+    String errorMinimumDurationBetweenAdjacentTackTypeSegmentsMustNotBeNegative();
+    String errorMinimumTackTypeSegmentDurationMustNotBeNegative();
+    String minimumDurationBetweenAdjacentTackTypeSegmentsInSeconds();
+    String minimumTackTypeSegmentsDurationInSeconds();
+    String errorNoAuthenticationParamsForGoogleMapsFound(String message);
 }

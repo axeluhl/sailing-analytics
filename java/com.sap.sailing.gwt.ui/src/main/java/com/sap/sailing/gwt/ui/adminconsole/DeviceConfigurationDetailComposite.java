@@ -111,6 +111,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             fillCourseAreaListBox(eventsById.get(selectedValue==null||selectedValue.isEmpty() ? null : UUID.fromString(selectedValue)));
         });
         captionPanel = new CaptionPanel(stringMessages.configuration());
+        captionPanel.ensureDebugId("DeviceConfigurationDetailComposite");
         VerticalPanel verticalPanel = new VerticalPanel();
         contentPanel = new VerticalPanel();
         cloneButton = new Button(stringMessages.save() + " + " + stringMessages.clone());
@@ -426,6 +427,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
 
     private Button createQrCodeButton() {
         Button qrCodeButton = new Button(stringMessages.qrSync());
+        qrCodeButton.ensureDebugId("DeviceConfigurationDetailsQrCodeButton");
         qrCodeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
