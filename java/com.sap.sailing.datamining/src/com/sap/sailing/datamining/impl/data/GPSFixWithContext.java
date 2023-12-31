@@ -4,10 +4,12 @@ import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -88,5 +90,21 @@ public class GPSFixWithContext implements HasGPSFixContext {
     @Override
     public Distance getAbsoluteXTE() {
         return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getAbsoluteCrossTrackError(getTimePoint());
+    }
+    
+    @Override
+    public TackType getTackType() throws NoWindException {
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTackType(getTimePoint());
+    }
+
+    @Override
+    public Speed getSmoothedSpeed() {
+        final SpeedWithBearing result;
+        if (getGPSFix().isEstimatedSpeedCached()) {
+            result = getGPSFix().getCachedEstimatedSpeed();
+        } else {
+            result = getTrackedLegOfCompetitorContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor()).getEstimatedSpeed(getTimePoint());
+        }
+        return result;
     }
 }

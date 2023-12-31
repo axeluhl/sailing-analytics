@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,7 +42,7 @@ public class TrofeoSofia_ParserTest extends AbstractTrofeoSofiaTest {
 
     @Test
     public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = new ResultUrlRegistryImpl(mock(MongoObjectFactory.class),
                 mock(DomainObjectFactory.class));
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(

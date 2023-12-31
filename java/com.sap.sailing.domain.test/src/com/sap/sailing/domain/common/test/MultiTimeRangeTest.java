@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.MultiTimeRangeImpl;
 
 public class MultiTimeRangeTest {
@@ -103,5 +104,37 @@ public class MultiTimeRangeTest {
         assertEquals(createMulti(100, 120, 300, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 300)));
         assertEquals(createMulti(100, 120, 350, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 350)));
         assertEquals(createMulti(100, 120, 350, 360, 370, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 350, 360, 370)));
+    }
+    
+    @Test
+    public void testOrderingWithOf() {
+        final MillisecondsTimePoint _10 = new MillisecondsTimePoint(10);
+        final MillisecondsTimePoint _20 = new MillisecondsTimePoint(20);
+        final MillisecondsTimePoint _100 = new MillisecondsTimePoint(100);
+        final MillisecondsTimePoint _200 = new MillisecondsTimePoint(200);
+        final MultiTimeRange mtr = MultiTimeRange.of(TimeRange.create(_100, _200), TimeRange.create(_10, _20));
+        assertEquals(TimeRange.create(_10, _20), Util.get(mtr, 0));
+        assertEquals(TimeRange.create(_100, _200), Util.get(mtr, 1));
+    }
+    
+    @Test
+    public void testOrderingWithUnion() {
+        final MillisecondsTimePoint _10 = new MillisecondsTimePoint(10);
+        final MillisecondsTimePoint _20 = new MillisecondsTimePoint(20);
+        final MillisecondsTimePoint _100 = new MillisecondsTimePoint(100);
+        final MillisecondsTimePoint _200 = new MillisecondsTimePoint(200);
+        final MultiTimeRange mtr = MultiTimeRange.of(TimeRange.create(_100, _200)).union(TimeRange.create(_10, _20));
+        assertEquals(TimeRange.create(_10, _20), Util.get(mtr, 0));
+        assertEquals(TimeRange.create(_100, _200), Util.get(mtr, 1));
+    }
+    
+    @Test
+    public void testEmptyTimeRangeRemoval() {
+        final MillisecondsTimePoint _10 = new MillisecondsTimePoint(10);
+        final MillisecondsTimePoint _100 = new MillisecondsTimePoint(100);
+        final MillisecondsTimePoint _200 = new MillisecondsTimePoint(200);
+        final MultiTimeRange mtr = MultiTimeRange.of(TimeRange.create(_100, _200)).union(TimeRange.create(_10, _10));
+        assertEquals(1, Util.size(mtr));
+        assertEquals(TimeRange.create(_100, _200), Util.get(mtr, 0));
     }
 }

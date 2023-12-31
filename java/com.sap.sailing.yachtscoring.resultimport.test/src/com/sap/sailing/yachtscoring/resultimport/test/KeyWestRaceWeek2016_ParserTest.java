@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -72,16 +73,14 @@ public class KeyWestRaceWeek2016_ParserTest extends AbstractYachtScoringEventRes
 
     @Test
     public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = new ResultUrlRegistryImpl(mock(MongoObjectFactory.class),
                 mock(DomainObjectFactory.class));
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(KEYWESTRACEWEEEK2016_EVENT_NAME);
         assertNotNull(resultsForKeyWestRaceWeek);
-
         assertEquals(2, resultsForKeyWestRaceWeek.size());
     }
     
@@ -100,7 +99,6 @@ public class KeyWestRaceWeek2016_ParserTest extends AbstractYachtScoringEventRes
             }
         }
         assertNotNull(resultForJ88);
-        
         RegattaScoreCorrections _J88Result = scoreCorrectionProvider.getScoreCorrections(KEYWESTRACEWEEEK2016_EVENT_NAME, BOAT_CLASS_J88,
                 resultForJ88.getB());
         assertNotNull(_J88Result);
@@ -108,5 +106,4 @@ public class KeyWestRaceWeek2016_ParserTest extends AbstractYachtScoringEventRes
         assertNotNull(scoreCorrectionsForRaces);
         assertEquals(10, Util.size(scoreCorrectionsForRaces)); 
     }
-
 }

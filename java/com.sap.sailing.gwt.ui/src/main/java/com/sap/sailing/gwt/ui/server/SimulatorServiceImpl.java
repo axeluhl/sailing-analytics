@@ -956,4 +956,9 @@ public class SimulatorServiceImpl extends DelegatingProxiedRemoteServiceServlet 
         }
         return timepointAsMillis - startTimePoint2asMillis;
     }
+
+    @Override
+    public String getGoogleMapsLoaderAuthenticationParams() {
+        return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
+    }
 }

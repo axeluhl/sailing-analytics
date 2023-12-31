@@ -38,5 +38,4 @@ public class CompetitorDayWithContext implements HasCompetitorDayContext {
     public String getDayAsISO() {
         return raceOfCompetitor.getTrackedRaceContext().getDayAsISO();
     }
-
 }

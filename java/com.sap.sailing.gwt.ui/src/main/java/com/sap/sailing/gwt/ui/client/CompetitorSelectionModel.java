@@ -125,9 +125,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public Iterable<CompetitorDTO> getSelectedFilteredCompetitors() {
-        Set<CompetitorDTO> result = new HashSet<>(selectedCompetitors.values());
-        Util.retainAll(getFilteredCompetitors(), result);
-        return result;
+        return Util.filter(getFilteredCompetitors(), c->selectedCompetitors.containsKey(c.getIdAsString()));
     }
 
     @Override
@@ -137,18 +135,13 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Iterable<CompetitorDTO> getFilteredCompetitors() {
-        Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<>(allCompetitors);
-        if (competitorsFilterSet != null) {
-            for (Filter<CompetitorDTO> filter : competitorsFilterSet.getFilters()) {
-                for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
-                    CompetitorDTO competitorDTO = i.next();
-                    if (!filter.matches(competitorDTO)) {
-                        i.remove();
-                    }
-                }
-            }
+        final Iterable<CompetitorDTO> result;
+        if (competitorsFilterSet == null || competitorsFilterSet.getFilters().isEmpty()) {
+            result = allCompetitors;
+        } else {
+            result = Util.filter(allCompetitors, competitorDTO -> competitorsFilterSet.getFilters().stream().allMatch(filter->filter.matches(competitorDTO)));
         }
-        return currentFilteredList;
+        return result;
     }
     
     public void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {

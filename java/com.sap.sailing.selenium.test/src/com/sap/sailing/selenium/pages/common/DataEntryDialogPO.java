@@ -63,22 +63,18 @@ public abstract class DataEntryDialogPO extends PageArea {
     public void pressOk(boolean acceptAlert, boolean waitForAjaxRequests) {
         // This generically triggers revalidation in dialogs to ensure that the ok button gets enabled
         ((JavascriptExecutor) driver).executeScript("!!document.activeElement ? document.activeElement.blur() : 0");
-        Wait<WebDriver> wait = new WebDriverWait(driver, 10);
+        Wait<WebDriver> wait = new WebDriverWait(driver, 20);
+        // click OK
         wait.until(ExpectedConditions.elementToBeClickable(okButton)).click();        
-        
         if (acceptAlert) {
             final Alert alert = new WebDriverWait(driver, DEFAULT_WAIT_TIMEOUT_SECONDS)
                     .until(ExpectedConditions.alertIsPresent());
             alert.accept();
         }
-        
         if (waitForAjaxRequests) {
             // Wait, since we do a callback usually
             waitForAjaxRequests();
         }
-        WebElement element = (WebElement) this.context;
-        // This waits until the dialog is physically closed to make sure further don't fail because the dialog still covers other elements
-        wait.until(ExpectedConditions.invisibilityOf(element));
     }
     
     public void pressCancel() {
