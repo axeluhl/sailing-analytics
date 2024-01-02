@@ -20,7 +20,7 @@ GIT_DIR_NAME="$3"
 cd "$(dirname "$0")/${ENV_TYPE}"
 GIT_PATH="$(grep "^${GIT_USER}" /etc/passwd | cut -d':' -f6)/${GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
 for dir in $(ls -d */ ); do
-    USERNAME=$(echo $dir | sed "s/\/$//")
+    USERNAME=$(echo $dir | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
     HOME_DIR=$(grep "^${USERNAME}" /etc/passwd | cut -d':' -f6)   # The path to the home dir of the user whose cronjob will be installed.
     touch $HOME_DIR/crontab
     for crontab in $(ls ${USERNAME}/crontab*); do
