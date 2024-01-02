@@ -6,6 +6,10 @@ if [ $# != 0 ]; then
 else
   if ec2-metadata | grep -q instance-id; then
     echo "Running on an AWS EC2 instance as user ${USER} / $(whoami), starting setup..."
+    # TODO: install JVM
+    # install mountnvmeswap stuff
+    # install /etc/init.d/sailing start-up script
+    # mount /home
     sudo adduser sailing
     ssh-keygen -t ed25519 -P '' -f /home/ec2-user/.ssh/id_ed25519
     cat /home/ec2-user/.ssh/id_ed25519.pub | ssh root@sapsailing.com "cat >>/home/trac/.ssh/authorized_keys"
