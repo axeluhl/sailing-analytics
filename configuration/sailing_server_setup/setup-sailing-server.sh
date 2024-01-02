@@ -25,39 +25,41 @@ else
     sudo chmod 700 /home/sailing/.ssh
     # Install standard packages:
     sudo yum -y update
-    sudo yum -y install git tmux nvme-cli chrony
+    sudo yum -y install --allowerasing git tmux nvme-cli chrony cronie cronie-anacron
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
-    # Clone Git to /home/sailing/code
-    sudo su - sailing -c "git clone ssh://trac@sapsailing.com/home/trac/git code"
+    # Clone Git to /home/sailing/code. TODO: remove -b bug5912 again when done with testing and merging to master
+    sudo su - sailing -c "git clone -b bug5912 ssh://trac@sapsailing.com/home/trac/git code"
     # Install SAP JVM 8:
     sudo mkdir -p /opt
     sudo su - -c "source /home/sailing/code/configuration/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
     # Install sailing.sh script to /etc/profile.d
     sudo ln -s /home/sailing/code/configuration/sailing.sh /etc/profile.d
-    # TODO: install /etc/init.d/sailing start-up script
+    # Install /etc/init.d/sailing start-up / shut-down service
     sudo ln -s /home/sailing/code/configuration/sailing /etc/init.d/sailing
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
     sudo systemctl daemon-reload
     sudo systemctl enable sailing.service
     # Configure SSH daemon:
-    sudo cat << EOF >>/etc/ssh/sshd_config
+    sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
 PermitRootLogin without-password
 PermitRootLogin Yes
 MaxStartups 100
 EOF
+"
     # Increase limits
-    sudo cat << EOF >>/etc/sysctl.conf
+    sudo su - -c "cat << EOF >>/etc/sysctl.conf
 # number of connections the firewall can track
 net.ipv4.ip_conntrac_max = 131072
 EOF
+"
     # Install mountnvmeswap stuff
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap.service /etc/systemd/system
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
-    sudo cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
+    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
 [mongodb-org-4.4]
 name=MongoDB Repository
 baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/4.4/x86_64/
@@ -65,12 +67,14 @@ gpgcheck=1
 enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
 EOF
+"
     sudo yum -y update
     sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools
-    sudo cat << EOF >>/etc/mongod.conf
+    sudo su - -c "cat << EOF >>/etc/mongod.conf
 replication:
   replSetName: replica
 EOF
+"
     sudo systemctl start mongod.service
     echo "rs.initiate()" | mongo
     # Install cron job for ssh key update for landscape managers
