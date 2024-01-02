@@ -74,12 +74,17 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public synchronized void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
-        this.raceLogStore = raceLogStore;
-        this.regattaLikeParent = regattaLikeParent;
+    public synchronized void setRaceLogInformationAndLoad(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
+        setRaceLogInformation(raceLogStore, regattaLikeParent);
         for (final Fleet fleet : getFleets()) {
             reloadRaceLog(fleet);
         }
+    }
+
+    @Override
+    public synchronized void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
+        this.raceLogStore = raceLogStore;
+        this.regattaLikeParent = regattaLikeParent;
     }
 
     @Override
@@ -191,6 +196,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void reloadRaceLog(Fleet fleet) {
+        // FIXME bug3286: newOrLoadedRaceLog will have MongoRaceLogStoreListener attached; raceLogAvailable, result of de-serialization, will not; merging newOrLoadedRaceLog into raceLogAvailable will leave resulting log without persistence
         RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
         RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
         RaceLog raceLogAvailable = raceLogs.get(fleet);
