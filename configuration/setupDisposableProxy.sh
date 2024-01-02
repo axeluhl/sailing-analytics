@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Setup script for Amazon Linux 2. May need to update macro definitions for the archive IP. 
+# Parameter 1 is the IP and parameter 2 is the bearer token to be installed in the root home dir.
 IP=$1
 BEARER_TOKEN=$2
 HTTP_LOGROTATE=/etc/logrotate.d/httpd
@@ -13,7 +14,8 @@ sudo -E bash <<NESTEDEOF
 sed -i 's/.*sleep 10. //g' ~/.ssh/authorized_keys
 NESTEDEOF
 FIRSTEOF
-ssh -A "root@${IP}" "bash -s" << SECONDEOF  2>&1 
+# writes std error to local text file
+ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFailure yes/' /etc/ssh/sshd_config
 
 # fstab setup
