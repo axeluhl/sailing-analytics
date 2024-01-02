@@ -1,6 +1,6 @@
 # Creating an Amazon AWS EC2 Image from Scratch
 
-I started out with a clean "Amazon Linux AMI 2015.03 (HVM), SSD Volume Type - ami-a10897d6" image from Amazon and added the existing Swap and Home snapshots as new volumes. The root/system volume I left as is, to start with. This requires having access to a user key that can be selected when launching the image.
+I started out with a clean "Amazon Linux AMI 2023" image from Amazon with a single 100GB root volume. The root/system volume I left as is, to start with. This requires having access to a user key that can be selected when launching the image.
 
 Add a ``sailing`` user / group. Under that user account, clone ``ssh://trac@sapsailing.com/home/trac/git`` to ``/home/sailing/code``.
 
@@ -52,14 +52,14 @@ A latest MongoDB shell is installed by the following:
 cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
 [mongodb-org-4.4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/4.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/4.4/x86_64/
 gpgcheck=1
 enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
 EOF
 
 yum update
-yum install mongodb-org-shell
+yum install mongodb-org-server mongodb-org-shell mongodb-org-tools
 ```
 
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
