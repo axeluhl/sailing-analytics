@@ -41,6 +41,13 @@ import com.sap.sse.common.Util.Pair;
  */
 public interface RaceColumn extends Named {
     /**
+     * Sets the information object used to access the race column's race logs (see
+     * {@link #setRaceLogInformation(RaceLogStore, RegattaLikeIdentifier)}) and (re-)loads the contents of all fleets'
+     * race logs.
+     */
+    void setRaceLogInformationAndLoad(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent);
+    
+    /**
      * Sets the information object used to access the race column's race logs.
      */
     void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent);
@@ -49,7 +56,6 @@ public interface RaceColumn extends Named {
      * Gets the race column's race log associated to the passed fleet. Note that the result may be <code>null</code>
      * particularly for columns in a {@link MetaLeaderboard}.
      *
-     * @param fleet
      * @return the race log or <code>null</code> in case this column belongs to a {@link MetaLeaderboard}
      */
     RaceLog getRaceLog(Fleet fleet);
