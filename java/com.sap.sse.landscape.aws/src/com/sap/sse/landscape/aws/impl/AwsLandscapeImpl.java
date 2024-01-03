@@ -1040,6 +1040,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
         return getTargetGroup(region, targetGroupName, /* discover load balancer ARN from target group */ null);
     }
+    
     @Override
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId) {
@@ -1201,7 +1202,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(t->t.targetGroupArn(targetGroup.getTargetGroupArn()).targets(descriptions));
 
     }
-
 
     private TargetDescription[] getTargetDescriptions(Iterable<AwsInstance<ShardingKey>> targets) {
         return Util.toArray(Util.map(targets, t->TargetDescription.builder().id(t.getInstanceId()).build()), new TargetDescription[0]);
