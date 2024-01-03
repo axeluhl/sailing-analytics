@@ -109,4 +109,10 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     
     @Statistic(messageKey="VMG", resultDecimals=2)
     public Speed getVelocityMadeGood();
+    
+    @Statistic(messageKey="RatioDurationLongVsShortTack", resultDecimals=2)
+    public double getRatioDurationLongVsShortTack();
+    
+    @Statistic(messageKey="RatioDistanceLongVsShortTack", resultDecimals=2)
+    public double getRatioDistanceLongVsShortTack();
 }

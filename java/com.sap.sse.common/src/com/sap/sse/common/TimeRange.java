@@ -159,7 +159,8 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * Produces a {@link TimeRange} that {@link TimeRange#includes(TimeRange) includes} both, {@code this} and
      * {@code other}. Other than {@link #union(TimeRange)}, this will also work in case {@code other} does not
      * {@link #touches(TimeRange) touch} {@code this} time range. If {@code this} already {@link #includes(TimeRange)}
-     * {@code other}, {@code this} time range is returned.
+     * {@code other}, {@code this} time range is returned. If {@code other} is {@code null}, {@code this} time range is
+     * returned.
      */
     TimeRange extend(TimeRange other);
 

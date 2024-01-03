@@ -70,4 +70,12 @@ public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements I
         this.degreesBoatToTheWind = degreesBoatToTheWind;
         this.detailValue = detailValue;
     }
+
+    @Override
+    public String toString() {
+        return "GPSFixDTOWithSpeedWindTackAndLegType [speedWithBearing=" + speedWithBearing + ", extrapolated="
+                + extrapolated + ", tack=" + tack + ", legType=" + legType + ", degreesBoatToTheWind="
+                + degreesBoatToTheWind + ", detailValue=" + detailValue + ", timepoint=" + timepoint + ", position="
+                + position + "]";
+    }
 }

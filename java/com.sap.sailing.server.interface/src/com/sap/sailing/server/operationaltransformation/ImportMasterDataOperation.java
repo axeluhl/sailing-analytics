@@ -339,7 +339,7 @@ public class ImportMasterDataOperation extends
                 } else if (override) {
                     for (RaceColumn raceColumn : existingLeaderboards.get(leaderboard.getName()).getRaceColumns()) {
                         for (Fleet fleet : raceColumn.getFleets()) {
-                            TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                            final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                             if (trackedRace != null) {
                                 raceColumn.releaseTrackedRace(fleet);
                             }
@@ -414,7 +414,7 @@ public class ImportMasterDataOperation extends
 
     private void addAllImportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
             final RaceLog log, RaceLogIdentifier identifier) {
-        RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
+        final RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
                 .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
         log.lockForRead();
         try {

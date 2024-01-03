@@ -682,4 +682,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * from the {@link Event}s obtains their {@link CourseArea}s.
      */
     void getCourseAreaForEventOfLeaderboard(String leaderboardName, AsyncCallback<List<CourseAreaDTO>> callback);
+
+    void getGoogleMapsLoaderAuthenticationParams(AsyncCallback<String> callback);
 }
