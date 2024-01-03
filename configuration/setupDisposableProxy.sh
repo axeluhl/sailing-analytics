@@ -115,7 +115,7 @@ scp -o StrictHostKeyChecking=no  -r "root@${AWS_CREDENTIALS_IP}:~/.aws"  /usr/sh
 chown -R apache:apache /usr/share/httpd
 sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config
 # setup releases
-# rsync -av --delete root@sapsailing.com:/var/www/static/releases /home/trac
+# rsync -av --delete root@sapsailing.com:/var/www/static/releases /var/www/static/releases
 # # setup p2
 # rsync -av --delete trac@sapsailing.com:p2-repositories /home/trac
 
