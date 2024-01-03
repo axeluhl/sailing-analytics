@@ -1,4 +1,16 @@
 #!/bin/bash
+# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2 AMI with
+# 100GB of root partition size and the "Sailing Analytics App" security group
+# using an SSH key for which you have a working private key available.
+# Then, run this script on your local computer, using the external IP address
+# of the instance you just launched in AWS as only argument. This will then
+# turn the instance into an application server for the SAP Sailing Analytics
+# application. When the script is done you may log in to look around and check
+# things. When done, shut down the instance (Stop, not Terminate) and create
+# an image off of it, naming it, e.g., "SAP Sailing Analytics 2.0" and
+# also tagging its root volume snapshot as, e.g., "SAP Sailing Analytics 2.0 (Root)".
+# If you want to use the resulting image in production, also tag it with
+# tag key "image-type" and tag value "sailing-analytics-server".
 if [ $# != 0 ]; then
   SERVER=$1
   scp "${0}" ec2-user@${SERVER}:
