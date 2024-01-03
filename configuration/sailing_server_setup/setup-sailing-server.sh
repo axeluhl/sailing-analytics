@@ -78,12 +78,6 @@ EOF
       echo "MongoDB not ready yet; waiting and trying again..."
       sleep 5
     done
-    # Install /etc/init.d/sailing start-up / shut-down service
-    sudo ln -s /home/sailing/code/configuration/sailing /etc/init.d/sailing
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
-    sudo systemctl daemon-reload
-    sudo systemctl enable sailing.service
-    sudo systemctl start sailing.service
     # Install cron job for ssh key update for landscape managers
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
@@ -94,6 +88,12 @@ EOF
     sudo chown root /root/ssh-key-reader.token
     sudo chgrp root /root/ssh-key-reader.token
     sudo chmod 600 /root/ssh-key-reader.token
+    # Install /etc/init.d/sailing start-up / shut-down service
+    sudo ln -s /home/sailing/code/configuration/sailing /etc/init.d/sailing
+    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
+    sudo systemctl daemon-reload
+    sudo systemctl enable sailing.service
+    sudo systemctl start sailing.service
     # Install secrets
     scp root@sapsailing.com:secrets /tmp
     sudo mv /tmp/secrets /root

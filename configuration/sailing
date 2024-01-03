@@ -26,7 +26,9 @@ SERVERS_DIR=/home/sailing/servers
 cd "${SERVERS_DIR}"
 JAVA_START_INSTANCES="$(find * -type d -prune)"
 GIT_REPOSITORY=/home/sailing/code
-if [ -x /usr/bin/ec2-metadata ]; then
+if [ -x /bin/ec2-metadata ]; then
+  EC2_METADATA_CMD=/bin/ec2-metadata
+elif [ -x /usr/bin/ec2-metadata ]; then
   EC2_METADATA_CMD=/usr/bin/ec2-metadata
 else
   EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
