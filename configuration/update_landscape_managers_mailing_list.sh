@@ -8,15 +8,11 @@ FOLDER_WITHIN_HOME="mailinglists"
 NAME_TO_STORE_IN="landscapeManagersMailingList"
 BASE_URL="https://security-service.sapsailing.com"
 curl_output=$( curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS" 2>/dev/null )
-curl_output=$(echo $curl_output | sed "s/^\[//" | sed "s/\]$//" | sed 's|"||g' )
-if [[ -f "${HOME_DIR}/mailinglists/landscapeManagersMailingList" ]]; then
-    mv -f ${HOME_DIR}/mailinglists/landscapeManagersMailingList ${HOME_DIR}/mailinglists/landscapeManagersMailingList.bak
+if [[ -f "${HOME_DIR}/${FOLDER_WITHIN_HOME}/${NAME_TO_STORE_IN}" ]]; then
+    mv -f ${HOME_DIR}/${FOLDER_WITHIN_HOME}/${NAME_TO_STORE_IN} ${HOME_DIR}/${FOLDER_WITHIN_HOME}/${NAME_TO_STORE_IN}.bak
 fi
-oldIFS=$IFS
-IFS=,
-touch ${HOME_DIR}/mailinglists/landscapeManagersMailingList
-for item in $curl_output; do
-    email=$(curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/security/api/restsecurity/user?username=$item" | jq '.email' | sed 's|"||g')
-    echo $email >> ${HOME_DIR}/mailinglists/landscapeManagersMailingList
+touch ${HOME_DIR}/${FOLDER_WITHIN_HOME}/${NAME_TO_STORE_IN}
+echo $curl_output | jq -r .[] | while read user; do
+    email=$(curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/security/api/restsecurity/user?username=$user" | jq -r '.email')
+    echo $email >> ${HOME_DIR}/${FOLDER_WITHIN_HOME}/${NAME_TO_STORE_IN}
 done
-IFS=$oldIFS
