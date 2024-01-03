@@ -71,6 +71,7 @@ replication:
   replSetName: replica
 EOF
 "
+    sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' /etc/mongod.conf
     sudo systemctl start mongod.service
     sleep 5
     echo "Initializing MongoDB replica set..."
