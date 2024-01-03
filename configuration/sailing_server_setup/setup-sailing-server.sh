@@ -17,7 +17,7 @@ else
     # Create an SSH key pair with empty passphrase for ec2-user, deploy it to trac@sapsailing.com
     # and then move it to the sailing user's .ssh directory
     ssh-keygen -t ed25519 -P '' -f /home/ec2-user/.ssh/id_ed25519
-    cat /home/ec2-user/.ssh/id_ed25519.pub | ssh root@sapsailing.com "cat >>/home/trac/.ssh/authorized_keys"
+    cat /home/ec2-user/.ssh/id_ed25519.pub | ssh -o StrictHostKeyChecking=false root@sapsailing.com "cat >>/home/trac/.ssh/authorized_keys"
     sudo mkdir /home/sailing/.ssh
     sudo mv /home/ec2-user/.ssh/id* /home/sailing/.ssh
     sudo chown -R sailing /home/sailing/.ssh
@@ -25,7 +25,7 @@ else
     sudo chmod 700 /home/sailing/.ssh
     # Install standard packages:
     sudo yum -y update
-    sudo yum -y install --allowerasing git tmux nvme-cli chrony cronie cronie-anacron
+    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
     # Clone Git to /home/sailing/code. TODO: remove -b bug5912 again when done with testing and merging to master
@@ -62,7 +62,7 @@ EOF
     sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
 [mongodb-org-4.4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/4.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/
 gpgcheck=1
 enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
@@ -76,7 +76,12 @@ replication:
 EOF
 "
     sudo systemctl start mongod.service
-    echo "rs.initiate()" | mongo
+    sleep 5
+    echo "Initializing MongoDB replica set..."
+    while ! echo "rs.initiate()" | mongo; do
+      echo "MongoDB not ready yet; waiting and trying again..."
+      sleep 5
+    done
     # Install cron job for ssh key update for landscape managers
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
@@ -87,6 +92,12 @@ EOF
     sudo chown root /root/ssh-key-reader.token
     sudo chgrp root /root/ssh-key-reader.token
     sudo chmod 600 /root/ssh-key-reader.token
+    # Install secrets
+    scp root@sapsailing.com:secrets /tmp
+    sudo mv /tmp/secrets /root
+    sudo chown root /root/secrets
+    sudo chgrp root /root/secrets
+    sudo chmod 600 /root/secrets
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     exit 2

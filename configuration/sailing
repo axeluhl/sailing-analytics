@@ -55,7 +55,7 @@ start_servers() {
 	      su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
 	    done
 	  else
-	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
+	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
 	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
 	    if [ "${FIRST_SERVER}" = "" ]; then
 	      echo "No SERVER_NAME provided; not configuring/starting any application processes" >>/var/log/sailing.err
