@@ -25,7 +25,7 @@ else
     sudo chmod 700 /home/sailing/.ssh
     # Install standard packages:
     sudo yum -y update
-    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron
+    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
     # Clone Git to /home/sailing/code. TODO: remove -b bug5912 again when done with testing and merging to master
@@ -35,11 +35,6 @@ else
     sudo su - -c "source /home/sailing/code/configuration/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
     # Install sailing.sh script to /etc/profile.d
     sudo ln -s /home/sailing/code/configuration/sailing.sh /etc/profile.d
-    # Install /etc/init.d/sailing start-up / shut-down service
-    sudo ln -s /home/sailing/code/configuration/sailing /etc/init.d/sailing
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
-    sudo systemctl daemon-reload
-    sudo systemctl enable sailing.service
     # Configure SSH daemon:
     sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
 PermitRootLogin without-password
@@ -58,6 +53,7 @@ EOF
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap.service /etc/systemd/system
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
+    sudo systemctl start mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
     sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
 [mongodb-org-4.4]
@@ -82,6 +78,12 @@ EOF
       echo "MongoDB not ready yet; waiting and trying again..."
       sleep 5
     done
+    # Install /etc/init.d/sailing start-up / shut-down service
+    sudo ln -s /home/sailing/code/configuration/sailing /etc/init.d/sailing
+    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
+    sudo systemctl daemon-reload
+    sudo systemctl enable sailing.service
+    sudo systemctl start sailing.service
     # Install cron job for ssh key update for landscape managers
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin

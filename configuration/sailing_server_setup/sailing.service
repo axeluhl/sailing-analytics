@@ -4,7 +4,7 @@ Requires=-.mount mongod.service
 After=-.mount mongod.service
 
 [Install]
-multi-user.target
+RequiredBy=multi-user.target
 
 [Service]
 Type=oneshot
