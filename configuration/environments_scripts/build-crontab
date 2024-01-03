@@ -17,7 +17,7 @@ ENV_TYPE="$1"
 GIT_USER="$2"
 GIT_DIR_NAME="$3"
 
-cd "$(dirname "$0")/${ENV_TYPE}"
+cd "$(dirname "$0")/${ENV_TYPE}/users"
 GIT_PATH="$(grep "^${GIT_USER}" /etc/passwd | cut -d':' -f6)/${GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
 for dir in $(ls -d */ ); do
     USERNAME=$(echo $dir | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
