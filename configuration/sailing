@@ -39,6 +39,11 @@ SSH_KEY_READER_BEARER_TOKEN=/root/ssh-key-reader.token
 echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
 start_servers() {
+        echo "Initializing local MongoDB replica set \"replica\"..."
+        while ! echo "rs.initiate()" | mongo; do
+          echo "MongoDB not ready yet; waiting and trying again..."
+          sleep 5
+        done
         /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
 	chown root /usr/local/bin/cp_root_mail_properties
