@@ -35,6 +35,8 @@ else
     sudo su - -c "source /home/sailing/code/configuration/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
     # Install sailing.sh script to /etc/profile.d
     sudo ln -s /home/sailing/code/configuration/sailing.sh /etc/profile.d
+    # Keep Amazon Linux from patching root's authorized_keys file:
+    sudo sed -i -e 's/disable_root: *true/disable_root: false/' /etc/cloud/cloud.cfg
     # Configure SSH daemon:
     sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
 PermitRootLogin without-password
