@@ -28,8 +28,8 @@ else
     sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
-    # Clone Git to /home/sailing/code. TODO: remove -b bug5912 again when done with testing and merging to master
-    sudo su - sailing -c "git clone -b bug5912 ssh://trac@sapsailing.com/home/trac/git code"
+    # Clone Git to /home/sailing/code
+    sudo su - sailing -c "git clone ssh://trac@sapsailing.com/home/trac/git code"
     # Install SAP JVM 8:
     sudo mkdir -p /opt
     sudo su - -c "source /home/sailing/code/configuration/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
