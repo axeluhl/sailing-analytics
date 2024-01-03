@@ -37,7 +37,7 @@ else
     sudo chmod 700 /home/sailing/.ssh
     # Install standard packages:
     sudo yum -y update
-    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq
+    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq telnet mailx
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
     # Clone Git to /home/sailing/code
