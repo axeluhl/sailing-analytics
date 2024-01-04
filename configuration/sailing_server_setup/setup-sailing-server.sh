@@ -104,7 +104,7 @@ EOF
     scp root@sapsailing.com:secrets /tmp
     scp root@sapsailing.com:mail.properties /tmp
     sudo mv /tmp/secrets /root
-    sudo mv /tmp/mail.propertier /root
+    sudo mv /tmp/mail.properties /root
     sudo chown root /root/secrets
     sudo chgrp root /root/secrets
     sudo chmod 600 /root/secrets
