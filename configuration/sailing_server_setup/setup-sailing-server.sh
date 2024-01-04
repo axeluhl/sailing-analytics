@@ -87,11 +87,6 @@ EOF
 "
     sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' /etc/mongod.conf
     sudo systemctl start mongod.service
-    echo "Initializing MongoDB replica set..."
-    while ! echo "rs.initiate()" | mongo; do
-      echo "MongoDB not ready yet; waiting and trying again..."
-      sleep 5
-    done
     # Install cron job for ssh key update for landscape managers
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
