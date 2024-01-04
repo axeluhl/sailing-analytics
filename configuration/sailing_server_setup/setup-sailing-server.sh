@@ -102,10 +102,15 @@ EOF
     sudo systemctl enable sailing.service
     # Install secrets
     scp root@sapsailing.com:secrets /tmp
+    scp root@sapsailing.com:mail.properties /tmp
     sudo mv /tmp/secrets /root
+    sudo mv /tmp/mail.propertier /root
     sudo chown root /root/secrets
     sudo chgrp root /root/secrets
     sudo chmod 600 /root/secrets
+    sudo chown root /root/mail.properties
+    sudo chgrp root /root/mail.properties
+    sudo chmod 600 /root/mail.properties
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2

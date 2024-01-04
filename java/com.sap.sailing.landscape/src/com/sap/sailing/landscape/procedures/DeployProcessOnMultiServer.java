@@ -286,8 +286,7 @@ implements Procedure<ShardingKey> {
                     "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"").replaceAll("\\$", "\\\\\\$")+
                     "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start\";"+ // SAILING_USER ends here
                     // from here on as root:
-                    "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
-                    "./defineReverseProxyMappings.sh",
+                    "cd "+serverDirectory.replaceAll("\"", "\\\\\""),
                     "stderr: ", Level.WARNING);
             logger.info("stdout: "+stdout);
         }
