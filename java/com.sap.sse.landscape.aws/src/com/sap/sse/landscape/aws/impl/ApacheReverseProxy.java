@@ -45,10 +45,17 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final Optional<Duration> TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(5)); 
     
     /**
-     * The configuration directory where files with extension {@link #CONFIG_FILE_EXTENSION} can be placed which
+     * The configuration directory within the "httpd/config" git repo where files with extension {@link #CONFIG_FILE_EXTENSION} can be placed which
      * a {@code reload} will pick up and evaluate.
      */
-    private static final String CONFIG_PATH = "/etc/httpd/conf.d";
+    private static final String RELATIVE_CONFIG_PATH = "conf.d";
+    
+    /**
+     * The path to the "httpd/config" git repo which stores all httpd configuration files.
+     */
+    private static final String CONFIG_REPO_PATH = "/etc/httpd";
+    
+    private static final String CONFIG_REPO_MAIN_BRANCH_NAME = "main";
     
     /**
      * Extension for files in the {@link #CONFIG_PATH} folder that will automatically be picked up when reloading
@@ -91,9 +98,8 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String... macroArguments)
             throws Exception {
         final String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
-                + "\" > " + getConfigFilePath(configFileNameForHostname) + "; service httpd reload && "
-                + "cd /etc/httpd && git add " + getConfigFilePath(configFileNameForHostname) + " && git commit -m \"Set "
-                + configFileNameForHostname + " redirect\""  + " && git push origin main;";
+                + "\" > " + getAbsoluteConfigFilePath(configFileNameForHostname) + "; service httpd reload && "
+                + "cd " + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname, "\"Set configFileNameForHostname redirect\"", false) ;
         logger.info("Standard output from setting up the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
@@ -108,8 +114,38 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         return stdout;
     }
     
-    private String getConfigFilePath(String configFileNameForHostname) {
-        return CONFIG_PATH+"/"+configFileNameForHostname;
+    /**
+     *  Creates a string that can be ran on an instance to commit and optionally push changes to a file (within a git repo). Assumes the command is ran from within the repository.
+     * @param editedFileName The file name edited, created or deleted to commit.
+     * @param commitMsg The commit message. Make sure it is enclosed with escaped speech marks.
+     * @param performPush Boolean indicating whether to push changes or not.
+     * @return Returns the created string command to perform a commit and optional push.
+     */
+    private String createCommitAndPushString(String editedFileName, String commitMsg, boolean performPush) {
+        StringBuilder command = new StringBuilder(" git add " + getRelativeConfigFilePath(editedFileName) + " && git commit -m " + commitMsg); // space at beginning added for safety
+        if (performPush) {
+            command.append(" && git push origin " + CONFIG_REPO_MAIN_BRANCH_NAME);
+        }
+        command.append(";");
+        return command.toString();
+    }
+    
+    /**
+     * 
+     * @param configFileNameForHostname The name of the file to append to the relative path. 
+     * @return Returns the relative path. This is the path, within the directory specified by {@link #CONFIG_REPO_PATH}, to where the argument file is or may be.
+     */
+    private String getRelativeConfigFilePath(String configFileNameForHostname) {
+        return RELATIVE_CONFIG_PATH + "/" + configFileNameForHostname;
+    }
+    
+   /**
+    * 
+    * @param configFileNameForHostname The filename to append to the absolute path.
+    * @return Returns the absolute path to the config file passed as an argument (which may be for creation, deletion or just finding the file).
+    */
+    private String getAbsoluteConfigFilePath(String configFileNameForHostname) {
+        return CONFIG_REPO_PATH + "/" + RELATIVE_CONFIG_PATH + "/" + configFileNameForHostname;
     }
 
     @Override
@@ -170,13 +206,13 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
 
     @Override
     public void removeRedirect(Scope<ShardingKey> scope, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String configFilePath = getConfigFilePath(getConfigFileNameForScope(scope));
+        final String configFilePath = getAbsoluteConfigFilePath(getConfigFileNameForScope(scope));
         removeRedirect(configFilePath, scope.toString(), optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     @Override
     public void removeRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String configFilePath = getConfigFilePath(getConfigFileNameForHostname(hostname));
+        final String configFilePath = getAbsoluteConfigFilePath(getConfigFileNameForHostname(hostname));
         removeRedirect(configFilePath, hostname, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
