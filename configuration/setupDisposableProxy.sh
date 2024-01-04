@@ -16,7 +16,7 @@ NESTEDEOF
 FIRSTEOF
 # writes std error to local text file
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
-sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nExitOnForwardFailure yes/' /etc/ssh/sshd_config
+sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
 
 # fstab setup
 mkdir /var/log/old
