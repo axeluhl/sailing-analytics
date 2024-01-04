@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
-import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -399,7 +399,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), SharedLandscapeConstants.ALL_REVERSE_PROXIES);
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), LandscapeConstants.ALL_REVERSE_PROXIES);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1151,7 +1151,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, SharedLandscapeConstants.REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, LandscapeConstants.REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;
@@ -1240,7 +1240,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
         return getSecurityGroupByName(SAILING_APP_SECURITY_GROUP_NAME, region).orElseGet(()->{
             List<SecurityGroup> securityGroups = new ArrayList<>();
-            securityGroups.addAll(getSecurityGroupByTag(SharedLandscapeConstants.SAILING_APPLICATION_SG_TAG, region));
+            securityGroups.addAll(getSecurityGroupByTag(LandscapeConstants.SAILING_APPLICATION_SG_TAG, region));
             return securityGroups.isEmpty() ? null : securityGroups.get(0);
         });
     }
@@ -1248,7 +1248,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(com.sap.sse.landscape.Region region) {
         List<SecurityGroup> securityGroups = new ArrayList<>();
-        securityGroups.addAll(getSecurityGroupByTag(SharedLandscapeConstants.REVERSE_PROXY_SG_TAG, region));
+        securityGroups.addAll(getSecurityGroupByTag(LandscapeConstants.REVERSE_PROXY_SG_TAG, region));
         return securityGroups;
     }
 
@@ -1278,7 +1278,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<SecurityGroup> getDefaultSecurityGroupsForMongoDBHosts(com.sap.sse.landscape.Region region) {
         List<SecurityGroup> securityGroups = new ArrayList<>();
-        securityGroups.addAll(getSecurityGroupByTag(SharedLandscapeConstants.MONGO_SG_TAG, region));
+        securityGroups.addAll(getSecurityGroupByTag(LandscapeConstants.MONGO_SG_TAG, region));
         return securityGroups;
     }
 
