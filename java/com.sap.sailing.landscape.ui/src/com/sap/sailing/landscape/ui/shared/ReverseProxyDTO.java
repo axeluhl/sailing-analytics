@@ -12,10 +12,10 @@ public class ReverseProxyDTO extends AwsInstanceDTO  {
     String health;
     boolean isDisposable = false;
 
-    public ReverseProxyDTO(String instanceId, String availabilityZoneId, String privateIpAddress,
+    public ReverseProxyDTO(String instanceId, String availabilityZoneName, String privateIpAddress,
             String publicIpAddress, String region, TimePoint launchTimePoint, boolean shared, String name,
             String imageId, String healthInTargetGroup) {
-        super(instanceId, availabilityZoneId, privateIpAddress, publicIpAddress, region, launchTimePoint, shared);
+        super(instanceId, availabilityZoneName, privateIpAddress, publicIpAddress, region, launchTimePoint, shared);
         this.name = name;
         this.amiId = imageId;
         this.health=healthInTargetGroup;

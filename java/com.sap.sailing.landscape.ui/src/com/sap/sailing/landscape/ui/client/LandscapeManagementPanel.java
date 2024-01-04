@@ -1473,7 +1473,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         } else {
             proxiesTableBusy.setBusy(true);
             landscapeManagementService.removeReverseProxy(instance, regionId,
-                    Optional.of(sshKeyManagementPanel.getSelectedKeyPair().getName()),
+                    sshKeyManagementPanel.getSelectedKeyPair().getName(),
                     sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
                             : new byte[0],

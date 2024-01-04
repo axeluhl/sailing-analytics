@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
-import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.ConsumerWithException;
@@ -63,13 +63,14 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, privateIpAddress, launchTimePoint, landscape),
                 getAmiId(az.getRegion()), instanceType, az, keyName,
-                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(SharedLandscapeConstants.DISPOSABLE_PROXY, "").and(SharedLandscapeConstants.REVERSE_PROXY_TAG_NAME, "")));
-        addHost(host);
+                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "");
+                // !/bin/bash \n iptables -F
+                addHost(host);
         Wait.wait(() -> !host.getInstance().state().name().equals(InstanceStateName.PENDING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, "Reattempting to add to target group");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
-                if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
-                    if (targetGroup.getLoadBalancer().getArn().contains(SharedLandscapeConstants.NLB_ARN_CONTAINS)) {
+                if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
+                    if (targetGroup.getLoadBalancer().getArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
                         getLandscape().addIpTargetToTargetGroup(targetGroup, Collections.singleton(host));
                     } else {
                         targetGroup.addTarget(host);
@@ -103,7 +104,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
      * Gets the latest image in the current region with the correct tag for creating a reverse proxy.
      */
     private MachineImage getAmiId(Region region) {
-        return getLandscape().getLatestImageWithType(region, SharedLandscapeConstants.IMAGE_TYPE_REVERSE_PROXY);
+        return getLandscape().getLatestImageWithType(region, LandscapeConstants.IMAGE_TYPE_REVERSE_PROXY);
     }
 
     @Override

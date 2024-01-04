@@ -28,8 +28,7 @@ Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.13.50",
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1"
 Web-ContextPath: /landscape
-Import-Package: com.sap.sailing.landscape.common,
- org.apache.shiro;version="1.2.2",
+Import-Package: org.apache.shiro;version="1.2.2",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sse.landscape.aws.impl.Activator

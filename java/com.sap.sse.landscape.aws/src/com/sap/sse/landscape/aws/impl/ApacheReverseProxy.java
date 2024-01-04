@@ -74,11 +74,11 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
     
     private String getConfigFileNameForScope(Scope<ShardingKey> scope) {
-        return scope.toString()+CONFIG_FILE_EXTENSION;
+        return scope.toString() + CONFIG_FILE_EXTENSION;
     }
 
     private String getConfigFileNameForHostname(String hostname) {
-        return hostname+CONFIG_FILE_EXTENSION;
+        return hostname + CONFIG_FILE_EXTENSION;
     }
     
     public void rotateLogs(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {

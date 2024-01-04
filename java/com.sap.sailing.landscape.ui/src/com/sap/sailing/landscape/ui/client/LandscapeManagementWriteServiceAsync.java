@@ -2,7 +2,6 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -42,7 +41,7 @@ public interface LandscapeManagementWriteServiceAsync {
      * Removes a reverse proxy from the given cluster and terminates it.
      * @return Returns true if a success.
      */
-    void removeReverseProxy(ReverseProxyDTO instance, String region, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Boolean> callback);
+    void removeReverseProxy(ReverseProxyDTO instance, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Boolean> callback);
     
     /**
      * Restarts the httpd on a reverse proxy, by stopping and then starting the service.

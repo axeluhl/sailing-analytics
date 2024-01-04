@@ -89,6 +89,7 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
@@ -279,7 +280,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 if (!description.tags().isEmpty()) {
                     for (Tag tag : description.tags()) {
 
-                        if (tag.key().equals(SharedLandscapeConstants.ALL_REVERSE_PROXIES)) {
+                        if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
                             targetGroupInQuestion = targetGroup;
                         }
                     }
@@ -294,11 +295,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape))
                 .getHosts()) {
             ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(),
-                    instance.getAvailabilityZone().toString(), instance.getPrivateAddress().toString(),
+                    instance.getAvailabilityZone().getName(), instance.getPrivateAddress().toString(),
                     instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(),
                     instance.isSharedHost(), instance.getNameTag(), instance.getImageId(),
                     extractHealth(healths, instance));
-            dto.setDisposable(landscape.getTag(instance, SharedLandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false);
+            dto.setDisposable(landscape.getTag(instance, LandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false);
             results.add(dto);
         }
         return results;
@@ -327,15 +328,14 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         checkLandscapeManageAwsPermission();
         AwsRegion awsRegion = new AwsRegion(region, getLandscape());
         AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(awsRegion, proxy.getInstanceId(),
                 AwsInstanceImpl::new);
-        getLandscape().getCentralReverseProxy(awsRegion).removeHost(awsInstance, optionalKeyName, privateKeyEncryptionPassphrase);
+        getLandscape().getCentralReverseProxy(awsRegion).removeHost(awsInstance, Optional.of(optionalKeyName), privateKeyEncryptionPassphrase);
         return true;
-
     }
     
     @Override
@@ -379,6 +379,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
         }
     }
+    
     private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {
         final MongoEndpoint result;
         if (mongoEndpointDTO == null) {
