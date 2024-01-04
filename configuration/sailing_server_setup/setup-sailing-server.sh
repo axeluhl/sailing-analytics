@@ -67,7 +67,6 @@ EOF
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap.service /etc/systemd/system
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
-    sudo systemctl start mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
     sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
 [mongodb-org-4.4]
@@ -86,7 +85,6 @@ replication:
 EOF
 "
     sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' /etc/mongod.conf
-    sudo systemctl start mongod.service
     # Install cron job for ssh key update for landscape managers
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
@@ -102,7 +100,6 @@ EOF
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
     sudo systemctl daemon-reload
     sudo systemctl enable sailing.service
-    sudo systemctl start sailing.service
     # Install secrets
     scp root@sapsailing.com:secrets /tmp
     sudo mv /tmp/secrets /root
