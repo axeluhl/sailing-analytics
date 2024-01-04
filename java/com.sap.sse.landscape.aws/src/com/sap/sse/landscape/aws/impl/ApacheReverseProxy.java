@@ -198,7 +198,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
 
     @Override
     public int getPort() {
-        return 443; // TODO currently, we offload SSL only at the reverse proxies; but we should change this to SSL offloading at the load balancer, and then this would have to become 80 (HTTP)
+        return 80;
     }
 
     /**
@@ -239,12 +239,10 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
      * Restarts the httpd service on the proxy via stop and then start.
      * @param optionalKeyName The keyname to use to connect, via ssh, to the instance to run the necessary commands.
      * @param privateKeyEncryptionPassphrase The passphrase for the key.
-     * @throws Exception
      */
     public void restart(Optional<String> optionalKeyName,byte[] privateKeyEncryptionPassphrase) throws Exception {
-        String command = "service httpd stop && service httpd start";
+        String command = "service httpd stop; service httpd start";
         runCommandAndReturnStdoutAndStderr(command, "Restarting Apache httpd server", Level.INFO, optionalKeyName,
                 privateKeyEncryptionPassphrase);
-
     }
 }

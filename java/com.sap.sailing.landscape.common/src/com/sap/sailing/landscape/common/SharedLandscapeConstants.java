@@ -127,5 +127,8 @@ public interface SharedLandscapeConstants {
      */
     String INSTANCE_SUITABLE_FOR_HTTPD = "canCoDeployWithHttpd";
     
-
+    /**
+     * The tag for the central reverse proxy, which hosts non-essential services.
+     */
+    String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
 }
