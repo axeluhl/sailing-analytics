@@ -172,7 +172,6 @@ public class TaggingComponent extends ComponentWithoutSettings
             RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight,
             StrippedLeaderboardDTO leaderboardDTO, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, context);
-
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.sailingServiceWrite = sailingServiceWrite;
@@ -182,19 +181,15 @@ public class TaggingComponent extends ComponentWithoutSettings
         this.timePointToHighlight = timePointToHighlight;
         this.tagToHighlight = tagToHighlight;
         this.leaderboardDTO = leaderboardDTO;
-
         style = TaggingPanelResources.INSTANCE.style();
         style.ensureInjected();
         TaggingPanelResources.INSTANCE.cellListStyle().ensureInjected();
         TaggingPanelResources.INSTANCE.cellTableStyle().ensureInjected();
-
         tagCellList = new CellList<TagDTO>(new TagCell(this, stringMessages, userService, false),
                 TaggingPanelResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
         tagListProvider = new TagListProvider();
-
         tagButtons = new ArrayList<TagButton>();
-
         taggingPanel = new DockLayoutPanel(Style.Unit.PX) {
             @Override
             public void onResize() {
@@ -210,13 +205,10 @@ public class TaggingComponent extends ComponentWithoutSettings
         filterbarPanel = new TagFilterPanel(this, stringMessages, userService);
         contentPanel = new FlowPanel();
         createTagsButton = new Button();
-
         userService.addUserStatusEventHandler(this);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
-
         generateRandomId();
         registerStorageEventHandler();
-
         setCurrentState(State.VIEW);
         initializePanel();
     }

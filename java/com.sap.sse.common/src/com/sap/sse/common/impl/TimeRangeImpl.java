@@ -259,12 +259,16 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
 
     @Override
     public TimeRange extend(TimeRange other) {
-        final TimeRange preResult = this.extend(other.from());
         final TimeRange result;
-        if (preResult.to().before(other.to())) {
-            result = new TimeRangeImpl(preResult.from(), other.to());
+        if (other == null) {
+            result = this;
         } else {
-            result = preResult;
+            final TimeRange preResult = this.extend(other.from());
+            if (preResult.to().before(other.to())) {
+                result = new TimeRangeImpl(preResult.from(), other.to());
+            } else {
+                result = preResult;
+            }
         }
         return result;
     }

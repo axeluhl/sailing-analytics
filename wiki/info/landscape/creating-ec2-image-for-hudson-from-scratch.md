@@ -15,7 +15,7 @@ This is an add-on to the regular EC2 image set-up described [here](https://wiki.
 
 * Ensure you have EC2 / EBS snapshot backups for the volumes by tagging them as follows: ``WeeklySailingInfrastructureBackup=Yes`` for ``/`` and ``/home/hudson``.
 
-``/home/hudson/repo`` has the Hudson build repository. The Hudson WAR file is under ``/usr/lib/hudson/hudson.war``. ``/etc/init.d/hudson``, linked to from ``/etc/rc0.d/K29hudson``, ``/etc/rc1.d/K29hudson``, ``/etc/rc2.d/K29hudson``, ``/etc/rc3.d/S81hudson``, ``/etc/rc4.d/K29hudson``, ``/etc/rc5.d/S81hudson``, and  ``/etc/rc6.d/K29hudson``, takes care of spinning up Hudson during instance re-boot. Hudson systemwide configuration is under ``/etc/sysconfig/hudson``:
+``/home/hudson/repo`` has the Hudson build repository. The Hudson WAR file is under ``/usr/lib/hudson/hudson.war`` which has to be taken from [here](https://static.sapsailing.com/hudson.war.patched-with-mail-1.6.2). ``/etc/init.d/hudson``, linked to from ``/etc/rc0.d/K29hudson``, ``/etc/rc1.d/K29hudson``, ``/etc/rc2.d/K29hudson``, ``/etc/rc3.d/S81hudson``, ``/etc/rc4.d/K29hudson``, ``/etc/rc5.d/S81hudson``, and  ``/etc/rc6.d/K29hudson``, takes care of spinning up Hudson during instance re-boot. It can be obtained from [here](https://static.sapsailing.com/etc-init.d-hudson). Hudson systemwide configuration is under ``/etc/sysconfig/hudson``:
 ```
 ## Path:        Development/Hudson
 ## Description: Configuration for the Hudson continuous build server

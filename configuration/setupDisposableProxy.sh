@@ -75,10 +75,10 @@ service fail2ban start
 yum install -y mod_ssl
 # setup mounting of nvme
 ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/archive_instance_setup/mountnvmeswap.service"  /etc/systemd/system/mountnvmeswap.service
-
 ## ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/archive_instance_setup/mountnvmeswap" /usr/local/bin/mountnvmeswap
 source /root/.bashrc
 ./mountnvmeswap
+systemctl enable mountnvmeswap.service
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out

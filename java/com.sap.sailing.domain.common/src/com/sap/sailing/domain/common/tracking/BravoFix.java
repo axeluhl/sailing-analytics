@@ -46,4 +46,5 @@ public interface BravoFix extends SensorFix {
 
     @Statistic(messageKey = "heel", resultDecimals = 1)
     Bearing getHeel();
+
 }

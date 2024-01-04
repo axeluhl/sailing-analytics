@@ -594,4 +594,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             YellowBrickConfigurationWithSecurityDTO configuration) throws Exception;
 
     List<CourseAreaDTO> getCourseAreaForEventOfLeaderboard(String leaderboardName);
+
+    String getGoogleMapsLoaderAuthenticationParams();
 }

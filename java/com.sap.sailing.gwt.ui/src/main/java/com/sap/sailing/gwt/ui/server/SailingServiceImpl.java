@@ -1790,7 +1790,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
-
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
         // competitor set will be calculated and returned to the client
         if (trackedRace == null || Arrays.equals(md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, trackedRace.getRace().getCompetitorMD5())) {
@@ -6257,5 +6256,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 Collections.singletonList(new YellowBrickRaceRecordDTO(config.getName(),
                         raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId()),
                         raceMetadata.getTimePointOfLastFix(), raceMetadata.getNumberOfCompetitors())));
+    }
+
+    @Override
+    public String getGoogleMapsLoaderAuthenticationParams() {
+        return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
     }
 }

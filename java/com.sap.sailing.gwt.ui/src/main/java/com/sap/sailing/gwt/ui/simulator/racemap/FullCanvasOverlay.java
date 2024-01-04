@@ -69,17 +69,14 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         }
         int canvasWidth = mapWidth;
         int canvasHeight = mapHeight;
-
         canvas.setWidth(String.valueOf(canvasWidth));
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
-
         Point sw = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getSouthWest());
         Point ne = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getNorthEast());
         setWidgetPosLeft(Math.min(sw.getX(), ne.getX()));
         setWidgetPosTop(Math.min(sw.getY(), ne.getY()));
-
         setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
     }
 
