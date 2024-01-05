@@ -102,10 +102,22 @@ EOF
     sudo systemctl enable sailing.service
     # Install secrets
     scp root@sapsailing.com:secrets /tmp
+    scp root@sapsailing.com:mail.properties /tmp
     sudo mv /tmp/secrets /root
+    sudo mv /tmp/mail.properties /root
     sudo chown root /root/secrets
     sudo chgrp root /root/secrets
     sudo chmod 600 /root/secrets
+    sudo chown root /root/mail.properties
+    sudo chgrp root /root/mail.properties
+    sudo chmod 600 /root/mail.properties
+    # Create some swap space for the case mountnvmeswap hasn't created any
+    sudo dd if=/dev/zero of=/var/cache/swapfile bs=1M count=6000
+    sudo chown root /var/cache/swapfile
+    sudo chgrp root /var/cache/swapfile
+    sudo chmod 600 /var/cache/swapfile
+    sudo mkswap /var/cache/swapfile
+    sudo su - -c 'echo "/var/cache/swapfile       none    swap    pri=0      0       0" >>/etc/fstab'
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2

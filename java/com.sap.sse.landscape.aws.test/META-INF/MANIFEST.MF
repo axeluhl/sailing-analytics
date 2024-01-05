@@ -14,6 +14,8 @@ Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1",
- com.sap.sailing.landscape.common
+ com.sap.sailing.landscape.common,
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
 Import-Package: org.mockito,
  org.mockito.stubbing;version="4.8.1"

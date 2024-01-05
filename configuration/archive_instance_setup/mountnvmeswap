@@ -22,7 +22,7 @@ if [ -n "${EPHEMERAL_VOLUME_NAME}" ]; then
   if [ "$FSTYPE" = "" ]; then
     echo FSTYPE was empty, creating swap partition
     mkswap $EPHEMERAL_VOLUME
-    swapon -a $EPHEMERAL_VOLUME
+    swapon --priority 2 -a $EPHEMERAL_VOLUME
   else
     echo "FSTYPE was $FSTYPE, not touching"
   fi
