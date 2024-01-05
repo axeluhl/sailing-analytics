@@ -99,7 +99,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             throws Exception {
         final String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
                 + "\" > " + getAbsoluteConfigFilePath(configFileNameForHostname) + "; service httpd reload && "
-                + "cd " + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname, "\"Set configFileNameForHostname redirect\"", false) ;
+                + "cd " + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname, "\"Set configFileNameForHostname redirect\"", false);
         logger.info("Standard output from setting up the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
@@ -115,14 +115,14 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
     
     /**
-     *  Creates a string that can be ran on an instance to commit and optionally push changes to a file (within a git repo). Assumes the command is ran from within the repository.
+     *  Creates a string that can be ran on an instance to commit and optionally push changes to a file (within a git repo). ASSUMES the command is ran from within the repository.
      * @param editedFileName The file name edited, created or deleted to commit.
-     * @param commitMsg The commit message. Make sure it is enclosed with escaped speech marks.
+     * @param commitMsg The commit message. MAKE SURE the message is enclosed with escaped speech marks.
      * @param performPush Boolean indicating whether to push changes or not.
      * @return Returns the created string command to perform a commit and optional push.
      */
     private String createCommitAndPushString(String editedFileName, String commitMsg, boolean performPush) {
-        StringBuilder command = new StringBuilder(" git add " + getRelativeConfigFilePath(editedFileName) + " && git commit -m " + commitMsg); // space at beginning added for safety
+        StringBuilder command = new StringBuilder(" git add " + getRelativeConfigFilePath(editedFileName) + " && git commit -m " + commitMsg); // space at beginning and after -m, for safety
         if (performPush) {
             command.append(" && git push origin " + CONFIG_REPO_MAIN_BRANCH_NAME);
         }
@@ -218,7 +218,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     
     private void removeRedirect(String configFilePath, String redirectNameForLogOutput,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String command = "rm " + configFilePath + "; service httpd reload";
+        final String command = "rm " + configFilePath + "; service httpd reload" + " && cd " + CONFIG_REPO_PATH + createCommitAndPushString(redirectNameForLogOutput, "\"Removed " + redirectNameForLogOutput +"\"", false);
         logger.info("Standard output from removing the re-direct for " + redirectNameForLogOutput
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
