@@ -72,6 +72,7 @@ maxretry = 5
 EOF
 chkconfig --level 23 fail2ban on
 service fail2ban start
+yum remove -y firewalld
 yum install -y mod_ssl
 # setup mounting of nvme
 ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/archive_instance_setup/mountnvmeswap.service"  /etc/systemd/system/mountnvmeswap.service
