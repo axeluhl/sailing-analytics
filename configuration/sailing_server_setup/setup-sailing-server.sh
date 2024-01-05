@@ -112,7 +112,7 @@ EOF
     sudo chgrp root /root/mail.properties
     sudo chmod 600 /root/mail.properties
     # Create some swap space for the case mountnvmeswap hasn't created any
-    sudo dd if=/dev/zero of=/var/cache/swapfile bs=1G count=6
+    sudo dd if=/dev/zero of=/var/cache/swapfile bs=1M count=6000
     sudo chown root /var/cache/swapfile
     sudo chgrp root /var/cache/swapfile
     sudo chmod 600 /var/cache/swapfile
