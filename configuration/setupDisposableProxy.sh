@@ -4,7 +4,7 @@
 # Parameter 1 is the IP and parameter 2 is the bearer token to be installed in the root home dir.
 IP=$1
 BEARER_TOKEN=$2
-HTTP_LOGROTATE=/etc/logrotate.d/httpd
+HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 HTTPD_GIT_REPO_IP="18.135.5.168"
 AWS_CREDENTIALS_IP="52.17.217.83"
@@ -81,11 +81,11 @@ source /root/.bashrc
 systemctl enable mountnvmeswap.service
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
-echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
-rm $HTTP_LOGROTATE
+echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
+rm $HTTP_LOGROTATE_ABSOLUTE
 ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/logrotate-httpd /etc/logrotate.d/httpd"
 mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
-sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${IP}|" $HTTP_LOGROTATE 
+sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
 # logrotate.conf setup
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
