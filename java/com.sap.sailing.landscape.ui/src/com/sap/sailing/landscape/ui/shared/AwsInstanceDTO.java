@@ -11,20 +11,26 @@ public class AwsInstanceDTO implements IsSerializable {
     private String region;
     private TimePoint launchTimePoint;
     private boolean shared;
+    private String availabilityZoneId;
     
     @Deprecated
     AwsInstanceDTO() {} // for GWT RPC serialization only
     
-    public AwsInstanceDTO(String instanceId, String availabilityZoneName, String privateIpAddress, String publicIpAddress, String region, TimePoint launchTimePoint, boolean shared) {
+    public AwsInstanceDTO(String instanceId, String availabilityZoneName, String privateIpAddress, String availabilityZoneId,String publicIpAddress, String region, TimePoint launchTimePoint, boolean shared) {
         super();
         this.instanceId = instanceId;
         this.availabilityZoneName = availabilityZoneName;
         this.privateIpAddress = privateIpAddress;
+        this.availabilityZoneId = availabilityZoneId;
         this.publicIpAddress = publicIpAddress;
         this.region = region;
         this.launchTimePoint = launchTimePoint;
         this.shared = shared;
     }
+    public String getAvailabilityZoneId() {
+        return availabilityZoneId;
+    }
+
     public String getInstanceId() {
         return instanceId;
     }

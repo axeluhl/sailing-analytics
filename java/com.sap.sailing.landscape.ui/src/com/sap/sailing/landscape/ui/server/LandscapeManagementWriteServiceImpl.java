@@ -296,10 +296,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 .getHosts()) {
             ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(),
                     instance.getAvailabilityZone().getName(), instance.getPrivateAddress().toString(),
-                    instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(),
-                    instance.isSharedHost(), instance.getNameTag(), instance.getImageId(),
-                    extractHealth(healths, instance));
-            dto.setDisposable(landscape.getTag(instance, LandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false);
+                    instance.getAvailabilityZone().getId(), instance.getPublicAddress().toString(), region,
+                    instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),
+                    instance.getImageId(), extractHealth(healths, instance));
+            dto.setDisposable(
+                    landscape.getTag(instance, LandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false);
             results.add(dto);
         }
         return results;
@@ -408,8 +409,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
-        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(),
-                host.getPrivateAddress().getHostAddress(),
+        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getName(),
+                host.getPrivateAddress().getHostAddress(), host.getAvailabilityZone().getId(),
                 host.getPublicAddress() == null ? null : host.getPublicAddress().getHostAddress(),
                 host.getRegion().getId(), host.getLaunchTimePoint(), host.isSharedHost());
     }
@@ -624,7 +625,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             logger.info("Shutting down MongoDB instance "+processToShutdown.getHost().getInstanceId()+" on behalf of user "+SessionUtils.getPrincipal());
             final AwsRegion region = new AwsRegion(processToShutdown.getHost().getRegion(), landscape);
             final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
-                    new AwsAvailabilityZoneImpl(processToShutdown.getHost().getAvailabilityZoneName(),
+                    new AwsAvailabilityZoneImpl(processToShutdown.getHost().getAvailabilityZoneId(),
                             processToShutdown.getHost().getAvailabilityZoneName(), region), 
                             InetAddress.getByName(processToShutdown.getHost().getPrivateIpAddress()),
                             processToShutdown.getHost().getLaunchTimePoint(), landscape);
@@ -845,7 +846,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     private SailingAnalyticsHost<String> getHostFromInstanceDTO(AwsInstanceDTO hostDTO) throws UnknownHostException {
         return new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(hostDTO.getInstanceId(),
-                new AwsAvailabilityZoneImpl(AvailabilityZone.builder().regionName(hostDTO.getRegion()).zoneId(hostDTO.getAvailabilityZoneName()).build(), getLandscape()),
+                new AwsAvailabilityZoneImpl(AvailabilityZone.builder().regionName(hostDTO.getRegion()).zoneId(hostDTO.getAvailabilityZoneId()).build(), getLandscape()),
                 InetAddress.getByName(hostDTO.getPrivateIpAddress()), hostDTO.getLaunchTimePoint(), getLandscape(),
                 new SailingAnalyticsProcessFactory(this::getLandscape));
     }
