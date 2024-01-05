@@ -111,6 +111,13 @@ EOF
     sudo chown root /root/mail.properties
     sudo chgrp root /root/mail.properties
     sudo chmod 600 /root/mail.properties
+    # Create some swap space for the case mountnvmeswap hasn't created any
+    sudo dd if=/dev/zero of=/var/cache/swapfile bs=1G count=6
+    sudo chown root /var/cache/swapfile
+    sudo chgrp root /var/cache/swapfile
+    sudo chmod 600 /var/cache/swapfile
+    sudo mkswap /var/cache/swapfile
+    sudo echo "/var/cache/swapfile       none    swap    pri=-1      0       0" >>/etc/fstab
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2
