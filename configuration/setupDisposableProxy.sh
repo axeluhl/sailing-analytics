@@ -64,7 +64,7 @@ cat <<EOF > /etc/fail2ban/jail.d/customisation.local
 [ssh-iptables]
 
 enabled  = true
-filter   = sshd
+filter   = sshd[mode=aggressive]
 action   = iptables[name=SSH, port=ssh, protocol=tcp]
            sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
 logpath  = /var/log/secure
