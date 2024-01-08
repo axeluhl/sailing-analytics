@@ -34,3 +34,6 @@ for dir in $(ls -d */ ); do
     sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
     crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
 done
+
+cd ../files
+\cp -rL * /
