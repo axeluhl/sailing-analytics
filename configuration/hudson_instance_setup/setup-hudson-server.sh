@@ -22,13 +22,13 @@ else
     echo "Running on an AWS EC2 instance as user ${USER} / $(whoami), starting setup..."
     # Install secrets
     scp root@sapsailing.com:dev-secrets /tmp
-    sudo mv /tmp/dev-secrets /root
+    sudo mv /tmp/dev-secrets /root/secrets
     sudo chown root /root/secrets
     sudo chgrp root /root/secrets
     sudo chmod 600 /root/secrets
     # Create "hudson" user and clear its directory again which is to become a mount point
     sudo adduser hudson
-    sudo rm -rf /home/hudson/* /home/hudson/.* 2>/dev/null
+    sudo su - hudson -c "rm -rf /home/hudson/* /home/hudson/.* 2>/dev/null"
     sudo mkdir /usr/lib/hudson
     sudo chown hudson /usr/lib/hudson
     sudo mkdir /var/log/hudson
