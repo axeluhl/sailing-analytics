@@ -41,23 +41,24 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.gateway.interfaces.MasterDataImportConstants;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 
-@Path("/v1/masterdata/leaderboardgroups")
+@Path(MasterDataImportConstants.MASTER_DATA_RESOURCE_BASE_URL)
 public class MasterDataResource extends AbstractSailingServerResource {
     
     private static final Logger logger = Logger.getLogger(MasterDataResource.class.getName());
     
     @POST
     @Produces("application/x-java-serialized-object")
-    public Response getMasterDataByLeaderboardGroups(@QueryParam("uuids[]") List<UUID> requestedLeaderboardGroupsUuids,
-            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind,
-            @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
-            @QueryParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking)
+    public Response getMasterDataByLeaderboardGroups(@QueryParam(MasterDataImportConstants.QUERY_PARAM_UUIDS) List<UUID> requestedLeaderboardGroupsUuids,
+            @QueryParam(MasterDataImportConstants.QUERY_PARAM_COMPRESS) Boolean compress, @QueryParam(MasterDataImportConstants.QUERY_PARAM_EXPORT_WIND) Boolean exportWind,
+            @QueryParam(MasterDataImportConstants.QUERY_PARAM_EXPORT_DEVICE_CONFIGS) Boolean exportDeviceConfigs,
+            @QueryParam(MasterDataImportConstants.QUERY_PARAM_EXPORT_TRACKED_RACES_AND_START_TRACKING) Boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();

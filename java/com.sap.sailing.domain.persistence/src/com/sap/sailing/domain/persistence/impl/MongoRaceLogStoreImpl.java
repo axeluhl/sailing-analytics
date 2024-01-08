@@ -41,7 +41,7 @@ public class MongoRaceLogStoreImpl implements RaceLogStore {
     }
 
     private void addListener(RaceLogIdentifier identifier, final RaceLog raceLog) {
-        MongoRaceLogStoreVisitor listener = new MongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
+        final MongoRaceLogStoreVisitor listener = new MongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
         listeners.put(raceLog, listener);
         raceLog.addListener(listener);
     }
@@ -55,7 +55,7 @@ public class MongoRaceLogStoreImpl implements RaceLogStore {
 
     @Override
     public void removeListenersAddedByStoreFrom(RaceLog raceLog) {
-        RaceLogEventVisitor visitor = listeners.get(raceLog);
+        final RaceLogEventVisitor visitor = listeners.get(raceLog);
         if (visitor != null) {
             raceLog.removeListener(visitor);
         }

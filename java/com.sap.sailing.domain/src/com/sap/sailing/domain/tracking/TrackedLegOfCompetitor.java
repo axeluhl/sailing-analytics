@@ -10,8 +10,8 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
-import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -359,7 +359,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * for this single call. Good, e.g., for test cases.
      */
     default TackType getTackType(TimePoint timePoint) throws NoWindException {
-        return getTackType(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getTackType(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     Double getExpeditionAWA(TimePoint at);

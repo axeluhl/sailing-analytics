@@ -253,6 +253,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.interfaces.MasterDataImportConstants;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
@@ -4161,12 +4162,12 @@ Replicator {
 
     @Override
     public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
-                RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
+                final Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
+                final RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
                 if (racelog != null) {
                     raceColumn.reloadRaceLog(fleetImpl);
                     logger.info("Reloaded race log for fleet " + fleetImpl + " for race column " + raceColumn.getName()
@@ -5214,8 +5215,7 @@ Replicator {
                 0.5);
         final String query;
         try {
-            query = createLeaderboardQuery(leaderboardGroupIds, compress, exportWind, exportDeviceConfigurations,
-                    exportTrackedRacesAndStartTracking);
+            query = createLeaderboardGroupQuery(leaderboardGroupIds, compress, exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking);
         } catch (UnsupportedEncodingException e1) {
             throw new RuntimeException(e1);
         }
@@ -5278,16 +5278,22 @@ Replicator {
         }
     }
 
-    private String createLeaderboardQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
+    private String createLeaderboardGroupQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
-        StringBuffer queryStringBuffer = new StringBuffer("");
+        StringBuilder queryStringBuilder = new StringBuilder();
         for (UUID uuid : leaderboardGroupIds) {
-            queryStringBuffer.append("uuids[]=" + uuid + "&");
+            queryStringBuilder.append(MasterDataImportConstants.QUERY_PARAM_UUIDS);
+            queryStringBuilder.append('=');
+            queryStringBuilder.append(uuid);
+            queryStringBuilder.append('&');
         }
-        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
-                exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
-        return queryStringBuffer.toString();
+        queryStringBuilder.append(String.format(MasterDataImportConstants.QUERY_PARAM_COMPRESS+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_WIND+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_DEVICE_CONFIGS+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_TRACKED_RACES_AND_START_TRACKING+"=%s",
+                                               compress, exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
+        return queryStringBuilder.toString();
     }
 
     private class TimeoutExtendingInputStream extends FilterInputStream {

@@ -388,12 +388,11 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     }
 
     private List<Component<?>> createSettingsComponentsFor(final DataRetrieverChainDefinitionDTO retrieverChain) {
-        List<Component<?>> settingsComponents = new ArrayList<>();
-        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(retrieverChain)
-                .entrySet()) {
+        final List<Component<?>> settingsComponents = new ArrayList<>();
+        for (final Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(retrieverChain).entrySet()) {
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
-            DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
+            final DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
             settingsComponents.add(new RetrieverLevelSettingsComponent(this, getComponentContext(), retrieverLevel,
                     settingsInfo.getId(), settingsInfo.getLocalizedName()) {
                 @Override

@@ -238,21 +238,16 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
             final Point corner0 = getPointInDivPixel(corners[0]);
             final Point corner1 = getPointInDivPixel(corners[1]);
             final Point corner3 = getPointInDivPixel(corners[3]);
-
             final int canvasWidth = (int) Math.sqrt(Math.pow(corner0.getX() - corner1.getX(), 2)
                     + Math.pow(corner0.getY() - corner1.getY(), 2));
             final int canvasHeight = (int) Math.sqrt(Math.pow(corner3.getX() - corner0.getX(), 2)
                     + Math.pow(corner3.getY() - corner0.getY(), 2));
-            
             final int canvasRadius = (int) Math.sqrt(canvasWidth * canvasWidth / 4 + canvasHeight * canvasHeight / 4);
             canvas.setSize("" + 2 * canvasRadius + "px", "" + 2 * canvasRadius + "px");
             canvas.setCoordinateSpaceWidth(2 * canvasRadius); canvas.setCoordinateSpaceHeight(2 * canvasRadius);
-             
             final Point anchorPoint = getAnchorPoint();
-
             setWidgetPosLeft(anchorPoint.getX());
             setWidgetPosTop(anchorPoint.getY());
-
             setCanvasPosition(anchorPoint.getX(), anchorPoint.getY());
         }
     }
