@@ -13,7 +13,9 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  org.hamcrest;bundle-version="2.2.0",
  com.sap.sse.common,
  com.sap.sailing.domain,
- com.sap.sse.mongodb
+ com.sap.sse.mongodb,
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
 Import-Package: com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.domain.persistence.impl,
  com.sap.sailing.domain.persistence.racelog.tracking.impl,

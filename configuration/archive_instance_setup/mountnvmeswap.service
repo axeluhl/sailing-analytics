@@ -4,7 +4,7 @@ Requires=-.mount
 After=-.mount
 
 [Install]
-WantedBy=multi-user.target
+RequiredBy=multi-user.target
 
 [Service]
 Type=oneshot

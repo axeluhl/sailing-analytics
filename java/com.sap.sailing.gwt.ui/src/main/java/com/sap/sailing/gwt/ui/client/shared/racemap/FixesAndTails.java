@@ -761,7 +761,7 @@ public class FixesAndTails {
                 } else {
                     final GPSFixDTOWithSpeedWindTackAndLegType maxFix = competitorFixes.get(maxIndex);
                     // replacing a fix with a non-maximal detailValue
-                    if (newFix.detailValue != null && maxFix.detailValue != null && newFix.detailValue < maxFix.detailValue) {
+                    if (newFix.detailValue != null && maxFix.detailValue != null && newFix.detailValue > maxFix.detailValue) {
                         // the replacement fix is a new maximum
                         maxDetailValueFixByCompetitorIdsAsStrings.put(competitorDTO.getIdAsString(), replacedFixIndex);
                     }
