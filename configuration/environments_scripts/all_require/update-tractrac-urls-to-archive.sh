@@ -1,1 +1,0 @@
-../../update-tractrac-urls-to-archive.sh
