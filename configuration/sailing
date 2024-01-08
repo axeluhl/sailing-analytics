@@ -26,20 +26,24 @@ SERVERS_DIR=/home/sailing/servers
 cd "${SERVERS_DIR}"
 JAVA_START_INSTANCES="$(find * -type d -prune)"
 GIT_REPOSITORY=/home/sailing/code
-APACHE_CONFIG_DIR=/etc/httpd/conf.d
-APACHE_INTERNALS_CONFIG_FILE="$APACHE_CONFIG_DIR/001-internals.conf"
-EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
+if [ -x /bin/ec2-metadata ]; then
+  EC2_METADATA_CMD=/bin/ec2-metadata
+elif [ -x /usr/bin/ec2-metadata ]; then
+  EC2_METADATA_CMD=/usr/bin/ec2-metadata
+else
+  EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
+fi
 REBOOT_INDICATOR=/var/run/is-rebooted
 SSH_KEY_READER_BEARER_TOKEN=/root/ssh-key-reader.token
 
 echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
-start_tmux() {
-	su - sailing -c "/home/sailing/bin/tmuxConsole.sh unattended"
-	success
-}
-
 start_servers() {
+        echo "Initializing local MongoDB replica set \"replica\"..."
+        while ! echo "rs.initiate()" | mongo; do
+          echo "MongoDB not ready yet; waiting and trying again..."
+          sleep 5
+        done
         /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
 	chown root /usr/local/bin/cp_root_mail_properties
@@ -58,15 +62,13 @@ start_servers() {
 	      su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
 	    done
 	  else
-	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
+	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
 	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
 	    if [ "${FIRST_SERVER}" = "" ]; then
 	      echo "No SERVER_NAME provided; not configuring/starting any application processes" >>/var/log/sailing.err
 	    else
 	      echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
 	      configure_and_start_server "${FIRST_SERVER}"
-	      create_basic_httpd_config "${FIRST_SERVER}"
-	      reload_httpd
 	    fi
 	    echo 1 >"${REBOOT_INDICATOR}"
 	  fi
@@ -98,7 +100,6 @@ stop_servers() {
 		su - sailing -c "cd $SERVERS_DIR/$conf && ./stop"
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
-		stop_httpd
 		sync_logs
 	done
 }
@@ -107,37 +108,6 @@ sync_logs() {
 	echo "Executing logrotate followed by a sync to ensure that logs are synchronized" >> /var/log/sailing.err
 	logrotate -f /etc/logrotate.conf
 	sync
-}
-
-reload_httpd() {
-	echo "Will try to launch httpd so this replica can work with an ELB easily." >>/var/log/sailing.err
-	if [ -x /etc/init.d/httpd ]; then
-	  echo "Reloading httpd configuration..." >>/var/log/sailing.err
-	  service httpd reload
-	else
-	  echo "Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd"
-	fi
-}
-
-# Adds a Plain-SSL mapping to the first server's port and a mapping for /internal-server-status, both to 001-internals.conf
-create_basic_httpd_config() {
-    FIRST_SERVER=$1
-    if [ -d $SERVERS_DIR/$FIRST_SERVER ]; then
-      source $SERVERS_DIR/$FIRST_SERVER/env.sh
-    fi
-    echo "Writing macro invocation to ${APACHE_INTERNALS_CONFIG_FILE} to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.err
-    echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >"${APACHE_INTERNALS_CONFIG_FILE}"
-    # Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to "${APACHE_INTERNALS_CONFIG_FILE}"
-    echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to ${APACHE_INTERNALS_CONFIG_FILE}" >>/var/log/sailing.err
-    echo "## SERVER STATUS" >>"${APACHE_INTERNALS_CONFIG_FILE}"
-    echo "Use Status $INSTANCE_DNS internal-server-status" >>"${APACHE_INTERNALS_CONFIG_FILE}"
-}
-
-stop_httpd() {
-	if [ -x /etc/init.d/httpd ]; then
-		service httpd stop
-		echo "Stopped httpd..." >>/var/log/sailing.err
-	fi
 }
 
 # See how we were called.

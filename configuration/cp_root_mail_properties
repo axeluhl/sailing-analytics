@@ -1,5 +1,10 @@
 #!/bin/bash
-RELATIVE_SERVER_DIR=$1
+if [ $# = 0 ]; then
+  PWD=$( pwd )
+  RELATIVE_SERVER_DIR=$( basename ${PWD} )
+else
+  RELATIVE_SERVER_DIR=$1
+fi
 MAIL_PROPERTIES=mail.properties
 SECRETS=secrets
 ROOT_MAIL_PROPERTIES=/root/${MAIL_PROPERTIES}

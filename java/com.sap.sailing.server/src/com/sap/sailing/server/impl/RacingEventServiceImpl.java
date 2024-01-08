@@ -4162,12 +4162,12 @@ Replicator {
 
     @Override
     public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
-                RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
+                final Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
+                final RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
                 if (racelog != null) {
                     raceColumn.reloadRaceLog(fleetImpl);
                     logger.info("Reloaded race log for fleet " + fleetImpl + " for race column " + raceColumn.getName()

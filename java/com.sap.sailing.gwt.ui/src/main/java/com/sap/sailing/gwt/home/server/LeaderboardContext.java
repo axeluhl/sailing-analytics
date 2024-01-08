@@ -134,36 +134,35 @@ public class LeaderboardContext {
     }
     
     public RegattaState calculateRegattaState() {
-        // First using event state -> fast and ensures that all regattas are marked as finished after the event is finished
+        // First using event state -> fast and ensures that all regattas are marked as finished after the event is
+        // finished
         EventState eventState = HomeServiceUtil.calculateEventState(event);
-        if(eventState == EventState.FINISHED) {
+        if (eventState == EventState.FINISHED) {
             return RegattaState.FINISHED;
         }
-        if(eventState == EventState.UPCOMING || eventState == EventState.PLANNED) {
+        if (eventState == EventState.UPCOMING || eventState == EventState.PLANNED) {
             return RegattaState.UPCOMING;
         }
-        
         // Using regatta start and end -> fast calculation of upcoming and finished states but not helpful to
         // distinguish between live and progress
         TimePoint startDate = getStartTimePoint();
-        if(startDate != null && now.before(startDate)) {
+        if (startDate != null && now.before(startDate)) {
             return RegattaState.UPCOMING;
         }
         TimePoint endDate = getEndTimePoint();
-        if(endDate != null && now.after(endDate)) {
+        if (endDate != null && now.after(endDate)) {
             return RegattaState.FINISHED;
         }
-        
         // Using the race states to calculate the real state for running events/regattas
         OverallRacesStateCalculator racesStateCalculator = new OverallRacesStateCalculator();
         forRacesWithReadPermissions(racesStateCalculator);
-        if(racesStateCalculator.hasLiveRace()) {
+        if (racesStateCalculator.hasLiveRace()) {
             return RegattaState.RUNNING;
         }
-        if(!racesStateCalculator.hasUnfinishedRace()) {
+        if (!racesStateCalculator.hasUnfinishedRace()) {
             return RegattaState.FINISHED;
         }
-        if(racesStateCalculator.hasAbandonedOrPostponedRace() || racesStateCalculator.hasFinishedRace()) {
+        if (racesStateCalculator.hasAbandonedOrPostponedRace() || racesStateCalculator.hasFinishedRace()) {
             return RegattaState.PROGRESS;
         }
         return RegattaState.UPCOMING;
