@@ -17,7 +17,7 @@ FIRSTEOF
 # writes std error to local text file
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
-
+sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
 # fstab setup
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
@@ -84,7 +84,7 @@ systemctl enable mountnvmeswap.service
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
 rm $HTTP_LOGROTATE_ABSOLUTE
-ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/logrotate-httpd /etc/logrotate.d/httpd"
+cp /home/${GIT_COPY_USER}/gitwiki/configuration/logrotate-httpd /etc/logrotate.d/httpd
 mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
 sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
 # logrotate.conf setup
