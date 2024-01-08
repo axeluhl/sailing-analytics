@@ -29,6 +29,12 @@ else
     # Create "hudson" user and clear its directory again which is to become a mount point
     sudo adduser hudson
     sudo rm -rf /home/hudson/* /home/hudson/.* 2>/dev/null
+    sudo mkdir /usr/lib/hudson
+    sudo chown hudson /usr/lib/hudson
+    sudo mkdir /var/log/hudson
+    sudo chgrp hudson /var/log/hudson
+    sudo chmod g+w /var/log/hudson
+    sudo wget -O /usr/lib/hudson/hudson.war "https://static.sapsailing.com/hudson.war.patched-with-mail-1.6.2"
     # Link hudson file to /etc/init.d
     sudo ln -s /home/sailing/code/configuration/hudson_instance_setup/hudson /etc/init.d
     # Link hudson service to /etc/systemd/system
@@ -43,6 +49,19 @@ else
 /home/hudson/android-sdk-linux 172.31.0.0/16(rw,nohide,no_root_squash)
 EOF
 "
+    # Install DEV server
+    sudo su - sailing -c "mkdir /home/sailing/servers/DEV
+cd /home/sailing/servers/DEV
+cat <<EOF | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin
+USE_ENVIRONMENT=dev-server
+EOF
+"
+    sudo cp /root/secrets /home/sailing/servers/DEV/configuration
+    sudo chown sailing /home/sailing/servers/DEV/configuration/secrets
+    sudo chgrp sailing /home/sailing/servers/DEV/configuration/secrets
+    sudo cp /root/mail.properties /home/sailing/servers/DEV/configuration
+    sudo chown sailing /home/sailing/servers/DEV/configuration/mail.properties
+    sudo chgrp sailing /home/sailing/servers/DEV/configuration/mail.properties
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2
