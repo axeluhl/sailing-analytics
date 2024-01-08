@@ -1,0 +1,1 @@
+* * * * *       export PATH=/bin:/usr/bin:/usr/local/bin; update_landscape_managers_mailing_list.sh $(cat /root/ssh-key-reader.token) /var/cache
