@@ -12,6 +12,6 @@ if [[ -f "${PATH_TO_STORE}/${NAME_TO_STORE_IN}" ]]; then
 fi
 touch ${PATH_TO_STORE}/${NAME_TO_STORE_IN}
 echo $curl_output | jq -r .[] | while read user; do
-    email=$(curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/security/api/restsecurity/user?username=$user" | jq -r '.email' 2>/dev/null)
+    email=$(curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/security/api/restsecurity/user?username=$user" 2>/dev/null| jq -r '.email' )
     echo $email >> ${PATH_TO_STORE}/${NAME_TO_STORE_IN}
 done
