@@ -1,1 +1,1 @@
-* * * * * /home/trac/bin/notify-unhealthy-mongodb 2>/home/trac/notify-unhealthy-mongodb.err >/home/trac/notify-unhealthy-mongodb.out
+* * * * * PATH_OF_GIT_HOME_DIR_TO_REPLACE/configuration/notify-unhealthy-mongodb 2>PATH_OF_HOME_DIR_TO_REPLACE/notify-unhealthy-mongodb.err >PATH_OF_HOME_DIR_TO_REPLACE/notify-unhealthy-mongodb.out
