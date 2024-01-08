@@ -1,0 +1,1 @@
+../../../../../update_landscape_managers_mailing_list.sh
